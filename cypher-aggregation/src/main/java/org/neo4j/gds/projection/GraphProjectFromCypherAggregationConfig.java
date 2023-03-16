@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
@@ -88,7 +87,6 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
         );
     }
 
-    @TestOnly
     static GraphProjectFromCypherAggregationConfig of(
         String userName,
         String graphName,

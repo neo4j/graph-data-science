@@ -38,6 +38,7 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -122,16 +123,19 @@ public final class GdsCallableFinder {
 
             return classes
                 .stream()
-                .map(clazz -> {
+                .flatMap(clazz -> {
                     GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
                     //noinspection unchecked
-                    return ImmutableGdsCallableDefinition
-                        .builder()
-                        .name(gdsCallable.name())
-                        .description(gdsCallable.description())
-                        .executionMode(gdsCallable.executionMode())
-                        .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
-                        .build();
+                    return Stream
+                        .concat(Arrays.stream(gdsCallable.aliases()), Stream.of(gdsCallable.name()))
+                        .map(gdsCallableName ->
+                            ImmutableGdsCallableDefinition
+                                .builder()
+                                .name(gdsCallableName)
+                                .description(gdsCallable.description())
+                                .executionMode(gdsCallable.executionMode())
+                                .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
+                                .build());
                 })
                 .collect(Collectors.toMap(
                     def -> def.name().toLowerCase(Locale.ENGLISH),

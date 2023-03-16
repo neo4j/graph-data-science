@@ -19,30 +19,57 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.STREAM;
 
-class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTest {
+class ModularityOptimizationStreamProcTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "custom-graph";
 
+    @Neo4jGraph
+    static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
+        ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
+        ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
+        ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
+        ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
+        ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
+        ", (a)-[:TYPE {weight: 0.01}]->(b)" +
+        ", (a)-[:TYPE {weight: 5.0}]->(e)" +
+        ", (a)-[:TYPE {weight: 5.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 5.0}]->(c)" +
+        ", (b)-[:TYPE {weight: 5.0}]->(d)" +
+        ", (c)-[:TYPE {weight: 0.01}]->(e)" +
+        ", (f)-[:TYPE {weight: 0.01}]->(d)";
+
     @BeforeEach
-    void graphSetup() {
+    void setup() throws Exception {
+        registerProcedures(
+            ModularityOptimizationStreamProc.class,
+            GraphProjectProc.class
+        );
+
         var createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
             .withRelationshipProperty("weight")
@@ -52,9 +79,15 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
         runQuery(createQuery);
     }
 
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
     @Test
     void testStreaming() {
-        String query = algoBuildStage()
+        String query = GdsCypher.call(GRAPH_NAME)
+            .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .yields("nodeId", "communityId");
 
@@ -64,7 +97,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
             communities[(int) nodeId] = row.getNumber("communityId").longValue();
         });
 
-        assertCommunities(communities, UNWEIGHTED_COMMUNITIES);
+        assertCommunities(communities, new long[]{0, 1, 2, 4}, new long[]{3, 5});
     }
 
     @Test
@@ -81,7 +114,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
             communities[(int) nodeId] = row.getNumber("communityId").longValue();
         });
 
-        assertCommunities(communities, WEIGHTED_COMMUNITIES);
+        assertCommunities(communities, new long[]{0, 4, 5}, new long[]{1, 2, 3});
     }
 
     @Test
@@ -98,8 +131,8 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
             communities[(int) nodeId] = row.getNumber("communityId").longValue();
         });
 
-        assertCommunities(communities, SEEDED_COMMUNITIES);
-        assertTrue(communities[0] == 0 && communities[2] == 2);
+        assertCommunities(communities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
+        assertThat(communities).containsExactly(0L, 0L, 2L, 2L, 2L, 2L);
     }
 
     @Test
@@ -110,14 +143,18 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertTrue(row.getNumber("bytesMin").longValue() > 0);
-            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+            assertThat(row.getNumber("bytesMin"))
+                .asInstanceOf(LONG)
+                .isPositive();
+            assertThat(row.getNumber("bytesMax"))
+                .asInstanceOf(LONG)
+                .isPositive();
         });
     }
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), Set.of(3L, 4L)),
+                Arguments.of(Map.of("minCommunitySize", 1), Set.of(5L, 4L)),
                 Arguments.of(Map.of("minCommunitySize", 3), Set.of(4L)),
                 Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), Set.of(0L, 1L)),
                 Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), Set.of(0L))
@@ -126,11 +163,12 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteMinCommunitySize(Map<String, Object> parameters, Set<Long> expectedCommunityIds) {
-        String query = algoBuildStage()
-                .streamMode()
-                .addAllParameters(parameters)
-                .yields("nodeId", "communityId");
+    void testWriteMinCommunitySize(Map<String, Object> parameters, Iterable<Long> expectedCommunityIds) {
+        String query = GdsCypher.call(GRAPH_NAME)
+            .algo("gds", "beta", "modularityOptimization")
+            .streamMode()
+            .addAllParameters(parameters)
+            .yields("nodeId", "communityId");
 
         var actualCommunities = new HashSet<Long>();
 
@@ -139,6 +177,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
             actualCommunities.add(communityId);
         });
 
-        assertEquals(actualCommunities, expectedCommunityIds);
+        assertThat(actualCommunities)
+            .containsExactlyInAnyOrderElementsOf(expectedCommunityIds);
     }
 }

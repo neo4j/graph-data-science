@@ -37,12 +37,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ToUndirectedProcTest extends BaseProcTest {
 
@@ -105,12 +101,11 @@ class ToUndirectedProcTest extends BaseProcTest {
     void shouldFailIfMutateRelationshipTypeExists() {
         String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL'})";
 
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
-        String expectedMessage = formatWithLocale(
-            "Relationship type `REL` already exists in the in-memory graph."
-        );
-        assertEquals(expectedMessage, throwable.getMessage());
+        assertThatThrownBy(() -> runQuery(query))
+            .isInstanceOf(QueryExecutionException.class)
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Relationship type `REL` already exists in the in-memory graph.");
     }
 
     @Test
@@ -154,9 +149,11 @@ class ToUndirectedProcTest extends BaseProcTest {
     void shouldFailIfRelationshipTypeIsAlreadyUndirected() {
         String query = "CALL gds.beta.graph.relationships.toUndirected('undirected_graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
 
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(UnsupportedOperationException.class, throwable.getClass());
-        assertEquals("The specified relationship type `REL` is already undirected.", throwable.getMessage());
+
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("The specified relationship type `REL` is already undirected.");
     }
 
     @Test

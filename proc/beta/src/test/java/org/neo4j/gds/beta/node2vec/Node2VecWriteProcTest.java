@@ -20,24 +20,50 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
+class Node2VecWriteProcTest extends BaseProcTest implements MemoryEstimateTest<Node2Vec, Node2VecWriteConfig, Node2VecModel.Result> {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node1)" +
+        ", (b:Node1)" +
+        ", (c:Node2)" +
+        ", (d:Isolated)" +
+        ", (e:Isolated)" +
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(a)" +
+        ", (a)-[:REL]->(c)" +
+        ", (c)-[:REL]->(a)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(b)";
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            Node2VecWriteProc.class,
+            GraphProjectProc.class
+        );
+    }
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
@@ -63,7 +89,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         );
     }
 
-    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, ?>> getProcedureClazz() {
+    public Class<Node2VecWriteProc> getProcedureClazz() {
         return Node2VecWriteProc.class;
     }
 
@@ -102,8 +128,6 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
             .addParameter("sudo", true)
             .yields();
 
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
         String expectedMessage = formatWithLocale(
             "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
             " Try reducing these parameters or run on a smaller graph.",
@@ -111,13 +135,26 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
             Integer.MAX_VALUE,
             Integer.MAX_VALUE
         );
-        assertEquals(expectedMessage, throwable.getMessage());
+
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(expectedMessage);
     }
 
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        if (!userInput.containsKey("writeProperty")) {
-            return userInput.withString("writeProperty", "embedding");
-        }
-        return userInput;
+        return userInput.withEntryIfMissing("writeProperty", "embedding");
     }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(Node2VecModel.Result result1, Node2VecModel.Result result2) {
+        // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
+        assertThat(result1.embeddings().get(0).data().length).isEqualTo(result2.embeddings().get(0).data().length);
+    }
+
 }

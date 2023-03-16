@@ -19,38 +19,69 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStreamConfig> {
+import java.util.List;
+import java.util.Map;
 
-    @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig, ?>> getProcedureClazz() {
-        return BetweennessCentralityStreamProc.class;
-    }
+class BetweennessCentralityStreamProcTest extends BaseProcTest {
 
-    @Override
-    public BetweennessCentralityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityStreamConfig.of(mapWrapper);
+
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(d)" +
+        ", (d)-[:REL]->(e)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            BetweennessCentralityStreamProc.class,
+            GraphProjectProc.class
+        );
+
+        runQuery(
+            GdsCypher.call(DEFAULT_GRAPH_NAME)
+                .graphProject()
+                .loadEverything(Orientation.NATURAL)
+                .yields()
+        );
     }
 
     @Test
     void testStream() {
-        loadGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.betweenness")
             .streamMode()
             .yields();
 
-        assertCypherResult(query, expected);
+        assertCypherResult(
+            query,
+            List.of(
+                Map.of("nodeId", idFunction.of("a"), "score", 0.0),
+                Map.of("nodeId", idFunction.of("b"), "score", 3.0),
+                Map.of("nodeId", idFunction.of("c"), "score", 4.0),
+                Map.of("nodeId", idFunction.of("d"), "score", 3.0),
+                Map.of("nodeId", idFunction.of("e"), "score", 0.0)
+            ));
     }
 
+    // This should not be tested here
     @Test
     void shouldValidateSampleSize() {
-        loadGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.betweenness")
             .streamMode()

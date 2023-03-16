@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 

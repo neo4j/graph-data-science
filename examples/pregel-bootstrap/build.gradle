@@ -2,7 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     // Used for building a standalone jar
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.0'
 }
 
 ext {
@@ -34,6 +34,7 @@ dependencies {
     compileOnly "org.neo4j.gds:annotations:$gdsVersion"
     compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
     compileOnly "org.neo4j.gds:config-api:$gdsVersion"
+    compileOnly "org.neo4j.gds:progress-tracking:$gdsVersion"
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
@@ -55,6 +56,7 @@ dependencies {
     testImplementation "org.neo4j.gds:core:$gdsVersion"
     testImplementation "org.neo4j.gds:proc-pregel:$gdsVersion"
     testImplementation "org.neo4j.gds:config-api:$gdsVersion"
+    testImplementation "org.neo4j.gds:progress-tracking:$gdsVersion"
 
     // Use JUnit Jupiter API for testing.
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"

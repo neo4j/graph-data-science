@@ -10,6 +10,7 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
+    compileOnly project(':annotations')
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     neodeps().each {
@@ -44,7 +45,12 @@ dependencies {
 
     // TEST DEPENDENCIES
 
+    testCompileOnly project(':annotations')
+    testCompileOnly project(':progress-tracking')
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':executor')
     testImplementation project(':open-model-catalog')

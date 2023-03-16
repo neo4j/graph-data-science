@@ -20,54 +20,99 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.assertj.core.api.Assertions;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.WRITE;
 
-class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest {
+class ModularityOptimizationWriteProcTest extends BaseProcTest {
 
     private static final String COMMUNITY = "community";
     private static final String COMMUNITY_COUNT = "communityCount";
 
+    @Neo4jGraph
+    static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
+        ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
+        ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
+        ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
+        ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
+        ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
+        ", (a)-[:TYPE {weight: 0.01}]->(b)" +
+        ", (a)-[:TYPE {weight: 5.0}]->(e)" +
+        ", (a)-[:TYPE {weight: 5.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 5.0}]->(c)" +
+        ", (b)-[:TYPE {weight: 5.0}]->(d)" +
+        ", (c)-[:TYPE {weight: 0.01}]->(e)" +
+        ", (f)-[:TYPE {weight: 0.01}]->(d)";
+
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            ModularityOptimizationWriteProc.class,
+            GraphProjectProc.class
+        );
+
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withNodeProperty("seed1")
+            .withRelationshipProperty("weight")
+            .loadEverything(Orientation.UNDIRECTED)
+            .yields();
+        runQuery(createQuery);
+    }
+
     @Test
     void testWriting() {
-        String query = algoBuildStage()
+        var createQuery = GdsCypher.call("naturalGraph")
+            .graphProject()
+            .loadEverything(Orientation.NATURAL)
+            .yields();
+        runQuery(createQuery);
+        String query = GdsCypher.call("naturalGraph")
+            .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("writeProperty", COMMUNITY)
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            // this value changed after adapting to OUTGOING
-            assertEquals(-0.0408, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber(COMMUNITY_COUNT).longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+            assertThat(row.getNumber("modularity"))
+                .asInstanceOf(DOUBLE)
+                // this value changed after adapting to OUTGOING
+                .isEqualTo(-0.0408, Offset.offset(0.001));
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isLessThanOrEqualTo(3);
         });
 
-        assertWriteResult(UNWEIGHTED_COMMUNITIES);
+        assertWriteResult(new long[]{0, 1, 2, 4}, new long[]{3, 5});
     }
     @Test
     void testWritingUndirected() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .loadEverything(Orientation.UNDIRECTED)
-            .yields();
-        runQuery(createQuery);
-
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
@@ -75,23 +120,23 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber(COMMUNITY_COUNT).longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+            assertThat(row.getNumber("modularity"))
+                .asInstanceOf(DOUBLE)
+                .isEqualTo(0.12244, Offset.offset(0.001));
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isLessThanOrEqualTo(3);
         });
 
-        assertWriteResult(UNWEIGHTED_COMMUNITIES);
+        assertWriteResult(new long[]{0, 1, 2, 4}, new long[]{3, 5});
     }
 
     @Test
     void testWritingWeighted() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withRelationshipProperty("weight")
-            .loadEverything(Orientation.UNDIRECTED)
-            .yields();
-        runQuery(createQuery);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
@@ -100,23 +145,23 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.4985, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber(COMMUNITY_COUNT).longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+            assertThat(row.getNumber("modularity"))
+                .asInstanceOf(DOUBLE)
+                .isEqualTo(0.4985, Offset.offset(0.001));
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isLessThanOrEqualTo(3);
         });
 
-        assertWriteResult(WEIGHTED_COMMUNITIES);
+        assertWriteResult(new long[]{0, 4, 5}, new long[]{1, 2, 3});
     }
 
     @Test
     void testWritingSeeded() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeProperty("seed1")
-            .loadEverything(Orientation.UNDIRECTED)
-            .yields();
-        runQuery(createQuery);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
@@ -131,12 +176,11 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
         runQueryWithRowConsumer("MATCH (n) RETURN n.community as community", (row) -> {
             communities[i.getAndIncrement()] = row.getNumber(COMMUNITY).longValue();
         });
-        assertCommunities(communities, SEEDED_COMMUNITIES);
+        assertCommunities(communities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
     }
 
     @Test
     void testWritingTolerance() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
@@ -145,16 +189,18 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertTrue(row.getBoolean("didConverge"));
+            assertThat(row.getBoolean("didConverge")).isTrue();
+
             // Cannot converge after one iteration,
             // because it doesn't have anything to compare the computed modularity against.
-            assertEquals(2, row.getNumber("ranIterations").longValue());
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
         });
     }
 
     @Test
     void testWritingIterations() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
@@ -163,44 +209,42 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertFalse(row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
+            assertThat(row.getBoolean("didConverge")).isFalse();
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1);
         });
     }
 
     @Test
     void testWritingEstimate() {
-        String query = algoBuildStage()
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
             .estimationMode(WRITE)
             .addParameter("writeProperty", COMMUNITY)
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertTrue(row.getNumber("bytesMin").longValue() > 0);
-            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+            assertThat(row.getNumber("bytesMin"))
+                .asInstanceOf(LONG)
+                .isPositive();
+            assertThat(row.getNumber("bytesMax"))
+                .asInstanceOf(LONG)
+                .isPositive();
         });
     }
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), new Long[] {3L, 4L}),
-                Arguments.of(Map.of("minCommunitySize", 3), new Long[] {4L}),
-                Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), new Long[] {0L, 1L}),
-                Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), new Long[] {0L})
+                Arguments.of(Map.of("minCommunitySize", 1), List.of(5L, 4L)),
+                Arguments.of(Map.of("minCommunitySize", 3), List.of(4L)),
+                Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), List.of(0L, 1L)),
+                Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), List.of(0L))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
-        Long totalCommunities = 2L;
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-                .graphProject()
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .yields();
-        runQuery(createQuery);
-
+    void testWriteMinCommunitySize(Map<String, Object> parameters, List<Long> expectedCommunityIds) {
         var query = GdsCypher
                 .call(DEFAULT_GRAPH_NAME)
                 .algo("gds", "beta", "modularityOptimization")
@@ -209,15 +253,13 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
                 .addAllParameters(parameters)
                 .yields(COMMUNITY_COUNT);
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(totalCommunities, row.getNumber(COMMUNITY_COUNT));
-        });
+        runQueryWithRowConsumer(query, row -> assertThat(row.getNumber(COMMUNITY_COUNT)).isEqualTo(2L));
 
         runQueryWithRowConsumer(
                 "MATCH (n) RETURN collect(DISTINCT n." + COMMUNITY + ") AS communities ",
-                row -> Assertions.assertThat(row.get("communities"))
+                row -> assertThat(row.get("communities"))
                         .asList()
-                        .containsExactlyInAnyOrder(expectedCommunityIds)
+                        .containsExactlyInAnyOrderElementsOf(expectedCommunityIds)
         );
     }
 

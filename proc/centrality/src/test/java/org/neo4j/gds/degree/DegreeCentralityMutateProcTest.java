@@ -21,86 +21,75 @@ package org.neo4j.gds.degree;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 
-class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCentralityMutateConfig>
-    implements MutateNodePropertyTest<DegreeCentrality, DegreeCentralityMutateConfig, DegreeCentrality.DegreeFunction> {
+class DegreeCentralityMutateProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig, ?>> getProcedureClazz() {
-        return DegreeCentralityMutateProc.class;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Label1)" +
+        ", (b:Label1)" +
+        ", (c:Label1)" +
+        ", (d:Label1)" +
+        ", (e:Label1)" +
+        ", (f:Label1)" +
+        ", (g:Label1)" +
+        ", (h:Label1)" +
+        ", (i:Label1)" +
+        ", (j:Label1)" +
 
-    @Override
-    public DegreeCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityMutateConfig.of(mapWrapper);
-    }
+        ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", DEFAULT_RESULT_PROPERTY);
-        }
-        return mapWrapper;
-    }
+        ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-    @Override
-    public String mutateProperty() {
-        return DEFAULT_RESULT_PROPERTY;
-    }
+        ", (d)-[:TYPE1 {weight: 2.0}]->(a)" +
+        ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
+        ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(d)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
 
-    @Override
-    public String expectedMutatedGraph() {
-        return "CREATE" +
-               "  (a { degreeScore: 0.0})" +
-               ", (b { degreeScore: 1.0})" +
-               ", (c { degreeScore: 1.0})" +
-               ", (d { degreeScore: 2.0})" +
-               ", (e { degreeScore: 3.0})" +
-               ", (f { degreeScore: 2.0})" +
-               ", (g { degreeScore: 0.0})" +
-               ", (h { degreeScore: 0.0})" +
-               ", (i { degreeScore: 0.0})" +
-               ", (j { degreeScore: 0.0})" +
+        ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
 
-               ", (b)-[{weight: 1.0}]->(c)" +
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            DegreeCentralityMutateProc.class,
+            GraphProjectProc.class
+        );
 
-               ", (c)-[{weight: 1.0}]->(b)" +
-
-               ", (d)-[{weight: 1.0}]->(a)" +
-               ", (d)-[{weight: 1.0}]->(b)" +
-
-               ", (e)-[{weight: 1.0}]->(b)" +
-               ", (e)-[{weight: 1.0}]->(d)" +
-               ", (e)-[{weight: 1.0}]->(f)" +
-
-               ", (f)-[{weight: 1.0}]->(b)" +
-               ", (f)-[{weight: 1.0}]->(e)";
+        runQuery(
+            GdsCypher.call("dcGraph")
+                .graphProject()
+                .loadEverything()
+                .yields()
+        );
     }
 
     @Test
     void testMutate() {
         String query = GdsCypher
-            .call(GRAPH_NAME)
+            .call("dcGraph")
             .algo("degree")
             .mutateMode()
-            .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)
+            .addParameter("mutateProperty", "degreeScore")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -135,5 +124,41 @@ class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCent
                 .asInstanceOf(LONG)
                 .isEqualTo(10L);
         });
+
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "dcGraph")
+            .graphStore()
+            .getUnion();
+
+        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), actualGraph);
+
     }
+
+    private String expectedMutatedGraph() {
+        return "CREATE" +
+               "  (a { degreeScore: 0.0})" +
+               ", (b { degreeScore: 1.0})" +
+               ", (c { degreeScore: 1.0})" +
+               ", (d { degreeScore: 2.0})" +
+               ", (e { degreeScore: 3.0})" +
+               ", (f { degreeScore: 2.0})" +
+               ", (g { degreeScore: 0.0})" +
+               ", (h { degreeScore: 0.0})" +
+               ", (i { degreeScore: 0.0})" +
+               ", (j { degreeScore: 0.0})" +
+
+               ", (b)-[{weight: 1.0}]->(c)" +
+
+               ", (c)-[{weight: 1.0}]->(b)" +
+
+               ", (d)-[{weight: 1.0}]->(a)" +
+               ", (d)-[{weight: 1.0}]->(b)" +
+
+               ", (e)-[{weight: 1.0}]->(b)" +
+               ", (e)-[{weight: 1.0}]->(d)" +
+               ", (e)-[{weight: 1.0}]->(f)" +
+
+               ", (f)-[{weight: 1.0}]->(b)" +
+               ", (f)-[{weight: 1.0}]->(e)";
+    }
+
 }

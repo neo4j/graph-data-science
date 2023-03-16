@@ -95,15 +95,15 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
     public LongDoubleScatterMap compute() {
         //Find the first node with greedy algorithm
         progressTracker.beginSubTask();
-        greedyPart();
+        var firstSeedNode = greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
-        lazyForwardPart();
+        lazyForwardPart(firstSeedNode);
         progressTracker.endSubTask();
 
         return seedSetNodes;
     }
 
-    private void greedyPart() {
+    private long greedyPart() {
         HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
         progressTracker.beginSubTask(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
@@ -136,15 +136,16 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         gain = spreads.cost(highestNode);
         spreads.pop();
         seedSetNodes.put(highestNode, gain);
+        return highestNode;
     }
 
-    private void lazyForwardPart() {
+    private void lazyForwardPart(long firstSeedNode) {
 
         var independentCascade = ICLazyForwardMC.create(
             graph,
             propagationProbability,
             monteCarloSimulations,
-            seedSetNodes.keys[0],
+            firstSeedNode,
             (int) seedSetCount,
             concurrency,
             executorService,

@@ -19,19 +19,83 @@
  */
 package org.neo4j.gds.beta.closeness;
 
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClosenessCentralityStatsProcTest extends ClosenessCentralityProcTest<ClosenessCentralityStatsConfig> {
+class ClosenessCentralityStatsProcTest extends BaseProcTest implements AlgoBaseProcTest<ClosenessCentrality, ClosenessCentralityStatsConfig, ClosenessCentralityResult> {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (n0:Node)" +
+        ", (n1:Node)" +
+        ", (n2:Node)" +
+        ", (n3:Node)" +
+        ", (n4:Node)" +
+        ", (n5:Node)" +
+        ", (n6:Node)" +
+        ", (n7:Node)" +
+        ", (n8:Node)" +
+        ", (n9:Node)" +
+        ", (n10:Node)" +
+
+        // first ring
+        ", (n1)-[:TYPE]->(n2)" +
+        ", (n2)-[:TYPE]->(n3)" +
+        ", (n3)-[:TYPE]->(n4)" +
+        ", (n4)-[:TYPE]->(n5)" +
+        ", (n5)-[:TYPE]->(n1)" +
+
+        ", (n0)-[:TYPE]->(n0)" +
+        ", (n1)-[:TYPE]->(n0)" +
+        ", (n2)-[:TYPE]->(n0)" +
+        ", (n3)-[:TYPE]->(n0)" +
+        ", (n4)-[:TYPE]->(n0)" +
+        ", (n5)-[:TYPE]->(n0)" +
+
+        // second ring
+        ", (n6)-[:TYPE]->(n7)" +
+        ", (n7)-[:TYPE]->(n8)" +
+        ", (n8)-[:TYPE]->(n9)" +
+        ", (n9)-[:TYPE]->(n10)" +
+        ", (n10)-[:TYPE]->(n6)" +
+
+        ", (n0)-[:TYPE]->(n0)" +
+        ", (n0)-[:TYPE]->(n1)" +
+        ", (n0)-[:TYPE]->(n2)" +
+        ", (n0)-[:TYPE]->(n3)" +
+        ", (n0)-[:TYPE]->(n4)" +
+        ", (n0)-[:TYPE]->(n5)" +
+        ", (n0)-[:TYPE]->(n6)" +
+        ", (n0)-[:TYPE]->(n7)" +
+        ", (n0)-[:TYPE]->(n8)" +
+        ", (n0)-[:TYPE]->(n9)" +
+        ", (n0)-[:TYPE]->(n10)";
+
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            ClosenessCentralityStatsProc.class,
+            GraphProjectProc.class
+        );
+    }
+
     @Override
-    public Class<? extends AlgoBaseProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, ?>> getProcedureClazz() {
+    public Class<ClosenessCentralityStatsProc> getProcedureClazz() {
         return ClosenessCentralityStatsProc.class;
     }
 
@@ -71,5 +135,31 @@ class ClosenessCentralityStatsProcTest extends ClosenessCentralityProcTest<Close
             ));
 
         });
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(ClosenessCentralityResult result1, ClosenessCentralityResult result2) {
+        var assertions = new SoftAssertions();
+
+        var left = result1.centralities();
+        var right = result2.centralities();
+
+        assertions.assertThat(left.size()).as("Result size").isEqualTo(right.size());
+
+        for (long i = 0; i < left.size(); i++) {
+            assertions.assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
+        }
+
+        assertions.assertAll();
+    }
+
+    @Test
+    @Disabled("Stats on empty graph has not been covered in AlgoBaseProcTest 🙈")
+    public void testRunOnEmptyGraph() {
     }
 }

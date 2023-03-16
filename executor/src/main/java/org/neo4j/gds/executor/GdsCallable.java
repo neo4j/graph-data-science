@@ -38,6 +38,8 @@ public @interface GdsCallable {
 
     String name();
 
+    String[] aliases() default {};
+
     ExecutionMode executionMode();
 
     String description() default "";

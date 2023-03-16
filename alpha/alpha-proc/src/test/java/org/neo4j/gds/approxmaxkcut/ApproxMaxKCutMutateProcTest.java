@@ -19,22 +19,86 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
+import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMutateConfig> implements
-    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult> {
+class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
+    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult>,
+    MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult> {
+
+    @Neo4jGraph
+    @Language("Cypher")
+    private static final
+    String DB_CYPHER =
+        "CREATE" +
+        "  (a:Label1)" +
+        ", (b:Label1)" +
+        ", (c:Label1)" +
+        ", (d:Label1)" +
+        ", (e:Label1)" +
+        ", (f:Label1)" +
+        ", (g:Label1)" +
+
+        ", (a)-[:TYPE1 {weight: 81.0}]->(b)" +
+        ", (a)-[:TYPE1 {weight: 7.0}]->(d)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(e)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(f)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(g)" +
+        ", (c)-[:TYPE1 {weight: 45.0}]->(b)" +
+        ", (c)-[:TYPE1 {weight: 3.0}]->(e)" +
+        ", (d)-[:TYPE1 {weight: 3.0}]->(c)" +
+        ", (d)-[:TYPE1 {weight: 1.0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 1.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 3.0}]->(a)" +
+        ", (f)-[:TYPE1 {weight: 1.0}]->(b)" +
+        ", (g)-[:TYPE1 {weight: 1.0}]->(b)" +
+        ", (g)-[:TYPE1 {weight: 4.0}]->(c)";
+
+    static final String GRAPH_NAME = "myGraph";
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            ApproxMaxKCutMutateProc.class,
+            GraphProjectProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
+
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphProject()
+            .loadEverything()
+            .yields();
+
+        runQuery(createQuery);
+    }
 
     @Override
     public String mutateProperty() {
@@ -47,7 +111,7 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig, ?>> getProcedureClazz() {
+    public Class<ApproxMaxKCutMutateProc> getProcedureClazz() {
         return ApproxMaxKCutMutateProc.class;
     }
 
@@ -58,11 +122,13 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", this.mutateProperty());
-        }
-
-        return minimalConfigWithDefaults(mapWrapper);
+        return mapWrapper
+            .withEntryIfMissing("k", 2)
+            .withEntryIfMissing("iterations", 8)
+            .withEntryIfMissing("vnsMaxNeighborhoodOrder", 0)
+            .withEntryIfMissing("concurrency", 1)
+            .withEntryIfMissing("randomSeed", 1337L)
+            .withEntryIfMissing("mutateProperty", this.mutateProperty());
     }
 
     // We override this in order to be able to specify an algo config yielding a deterministic result.
@@ -107,4 +173,16 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
             ", (g)-[{w: 1.0d}]->(b)" +
             ", (g)-[{w: 1.0d}]->(c)";
     }
+
+    @Override
+    public void assertResultEquals(ApproxMaxKCut.CutResult result1, ApproxMaxKCut.CutResult result2) {
+        assertThat(result1.cutCost())
+            .isEqualTo(result2.cutCost());
+    }
+
+    @AfterEach
+    void clearStore() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
 }

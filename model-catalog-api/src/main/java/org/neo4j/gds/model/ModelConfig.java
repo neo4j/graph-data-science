@@ -28,7 +28,6 @@ import java.io.Serializable;
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
-@Configuration
 public interface ModelConfig extends Serializable, BaseConfig {
 
     long serialVersionUID = 0x42L;

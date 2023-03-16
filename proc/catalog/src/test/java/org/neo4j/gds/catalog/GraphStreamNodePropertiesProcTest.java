@@ -35,12 +35,12 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.IdentityPropertyValues;
 import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 

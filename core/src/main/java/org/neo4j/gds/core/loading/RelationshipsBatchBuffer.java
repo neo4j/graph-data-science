@@ -22,8 +22,8 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.PropertyReference;
 
-import static org.neo4j.gds.utils.ExceptionUtil.validateSourceNodeIsLoaded;
-import static org.neo4j.gds.utils.ExceptionUtil.validateTargetNodeIsLoaded;
+import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
+import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsLoaded;
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 

@@ -25,11 +25,11 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainer;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;

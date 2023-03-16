@@ -19,41 +19,73 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
 import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
-class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropagationStatsConfig> {
+class LabelPropagationStatsProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, ?>> getProcedureClazz() {
-        return LabelPropagationStatsProc.class;
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:A {id: 0, seed: 42}) " +
+        ", (b:B {id: 1, seed: 42}) " +
+
+        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+
+        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            LabelPropagationStatsProc.class,
+            GraphProjectProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
+        // Create explicit graphs with both projection variants
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'myGraph', " +
+            "   {" +
+            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+            "   }, " +
+            "   '*'" +
+            ")"
+        );
     }
 
-    @Override
-    public LabelPropagationStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationStatsConfig.of(mapWrapper);
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
     void yields() {
-        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call(DEFAULT_GRAPH_NAME)
+            .call("myGraph")
             .algo("labelPropagation")
             .statsMode()
             .yields();
@@ -85,6 +117,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
         )));
     }
 
+    // FIXME: This doesn't belong here.
     @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
@@ -102,35 +135,5 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
             .yields("communityCount");
 
         assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
-    }
-
-    @Test
-    void statsShouldNotHaveWriteProperties() {
-        String query = GdsCypher
-            .call(TEST_GRAPH_NAME)
-            .algo("labelPropagation")
-            .statsMode()
-            .yields();
-
-        List<String> forbiddenResultColumns = Arrays.asList(
-            "writeMillis",
-            "nodePropertiesWritten",
-            "relationshipPropertiesWritten"
-        );
-        List<String> forbiddenConfigKeys = Collections.singletonList("writeProperty");
-        runQueryWithResultConsumer(query, result -> {
-            List<String> badResultColumns = result.columns()
-                .stream()
-                .filter(forbiddenResultColumns::contains)
-                .collect(Collectors.toList());
-            assertEquals(Collections.emptyList(), badResultColumns);
-            assertTrue(result.hasNext(), "Result must not be empty.");
-            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-            List<String> badConfigKeys = config.keySet()
-                .stream()
-                .filter(forbiddenConfigKeys::contains)
-                .collect(Collectors.toList());
-            assertEquals(Collections.emptyList(), badConfigKeys);
-        });
     }
 }

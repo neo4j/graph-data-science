@@ -68,3 +68,4 @@ public class PackedAdjacencyList implements AdjacencyList {
         return new DecompressingCursor(this.adjacencies, PackedCompressor.FLAGS);
     }
 }
+

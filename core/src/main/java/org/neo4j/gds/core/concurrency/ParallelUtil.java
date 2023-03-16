@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.ExceptionUtil;

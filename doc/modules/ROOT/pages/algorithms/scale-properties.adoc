@@ -1,0 +1,609 @@
+[[algorithms-scale-properties]]
+[.beta]
+= Scale Properties
+:description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
+:page-aliases: alpha-algorithms/scale-properties
+
+:algorithm: Scale Properties
+:entity: node
+:result: scaled properties
+
+include::partial$/operations-reference/beta-note.adoc[]
+
+
+[[algorithms-scale-properties-intro]]
+== Introduction
+
+The Scale Properties algorithm is a utility algorithm that is used to pre-process node properties for model training or post-process algorithm results such as PageRank scores.
+It scales the node properties based on the specified scaler.
+Multiple properties can be scaled at once and are returned in a list property.
+
+The input properties must be numbers or lists of numbers.
+The lists must all have the same size.
+The output property will always be a list.
+The size of the output list is equal to the sum of length of the input properties.
+That is, if the input properties are two scalar numeric properties and one list property of length three, the output list will have a total length of five.
+
+There are a number of supported scalers for the Scale Properties algorithm.
+These can be configured using the `scaler` configuration parameter.
+
+List properties are scaled index-by-index.
+See xref:algorithms/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
+
+In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
+
+
+[[algorithms-scale-properties-minmax]]
+=== Min-max scaler
+
+Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
+
+image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+
+The minimum and maximum values are reported as statistics when this scaler is used.
+
+
+[[algorithms-scale-properties-max]]
+=== Max scaler
+
+Scales all property values into the range `[-1, 1]` where the absolute maximum value(s) get the scaled value `1`, according to this formula:
+
+image::equations/scale-properties/max.svg[scaled p equals p divided by the absolute maximum of p,align="center"]
+
+The maximum absolute value is reported as statistic when this scaler is used.
+
+
+[[algorithms-scale-properties-mean]]
+=== Mean scaler
+
+Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
+
+image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+
+The minimum, maximum and average values are reported as statistics when this scaler is used.
+
+
+[[algorithms-scale-properties-log]]
+=== Log scaler
+
+Transforms all property values using the natural logarithm.
+`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as their logarithms are not finite values.
+
+image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
+
+
+[[algorithms-scale-properties-standard]]
+=== Standard Score
+
+Scales all property values using the https://en.wikipedia.org/wiki/Standard_score[Standard Score (Wikipedia)].
+
+image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
+
+The average value and standard deviation are reported as statistics when this scaler is used.
+
+
+[[algorithms--scale-properties-center]]
+=== Center
+
+Transforms all properties by subtracting the mean.
+
+image::equations/scale-properties/center.svg[p minus average value of p,align="center"]
+
+The average value is reported as statistic when this scaler is used.
+
+
+[[algorithms-scale-properties-l1norm]]
+=== L1 Norm
+
+Scales all property values into the range `[0.0, 1.0]`.
+
+image::equations/scale-properties/l1norm.svg[scaled p equals p divided by l1 norm of p ,align="center"]
+
+
+[[algorithms-scale-properties-l2norm]]
+=== L2 Norm
+
+Scales all property values using the https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 Norm (Wikipedia)].
+
+image::equations/scale-properties/l2norm.svg[scaled p equals p divided by l2 norm of p ,align="center"]
+
+
+[NOTE]
+====
+Some scalers must do divisions as part of their computation.
+For example, computing the "Standard Score" requires dividing by the standard deviation.
+If computing a scaled property requires division by an illegal value, like 0 or NaN, the resulting scaled property value will be 0.
+====
+
+
+[[algorithms-scale-properties-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Scale Properties syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Scale Properties in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  scaledProperty: List of Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name           | Type        | Description
+| nodeId         | Integer     | Node ID.
+| scaledProperty | List of Float | Scaled values for each input node property.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run Scale Properties in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  scalerStatistics: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis  | Integer   | Unused.
+| nodePropertiesWritten | Integer   | Number of node properties written.
+| configuration         | Map       | Configuration used for running the algorithm.
+|===
+======
+
+[.include-with-stats]
+======
+.Run Scale Properties in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  scalerStatistics: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer   | Unused.
+| configuration         | Map       | Configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run Scale properties in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  scalerStatistics: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| writeMillis           | Integer   | Milliseconds for writing result back to Neo4j.
+| postProcessingMillis  | Integer   | Unused.
+| nodePropertiesWritten | Integer   | Number of node properties written.
+| configuration         | Map       | Configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-scale-properties-syntax-scalerparams]]
+=== Scaler-specific configuration options
+
+The log scaler supports specific configuration, which we document here.
+
+.Specific configuration for `log` scaler
+[opts="header",cols="1,1,1m,1,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+| type          | String | n/a     | no       | Type of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
+| offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
+|===
+
+
+All other scalers do not support additional, custom configuration.
+
+
+[[algorithms-scale-properties-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: hotel
+:image-file: scale-properties.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (:Hotel {avgReview: 4.2, buildYear: 1978, storyCapacity: [32, 32, 0], name: 'East'}),
+  (:Hotel {avgReview: 8.1, buildYear: 1958, storyCapacity: [18, 20, 0], name: 'Plaza'}),
+  (:Hotel {avgReview: 19.0, buildYear: 1999, storyCapacity: [100, 100, 70], name: 'Central'}),
+  (:Hotel {avgReview: -4.12, buildYear: 2005, storyCapacity: [250, 250, 250], name: 'West'}),
+  (:Hotel {avgReview: 0.01, buildYear: 2020, storyCapacity: [1250, 1250, 900], name: 'Polar'}),
+  (:Hotel {avgReview: 3.3, buildYear: 1981, storyCapacity: [240, 240, 0], name: 'Beach'}),
+  (:Hotel {avgReview: 6.7, buildYear: 1984, storyCapacity: [80, 0, 0], name: 'Mountain'}),
+  (:Hotel {avgReview: -1.2, buildYear: 2010, storyCapacity: [55, 20, 0], name: 'Forest'})
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Hotel` nodes, including their properties.
+Note that no relationships are necessary to scale the node properties.
+Thus we use a star projection ('*') for relationships.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'myGraph',
+  'Hotel',
+  '*',
+  { nodeProperties: ['avgReview', 'buildYear', 'storyCapacity'] }
+)
+----
+
+In the following examples we will demonstrate how to scale the node properties of this graph.
+
+
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stream.estimate('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'MinMax'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 0                 | 8416     | 8416     | "8416 Bytes"
+|===
+--
+
+
+[[algorithms-scale-properties-examples-stream]]
+=== Stream
+
+:stream-details: Note that the output is always a single list property, containing all scaled node properties in the input order.
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stream('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'MinMax'
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [0.3709677419354839, 0.3209342560553633]
+| "Central"  | [0.6612903225806451, 1.0]
+| "East"     | [0.3225806451612903, 0.35986159169550175]
+| "Forest"   | [0.8387096774193549, 0.12629757785467127]
+| "Mountain" | [0.41935483870967744, 0.4679930795847751]
+| "Plaza"    | [0.0, 0.5285467128027681]
+| "Polar"    | [1.0, 0.17863321799307957]
+| "West"     | [0.7580645161290323, 0.0]
+|===
+--
+
+In the results we can observe that the first element in the resulting `scaledProperty` we get the min-max-scaled values for `buildYear`, where the `Plaza` hotel has the minimum value and is scaled to zero, while the `Polar` hotel has the maximum value and is scaled to one.
+This can be verified with the example graph.
+The second value in the `scaledProperty` result are the scaled values of the `avgReview` property.
+
+
+=== Mutate
+
+The `mutate` execution mode enables updating the named graph with a new node property containing the scaled properties for that node.
+The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
+The result is a single summary row containing metrics from the computation.
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:algorithms/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
+The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.mutate('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'Mean',
+  mutateProperty: 'hotelFeatures'
+}) YIELD nodePropertiesWritten, scalerStatistics
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], max=[19.0], min=[-4.12]}, buildYear={avg=[1991.875], max=[2020.0], min=[1958.0]}}
+|===
+--
+
+The result shows that there are now eight new node properties in the in-memory graph.
+These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs in the catalog].
+
+
+=== Stats
+
+:stats-syntax: algorithms-scale-properties-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stats` mode using the "Center" scaler:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stats('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'center'
+}) YIELD scalerStatistics
+----
+
+.Results
+[opts="header"]
+|===
+| scalerStatistics
+| {avgReview={avg=[4.49875]}, buildYear={avg=[1991.875]}}
+|===
+--
+
+Different scalers will need to compute different statistics as part of their computation.
+This will be reflected in the `scalerStatistics` returned.
+Since the "Center" computes the average value of the various input properties, that is what we get as scaler statistics results in this case.
+
+
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.write('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'stdscore',
+  writeProperty: 'hotelStdScore'
+}) YIELD nodePropertiesWritten, scalerStatistics
+
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], std=[6.675837845356941]}, buildYear={avg=[1991.875], std=[18.917171432325713]}}
+|===
+--
+
+The result shows that there are now eight new node properties in the database graph on the nodes corresponding to those in the projection `'myGraph'`.
+These node properties contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
+
+
+[[algorithms-scale-properties-examples-list]]
+=== List properties
+
+The `storyCapacity` property models the amount of rooms on each story of the hotel.
+The property is normalized so that hotels with fewer stories have a zero value.
+This is because the Scale Properties algorithm requires that all values for the same property have the same length.
+In this example we will show how to scale the values in these lists using the Scale Properties algorithm.
+We imagine using the output as feature vector to input in a machine learning algorithm.
+Additionally, we will include the `avgReview` property in our feature vector.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stream('myGraph', {
+  nodeProperties: ['avgReview', 'storyCapacity'],
+  scaler: 'StdScore'
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty AS features
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | features
+| "Beach"    | [-0.17956547594003253, -0.03401933556831381, 0.00254261210704973, -0.5187592498702616]
+| "Central"  | [2.172199255871029, -0.3968922482969945, -0.3534230828799124, -0.2806402499298136]
+| "East"     | [-0.0447509371737933, -0.5731448059080679, -0.526320706159294, -0.5187592498702616]
+| "Forest"   | [-0.8536381697712284, -0.513529970245499, -0.5568320514438908, -0.5187592498702616]
+| "Mountain" | [0.32973389273242665, -0.4487312358296632, -0.6076842935848854, -0.5187592498702616]
+| "Plaza"    | [0.5394453974799097, -0.609432097180936, -0.5568320514438908, -0.5187592498702616]
+| "Polar"    | [-0.672387512096618, 2.583849534831454, 2.5705808402272767, 2.542770749364069]
+| "West"     | [-1.2910364511016934, -0.00809984180197948, 0.027968733177547028, 0.3316657499170525]
+|===
+--
+
+The resulting feature vector contains the standard-score scaled value for the `avgReview` property in the first list position.
+We can see that some values are negative and that the maximum value sticks out for the `Central` hotel.
+
+The other three list positions are the scaled values for the `storyCapacity` list property.
+Note that each list item is scaled only with respect to the corresponding item in the other lists.
+Thus, the `Polar` hotel has the greatest scaled value in all list positions.
+
+
+[[algorithms-scale-properties-examples-log-offset]]
+=== Scaler-specific configuration
+
+The `log` scaler supports a configurable offset parameter.
+In this example we illustrate how to configure that offset.
+
+We want to scale the `avgReview` property, but it contains negative numbers, for which the logarithm is not defined.
+First, we'll determine what the minimum value is, by using Cypher's `min()` aggregating function:
+
+[role=query-example]
+--
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'avgReview') YIELD propertyValue
+RETURN min(propertyValue) AS minimumAvgReview
+----
+
+.Results
+[opts="header"]
+|===
+| minimumAvgReview
+| -4.12
+|===
+--
+
+Learning this value, we can use a greater value, thus ensuring that the logarithm will be a finite value.
+We will use `5.12`, as this will make the smallest scaled value zero.
+
+[role=query-example]
+--
+.The following will run the algorithm with a custom offset for the log scaler:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stream('myGraph', {
+  nodeProperties: ['avgReview'],
+  scaler: {type: 'Log', offset: 5.12}
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [2.130609828254235]
+| "Central"  | [3.183041371858985]
+| "East"     | [2.2321626286975]
+| "Forest"   | [1.366091653802371]
+| "Mountain" | [2.469793011977952]
+| "Plaza"    | [2.581730834423540]
+| "Polar"    | [1.635105659182678]
+| "West"     | [0.0]
+|===
+--
+
+As we can see, all scaled values are finite numbers.
+In particular, the smallest scaled value is zero.
+Try this example with an offset lower than `4.12` if you are curious about the results.

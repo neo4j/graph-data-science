@@ -14,6 +14,8 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 
     neodeps().each {
@@ -28,13 +30,16 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':ml-algo')
+    implementation project(':ml-api')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':pregel')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     // TEST DEPENDENCIES

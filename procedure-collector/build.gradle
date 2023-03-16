@@ -18,10 +18,4 @@ dependencies {
     implementation group: 'com.google.auto', name: 'auto-common',        version: ver.'auto-common'
     implementation group: 'com.squareup',    name: 'javapoet',           version: ver.'javapoet'
     implementation group: 'org.jetbrains',   name: 'annotations',        version: ver.'jetbrains-annotations'
-
-    testImplementation platform(dep.junit5bom)
-    testImplementation project(':core-test-utils')
-    testImplementation dep.junit5jupiter
-    testImplementation dep.junit5migration
-    testImplementation group: 'com.google.testing.compile',  name: 'compile-testing',  version: ver.'compile-testing'
 }

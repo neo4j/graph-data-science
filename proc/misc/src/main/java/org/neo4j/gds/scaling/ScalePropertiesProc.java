@@ -22,6 +22,8 @@ package org.neo4j.gds.scaling;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.scaleproperties.ScaleProperties;
+import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 
 public final class ScalePropertiesProc {
 

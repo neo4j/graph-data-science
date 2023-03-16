@@ -28,6 +28,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.scaleproperties.ScaleProperties;
+import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
+import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -35,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scaleProperties.mutate", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.scaleProperties.mutate", aliases = {"gds.alpha.scaleProperties.mutate"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateProc.MutateResult>, ScalePropertiesFactory<ScalePropertiesMutateConfig>> {
 
     @Override

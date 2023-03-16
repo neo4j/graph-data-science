@@ -20,19 +20,51 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConfig> {
+class K1ColoringStatsProcTest extends BaseProcTest implements
+    MemoryEstimateTest<K1Coloring, K1ColoringStatsConfig, HugeLongArray> {
+
+    private static final String K1COLORING_GRAPH = "myGraph";
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        " (a)" +
+        ",(b)" +
+        ",(c)" +
+        ",(d)" +
+        ",(a)-[:REL]->(b)" +
+        ",(a)-[:REL]->(c)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            K1ColoringStatsProc.class,
+            GraphProjectProc.class
+        );
+        loadGraph(K1COLORING_GRAPH);
+    }
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStatsConfig, ?>> getProcedureClazz() {
+    public Class<K1ColoringStatsProc> getProcedureClazz() {
         return K1ColoringStatsProc.class;
     }
 
@@ -43,7 +75,7 @@ class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConf
     @Test
     void testStats() {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .statsMode()
             .yields();
 
@@ -55,5 +87,25 @@ class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConf
             assertTrue(row.getBoolean("didConverge"));
             assertTrue(row.getNumber("ranIterations").longValue() < 3);
         });
+    }
+
+    @Test
+    @Disabled("Stats on empty graph has not been covered in AlgoBaseProcTest 🙈")
+    public void testRunOnEmptyGraph() {
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
+        assertThat(result1.toArray()).containsExactly(result2.toArray());
     }
 }

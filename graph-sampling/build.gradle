@@ -16,12 +16,15 @@ dependencies {
     implementation project(':core')
     implementation project(':algo')
     implementation project(':graph-schema-api')
+    implementation project(':progress-tracking')
     implementation project(':subgraph-filtering')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -29,6 +32,8 @@ dependencies {
     }
 
     testAnnotationProcessor project(':annotations')
+
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':test-utils')
     testImplementation project(':core-test-utils')

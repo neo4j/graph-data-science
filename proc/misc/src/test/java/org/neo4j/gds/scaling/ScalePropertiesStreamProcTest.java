@@ -30,6 +30,9 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.isA;
+
 class ScalePropertiesStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -57,7 +60,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     void stream() {
         var query = GdsCypher
             .call("g")
-            .algo("gds.alpha.scaleProperties")
+            .algo("gds.beta.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "Mean")
@@ -74,8 +77,32 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     }
 
     @Test
+    void estimate() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .streamEstimation()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "Mean")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "mapView", isA(Map.class),
+                "treeView", isA(String.class),
+                "bytesMax", greaterThanOrEqualTo(0L),
+                "heapPercentageMin", greaterThanOrEqualTo(0.0),
+                "nodeCount", 6L,
+                "relationshipCount", 0L,
+                "requiredMemory", isA(String.class),
+                "bytesMin", greaterThanOrEqualTo(0L),
+                "heapPercentageMax", greaterThanOrEqualTo(0.0)
+            ))
+        );
+    }
+
+    @Test
     void streamLogWithOffset() {
-        var query = "CALL gds.alpha.scaleProperties.stream('g', {" +
+        var query = "CALL gds.beta.scaleProperties.stream('g', {" +
                     "scaler: {type: 'log', offset: 10 }," +
                     "nodeProperties: 'myProp'}) " +
                     "yield nodeId, scaledProperty " +
@@ -88,6 +115,26 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             Map.of("nodeId", 3L, "scaledProperty", List.of(2.56, 2.48)),
             Map.of("nodeId", 4L, "scaledProperty", List.of(2.63, 2.48)),
             Map.of("nodeId", 5L, "scaledProperty", List.of(2.7, 2.48))
+        ));
+    }
+
+    @Test
+    void alphaStream() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.alpha.scaleProperties")
+            .streamMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "Mean")
+            .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D, 0D)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D, 0D)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D, 0D)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D, 0D)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D, 0D)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D, 0D))
         ));
     }
 }

@@ -19,23 +19,49 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-import java.util.List;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
+class Node2VecStreamProcTest extends BaseProcTest implements MemoryEstimateTest<Node2Vec, Node2VecStreamConfig, Node2VecModel.Result> {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node1)" +
+        ", (b:Node1)" +
+        ", (c:Node2)" +
+        ", (d:Isolated)" +
+        ", (e:Isolated)" +
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(a)" +
+        ", (a)-[:REL]->(c)" +
+        ", (c)-[:REL]->(a)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(b)";
+
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            Node2VecStreamProc.class,
+            GraphProjectProc.class
+        );
+    }
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
@@ -47,11 +73,15 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
             .addParameter("embeddingDimension", 42)
             .yields();
 
-        runQueryWithRowConsumer(query, row -> assertEquals(dimensions, ((List<Double>) row.get("embedding")).size()));
+        runQueryWithRowConsumer(query, row -> {
+            assertThat(row.get("embedding"))
+                .asList()
+                .hasSize(dimensions);
+        });
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecModel.Result, Node2VecStreamConfig, ?>> getProcedureClazz() {
+    public Class<Node2VecStreamProc> getProcedureClazz() {
         return Node2VecStreamProc.class;
     }
 
@@ -74,8 +104,6 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
             .addParameter("sudo", true)
             .yields();
 
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
         String expectedMessage = formatWithLocale(
             "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
             " Try reducing these parameters or run on a smaller graph.",
@@ -83,6 +111,20 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
             Integer.MAX_VALUE,
             Integer.MAX_VALUE
         );
-        assertEquals(expectedMessage, throwable.getMessage());
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(expectedMessage);
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(Node2VecModel.Result result1, Node2VecModel.Result result2) {
+        // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
+        assertEquals(result1.embeddings().get(0).data().length, result2.embeddings().get(0).data().length);
     }
 }

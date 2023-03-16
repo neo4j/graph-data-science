@@ -25,11 +25,13 @@ dependencies {
     implementation project(':collections')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
+    implementation project(':progress-tracking')
 
     testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
 
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
-
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     testImplementation project(':test-utils')
+    testImplementation project(':graph-schema-api')
 }

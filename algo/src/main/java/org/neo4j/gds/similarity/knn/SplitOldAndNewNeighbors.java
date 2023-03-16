@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.core.utils.BiLongConsumer;
+import org.neo4j.gds.core.concurrency.BiLongConsumer;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 

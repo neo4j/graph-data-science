@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
@@ -41,11 +41,11 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
 
     public static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
 
-    private final CsvAppender csvAppender;
+    private final CsvWriter csvWriter;
 
     public CsvRelationshipSchemaVisitor(Path fileLocation) {
         try {
-            this.csvAppender = new CsvWriter().append(fileLocation.resolve(RELATIONSHIP_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
+            this.csvWriter = CsvWriter.builder().build(fileLocation.resolve(RELATIONSHIP_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -54,40 +54,38 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
 
     @Override
     protected void export() {
-        try {
-            csvAppender.appendField(relationshipType().name());
-            csvAppender.appendField(direction().name());
-            if (key() != null) {
-                csvAppender.appendField(key());
-                csvAppender.appendField(valueType().csvName());
-                csvAppender.appendField(defaultValue().toString());
-                csvAppender.appendField(aggregation().name());
-                csvAppender.appendField(state().name());
-            }
-            csvAppender.endLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        var row = new ArrayList<String>();
+
+        row.add(relationshipType().name());
+        row.add(direction().name());
+        if (key() != null) {
+            row.add(key());
+            row.add(valueType().csvName());
+            row.add(defaultValue().toString());
+            row.add(aggregation().name());
+            row.add(state().name());
         }
+        csvWriter.writeRow(row);
     }
 
     @Override
     public void close() {
         try {
-            csvAppender.flush();
-            csvAppender.close();
+            csvWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeHeader() throws IOException {
-        csvAppender.appendField(RELATIONSHIP_TYPE_COLUMN_NAME);
-        csvAppender.appendField(DIRECTION_COLUMN_NAME);
-        csvAppender.appendField(PROPERTY_KEY_COLUMN_NAME);
-        csvAppender.appendField(VALUE_TYPE_COLUMN_NAME);
-        csvAppender.appendField(DEFAULT_VALUE_COLUMN_NAME);
-        csvAppender.appendField(AGGREGATION_COLUMN_NAME);
-        csvAppender.appendField(STATE_COLUMN_NAME);
-        csvAppender.endLine();
+    private void writeHeader() {
+        csvWriter.writeRow(
+            RELATIONSHIP_TYPE_COLUMN_NAME,
+            DIRECTION_COLUMN_NAME,
+            PROPERTY_KEY_COLUMN_NAME,
+            VALUE_TYPE_COLUMN_NAME,
+            DEFAULT_VALUE_COLUMN_NAME,
+            AGGREGATION_COLUMN_NAME,
+            STATE_COLUMN_NAME
+        );
     }
 }

@@ -119,6 +119,14 @@ public final class CypherMapWrapper implements CypherMapAccess {
         return withEntry(key, value);
     }
 
+    public CypherMapWrapper withEntryIfMissing(String key, Object value) {
+        if(!containsKey(key)) {
+            return withEntry(key, value);
+        }
+
+        return this;
+    }
+
     public CypherMapWrapper withEntry(String key, Object value) {
         Map<String, Object> newMap = copyValues();
         newMap.put(key, value);

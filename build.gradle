@@ -1,6 +1,6 @@
 plugins {
     id 'com.github.hierynomus.license'              version '0.16.2-37dde1f'        apply false
-    id 'com.github.johnrengelman.shadow'            version '7.0.0'                 apply false
+    id 'com.github.johnrengelman.shadow'            version '8.1.0'                 apply false
     id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
     id 'de.thetaphi.forbiddenapis'                  version '3.4'                   apply false
     id 'com.github.spotbugs'                        version '5.0.13'                 apply false

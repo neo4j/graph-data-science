@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 
 public class NodeRegressionTrainingPipeline extends NodePropertyTrainingPipeline {

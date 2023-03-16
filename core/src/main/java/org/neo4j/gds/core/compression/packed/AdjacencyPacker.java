@@ -51,7 +51,14 @@ public final class AdjacencyPacker {
         } else {
             return compress(values, offset, length);
         }
+    }
 
+    public static Compressed compressWithProperties(long[] values, long[][] properties, int length, int flags) {
+        // TODO: works only for sorted + delta compression; do we need more?
+        // TODO: only supports a single aggregation for now
+        var ordinal = flags & MASK;
+        var aggregation = Aggregation.resolve(Aggregation.values()[ordinal]);
+        return deltaCompressWithProperties(values, properties, length, aggregation);
     }
 
     public static Compressed compress(long[] values, int offset, int length) {
@@ -63,6 +70,24 @@ public final class AdjacencyPacker {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
         }
         return preparePacking(values, offset, length);
+    }
+
+    private static Compressed deltaCompressWithProperties(long[] values, long[][] properties, int length, Aggregation aggregation) {
+        if (length > 0) {
+            // sort, delta encode, reorder and aggregate properties
+            length = AdjacencyCompression.applyDeltaEncoding(
+                values,
+                length,
+                properties,
+                new Aggregation[]{aggregation},
+                aggregation == Aggregation.NONE
+            );
+        }
+        // pack targets
+        var compressed = preparePacking(values, 0, length);
+        // link properties
+        compressed.properties(properties);
+        return compressed;
     }
 
     private static Compressed preparePacking(long[] values, int offset, int length) {

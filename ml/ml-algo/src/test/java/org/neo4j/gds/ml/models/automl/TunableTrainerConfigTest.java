@@ -23,7 +23,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;

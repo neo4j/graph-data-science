@@ -19,12 +19,25 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 public interface BellmanFordMutateConfig extends BellmanFordBaseConfig, MutateRelationshipConfig {
+
+    default boolean mutateNegativeCycles() {
+        return false;
+    }
+
+    @Override
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean trackNegativeCycles() {
+        return mutateNegativeCycles();
+    }
+
 
     static BellmanFordMutateConfig of(CypherMapWrapper userInput) {
         return new BellmanFordMutateConfigImpl(userInput);

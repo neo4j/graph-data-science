@@ -20,8 +20,10 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,10 +34,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesMutateProc extends BaseProc {
 
-    @Procedure("gds.alpha.scaleProperties.mutate")
+    @Procedure("gds.beta.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -45,6 +48,30 @@ public class ScalePropertiesMutateProc extends BaseProc {
             new ScalePropertiesMutateSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.beta.scaleProperties.mutate.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var spec = new ScalePropertiesMutateSpec();
+
+        return new MemoryEstimationExecutor<>(
+            spec,
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.alpha.scaleProperties.mutate", deprecatedBy = "gds.beta.scaleProperties.mutate")
+    @Description(SCALE_PROPERTIES_DESCRIPTION)
+    public Stream<MutateResult> alphaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return mutate(graphName, configuration);
     }
 
     public static final class MutateResult extends StandardMutateResult {

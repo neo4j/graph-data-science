@@ -18,9 +18,11 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
     implementation project(':transaction')
@@ -35,6 +37,8 @@ dependencies {
             transitive = false
         }
     }
+
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':test-utils')
 }

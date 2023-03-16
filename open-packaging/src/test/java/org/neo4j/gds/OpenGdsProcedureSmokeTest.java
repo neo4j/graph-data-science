@@ -56,9 +56,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.allShortestPaths.stream",
 
         "gds.bellmanFord.stats",
+        "gds.bellmanFord.stats.estimate",
         "gds.bellmanFord.stream",
+        "gds.bellmanFord.stream.estimate",
         "gds.bellmanFord.mutate",
+        "gds.bellmanFord.mutate.estimate",
         "gds.bellmanFord.write",
+        "gds.bellmanFord.write.estimate",
 
         "gds.beta.collapsePath.mutate",
 
@@ -175,8 +179,15 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.scc.stream",
 
         "gds.alpha.scaleProperties.mutate",
+        "gds.beta.scaleProperties.mutate",
+        "gds.beta.scaleProperties.mutate.estimate",
         "gds.alpha.scaleProperties.stream",
+        "gds.beta.scaleProperties.stream",
+        "gds.beta.scaleProperties.stream.estimate",
+        "gds.beta.scaleProperties.stats",
+        "gds.beta.scaleProperties.stats.estimate",
         "gds.beta.scaleProperties.write",
+        "gds.beta.scaleProperties.write.estimate",
 
         "gds.alpha.sllpa.mutate",
         "gds.alpha.sllpa.mutate.estimate",
@@ -537,7 +548,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 383;
+        int expectedCount = 394;
         assertEquals(
             expectedCount,
             returnedRows,

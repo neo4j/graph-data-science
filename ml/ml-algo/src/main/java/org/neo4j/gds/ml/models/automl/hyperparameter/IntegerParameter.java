@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models.automl.hyperparameter;
 import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
+@SuppressWarnings("immutables:from")
 public interface IntegerParameter extends ConcreteParameter<Integer> {
     static IntegerParameter of(int value) {
         return ImmutableIntegerParameter.of(value);

@@ -21,6 +21,10 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -35,6 +39,8 @@ public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> e
             graphOrGraphStore,
             progressTracker,
             graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
+            configuration.trackNegativeCycles(),
+            configuration.trackPaths(),
             configuration.concurrency()
         );
     }
@@ -53,5 +59,20 @@ public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> e
                 Tasks.leaf("Sync")
             )
         );
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        var builder = MemoryEstimations.builder(BellmanFord.class)
+            .perNode("frontier", HugeLongArray::memoryEstimation)
+            .perNode("validBitset", HugeAtomicBitSet::memoryEstimation)
+            .add(DistanceTracker.memoryEstimation())
+            .perThread("BellmanFordTask", BellmanFordTask.memoryEstimation());
+
+        if(configuration.trackNegativeCycles()) {
+            builder.perNode("negativeCyclesVertices", HugeLongArray::memoryEstimation);
+        }
+
+        return builder.build();
     }
 }

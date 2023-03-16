@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;

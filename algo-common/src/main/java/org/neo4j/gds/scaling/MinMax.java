@@ -44,7 +44,7 @@ public final class MinMax extends ScalarScaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+    public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override

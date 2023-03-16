@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.ConfigKeyValidation;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;

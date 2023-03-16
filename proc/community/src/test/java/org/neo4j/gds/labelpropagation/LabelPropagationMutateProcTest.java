@@ -20,22 +20,25 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +48,52 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements
+public class LabelPropagationMutateProcTest extends BaseProcTest implements
+    // Leaving this and we should look into what is it testing and is it really relevant.
     MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagationResult> {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:A {id: 0, seed: 42}) " +
+        ", (b:B {id: 1, seed: 42}) " +
+
+        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+
+        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            LabelPropagationMutateProc.class,
+            GraphProjectProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
+        // Create explicit graphs with both projection variants
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'myGraph', " +
+            "   {" +
+            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+            "   }, " +
+            "   '*'" +
+            ")"
+        );
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
 
     @Override
     public String mutateProperty() {
@@ -76,13 +123,25 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, ?>> getProcedureClazz() {
+    public Class<LabelPropagationMutateProc> getProcedureClazz() {
         return LabelPropagationMutateProc.class;
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
     }
 
     @Override
     public LabelPropagationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return LabelPropagationMutateConfig.of(mapWrapper);
+    }
+
+    @Override
+    public void assertResultEquals(LabelPropagationResult result1, LabelPropagationResult result2) {
+        assertThat(result1)
+            .usingRecursiveComparison()
+            .isEqualTo(result2);
     }
 
     @Test
@@ -125,7 +184,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call(TEST_GRAPH_NAME)
+            .call("myGraph")
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -177,6 +236,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         );
     }
 
+    // FIXME: This doesn't belong here.
     @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
@@ -205,26 +265,13 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Nested
     class FilteredGraph extends BaseTest {
 
-        @Neo4jGraph
-        private static final String DB_CYPHER_WITH_OFFSET = "CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER;
+        @Neo4jGraph(offsetIds = true)
+        private static final String DB_CYPHER_WITH_OFFSET = DB_CYPHER;
 
         @Test
         void testGraphMutationFiltered() {
-            long deletedNodes = clearDb();
-
-            String graphName = "loadGraph";
-
-            String loadQuery = GdsCypher
-                .call(graphName)
-                .graphProject()
-                .withNodeLabels("Ignore", "A", "B")
-                .withAnyRelationshipType()
-                .yields();
-
-            runQuery(loadQuery);
-
             String query = GdsCypher
-                .call(graphName)
+                .call("myGraph")
                 .algo("labelPropagation")
                 .mutateMode()
                 .addParameter("nodeLabels", Arrays.asList("A", "B"))
@@ -233,16 +280,13 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
             runQuery(query);
 
-            List<Long> expectedValueList = new ArrayList<>(RESULT.size() + 1);
-            expectedValueList.add(Long.MIN_VALUE);
-            RESULT.forEach(component -> expectedValueList.add(component + deletedNodes + 1));
+            // offset is `42`
+            var expectedResult = List.of(44L, 49L, 44L, 45L, 46L, 47L, 48L, 49L, 50L, 51L, 52L, 53L);
 
-            Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore().getUnion();
+            var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), "myGraph").graphStore().getUnion();
             mutatedGraph.forEachNode(nodeId -> {
                     assertThat(mutatedGraph.nodeProperties("communityId").longValue(nodeId))
-                        .isEqualTo(
-                        expectedValueList.get(Math.toIntExact(nodeId))
-                    );
+                        .isEqualTo(expectedResult.get(Math.toIntExact(nodeId)));
                     return true;
                 }
             );

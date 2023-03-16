@@ -16,6 +16,7 @@ dependencies {
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -26,6 +27,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':memory-usage')
@@ -33,6 +35,7 @@ dependencies {
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
 
@@ -45,10 +48,11 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':test-utils')
     testImplementation project(':proc-test')
     testImplementation project(':proc-community')
 
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
 }

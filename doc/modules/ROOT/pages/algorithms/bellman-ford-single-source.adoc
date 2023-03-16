@@ -1,0 +1,431 @@
+[[algorithms-Bellman-Ford-single-source]]
+= Bellman-Ford Single-Source Shortest Path
+:description: This section describes the Bellman-Ford Shortest Path algorithm in the Neo4j Graph Data Science library.
+:entity: source-target-pair
+:result: shortest path
+:algorithm: Bellman-Ford
+:source-target: false
+:procedure-name: pass:q[gds.bellmanFord]
+
+
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-bellman-single-source-intro]]
+== Introduction
+
+The xref:https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm[Bellman-Ford] Shortest Path algorithm
+computes the shortest path between nodes.
+
+In contrast to the xref:algorithms/dijkstra-single-source.adoc[Dijkstra algorithm] which works only for graphs with non-negative relationship weights, Bellman-Ford can also handle graphs with negative weights provided that the source cannot reach any node involved in a negative cycle.
+A cycle in a graph is a path starting and ending at the same node.
+A negative cycle is a cycle for which the sum of the relationship weights is negative.
+When negative cycles exist, shortest paths cannot easily be defined.
+That is so because we can traverse a negative cycle multiple times to get smaller and smaller costs each time.
+
+When the Bellman-Ford algorithm detects negative cycles, it will return negative cycles instead of shortest paths.
+As the full set of negative cycles can be too large to enumerate, each node will be included in at most one returned negative cycle.
+
+The ability to handle negative weights makes Bellman-Ford more versatile than Dijkstra, but also slower in practice.
+
+The Neo4j GDS Library provides an adaptation of the original Bellman-Ford algorithm called xref:https://en.wikipedia.org/wiki/Shortest_path_faster_algorithm[Shortest-Path Faster Algorithm (SPFA)].
+SPFA significantly reduces the computational time of Bellman-Ford by working only on a subset of the nodes rather than iterating over the set of nodes at each step.
+In addition, the computations are parallelized to further speed-up computations.
+
+[[algorithms-bellman-single-source-syntax]]
+== Syntax
+
+include::partial$/algorithms/shortest-path/bellman-ford/bellman-ford-syntax.adoc[]
+
+[[algorithms-bellman-single-source-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: example network
+:image-file: bellman-ford.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Node {name: 'A'}),
+       (b:Node {name: 'B'}),
+       (c:Node {name: 'C'}),
+       (d:Node {name: 'D'}),
+       (e:Node {name: 'E'}),
+       (f:Node {name: 'F'}),
+       (g:Node {name: 'G'}),
+       (h:Node {name: 'H'}),
+       (i:Node {name: 'I'}),
+       (a)-[:REL {cost: 50}]->(b),
+       (a)-[:REL {cost: -50}]->(c),
+       (a)-[:REL {cost: 100}]->(d),
+       (b)-[:REL {cost: 40}]->(d),
+       (c)-[:REL {cost: 40}]->(d),
+       (c)-[:REL {cost: 80}]->(e),
+       (d)-[:REL {cost: 30}]->(e),
+       (d)-[:REL {cost: 80}]->(f),
+       (e)-[:REL {cost: 40}]->(f),
+       (g)-[:REL {cost: 40}]->(h),
+       (h)-[:REL {cost: -60}]->(i),
+       (i)-[:REL {cost: 10}]->(g)
+
+----
+
+This graph builds an example network with relationships between nodes having both negative and positive weights.
+These weights are represented by the `cost` relationship property.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'Node',
+    'REL',
+    {
+        relationshipProperties: 'cost'
+    }
+)
+----
+
+In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
+
+
+[[algorithms-bellman-single-source-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.write.estimate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 12                | 1336     | 1336      | "1336 Bytes"
+|===
+--
+
+The algorithm supports writing (or mutating) negative cycles if they exist in the graph, this is controlled by the `writeNegativeCycles` (`mutateNegativeCycles`) configuration parameter.
+This requires additional memory because the negative cycles have to be tracked.
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode including the negative cycles:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.write.estimate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH',
+    writeNegativeCycles: true
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 12                | 1448     | 1448      | "1448 Bytes"
+|===
+--
+
+
+[[algorithms-bellman-single-source-examples-stream]]
+=== Stream
+
+:!stream-details:
+In the `stream` execution mode, the algorithm returns the shortest path for each source-target-pair or negative cycles.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+
+[[algorithms-bellman-single-source-examples-stream-no-neg-cycles]]
+
+==== Stream without negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component without negative cycles in stream mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.stream('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, route, isNegativeCycle
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNode,
+    gds.util.asNode(targetNode).name AS targetNode,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(route) as route,
+    isNegativeCycle as isNegativeCycle
+ORDER BY index
+----
+
+.Results
+[opts="header",cols="2,3,3,1,2,2,2,3"]
+|===
+| index | sourceNode | targetNode | totalCost | nodeNames       | costs                   | route                                         | isNegativeCycle
+| 0     | "A"        | "A"        | 0.0       | [A]             | [0]                     | [Node[0]]                                     | false
+| 1     | "A"        | "B"        | 50.0      | [A, B]          | [0, 50]                 | [Node[0], Node[1]]                            | false
+| 2     | "A"        | "C"        | -50.0     | [A, C]          | [0, -50]                | [Node[0], Node[2]]                            | false
+| 3     | "A"        | "D"        | -10.0     | [A, C, D]       | [0, -50, -10]           | [Node[0], Node[2], Node[3]]                   | false
+| 4     | "A"        | "E"        | 20.0      | [A, C, D, E]    | [0, -50, -10, 20]       | [Node[0], Node[2], Node[3], Node[4]]          | false
+| 5     | "A"        | "F"        | 60.0      | [A, C, D, E, F] | [0, -50, -10.0, 20, 60] | [Node[0], Node[2], Node[3], Node[4], Node[5]] | false
+|===
+--
+
+Since the component of  `A` does not contain any negative cycles, the results depict the shortest paths from  `A` to all of its reachable nodes.
+ The ordered lists of node ids for each path as well as their accumulated costs are also returned.
+The Cypher Path objects are returned by the `path` return field, they contain node objects and virtual relationships which have a `cost` property.
+
+
+==== Stream with negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component with a negative cycle in stream mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'G'})
+CALL gds.bellmanFord.stream('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, route, isNegativeCycle
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNode,
+    gds.util.asNode(targetNode).name AS targetNode,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(route) as route,
+    isNegativeCycle as isNegativeCycle
+ORDER BY index
+----
+
+.Results
+[opts="header",cols="2,3,3,1,2,2,2,3"]
+|===
+| index | sourceNode | targetNode | totalCost | nodeNames       | costs              | route                                | isNegativeCycle
+| 0     | "G"        | "G"        | -10       | [G, H, I, G]    | [0, 40, -20, -10]  | [Node[6], Node[7], Node[8], Node[6]] | true
+
+|===
+--
+
+For this example, Bellman-Ford did not yield any shortest paths as it detected negative cycles.
+A negative cycle for `G` of -10 total cost is emitted as the output, with the `isNegativeCycle` field set to true.
+
+[[algorithms-bellman-single-source-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-bellman-single-source-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run Bellman Ford on `stats` mode
+[source,cypher,role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.stats('myGraph', {
+  sourceNode: source,
+  relationshipWeightProperty: 'cost'
+})
+YIELD  containsNegativeCycle
+RETURN containsNegativeCycle
+----
+.Results
+[opts="header"]
+|===
+| containsNegativeCycle
+| false
+|===
+--
+
+Running stats mode can be useful if we want to discover if the graph has any negative cycles, but we do not to have them computed or stored.
+For this example, we can see that the `containsNegativeCycle` field is false as `A` cannot reach any negative cycles.
+
+[[algorithms-bellman-single-source-examples-mutate]]
+=== Mutate
+
+The `mutate` execution mode updates the named graph with new relationships.
+Each new relationship represents a path from source node to target node or a negative cycle.
+The relationship type is configured using the mutateRelationshipType option.
+The total route cost is stored using the totalCost property.
+
+
+==== Mutate without negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford  on a component without negative cycles in mutate mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.mutate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    mutateRelationshipType: 'ROUTE'
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten |  containsNegativeCycle
+| 6                    | false
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with new relationships of type `ROUTE`.
+Since `containsNegativeCycle` is false, these relationships represent shortest paths.
+The new relationships will store a single property `totalCost`, corresponding to the shortest path cost from source to target.
+
+==== Mutate with negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component with negative cycles in mutate mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'G'})
+CALL gds.bellmanFord.mutate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    mutateRelationshipType: 'ROUTE',
+    mutateNegativeCycles: true
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten | containsNegativeCycle
+| 1                    | true
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with a single relationship of type `ROUTE`.
+Since `containsNegativeCycle` is true, this relationship represents the discovered negative cycle.
+The new relationship stores a single property `totalCost`, corresponding to the weight of the negative cycle.
+
+Note that by default, when negative cycles are detected during mutate mode, they will not be written back to the in-memory graph.
+This can be bypassed by setting the `mutateNegativeCycles` to true as showcased in the above example.
+
+[NOTE]
+====
+The relationships produced are always directed, even if the input graph is undirected.
+====
+
+[[algorithms-bellman-single-source-examples-write]]
+=== Write
+
+The `write` execution mode updates the Neo4j database with new relationships.
+Each new relationship represents a path from source node to target node or a negative cycle.
+The relationship type is configured using the writeRelationshipType option.
+The total cost is stored using the totalCost property.
+The intermediate node ids are stored using the nodeIds property.
+The accumulated costs to reach an intermediate node are stored using the costs property.
+
+==== Write without negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component without negative cycles in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.write('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'ROUTE',
+    writeNodeIds: true,
+    writeCosts: true
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten | containsNegativeCycle
+| 6                    | false
+|===
+--
+
+The above query will write 6 relationships of type `ROUTE` back to Neo4j.
+The relationships store three properties describing the path: `totalCost`, `nodeIds` and `costs`.
+
+
+==== Write with negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component with negative cycles in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'G'})
+CALL gds.bellmanFord.write('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'ROUTE',
+    writeNodeIds: true,
+    writeCosts: true,
+    writeNegativeCycles:true
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten | containsNegativeCycle
+| 1                    | true
+|===
+--
+
+After executing the above query,  one relationship of type  `ROUTE` is written back to the Neo4j graph.
+Since `containsNegativeCycle` is true, the relationship represents a negative cycle.
+
+Similar to the `mutate` mode, the default behavior when encountering negative cycles is to not write them back in tne Neo4j database.
+ We can set `writeNegativeCycles` to true as in the example to override this setting.
+
+[NOTE]
+====
+The relationships written are always directed, even if the input graph is undirected.
+====

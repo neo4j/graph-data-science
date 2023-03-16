@@ -6,7 +6,6 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor project(':config-generator')
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
@@ -16,6 +15,8 @@ dependencies {
     implementation project(':graph-projection-api')
     implementation group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'
 
+
+    testCompileOnly    group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
 
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter

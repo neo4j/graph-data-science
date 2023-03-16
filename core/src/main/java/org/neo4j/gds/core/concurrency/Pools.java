@@ -38,8 +38,8 @@ import java.util.concurrent.TimeoutException;
 public final class Pools {
 
     private static final String THREAD_NAME_PREFIX = "gds";
-    private static final ThreadFactory DEFAULT_THREAD_FACTORY = NamedThreadFactory.daemon(THREAD_NAME_PREFIX);
 
+    public static final ThreadFactory DEFAULT_THREAD_FACTORY = NamedThreadFactory.daemon(THREAD_NAME_PREFIX);
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createSingleThreadPool("algo");
 
@@ -47,7 +47,7 @@ public final class Pools {
         throw new UnsupportedOperationException();
     }
 
-    static ExecutorService createDefaultPool() {
+    public static ExecutorService createDefaultPool() {
         var poolSizes = PoolSizesService.poolSizes();
         return new ThreadPoolExecutor(
             poolSizes.corePoolSize(),

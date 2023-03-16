@@ -14,6 +14,7 @@ dependencies {
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -32,10 +33,12 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':ml-algo')
+    implementation project(':ml-api')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':pipeline')
     implementation project(':proc-common')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
 
@@ -47,6 +50,7 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')

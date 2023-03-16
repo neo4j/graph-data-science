@@ -272,18 +272,18 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     static Stream<Arguments> componentSizeInputs() {
         return Stream.of(
-            Arguments.of(Map.of("minComponentSize", 1), new Long[] {0L, 7L, 9L}),
-            Arguments.of(Map.of("minComponentSize", 2), new Long[] {0L, 7L}),
-            Arguments.of(Map.of("minComponentSize", 1, "consecutiveIds", true), new Long[] {0L, 1L, 2L}),
-            Arguments.of(Map.of("minComponentSize", 2, "consecutiveIds", true), new Long[] {0L, 1L}),
-            Arguments.of(Map.of("minComponentSize", 1, "seedProperty", SEED_PROPERTY), new Long[] {42L, 46L, 48L}),
-            Arguments.of(Map.of("minComponentSize", 2, "seedProperty", SEED_PROPERTY), new Long[] {42L, 46L})
+            Arguments.of(Map.of("minComponentSize", 1), List.of(0L, 7L, 9L)),
+            Arguments.of(Map.of("minComponentSize", 2), List.of(0L, 7L)),
+            Arguments.of(Map.of("minComponentSize", 1, "consecutiveIds", true), List.of(0L, 1L, 2L)),
+            Arguments.of(Map.of("minComponentSize", 2, "consecutiveIds", true), List.of(0L, 1L)),
+            Arguments.of(Map.of("minComponentSize", 1, "seedProperty", SEED_PROPERTY), List.of(42L, 46L, 48L)),
+            Arguments.of(Map.of("minComponentSize", 2, "seedProperty", SEED_PROPERTY), List.of(42L, 46L))
         );
     }
 
     @ParameterizedTest
     @MethodSource("componentSizeInputs")
-    void testWriteWithMinComponentSize(Map<String, Object> parameters, Long[] expectedComponentIds) {
+    void testWriteWithMinComponentSize(Map<String, Object> parameters, List<Long> expectedComponentIds) {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -310,7 +310,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             row -> {
                 assertThat(row.get("components"))
                     .asList()
-                    .containsExactlyInAnyOrder(expectedComponentIds);
+                    .containsExactlyInAnyOrderElementsOf(expectedComponentIds);
             }
         );
     }

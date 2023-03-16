@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
@@ -47,11 +43,14 @@ public final class Compressed implements AutoCloseable {
     // header of compression blocks
     private final byte[] header;
 
+    private long[][] properties;
+
     private Compressed() {
         this.address = Address.EMPTY;
         this.header = new byte[0];
         this.length = 0;
         this.cleanable = () -> {};
+        this.properties = null;
     }
 
     public Compressed(long address, long bytes, byte[] header, int length) {
@@ -59,11 +58,20 @@ public final class Compressed implements AutoCloseable {
         this.cleanable = CLEANER.register(this, this.address);
         this.header = header;
         this.length = length;
+        this.properties = null;
     }
 
     @Override
     public String toString() {
         return "Compressed{address=" + this.address.address() + ", bytes=" + this.address.bytes() + ", blocks=" + header.length + '}';
+    }
+
+    public long[] @Nullable [] properties() {
+        return this.properties;
+    }
+
+    public void properties(long[][] properties) {
+        this.properties = properties.clone();
     }
 
     /**
@@ -176,170 +184,5 @@ final class Address implements Runnable {
         if (address == 0) {
             throw new IllegalStateException("This compressed memory has already been freed.");
         }
-    }
-}
-
-final class DecompressingCursor implements AdjacencyCursor {
-
-    private final HugeObjectArray<Compressed> adjacencies;
-
-    private final BlockDecompressor decompressingReader;
-
-    private int maxTargets;
-    private int currentPosition;
-
-    DecompressingCursor(HugeObjectArray<Compressed> adjacencies, int flags) {
-        this.adjacencies = adjacencies;
-        this.decompressingReader = new BlockDecompressor(flags);
-
-    }
-
-    void init(long node) {
-        init(node, 42);
-    }
-
-    @Override
-    public void init(long node, int ignore) {
-        var compressed = this.adjacencies.getOrDefault(node, Compressed.EMPTY);
-        this.maxTargets = compressed.length();
-        this.currentPosition = 0;
-        this.decompressingReader.reset(compressed);
-    }
-
-    @Override
-    public int size() {
-        return this.maxTargets;
-    }
-
-    @Override
-    public int remaining() {
-        return this.maxTargets - this.currentPosition;
-    }
-
-    @Override
-    public boolean hasNextVLong() {
-        return currentPosition < maxTargets;
-    }
-
-    @Override
-    public long nextVLong() {
-        this.currentPosition++;
-        return decompressingReader.next();
-    }
-
-    @Override
-    public long peekVLong() {
-        return decompressingReader.peek();
-    }
-
-    @Override
-    public long skipUntil(long targetId) {
-        long next;
-        while (hasNextVLong()) {
-            if ((next = nextVLong()) > targetId) {
-                return next;
-            }
-        }
-        return AdjacencyCursor.NOT_FOUND;
-    }
-
-    @Override
-    public long advance(long targetId) {
-        long next;
-        while (hasNextVLong()) {
-            if ((next = nextVLong()) >= targetId) {
-                return next;
-            }
-        }
-        return AdjacencyCursor.NOT_FOUND;
-    }
-
-    @Override
-    public long advanceBy(int n) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    @Override
-    public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-}
-
-final class BlockDecompressor {
-
-    private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
-
-    private final boolean isDeltaCompressed;
-
-    // Compressed
-    private long ptr;
-    private byte[] header;
-    private int length;
-
-    // Decompression state
-    private final long[] block;
-
-    private int idxInBlock;
-    private int blockId;
-    private int blockOffset;
-    private long lastValue;
-
-
-    BlockDecompressor(int flags) {
-        this.isDeltaCompressed = (flags & AdjacencyPacker.DELTA) == AdjacencyPacker.DELTA;
-        this.block = new long[BLOCK_SIZE];
-    }
-
-    void reset(Compressed compressed) {
-        this.ptr = compressed.address();
-        this.header = compressed.header();
-        this.length = compressed.length();
-        this.idxInBlock = 0;
-        this.blockId = 0;
-        this.blockOffset = 0;
-        this.lastValue = 0;
-
-        this.decompressBlock();
-    }
-
-    long next() {
-        if (this.idxInBlock == BLOCK_SIZE) {
-            decompressBlock();
-        }
-        return block[this.idxInBlock++];
-    }
-
-    long peek() {
-        if (this.idxInBlock == BLOCK_SIZE) {
-            decompressBlock();
-        }
-        return block[this.idxInBlock];
-    }
-
-    private void decompressBlock() {
-        if (this.blockId < this.header.length) {
-            // block unpacking
-            byte blockHeader = this.header[blockId];
-            this.ptr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.ptr);
-            if (this.isDeltaCompressed) {
-                long value = this.lastValue;
-                for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
-                    value = this.block[i] += value;
-                }
-                this.lastValue = value;
-            }
-            this.blockOffset += BLOCK_SIZE;
-            this.blockId++;
-        } else {
-            // tail decompression
-            int tailLength = this.length - this.blockOffset;
-            if (this.isDeltaCompressed) {
-                AdjacencyCompression.decompressAndPrefixSum(tailLength, this.lastValue, this.ptr, this.block, 0);
-            } else {
-                AdjacencyCompression.decompress(tailLength, this.ptr, this.block, 0);
-            }
-        }
-
-        this.idxInBlock = 0;
     }
 }

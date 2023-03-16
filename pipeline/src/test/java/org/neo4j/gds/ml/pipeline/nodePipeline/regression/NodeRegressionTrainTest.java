@@ -25,14 +25,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.ResourceUtil;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.beta.generator.PropertyProducer;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionData;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
@@ -48,6 +53,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigI
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,7 +66,7 @@ import static org.neo4j.gds.compat.TestLog.INFO;
 @GdlExtension
 class NodeRegressionTrainTest {
 
-    @GdlGraph(idOffset=42)
+    @GdlGraph(idOffset = 42)
     private static final String DB_QUERY =
         "({scalar: 1.5,     target:   3 })," +
         "({scalar: 2.5,     target:   5 })," +
@@ -78,6 +84,18 @@ class NodeRegressionTrainTest {
 
     @Inject
     GraphStore graphStore;
+
+    @GdlGraph(graphNamePrefix = "nan", idOffset = 42)
+    private static final String NAN_DB_QUERY =
+        "({scalar: 1.5,     target:   3.0 })," +
+        "({scalar: 2.5,     target:   5.0 })," +
+        "({scalar: 3.5,     target:   7.0 })," +
+        "({scalar: 4.5,     target:   9.0 })," +
+        "({scalar: 5.5,     target: NaN })," +
+        "({scalar: 42.5,    target:  85.0 }),";
+
+    @Inject
+    GraphStore nanGraphStore;
 
     @Test
     void trainWithOnlyLR() {
@@ -149,9 +167,13 @@ class NodeRegressionTrainTest {
         assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
 
 
-
-        assertThat(trainingStatistics.winningModelOuterTrainMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(416.9288888888889, Offset.offset(1e-5));
-        assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(1265.4725, Offset.offset(1e-5));
+        assertThat(trainingStatistics
+            .winningModelOuterTrainMetrics()
+            .get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(416.9288888888889, Offset.offset(1e-5));
+        assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(
+            1265.4725,
+            Offset.offset(1e-5)
+        );
     }
 
     @Test
@@ -180,7 +202,12 @@ class NodeRegressionTrainTest {
             .metrics(evaluationMetrics)
             .build();
 
-        NodeRegressionTrainResult result = createWithExecutionContext(graphStore, pipeline, trainConfig, ProgressTracker.NULL_TRACKER).run();
+        NodeRegressionTrainResult result = createWithExecutionContext(
+            graphStore,
+            pipeline,
+            trainConfig,
+            ProgressTracker.NULL_TRACKER
+        ).run();
 
         var trainingStatistics = result.trainingStatistics();
 
@@ -200,7 +227,11 @@ class NodeRegressionTrainTest {
         int MAX_TRIALS = 2;
         var pipeline = new NodeRegressionTrainingPipeline();
 
-        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder().validationFolds(2).testFraction(0.5D).build());
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl
+            .builder()
+            .validationFolds(2)
+            .testFraction(0.5D)
+            .build());
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
 
         pipeline.addTrainerConfig(
@@ -260,7 +291,12 @@ class NodeRegressionTrainTest {
             .concurrency(concurrency)
             .build();
 
-        Supplier<NodeRegressionTrain> algoSupplier = () -> createWithExecutionContext(graphStore, pipeline, config, ProgressTracker.NULL_TRACKER);
+        Supplier<NodeRegressionTrain> algoSupplier = () -> createWithExecutionContext(
+            graphStore,
+            pipeline,
+            config,
+            ProgressTracker.NULL_TRACKER
+        );
 
         var firstResult = algoSupplier.get().run();
         var secondResult = algoSupplier.get().run();
@@ -287,11 +323,105 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR))
             .build();
 
-        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
+        var nodeFeatureProducer = NodeFeatureProducer.create(
+            graphStore,
+            config,
+            ExecutionContext.EMPTY,
+            ProgressTracker.NULL_TRACKER
+        );
 
         // we are mostly interested in the fact that the validation method is called
-        assertThatThrownBy(() -> NodeRegressionTrain.create(graphStore, pipeline, config, nodeFeatureProducer, ProgressTracker.NULL_TRACKER))
-            .hasMessage("The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
+        assertThatThrownBy(() -> NodeRegressionTrain.create(
+            graphStore,
+            pipeline,
+            config,
+            nodeFeatureProducer,
+            ProgressTracker.NULL_TRACKER
+        ))
+            .hasMessage(
+                "The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
+    }
+
+    @Test
+    void failGivenNaNTargetProperty() {
+        var pipeline = new NodeRegressionTrainingPipeline();
+        pipeline.featureProperties().addAll(List.of("scalar"));
+
+        var config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .pipeline("")
+            .modelUser("myUser")
+            .graphName("dummy")
+            .modelName("myModel")
+            .targetProperty("target")
+            .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR))
+            .build();
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(
+            nanGraphStore,
+            config,
+            ExecutionContext.EMPTY,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        // we are mostly interested in the fact that the validation method is called
+        assertThatThrownBy(() -> NodeRegressionTrain.create(
+            nanGraphStore,
+            pipeline,
+            config,
+            nodeFeatureProducer,
+            ProgressTracker.NULL_TRACKER
+        ))
+            .hasMessage(
+                "Node with id 46 has `target` target property value `NaN`");
+    }
+
+    @Test
+    void failGivenInfiniteTargetProperty() {
+        var pipeline = new NodeRegressionTrainingPipeline();
+        pipeline.featureProperties().addAll(List.of("scalar"));
+
+        var infinityGraph = RandomGraphGenerator.builder()
+            .nodeCount(12)
+            .averageDegree(1)
+            .nodePropertyProducer(PropertyProducer.randomDouble("scalar", -1.0f, 1.0f))
+            .nodePropertyProducer(PropertyProducer.fixedDouble("target", Double.POSITIVE_INFINITY))
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .seed(42)
+            .build()
+            .generate();
+        GraphStore infinityGraphStore = CSRGraphStoreUtil.createFromGraph(
+            DatabaseId.random(),
+            infinityGraph,
+            Optional.empty(),
+            4
+        );
+
+        var config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .pipeline("")
+            .modelUser("myUser")
+            .graphName("dummy")
+            .modelName("myModel")
+            .targetProperty("target")
+            .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR))
+            .build();
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(
+            infinityGraphStore,
+            config,
+            ExecutionContext.EMPTY,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        // we are mostly interested in the fact that the validation method is called
+        assertThatThrownBy(() -> NodeRegressionTrain.create(
+            infinityGraphStore,
+            pipeline,
+            config,
+            nodeFeatureProducer,
+            ProgressTracker.NULL_TRACKER
+        ))
+            .hasMessage(
+                "Node with id 0 has infinite `target` target property value");
     }
 
     static NodeRegressionTrain createWithExecutionContext(
@@ -300,7 +430,12 @@ class NodeRegressionTrainTest {
         NodeRegressionPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, progressTracker);
+        var nodeFeatureProducer = NodeFeatureProducer.create(
+            graphStore,
+            config,
+            ExecutionContext.EMPTY,
+            progressTracker
+        );
         return NodeRegressionTrain.create(
             graphStore,
             pipeline,

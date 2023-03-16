@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.io.file.GraphInfo;
@@ -39,11 +38,13 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     public static final String REL_TYPE_COUNTS_COLUMN_NAME = "relTypeCounts";
     public static final String INVERSE_INDEXED_REL_TYPES = "inverseIndexedRelTypes";
 
-    private final CsvAppender csvAppender;
+    private final CsvWriter csvWriter;
 
     public CsvGraphInfoVisitor(Path fileLocation) {
         try {
-            this.csvAppender = new CsvWriter().append(fileLocation.resolve(GRAPH_INFO_FILE_NAME), StandardCharsets.UTF_8);
+            this.csvWriter = CsvWriter
+                .builder()
+                .build(fileLocation.resolve(GRAPH_INFO_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -58,34 +59,31 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
             .map(RelationshipType::name)
             .collect(Collectors.joining(";"));
 
-        try {
-            this.csvAppender.appendField(graphInfo.databaseId().databaseName());
-            this.csvAppender.appendField(Long.toString(graphInfo.nodeCount()));
-            this.csvAppender.appendField(Long.toString(graphInfo.maxOriginalId()));
-            this.csvAppender.appendField(CsvMapUtil.relationshipCountsToString(graphInfo.relationshipTypeCounts()));
-            this.csvAppender.appendField(inverseIndexedRelTypesString);
-            this.csvAppender.endLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.csvWriter.writeRow(
+            graphInfo.databaseId().databaseName(),
+            Long.toString(graphInfo.nodeCount()),
+            Long.toString(graphInfo.maxOriginalId()),
+            CsvMapUtil.relationshipCountsToString(graphInfo.relationshipTypeCounts()),
+            inverseIndexedRelTypesString
+        );
     }
 
     @Override
     public void close() {
         try {
-            this.csvAppender.flush();
-            this.csvAppender.close();
+            this.csvWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeHeader() throws IOException {
-        this.csvAppender.appendField(DATABASE_NAME_COLUMN_NAME);
-        this.csvAppender.appendField(NODE_COUNT_COLUMN_NAME);
-        this.csvAppender.appendField(MAX_ORIGINAL_ID_COLUMN_NAME);
-        this.csvAppender.appendField(REL_TYPE_COUNTS_COLUMN_NAME);
-        this.csvAppender.appendField(INVERSE_INDEXED_REL_TYPES);
-        this.csvAppender.endLine();
+    private void writeHeader() {
+        this.csvWriter.writeRow(
+            DATABASE_NAME_COLUMN_NAME,
+            NODE_COUNT_COLUMN_NAME,
+            MAX_ORIGINAL_ID_COLUMN_NAME,
+            REL_TYPE_COUNTS_COLUMN_NAME,
+            INVERSE_INDEXED_REL_TYPES
+        );
     }
 }

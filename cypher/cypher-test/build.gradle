@@ -13,6 +13,7 @@ dependencies {
     testCompileOnly         group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     testCompileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
     testCompileOnly         group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
+    testCompileOnly         group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     neodeps().each {
         testCompileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -20,6 +21,7 @@ dependencies {
         }
     }
 
+    testCompileOnly    project(':progress-tracking')
     testImplementation project(':core')
     testImplementation project(':storage-engine-adapter')
     testImplementation project(':config-api')

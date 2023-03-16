@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.NodeProjections;
@@ -30,25 +32,48 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Arrays;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
-class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimizationResult> {
+class ModularityOptimizationMutateProcTest extends BaseProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimizationResult> {
 
     private static final String TEST_GRAPH_NAME = "myGraph";
+
+    @Neo4jGraph
+    static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
+        ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
+        ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
+        ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
+        ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
+        ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
+        ", (a)-[:TYPE {weight: 0.01}]->(b)" +
+        ", (a)-[:TYPE {weight: 5.0}]->(e)" +
+        ", (a)-[:TYPE {weight: 5.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 5.0}]->(c)" +
+        ", (b)-[:TYPE {weight: 5.0}]->(d)" +
+        ", (c)-[:TYPE {weight: 0.01}]->(e)" +
+        ", (f)-[:TYPE {weight: 0.01}]->(d)";
+
 
     @Override
     public String mutateProperty() {
@@ -61,46 +86,64 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @BeforeEach
-    @Override
-    void setup() throws Exception{
-        super.setup();
+    void setup() throws Exception {
+        registerProcedures(
+            ModularityOptimizationMutateProc.class,
+            GraphProjectProc.class,
+            // this is needed by `MutateNodePropertyTest.testWriteBackGraphMutationOnFilteredGraph` 🤨
+            GraphWriteNodePropertiesProc.class
+        );
+
         runQuery(graphProjectQuery());
     }
 
     @Test
     void testMutate() {
-        String query = explicitAlgoBuildStage()
+        String query = GdsCypher.call(TEST_GRAPH_NAME)
+            .algo("gds", "beta", "modularityOptimization")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber("communityCount").longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+            assertThat(row.getNumber("modularity"))
+                .asInstanceOf(DOUBLE)
+                .isEqualTo(0.12244, Offset.offset(0.001));
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isLessThanOrEqualTo(3);
         });
     }
 
     @Test
     void testMutateWeighted() {
-        String query = explicitAlgoBuildStage()
+        String query = GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
             .mutateMode()
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.4985, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber("communityCount").longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+            assertThat(row.getNumber("modularity"))
+                .asInstanceOf(DOUBLE)
+                .isEqualTo(0.4985, Offset.offset(0.001));
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isLessThanOrEqualTo(3);
         });
     }
 
     @Test
     void testMutateSeeded() {
-        String query = explicitAlgoBuildStage()
+        String query = GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
             .mutateMode()
             .addParameter("seedProperty", "seed1")
             .addParameter("mutateProperty", mutateProperty())
@@ -108,7 +151,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
         runQuery(query);
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), TEST_GRAPH_NAME).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_NAME).graphStore();
         var communities = mutatedGraph.nodeProperty(mutateProperty()).values();
         var seeds = mutatedGraph.nodeProperty("seed1").values();
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
@@ -118,44 +161,54 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
     @Test
     void testMutateTolerance() {
-        String query = explicitAlgoBuildStage()
+        String query = GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
             .mutateMode()
             .addParameter("tolerance", 1)
             .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertTrue(row.getBoolean("didConverge"));
+            assertThat(row.getBoolean("didConverge")).isTrue();
+
             // Cannot converge after one iteration,
             // because it doesn't have anything to compare the computed modularity against.
-            assertEquals(2, row.getNumber("ranIterations").longValue());
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
         });
     }
 
     @Test
     void testMutateIterations() {
-        String query = explicitAlgoBuildStage()
+        String query = GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
             .mutateMode()
             .addParameter("maxIterations", 1)
             .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertFalse(row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
+            assertThat(row.getBoolean("didConverge")).isFalse();
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1);
         });
     }
 
+    // This should not be tested here...
     @Test
     void testMutateEstimate() {
-        String query = explicitAlgoBuildStage()
+        String query = GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
             .estimationMode(MUTATE)
             .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
-            assertTrue(row.getNumber("bytesMin").longValue() > 0);
-            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+            assertThat(row.getNumber("bytesMin"))
+                .asInstanceOf(LONG)
+                .isPositive();
+            assertThat(row.getNumber("bytesMax"))
+                .asInstanceOf(LONG)
+                .isPositive();
         });
     }
 
@@ -178,7 +231,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig, ?>> getProcedureClazz() {
+    public Class<ModularityOptimizationMutateProc> getProcedureClazz() {
         return ModularityOptimizationMutateProc.class;
     }
 
@@ -193,18 +246,14 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public void assertResultEquals(
-        ModularityOptimizationResult result1, ModularityOptimizationResult result2
-    ) {
-        assertEquals(result1.modularity(), result2.modularity());
-        assertEquals(result1.ranIterations(), result2.ranIterations());
+    public void assertResultEquals(ModularityOptimizationResult result1, ModularityOptimizationResult result2) {
+        assertThat(result1.modularity())
+                .isEqualTo(result2.modularity());
+        assertThat(result1.ranIterations())
+            .isEqualTo(result2.ranIterations());
     }
 
-    GdsCypher.ModeBuildStage explicitAlgoBuildStage() {
-        return GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization");
-    }
-
-    static String graphProjectQuery() {
+    private static String graphProjectQuery() {
         GraphProjectFromStoreConfig config = GraphProjectFromStoreConfigImpl
             .builder()
             .graphName("")
@@ -226,5 +275,10 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
             .graphProject()
             .withGraphProjectConfig(config)
             .yields();
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 }

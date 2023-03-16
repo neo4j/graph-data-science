@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;

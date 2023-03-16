@@ -100,8 +100,8 @@ class EigenvectorProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(expectedNode0, PageRankProcTest.RESULT_ERROR)),
-            Map.of("nodeId", 1L, "score", closeTo(expectedNode1, PageRankProcTest.RESULT_ERROR))
+            Map.of("nodeId", 0L, "score", closeTo(expectedNode0, 1e-5)),
+            Map.of("nodeId", 1L, "score", closeTo(expectedNode1, 1e-5))
         ));
     }
 
@@ -146,8 +146,8 @@ class EigenvectorProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.04371, PageRankProcTest.RESULT_ERROR)),
-            Map.of("nodeId", 1L, "score", closeTo(0.99904, PageRankProcTest.RESULT_ERROR))
+            Map.of("nodeId", 0L, "score", closeTo(0.04371, 1e-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.99904, 1e-5))
         ));
     }
 
@@ -162,8 +162,8 @@ class EigenvectorProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.04371, PageRankProcTest.RESULT_ERROR)),
-            Map.of("nodeId", 1L, "score", closeTo(0.99904, PageRankProcTest.RESULT_ERROR))
+            Map.of("nodeId", 0L, "score", closeTo(0.04371, 1e-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.99904, 1e-5))
         ));
     }
 

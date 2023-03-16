@@ -23,6 +23,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
+import org.neo4j.gds.scaling.ScalePropertiesStatsProc;
 import org.neo4j.gds.scaling.ScalePropertiesStreamProc;
 import org.neo4j.gds.scaling.ScalePropertiesWriteProc;
 
@@ -36,6 +37,7 @@ class ScalePropertiesDocTest extends SingleFileDocTestBase {
             GraphProjectProc.class,
             ScalePropertiesStreamProc.class,
             ScalePropertiesMutateProc.class,
+            ScalePropertiesStatsProc.class,
             ScalePropertiesWriteProc.class,
             GraphStreamNodePropertiesProc.class
         );
@@ -48,6 +50,6 @@ class ScalePropertiesDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/scale-properties.adoc";
+        return "pages/algorithms/scale-properties.adoc";
     }
 }

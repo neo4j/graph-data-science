@@ -24,6 +24,7 @@ dependencies {
     implementation project(':core')
     implementation project(':graph-schema-api')
     implementation project(':proc-common')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     implementation group: 'org.openjdk.jol',   name: 'jol-core',                  version: ver.'jol'
@@ -35,6 +36,7 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':executor')
     testImplementation project(':test-utils')

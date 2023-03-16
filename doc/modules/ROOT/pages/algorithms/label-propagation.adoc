@@ -265,12 +265,12 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (alice:User {name: 'Alice', seed_label: 52}),
-  (bridget:User {name: 'Bridget', seed_label: 21}),
-  (charles:User {name: 'Charles', seed_label: 43}),
-  (doug:User {name: 'Doug', seed_label: 21}),
-  (mark:User {name: 'Mark', seed_label: 19}),
-  (michael:User {name: 'Michael', seed_label: 52}),
+  (alice:User {name: 'Alice', posts: 4, seed_label: 52}),
+  (bridget:User {name: 'Bridget', posts: 13, seed_label: 21}),
+  (charles:User {name: 'Charles', posts: 55, seed_label: 43}),
+  (doug:User {name: 'Doug', posts: 5, seed_label: 21}),
+  (mark:User {name: 'Mark', posts: 7, seed_label: 19}),
+  (michael:User {name: 'Michael', posts: 15, seed_label: 52}),
 
   (alice)-[:FOLLOW {weight: 1}]->(bridget),
   (alice)-[:FOLLOW {weight: 10}]->(charles),
@@ -300,7 +300,7 @@ CALL gds.graph.project(
     'User',
     'FOLLOW',
     {
-        nodeProperties: 'seed_label',
+        nodeProperties: ['posts', 'seed_label'],
         relationshipProperties: 'weight'
     }
 )
@@ -449,10 +449,6 @@ Additionally, each of the six nodes now has a new property `community` in the Ne
 [[algorithms-label-propagation-examples-weighted]]
 === Weighted
 
-The Label Propagation algorithm can also be configured to use node and/or relationship weights into account.
-By specifying a node weight via the `nodeWeightProperty` key, we can control the influence of a nodes community onto its neighbors.
-During the computation of the weight of a specific community, the node property will be multiplied by the weight of that nodes relationships.
-
 When we projected `myGraph`, we also projected the relationship property `weight`.
 In order to tell the algorithm to consider this property as a relationship weight, we have to set the `relationshipWeightProperty` configuration parameter to `weight`.
 
@@ -482,6 +478,35 @@ ORDER BY Community, Name
 
 Compared to the xref:algorithms/label-propagation.adoc#algorithms-label-propagation-examples-stream[unweighted run] of the algorithm we still have two communities, but they contain two and four nodes respectively.
 Using the weighted relationships, the nodes `Alice` and `Charles` are now in the same community as there is a strong link between them.
+
+==== Weighted nodes
+
+By specifying a node weight via the `nodeWeightProperty` key, we can also control the influence of a nodes community onto its neighbors.
+During the computation of the weight of a specific community, the node property will be multiplied by the weight of that node's relationships.
+
+[role=query-example]
+--
+.The following will run the algorithm on a graph with weighted nodes and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.labelPropagation.stream('myGraph', { nodeWeightProperty: 'posts' })
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name      | Community
+| "Alice"   | 4
+| "Charles" | 4
+| "Doug"    | 4
+| "Mark"    | 4
+| "Bridget" | 5
+| "Michael" | 5
+|===
+--
 
 NOTE: We have used the `stream` mode to demonstrate running the algorithm using weights, the configuration parameters are available for all the modes of the algorithm.
 

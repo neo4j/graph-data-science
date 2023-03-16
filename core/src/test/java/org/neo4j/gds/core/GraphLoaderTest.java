@@ -47,6 +47,8 @@ import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -212,12 +214,13 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void shouldLogProgressWithCypherLoading() {
+        var progressRegex = Pattern.compile("(\\d+)%$");
         var log = Neo4jProxy.testLog();
         new CypherLoaderBuilder()
             .databaseService(db)
             .graphName("graph")
             .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
-            .relationshipQuery("MATCH (n)-[:REL1|REL2]->(m) RETURN id(n) AS source, id(m) AS target")
+            .relationshipQuery("MATCH (n)-[:REL1|REL2]-(m) RETURN id(n) AS source, id(m) AS target")
             .log(log)
             .build()
             .graph();
@@ -229,17 +232,25 @@ class GraphLoaderTest extends BaseTest {
                 "Loading :: Nodes 33%",
                 "Loading :: Nodes 66%",
                 "Loading :: Nodes 100%",
-                "Loading :: Nodes :: Start",
                 "Loading :: Nodes :: Finished",
                 "Loading :: Relationships :: Start",
-                "Loading :: Relationships 25%",
-                "Loading :: Relationships 50%",
-                "Loading :: Relationships 75%",
+                "Loading :: Relationships 100%",
                 "Loading :: Relationships :: Finished",
                 "Loading :: Finished"
-            );
+            )
+            .noneMatch(message -> {
+                Matcher matcher = progressRegex.matcher(message);
+                if (matcher.find()) {
+                    int progress = Integer.parseInt(matcher.group(1));
+                    return progress > 100;
+                }
+                return false;
+            });
 
-        assertThat(log.getMessages(TestLog.DEBUG)).isEmpty();
+        assertThat(log.getMessages(TestLog.DEBUG))
+            .extracting(removingThreadId())
+            .isNotEmpty()
+            .anyMatch(message -> message.startsWith("Loading Actual memory usage of the loaded graph:"));
     }
 
     @AllGraphStoreFactoryTypesTest

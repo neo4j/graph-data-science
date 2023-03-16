@@ -35,13 +35,14 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
@@ -220,7 +221,7 @@ class LinkPredictionTrainingPipelineTest {
                 .modelUser("")
                 .modelName(modelName)
                 .relationshipWeightProperty("derivedWeight").build(),
-            Map::of
+            new TestCustomInfo()
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
@@ -264,7 +265,7 @@ class LinkPredictionTrainingPipelineTest {
                 .modelUser("")
                 .modelName(modelName)
                 .build(),
-            Map::of
+            new TestCustomInfo()
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
@@ -450,4 +451,5 @@ class LinkPredictionTrainingPipelineTest {
                 );
         }
     }
+
 }
