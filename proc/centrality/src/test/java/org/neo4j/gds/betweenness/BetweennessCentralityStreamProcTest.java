@@ -82,7 +82,7 @@ class BetweennessCentralityStreamProcTest extends BaseProcTest {
             ));
     }
 
-    // This should not be tested here
+    // FIXME: This should not be tested here
     @Test
     void shouldValidateSampleSize() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
