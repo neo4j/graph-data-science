@@ -40,7 +40,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
@@ -98,7 +98,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @SuppressWarnings("unused")
-    public static final class WriteResult extends BetweennessCentralityStatsProc.StatsResult {
+    public static final class WriteResult extends StatsResult {
 
         public final long nodePropertiesWritten;
         public final long writeMillis;

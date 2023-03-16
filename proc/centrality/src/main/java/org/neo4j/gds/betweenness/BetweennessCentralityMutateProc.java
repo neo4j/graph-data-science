@@ -43,11 +43,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentralityProc.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentrality.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class BetweennessCentralityMutateProc extends MutatePropertyProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {
 
     @Procedure(value = "gds.betweenness.mutate", mode = READ)
-    @Description(BetweennessCentralityProc.BETWEENNESS_DESCRIPTION)
+    @Description(BetweennessCentrality.BETWEENNESS_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -56,7 +56,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @Procedure(value = "gds.betweenness.mutate.estimate", mode = READ)
-    @Description(BetweennessCentralityProc.BETWEENNESS_DESCRIPTION)
+    @Description(BetweennessCentrality.BETWEENNESS_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -96,7 +96,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @SuppressWarnings("unused")
-    public static final class MutateResult extends BetweennessCentralityStatsProc.StatsResult {
+    public static final class MutateResult extends StatsResult {
 
         public final long nodePropertiesWritten;
         public final long mutateMillis;

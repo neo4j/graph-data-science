@@ -32,8 +32,6 @@ import java.util.List;
 
 final class BetweennessCentralityProc {
 
-    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
-
     private BetweennessCentralityProc() {}
 
     static <CONFIG extends BetweennessCentralityBaseConfig> NodePropertyValues nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult) {
