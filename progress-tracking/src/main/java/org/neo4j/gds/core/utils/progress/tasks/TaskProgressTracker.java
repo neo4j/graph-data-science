@@ -34,6 +34,7 @@ import org.neo4j.logging.Log;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -234,6 +235,11 @@ public class TaskProgressTracker implements ProgressTracker {
             default:
                 throw new IllegalStateException("Unknown log level " + level);
         }
+    }
+
+    @Override
+    public void logDebug(Supplier<String> messageSupplier) {
+        taskProgressLogger.logDebug(messageSupplier);
     }
 
     @Override

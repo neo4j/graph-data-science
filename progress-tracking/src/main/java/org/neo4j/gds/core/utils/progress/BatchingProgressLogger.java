@@ -159,8 +159,10 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public void logDebug(String message) {
-        log.debug("[%s] %s %s", Thread.currentThread().getName(), taskName, message);
+    public void logDebug(Supplier<String> msg) {
+        if (log.isDebugEnabled()) {
+            log.debug("[%s] %s %s", Thread.currentThread().getName(), taskName, msg.get());
+        }
     }
 
     @Override
