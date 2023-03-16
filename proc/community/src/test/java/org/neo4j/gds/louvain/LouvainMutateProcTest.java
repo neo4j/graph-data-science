@@ -20,16 +20,19 @@
 package org.neo4j.gds.louvain;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -38,11 +41,77 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
-import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
-public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements
+public class LouvainMutateProcTest extends BaseProcTest implements
     MutateNodePropertyTest<Louvain, LouvainMutateConfig, LouvainResult> {
+
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {seed: 1})" +        // 0
+        ", (b:Node {seed: 1})" +        // 1
+        ", (c:Node {seed: 1})" +        // 2
+        ", (d:Node {seed: 1})" +        // 3
+        ", (e:Node {seed: 1})" +        // 4
+        ", (f:Node {seed: 1})" +        // 5
+        ", (g:Node {seed: 2})" +        // 6
+        ", (h:Node {seed: 2})" +        // 7
+        ", (i:Node {seed: 2})" +        // 8
+        ", (j:Node {seed: 42})" +       // 9
+        ", (k:Node {seed: 42})" +       // 10
+        ", (l:Node {seed: 42})" +       // 11
+        ", (m:Node {seed: 42})" +       // 12
+        ", (n:Node {seed: 42})" +       // 13
+        ", (x:Node {seed: 1})" +        // 14
+
+        ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(e)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (d)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (e)-[:TYPE {weight: 0.01}]->(f)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (f)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(j)" +
+        ", (i)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(l)" +
+        ", (l)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (m)-[:TYPE {weight: 1.0}]->(n)";
+
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            LouvainMutateProc.class,
+            GraphProjectProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
+
+        runQuery(
+            "CALL gds.graph.project(" +
+            "  'myGraph', " +
+            "  {Node: {label: 'Node', properties: 'seed'}}, " +
+            "  {TYPE: {type: 'TYPE', orientation: 'UNDIRECTED'}}" +
+            ")"
+        );
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
 
     @Override
     public String mutateProperty() {
@@ -56,7 +125,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
     @Override
     public Optional<String> mutateGraphName() {
-        return Optional.of(LOUVAIN_GRAPH);
+        return Optional.of("myGraph");
     }
 
     @Override
@@ -106,49 +175,13 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Louvain, LouvainResult, LouvainMutateConfig, ?>> getProcedureClazz() {
+    public Class<LouvainMutateProc> getProcedureClazz() {
         return LouvainMutateProc.class;
     }
 
     @Override
     public LouvainMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return LouvainMutateConfig.of(mapWrapper);
-    }
-
-    @Test
-    void testMutateAndWriteWithSeeding() throws Exception {
-        registerProcedures(LouvainWriteProc.class);
-        var testGraphName = mutateGraphName().orElseThrow();
-
-        var mutateQuery = GdsCypher
-            .call(testGraphName)
-            .algo("louvain")
-            .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
-            .yields();
-
-        runQuery(mutateQuery);
-
-        var writeQuery = GdsCypher
-            .call(testGraphName)
-            .algo("louvain")
-            .writeMode()
-            .addParameter("seedProperty", mutateProperty())
-            .addParameter("writeProperty", mutateProperty())
-            .yields();
-
-        runQuery(writeQuery);
-
-        var updatedGraph = new StoreLoaderBuilder().databaseService(db)
-            .addNodeLabel("Node")
-            .addRelationshipType("TYPE")
-            .globalOrientation(Orientation.UNDIRECTED)
-            .addNodeProperty(mutateProperty(), mutateProperty(), DefaultValue.of(42.0), Aggregation.NONE)
-            .addNodeProperty("seed", "seed", DefaultValue.of(42.0), Aggregation.NONE)
-            .build()
-            .graph();
-
-        assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
     }
 
     @Test
@@ -224,6 +257,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         );
     }
 
+    // FIXME: This doesn't belong here.
     @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
@@ -251,5 +285,17 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
                .asInstanceOf(LONG)
                .isEqualTo(0L);
         });
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(LouvainResult result1, LouvainResult result2) {
+        assertThat(result1)
+            .usingRecursiveComparison()
+            .isEqualTo(result2);
     }
 }

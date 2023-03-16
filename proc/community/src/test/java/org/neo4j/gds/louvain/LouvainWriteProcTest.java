@@ -19,66 +19,105 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG_ARRAY;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
+class LouvainWriteProcTest extends BaseProcTest {
 
-    @Override
-    Stream<DynamicTest> modeSpecificConfigTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {seed: 1})" +        // 0
+        ", (b:Node {seed: 1})" +        // 1
+        ", (c:Node {seed: 1})" +        // 2
+        ", (d:Node {seed: 1})" +        // 3
+        ", (e:Node {seed: 1})" +        // 4
+        ", (f:Node {seed: 1})" +        // 5
+        ", (g:Node {seed: 2})" +        // 6
+        ", (h:Node {seed: 2})" +        // 7
+        ", (i:Node {seed: 2})" +        // 8
+        ", (j:Node {seed: 42})" +       // 9
+        ", (k:Node {seed: 42})" +       // 10
+        ", (l:Node {seed: 42})" +       // 11
+        ", (m:Node {seed: 42})" +       // 12
+        ", (n:Node {seed: 42})" +       // 13
+        ", (x:Node {seed: 1})" +        // 14
+
+        ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(e)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (d)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (e)-[:TYPE {weight: 0.01}]->(f)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (f)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(j)" +
+        ", (i)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(l)" +
+        ", (l)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (m)-[:TYPE {weight: 1.0}]->(n)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            LouvainWriteProc.class,
+            GraphProjectProc.class
+        );
+        registerFunctions(AsNodeFunc.class);
+
+        runQuery(
+            "CALL gds.graph.project(" +
+            "  'myGraph', " +
+            "  {Node: {label: 'Node', properties: 'seed'}}, " +
+            "  {TYPE: {type: 'TYPE', orientation: 'UNDIRECTED'}}" +
+            ")"
+        );
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<Louvain, LouvainResult, LouvainWriteConfig, ?>> getProcedureClazz() {
-        return LouvainWriteProc.class;
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
     void testWrite() {
-        String writeProperty = "myFancyCommunity";
-        var query = GdsCypher.call("myGraph")
-            .algo("louvain")
-            .writeMode()
-            .addParameter("writeProperty", writeProperty)
-            .yields(
-                "communityCount",
-                "modularity",
-                "modularities",
-                "ranLevels",
-                "preProcessingMillis",
-                "computeMillis",
-                "writeMillis",
-                "postProcessingMillis",
-                "communityDistribution",
-                "configuration"
-            );
+
+        var query = "CALL gds.louvain.write('myGraph', { writeProperty: 'myFancyCommunity'})" +
+                    " YIELD communityCount, modularity, modularities, ranLevels, preProcessingMillis, " +
+                    "   computeMillis, writeMillis, postProcessingMillis, communityDistribution, configuration";
 
         runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("communityCount"))
@@ -118,64 +157,42 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
                 .as("invalid computeTime")
                 .isGreaterThanOrEqualTo(0);
         });
-        assertWriteResult(RESULT, writeProperty);
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) as id, n.myFancyCommunity as community", row -> {
+            long communityId = row.getNumber("community").longValue();
+            int nodeId = row.getNumber("id").intValue();
+            actualCommunities.add(nodeId, communityId);
+        });
+
+        assertCommunities(actualCommunities, List.of(
+            List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
+            List.of(6L, 7L, 8L),
+            List.of(9L, 10L, 11L, 12L, 13L)
+        ));
     }
 
     @Test
     void testWriteIntermediateCommunities() {
-        String writeProperty = "myFancyCommunity";
-        String query = GdsCypher.call("myGraph")
-            .algo("louvain")
-            .writeMode()
-            .addParameter("writeProperty", writeProperty)
-            .addParameter("includeIntermediateCommunities", true)
-            .yields("configuration");
+
+        var query = "CALL gds.louvain.write('myGraph', { writeProperty: 'myFancyCommunity', includeIntermediateCommunities: true})" +
+                    " YIELD configuration";
 
         runQueryWithRowConsumer(query, row -> {
             assertUserInput(row, "includeIntermediateCommunities", true);
         });
 
-        runQueryWithRowConsumer(formatWithLocale("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
-            assertThat(row.get(writeProperty))
+        runQueryWithRowConsumer("MATCH (n) RETURN n.myFancyCommunity as myFancyCommunity", row -> {
+            assertThat(row.get("myFancyCommunity"))
                 .asInstanceOf(LONG_ARRAY)
                 .hasSize(2);
         });
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "",
-        "writeProperty: null",
-        "writeProperty: ''",
-    })
-    void testWriteRequiresWritePropertyToBeSet(String writePropertyParameter) {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .yields();
-        runQuery(createQuery);
-        String query = "CALL gds.louvain.write('" + DEFAULT_GRAPH_NAME + "', {" +
-                       writePropertyParameter +
-                       "})";
-
-        assertThatExceptionOfType(QueryExecutionException.class)
-            .isThrownBy(() -> runQuery(query))
-            .havingRootCause()
-            .isInstanceOf(IllegalArgumentException.class)
-            .withMessage("No value specified for the mandatory configuration parameter `writeProperty`");
-    }
-
     @Test
     void testWriteWithSeeding() {
-        String writeProperty = "myFancyWriteProperty";
-        String query = GdsCypher.call("myGraph")
-            .algo("louvain")
-            .writeMode()
-            .addParameter("writeProperty", writeProperty)
-            .addParameter("seedProperty", SEED_PROPERTY)
-            .yields("communityCount", "ranLevels");
-
+        var query = "CALL gds.louvain.write('myGraph', { writeProperty: 'myFancyWriteProperty', seedProperty: 'seed'})" +
+                    " YIELD communityCount, ranLevels";
         runQueryWithRowConsumer(
             query,
             row -> {
@@ -189,20 +206,23 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
                     .isEqualTo(1L);
             }
         );
-        assertWriteResult(RESULT, writeProperty);
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) as id, n.myFancyWriteProperty as community", row -> {
+            long communityId = row.getNumber("community").longValue();
+            int nodeId = row.getNumber("id").intValue();
+            actualCommunities.add(nodeId, communityId);
+        });
+
+        assertCommunities(actualCommunities, List.of(
+            List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
+            List.of(6L, 7L, 8L),
+            List.of(9L, 10L, 11L, 12L, 13L)
+        ));
     }
 
-    // TODO: add a variation of the below with non-defaults
-    @Test
-    void testCreateConfigWithDefaults() {
-        LouvainBaseConfig louvainConfig = LouvainWriteConfig.of(createMinimalConfig(CypherMapWrapper.empty()));
-        assertThat(louvainConfig.includeIntermediateCommunities()).isFalse();
-        assertThat(louvainConfig.maxLevels()).isEqualTo(10);
-        assertThat(louvainConfig.maxIterations()).isEqualTo(10);
-        assertThat(louvainConfig.tolerance()).isEqualTo(0.0001D);
-        assertThat(louvainConfig.seedProperty()).isNull();
-    }
 
+    // FIXME: This doesn't belong here.
     @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
@@ -231,8 +251,8 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             Arguments.of(Map.of("minCommunitySize", 3), 3L, List.of(14L, 13L)),
             Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), 3L, List.of(0L, 1L, 2L)),
             Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), 3L, List.of(0L, 1L)),
-            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", SEED_PROPERTY), 3L, List.of(1L, 2L, 42L)),
-            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), 3L, List.of(2L, 42L))
+            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", "seed"), 3L, List.of(1L, 2L, 42L)),
+            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", "seed"), 3L, List.of(2L, 42L))
         );
     }
 
@@ -243,7 +263,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .withNodeProperty(SEED_PROPERTY)
+            .withNodeProperty("seed")
             .yields();
         runQuery(createQuery);
 
@@ -251,7 +271,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             .call(DEFAULT_GRAPH_NAME)
             .algo("louvain")
             .writeMode()
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("writeProperty", "writeProperty")
             .addAllParameters(parameters)
             .yields("communityCount");
 
@@ -262,36 +282,12 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
         });
 
         runQueryWithRowConsumer(
-            "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS communities ",
+            "MATCH (n) RETURN collect(DISTINCT n.writeProperty) AS communities ",
             row -> {
                 assertThat(row.get("communities"))
                     .asList()
                     .containsExactlyInAnyOrderElementsOf(expectedCommunityIds);
             }
         );
-    }
-
-    @Override
-    public LouvainWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainWriteConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", "writeProperty");
-        }
-        return mapWrapper;
-    }
-
-    private void assertWriteResult(List<List<Long>> expectedCommunities, String writeProperty) {
-        List<Long> actualCommunities = new ArrayList<>();
-        runQueryWithRowConsumer(formatWithLocale("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
-            long community = row.getNumber("community").longValue();
-            int id = row.getNumber("id").intValue();
-            actualCommunities.add(id, community);
-        });
-
-        assertCommunities(actualCommunities, expectedCommunities);
     }
 }
