@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -51,4 +52,25 @@ public final class DimensionsMap {
         }
         return dimensionOrNull;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DimensionsMap that = (DimensionsMap) o;
+        return actualDimensions.equals(that.actualDimensions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(actualDimensions);
+    }
+
+//    @Override
+//    public String toString() {
+//        return "DimensionsMap{" +
+//               "actualDimensions=" + actualDimensions +
+//               '}';
+//    }
 }

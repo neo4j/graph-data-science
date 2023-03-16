@@ -39,4 +39,12 @@ class DimensionsMapTest {
         assertThat(foo.get("bar")).contains(2);
     }
 
+    @Test
+    void equals() {
+        DimensionsMap foo1 = new DimensionsMap(Map.of("foo", Optional.of(1), "bar", Optional.of(2)));
+        DimensionsMap foo2 = new DimensionsMap(Map.of("foo", Optional.of(1), "bar", Optional.of(2)));
+
+        assertThat(foo1).isEqualTo(foo2);
+    }
+
 }
