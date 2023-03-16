@@ -25,46 +25,39 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.Map;
 
-public final class MutateResult extends StatsResult {
+public final class WriteResult extends StatsResult {
 
     public final long nodePropertiesWritten;
-    public final long mutateMillis;
+    public final long writeMillis;
 
-    private MutateResult(
+    private WriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
+        long writeMillis,
         @Nullable Map<String, Object> centralityDistribution,
-
         Map<String, Object> config
     ) {
-        super(
-            centralityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            config
-        );
+        super(centralityDistribution, preProcessingMillis, computeMillis, postProcessingMillis, config);
         this.nodePropertiesWritten = nodePropertiesWritten;
-        this.mutateMillis = mutateMillis;
+        this.writeMillis = writeMillis;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
+    static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public MutateResult buildResult() {
-            return new MutateResult(
+        public WriteResult buildResult() {
+            return new WriteResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
-                mutateMillis,
+                writeMillis,
                 centralityHistogram,
                 config.toMap()
             );

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -35,46 +35,48 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentrality.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<MutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
+@GdsCallable(name = "gds.betweenness.write", description = BETWEENNESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<WriteResult>, BetweennessCentralityFactory<BetweennessCentralityWriteConfig>> {
     @Override
     public String name() {
-        return "BetweennessCentralityMutate";
+        return "BetweennessCentralityWrite";
     }
 
     @Override
-    public BetweennessCentralityFactory<BetweennessCentralityMutateConfig> algorithmFactory() {
+    public BetweennessCentralityFactory<BetweennessCentralityWriteConfig> algorithmFactory() {
         return new BetweennessCentralityFactory<>();
     }
 
     @Override
-    public NewConfigFunction<BetweennessCentralityMutateConfig> newConfigFunction() {
-        return (__, userInput) -> BetweennessCentralityMutateConfig.of(userInput);
+    public NewConfigFunction<BetweennessCentralityWriteConfig> newConfigFunction() {
+        return (__, userInput) -> BetweennessCentralityWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
+    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+        return new WriteNodePropertiesComputationResultConsumer<>(
+            this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
+                computationResult.config().writeProperty(),
                 computationResult.result().asNodeProperties()
             )),
-            this::resultBuilder
+            name()
         );
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityMutateConfig> validationConfig(ExecutionContext executionContext) {
+    public ValidationConfiguration<BetweennessCentralityWriteConfig> validationConfig(ExecutionContext executionContext) {
         return new BetweennessCentralityConfigValidation<>();
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult,
+    private AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = new WriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

@@ -26,7 +26,6 @@ import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class StatsResult extends StandardStatsResult {
 
     public final Map<String, Object> centralityDistribution;

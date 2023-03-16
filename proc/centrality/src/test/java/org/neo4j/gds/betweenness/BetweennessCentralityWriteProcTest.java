@@ -77,7 +77,7 @@ class BetweennessCentralityWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "centrality")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
@@ -109,6 +109,10 @@ class BetweennessCentralityWriteProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isEqualTo(5);
         });
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @Test
