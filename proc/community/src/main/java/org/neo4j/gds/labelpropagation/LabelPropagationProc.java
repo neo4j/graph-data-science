@@ -28,9 +28,6 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 final class LabelPropagationProc {
 
-    static final String LABEL_PROPAGATION_DESCRIPTION =
-        "The Label Propagation algorithm is a fast algorithm for finding communities in a graph.";
-
     private LabelPropagationProc() {}
 
     static <CONFIG extends LabelPropagationBaseConfig> NodePropertyValues nodeProperties(

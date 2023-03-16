@@ -21,12 +21,12 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -36,12 +36,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
+import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.labelPropagation.mutate", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagation, LabelPropagationResult, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> {
+public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagation, LabelPropagationResult, MutateResult, LabelPropagationMutateConfig> {
 
     @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
@@ -49,7 +47,10 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LabelPropagationMutateSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.mutate.estimate", mode = READ)
@@ -58,7 +59,11 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new LabelPropagationMutateSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
@@ -90,59 +95,4 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         );
     }
 
-    @SuppressWarnings("unused")
-    public static class MutateResult extends LabelPropagationStatsProc.StatsResult {
-
-        public final long mutateMillis;
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            long ranIterations,
-            boolean didConverge,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                ranIterations,
-                didConverge,
-                communityCount,
-                communityDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.mutateMillis = mutateMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected MutateResult buildResult() {
-                return new MutateResult(
-                    ranIterations,
-                    didConverge,
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

@@ -43,6 +43,8 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagationResult> {
 
+    static final String LABEL_PROPAGATION_DESCRIPTION =
+        "The Label Propagation algorithm is a fast algorithm for finding communities in a graph.";
     private final long nodeCount;
     private final NodePropertyValues nodePropertyValues;
     private final NodePropertyValues nodeWeights;

@@ -37,14 +37,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.labelPropagation.write", description = LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.labelPropagation.write", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, LabelPropagationResult, LabelPropagationWriteProc.WriteResult, LabelPropagationWriteConfig> {
 
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
-    @Description(LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION)
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

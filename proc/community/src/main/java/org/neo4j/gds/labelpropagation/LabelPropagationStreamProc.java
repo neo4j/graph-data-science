@@ -35,13 +35,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.labelPropagation.stream", description = LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.labelPropagation.stream", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = STREAM)
 public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, LabelPropagationResult, LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig> {
 
     @Procedure(value = "gds.labelPropagation.stream", mode = READ)
-    @Description(LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION)
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
