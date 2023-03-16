@@ -17,12 +17,14 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':executor')
     implementation project(':neo4j-adapter')
     implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':transaction')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

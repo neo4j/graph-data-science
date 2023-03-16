@@ -39,6 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction> {
 
+    static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
     private static final double DEFAULT_WEIGHT = 0D;
 
     private Graph graph;
