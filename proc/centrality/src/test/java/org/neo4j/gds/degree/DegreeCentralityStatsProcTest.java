@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.degree;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +30,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class DegreeCentralityStatsProcTest extends BaseProcTest {
@@ -86,29 +86,33 @@ class DegreeCentralityStatsProcTest extends BaseProcTest {
             .statsMode()
             .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis");
 
-        runQueryWithRowConsumer(query, row -> {
-            Assertions.assertThat(row.get("centralityDistribution"))
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
                 .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsEntry("min", 0.0)
                 .hasEntrySatisfying("max",
-                    value -> Assertions.assertThat(value)
+                    value -> assertThat(value)
                         .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
                         .isEqualTo(3.0, Offset.offset(1e-4))
                 );
 
-            Assertions.assertThat(row.getNumber("preProcessingMillis"))
+            assertThat(row.getNumber("preProcessingMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
 
-            Assertions.assertThat(row.getNumber("computeMillis"))
+            assertThat(row.getNumber("computeMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
 
-            Assertions.assertThat(row.getNumber("postProcessingMillis"))
+            assertThat(row.getNumber("postProcessingMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
         });
+
+        assertThat(rowCount)
+            .as("`stats` mode should always return one row")
+            .isEqualTo(1);
     }
 }
