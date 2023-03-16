@@ -291,8 +291,21 @@ public final class TestSupport {
         int concurrency,
         MemoryRange expected
     ) {
-        var actual = actualMemoryEstimation
-            .get().estimate(GraphDimensions.of(nodeCount, relationshipCount), concurrency).memoryUsage();
+        assertMemoryEstimation(
+            actualMemoryEstimation.get(),
+            GraphDimensions.of(nodeCount, relationshipCount),
+            concurrency,
+            expected
+        );
+    }
+
+    public static void assertMemoryEstimation(
+        MemoryEstimation memoryEstimation,
+        GraphDimensions graphDimensions,
+        int concurrency,
+        MemoryRange expected
+    ) {
+        MemoryRange actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
         assertMemoryRange(actual, expected.min, expected.max);
     }
 
