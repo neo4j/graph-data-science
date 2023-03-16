@@ -34,7 +34,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
+import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.kmeans.mutate", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
 public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansMutateConfig, Stream<MutateResult>, KmeansAlgorithmFactory<KmeansMutateConfig>> {

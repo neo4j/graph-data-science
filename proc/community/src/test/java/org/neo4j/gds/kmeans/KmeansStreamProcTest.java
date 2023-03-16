@@ -22,32 +22,20 @@ package org.neo4j.gds.kmeans;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
 
 class KmeansStreamProcTest extends BaseProcTest {
-
-
-    public Class<? extends AlgoBaseProc<Kmeans, KmeansResult, KmeansStreamConfig, ?>> getProcedureClazz() {
-        return KmeansStreamProc.class;
-    }
-
-    public KmeansStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KmeansStreamConfig.of(mapWrapper);
-    }
-
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            getProcedureClazz(),
+            KmeansStreamProc.class,
             GraphProjectProc.class
         );
     }
@@ -86,43 +74,29 @@ class KmeansStreamProcTest extends BaseProcTest {
             .addParameter("computeSilhouette", true)
             .yields("nodeId", "communityId", "distanceFromCentroid", "silhouette");
         assertCypherResult(algoQuery, List.of(
-            Map.of("nodeId",
-                0L,
-                "communityId",
-                0L,
-                "distanceFromCentroid",
-                0.5, "silhouette",
-                0.9929292857150108
+            Map.of(
+                "nodeId", 0L,
+                "communityId", 0L,
+                "distanceFromCentroid", 0.5,
+                "silhouette", 0.9929292857150108
             ),
             Map.of(
-                "nodeId",
-                1L,
-                "communityId",
-                1L,
-                "distanceFromCentroid",
-                Math.sqrt(2),
-                "silhouette",
-                0.9799515133128792
+                "nodeId", 1L,
+                "communityId", 1L,
+                "distanceFromCentroid", Math.sqrt(2),
+                "silhouette", 0.9799515133128792
             ),
             Map.of(
-                "nodeId",
-                2L,
-                "communityId",
-                0L,
-                "distanceFromCentroid",
-                0.5,
-                "silhouette",
-                0.9928938477702276
+                "nodeId", 2L,
+                "communityId", 0L,
+                "distanceFromCentroid", 0.5,
+                "silhouette", 0.9928938477702276
             ),
             Map.of(
-                "nodeId",
-                3L,
-                "communityId",
-                1L,
-                "distanceFromCentroid",
-                Math.sqrt(2),
-                "silhouette",
-                0.9799505034216922
+                "nodeId", 3L,
+                "communityId", 1L,
+                "distanceFromCentroid", Math.sqrt(2),
+                "silhouette", 0.9799505034216922
             )
 
         ));
