@@ -36,11 +36,11 @@ import static org.neo4j.gds.SeededRandom.newRandom;
 class CompressedTest {
 
     static Stream<Arguments> cursorFeaturesAndLengths() {
-        return TestSupport.crossArguments(
+        return TestSupport.crossArgument(
             () -> Stream.of(
                 AdjacencyPackerTest.Features.Sort,
                 AdjacencyPackerTest.Features.SortAndDelta
-            ).map(Arguments::of),
+            ),
             () -> Stream.of(
                 0,
                 1,
@@ -49,15 +49,16 @@ class CompressedTest {
                 AdjacencyPacking.BLOCK_SIZE * 2,
                 AdjacencyPacking.BLOCK_SIZE * 2 + 42,
                 1337
-            ).map(Arguments::of)
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("cursorFeaturesAndLengths")
-    void decompressConsecutiveLongsViaCursor(AdjacencyPackerTest.Features features, long length) {
+    void decompressConsecutiveLongsViaCursor(AdjacencyPackerTest.Features features, int length) {
         var data = LongStream.range(0, length).toArray();
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
+        var compressed = AdjacencyPacker.compress(alignedData, 0, length, features.flags());
 
         var adjacencyList = HugeObjectArray.of(compressed);
         var cursor = new DecompressingCursor(adjacencyList, features.flags());
@@ -75,10 +76,11 @@ class CompressedTest {
 
     @ParameterizedTest
     @MethodSource("cursorFeaturesAndLengths")
-    void decompressRandomLongsViaCursor(AdjacencyPackerTest.Features features, long length) {
+    void decompressRandomLongsViaCursor(AdjacencyPackerTest.Features features, int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
+        var compressed = AdjacencyPacker.compress(alignedData, 0, length, features.flags());
 
         var adjacencyList = HugeObjectArray.of(compressed);
         var cursor = new DecompressingCursor(adjacencyList, features.flags());
