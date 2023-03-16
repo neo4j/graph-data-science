@@ -21,7 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -35,43 +35,43 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 
-@GdsCallable(name = "gds.labelPropagation.mutate", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<MutateResult>, LabelPropagationFactory<LabelPropagationMutateConfig>> {
+@GdsCallable(name = "gds.labelPropagation.write", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, Stream<WriteResult>, LabelPropagationFactory<LabelPropagationWriteConfig>> {
     @Override
     public String name() {
-        return "LabelPropagationMutate";
+        return "LabelPropagationWrite";
     }
 
     @Override
-    public LabelPropagationFactory<LabelPropagationMutateConfig> algorithmFactory() {
+    public LabelPropagationFactory<LabelPropagationWriteConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 
     @Override
-    public NewConfigFunction<LabelPropagationMutateConfig> newConfigFunction() {
-        return (__, userInput) -> LabelPropagationMutateConfig.of(userInput);
+    public NewConfigFunction<LabelPropagationWriteConfig> newConfigFunction() {
+        return (__, userInput) -> LabelPropagationWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-
-        return new MutatePropertyComputationResultConsumer<>(
+    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+        return new WriteNodePropertiesComputationResultConsumer<>(
+            this::resultBuilder,
             this::nodeProperties,
-            this::resultBuilder
+            name()
         );
     }
 
     @NotNull
-    private List<NodeProperty> nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult) {
+    private List<NodeProperty> nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computationResult) {
         return List.of(
             NodeProperty.of(
-                computationResult.config().mutateProperty(),
+                computationResult.config().writeProperty(),
                 CommunityProcCompanion.nodeProperties(
                     computationResult.config(),
-                    computationResult.config().mutateProperty(),
+                    computationResult.config().writeProperty(),
                     computationResult.result().labels().asNodeProperties(),
                     () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
                 )
@@ -79,11 +79,11 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
     }
 
     @NotNull
-    AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult,
+    private AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = new WriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

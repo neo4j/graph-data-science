@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -78,21 +79,20 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult) {
-        return LabelPropagationProc.nodeProperties(
-            computationResult,
-            computationResult.config().mutateProperty()
+        return CommunityProcCompanion.nodeProperties(
+            computationResult.config(),
+            computationResult.config().mutateProperty(),
+            computationResult.result().labels().asNodeProperties(),
+            () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
         );
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computeResult,
+        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return LabelPropagationProc.resultBuilder(
-            new MutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
+        return new LabelPropagationMutateSpecification().resultBuilder(computationResult, executionContext);
     }
 
 }
