@@ -92,7 +92,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @SuppressWarnings("unused")
-    public static class WriteResult extends LabelPropagationStatsProc.StatsResult {
+    public static class WriteResult extends StatsResult {
 
         public final long writeMillis;
         public final long nodePropertiesWritten;
@@ -124,7 +124,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         }
 
 
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
+        static class Builder extends LabelPropagationResultBuilder<WriteResult> {
 
             Builder(ProcedureReturnColumns returnColumns, int concurrency) {
                 super(returnColumns, concurrency);

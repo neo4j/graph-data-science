@@ -4,8 +4,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public final class MutateResult extends LabelPropagationStatsProc.StatsResult {
+public final class MutateResult extends StatsResult {
 
     public final long mutateMillis;
     public final long nodePropertiesWritten;
@@ -36,7 +35,7 @@ public final class MutateResult extends LabelPropagationStatsProc.StatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
+    static class Builder extends LabelPropagationResultBuilder<MutateResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
