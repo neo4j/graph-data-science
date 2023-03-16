@@ -59,6 +59,11 @@ public final class PageUtil {
         return (int) (index & pageMask);
     }
 
+    public static int exclusiveIndexOfPage(long index, int pageMask) {
+        return 1 + (int) ((index - 1L) & pageMask);
+    }
+
+
     private PageUtil() {
         throw new UnsupportedOperationException("No instances");
     }

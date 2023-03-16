@@ -34,6 +34,12 @@ public @interface HugeAtomicArray {
     Class<?> valueType();
 
     /**
+     * The functional interface which takes the valueType and returns the valueType.
+     * The method is expected to be named "apply".
+     */
+    Class<?> valueOperatorInterface();
+
+    /**
      * The page shift defines the page size used in the
      * generated HugeAtomicArray. The default value of 14
      * leads so 2^14 = 16384 elements per page (array).

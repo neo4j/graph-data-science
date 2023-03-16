@@ -17,25 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.haa;
 
+import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
-import java.util.function.LongConsumer;
-import java.util.function.LongUnaryOperator;
-
-@HugeAtomicArray(valueType = long.class)
+@HugeAtomicArray(valueType = long.class, valueOperatorInterface = LongToLongFunction.class)
 public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
 
     /**
      * Creates a new array of the given size.
      *
      * @param size the length of the new array, the highest supported index is {@code size - 1}
-     * @param trackAllocation tracks allocated memory during array creation
      * @return new array
      */
-    static HugeAtomicLongArray newArray(long size, LongConsumer trackAllocation) {
-        return null;
+    static HugeAtomicLongArray of(long size) {
+        return HugeAtomicLongArraySon.of(size);
     }
 
     /**
@@ -128,7 +125,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    void update(long index, LongUnaryOperator updateFunction);
+    void update(long index, LongToLongFunction updateFunction);
 
     /**
      * Returns the length of this array.
