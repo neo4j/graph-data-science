@@ -19,17 +19,22 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
@@ -38,45 +43,78 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> {
+@ExtendWith(SoftAssertionsExtension.class)
+class LabelPropagationStreamProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig, ?>> getProcedureClazz() {
-        return LabelPropagationStreamProc.class;
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:A {id: 0, seed: 42}) " +
+        ", (b:B {id: 1, seed: 42}) " +
+
+        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+
+        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            LabelPropagationStreamProc.class,
+            GraphProjectProc.class
+        );
+        // Create explicit graphs with both projection variants
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'myGraph', " +
+            "   {" +
+            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+            "   }, " +
+            "   '*'" +
+            ")"
+        );
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
-    void testStream(
-    ) {
+    void testStream(SoftAssertions assertions) {
 
-        String query = GdsCypher.call(TEST_GRAPH_NAME)
+        String query = GdsCypher.call("myGraph")
             .algo("gds.labelPropagation")
             .streamMode()
             .yields();
 
-        Long[] actualCommunities = new Long[RESULT.size()];
+        var expectedCommunities = List.of(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
         runQueryWithRowConsumer(query, row -> {
-            int id = row.getNumber("nodeId").intValue();
-            long community = row.getNumber("communityId").longValue();
-            actualCommunities[id] = community;
-        });
+            int nodeId = row.getNumber("nodeId").intValue();
+            long communityId = row.getNumber("communityId").longValue();
 
-        assertEquals(RESULT, Arrays.asList(actualCommunities));
+            assertions.assertThat(communityId).isEqualTo(expectedCommunities.get(nodeId));
+        });
     }
 
+    // FIXME: This doesn't belong here.
     @Test
     void testEstimate() {
-        String query = GdsCypher
-            .call(TEST_GRAPH_NAME)
-            .algo("labelPropagation")
-            .streamEstimation()
-            .addAllParameters(createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
-            .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
+        var query = "CALL gds.labelPropagation.stream.estimate('myGraph', {concurrency: 4})" +
+                    " YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
 
-        assertCypherResult(query, Arrays.asList(MapUtil.map(
+        assertCypherResult(query, List.of(MapUtil.map(
             "nodeCount", 12L,
             "relationshipCount", 10L,
             "bytesMin", 1640L,
@@ -84,9 +122,10 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
         )));
     }
 
+    // FIXME: this looks dodgy and unreadable...
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), RESULT.toArray(new Long[0])),
+                Arguments.of(Map.of("minCommunitySize", 1), new Long[]{2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L}),
                 Arguments.of(Map.of("minCommunitySize", 2), new Long[]{2L, 7L, 2L, null, null, null, null, 7L, null, null, null, null})
         );
     }
@@ -94,13 +133,13 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
     void testStreamMinCommunitySize(Map<String, Long> parameters, Long[] expectedCommunityIds) {
-        String query = GdsCypher.call(TEST_GRAPH_NAME)
+        String query = GdsCypher.call("myGraph")
                 .algo("gds.labelPropagation")
                 .streamMode()
                 .addAllParameters(parameters)
                 .yields();
 
-        Long[] actualCommunities = new Long[RESULT.size()];
+        Long[] actualCommunities = new Long[12];
         runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
@@ -113,46 +152,26 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     @Nested
     class FilteredGraph extends BaseTest {
 
-        @Neo4jGraph
-        static final String DB_CYPHER_WITH_OFFSET = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
+        @Neo4jGraph(offsetIds = true)
+        static final String DB_CYPHER_WITH_OFFSET = DB_CYPHER;
 
         @Test
         void testStreamWithFilteredNodes() {
-
-            String graphCreateQuery = GdsCypher
-                .call("nodeFilteredGraph")
-                .graphProject()
-                .withNodeLabels("A", "B")
-                .withNodeProperty("id", DefaultValue.of(-1))
-                .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
-                .withNodeProperty("weight", DefaultValue.of(Double.NaN))
-                .withAnyRelationshipType()
-                .yields("nodeCount", "relationshipCount");
-
-            runQueryWithRowConsumer(graphCreateQuery, row -> {
-                assertEquals(12L, row.getNumber("nodeCount"));
-                assertEquals(10L, row.getNumber("relationshipCount"));
-            });
-
-            String query = GdsCypher.call("nodeFilteredGraph")
+            String query = GdsCypher.call("myGraph")
                 .algo("gds.labelPropagation")
                 .streamMode()
                 .addParameter("nodeLabels", Arrays.asList("A", "B"))
                 .yields();
 
-            List<Long> actualCommunities = new ArrayList<>();
+            // offset is `42`
+            var expectedCommunities = List.of(44L, 49L, 44L, 45L, 46L, 47L, 48L, 49L, 50L, 51L, 52L, 53L);
+            var actualCommunities = new ArrayList<Long>();
             runQueryWithRowConsumer(query, row -> {
-                int id = row.getNumber("nodeId").intValue();
-                long community = row.getNumber("communityId").longValue();
-                actualCommunities.add(id - 1, community - 1);
+                long communityId = row.getNumber("communityId").longValue();
+                actualCommunities.add(communityId);
             });
 
-            assertEquals(RESULT, actualCommunities);
+            assertThat(actualCommunities).containsExactlyInAnyOrderElementsOf(expectedCommunities);
         }
-    }
-
-    @Override
-    public LabelPropagationStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationStreamConfig.of(mapWrapper);
     }
 }

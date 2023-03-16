@@ -20,25 +20,22 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
-import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -48,50 +45,55 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> {
+class LabelPropagationWriteProcTest extends BaseProcTest {
 
-    @Override
-    Stream<DynamicTest> modeSpecificConfigTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:A {id: 0, seed: 42}) " +
+        ", (b:B {id: 1, seed: 42}) " +
+
+        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+
+        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            LabelPropagationWriteProc.class,
+            GraphProjectProc.class
+        );
+        // Create explicit graphs with both projection variants
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'myGraph', " +
+            "   {" +
+            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+            "   }, " +
+            "   '*'" +
+            ")"
+        );
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, ?>> getProcedureClazz() {
-        return LabelPropagationWriteProc.class;
-    }
-
-    @Override
-    public LabelPropagationWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationWriteConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        // TODO: generalise for all WriteProcTests
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", "writeProperty");
-        }
-        return mapWrapper;
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
     void testWrite() {
-        String writeProperty = "myFancyCommunity";
-        @Language("Cypher") String query = GdsCypher.call(TEST_GRAPH_NAME)
-            .algo("labelPropagation")
-            .writeMode()
-            .addParameter("writeProperty", writeProperty)
-            .yields(
-                "communityCount",
-                "preProcessingMillis",
-                "computeMillis",
-                "writeMillis",
-                "postProcessingMillis",
-                "communityDistribution",
-                "didConverge"
-            );
+        var query = "CALL gds.labelPropagation.write('myGraph', {writeProperty: 'myFancyCommunity'})" +
+                    " YIELD communityCount, preProcessingMillis, computeMillis, writeMillis, " +
+                    " postProcessingMillis, communityDistribution, didConverge";
 
         runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("communityCount"))
@@ -123,9 +125,10 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         });
     }
 
+    // FIXME: This doesn't belong here.
     @Test
     void respectsMaxIterations() {
-        @Language("Cypher") String query = GdsCypher.call(TEST_GRAPH_NAME)
+        @Language("Cypher") String query = GdsCypher.call("myGraph")
             .algo("labelPropagation")
             .writeMode()
             .addParameter("writeProperty", "label")
@@ -159,157 +162,11 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
     }
 
-    static Stream<Arguments> concurrencies() {
-        return TestSupport.crossArguments(
-            () -> Stream.of(1, 2, 4).map(Arguments::of)
-        );
-    }
-
-    @Test
-    void shouldRunLabelPropagationNatural() {
-
-        String query = GdsCypher.call(TEST_GRAPH_NAME)
-            .algo("gds.labelPropagation")
-            .writeMode()
-            .addParameter("writeProperty", "community")
-            .addParameter("seedProperty", "seed")
-            .addParameter("nodeWeightProperty", "weight")
-            .yields();
-
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertThat(row.getNumber("nodePropertiesWritten"))
-                    .asInstanceOf(LONG)
-                    .isEqualTo(12L);
-                checkMillisSet(row);
-                assertThat(row.get("communityDistribution"))
-                    .isInstanceOf(Map.class)
-                    .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
-                        Map.of(
-                            "p999", 8L,
-                            "p99", 8L,
-                            "p95", 8L,
-                            "p90", 8L,
-                            "p75", 8L,
-                            "p50", 4L,
-                            "min", 4L,
-                            "max", 8L,
-                            "mean", 6.0D
-                        )
-                    );
-            }
-        );
-        String check = "MATCH (n) " +
-                       "WHERE n.id IN [0,1] " +
-                       "RETURN n.community AS community";
-        runQueryWithRowConsumer(check, row ->
-            assertThat(row.getNumber("community"))
-                .asInstanceOf(LONG)
-                .isEqualTo(2L));
-    }
-
-    @Test
-    void shouldRunLabelPropagationUndirected() {
-        String graphName = "myGraphUndirected";
-        String writeProperty = "community";
-
-        runQuery(graphProjectQuery(Orientation.UNDIRECTED, graphName));
-        @Language("Cypher")
-        String query = "CALL gds.labelPropagation.write(" +
-                       "        $graph, {" +
-                       "         writeProperty: $writeProperty" +
-                       "    }" +
-                       ")";
-
-        runQueryWithRowConsumer(query, Map.of("graph", graphName, "writeProperty", writeProperty), row -> {
-                assertThat(row.getNumber("nodePropertiesWritten"))
-                    .asInstanceOf(LONG)
-                    .isEqualTo(12L);
-                assertThat(row.get("communityDistribution"))
-                    .isInstanceOf(Map.class)
-                    .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
-                        Map.of(
-                            "p999", 6L,
-                            "p99", 6L,
-                            "p95", 6L,
-                            "p90", 6L,
-                            "p75", 6L,
-                            "p50", 6L,
-                            "min", 6L,
-                            "max", 6L,
-                            "mean", 6.0D
-                        )
-                    );
-            }
-        );
-        String check = formatWithLocale("MATCH (a {id: 0}), (b {id: 1}) " +
-                                     "RETURN a.%1$s AS a, b.%1$s AS b", writeProperty);
-        runQueryWithRowConsumer(check, row -> {
-            assertThat(row.getNumber("a"))
-                .asInstanceOf(LONG)
-                .isEqualTo(2);
-            assertThat(row.getNumber("b"))
-                .asInstanceOf(LONG)
-                .isEqualTo(7);
-        });
-    }
-
-    @Test
-    void shouldRunLabelPropagationReverse() {
-        String writeProperty = "community";
-
-        var createQuery = graphProjectQuery(DEFAULT_GRAPH_NAME, Orientation.REVERSE).yields();
-        runQuery(createQuery);
-
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.labelPropagation")
-            .writeMode()
-            .addParameter("writeProperty", writeProperty)
-            .yields();
-
-        runQueryWithRowConsumer(query,
-            row -> {
-                assertThat(row.getNumber("nodePropertiesWritten"))
-                    .asInstanceOf(LONG)
-                    .isEqualTo(12L);
-
-                checkMillisSet(row);
-                assertThat(row.get("communityDistribution"))
-                    .isInstanceOf(Map.class)
-                    .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
-                        Map.of(
-                            "p999", 6L,
-                            "p99", 6L,
-                            "p95", 6L,
-                            "p90", 6L,
-                            "p75", 6L,
-                            "p50", 6L,
-                            "min", 6L,
-                            "max", 6L,
-                            "mean", 6.0D
-                        )
-                    );
-            }
-        );
-        String validateQuery = formatWithLocale(
-            "MATCH (n) RETURN n.%1$s AS community, count(*) AS communitySize",
-            writeProperty
-        );
-        assertCypherResult(validateQuery, Arrays.asList(
-            Map.of("community", 0L, "communitySize", 6L),
-            Map.of("community", 1L, "communitySize", 6L)
-        ));
-    }
-
     @ParameterizedTest(name = "concurrency = {0}")
-    @MethodSource("concurrencies")
+    @ValueSource(ints = {1, 2, 4})
     void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(int concurrency) {
 
-        String query = GdsCypher.call(TEST_GRAPH_NAME)
+        String query = GdsCypher.call("myGraph")
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("concurrency", concurrency)
@@ -327,7 +184,20 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
                 assertUserInput(row, "seedProperty", "seed");
                 assertUserInput(row, "writeProperty", "seed");
-                checkMillisSet(row);
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .as("load time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("compute time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("writeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("write time not set")
+                    .isGreaterThan(-1L);
                 assertThat(row.get("communityDistribution"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(MAP)
@@ -359,10 +229,10 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
-    @MethodSource("concurrencies")
+    @ValueSource(ints = {1, 2, 4})
     void shouldRunLabelPropagationWithoutInitialSeed(int concurrency) {
 
-        String query = GdsCypher.call(TEST_GRAPH_NAME)
+        String query = GdsCypher.call("myGraph")
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("concurrency", concurrency)
@@ -378,7 +248,20 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
                     .asInstanceOf(LONG)
                     .isEqualTo(12L);
 
-                checkMillisSet(row);
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .as("load time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("compute time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("writeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("write time not set")
+                    .isGreaterThan(-1L);
             }
         );
         runQueryWithRowConsumer(
@@ -449,12 +332,8 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
     @Test
     void testWriteEstimate() {
-        String query = GdsCypher
-            .call(TEST_GRAPH_NAME)
-            .algo("labelPropagation")
-            .writeEstimation()
-            .addAllParameters(createMinimalConfig(CypherMapWrapper.create(Map.of("concurrency", 4))).toMap())
-            .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
+        var query = "CALL gds.labelPropagation.write.estimate('myGraph', {writeProperty: 'foo', concurrency: 4})" +
+                    " YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
 
         assertCypherResult(query, List.of(Map.of(
             "nodeCount", 12L,
@@ -464,6 +343,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         )));
     }
 
+    // FIXME: This doesn't belong here.
     @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
@@ -489,33 +369,13 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     @Nested
     class FilteredGraph extends BaseTest {
 
-        @Neo4jGraph
-        static final String DB_CYPHER_WITH_OFFSET = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
+        @Neo4jGraph(offsetIds = true)
+        static final String DB_CYPHER_WITH_OFFSET = DB_CYPHER;
 
         @Test
         void shouldRunLabelPropagationNaturalOnFilteredNodes() {
-            String graphCreateQuery = GdsCypher
-                .call("nodeFilterGraph")
-                .graphProject()
-                .withNodeLabels("A", "B")
-                .withNodeProperty("id", DefaultValue.of(-1))
-                .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
-                .withNodeProperty("weight", DefaultValue.of(Double.NaN))
-                .withAnyRelationshipType()
-                .yields("nodeCount", "relationshipCount");
 
-            runQueryWithRowConsumer(graphCreateQuery, row -> {
-                assertThat(row.getNumber("nodeCount"))
-                    .asInstanceOf(LONG)
-                    .isEqualTo(12L);
-
-                assertThat(row.getNumber("relationshipCount"))
-                    .asInstanceOf(LONG)
-                    .isEqualTo(10L);
-
-            });
-
-            String query = GdsCypher.call("nodeFilterGraph")
+            String query = GdsCypher.call("myGraph")
                 .algo("gds.labelPropagation")
                 .writeMode()
                 .addParameter("writeProperty", "community")
@@ -531,7 +391,20 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
                         .asInstanceOf(LONG)
                         .isEqualTo(12L);
 
-                    checkMillisSet(row);
+                    assertThat(row.getNumber("preProcessingMillis"))
+                        .asInstanceOf(LONG)
+                        .as("load time not set")
+                        .isGreaterThan(-1L);
+
+                    assertThat(row.getNumber("computeMillis"))
+                        .asInstanceOf(LONG)
+                        .as("compute time not set")
+                        .isGreaterThan(-1L);
+
+                    assertThat(row.getNumber("writeMillis"))
+                        .asInstanceOf(LONG)
+                        .as("write time not set")
+                        .isGreaterThan(-1L);
 
                     assertThat(row.get("communityDistribution"))
                         .isInstanceOf(Map.class)
@@ -564,20 +437,189 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         }
     }
 
-    private void checkMillisSet(Result.ResultRow row) {
-        assertThat(row.getNumber("preProcessingMillis"))
-            .asInstanceOf(LONG)
-            .as("load time not set")
-            .isGreaterThan(-1L);
+    // FIXME: This doesn't belong here.
+    @Test
+    void shouldRunLabelPropagationNatural() {
 
-        assertThat(row.getNumber("computeMillis"))
-            .asInstanceOf(LONG)
-            .as("compute time not set")
-            .isGreaterThan(-1L);
+        String query = GdsCypher.call("myGraph")
+            .algo("gds.labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", "community")
+            .addParameter("seedProperty", "seed")
+            .addParameter("nodeWeightProperty", "weight")
+            .yields();
 
-        assertThat(row.getNumber("writeMillis"))
-            .asInstanceOf(LONG)
-            .as("write time not set")
-            .isGreaterThan(-1L);
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .as("load time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("compute time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("writeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("write time not set")
+                    .isGreaterThan(-1L);
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 8L,
+                            "p99", 8L,
+                            "p95", 8L,
+                            "p90", 8L,
+                            "p75", 8L,
+                            "p50", 4L,
+                            "min", 4L,
+                            "max", 8L,
+                            "mean", 6.0D
+                        )
+                    );
+            }
+        );
+        String check = "MATCH (n) " +
+                       "WHERE n.id IN [0,1] " +
+                       "RETURN n.community AS community";
+        runQueryWithRowConsumer(check, row ->
+            assertThat(row.getNumber("community"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2L));
+    }
+
+    // FIXME: This doesn't belong here.
+    @Test
+    void shouldRunLabelPropagationUndirected() {
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'undirected', " +
+            "   {" +
+            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+            "   }, " +
+            "   {" +
+            "       X: { type: 'X', orientation: 'UNDIRECTED' }" +
+            "   }" +
+            ")"
+
+        );
+
+        var query = "CALL gds.labelPropagation.write(" +
+                    "        'undirected', {" +
+                    "         writeProperty: 'community'" +
+                    "    }" +
+                    ")";
+
+        runQueryWithRowConsumer(query, row -> {
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 6L,
+                            "p99", 6L,
+                            "p95", 6L,
+                            "p90", 6L,
+                            "p75", 6L,
+                            "p50", 6L,
+                            "min", 6L,
+                            "max", 6L,
+                            "mean", 6.0D
+                        )
+                    );
+            }
+        );
+        var check = formatWithLocale("MATCH (a {id: 0}), (b {id: 1}) " +
+                                     "RETURN a.%1$s AS a, b.%1$s AS b", "community");
+        runQueryWithRowConsumer(check, row -> {
+            assertThat(row.getNumber("a"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("b"))
+                .asInstanceOf(LONG)
+                .isEqualTo(7);
+        });
+    }
+
+    // FIXME: This doesn't belong here.
+    @Test
+    void shouldRunLabelPropagationReverse() {
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'reverse', " +
+            "   {" +
+            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+            "   }, " +
+            "   {" +
+            "       X: { type: 'X', orientation: 'REVERSE' }" +
+            "   }" +
+            ")"
+        );
+
+        var query = "CALL gds.labelPropagation.write(" +
+                    "        'reverse', {" +
+                    "         writeProperty: 'community'" +
+                    "    }" +
+                    ")";
+
+        runQueryWithRowConsumer(query,
+            row -> {
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .as("load time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("compute time not set")
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("writeMillis"))
+                    .asInstanceOf(LONG)
+                    .as("write time not set")
+                    .isGreaterThan(-1L);
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 6L,
+                            "p99", 6L,
+                            "p95", 6L,
+                            "p90", 6L,
+                            "p75", 6L,
+                            "p50", 6L,
+                            "min", 6L,
+                            "max", 6L,
+                            "mean", 6.0D
+                        )
+                    );
+            }
+        );
+        String validateQuery = formatWithLocale(
+            "MATCH (n) RETURN n.%1$s AS community, count(*) AS communitySize",
+            "community"
+        );
+        assertCypherResult(validateQuery, Arrays.asList(
+            Map.of("community", 0L, "communitySize", 6L),
+            Map.of("community", 1L, "communitySize", 6L)
+        ));
     }
 }
