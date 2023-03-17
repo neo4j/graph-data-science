@@ -5,13 +5,15 @@ ifdef::directed[]
 [.supported]
 <<directed>>
 endif::[]
+ifndef::directed[]
 ifdef::no-directed[]
 [.not-supported]
 <<directed-unsupported>>
 endif::[]
-ifndef::directed,no-directed[]
+ifndef::no-directed[]
 [.allowed]
 <<directed-allowed>>
+endif::[]
 endif::[]
 
 ifdef::undirected[]
