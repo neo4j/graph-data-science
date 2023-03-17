@@ -3,19 +3,48 @@
 :description: This chapter explains the common usage patterns and operations that constitute the core of the Neo4j Graph Data Science library.
 
 
-The GDS library usage pattern is typically split in two phases: development and production.
-In the development phase the goal is to establish a workflow of useful algorithms.
-In order to do this, the system must be configured, graph projections must be defined, and algorithms must be selected.
+The GDS library usage pattern is typically split in two phases: _development_ and _production_.
+
+
+== Development phase
+
+In the development phase the goal is to establish a workflow of useful algorithms and machine-learning pipelines.
+In order to do this, the system must be configured, graph projections must be defined, algorithms must be selected, and machine learning experiments conducted.
 It is typical to make use of the memory estimation features of the library.
 This enables you to successfully configure your system to handle the amount of data to be processed.
-There are two kinds of resources to keep in mind: the projected graph and the algorithm data structures.
+There are three kinds of resources to keep in mind: the projected graph, the algorithm data structures, and the machine learning setup.
 
-In the production phase, the system would be configured appropriately to successfully run the desired algorithms.
-The sequence of operations would normally be to project a graph, run one or more algorithms on it, and consume results.
+
+=== Machine learning pipelines
+
+Developing a successful machine learning pipeline with Neo4j Graph Data Science will typically include trying out several of the following steps:
+
+- selecting training methods
+- selecting algorithms to produce graph features
+- selecting embedding algorithms to produce node embeddings
+- tuning parameters of training methods
+- tuning parameters of embedding algorithms
+- configuring pipeline training parameters
+- using graph sampling to train model candidates on data subsets
+
+
+== Production phase
+
+In the production phase, the system would be configured appropriately to successfully run the desired algorithms and pipelines.
+The sequence of operations would normally be one of
+
+- project a graph, run one or more algorithms on it, and consume results.
+- project a graph, configure a machine learning pipeline, train a machine learning model
+- project a graph, compute predictions using a previously trained machine learning model
+
+
+== General considerations
 
 The below image illustrates an overview of standard operation of the GDS library:
 
 image::projected-graph-model.svg[]
+
+In this image, machine learning pipelines are included in the Algorithms category.
 
 [NOTE]
 ====
@@ -28,20 +57,8 @@ Concurrently running procedures share the resources of the system hosting the DB
 To get an overview of the status of the system you can use the xref:common-usage/monitoring-system.adoc[System monitor procedure].
 ====
 
-The more detail on each individual operation, see the corresponding section:
+For more detail on the core operations in GDS, see the corresponding section:
 
 1. xref:management-ops/graph-catalog-ops.adoc[Graph Catalog]
 2. xref:common-usage/projecting-graphs.adoc[Projecting graphs]
 3. xref:common-usage/running-algos.adoc[Running algorithms]
-
-
-In this chapter, we will go through these aspects and guide you towards the most useful operations.
-
-This chapter is divided into the following sections:
-
-* xref:common-usage/memory-estimation.adoc[Memory Estimation]
-* xref:common-usage/projecting-graphs.adoc[Projecting graphs]
-* xref:common-usage/running-algos.adoc[Running algorithms]
-* xref:common-usage/logging.adoc[Logging]
-* xref:common-usage/monitoring-system.adoc[Monitoring system]
-* xref:common-usage/debug-sysinfo.adoc[System Information]
