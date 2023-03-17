@@ -8,6 +8,7 @@
 :procedure-name: pass:q[gds.shortestPath.yens]
 
 :directed:
+:undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]

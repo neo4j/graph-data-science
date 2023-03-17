@@ -3,6 +3,7 @@
 :description: This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
 
 :directed:
+:undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
