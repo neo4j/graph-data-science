@@ -574,8 +574,6 @@ dbms.security.procedures.unrestricted=custom.pregel.proc.*
 dbms.security.procedures.allowlist=custom.pregel.proc.*
 ----
 
-NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
-
 
 [[algorithms-pregel-api-example]]
 == Examples
