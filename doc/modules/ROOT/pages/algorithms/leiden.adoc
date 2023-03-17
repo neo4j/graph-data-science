@@ -10,6 +10,7 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:no-directed:
 :undirected:
 :homogeneous:
 :weighted:

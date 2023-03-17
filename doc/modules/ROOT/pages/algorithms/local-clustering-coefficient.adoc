@@ -5,7 +5,7 @@
 :result: local clustering coefficient
 :algorithm: Local Clustering Coefficient
 
-
+:no-directed:
 :undirected:
 :homogeneous:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]

@@ -3,11 +3,16 @@
 --
 ifdef::directed[]
 [.supported]
-endif::[]
-ifndef::directed[]
-[.not-supported]
-endif::[]
 <<directed>>
+endif::[]
+ifdef::no-directed[]
+[.not-supported]
+<<directed-unsupported>>
+endif::[]
+ifndef::directed,no-directed[]
+[.allowed]
+<<directed-allowed>>
+endif::[]
 
 ifdef::undirected[]
 [.supported]
@@ -59,6 +64,10 @@ endif::[]
 
 [glossary]
 [[directed]]Directed:: xref:introduction.adoc#introduction-algorithms-directed[Directed trait]. The algorithm is well-defined on a directed graph.
+
+[[directed-allowed]]Directed:: xref:introduction.adoc#introduction-algorithms-directed[Directed trait]. The algorithm ignores the orientations in a directed graph.
+
+[[directed-unsupported]]Directed:: xref:introduction.adoc#introduction-algorithms-directed[Directed trait]. The algorithm does not run with a directed graph.
 
 [[undirected]]Undirected:: xref:introduction.adoc#introduction-algorithms-undirected[Undirected trait]. The algorithm is well-defined on an undirected graph.
 
