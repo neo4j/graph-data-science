@@ -8,7 +8,6 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
-:undirected:
 :directed:
 :homogeneous:
 :weighted:
