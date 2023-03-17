@@ -19,19 +19,8 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityStatsConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,69 +31,18 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.beta.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsProc.StatsResult, ClosenessCentralityStatsConfig> {
+public class ClosenessCentralityStatsProc extends BaseProc {
     @Procedure(value = "gds.beta.closeness.stats", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ClosenessCentralityStatsSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
-    @Override
-    public AlgorithmFactory<?, ClosenessCentrality, ClosenessCentralityStatsConfig> algorithmFactory() {
-        return ClosenessCentralityProc.algorithmFactory();
-    }
-
-    @Override
-    protected ClosenessCentralityStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return ClosenessCentralityStatsConfig.of(config);
-    }
-
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return ClosenessCentralityProc.resultBuilder(
-            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final Map<String, Object> centralityDistribution;
-
-        StatsResult(
-            @Nullable Map<String, Object> centralityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-            this.centralityDistribution = centralityDistribution;
-        }
-
-        static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
-            private Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            public StatsResult buildResult() {
-                return new StatsResult(
-                    centralityHistogram,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    config.toMap()
-                );
-            }
-        }
-    }
 
 }
