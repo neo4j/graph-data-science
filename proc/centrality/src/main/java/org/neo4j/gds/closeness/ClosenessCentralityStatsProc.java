@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.beta.closeness.ClosenessCentrality;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -36,12 +39,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.beta.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsProc.StatsResult, ClosenessCentralityStatsConfig> {
     @Procedure(value = "gds.beta.closeness.stats", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(CLOSENESS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

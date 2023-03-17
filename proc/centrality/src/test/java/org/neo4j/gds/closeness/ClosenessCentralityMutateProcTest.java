@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
 import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matchers;
@@ -28,6 +28,9 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.beta.closeness.ClosenessCentrality;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
