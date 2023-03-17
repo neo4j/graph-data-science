@@ -3,7 +3,7 @@
 
 On a standalone Neo4j Server, GDS will need to be installed and configured manually.
 
-1. Download `neo4j-graph-data-science-[version].zip` from the https://neo4j.com/download-center/#algorithms[Neo4j Download Center]
+1. Download `neo4j-graph-data-science-[version].zip` from the https://neo4j.com/download-center/#graph-data-science[Neo4j Download Center]
 
 2. Unzip the archive and move the `neo4j-graph-data-science-[version].jar` file into the `$NEO4J_HOME/plugins` directory.
 
