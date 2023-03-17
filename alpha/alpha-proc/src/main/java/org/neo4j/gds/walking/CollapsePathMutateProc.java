@@ -43,7 +43,7 @@ import static org.neo4j.gds.walking.CollapsePathMutateProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.collapsePath.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeRelationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
+public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeRelationships, MutateResult, CollapsePathConfig> {
 
     static final String DESCRIPTION = "Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal";
 
@@ -76,44 +76,6 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeR
                 resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
             }
         };
-    }
-
-    @SuppressWarnings("unused")
-    public static class MutateResult {
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> configuration;
-
-        MutateResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long relationshipsWritten,
-            Map<String, Object> configuration
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.relationshipsWritten = relationshipsWritten;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends AbstractResultBuilder<MutateResult> {
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    mutateMillis,
-                    relationshipsWritten,
-                    config.toMap()
-                );
-            }
-        }
     }
 
     @Override
