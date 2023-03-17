@@ -38,6 +38,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
     private final HugeObjectArray<Compressed> adjacencies;
     private final Aggregation[] aggregations;
+    private final boolean noAggregation;
+    // TODO: only used for non-property case
     private final int flags;
 
     public static AdjacencyCompressorFactory factory(
@@ -49,11 +51,12 @@ public final class PackedCompressor implements AdjacencyCompressor {
         return new Factory(nodeCountSupplier, propertyMappings, aggregations, noAggregation);
     }
 
-    private PackedCompressor(HugeObjectArray<Compressed> adjacencies, Aggregation[] aggregations) {
+    private PackedCompressor(HugeObjectArray<Compressed> adjacencies, Aggregation[] aggregations, boolean noAggregation) {
         this.adjacencies = adjacencies;
         this.aggregations = aggregations;
+        this.noAggregation = noAggregation;
 
-        // TODO we need to support all aggregations
+        // TODO: only used for non-property case
         this.flags = FLAGS | aggregations[0].ordinal();
     }
 
@@ -110,9 +113,13 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[] targets = buffer.buffer;
         int targetsLength = buffer.length;
 
-        var compress = AdjacencyPacker.compressWithProperties(targets, uncompressedPropertiesPerProperty, targetsLength, flags);
-
-        return compress;
+        return AdjacencyPacker.compressWithProperties(
+            targets,
+            uncompressedPropertiesPerProperty,
+            targetsLength,
+            aggregations,
+            noAggregation
+        );
     }
 
     private Compressed packWithoutProperties(
@@ -133,7 +140,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[] targets = buffer.buffer;
         int targetsLength = buffer.length;
 
-        return AdjacencyPacker.compress(targets, 0, targetsLength, flags);
+        return AdjacencyPacker.compress(targets, 0, targetsLength, this.flags);
     }
 
     @Override
@@ -173,7 +180,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
         @Override
         public AdjacencyCompressor createCompressor() {
-            return new PackedCompressor(this.adjacencies, this.aggregations);
+            return new PackedCompressor(this.adjacencies, this.aggregations, this.noAggregation);
         }
 
         @Override

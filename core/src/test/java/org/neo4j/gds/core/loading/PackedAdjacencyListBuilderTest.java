@@ -43,4 +43,9 @@ class PackedAdjacencyListBuilderTest extends AdjacencyListBuilderBaseTest {
     void testMapperWithProperties() {
         GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.enableAndRun(this::testValueMapperWithProperties);
     }
+
+    @Test
+    void testWithAggregations() {
+        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.enableAndRun(this::testAdjacencyListWithAggregations);
+    }
 }
