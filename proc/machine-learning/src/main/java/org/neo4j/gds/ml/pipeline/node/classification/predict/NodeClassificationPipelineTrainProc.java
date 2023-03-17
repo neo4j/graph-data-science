@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.BuildInfoProperties;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
+import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
@@ -83,7 +83,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         NodeClassificationTrainAlgorithm,
         NodeClassificationPipelineTrainConfig
     > algorithmFactory() {
-        var gdsVersion = BuildInfoProperties.require().gdsVersion();
+        var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
         return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
     }
 
