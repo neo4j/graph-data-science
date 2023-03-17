@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.conductance.Conductance;
 import org.neo4j.gds.impl.conductance.ConductanceFactory;
+import org.neo4j.gds.impl.conductance.ConductanceResult;
 import org.neo4j.gds.impl.conductance.ConductanceStreamConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.impl.conductance.Conductance.CONDUCTANCE_DESCRIPTION
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.conductance.stream", description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
-public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.Result, StreamResult, ConductanceStreamConfig> {
+public class ConductanceStreamProc extends StreamProc<Conductance, ConductanceResult, StreamResult, ConductanceStreamConfig> {
 
     @Procedure(value = "gds.alpha.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
