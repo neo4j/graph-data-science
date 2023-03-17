@@ -22,9 +22,6 @@ dbms.security.procedures.allowlist=gds.*
 ----
 +
 
-NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
-
-
 5. Restart Neo4j
 
 
