@@ -4,13 +4,21 @@
 
 
 Graph algorithms run on a graph data model which is a _projection_ of the Neo4j property graph data model.
-A graph projection can be seen as a materialized view over the stored graph, containing only analytically relevant, potentially aggregated, topological and property information.
+A graph projection can be seen as a materialized view of the graph stored in a Neo4j database, containing only analytically relevant, potentially aggregated, topological and property information.
 Graph projections are stored entirely in-memory using compressed data structures optimized for topology and property lookup operations.
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using its name, a graph projection can be used many times in the analytical workflow.
-Named graphs can be projected using either a xref:management-ops/projections/graph-project.adoc[Native projection] or a xref:management-ops/projections/graph-project-cypher.adoc[Cypher projection].
+
 After usage, named graphs can be removed from the catalog to free up main memory.
+This chapter details all available graph catalog operations.
+
+
+== Considerations
+
+
+=== Lifecycle
+
 
 [NOTE]
 ====
@@ -19,7 +27,27 @@ When Neo4j is restarted, graphs stored in the catalog are lost.
 See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph projections.
 ====
 
-This chapter explains the available graph catalog operations.
+
+=== Security
+
+[NOTE]
+====
+Projecting, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
+Graphs projected by a different Neo4j user are not accessible at any time.
+====
+
+
+== Graph projections
+
+Named graphs can be projected from a Neo4j database by using either of
+
+- a xref:management-ops/projections/graph-project.adoc[Native projection]
+- a xref:management-ops/projections/graph-project-cypher.adoc[Cypher projection]
+- or a xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher Aggregation]
+
+But graphs can also be projected into the graph catalog from other sources.
+xref:management-ops/projections/graph-project-subgraph.adoc[Subgraph] and xref:management-ops/projections/rwr.adoc[Graph Sampling] projections allow projecting a new graph based off of an existing graph projection.
+xref:management-ops/projections/graph-generation.adoc[Randomised graphs can be generated], and graphs can be xref:graph-catalog-apache-arrow-ops.adoc[constructed from external data via an Apache Arrow connection].
 
 .Graph projections, adding additional graphs to the catalog:
 [opts=header,cols="1m,1"]
@@ -33,6 +61,9 @@ This chapter explains the available graph catalog operations.
 | xref:management-ops/projections/graph-generation.adoc[gds.beta.graph.generate]                 | Creates a new random graph projection of the user-defined properties and dimensions.
 |===
 
+
+== Inspecting the graph catalog
+
 .Graph catalog inspection operations:
 [opts=header,cols="1m,1"]
 |===
@@ -41,6 +72,8 @@ This chapter explains the available graph catalog operations.
 | xref:graph-exists.adoc[gds.graph.exists] | Checks if a named graph is stored in the catalog.
 |===
 
+
+== Exporting from the graph catalog
 
 .Graph catalog export operations:
 [opts=header,cols="1m,1"]
@@ -58,6 +91,8 @@ This chapter explains the available graph catalog operations.
 |===
 
 
+== Removing from the graph catalog
+
 .Graph catalog removal operations:
 [opts=header,cols="1m,1"]
 |===
@@ -66,10 +101,3 @@ This chapter explains the available graph catalog operations.
 | xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                                      | Removes node properties from a named graph.
 | xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop] | Deletes relationships of a given relationship type from a named graph.
 |===
-
-
-[NOTE]
-====
-Projecting, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
-Graphs projected by a different Neo4j user are not accessible at any time.
-====
