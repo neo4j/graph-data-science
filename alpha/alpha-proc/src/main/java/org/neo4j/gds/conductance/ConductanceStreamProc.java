@@ -38,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.conductance.stream", description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
-public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.Result, ConductanceStreamProc.StreamResult, ConductanceStreamConfig> {
+public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.Result, StreamResult, ConductanceStreamConfig> {
 
     @Procedure(value = "gds.alpha.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
@@ -75,15 +75,4 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
         throw new UnsupportedOperationException("Conductance handles result building individually.");
     }
 
-    @SuppressWarnings("unused")
-    public static class StreamResult {
-
-        public final long community;
-        public final double conductance;
-
-        public StreamResult(long community, double conductance) {
-            this.community = community;
-            this.conductance = conductance;
-        }
-    }
 }
