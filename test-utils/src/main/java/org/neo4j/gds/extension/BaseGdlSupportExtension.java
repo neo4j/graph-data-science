@@ -31,6 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -49,7 +50,7 @@ import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.neo4j.gds.extension.ExtensionUtil.getStringValueOfField;
 import static org.neo4j.gds.extension.ExtensionUtil.setField;
 
-abstract class BaseGdlSupportExtension {
+public abstract class BaseGdlSupportExtension {
 
     public static final DatabaseId DATABASE_ID = DatabaseId.from("GDL");
 
@@ -139,6 +140,7 @@ abstract class BaseGdlSupportExtension {
             .databaseId(DATABASE_ID)
             .build();
 
+        GraphDimensions dimensions = gdlFactory.dimensions();
         CSRGraphStore graphStore = gdlFactory.build();
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
@@ -154,6 +156,7 @@ abstract class BaseGdlSupportExtension {
             injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
             injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
+            injectInstance(testInstance, graphNamePrefix, dimensions, GraphDimensions.class, "GraphDimensions");
         });
     }
 
