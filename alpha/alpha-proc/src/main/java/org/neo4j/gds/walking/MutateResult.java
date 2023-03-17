@@ -46,7 +46,7 @@ public class MutateResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    static final class Builder extends AbstractResultBuilder<MutateResult> {
 
         @Override
         public MutateResult build() {
