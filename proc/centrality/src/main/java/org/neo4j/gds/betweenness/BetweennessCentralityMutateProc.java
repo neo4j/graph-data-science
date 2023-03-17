@@ -19,19 +19,9 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,106 +30,32 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentralityProc.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class BetweennessCentralityMutateProc extends MutatePropertyProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {
+public class BetweennessCentralityMutateProc extends BaseProc {
 
     @Procedure(value = "gds.betweenness.mutate", mode = READ)
-    @Description(BetweennessCentralityProc.BETWEENNESS_DESCRIPTION)
+    @Description(BetweennessCentrality.BETWEENNESS_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new BetweennessCentralityMutateSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.mutate.estimate", mode = READ)
-    @Description(BetweennessCentralityProc.BETWEENNESS_DESCRIPTION)
+    @Description(BetweennessCentrality.BETWEENNESS_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected BetweennessCentralityMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return BetweennessCentralityMutateConfig.of(config);
-    }
-
-    @Override
-    public ValidationConfiguration<BetweennessCentralityMutateConfig> validationConfig(ExecutionContext executionContext) {
-        return BetweennessCentralityProc.getValidationConfig();
-    }
-
-    @Override
-    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory() {
-        return BetweennessCentralityProc.algorithmFactory();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult) {
-        return BetweennessCentralityProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        ), computeResult);
-    }
-
-    @SuppressWarnings("unused")
-    public static final class MutateResult extends BetweennessCentralityStatsProc.StatsResult {
-
-        public final long nodePropertiesWritten;
-        public final long mutateMillis;
-
-        MutateResult(
-            long nodePropertiesWritten,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            @Nullable Map<String, Object> centralityDistribution,
-
-            Map<String, Object> config
-        ) {
-            super(
-                centralityDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                config
-            );
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.mutateMillis = mutateMillis;
-        }
-
-        static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            public MutateResult buildResult() {
-                return new MutateResult(
-                    nodePropertiesWritten,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    mutateMillis,
-                    centralityHistogram,
-                    config.toMap()
-                );
-            }
-        }
+        return new MemoryEstimationExecutor<>(
+            new BetweennessCentralityMutateSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

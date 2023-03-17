@@ -29,10 +29,12 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -84,7 +86,7 @@ class BetweennessCentralityMutateProcTest extends BaseProcTest {
             .addParameter("mutateProperty", "centrality")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
@@ -116,5 +118,28 @@ class BetweennessCentralityMutateProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isEqualTo(5);
         });
+
+        assertThat(rowCount)
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
+    }
+
+    @Test
+    void shouldFailOnMixedProjections() {
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'mixedGraph', " +
+            "   '*', " +
+            "   {" +
+            "       N: {type: 'REL', orientation: 'NATURAL'}, " +
+            "       U: {type: 'REL', orientation: 'UNDIRECTED'}" +
+            "   }" +
+            ")"
+        );
+
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery("CALL gds.betweenness.mutate('mixedGraph', {mutateProperty: 'foo'})"))
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported.");
     }
 }

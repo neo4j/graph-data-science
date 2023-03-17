@@ -19,16 +19,10 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,12 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.betweenness.stream", description = BETWEENNESS_DESCRIPTION, executionMode = STREAM)
-public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentrality, HugeAtomicDoubleArray, CentralityStreamResult, BetweennessCentralityStreamConfig> {
+public class BetweennessCentralityStreamProc extends BaseProc {
 
     @Procedure(value = "gds.betweenness.stream", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
@@ -50,11 +42,10 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stream(computationResult);
+        return new ProcedureExecutor<>(
+            new BetweennessCentralityStreamSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.stream.estimate", mode = READ)
@@ -63,33 +54,10 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected CentralityStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        return new CentralityStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
-        return BetweennessCentralityProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected BetweennessCentralityStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return BetweennessCentralityStreamConfig.of(config);
-    }
-
-    @Override
-    public ValidationConfiguration<BetweennessCentralityStreamConfig> validationConfig(ExecutionContext executionContext) {
-        return BetweennessCentralityProc.getValidationConfig();
-    }
-
-    @Override
-    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
-        return BetweennessCentralityProc.algorithmFactory();
+        return new MemoryEstimationExecutor<>(
+            new BetweennessCentralityStreamSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

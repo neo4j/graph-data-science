@@ -28,10 +28,12 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class BetweennessCentralityStatsProcTest extends BaseProcTest {
@@ -72,7 +74,7 @@ class BetweennessCentralityStatsProcTest extends BaseProcTest {
             .statsMode()
             .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis");
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
@@ -101,28 +103,28 @@ class BetweennessCentralityStatsProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
         });
+
+        assertThat(rowCount)
+            .as("`stats` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @Test
-    void testStatsWithDeprecatedFields() {
-        String query = GdsCypher
-            .call(DEFAULT_GRAPH_NAME)
-            .algo("betweenness")
-            .statsMode()
-            .yields("preProcessingMillis", "computeMillis", "postProcessingMillis");
+    void shouldFailOnMixedProjections() {
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'mixedGraph', " +
+            "   '*', " +
+            "   {" +
+            "       N: {type: 'REL', orientation: 'NATURAL'}, " +
+            "       U: {type: 'REL', orientation: 'UNDIRECTED'}" +
+            "   }" +
+            ")"
+        );
 
-        runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("preProcessingMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
-
-            assertThat(row.getNumber("computeMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
-
-            assertThat(row.getNumber("postProcessingMillis"))
-                .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
-        });
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery("CALL gds.betweenness.stats('mixedGraph', {})"))
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported.");
     }
 }

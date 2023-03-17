@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 
 public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
+    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
     private final Graph graph;
     private final long nodeCount;
     private final double divisor;
