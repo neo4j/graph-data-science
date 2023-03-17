@@ -6,6 +6,7 @@ ifdef::directed[]
 <<directed>>
 endif::[]
 ifndef::directed[]
+// An unsupported Directed trait has to be added explicitly as `no-directed`
 ifdef::no-directed[]
 [.not-supported]
 <<directed-unsupported>>
