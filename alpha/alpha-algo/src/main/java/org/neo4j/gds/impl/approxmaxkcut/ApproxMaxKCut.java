@@ -20,9 +20,7 @@
 package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,7 +43,8 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * [1]: Festa et al. Randomized Heuristics for the Max-Cut Problem, 2002.
  * [2]: Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.
  */
-public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
+public class ApproxMaxKCut extends Algorithm<MaxKCutResult> {
+    public static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the sum of weights of relationships between these communities.";
 
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
     private static final Comparator MAXIMIZING = (lhs, rhs) -> lhs > rhs;
@@ -104,36 +103,13 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
         );
     }
 
-    @ValueClass
-    public interface CutResult {
-        // Value at index `i` is the idx of the community to which node with id `i` belongs.
-        HugeByteArray candidateSolution();
-
-        double cutCost();
-
-        static CutResult of(
-            HugeByteArray candidateSolution,
-            double cutCost
-        ) {
-            return ImmutableCutResult
-                .builder()
-                .candidateSolution(candidateSolution)
-                .cutCost(cutCost)
-                .build();
-        }
-
-        default LongNodePropertyValues asNodeProperties() {
-            return candidateSolution().asNodeProperties();
-        }
-    }
-
     @FunctionalInterface
     public interface Comparator {
         boolean compare(double lhs, double rhs);
     }
 
     @Override
-    public CutResult compute() {
+    public MaxKCutResult compute() {
         // Keep track of which candidate solution is currently being used and which is best.
         byte currIdx = 0, bestIdx = 1;
 
@@ -186,7 +162,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
 
         progressTracker.endSubTask();
 
-        return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
+        return MaxKCutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
     }
 
 }

@@ -25,11 +25,10 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutFactory;
+import org.neo4j.gds.impl.approxmaxkcut.MaxKCutResult;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 
 public final class ApproxMaxKCutProc {
-
-    static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the sum of weights of relationships between these communities.";
 
     private ApproxMaxKCutProc() {}
 
@@ -38,7 +37,7 @@ public final class ApproxMaxKCutProc {
     }
 
     static <CONFIG extends ApproxMaxKCutConfig> NodePropertyValues nodeProperties(
-        ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, CONFIG> computationResult
+        ComputationResult<ApproxMaxKCut, MaxKCutResult, CONFIG> computationResult
     ) {
         var config = computationResult.config();
 

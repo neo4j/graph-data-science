@@ -36,6 +36,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
+import org.neo4j.gds.impl.approxmaxkcut.MaxKCutResult;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -47,7 +48,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutStreamConfig, ApproxMaxKCut.CutResult> {
+class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutStreamConfig, MaxKCutResult> {
 
     // The optimal max cut for this graph when k = 2 is:
     //     {a, b, c}, {d, e, f, g} if the graph is unweighted.
@@ -209,7 +210,7 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
     }
 
     @Override
-    public void assertResultEquals(ApproxMaxKCut.CutResult result1, ApproxMaxKCut.CutResult result2) {
+    public void assertResultEquals(MaxKCutResult result1, MaxKCutResult result2) {
         assertThat(result1.cutCost())
             .isEqualTo(result2.cutCost());
     }

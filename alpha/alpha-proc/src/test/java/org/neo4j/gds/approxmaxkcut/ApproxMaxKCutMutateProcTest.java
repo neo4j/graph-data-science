@@ -37,6 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
+import org.neo4j.gds.impl.approxmaxkcut.MaxKCutResult;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -45,8 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
-    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult>,
-    MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult> {
+    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, MaxKCutResult>,
+    MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, MaxKCutResult> {
 
     @Neo4jGraph
     @Language("Cypher")
@@ -175,7 +176,7 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
     }
 
     @Override
-    public void assertResultEquals(ApproxMaxKCut.CutResult result1, ApproxMaxKCut.CutResult result2) {
+    public void assertResultEquals(MaxKCutResult result1, MaxKCutResult result2) {
         assertThat(result1.cutCost())
             .isEqualTo(result2.cutCost());
     }
