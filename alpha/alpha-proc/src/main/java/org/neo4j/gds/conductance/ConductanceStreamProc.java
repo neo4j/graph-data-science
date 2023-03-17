@@ -25,6 +25,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.conductance.Conductance;
+import org.neo4j.gds.impl.conductance.ConductanceFactory;
 import org.neo4j.gds.impl.conductance.ConductanceStreamConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,8 +34,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.conductance.ConductanceProc.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.impl.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.conductance.stream", description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
@@ -67,7 +68,7 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
 
     @Override
     public GraphAlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
-        return ConductanceProc.algorithmFactory();
+        return new ConductanceFactory<>();
     }
 
     @Override

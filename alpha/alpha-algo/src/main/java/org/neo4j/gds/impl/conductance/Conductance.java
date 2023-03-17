@@ -41,6 +41,8 @@ import java.util.stream.Stream;
 
 public class Conductance extends Algorithm<Conductance.Result> {
 
+    public static final String CONDUCTANCE_DESCRIPTION = "Evaluates a division of nodes into communities based on the proportion of relationships that cross community boundaries.";
+
     private static final double DEFAULT_WEIGHT = 0.0D;
 
     private Graph graph;
