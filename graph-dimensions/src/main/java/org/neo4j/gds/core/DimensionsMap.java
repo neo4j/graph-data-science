@@ -46,11 +46,7 @@ public final class DimensionsMap {
      */
     @NotNull
     public Optional<Integer> get(String propertyKey) {
-        var dimensionOrNull = actualDimensions.get(propertyKey);
-        if (dimensionOrNull == null) {
-            return Optional.empty();
-        }
-        return dimensionOrNull;
+        return actualDimensions.getOrDefault(propertyKey, Optional.empty());
     }
 
 
@@ -67,10 +63,10 @@ public final class DimensionsMap {
         return Objects.hash(actualDimensions);
     }
 
-//    @Override
-//    public String toString() {
-//        return "DimensionsMap{" +
-//               "actualDimensions=" + actualDimensions +
-//               '}';
-//    }
+    @Override
+    public String toString() {
+        return "DimensionsMap{" +
+               "actualDimensions=" + actualDimensions +
+               '}';
+    }
 }
