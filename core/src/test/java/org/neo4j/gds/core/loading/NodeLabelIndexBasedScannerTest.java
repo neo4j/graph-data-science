@@ -26,9 +26,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.Label;
-import org.roaringbitmap.longlong.Roaring64Bitmap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
@@ -41,8 +41,8 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         var nodeCount = 150_000;
         var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
 
-        var labelABits = new Roaring64Bitmap();
-        var labelBBits = new Roaring64Bitmap();
+        var labelABits = HugeAtomicBitSet.create(nodeCount);
+        var labelBBits = HugeAtomicBitSet.create(nodeCount);
 
         var labelA = Label.label("A");
         var labelB = Label.label("B");
@@ -50,13 +50,13 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
                 if (i % 3 == 0) {
-                    labelABits.add(tx.createNode(labelA).getId());
+                    labelABits.set(tx.createNode(labelA).getId());
                 } else if (i % 3 == 1) {
-                    labelBBits.add(tx.createNode(labelB).getId());
+                    labelBBits.set(tx.createNode(labelB).getId());
                 } else {
                     var id = tx.createNode(labelA, labelB).getId();
-                    labelABits.add(id);
-                    labelBBits.add(id);
+                    labelABits.set(id);
+                    labelBBits.set(id);
                 }
             }
         });
@@ -95,20 +95,20 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                     if (neoId % 3 == 0) {
                         assertThat(labels).contains(labelAToken);
                         assertThat(labels).doesNotContain(labelBToken);
-                        assertThat(labelABits.contains(neoId)).isTrue();
-                        assertThat(labelBBits.contains(neoId)).isFalse();
+                        assertThat(labelABits.get(neoId)).isTrue();
+                        assertThat(labelBBits.get(neoId)).isFalse();
                     }
                     if (neoId % 3 == 1) {
                         assertThat(labels).doesNotContain(labelAToken);
                         assertThat(labels).contains(labelBToken);
-                        assertThat(labelABits.contains(neoId)).isFalse();
-                        assertThat(labelBBits.contains(neoId)).isTrue();
+                        assertThat(labelABits.get(neoId)).isFalse();
+                        assertThat(labelBBits.get(neoId)).isTrue();
                     }
                     if (neoId % 3 == 2) {
                         assertThat(labels).contains(labelAToken);
                         assertThat(labels).contains(labelBToken);
-                        assertThat(labelABits.contains(neoId)).isTrue();
-                        assertThat(labelBBits.contains(neoId)).isTrue();
+                        assertThat(labelABits.get(neoId)).isTrue();
+                        assertThat(labelBBits.get(neoId)).isTrue();
                     }
                     return true;
                 })) {
