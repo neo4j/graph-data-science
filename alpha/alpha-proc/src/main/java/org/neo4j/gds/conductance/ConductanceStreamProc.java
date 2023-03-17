@@ -19,15 +19,8 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.conductance.Conductance;
-import org.neo4j.gds.impl.conductance.ConductanceFactory;
-import org.neo4j.gds.impl.conductance.ConductanceResult;
-import org.neo4j.gds.impl.conductance.ConductanceStreamConfig;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,12 +28,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.impl.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.conductance.stream", description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
-public class ConductanceStreamProc extends StreamProc<Conductance, ConductanceResult, StreamResult, ConductanceStreamConfig> {
+public class ConductanceStreamProc extends BaseProc {
 
     @Procedure(value = "gds.alpha.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
@@ -48,33 +39,10 @@ public class ConductanceStreamProc extends StreamProc<Conductance, ConductanceRe
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(
-            graphName,
-            configuration
-        );
+        return new ProcedureExecutor<>(
+            new ConductanceStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
 
-        if (result.isGraphEmpty()) {
-            return Stream.empty();
-        }
-
-        return result.result()
-            .streamCommunityResults()
-            .map(communityResult -> new StreamResult(communityResult.community(), communityResult.conductance()));
     }
-
-    @Override
-    protected ConductanceStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return ConductanceStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
-        return new ConductanceFactory<>();
-    }
-
-    @Override
-    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues) {
-        throw new UnsupportedOperationException("Conductance handles result building individually.");
-    }
-
 }
