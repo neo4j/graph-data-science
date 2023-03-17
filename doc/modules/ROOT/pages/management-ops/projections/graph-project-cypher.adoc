@@ -11,10 +11,6 @@ This allows multiple algorithms to use the same graph without having to project 
 Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
 Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
 
-[NOTE]
---
-There is also a way to generate a random graph, see xref:management-ops/projections/graph-generation.adoc[Graph Generation] documentation for more details.
---
 
 [NOTE]
 --

@@ -13,11 +13,6 @@ Cypher projections are primarily recommended for the development phase (see xref
 
 [NOTE]
 --
-There is also a way to generate a random graph, see xref:management-ops/projections/graph-generation.adoc[Graph Generation] documentation for more details.
---
-
-[NOTE]
---
 The projected graph will reside in the catalog until:
 
 - the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
