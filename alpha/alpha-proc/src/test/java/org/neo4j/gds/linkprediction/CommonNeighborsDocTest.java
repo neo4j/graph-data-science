@@ -30,7 +30,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CommonNeighorsDocTest extends BaseProcTest {
+class CommonNeighborsDocTest extends BaseProcTest {
 
     @Override
     @ExtensionCallback
