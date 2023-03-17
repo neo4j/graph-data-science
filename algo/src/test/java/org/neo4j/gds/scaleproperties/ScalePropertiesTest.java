@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -67,6 +68,9 @@ class ScalePropertiesTest {
 
     @Inject
     TestGraph graph;
+
+    @Inject
+    GraphDimensions graphDimensions;
 
     @Test
     void scaleSingleProperty() {
@@ -301,6 +305,21 @@ class ScalePropertiesTest {
             );
     }
 
+    @Test
+    void shouldEstimateMemoryFromGraph() {
+        var config = ScalePropertiesStreamConfigImpl.builder()
+            .nodeProperties(List.of("bAndC", "longArrayB"))
+            .scaler("MEAN")
+            .build();
+
+        assertMemoryEstimation(
+            new ScalePropertiesFactory<>().memoryEstimation(config),
+            graphDimensions,
+            1,
+            MemoryRange.of(288)
+        );
+    }
+
     @ParameterizedTest
     @CsvSource(value = {
         // BASE
@@ -309,7 +328,7 @@ class ScalePropertiesTest {
         // Should increase linearly with node count
         "   2_000, 2_088_064"
     })
-    void shouldEstimateMemory(
+    void shouldEstimateMemoryFromCounts(
         long nodeCount,
         long expectedMemory
     ) {

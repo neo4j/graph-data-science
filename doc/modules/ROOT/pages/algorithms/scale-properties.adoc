@@ -354,7 +354,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.scaleProperties.stream.estimate('myGraph', {
-  nodeProperties: ['buildYear', 'avgReview'],
+  nodeProperties: ['buildYear', 'storyCapacity'],
   scaler: 'MinMax'
 })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -364,7 +364,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 8         | 0                 | 8416     | 8416     | "8416 Bytes"
+| 8         | 0                 | 480      | 480      | "480 Bytes"
 |===
 --
 
