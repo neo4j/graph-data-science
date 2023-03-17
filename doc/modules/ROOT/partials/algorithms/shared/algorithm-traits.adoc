@@ -70,11 +70,11 @@ endif::[]
 
 [[directed-allowed]]Directed:: xref:introduction.adoc#introduction-algorithms-directed[Directed trait]. The algorithm ignores the orientations in a directed graph.
 
-[[directed-unsupported]]Directed:: xref:introduction.adoc#introduction-algorithms-directed[Directed trait]. The algorithm does not run with a directed graph.
+[[directed-unsupported]]Directed:: xref:introduction.adoc#introduction-algorithms-directed[Directed trait]. The algorithm does not run on a directed graph.
 
 [[undirected]]Undirected:: xref:introduction.adoc#introduction-algorithms-undirected[Undirected trait]. The algorithm is well-defined on an undirected graph.
 
-[[undirected-allowed]]Undirected:: xref:introduction.adoc#introduction-algorithms-undirected[Undirected trait]. The algorithm treats an undirected graph as a directed graph, with each undirected edge replaced by two directed edges having opposite orientations.
+[[undirected-allowed]]Undirected:: xref:introduction.adoc#introduction-algorithms-undirected[Undirected trait]. The algorithm treats an undirected graph as a directed graph, with each undirected edge treated as two directed edges having opposite orientations.
 
 [[homogeneous]]Homogeneous:: xref:introduction.adoc#introduction-algorithms-homogeneous[Homogeneous trait]. The algorithm will treat all nodes and relationships in its input graph(s) similarly, as if they were all of the same type. If multiple types of nodes or relationships exist in the graph, this must be taken into account when analysing the results of the algorithm.
 
