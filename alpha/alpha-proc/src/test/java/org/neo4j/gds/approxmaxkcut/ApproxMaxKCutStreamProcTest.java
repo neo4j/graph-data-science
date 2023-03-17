@@ -29,16 +29,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.MaxKCutResult;
-import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -48,7 +42,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutStreamConfig, MaxKCutResult> {
+class ApproxMaxKCutStreamProcTest extends BaseProcTest {
 
     // The optimal max cut for this graph when k = 2 is:
     //     {a, b, c}, {d, e, f, g} if the graph is unweighted.
@@ -84,10 +78,6 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
 
     static final String GRAPH_NAME = "myGraph";
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -103,17 +93,6 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
             .yields();
 
         runQuery(createQuery);
-    }
-
-
-    @Override
-    public Class<ApproxMaxKCutStreamProc> getProcedureClazz() {
-        return ApproxMaxKCutStreamProc.class;
-    }
-
-    @Override
-    public ApproxMaxKCutStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ApproxMaxKCutStreamConfig.of(mapWrapper);
     }
 
     @Test
@@ -136,11 +115,14 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
             idFunction.of("g"), 0L
         );
 
-        runQueryWithRowConsumer(streamQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(streamQuery, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long communityId = row.getNumber("communityId").longValue();
             assertThat(communityId).isEqualTo(expected.get(nodeId));
         });
+        
+        assertThat(rowCount).isEqualTo(expected.keySet().size());
+
     }
 
     static Stream<Arguments> communitySizeInputs() {
@@ -167,20 +149,21 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
     @MethodSource("communitySizeInputs")
     void testStreamWithMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
         String streamQuery = GdsCypher.call(GRAPH_NAME)
-                .algo("gds.alpha.maxkcut")
-                .streamMode()
-                // Make sure we get a deterministic result.
-                .addParameter("randomSeed", 1337L)
-                .addParameter("concurrency", 1)
-                .addAllParameters(parameter)
-                .yields();
+            .algo("gds.alpha.maxkcut")
+            .streamMode()
+            // Make sure we get a deterministic result.
+            .addParameter("randomSeed", 1337L)
+            .addParameter("concurrency", 1)
+            .addAllParameters(parameter)
+            .yields();
 
-        runQueryWithRowConsumer(streamQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(streamQuery, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long communityId = row.getNumber("communityId").longValue();
             assertThat(communityId).isEqualTo(expectedResult.get(nodeId));
-
         });
+
+        assertThat(rowCount).isEqualTo(expectedResult.keySet().size());
     }
 
     // Min k-cut capabilities not exposed in API yet.
@@ -197,22 +180,6 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
             .isThrownBy(() -> runQuery(streamQuery))
             .withRootCauseInstanceOf(IllegalArgumentException.class)
             .withMessage("The sum of min community sizes is larger than half of the number of nodes in the graph: 200 > 3");
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        return mapWrapper
-            .withEntryIfMissing("k", 2)
-            .withEntryIfMissing("iterations", 8)
-            .withEntryIfMissing("vnsMaxNeighborhoodOrder", 0)
-            .withEntryIfMissing("concurrency", 1)
-            .withEntryIfMissing("randomSeed", 1337L);
-    }
-
-    @Override
-    public void assertResultEquals(MaxKCutResult result1, MaxKCutResult result2) {
-        assertThat(result1.cutCost())
-            .isEqualTo(result2.cutCost());
     }
 
     @AfterEach
