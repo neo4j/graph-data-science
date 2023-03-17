@@ -24,7 +24,7 @@ import org.neo4j.gds.catalog.GraphSampleProc;
 
 import java.util.List;
 
-final class CNARWSampleDocTest extends SingleFileDocTestBase {
+final class CommonNeighbourAwareRandomWalkSampleDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

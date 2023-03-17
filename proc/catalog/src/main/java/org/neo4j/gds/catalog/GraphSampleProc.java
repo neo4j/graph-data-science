@@ -102,7 +102,7 @@ public class GraphSampleProc extends CatalogProc {
 
     @Procedure(name = "gds.alpha.graph.sample.cnarw", mode = READ)
     @Description(CNARW_DESCRIPTION)
-    public Stream<CNARWSampleResult> sampleCNARW(
+    public Stream<CommonNeighbourAwareRandomWalkSampleResult> sampleCNARW(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -144,7 +144,7 @@ public class GraphSampleProc extends CatalogProc {
             GraphStoreCatalog.set(rwrProcConfig, sampledGraphStore);
 
             var projectMillis = progressTimer.stop().getDuration();
-            return Stream.of(new CNARWSampleResult(
+            return Stream.of(new CommonNeighbourAwareRandomWalkSampleResult(
                 graphName,
                 fromGraphName,
                 sampledGraphStore.nodeCount(),
@@ -174,11 +174,11 @@ public class GraphSampleProc extends CatalogProc {
         }
     }
 
-    public static class CNARWSampleResult extends GraphProjectProc.GraphProjectResult {
+    public static class CommonNeighbourAwareRandomWalkSampleResult extends GraphProjectProc.GraphProjectResult {
         public final String fromGraphName;
         public final long startNodeCount;
 
-        CNARWSampleResult(
+        CommonNeighbourAwareRandomWalkSampleResult(
             String graphName,
             String fromGraphName,
             long nodeCount,
