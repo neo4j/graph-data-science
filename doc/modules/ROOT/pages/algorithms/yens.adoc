@@ -1,5 +1,5 @@
 [[algorithms-yens]]
-= Yen's algorithm Shortest Path
+= Yen's Shortest Path algorithm
 :description: This section describes the Yen's Shortest Path algorithm in the Neo4j Graph Data Science library.
 :entity: source-target-pair
 :result: shortest path
