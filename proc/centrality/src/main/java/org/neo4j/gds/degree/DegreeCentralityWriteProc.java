@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.degree;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -39,13 +34,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.degree.DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.degree.write", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteProc.WriteResult, DegreeCentralityWriteConfig> {
+public class DegreeCentralityWriteProc extends BaseProc {
+    @Context
+    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.degree.write", mode = WRITE)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
@@ -53,7 +48,10 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new DegreeCentralityWriteSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.degree.write.estimate", mode = READ)
@@ -62,73 +60,15 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new DegreeCentralityWriteSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig> computationResult) {
-        return DegreeCentralityProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected DegreeCentralityWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return DegreeCentralityWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityWriteConfig> algorithmFactory() {
-        return new DegreeCentralityFactory<>();
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return DegreeCentralityProc.resultBuilder(
-            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends StandardWriteResult {
-
-        public final long nodePropertiesWritten;
-        public final Map<String, Object> centralityDistribution;
-
-        WriteResult(
-            long nodePropertiesWritten,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            @Nullable Map<String, Object> centralityDistribution,
-            Map<String, Object> config
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.centralityDistribution = centralityDistribution;
-        }
-
-        static class Builder extends AbstractCentralityResultBuilder<WriteResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    nodePropertiesWritten,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    writeMillis,
-                    centralityHistogram,
-                    config.toMap()
-                );
-            }
-        }
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }

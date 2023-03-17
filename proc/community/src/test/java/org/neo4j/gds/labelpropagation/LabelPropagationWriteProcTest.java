@@ -95,7 +95,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     " YIELD communityCount, preProcessingMillis, computeMillis, writeMillis, " +
                     " postProcessingMillis, communityDistribution, didConverge";
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("communityCount"))
                 .asInstanceOf(LONG)
                 .isEqualTo(10);
@@ -123,6 +123,10 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 .asInstanceOf(MAP)
                 .containsKeys("min", "max", "mean", "p50", "p75", "p90", "p99", "p999", "p95");
         });
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 
     // FIXME: This doesn't belong here.
@@ -135,7 +139,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             .addParameter("maxIterations", 5)
             .yields("ranIterations", "communityDistribution");
 
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             query,
             row -> {
                 assertThat(row.getNumber("ranIterations"))
@@ -160,6 +164,9 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             }
         );
 
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -175,7 +182,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             .addParameter("nodeWeightProperty", "weight")
             .yields();
 
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             query,
             row -> {
                 assertThat(row.getNumber("nodePropertiesWritten"))
@@ -216,6 +223,11 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     );
             }
         );
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.seed AS community";
@@ -240,7 +252,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             .addParameter("nodeWeightProperty", "weight")
             .yields();
 
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             query,
             row -> {
                 assertUserInput(row, "seedProperty", null);
@@ -264,6 +276,11 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     .isGreaterThan(-1L);
             }
         );
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
         runQueryWithRowConsumer(
             "MATCH (n) WHERE n.id = 0 RETURN n.community AS community",
             row ->
@@ -312,7 +329,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             .addAllParameters(parameters)
             .yields("communityCount");
 
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             query,
             row ->
                 assertThat(row.getNumber("communityCount"))
@@ -320,6 +337,10 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     .isEqualTo(parameters.containsKey("seedProperty") ? 2L : 10L)
 
         );
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + writeProp + ") AS communities ",
@@ -384,7 +405,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 .addParameter("nodeLabels", Arrays.asList("A", "B"))
                 .yields();
 
-            runQueryWithRowConsumer(
+            var rowCount = runQueryWithRowConsumer(
                 query,
                 row -> {
                     assertThat(row.getNumber("nodePropertiesWritten"))
@@ -424,6 +445,11 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                         );
                 }
             );
+
+            assertThat(rowCount)
+                .as("`write` mode should always return one row")
+                .isEqualTo(1);
+
             String check = "MATCH (n) " +
                            "WHERE n.id IN [0,1] " +
                            "RETURN n.community AS community";
@@ -449,7 +475,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             .addParameter("nodeWeightProperty", "weight")
             .yields();
 
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             query,
             row -> {
                 assertThat(row.getNumber("nodePropertiesWritten"))
@@ -487,6 +513,11 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     );
             }
         );
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.community AS community";
@@ -519,7 +550,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     "    }" +
                     ")";
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
                 assertThat(row.getNumber("nodePropertiesWritten"))
                     .asInstanceOf(LONG)
                     .isEqualTo(12L);
@@ -541,6 +572,11 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     );
             }
         );
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
         var check = formatWithLocale("MATCH (a {id: 0}), (b {id: 1}) " +
                                      "RETURN a.%1$s AS a, b.%1$s AS b", "community");
         runQueryWithRowConsumer(check, row -> {
@@ -575,7 +611,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     "    }" +
                     ")";
 
-        runQueryWithRowConsumer(query,
+        var rowCount = runQueryWithRowConsumer(query,
             row -> {
                 assertThat(row.getNumber("nodePropertiesWritten"))
                     .asInstanceOf(LONG)
@@ -613,6 +649,11 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     );
             }
         );
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
         String validateQuery = formatWithLocale(
             "MATCH (n) RETURN n.%1$s AS community, count(*) AS communitySize",
             "community"
