@@ -9,18 +9,20 @@ The Neo4j Graph Data Science Library is capable of augmenting nodes with additio
 These properties can be loaded from the database when the graph is projected.
 Many algorithms can also persist their result as one or more node properties when they are run using the `mutate` mode.
 
+[[node-properties-supported]]
 == Supported types
 
 The Neo4j Graph Data Science library does not support all property types that are supported by the Neo4j database.
 Every supported type also defines a fallback value, which is used to indicate that the value of this property is not set.
 
-The following table lists the supported property types, as well as, their corresponding fallback values.
+The following table lists the supported property types, as well as their corresponding fallback values.
 
 * `Long` - `Long.MIN_VALUE`
 * `Double` - `NaN`
 * `Long Array` - `null`
 * `Float Array` - `null`
 * `Double Array` - `null`
+
 
 == Defining the type of a node property
 
