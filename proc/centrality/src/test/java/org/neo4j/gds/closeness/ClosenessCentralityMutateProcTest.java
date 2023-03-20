@@ -19,26 +19,19 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityMutateConfig;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +39,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ClosenessCentralityMutateProcTest extends BaseProcTest implements AlgoBaseProcTest<ClosenessCentrality, ClosenessCentralityMutateConfig, ClosenessCentralityResult> {
+class ClosenessCentralityMutateProcTest extends BaseProcTest {
 
     private static final String MUTATE_PROPERTY = "score";
 
@@ -126,29 +119,11 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest implements AlgoBase
             Map.of("nodeId", idFunction.of("n9"), "score", Matchers.closeTo(0.588, 0.01)),
             Map.of("nodeId", idFunction.of("n10"), "score", Matchers.closeTo(0.588, 0.01))
         );
-    }
-
-    @Override
-    public Class<ClosenessCentralityMutateProc> getProcedureClazz() {
-        return ClosenessCentralityMutateProc.class;
-    }
-
-    @Override
-    public ClosenessCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ClosenessCentralityMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            return mapWrapper.withString("mutateProperty", MUTATE_PROPERTY);
-        }
-        return mapWrapper;
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
     }
 
     @Test
-    void testClosenessMutate() {
-        loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+    void shouldMutate() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.closeness")
             .mutateMode()
@@ -190,26 +165,7 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest implements AlgoBase
         );
     }
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
 
-    @Override
-    public void assertResultEquals(ClosenessCentralityResult result1, ClosenessCentralityResult result2) {
-        var assertions = new SoftAssertions();
-
-        var left = result1.centralities();
-        var right = result2.centralities();
-
-        assertions.assertThat(left.size()).as("Result size").isEqualTo(right.size());
-
-        for (long i = 0; i < left.size(); i++) {
-            assertions.assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
-        }
-
-        assertions.assertAll();
-    }
     @Test
     @Disabled("Mutate on empty graph has not been covered in AlgoBaseProcTest 🙈")
     public void testRunOnEmptyGraph() {
