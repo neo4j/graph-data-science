@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Supplier;
 
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.PRUNED;
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.ROOT_NODE;
@@ -48,7 +47,6 @@ abstract class ReroutingAlgorithm {
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.sourceId = sourceId;
-        Supplier<ReroutingAlgorithm> a;
 
     }
 

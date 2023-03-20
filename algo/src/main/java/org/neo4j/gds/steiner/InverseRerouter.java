@@ -85,39 +85,37 @@ public class InverseRerouter extends ReroutingAlgorithm {
         long endIndex = indexQueue.longValue();
         //we start traversing paths to terminals in the order they were found
         for (long indexId = 0; indexId < endIndex; ++indexId) {
-            boolean reachedSegmentEnd = false;
             long element = this.examinationQueue.get(indexId);
 
-            if (element == PRUNED) { //PRUNED signals end of a path
-                reachedSegmentEnd = true;
-            } else {
+            if (element != PRUNED) { //PRUNED signals end of a path
                 currentSegmentArray.set(currentSegmentIndex++, element);
+                continue;
             }
 
-            if (reachedSegmentEnd) {
-                while (currentSegmentIndex > 0) {
-                    long node = currentSegmentArray.get(--currentSegmentIndex);
-                    examinationQueue.add(node); //transfer path to the examination queue (FIFO)
-                    //if the node in the path cannot be pruned (because it's part of other paths), we prune what we can so far
-                    //at the end prune
-                    boolean shouldOptimizeSegment = currentSegmentIndex == 0 || !childrenManager.prunable(node);
-                    if (shouldOptimizeSegment) {
-                        optimizeSegment(
-                            childrenManager,
-                            examinationQueue,
-                            priorityQueue,
-                            pruningArray,
-                            bestAlternative,
-                            bestAlternativeParentCost,
-                            linkCutTree,
-                            parent,
-                            parentCost,
-                            totalCost,
-                            effectiveNodeCount
-                        );
-                    }
+            while (currentSegmentIndex > 0) {
+                long node = currentSegmentArray.get(--currentSegmentIndex);
+                examinationQueue.add(node); //transfer path to the examination queue (FIFO)
+                //if the node in the path cannot be pruned (because it's part of other paths), we prune what we can so far
+                //at the end prune
+                boolean shouldOptimizeSegment = currentSegmentIndex == 0 || !childrenManager.prunable(node);
+
+                if (shouldOptimizeSegment) {
+                    optimizeSegment(
+                        childrenManager,
+                        examinationQueue,
+                        priorityQueue,
+                        pruningArray,
+                        bestAlternative,
+                        bestAlternativeParentCost,
+                        linkCutTree,
+                        parent,
+                        parentCost,
+                        totalCost,
+                        effectiveNodeCount
+                    );
                 }
             }
+
         }
         progressTracker.endSubTask("Reroute");
     }
@@ -264,10 +262,12 @@ public class InverseRerouter extends ReroutingAlgorithm {
                 linkCutTree.link(parentId, nodeId);
 
             }
-            return true;
-        });
+                return true;
+            }
+        );
         return bestGain.doubleValue();
     }
+    
     private double rerouteWithPruning(
         ReroutingChildrenManager childrenManager,
         HugeLongArray bestAlternative,

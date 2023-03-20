@@ -50,7 +50,6 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final int binSizeThreshold;
     private final HugeLongArray examinationQueue;
     private final LongAdder indexQueue;
-
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
         long sourceId,
@@ -99,8 +98,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.binSizeThreshold = binSizeThreshold;
         this.examinationQueue = createExaminationQueue(graph, applyRerouting, terminals.size());
         this.indexQueue = new LongAdder();
-
-
+        
     }
 
     private BitSet createTerminals() {
