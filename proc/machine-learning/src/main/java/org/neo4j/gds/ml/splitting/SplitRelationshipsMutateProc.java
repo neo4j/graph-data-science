@@ -39,11 +39,11 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.splitRelationships.mutate", description = "Splits a graph into holdout and remaining relationship types and adds them to the graph.", executionMode = MUTATE_RELATIONSHIP)
-public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships, SplitResult, SplitRelationshipsMutateProc.MutateResult, SplitRelationshipsMutateConfig> {
+public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships, SplitResult, MutateResult, SplitRelationshipsMutateConfig> {
 
     @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ)
     @Description("Splits a graph into holdout and remaining relationship types and adds them to the graph.")
-    public Stream<SplitRelationshipsMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -95,41 +95,4 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         };
     }
 
-    @SuppressWarnings("unused")
-    public static class MutateResult {
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> configuration;
-
-        MutateResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long relationshipsWritten,
-            Map<String, Object> configuration
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.relationshipsWritten = relationshipsWritten;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends AbstractResultBuilder<SplitRelationshipsMutateProc.MutateResult> {
-
-            @Override
-            public SplitRelationshipsMutateProc.MutateResult build() {
-                return new SplitRelationshipsMutateProc.MutateResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    mutateMillis,
-                    relationshipsWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }
