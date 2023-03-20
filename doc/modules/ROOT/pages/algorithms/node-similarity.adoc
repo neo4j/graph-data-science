@@ -14,7 +14,6 @@ The algorithm is based on the Jaccard and Overlap similarity metrics.
 
 :directed:
 :undirected:
-:homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
