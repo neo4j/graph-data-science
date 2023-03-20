@@ -32,9 +32,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
 public class Scc extends Algorithm<HugeLongArray> {
-
+    public static final int NOT_VALID = -1;
+    public static final String SCC_DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
+                                                 "where all nodes in the same set form a connected component.";
     private Graph graph;
-
     private final long nodeCount;
     private HugeLongArray index;
     private BitSet visited;
@@ -64,7 +65,7 @@ public class Scc extends Algorithm<HugeLongArray> {
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
         index.fill(-1);
-        connectedComponents.fill(-1);
+        connectedComponents.fill(NOT_VALID);
         todo.clear();
         boundaries.clear();
         stack.clear();

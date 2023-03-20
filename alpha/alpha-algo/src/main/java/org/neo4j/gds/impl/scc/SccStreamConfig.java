@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface SccStreamConfig extends SccBaseConfig {
 
     static SccStreamConfig of(CypherMapWrapper userInput) {

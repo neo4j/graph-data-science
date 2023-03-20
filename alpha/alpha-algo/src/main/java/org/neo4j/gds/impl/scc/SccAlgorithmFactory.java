@@ -28,9 +28,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
 
     @Override
-    public Scc build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
+    public Scc build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
         return new Scc(
-            graphOrGraphStore,
+            graph,
             progressTracker
         );
     }

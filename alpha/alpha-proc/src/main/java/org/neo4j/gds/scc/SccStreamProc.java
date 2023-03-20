@@ -28,13 +28,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.scc.SccWriteProc.DESCRIPTION;
+import static org.neo4j.gds.impl.scc.Scc.SCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SccStreamProc extends BaseProc {
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(SCC_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

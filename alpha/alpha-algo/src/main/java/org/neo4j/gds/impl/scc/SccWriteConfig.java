@@ -25,7 +25,6 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface SccWriteConfig extends SccBaseConfig, WritePropertyConfig {
     
     @Value.Default

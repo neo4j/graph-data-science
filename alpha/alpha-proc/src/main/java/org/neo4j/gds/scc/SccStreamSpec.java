@@ -33,9 +33,10 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.scc.SccWriteProc.DESCRIPTION;
+import static org.neo4j.gds.impl.scc.Scc.NOT_VALID;
+import static org.neo4j.gds.impl.scc.Scc.SCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scc.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.alpha.scc.stream", description = SCC_DESCRIPTION, executionMode = STREAM)
 public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
     @Override
     public String name() {
@@ -63,7 +64,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
             }
 
             return LongStream.range(0, graph.nodeCount())
-                .filter(i -> components.get(i) != -1)
+                .filter(i -> components.get(i) != NOT_VALID)
                 .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
         };
     }

@@ -37,9 +37,9 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.scc.SccWriteProc.DESCRIPTION;
+import static org.neo4j.gds.impl.scc.Scc.SCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scc.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.alpha.scc.write", description = SCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
 
     @Override

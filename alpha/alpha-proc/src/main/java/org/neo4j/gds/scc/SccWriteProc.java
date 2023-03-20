@@ -32,18 +32,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.impl.scc.Scc.SCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class SccWriteProc extends BaseProc {
 
-    public static final String DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
-                                             "where all nodes in the same set form a connected component.";
 
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
-    
+
     @Procedure(value = "gds.alpha.scc.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(SCC_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
