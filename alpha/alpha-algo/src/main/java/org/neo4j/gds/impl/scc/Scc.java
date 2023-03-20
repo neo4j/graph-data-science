@@ -31,23 +31,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
  *
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
-public class SccAlgorithm extends Algorithm<HugeLongArray> {
-
-    private enum Action {
-        VISIT(0L),
-        VISITEDGE(1L),
-        POSTVISIT(2L);
-
-        public final long code;
-
-        Action(long code) {
-            this.code = code;
-        }
-
-    }
-
+public class Scc extends Algorithm<HugeLongArray> {
+    public static final int NOT_VALID = -1;
+    public static final String SCC_DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
+                                                 "where all nodes in the same set form a connected component.";
     private Graph graph;
-
     private final long nodeCount;
     private HugeLongArray index;
     private BitSet visited;
@@ -55,12 +43,8 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
     private PagedLongStack stack;
     private PagedLongStack boundaries;
     private PagedLongStack todo; // stores pairs of (node-Id, TODO-Id)
-    private int setCount;
 
-    private int minSetSize;
-    private int maxSetSize;
-
-    public SccAlgorithm(
+    public Scc(
         Graph graph,
         ProgressTracker progressTracker
     ) {
@@ -79,39 +63,15 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
      * compute scc
      */
     public HugeLongArray compute() {
-        progressTracker.beginSubTask(graph.nodeCount());
-        setCount = 0;
-        minSetSize = Integer.MAX_VALUE;
-        maxSetSize = 0;
+        progressTracker.beginSubTask();
         index.fill(-1);
-        connectedComponents.fill(-1);
+        connectedComponents.fill(NOT_VALID);
         todo.clear();
         boundaries.clear();
         stack.clear();
         graph.forEachNode(this::compute);
         progressTracker.endSubTask();
         return connectedComponents;
-    }
-
-    /**
-     * number of connected components in the graph
-     */
-    public long getSetCount() {
-        return setCount;
-    }
-
-    /**
-     * minimum set size
-     */
-    public long getMinSetSize() {
-        return minSetSize;
-    }
-
-    /**
-     * maximum component size
-     */
-    public long getMaxSetSize() {
-        return maxSetSize;
     }
 
     private boolean compute(long nodeId) {
@@ -150,17 +110,12 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
     private void postVisit(long nodeId) {
         if (boundaries.peek() == index.get(nodeId)) {
             boundaries.pop();
-            int elementCount = 0;
             long element;
             do {
                 element = stack.pop();
                 connectedComponents.set(element, nodeId);
                 visited.set(element);
-                elementCount++;
             } while (element != nodeId);
-            minSetSize = Math.min(minSetSize, elementCount);
-            maxSetSize = Math.max(maxSetSize, elementCount);
-            setCount++;
         }
 
     }
@@ -188,17 +143,17 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
         todo.push(action.code);
     }
 
-    /**
-     * stream result type
-     */
-    public static class StreamResult {
+    private enum Action {
+        VISIT(0L),
+        VISITEDGE(1L),
+        POSTVISIT(2L);
 
-        public final long nodeId;
-        public final long componentId;
+        public final long code;
 
-        public StreamResult(long nodeId, long componentId) {
-            this.nodeId = nodeId;
-            this.componentId = componentId;
+        Action(long code) {
+            this.code = code;
         }
+
     }
+
 }

@@ -21,23 +21,18 @@ package org.neo4j.gds.impl.scc;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
-
+public interface SccWriteConfig extends SccBaseConfig, WritePropertyConfig {
+    
     @Value.Default
     @Override
     default String writeProperty() {
         return "componentId";
     }
-
-    static SccConfig of(CypherMapWrapper userInput) {
-        return new SccConfigImpl(userInput);
+    static SccWriteConfig of(CypherMapWrapper userInput) {
+        return new SccWriteConfigImpl(userInput);
     }
 }
