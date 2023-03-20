@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * It is a very customized dataset for a very far fetched use case :)
  */
-class CollapsePathMutateProcedureTest extends BaseProcTest {
+class CollapsePathMutateProcTest extends BaseProcTest {
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE " +
