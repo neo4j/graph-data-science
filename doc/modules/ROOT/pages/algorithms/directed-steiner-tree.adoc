@@ -8,8 +8,8 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
-:undirected:
 :directed:
+:undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]

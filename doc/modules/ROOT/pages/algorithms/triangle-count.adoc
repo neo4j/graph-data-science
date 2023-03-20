@@ -5,7 +5,7 @@
 :result: triangle count
 :algorithm: Triangle Count
 
-
+:no-directed:
 :undirected:
 :homogeneous:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
