@@ -24,10 +24,12 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper;
+import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.DirectIdMap;
@@ -39,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -49,349 +50,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public abstract class AdjacencyListBuilderBaseTest {
-
-    private void adjacencyListTest(Optional<Long> idOffset) {
-        long nodeCount = 6;
-
-        var fakeNodeCount = idOffset.map(o -> nodeCount + o).orElse(nodeCount);
-        var mapper = idOffset.map(offset -> (ValueMapper) value -> value + offset);
-        var toMapped = mapper.orElseGet(() -> id -> id);
-
-        var importMetaData = ImmutableImportMetaData.builder()
-            .projection(RelationshipProjection.of("", Orientation.NATURAL, Aggregation.NONE))
-            .aggregations(Aggregation.NONE)
-            .propertyKeyIds()
-            .defaultValues()
-            .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
-            .build();
-
-
-        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            () -> fakeNodeCount,
-            PropertyMappings.of(),
-            importMetaData.aggregations()
-        );
-
-        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
-            .importMetaData(importMetaData)
-            .importSizing(ImportSizing.of(1, nodeCount))
-            .build();
-
-        DirectIdMap idMap = new DirectIdMap(nodeCount);
-
-        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, 10);
-        Map<Long, Long> relationships = new HashMap<>();
-        for (long i = 0; i < nodeCount; i++) {
-            relationships.put(i, nodeCount - i);
-            relationshipsBatchBuffer.add(i, nodeCount - i);
-        }
-
-        var importer = ThreadLocalSingleTypeRelationshipImporter.of(
-            adjacencyBuffer,
-            relationshipsBatchBuffer,
-            importMetaData,
-            null
-        );
-        importer.importRelationships();
-
-        LongConsumer drainCountConsumer = drainCount -> assertThat(drainCount).isGreaterThan(0);
-        adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.of(drainCountConsumer)).forEach(Runnable::run);
-
-        var adjacencyList = adjacencyCompressorFactory.build().adjacency();
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var cursor = adjacencyList.adjacencyCursor(toMapped.map(nodeId));
-            while (cursor.hasNextVLong()) {
-                long target = cursor.nextVLong();
-                var expected = toMapped.map(relationships.remove(nodeId));
-                assertEquals(expected, target);
-            }
-        }
-        assertThat(relationships).isEmpty();
-    }
-
-    private void adjacencyListWithPropertiesTest(Optional<Long> idOffset) {
-        long nodeCount = 6;
-
-        var rng = new Random(42);
-
-        long fakeNodeCount = idOffset.map(o -> nodeCount + o).orElse(nodeCount);
-        var mapper = idOffset.map(offset -> (ValueMapper) value -> value + offset);
-        var toOriginal = mapper.orElseGet(() -> id -> id);
-
-        // Load a single property
-        int propertyKeyId = 0;
-        double defaultValue = 42.0;
-        var propertyMappings = PropertyMappings.of(PropertyMapping.of("foo", defaultValue));
-        var relationshipProjection = RelationshipProjection
-            .of("", Orientation.NATURAL, Aggregation.NONE)
-            .withAdditionalPropertyMappings(propertyMappings);
-
-        var importMetaData = ImmutableImportMetaData.builder()
-            .projection(relationshipProjection)
-            .aggregations(Aggregation.NONE)
-            .propertyKeyIds(propertyKeyId)
-            .defaultValues(defaultValue)
-            .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
-            .build();
-
-        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            () -> fakeNodeCount,
-            propertyMappings,
-            importMetaData.aggregations()
-        );
-
-        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
-            .importMetaData(importMetaData)
-            .importSizing(ImportSizing.of(1, nodeCount))
-            .build();
-
-        DirectIdMap idMap = new DirectIdMap(nodeCount);
-
-        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, 10);
-        PropertyReader.Buffered propertyReader = PropertyReader.buffered((int) nodeCount, 1);
-
-        List<Long> expectedRelationships = new ArrayList<>();
-        List<Double> expectedRelationshipProperties = new ArrayList<>();
-        Map<Long, Integer> targetsToRelationshipId = new HashMap<>();
-
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long targetId = nodeCount - nodeId;
-            long originalTargetId = toOriginal.map(targetId);
-            var relationshipId = expectedRelationships.size();
-            assertThat(expectedRelationshipProperties.size()).isEqualTo(relationshipId);
-
-            targetsToRelationshipId.put(originalTargetId, relationshipId);
-            double relationshipProperty = rng.nextDouble();
-
-            relationshipsBatchBuffer.add(
-                nodeId,
-                targetId,
-                relationshipId,
-                // PropertyReader.Buffered does not require property references
-                LongPropertyReference.empty()
-            );
-
-            propertyReader.add(relationshipId, propertyKeyId, relationshipProperty);
-
-            expectedRelationships.add(targetId);
-            expectedRelationshipProperties.add(relationshipProperty);
-        }
-
-        var importer = ThreadLocalSingleTypeRelationshipImporter.of(
-            adjacencyBuffer,
-            relationshipsBatchBuffer,
-            importMetaData,
-            propertyReader
-        );
-
-        // import target ids into intermediate buffers (ChunkedAdjacencyList)
-        importer.importRelationships();
-
-        // import targets ids from intermediate buffer to final adjacency list
-        LongConsumer drainCountConsumer = drainCount -> assertThat(drainCount).isGreaterThan(0);
-        adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.of(drainCountConsumer)).forEach(Runnable::run);
-
-        var adjacencyListsWithProperties = adjacencyCompressorFactory.build();
-        var adjacencyList = adjacencyListsWithProperties.adjacency();
-        var propertyLists = adjacencyListsWithProperties.properties();
-        assertThat(propertyLists).hasSize(1);
-        var propertyList = propertyLists.get(0);
-
-        assertTopologyAndProperties(
-            nodeCount,
-            toOriginal,
-            targetsToRelationshipId,
-            expectedRelationships,
-            expectedRelationshipProperties,
-            adjacencyList,
-            propertyList
-        );
-    }
-
-    private void adjacencyListWithAggregationsTest() {
-        long nodeCount = 6;
-
-        var rng = new Random(42);
-
-        // Load multiple properties with different aggregations
-        Aggregation[] aggregations = new Aggregation[]{Aggregation.SINGLE, Aggregation.SUM, Aggregation.MAX};
-        int propertyCount = aggregations.length;
-
-        double defaultValue = 42.0;
-        int degree = 5;
-        int relationshipCount = (int) (nodeCount * degree);
-        var propertyKeyIds = IntStream.range(0, propertyCount).toArray();
-        var propertyMappings = PropertyMappings.of(Arrays
-            .stream(aggregations)
-            .map(agg -> PropertyMapping.of("foo_" + agg.name(), DefaultValue.of(defaultValue), agg))
-            .toArray(PropertyMapping[]::new));
-        var defaultValues = DoubleStream.generate(() -> defaultValue).limit(propertyCount).toArray();
-
-        var relationshipProjection = RelationshipProjection
-            .of("", Orientation.NATURAL, Aggregation.NONE)
-            .withAdditionalPropertyMappings(propertyMappings);
-
-        var importMetaData = ImmutableImportMetaData.builder()
-            .projection(relationshipProjection)
-            .aggregations(aggregations)
-            .propertyKeyIds(propertyKeyIds)
-            .defaultValues(defaultValues)
-            .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
-            .build();
-
-        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            () -> nodeCount,
-            propertyMappings,
-            importMetaData.aggregations()
-        );
-
-        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
-            .importMetaData(importMetaData)
-            .importSizing(ImportSizing.of(1, nodeCount))
-            .build();
-
-        DirectIdMap idMap = new DirectIdMap(nodeCount);
-
-        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, relationshipCount);
-        PropertyReader.Buffered propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);
-
-        Map<Long, Integer> targetsToRelationshipId = new HashMap<>();
-        List<Long> expectedRelationships = new ArrayList<>();
-        Map<Aggregation, Map<Integer, Double>> expectedRelationshipProperties = new HashMap<>();
-        Arrays.stream(aggregations).forEach(agg -> expectedRelationshipProperties.put(agg, new HashMap<>()));
-
-        var importer = ThreadLocalSingleTypeRelationshipImporter.of(
-            adjacencyBuffer,
-            relationshipsBatchBuffer,
-            importMetaData,
-            propertyReader
-        );
-
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long targetId = nodeCount - nodeId;
-
-            int aggregatedRelationshipId = expectedRelationships.size();
-            expectedRelationships.add(targetId);
-            targetsToRelationshipId.put(targetId, aggregatedRelationshipId);
-        }
-
-        // we import parallel relationships but we want to avoid triggering the pre-aggregation
-        // for that reason, we are importing only one relationship per node in one buffer flush
-        int localRelationshipId = 0;
-        for (int i = 0; i < degree; i++) {
-            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-
-                // get the relationship id of the target node
-                long targetId = nodeCount - nodeId;
-                int aggregatedRelationshipId = targetsToRelationshipId.get(targetId);
-
-                double relationshipProperty = rng.nextDouble();
-
-                // add this relationship to the buffers
-                relationshipsBatchBuffer.add(
-                    nodeId,
-                    targetId,
-                    localRelationshipId,
-                    // PropertyReader.Buffered does not require property references
-                    LongPropertyReference.empty()
-                );
-                for (int propertyKeyId : propertyKeyIds) {
-                    propertyReader.add(localRelationshipId, propertyKeyId, relationshipProperty);
-                }
-
-                // update expected properties where we manually aggregate the expected value
-                for (Aggregation aggregation : aggregations) {
-                    expectedRelationshipProperties
-                        .get(aggregation)
-                        .compute(aggregatedRelationshipId, (relId, current) -> {
-                            var normalizedValue = aggregation.normalizePropertyValue(relationshipProperty);
-                            return current == null
-                                ? aggregation.emptyValue(normalizedValue)
-                                : aggregation.merge(current, normalizedValue);
-                        });
-                }
-
-                localRelationshipId++;
-            }
-
-            // import target ids and properties into intermediate buffers (ChunkedAdjacencyList)
-            importer.importRelationships();
-            importer.buffer().reset();
-        }
-
-        // import targets ids from intermediate buffer to final adjacency list
-        LongConsumer drainCountConsumer = drainCount -> assertThat(drainCount).isGreaterThan(0);
-        adjacencyBuffer
-            .adjacencyListBuilderTasks(Optional.empty(), Optional.of(drainCountConsumer))
-            .forEach(Runnable::run);
-
-        var adjacencyListsWithProperties = adjacencyCompressorFactory.build();
-        var adjacencyList = adjacencyListsWithProperties.adjacency();
-        var propertyLists = adjacencyListsWithProperties.properties();
-        assertThat(propertyLists).hasSize(aggregations.length);
-
-        for (int i = 0; i < aggregations.length; i++) {
-            var actualProperties = propertyLists.get(i);
-
-            var aggregatedProperties = expectedRelationshipProperties.get(aggregations[i]);
-            var expectedProperties = IntStream.range(0, expectedRelationships.size())
-                .mapToObj(aggregatedProperties::get)
-                .collect(Collectors.toList());
-
-            assertTopologyAndProperties(
-                nodeCount,
-                id -> id,
-                targetsToRelationshipId,
-                expectedRelationships,
-                expectedProperties,
-                adjacencyList,
-                actualProperties
-            );
-        }
-    }
-
-    private static void assertTopologyAndProperties(
-        long nodeCount,
-        ValueMapper toMapped,
-        Map<Long, Integer> targetNodesToRelationshipId,
-        List<Long> expectedRelationships,
-        List<Double> expectedRelationshipProperties,
-        AdjacencyList adjacencyList,
-        AdjacencyProperties propertyList
-    ) {
-        // we modify the incoming data structures, so we need to copy them
-        targetNodesToRelationshipId = new HashMap<>(targetNodesToRelationshipId);
-        expectedRelationships = new ArrayList<>(expectedRelationships);
-        expectedRelationshipProperties = new ArrayList<>(expectedRelationshipProperties);
-
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var mappedNodeId = toMapped.map(nodeId);
-
-            var adjacencyCursor = adjacencyList.adjacencyCursor(mappedNodeId);
-            while (adjacencyCursor.hasNextVLong()) {
-                long target = adjacencyCursor.nextVLong();
-
-                var relationshipId = targetNodesToRelationshipId.remove(target);
-                assertThat(relationshipId).isNotNull();
-
-                var expected = toMapped.map(expectedRelationships.set(relationshipId, -1L));
-                assertEquals(expected, target);
-
-                var propertyCursor = propertyList.propertyCursor(mappedNodeId);
-                while (propertyCursor.hasNextLong()) {
-                    double property = Double.longBitsToDouble(propertyCursor.nextLong());
-                    double expectedValue = expectedRelationshipProperties.set(relationshipId, Double.NaN);
-                    assertThat(property).isCloseTo(expectedValue, Offset.offset(1E-3));
-                }
-            }
-        }
-
-        assertThat(expectedRelationships).isNotEmpty().allMatch(v -> v == -1L);
-        assertThat(expectedRelationshipProperties).isNotEmpty().allMatch(v -> Double.isNaN(v));
-    }
 
     void testAdjacencyList() {
         adjacencyListTest(Optional.empty());
@@ -411,5 +69,308 @@ public abstract class AdjacencyListBuilderBaseTest {
 
     void testAdjacencyListWithAggregations() {
         adjacencyListWithAggregationsTest();
+    }
+
+    private void adjacencyListTest(Optional<Long> idOffset) {
+        var graph = generateGraph(6, 1, idOffset);
+        assertTopologyAndProperties(graph);
+    }
+
+    private void adjacencyListWithPropertiesTest(Optional<Long> idOffset) {
+        var graph = generateGraph(6, 1, idOffset, Aggregation.SINGLE);
+        assertTopologyAndProperties(graph);
+    }
+
+    private void adjacencyListWithAggregationsTest() {
+        var aggregations = new Aggregation[]{Aggregation.SINGLE, Aggregation.SUM, Aggregation.MAX};
+        var graph = generateGraph(6, 5, Optional.empty(), aggregations);
+        assertTopologyAndProperties(graph);
+    }
+
+    private static void assertTopologyAndProperties(GraphStructures graph) {
+        var graphAssertions = graph.assertions();
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            var originalNodeId = graph.toOriginal(nodeId);
+
+            var adjacencyCursor = graph.adjacencyList().adjacencyCursor(originalNodeId);
+            while (adjacencyCursor.hasNextVLong()) {
+                long target = adjacencyCursor.nextVLong();
+
+                long expected = graph.toOriginal(graphAssertions.expectedTargetFor(nodeId));
+                assertEquals(expected, target);
+            }
+        }
+
+        for (var propertyStructure : graph.properties()) {
+            AdjacencyProperties propertyList = propertyStructure.adjacencyProperties();
+            var propertyAssertions = propertyStructure.assertions();
+
+            for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                var originalNodeId = graph.toOriginal(nodeId);
+                int relationshipId = graphAssertions.relationshipIdFor(nodeId);
+                var propertyCursor = propertyList.propertyCursor(originalNodeId);
+
+                while (propertyCursor.hasNextLong()) {
+                    double property = Double.longBitsToDouble(propertyCursor.nextLong());
+                    double expectedValue = propertyAssertions.expectedPropertyFor(relationshipId);
+                    assertThat(property).isCloseTo(expectedValue, Offset.offset(1E-3));
+                }
+            }
+            propertyAssertions.assertAllConsumed();
+        }
+
+        graphAssertions.assertAllConsumed();
+    }
+
+    // Generate a graph where every node is connected to only one other node.
+    // There can be multiple relationships between the same pair of nodes.
+    private GraphStructures generateGraph(
+        long nodeCount,
+        int parallelDegree,
+        Optional<Long> idOffset,
+        Aggregation... propertyAggregations
+    ) {
+        assert parallelDegree >= 1;
+
+        var originalNodeCount = idOffset.map(o -> nodeCount + o).orElse(nodeCount);
+        var mapper = idOffset.map(offset -> (ValueMapper) value -> value + offset);
+        var toOriginal = mapper.orElseGet(() -> id -> id);
+
+        int relationshipCount = (int) (nodeCount * parallelDegree);
+
+        // Create properties for every provided aggregation
+        int propertyCount = propertyAggregations.length;
+
+        double defaultValue = 42.0;
+        var propertyKeyIds = IntStream.range(0, propertyCount).toArray();
+        var propertyMappings = PropertyMappings.of(Arrays
+            .stream(propertyAggregations)
+            .map(agg -> PropertyMapping.of("foo_" + agg.name(), DefaultValue.of(defaultValue), agg))
+            .toArray(PropertyMapping[]::new));
+        var defaultValues = DoubleStream.generate(() -> defaultValue).limit(propertyCount).toArray();
+
+        var relationshipProjection = RelationshipProjection
+            .of("", Orientation.NATURAL, Aggregation.NONE)
+            .withAdditionalPropertyMappings(propertyMappings);
+
+        var importAggregations = propertyAggregations.length == 0
+            ? new Aggregation[]{Aggregation.NONE}
+            : propertyAggregations;
+
+        var importMetaData = ImmutableImportMetaData.builder()
+            .projection(relationshipProjection)
+            .aggregations(importAggregations)
+            .propertyKeyIds(propertyKeyIds)
+            .defaultValues(defaultValues)
+            .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
+            .build();
+
+        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
+            () -> originalNodeCount,
+            propertyMappings,
+            importMetaData.aggregations()
+        );
+
+        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
+            .adjacencyCompressorFactory(adjacencyCompressorFactory)
+            .importMetaData(importMetaData)
+            .importSizing(ImportSizing.of(1, nodeCount))
+            .build();
+
+        DirectIdMap idMap = new DirectIdMap(nodeCount);
+
+        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, relationshipCount);
+        PropertyReader.Buffered propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);
+
+        Map<Long, Long> sourceNodeToTargetNode = new HashMap<>();
+        Map<Long, Integer> sourceNodeToRelationshipId = new HashMap<>();
+        Map<Aggregation, Map<Integer, Double>> expectedRelationshipProperties = new HashMap<>();
+        Arrays.stream(propertyAggregations).forEach(agg -> expectedRelationshipProperties.put(agg, new HashMap<>()));
+
+        var importer = ThreadLocalSingleTypeRelationshipImporter.of(
+            adjacencyBuffer,
+            relationshipsBatchBuffer,
+            importMetaData,
+            propertyReader
+        );
+
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            long targetId = nodeCount - nodeId;
+
+            int aggregatedRelationshipId = sourceNodeToTargetNode.size();
+            sourceNodeToTargetNode.put(nodeId, targetId);
+            sourceNodeToRelationshipId.put(nodeId, aggregatedRelationshipId);
+        }
+
+        var rng = new Random(42);
+
+        // we import parallel relationships but we want to avoid triggering the pre-aggregation
+        // for that reason, we are importing only one relationship per node in one buffer flush
+        int localRelationshipId = 0;
+        for (int i = 0; i < parallelDegree; i++) {
+            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+
+                // get the relationship id of the target node
+                long targetId = nodeCount - nodeId;
+                int aggregatedRelationshipId = sourceNodeToRelationshipId.get(nodeId);
+
+                double relationshipProperty = rng.nextDouble();
+
+                // add this relationship to the buffers
+                relationshipsBatchBuffer.add(
+                    nodeId,
+                    targetId,
+                    localRelationshipId,
+                    // PropertyReader.Buffered does not require property references
+                    LongPropertyReference.empty()
+                );
+                for (int propertyKeyId : propertyKeyIds) {
+                    propertyReader.add(localRelationshipId, propertyKeyId, relationshipProperty);
+                }
+
+                // update expected properties where we manually aggregate the expected value
+                for (Aggregation aggregation : propertyAggregations) {
+                    expectedRelationshipProperties
+                        .get(aggregation)
+                        .compute(aggregatedRelationshipId, (relId, current) -> {
+                            var normalizedValue = aggregation.normalizePropertyValue(relationshipProperty);
+                            return current == null
+                                ? aggregation.emptyValue(normalizedValue)
+                                : aggregation.merge(current, normalizedValue);
+                        });
+                }
+
+                localRelationshipId++;
+            }
+
+            // import target ids and properties into intermediate buffers (ChunkedAdjacencyList)
+            importer.importRelationships();
+            importer.buffer().reset();
+        }
+
+        // import targets ids from intermediate buffer to final adjacency list
+        adjacencyBuffer
+            .adjacencyListBuilderTasks(mapper, Optional.empty())
+            .forEach(Runnable::run);
+
+        AdjacencyListsWithProperties adjacencyListsWithProperties = adjacencyCompressorFactory.build();
+        AdjacencyList adjacencyList = adjacencyListsWithProperties.adjacency();
+        List<AdjacencyProperties> propertyLists = adjacencyListsWithProperties.properties();
+        assertThat(propertyLists).hasSize(propertyAggregations.length);
+
+        var builder = ImmutableGraphStructures.builder()
+            .nodeCount(nodeCount)
+            .toOriginalMapper(toOriginal)
+            .adjacencyList(adjacencyList)
+            .sourceNodeToTargetNode(sourceNodeToTargetNode)
+            .sourceNodeToRelationshipId(sourceNodeToRelationshipId);
+
+        for (int i = 0; i < propertyAggregations.length; i++) {
+            AdjacencyProperties actualProperties = propertyLists.get(i);
+
+            Map<Integer, Double> aggregatedProperties = expectedRelationshipProperties.get(propertyAggregations[i]);
+            List<Double> expectedProperties = IntStream.range(0, sourceNodeToTargetNode.size())
+                .mapToObj(aggregatedProperties::get)
+                .collect(Collectors.toList());
+
+            var properties = ImmutableGraphPropertyStructures.builder()
+                .adjacencyProperties(actualProperties)
+                .expectedProperties(expectedProperties)
+                .build();
+
+            builder.addProperty(properties);
+        }
+
+        return builder.build();
+    }
+
+    @ValueClass
+    interface GraphStructures {
+
+        AdjacencyList adjacencyList();
+
+        long nodeCount();
+
+        ValueMapper toOriginalMapper();
+
+        Map<Long, Long> sourceNodeToTargetNode();
+
+        Map<Long, Integer> sourceNodeToRelationshipId();
+
+        List<GraphPropertyStructures> properties();
+
+        default long toOriginal(long nodeId) {
+            return toOriginalMapper().map(nodeId);
+        }
+
+        default GraphStructureAssertions assertions() {
+            return new GraphStructureAssertions(
+                sourceNodeToTargetNode(),
+                sourceNodeToRelationshipId()
+            );
+        }
+    }
+
+    @ValueClass
+    interface GraphPropertyStructures {
+
+        AdjacencyProperties adjacencyProperties();
+
+        List<Double> expectedProperties();
+
+        default GraphPropertyStructureAssertions assertions() {
+            return new GraphPropertyStructureAssertions(
+                expectedProperties()
+            );
+        }
+    }
+
+    static final class GraphStructureAssertions {
+
+        private final Map<Long, Long> sourceNodeToTargetNode;
+        private final Map<Long, Integer> sourceNodeToRelationshipId;
+
+        GraphStructureAssertions(
+            Map<Long, Long> sourceNodeToTargetNode,
+            Map<Long, Integer> sourceNodeToRelationshipId
+        ) {
+            this.sourceNodeToTargetNode = new HashMap<>(sourceNodeToTargetNode);
+            this.sourceNodeToRelationshipId = new HashMap<>(sourceNodeToRelationshipId);
+        }
+
+        long expectedTargetFor(long sourceNode) {
+            var expectedTarget = this.sourceNodeToTargetNode.remove(sourceNode);
+            assertThat(expectedTarget).isNotNull();
+            return expectedTarget;
+        }
+
+        int relationshipIdFor(long source) {
+            var relationshipId = this.sourceNodeToRelationshipId.get(source);
+            assertThat(relationshipId).isNotNull();
+            return relationshipId;
+        }
+
+        void assertAllConsumed() {
+            assertThat(this.sourceNodeToTargetNode).isEmpty();
+        }
+    }
+
+    static final class GraphPropertyStructureAssertions {
+
+        private final List<Double> expectedProperties;
+
+        GraphPropertyStructureAssertions(List<Double> expectedProperties) {
+            this.expectedProperties = new ArrayList<>(expectedProperties);
+        }
+
+        double expectedPropertyFor(int relationshipId) {
+            var expectedProperty = this.expectedProperties.set(relationshipId, Double.NaN);
+            assertThat(expectedProperty).isNotNaN();
+            return expectedProperty;
+        }
+
+        void assertAllConsumed() {
+            assertThat(expectedProperties).isNotEmpty().allMatch(v -> Double.isNaN(v));
+        }
     }
 }
