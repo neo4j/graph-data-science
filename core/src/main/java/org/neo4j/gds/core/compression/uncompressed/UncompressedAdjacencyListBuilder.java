@@ -42,7 +42,7 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
 
     @Override
     public AdjacencyListBuilder.PositionalAllocator<long[]> newPositionalAllocator() {
-        return new PositionalAllocator(this.builder.newLocalPositionalAllocator());
+        return new PositionalAllocator(this.builder.newLocalPositionalAllocator(PositionalFactory.INSTANCE));
     }
 
     @Override
@@ -64,6 +64,10 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         public long[] newPage(int length) {
             return new long[length];
         }
+    }
+
+    private enum PositionalFactory implements BumpAllocator.PositionalFactory<long[]> {
+        INSTANCE;
 
         @Override
         public long[] copyOfPage(long[] longs, int length) {

@@ -72,8 +72,8 @@ public final class BumpAllocator<PAGE> {
         return new LocalAllocator<>(this);
     }
 
-    public LocalPositionalAllocator<PAGE> newLocalPositionalAllocator() {
-        return new LocalPositionalAllocator<>(this);
+    public LocalPositionalAllocator<PAGE> newLocalPositionalAllocator(PositionalFactory<PAGE> positionalFactory) {
+        return new LocalPositionalAllocator<>(this, positionalFactory);
     }
 
     public PAGE[] intoPages() {
@@ -176,6 +176,9 @@ public final class BumpAllocator<PAGE> {
         PAGE[] newEmptyPages();
 
         PAGE newPage(int length);
+    }
+
+    public interface PositionalFactory<PAGE> {
 
         PAGE copyOfPage(PAGE page, int length);
 
@@ -256,10 +259,12 @@ public final class BumpAllocator<PAGE> {
     public static final class LocalPositionalAllocator<PAGE> {
 
         private final BumpAllocator<PAGE> globalAllocator;
+        private final PositionalFactory<PAGE> pageFactory;
         private long capacity;
 
-        private LocalPositionalAllocator(BumpAllocator<PAGE> globalAllocator) {
+        private LocalPositionalAllocator(BumpAllocator<PAGE> globalAllocator, PositionalFactory<PAGE> pageFactory) {
             this.globalAllocator = globalAllocator;
+            this.pageFactory = pageFactory;
             this.capacity = 0;
         }
 
@@ -270,7 +275,7 @@ public final class BumpAllocator<PAGE> {
             // targetLength is the length of the array that is provided ({@code == page.length}).
             // This value can be greater than `length` if the provided array is a buffer of some sort.
             // We need this to determine if we need to make a slice-copy of the page array or not.
-            var targetLength = globalAllocator.pageFactory.lengthOfPage(page);
+            var targetLength = this.pageFactory.lengthOfPage(page);
             insertData(offset, page, Math.min(length, targetLength), this.capacity, targetLength);
         }
 
@@ -300,7 +305,7 @@ public final class BumpAllocator<PAGE> {
                 if (length < targetsLength) {
                     // We have an oversized page but it contains additional buffer space at the end
                     // We create a new copy of that page that is the exact size to fit all data
-                    page = globalAllocator.pageFactory.copyOfPage(page, length);
+                    page = this.pageFactory.copyOfPage(page, length);
                 }
                 existingPage = page;
             }

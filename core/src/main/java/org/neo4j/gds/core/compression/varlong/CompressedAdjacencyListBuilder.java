@@ -25,8 +25,6 @@ import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-import java.util.Arrays;
-
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
     private final BumpAllocator<byte[]> builder;
@@ -63,16 +61,6 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         @Override
         public byte[] newPage(int length) {
             return new byte[length];
-        }
-
-        @Override
-        public byte[] copyOfPage(byte[] bytes, int length) {
-            return Arrays.copyOf(bytes, length);
-        }
-
-        @Override
-        public int lengthOfPage(byte[] bytes) {
-            return bytes.length;
         }
     }
 
