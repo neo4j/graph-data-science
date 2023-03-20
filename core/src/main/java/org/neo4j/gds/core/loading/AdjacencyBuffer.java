@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
@@ -60,7 +61,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 public final class AdjacencyBuffer {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
-    private final ThreadLocalRelationshipsBuilder[] localBuilders;
+    private final ReentrantLock[] chunkLocks;
     private final ChunkedAdjacencyLists[] chunkedAdjacencyLists;
     private final AdjacencyBufferPaging paging;
     private final LongAdder relationshipCounter;
@@ -115,7 +116,7 @@ public final class AdjacencyBuffer {
         var numPages = importSizing.numberOfPages();
         var pageSize = importSizing.pageSize();
 
-        ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
+        ReentrantLock[] chunkLocks = new ReentrantLock[numPages];
         ChunkedAdjacencyLists[] compressedAdjacencyLists = new ChunkedAdjacencyLists[numPages];
 
         for (int page = 0; page < numPages; page++) {
@@ -123,7 +124,7 @@ public final class AdjacencyBuffer {
                 importMetaData.propertyKeyIds().length,
                 pageSize.orElse(0)
             );
-            localBuilders[page] = new ThreadLocalRelationshipsBuilder(adjacencyCompressorFactory);
+            chunkLocks[page] = new ReentrantLock();
         }
 
         boolean atLeastOnePropertyToLoad = Arrays
@@ -137,7 +138,7 @@ public final class AdjacencyBuffer {
         return new AdjacencyBuffer(
             importMetaData,
             adjacencyCompressorFactory,
-            localBuilders,
+            chunkLocks,
             compressedAdjacencyLists,
             paging,
             atLeastOnePropertyToLoad
@@ -147,13 +148,13 @@ public final class AdjacencyBuffer {
     private AdjacencyBuffer(
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
-        ThreadLocalRelationshipsBuilder[] localBuilders,
+        ReentrantLock[] chunkLocks,
         ChunkedAdjacencyLists[] chunkedAdjacencyLists,
         AdjacencyBufferPaging paging,
         boolean atLeastOnePropertyToLoad
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
-        this.localBuilders = localBuilders;
+        this.chunkLocks = chunkLocks;
         this.chunkedAdjacencyLists = chunkedAdjacencyLists;
         this.paging = paging;
         this.relationshipCounter = adjacencyCompressorFactory.relationshipCounter();
@@ -179,7 +180,7 @@ public final class AdjacencyBuffer {
     ) {
         var paging = this.paging;
 
-        ThreadLocalRelationshipsBuilder builder = null;
+        ReentrantLock lock = null;
         int lastPageIndex = -1;
         int endOffset, startOffset = 0;
         try {
@@ -197,11 +198,11 @@ public final class AdjacencyBuffer {
 
                 if (pageIndex != lastPageIndex) {
                     // switch to the builder for this page
-                    if (builder != null) {
-                        builder.unlock();
+                    if (lock != null) {
+                        lock.unlock();
                     }
-                    builder = localBuilders[pageIndex];
-                    builder.lock();
+                    lock = this.chunkLocks[pageIndex];
+                    lock.lock();
                     lastPageIndex = pageIndex;
                 }
 
@@ -222,8 +223,8 @@ public final class AdjacencyBuffer {
                 startOffset = endOffset;
             }
         } finally {
-            if (builder != null && builder.isLockedByCurrentThread()) {
-                builder.unlock();
+            if (lock != null && lock.isHeldByCurrentThread()) {
+                lock.unlock();
             }
         }
     }
@@ -234,12 +235,12 @@ public final class AdjacencyBuffer {
     ) {
         adjacencyCompressorFactory.init();
 
-        var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
-        for (int page = 0; page < localBuilders.length; page++) {
+        var tasks = new ArrayList<AdjacencyListBuilderTask>(chunkedAdjacencyLists.length + 1);
+        for (int page = 0; page < chunkedAdjacencyLists.length; page++) {
             tasks.add(new AdjacencyListBuilderTask(
                 page,
                 paging,
-                localBuilders[page],
+                adjacencyCompressorFactory,
                 chunkedAdjacencyLists[page],
                 relationshipCounter,
                 mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE),
@@ -273,7 +274,7 @@ public final class AdjacencyBuffer {
 
         private final int page;
         private final AdjacencyBufferPaging paging;
-        private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
+        private final AdjacencyCompressorFactory adjacencyCompressorFactory;
         private final ChunkedAdjacencyLists chunkedAdjacencyLists;
         private final LongAdder relationshipCounter;
         private final AdjacencyCompressor.ValueMapper valueMapper;
@@ -282,7 +283,7 @@ public final class AdjacencyBuffer {
         AdjacencyListBuilderTask(
             int page,
             AdjacencyBufferPaging paging,
-            ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
+            AdjacencyCompressorFactory adjacencyCompressorFactory,
             ChunkedAdjacencyLists chunkedAdjacencyLists,
             LongAdder relationshipCounter,
             AdjacencyCompressor.ValueMapper valueMapper,
@@ -290,7 +291,7 @@ public final class AdjacencyBuffer {
         ) {
             this.page = page;
             this.paging = paging;
-            this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
+            this.adjacencyCompressorFactory = adjacencyCompressorFactory;
             this.chunkedAdjacencyLists = chunkedAdjacencyLists;
             this.valueMapper = valueMapper;
             this.drainCountConsumer = drainCountConsumer;
@@ -299,7 +300,7 @@ public final class AdjacencyBuffer {
 
         @Override
         public void run() {
-            try (var compressor = threadLocalRelationshipsBuilder.intoCompressor()) {
+            try (var compressor = adjacencyCompressorFactory.createCompressor()) {
                 var importedRelationships = new MutableLong(0L);
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
