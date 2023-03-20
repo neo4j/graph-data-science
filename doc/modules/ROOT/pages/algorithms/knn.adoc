@@ -7,7 +7,6 @@
 :algorithm: K-Nearest Neighbors
 :knnSpecificConfigurationTableTitle: Algorithm specific configuration
 
-:weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 {nbsp} +
