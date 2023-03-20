@@ -17,20 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.conductance;
+package org.neo4j.gds.impl.conductance;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.impl.conductance.Conductance;
-import org.neo4j.gds.impl.conductance.ConductanceConfig;
-import org.neo4j.gds.impl.conductance.ConductanceFactory;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.HugeSparseDoubleArray;
 
-public final class ConductanceProc {
+@ValueClass
+public interface ConductanceResult {
+    HugeSparseDoubleArray communityConductances();
 
-    static final String CONDUCTANCE_DESCRIPTION = "Evaluates a division of nodes into communities based on the proportion of relationships that cross community boundaries.";
+    double globalAverageConductance();
 
-    private ConductanceProc() {}
-
-    static <CONFIG extends ConductanceConfig> GraphAlgorithmFactory<Conductance, CONFIG> algorithmFactory() {
-        return new ConductanceFactory<>();
+    static ConductanceResult of(
+        HugeSparseDoubleArray communityConductances,
+        double globalAverageConductance
+    ) {
+        return ImmutableConductanceResult
+            .builder()
+            .communityConductances(communityConductances)
+            .globalAverageConductance(globalAverageConductance)
+            .build();
     }
+
 }
