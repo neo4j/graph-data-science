@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.compression.common.ThreadLocalRelationshipsCompressor;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,8 +47,7 @@ final class ThreadLocalRelationshipsBuilder {
         return lock.isHeldByCurrentThread();
     }
 
-    ThreadLocalRelationshipsCompressor intoCompressor() {
-        var compressor = this.adjacencyCompressor.createCompressor();
-        return new ThreadLocalRelationshipsCompressor(compressor);
+    AdjacencyCompressor intoCompressor() {
+        return this.adjacencyCompressor.createCompressor();
     }
 }

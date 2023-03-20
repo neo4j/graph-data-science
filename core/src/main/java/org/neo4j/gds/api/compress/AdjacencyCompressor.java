@@ -53,7 +53,6 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * @param properties A nested list of property values.
      * @param numberOfCompressedTargets The number of targets compressed in `targets`.
      * @param compressedBytesSize The byte size of targets.
-     * @param buffer A long array that may or may not be used during the compression.
      * @param mapper A mapper to transform values before compressing them.
      * @return the degree of the compressed adjacency list
      */
@@ -63,9 +62,6 @@ public interface AdjacencyCompressor extends AutoCloseable {
         long[][] properties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
-        LongArrayBuffer buffer,
-        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
-        AdjacencyListBuilder.Slice<long[]> propertySlice,
         ValueMapper mapper
     );
 

@@ -26,9 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.api.compress.AdjacencyListBuilder;
-import org.neo4j.gds.api.compress.LongArrayBuffer;
-import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -176,7 +173,7 @@ public final class AdjacencyBuffer {
     void addAll(
         long[] batch,
         long[] targets,
-        @Nullable long[][] propertyValues,
+        long[] @Nullable [] propertyValues,
         int[] offsets,
         int length
     ) {
@@ -278,10 +275,6 @@ public final class AdjacencyBuffer {
         private final AdjacencyBufferPaging paging;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
         private final ChunkedAdjacencyLists chunkedAdjacencyLists;
-        // A long array that may or may not be used during the compression.
-        private final LongArrayBuffer buffer;
-        private final AdjacencyListBuilder.Slice<byte[]> adjacencySlice;
-        private final AdjacencyListBuilder.Slice<long[]> propertySlice;
         private final LongAdder relationshipCounter;
         private final AdjacencyCompressor.ValueMapper valueMapper;
         private final LongConsumer drainCountConsumer;
@@ -301,9 +294,6 @@ public final class AdjacencyBuffer {
             this.chunkedAdjacencyLists = chunkedAdjacencyLists;
             this.valueMapper = valueMapper;
             this.drainCountConsumer = drainCountConsumer;
-            this.buffer = new LongArrayBuffer();
-            this.adjacencySlice = ModifiableSlice.create();
-            this.propertySlice = ModifiableSlice.create();
             this.relationshipCounter = relationshipCounter;
         }
 
@@ -314,15 +304,12 @@ public final class AdjacencyBuffer {
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
                     var nodeId = valueMapper.map(sourceNodeId);
-                    importedRelationships.add(compressor.applyVariableDeltaEncoding(
+                    importedRelationships.add(compressor.compress(
                         nodeId,
                         targets,
                         properties,
                         numberOfCompressedTargets,
                         compressedByteSize,
-                        this.buffer,
-                        this.adjacencySlice,
-                        this.propertySlice,
                         valueMapper
                     ));
                 });
