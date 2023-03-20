@@ -1,14 +1,13 @@
 [[neo4j-server]]
 = Neo4j Server
 
-The GDS library is intended to be used on a standalone Neo4j server.
+On a standalone Neo4j Server, GDS will need to be installed and configured manually.
 
-On a standalone Neo4j Server, the library will need to be installed and configured manually.
+1. Download `neo4j-graph-data-science-[version].zip` from the https://neo4j.com/download-center/#graph-data-science[Neo4j Download Center]
 
-1. Download `neo4j-graph-data-science-[version].jar` from the https://neo4j.com/download-center/#algorithms[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
+2. Unzip the archive and move the `neo4j-graph-data-science-[version].jar` file into the `$NEO4J_HOME/plugins` directory.
 
-
-2. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
+3. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
 +
 ----
 dbms.security.procedures.unrestricted=gds.*
@@ -16,32 +15,29 @@ dbms.security.procedures.unrestricted=gds.*
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 +
 
-3. Check if the procedure allowlist is enabled in the `$NEO4J_HOME/conf/neo4j.conf` file and add the GDS library if necessary:
+4. Check if the procedure allowlist is enabled in the `$NEO4J_HOME/conf/neo4j.conf` file and add the GDS library if necessary:
 +
 ----
 dbms.security.procedures.allowlist=gds.*
 ----
 +
 
-NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
-
-
-4. Restart Neo4j
+5. Restart Neo4j
 
 
 [[neo4j-server-verify]]
 == Verifying installation
 
-To verify your installation, the library version can be printed by entering into the browser in Neo4j Desktop and calling the `gds.version()` function:
+To verify your installation, print the version of Graph Data Science by opening Neo4j Browser and running the `gds.version()` function:
 
 [source, cypher, role=noplay]
 ----
-RETURN gds.version()
+RETURN gds.version();
 ----
 
-To list all installed algorithms, run the `gds.list()` procedure:
+To list all available procedures, run the `gds.list()` procedure:
 
 [source, cypher, role=noplay]
 ----
-CALL gds.list()
+CALL gds.list();
 ----
