@@ -19,21 +19,20 @@
  */
 package org.neo4j.gds.kmeans;
 
-import java.util.ArrayList;
-import java.util.List;
+public class StreamResult {
 
-final class KmeansProcHelper {
-    private KmeansProcHelper() {}
+    public final long nodeId;
 
-    static List<List<Double>> arrayMatrixToListMatrix(double[][] matrix) {
-        var result = new ArrayList<List<Double>>();
+    public final long communityId;
+    public final double distanceFromCentroid;
 
-        for (double[] row : matrix) {
-            List<Double> rowList = new ArrayList<>();
-            result.add(rowList);
-            for (double column : row)
-                rowList.add(column);
-        }
-        return result;
+    public final double silhouette;
+
+
+    public StreamResult(long nodeId, long communityId, double distanceFromCentroid, double silhouette) {
+        this.nodeId = nodeId;
+        this.communityId = communityId;
+        this.distanceFromCentroid = distanceFromCentroid;
+        this.silhouette = silhouette;
     }
 }

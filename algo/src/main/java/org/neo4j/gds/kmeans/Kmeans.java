@@ -38,6 +38,8 @@ import java.util.concurrent.ExecutorService;
 
 public class Kmeans extends Algorithm<KmeansResult> {
 
+    static final String KMEANS_DESCRIPTION =
+        "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
     private static final int UNASSIGNED = -1;
     private final String nodeWeightProperty;
     private HugeIntArray bestCommunities;
