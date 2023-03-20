@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.common;
 
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
+import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
 
 public final class ThreadLocalRelationshipsCompressor implements AutoCloseable {
@@ -37,6 +38,8 @@ public final class ThreadLocalRelationshipsCompressor implements AutoCloseable {
         int numberOfCompressedTargets,
         int compressedBytesSize,
         LongArrayBuffer buffer,
+        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
+        AdjacencyListBuilder.Slice<long[]> propertySlice,
         AdjacencyCompressor.ValueMapper mapper
     ) {
         return adjacencyCompressor.compress(
@@ -46,6 +49,8 @@ public final class ThreadLocalRelationshipsCompressor implements AutoCloseable {
             numberOfCompressedTargets,
             compressedBytesSize,
             buffer,
+            adjacencySlice,
+            propertySlice,
             mapper
         );
     }

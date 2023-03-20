@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.uncompressed;
 
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
+import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -40,7 +41,7 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
     }
 
     @Override
-    public AdjacencyListBuilder.Allocator<long[]> newPositionalAllocator() {
+    public AdjacencyListBuilder.PositionalAllocator<long[]> newPositionalAllocator() {
         return new PositionalAllocator(this.builder.newLocalPositionalAllocator());
     }
 
@@ -84,16 +85,16 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public void close() {
+        public long allocate(int length, Slice<long[]> into) {
+            return allocator.insertInto(length, (ModifiableSlice<long[]>) into);
         }
 
         @Override
-        public long write(long[] properties, int length, long address) {
-            return allocator.insert(properties, length);
+        public void close() {
         }
     }
 
-    public static final class PositionalAllocator implements AdjacencyListBuilder.Allocator<long[]> {
+    public static final class PositionalAllocator implements AdjacencyListBuilder.PositionalAllocator<long[]> {
 
         private final BumpAllocator.LocalPositionalAllocator<long[]> allocator;
 
@@ -102,13 +103,12 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public void close() {
+        public void writeAt(long address, long[] properties, int length) {
+            allocator.insertAt(address, properties, length);
         }
 
         @Override
-        public long write(long[] properties, int length, long address) {
-            allocator.insertAt(address, properties, length);
-            return address;
+        public void close() {
         }
     }
 }

@@ -64,6 +64,8 @@ public interface AdjacencyCompressor extends AutoCloseable {
         int numberOfCompressedTargets,
         int compressedBytesSize,
         LongArrayBuffer buffer,
+        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
+        AdjacencyListBuilder.Slice<long[]> propertySlice,
         ValueMapper mapper
     );
 

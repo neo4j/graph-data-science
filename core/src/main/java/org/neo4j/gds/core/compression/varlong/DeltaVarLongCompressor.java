@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -40,7 +41,8 @@ import java.util.function.LongSupplier;
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private final AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator;
-    private final AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators;
+    private final @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator;
+    private final AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray propertyOffsets;
@@ -69,7 +71,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private DeltaVarLongCompressor(
         AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator,
-        AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators,
+        @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator,
+        AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray propertyOffsets,
@@ -77,7 +80,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         Aggregation[] aggregations
     ) {
         this.adjacencyAllocator = adjacencyAllocator;
-        this.propertiesAllocators = propertiesAllocators;
+        this.firstPropertyAllocator = firstPropertyAllocator;
+        this.otherPropertyAllocators = otherPropertyAllocators;
         this.adjacencyDegrees = adjacencyDegrees;
         this.adjacencyOffsets = adjacencyOffsets;
         this.propertyOffsets = propertyOffsets;
@@ -93,21 +97,47 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int numberOfCompressedTargets,
         int compressedBytesSize,
         LongArrayBuffer buffer,
+        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
+        AdjacencyListBuilder.Slice<long[]> propertySlice,
         ValueMapper mapper
     ) {
         if (properties != null) {
-            return applyVariableDeltaEncodingWithProperties(nodeId, targets, properties, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
+            return applyVariableDeltaEncodingWithProperties(
+                nodeId,
+                targets,
+                properties,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                buffer,
+                adjacencySlice,
+                propertySlice,
+                mapper
+            );
         } else {
-            return applyVariableDeltaEncodingWithoutProperties(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
+            return applyVariableDeltaEncodingWithoutProperties(
+                nodeId,
+                targets,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                buffer,
+                adjacencySlice,
+                mapper
+            );
         }
     }
 
     @Override
     public void close() {
         adjacencyAllocator.close();
-        for (var propertiesAllocator : propertiesAllocators) {
-            if (propertiesAllocator != null) {
-                propertiesAllocator.close();
+        if (firstPropertyAllocator != null) {
+            firstPropertyAllocator.close();
+        }
+        if (otherPropertyAllocators != null) {
+            for (var otherPropertyAllocator : otherPropertyAllocators) {
+                // TODO: Do we need this null check here?
+                if (otherPropertyAllocator != null) {
+                    otherPropertyAllocator.close();
+                }
             }
         }
     }
@@ -118,6 +148,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int numberOfCompressedTargets,
         int compressedByteSize,
         LongArrayBuffer buffer,
+        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
         ValueMapper mapper
     ) {
         AdjacencyCompression.zigZagUncompressFrom(
@@ -140,7 +171,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         int requiredBytes = AdjacencyCompression.compress(buffer, semiCompressedBytesDuringLoading);
 
-        long address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
+        long address = copyIds(semiCompressedBytesDuringLoading, requiredBytes, adjacencySlice);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
@@ -155,6 +186,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int numberOfCompressedTargets,
         int compressedByteSize,
         LongArrayBuffer buffer,
+        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
+        AdjacencyListBuilder.Slice<long[]> propertySlice,
         ValueMapper mapper
     ) {
         // decompress semiCompressed into full uncompressed long[] (in buffer)
@@ -185,10 +218,10 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int requiredBytes = AdjacencyCompression.compress(buffer, semiCompressedBytesDuringLoading);
         // values are now vlong encoded in the array storage (semiCompressed)
 
-        var address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
+        long address = copyIds(semiCompressedBytesDuringLoading, requiredBytes, adjacencySlice);
         // values are in the final adjacency list
 
-        copyProperties(uncompressedPropertiesPerProperty, degree, nodeId, propertyOffsets);
+        copyProperties(uncompressedPropertiesPerProperty, degree, nodeId, propertyOffsets, propertySlice);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
@@ -196,18 +229,30 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private long copyIds(byte[] targets, int requiredBytes) {
-        return adjacencyAllocator.write(targets, requiredBytes, -1L);
+    private long copyIds(byte[] targets, int requiredBytes, AdjacencyListBuilder.Slice<byte[]> slice) {
+        long address = adjacencyAllocator.allocate(requiredBytes, slice);
+        System.arraycopy(targets, 0, slice.slice(), slice.offset(), requiredBytes);
+        return address;
     }
 
-    private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray offsets) {
-        long offset = propertiesAllocators[0].write(properties[0], degree, -1L);
+    private void copyProperties(
+        long[][] properties,
+        int degree,
+        long nodeId,
+        HugeLongArray offsets,
+        AdjacencyListBuilder.Slice<long[]> slice
+    ) {
+        assert firstPropertyAllocator != null;
+        assert otherPropertyAllocators != null;
+
+        long address = firstPropertyAllocator.allocate(degree, slice);
+        System.arraycopy(properties[0], 0, slice.slice(), slice.offset(), degree);
 
         for (int i = 1; i < properties.length; i++) {
-            propertiesAllocators[i].write(properties[i], degree, offset);
+            this.otherPropertyAllocators[i - 1].writeAt(address, properties[i], degree);
         }
 
-        offsets.set(nodeId, offset);
+        offsets.set(nodeId, address);
     }
 
     private static final class Factory extends AbstractAdjacencyCompressorFactory<byte[], long[]> {
@@ -238,16 +283,26 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             HugeLongArray adjacencyOffsets,
             HugeLongArray propertyOffsets
         ) {
-            var propertyAllocators = new AdjacencyListBuilder.Allocator[propertyBuilders.length];
-            Arrays.setAll(
-                propertyAllocators,
-                i -> i == 0 ? propertyBuilders[i].newAllocator() : propertyBuilders[i].newPositionalAllocator()
-            );
+            AdjacencyListBuilder.Allocator<long[]> firstAllocator;
+            AdjacencyListBuilder.PositionalAllocator<long[]>[] otherAllocators;
 
-            //noinspection unchecked
+            if (propertyBuilders.length > 0) {
+                firstAllocator = propertyBuilders[0].newAllocator();
+                //noinspection unchecked
+                otherAllocators = new AdjacencyListBuilder.PositionalAllocator[propertyBuilders.length - 1];
+                Arrays.setAll(
+                    otherAllocators,
+                    i -> propertyBuilders[i + 1].newPositionalAllocator()
+                );
+            } else {
+                firstAllocator = null;
+                otherAllocators = null;
+            }
+
             return new DeltaVarLongCompressor(
                 adjacencyBuilder.newAllocator(),
-                propertyAllocators,
+                firstAllocator,
+                otherAllocators,
                 adjacencyDegrees,
                 adjacencyOffsets,
                 propertyOffsets,

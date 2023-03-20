@@ -22,6 +22,7 @@ package org.neo4j.gds.core.compression.packed;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
@@ -68,6 +69,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
         int numberOfCompressedTargets,
         int compressedBytesSize,
         LongArrayBuffer buffer,
+        AdjacencyListBuilder.Slice<byte[]> adjacencySlice,
+        AdjacencyListBuilder.Slice<long[]> propertySlice,
         ValueMapper mapper
     ) {
         Compressed compressed;

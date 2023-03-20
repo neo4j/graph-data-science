@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api.compress;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.core.utils.PageReordering;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -28,16 +29,35 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
     Allocator<PAGE> newAllocator();
 
-    Allocator<PAGE> newPositionalAllocator();
+    PositionalAllocator<PAGE> newPositionalAllocator();
 
     T build(HugeIntArray degrees, HugeLongArray offsets);
 
+    // TODO: extra interface for the positional allocator
     interface Allocator<PAGE> extends AutoCloseable {
 
-        long write(PAGE targets, int length, long address);
+        long allocate(int length, Slice<PAGE> into);
 
         @Override
         void close();
+    }
+
+    interface PositionalAllocator<PAGE> extends AutoCloseable {
+
+        void writeAt(long address, PAGE targets, int length);
+
+        @Override
+        void close();
+    }
+
+    @Value.Modifiable
+    interface Slice<PAGE> {
+
+        PAGE slice();
+
+        int offset();
+
+        int length();
     }
 
     default void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {

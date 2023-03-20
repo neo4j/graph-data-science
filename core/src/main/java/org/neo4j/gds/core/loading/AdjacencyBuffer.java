@@ -26,7 +26,9 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
+import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -278,6 +280,8 @@ public final class AdjacencyBuffer {
         private final ChunkedAdjacencyLists chunkedAdjacencyLists;
         // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
+        private final AdjacencyListBuilder.Slice<byte[]> adjacencySlice;
+        private final AdjacencyListBuilder.Slice<long[]> propertySlice;
         private final LongAdder relationshipCounter;
         private final AdjacencyCompressor.ValueMapper valueMapper;
         private final LongConsumer drainCountConsumer;
@@ -298,6 +302,8 @@ public final class AdjacencyBuffer {
             this.valueMapper = valueMapper;
             this.drainCountConsumer = drainCountConsumer;
             this.buffer = new LongArrayBuffer();
+            this.adjacencySlice = ModifiableSlice.create();
+            this.propertySlice = ModifiableSlice.create();
             this.relationshipCounter = relationshipCounter;
         }
 
@@ -314,7 +320,9 @@ public final class AdjacencyBuffer {
                         properties,
                         numberOfCompressedTargets,
                         compressedByteSize,
-                        buffer,
+                        this.buffer,
+                        this.adjacencySlice,
+                        this.propertySlice,
                         valueMapper
                     ));
                 });
