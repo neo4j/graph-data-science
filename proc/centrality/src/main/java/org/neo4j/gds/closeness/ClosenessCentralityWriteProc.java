@@ -19,22 +19,12 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityWriteConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,16 +33,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.beta.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
-
-    @Override
-    public String name() {
-        return "ClosenessCentrality";
-    }
+public class ClosenessCentralityWriteProc extends BaseProc {
+    @Context
+    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.beta.closeness.write", mode = WRITE)
     @Description(CLOSENESS_DESCRIPTION)
@@ -60,90 +45,14 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ClosenessCentralityWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Override
-    protected ClosenessCentralityWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return ClosenessCentralityWriteConfig.of(config);
-    }
-
-    @Override
-    public ValidationConfiguration<ClosenessCentralityWriteConfig> validationConfig(ExecutionContext executionContext) {
-        return ClosenessCentralityProc.getValidationConfig();
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ClosenessCentrality, ClosenessCentralityWriteConfig> algorithmFactory() {
-        return ClosenessCentralityProc.algorithmFactory();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computationResult) {
-        return ClosenessCentralityProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return ClosenessCentralityProc.resultBuilder(
-            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()).withWriteProperty(computeResult
-                .config()
-                .writeProperty()),
-            computeResult
-        );
-    }
-
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends StandardWriteResult {
-
-        public final long nodePropertiesWritten;
-        public final String writeProperty;
-        public final Map<String, Object> centralityDistribution;
-
-        WriteResult(
-            long nodePropertiesWritten,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            String writeProperty,
-            @Nullable Map<String, Object> centralityDistribution,
-            Map<String, Object> config
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
-            this.writeProperty = writeProperty;
-            this.centralityDistribution = centralityDistribution;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
-            public String writeProperty;
-
-            private Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            public Builder withWriteProperty(String writeProperty) {
-                this.writeProperty = writeProperty;
-                return this;
-            }
-
-            @Override
-            public WriteResult buildResult() {
-                return new WriteResult(
-                    nodePropertiesWritten,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    writeMillis,
-                    writeProperty,
-                    centralityHistogram,
-                    config.toMap()
-                );
-            }
-        }
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }
