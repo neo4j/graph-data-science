@@ -10,6 +10,12 @@
 include::partial$/operations-reference/alpha-note.adoc[]
 
 
+:no-directed:
+:undirected:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 == Introduction
 
 Sometimes, we might require a spanning tree(a tree where its nodes are connected with each via a single path) that does not necessarily span all nodes in the graph.
