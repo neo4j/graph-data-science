@@ -33,9 +33,9 @@ Developing a successful machine learning pipeline with Neo4j Graph Data Science 
 In the production phase, the system is configured to run the desired algorithms and pipelines successfully and reliably.
 The sequence of operations would normally be one of:
 
-- project a graph, run one or more algorithms on it, and consume results.
-- project a graph, configure a machine learning pipeline, train a machine learning model
-- project a graph, compute predictions using a previously trained machine learning model
+- project a graph -> run one or more algorithms on the projection -> consume results
+- project a graph -> configure a machine learning pipeline -> train a machine learning model
+- project a graph -> compute predictions using a previously trained machine learning model
 
 
 == General considerations
