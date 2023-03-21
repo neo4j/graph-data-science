@@ -38,6 +38,7 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.DEFAULT_VALUE_METHOD;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.valueArrayType;
+import static org.neo4j.gds.collections.haa.SingleArrayBuilder.SINLGE_CLASS_NAME;
 
 final class PagedArrayBuilder {
 
@@ -465,45 +466,71 @@ final class PagedArrayBuilder {
         FieldSpec size,
         FieldSpec pages
     ) {
-
-        // FIXME also handle SingleHugeAtomicLongArray case
-
         return MethodSpec.methodBuilder("copyTo")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(interfaceType, "dest")
             .addParameter(TypeName.LONG, "length")
             .returns(TypeName.VOID)
-            .beginControlFlow("if (!(dest instanceof $N))", PAGED_CLASS_NAME)
-            .addStatement("throw new $T(\"Can only handle Paged version for now\")", RuntimeException.class)
-            .endControlFlow()
-            .addStatement("$1N dst = ($1N) dest", PAGED_CLASS_NAME)
-            .beginControlFlow("if (length > $N)", size)
-            .addStatement("length = $N", size)
-            .endControlFlow()
-            .beginControlFlow("if (length > dst.size())")
-            .addStatement("length = dst.size()")
-            .endControlFlow()
-            .addStatement("int pageLen = Math.min($1N.length, dst.$1N.length)", pages)
-            .addStatement("int lastPage = pageLen - 1")
-            .addStatement("long remaining = length")
-            .beginControlFlow("for(int i = 0; i < lastPage; i++)")
-            .addStatement("$T page = $N[i]", valueArrayType(valueType), pages)
-            .addStatement("$T dstPage = dst.$N[i]", valueArrayType(valueType), pages)
-            .addStatement("$T.arraycopy(page, 0, dstPage, 0, page.length)", System.class)
-            .addStatement("remaining -= page.length")
-            .endControlFlow()
             .addStatement("$T defaultValue = $N()", valueType, DEFAULT_VALUE_METHOD)
-            .beginControlFlow("if (remaining > 0)")
-            .addStatement("$1T.arraycopy($2N[lastPage], 0, dst.$2N[lastPage], 0, (int) remaining)", System.class, pages)
+            .addCode(CodeBlock.builder()
+                .beginControlFlow("if (dest instanceof $N)", SINLGE_CLASS_NAME)
+                .addStatement("$1N dst = ($1N) dest", SINLGE_CLASS_NAME)
+                .addStatement("int start = 0")
+                .addStatement("int remaining = (int) length")
+                .add(CodeBlock.builder()
+                    .beginControlFlow("for($T page: pages)", valueArrayType(valueType))
+                    .addStatement("int toCopy = $T.min(remaining, page.length)", Math.class)
+                    .beginControlFlow("if (toCopy == 0)")
+                    .addStatement("break")
+                    .endControlFlow()
+                    .addStatement("$T.arraycopy(page, 0, dst.page, start, toCopy)", System.class)
+                    .addStatement("start += toCopy")
+                    .addStatement("remaining -= toCopy")
+                    .endControlFlow()
+                    .build())
+                .endControlFlow()
+                .build())
+            .addCode(CodeBlock.builder()
+                .beginControlFlow("else if (dest instanceof $N)", PAGED_CLASS_NAME)
+                .addStatement("$1N dst = ($1N) dest", PAGED_CLASS_NAME)
+                .beginControlFlow("if (length > $N)", size)
+                .addStatement("length = $N", size)
+                .endControlFlow()
+                .beginControlFlow("if (length > dst.size())")
+                .addStatement("length = dst.size()")
+                .endControlFlow()
+                .addStatement("int pageLen = Math.min($1N.length, dst.$1N.length)", pages)
+                .addStatement("int lastPage = pageLen - 1")
+                .addStatement("long remaining = length")
+                .beginControlFlow("for(int i = 0; i < lastPage; i++)")
+                .addStatement("$T page = $N[i]", valueArrayType(valueType), pages)
+                .addStatement("$T dstPage = dst.$N[i]", valueArrayType(valueType), pages)
+                .addStatement("$T.arraycopy(page, 0, dstPage, 0, page.length)", System.class)
+                .addStatement("remaining -= page.length")
+                .endControlFlow()
+                .beginControlFlow("if (remaining > 0)")
+                .addStatement(
+                    "$1T.arraycopy($2N[lastPage], 0, dst.$2N[lastPage], 0, (int) remaining)",
+                    System.class,
+                    pages
+                )
+                .addStatement(
+                    "$1T.fill(dst.$2N[lastPage], (int) remaining, dst.$2N[lastPage].length, defaultValue)",
+                    Arrays.class,
+                    pages
+                )
+                .endControlFlow()
+                .beginControlFlow("for (int i = pageLen; i < dst.$N.length; i++)", pages)
+                .addStatement("$T.fill(dst.pages[i], defaultValue)", Arrays.class)
+                .endControlFlow()
+                .endControlFlow()
+                .build())
+            .beginControlFlow("else")
             .addStatement(
-                "$1T.fill(dst.$2N[lastPage], (int) remaining, dst.$2N[lastPage].length, defaultValue)",
-                Arrays.class,
-                pages
+                "throw new $T(\"Can handle only the known implementations of Single and Paged versions.\")",
+                RuntimeException.class
             )
-            .endControlFlow()
-            .beginControlFlow("for (int i = pageLen; i < dst.$N.length; i++)", pages)
-            .addStatement("$T.fill(dst.pages[i], defaultValue)", Arrays.class)
             .endControlFlow()
             .build();
     }
