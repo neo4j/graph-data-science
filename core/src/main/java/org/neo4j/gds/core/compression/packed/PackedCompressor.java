@@ -34,14 +34,6 @@ import java.util.function.LongSupplier;
 
 public final class PackedCompressor implements AdjacencyCompressor {
 
-    static final int FLAGS = AdjacencyPacker.DELTA | AdjacencyPacker.SORT;
-
-    private final HugeObjectArray<Compressed> adjacencies;
-    private final Aggregation[] aggregations;
-    private final boolean noAggregation;
-    // TODO: only used for non-property case
-    private final int flags;
-
     public static AdjacencyCompressorFactory factory(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
@@ -49,103 +41,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
         boolean noAggregation
     ) {
         return new Factory(nodeCountSupplier, propertyMappings, aggregations, noAggregation);
-    }
-
-    private PackedCompressor(HugeObjectArray<Compressed> adjacencies, Aggregation[] aggregations, boolean noAggregation) {
-        this.adjacencies = adjacencies;
-        this.aggregations = aggregations;
-        this.noAggregation = noAggregation;
-
-        // TODO: only used for non-property case
-        this.flags = FLAGS | aggregations[0].ordinal();
-    }
-
-    @Override
-    public int compress(
-        long nodeId,
-        byte[] targets,
-        long[][] properties,
-        int numberOfCompressedTargets,
-        int compressedBytesSize,
-        LongArrayBuffer buffer,
-        ValueMapper mapper
-    ) {
-        Compressed compressed;
-        if (properties != null) {
-            compressed = packWithProperties(
-                targets,
-                properties,
-                numberOfCompressedTargets,
-                compressedBytesSize,
-                buffer,
-                mapper
-            );
-        } else {
-            compressed = packWithoutProperties(
-                targets,
-                numberOfCompressedTargets,
-                compressedBytesSize,
-                buffer,
-                mapper
-            );
-        }
-
-        this.adjacencies.set(nodeId, compressed);
-        return compressed.length();
-    }
-
-    private Compressed packWithProperties(
-        byte[] semiCompressedBytesDuringLoading,
-        long[][] uncompressedPropertiesPerProperty,
-        int numberOfCompressedTargets,
-        int compressedByteSize,
-        LongArrayBuffer buffer,
-        ValueMapper mapper
-    ) {
-        AdjacencyCompression.zigZagUncompressFrom(
-            buffer,
-            semiCompressedBytesDuringLoading,
-            numberOfCompressedTargets,
-            compressedByteSize,
-            mapper
-        );
-
-        long[] targets = buffer.buffer;
-        int targetsLength = buffer.length;
-
-        return AdjacencyPacker.compressWithProperties(
-            targets,
-            uncompressedPropertiesPerProperty,
-            targetsLength,
-            aggregations,
-            noAggregation
-        );
-    }
-
-    private Compressed packWithoutProperties(
-        byte[] semiCompressedBytesDuringLoading,
-        int numberOfCompressedTargets,
-        int compressedByteSize,
-        LongArrayBuffer buffer,
-        ValueMapper mapper
-    ) {
-        AdjacencyCompression.zigZagUncompressFrom(
-            buffer,
-            semiCompressedBytesDuringLoading,
-            numberOfCompressedTargets,
-            compressedByteSize,
-            mapper
-        );
-
-        long[] targets = buffer.buffer;
-        int targetsLength = buffer.length;
-
-        return AdjacencyPacker.compress(targets, 0, targetsLength, this.flags);
-    }
-
-    @Override
-    public void close() {
-
     }
 
     static class Factory implements AdjacencyCompressorFactory {
@@ -196,7 +91,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 .adjacency(adjacency)
                 .relationshipCount(this.relationshipCounter.longValue());
 
-            var mappings = propertyMappings.mappings();
+            var mappings = this.propertyMappings.mappings();
             for (int i = 0; i < mappings.size(); i++) {
                 var property = new PackedPropertyList(this.adjacencies, i);
                 builder.addProperty(property);
@@ -204,5 +99,113 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
             return builder.build();
         }
+    }
+
+    static final int FLAGS = AdjacencyPacker.DELTA | AdjacencyPacker.SORT;
+
+    private final HugeObjectArray<Compressed> adjacencies;
+    private final Aggregation[] aggregations;
+    private final boolean noAggregation;
+    // TODO: only used for non-property case
+    private final int flags;
+
+    private final LongArrayBuffer buffer;
+
+    private PackedCompressor(
+        HugeObjectArray<Compressed> adjacencies,
+        Aggregation[] aggregations,
+        boolean noAggregation
+    ) {
+        this.adjacencies = adjacencies;
+        this.aggregations = aggregations;
+        this.noAggregation = noAggregation;
+
+        // TODO: only used for non-property case
+        this.flags = FLAGS | aggregations[0].ordinal();
+
+        this.buffer = new LongArrayBuffer();
+    }
+
+    @Override
+    public int compress(
+        long nodeId,
+        byte[] targets,
+        long[][] properties,
+        int numberOfCompressedTargets,
+        int compressedBytesSize,
+        ValueMapper mapper
+    ) {
+        Compressed compressed;
+        if (properties != null) {
+            compressed = packWithProperties(
+                targets,
+                properties,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                mapper
+            );
+        } else {
+            compressed = packWithoutProperties(
+                targets,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                mapper
+            );
+        }
+
+        this.adjacencies.set(nodeId, compressed);
+        return compressed.length();
+    }
+
+    private Compressed packWithProperties(
+        byte[] semiCompressedBytesDuringLoading,
+        long[][] uncompressedPropertiesPerProperty,
+        int numberOfCompressedTargets,
+        int compressedByteSize,
+        ValueMapper mapper
+    ) {
+        AdjacencyCompression.zigZagUncompressFrom(
+            this.buffer,
+            semiCompressedBytesDuringLoading,
+            numberOfCompressedTargets,
+            compressedByteSize,
+            mapper
+        );
+
+        long[] targets = this.buffer.buffer;
+        int targetsLength = this.buffer.length;
+
+        return AdjacencyPacker.compressWithProperties(
+            targets,
+            uncompressedPropertiesPerProperty,
+            targetsLength,
+            this.aggregations,
+            this.noAggregation
+        );
+    }
+
+    private Compressed packWithoutProperties(
+        byte[] semiCompressedBytesDuringLoading,
+        int numberOfCompressedTargets,
+        int compressedByteSize,
+        ValueMapper mapper
+    ) {
+        AdjacencyCompression.zigZagUncompressFrom(
+            this.buffer,
+            semiCompressedBytesDuringLoading,
+            numberOfCompressedTargets,
+            compressedByteSize,
+            mapper
+        );
+
+        long[] targets = this.buffer.buffer;
+        int targetsLength = this.buffer.length;
+
+        return AdjacencyPacker.compress(targets, 0, targetsLength, this.flags);
+    }
+
+    @Override
+    public void close() {
+
     }
 }
