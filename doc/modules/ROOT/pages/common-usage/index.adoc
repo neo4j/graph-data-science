@@ -8,8 +8,8 @@ The GDS library usage pattern is typically split in two phases: _development_ an
 
 == Development phase
 
-In the development phase the goal is to establish a workflow of useful algorithms and machine-learning pipelines.
-In order to do this, the system must be configured, graph projections must be defined, algorithms must be selected, and machine learning experiments conducted.
+The goal of the development phase is to establish a workflow of useful algorithms and machine learning pipelines.
+This phase involves configuring the system, defining graph projections, selecting the appropriate algorithms, and running machine learning experiments.
 It is typical to make use of the memory estimation features of the library.
 This enables you to successfully configure your system to handle the amount of data to be processed.
 There are three kinds of resources to keep in mind: the projected graph, the algorithm data structures, and the machine learning setup.
@@ -17,7 +17,7 @@ There are three kinds of resources to keep in mind: the projected graph, the alg
 
 === Machine learning pipelines
 
-Developing a successful machine learning pipeline with Neo4j Graph Data Science will typically include trying out several of the following steps:
+Developing a successful machine learning pipeline with Neo4j Graph Data Science typically involves experimenting with the following steps:
 
 - selecting training methods
 - selecting algorithms to produce graph features
@@ -30,8 +30,8 @@ Developing a successful machine learning pipeline with Neo4j Graph Data Science 
 
 == Production phase
 
-In the production phase, the system would be configured appropriately to successfully run the desired algorithms and pipelines.
-The sequence of operations would normally be one of
+In the production phase, the system is configured to run the desired algorithms and pipelines successfully and reliably.
+The sequence of operations would normally be one of:
 
 - project a graph, run one or more algorithms on it, and consume results.
 - project a graph, configure a machine learning pipeline, train a machine learning model
