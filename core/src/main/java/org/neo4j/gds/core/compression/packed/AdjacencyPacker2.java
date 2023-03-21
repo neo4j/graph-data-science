@@ -40,13 +40,7 @@ public final class AdjacencyPacker2 {
         return (int) BitUtil.align(length, AdjacencyPacking.BLOCK_SIZE);
     }
 
-    private static final Aggregation[] AGGREGATIONS = Aggregation.values();
-
-    public static final int PASS = 0;
-    public static final int SORT = 1 << 22;
-    public static final int DELTA = 1 << 23;
-
-    private static final int MASK = ~(SORT | DELTA);
+    static final int BYTE_ARRAY_BASE_OFFSET = UnsafeUtil.arrayBaseOffset(byte[].class);
 
     public static long compress(
         AdjacencyListBuilder.Allocator<Long> allocator,
@@ -59,7 +53,7 @@ public final class AdjacencyPacker2 {
         return deltaCompress(allocator, slice, values, length, aggregation);
     }
 
-    public static long compressWithProperties(
+    static long compressWithProperties(
         AdjacencyListBuilder.Allocator<Long> allocator,
         AdjacencyListBuilder.Slice<Long> slice,
         long[] values,
@@ -123,9 +117,6 @@ public final class AdjacencyPacker2 {
         return runPacking(allocator, slice, values, length, header, bytes);
     }
 
-    public static final int BYTE_ARRAY_BASE_OFFSET = UnsafeUtil.arrayBaseOffset(byte[].class);
-    private static final int BYTE_ARRAY_INDEX_SCALE = UnsafeUtil.arrayIndexScale(byte[].class);
-
     private static long runPacking(
         AdjacencyListBuilder.Allocator<Long> allocator,
         AdjacencyListBuilder.Slice<Long> slice,
@@ -164,40 +155,6 @@ public final class AdjacencyPacker2 {
         // TODO: do we need to return alignedBytes somehow?
         ((ModifiableSlice<?>) slice).setLength(length);
         return adjacencyOffset;
-    }
-
-    public static long[] decompressAndPrefixSum(Compressed compressed) {
-        long ptr = compressed.address();
-        byte[] header = compressed.header();
-        long[] values = new long[(int) BitUtil.align(compressed.length(), AdjacencyPacking.BLOCK_SIZE)];
-
-        // main unpacking loop
-        int offset = 0;
-        long value = 0L;
-        for (byte bits : header) {
-            ptr = AdjacencyUnpacking.unpack(bits, values, offset, ptr);
-            for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
-                value = values[offset + i] += value;
-            }
-            offset += AdjacencyPacking.BLOCK_SIZE;
-        }
-
-        return Arrays.copyOf(values, compressed.length());
-    }
-
-    public static long[] decompress(Compressed compressed) {
-        long ptr = compressed.address();
-        byte[] header = compressed.header();
-        long[] values = new long[(int) BitUtil.align(compressed.length(), AdjacencyPacking.BLOCK_SIZE)];
-
-        // main unpacking loop
-        int offset = 0;
-        for (byte bits : header) {
-            ptr = AdjacencyUnpacking.unpack(bits, values, offset, ptr);
-            offset += AdjacencyPacking.BLOCK_SIZE;
-        }
-
-        return Arrays.copyOf(values, compressed.length());
     }
 
     private static int bitsNeeded(long[] values, int offset, int length) {

@@ -34,9 +34,9 @@ final class DecompressingCursor implements AdjacencyCursor {
     private int maxTargets;
     private int currentPosition;
 
-    DecompressingCursor(long[] pages, int flags) {
+    DecompressingCursor(long[] pages) {
         this.pages = pages;
-        this.decompressingReader = new BlockDecompressor(flags);
+        this.decompressingReader = new BlockDecompressor();
     }
 
     @Override

@@ -171,8 +171,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
 //        }
     }
 
-    static final int FLAGS = AdjacencyPacker.DELTA | AdjacencyPacker.SORT;
-
     private final AdjacencyListBuilder.Allocator<Long> adjacencyAllocator;
     private final @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator;
     private final AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators;
@@ -185,9 +183,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final LongArrayBuffer buffer;
     private final ModifiableSlice<Long> adjacencySlice;
     private final ModifiableSlice<long[]> propertySlice;
-
-    // TODO: only used for non-property case
-    private final int flags;
 
     private PackedCompressor(
         AdjacencyListBuilder.Allocator<Long> adjacencyAllocator,
@@ -207,9 +202,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
-
-        // TODO: only used for non-property case
-        this.flags = FLAGS | aggregations[0].ordinal();
 
         this.buffer = new LongArrayBuffer();
         this.adjacencySlice = ModifiableSlice.create();

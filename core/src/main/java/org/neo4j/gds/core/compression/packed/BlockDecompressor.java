@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
-
-import java.nio.ByteBuffer;
 
 import static org.neo4j.gds.core.compression.packed.AdjacencyPacker2.BYTE_ARRAY_BASE_OFFSET;
 
 final class BlockDecompressor {
 
     private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
-
-    private final boolean isDeltaCompressed;
 
     // Compressed
     private long targetPtr;
@@ -46,8 +41,7 @@ final class BlockDecompressor {
     private int blockId;
     private long lastValue;
 
-    BlockDecompressor(int flags) {
-        this.isDeltaCompressed = (flags & AdjacencyPacker.DELTA) == AdjacencyPacker.DELTA;
+    BlockDecompressor() {
         this.block = new long[BLOCK_SIZE];
     }
 
@@ -88,13 +82,11 @@ final class BlockDecompressor {
             // block unpacking
             byte blockHeader = this.header[blockId];
             this.targetPtr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.targetPtr);
-            if (this.isDeltaCompressed) {
-                long value = this.lastValue;
-                for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
-                    value = this.block[i] += value;
-                }
-                this.lastValue = value;
+            long value = this.lastValue;
+            for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
+                value = this.block[i] += value;
             }
+            this.lastValue = value;
             this.blockId++;
         }
 

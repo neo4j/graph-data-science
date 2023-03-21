@@ -20,11 +20,8 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.internal.unsafe.UnsafeUtil;
-import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.lang.ref.Cleaner;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 /**
  * Represents a slice of compressed memory that lives off-heap.

@@ -22,11 +22,7 @@ package org.neo4j.gds.core.compression.packed;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.compress.AdjacencyListBuilder;
-import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.internal.unsafe.UnsafeUtil;
-import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -50,30 +46,16 @@ class CompressedTest {
         var data = LongStream.range(0, length).toArray();
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
 
-        try (var allocator = new TestAllocator()) {
-            var slice = ModifiableSlice.<Long>create();
-            var offset = AdjacencyPacker2.compress(
-                allocator,
-                slice,
-                alignedData,
-                length,
-                Aggregation.NONE
-            );
+        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, cursor -> {
 
-            var pages = new long[]{slice.slice()};
-            var cursor = new DecompressingCursor(pages, PackedCompressor.FLAGS);
-            var degree = slice.length();
+            assertThat(cursor.remaining()).isEqualTo(length);
 
-            assertThat(degree).isEqualTo(length);
-
-            cursor.init(offset, degree);
-
-            long[] decompressed = decompressCursor(degree, cursor);
+            long[] decompressed = decompressCursor(length, cursor);
 
             assertThat(decompressed)
                 .as("compressed data did not roundtrip")
                 .containsExactly(data);
-        }
+        });
     }
 
     @ParameterizedTest
@@ -92,29 +74,16 @@ class CompressedTest {
         Arrays.sort(data);
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
 
-        try (var allocator = new TestAllocator()) {
-            var slice = ModifiableSlice.<Long>create();
-            var offset = AdjacencyPacker2.compress(
-                allocator,
-                slice,
-                alignedData,
-                length,
-                Aggregation.NONE
-            );
+        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, cursor -> {
 
-            var pages = new long[]{slice.slice()};
-            var cursor = new DecompressingCursor(pages, PackedCompressor.FLAGS);
-            var degree = slice.length();
+            assertThat(cursor.remaining()).isEqualTo(length);
 
-            assertThat(degree).isEqualTo(length);
-
-            cursor.init(offset, degree);
-            long[] decompressed = decompressCursor(degree, cursor);
+            long[] decompressed = decompressCursor(length, cursor);
 
             assertThat(decompressed)
                 .as("compressed data did not roundtrip, seed = %d", random.seed())
                 .containsExactly(data);
-        }
+        });
     }
 
     private static long[] decompressCursor(int length, AdjacencyCursor cursor) {
@@ -128,26 +97,5 @@ class CompressedTest {
             decompressed[idx++] = next;
         }
         return decompressed;
-    }
-
-    static class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
-        private Address address;
-
-        @Override
-        public long allocate(int length, AdjacencyListBuilder.Slice<Long> into) {
-            var slice = (ModifiableSlice<Long>) into;
-            long ptr = UnsafeUtil.allocateMemory(length, EmptyMemoryTracker.INSTANCE);
-            this.address = Address.createAddress(ptr, length);
-            slice.setSlice(ptr);
-            slice.setOffset(0);
-            slice.setLength(length);
-            return 0;
-        }
-
-        @Override
-        public void close() {
-            // deallocate
-            this.address.run();
-        }
     }
 }
