@@ -302,7 +302,7 @@ final class HugeAtomicLongArrayTest {
     @CsvSource({
         "0, 40", // FIXME 0 case should use single paged version
         "100, 840",
-        "100_000_000_000, 800_122_070_336",
+        "100_000_000_000, 800_122_070_368",
     })
     void shouldComputeMemoryEstimation(long size, long estimation) {
         assertThat(HugeAtomicLongArray.memoryEstimation(size)).isEqualTo(estimation);
@@ -384,8 +384,8 @@ final class HugeAtomicLongArrayTest {
 
     @Test
     void testGetAndAddIsWithinBoundsForPagedArray() {
-        var size = HugeAtomicLongArraySon.PAGE_SIZE * 2 + 1; // We want an array with three pages
-        var index = HugeAtomicLongArraySon.PAGE_SIZE + 1;    // and look up some index larger than what fits in a single page
+        var size = HugeAtomicLongArraySon.Paged.PAGE_SIZE * 2 + 1; // We want an array with three pages
+        var index = HugeAtomicLongArraySon.Paged.PAGE_SIZE + 1;    // and look up some index larger than what fits in a single page
         var array = pagedArray(size);
 
         array.getAndAdd(index, 1);
@@ -455,32 +455,37 @@ final class HugeAtomicLongArrayTest {
 
     private void testArray(int size, ThrowingConsumer<HugeAtomicLongArray> block) {
         if (bool()) {
-            // FIXME enable once singleArray exists
-//            block.accept(singleArray(size));
+            block.accept(singleArray(size));
             block.accept(pagedArray(size));
         } else {
             block.accept(pagedArray(size));
-//            block.accept(singleArray(size));
+            block.accept(singleArray(size));
         }
     }
 
     private void testArray(int size, LongUnaryOperator valueProducer, Consumer<HugeAtomicLongArray> block) {
         if (bool()) {
-//            block.accept(singleArray(size, pageFiller));
+            block.accept(singleArray(size, valueProducer));
             block.accept(pagedArray(size, valueProducer));
         } else {
             block.accept(pagedArray(size, valueProducer));
-//            block.accept(singleArray(size, pageFiller));
+            block.accept(singleArray(size, valueProducer));
         }
     }
 
-//    private HugeAtomicLongArray singleArray(final int size) {
-//        return HugeAtomicLongArray.newSingleArray(size, LongPageCreator.passThrough(1));
-//    }
-//
-//    private HugeAtomicLongArray singleArray(final int size, final LongPageCreator pageFiller) {
-//        return HugeAtomicLongArray.newSingleArray(size, pageFiller);
-//    }
+    private HugeAtomicLongArray singleArray(final int size) {
+        return HugeAtomicLongArraySon.Single.of(size);
+    }
+
+    private HugeAtomicLongArray singleArray(final int size, final LongUnaryOperator valueProducer) {
+        HugeAtomicLongArray array = HugeAtomicLongArraySon.Single.of(size);
+        // FIXME mimic setAll(LongUnaryOp valueProducer)
+        for (int i = 0; i < size; i++) {
+            array.set(i, valueProducer.applyAsLong(i));
+        }
+
+        return array;
+    }
 
     private HugeAtomicLongArray pagedArray(final int size) {
         return HugeAtomicLongArray.of(size);

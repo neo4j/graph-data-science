@@ -32,7 +32,6 @@ import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.stream.IntStream;
 
 final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAtomicArrayValidation.Spec> {
 
@@ -53,34 +52,26 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
         // class annotation
         builder.addAnnotation(generatedAnnotation());
 
-        // TODO add single
-
-        // class fields
-        var arrayHandle = arrayHandleField(valueType);
-        var pageShift = pageShiftField(spec.pageShift());
-        var pageSize = pageSizeField(pageShift);
-        var pageMask = pageMaskField(pageSize);
-        builder.addField(arrayHandle);
-        builder.addField(pageShift);
-        builder.addField(pageSize);
-        builder.addField(pageMask);
-
         // static methods
         builder.addMethod(memoryEstimationMethod());
 
         // constructor
         // TODO idx to value producer as a parameter
-        builder.addMethod(ofMethod(valueType, elementType, pageMask, pageShift, pageSize));
+        builder.addMethod(ofMethod(elementType));
+
+        builder.addType(SingleArrayBuilder.builder(
+            elementType,
+            className,
+            valueType,
+            unaryOperatorType
+        ));
 
         builder.addType(PageArrayBuilder.builder(
             elementType,
             className,
             valueType,
             unaryOperatorType,
-            arrayHandle,
-            pageShift,
-            pageSize,
-            pageMask
+            spec.pageShift()
         ));
 
         return builder.build();
@@ -96,53 +87,22 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .build();
     }
 
-    private static FieldSpec pageShiftField(int pageShift) {
-        return FieldSpec
-            .builder(TypeName.INT, "PAGE_SHIFT", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("$L", pageShift)
-            .build();
-    }
-
-    private static FieldSpec pageSizeField(FieldSpec pageShiftField) {
-        return FieldSpec
-            .builder(TypeName.INT, "PAGE_SIZE", Modifier.STATIC, Modifier.FINAL)
-            .initializer("1 << $N", pageShiftField)
-            .build();
-    }
-
-    private static FieldSpec pageMaskField(FieldSpec pageSizeField) {
-        return FieldSpec
-            .builder(TypeName.INT, "PAGE_MASK", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("$N - 1", pageSizeField)
-            .build();
-    }
-
-    private static FieldSpec arrayHandleField(TypeName valueType) {
+    static FieldSpec arrayHandleField(TypeName valueType) {
         return FieldSpec
             .builder(VarHandle.class, "ARRAY_HANDLE", Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
             .initializer("$T.arrayElementVarHandle($T.class)", MethodHandles.class, valueArrayType(valueType))
             .build();
     }
 
-    private static MethodSpec ofMethod(
-        TypeName valueType,
-        TypeName interfaceType,
-        FieldSpec pageMask,
-        FieldSpec pageShift,
-        FieldSpec pageSize
-    ) {
+    private static MethodSpec ofMethod(TypeName interfaceType) {
         return MethodSpec.methodBuilder("of")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addParameter(TypeName.LONG, "size")
             .returns(interfaceType)
-            .addStatement("int numPages = $T.numPagesFor(size, $N, $N)", PAGE_UTIL, pageShift, pageMask)
-            .addStatement("$T pages = new $T[numPages][]", valueArrayType(valueArrayType(valueType)), valueType)
-            .addStatement("int lastPageSize = $T.exclusiveIndexOfPage(size, $N)", PAGE_UTIL, pageMask)
-            .addStatement("int lastPageIndex = pages.length - 1")
-            .addStatement("$T.range(0, lastPageIndex).forEach(idx -> pages[idx] = new $T[$N])", IntStream.class, valueType, pageSize)
-            .addStatement("pages[lastPageIndex] = new $T[lastPageSize]", valueType)
-            .addStatement("long memoryUsed = memoryEstimation(size)")
-            .addStatement("return new $N(size, pages, memoryUsed)", PageArrayBuilder.PAGED_CLASS_NAME)
+            .beginControlFlow("if (size <= $T.MAX_ARRAY_LENGTH)", PAGE_UTIL)
+            .addStatement("return $N.of(size)", SingleArrayBuilder.SINLGE_CLASS_NAME)
+            .endControlFlow()
+            .addStatement("return $N.of(size)", PageArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }
 
@@ -152,6 +112,9 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .addParameter(TypeName.LONG, "size")
             .returns(TypeName.LONG)
             .addStatement("assert size >= 0")
+            .beginControlFlow("if (size <= $T.MAX_ARRAY_LENGTH)", PAGE_UTIL)
+            .addStatement("return $N.memoryEstimation(size)", SingleArrayBuilder.SINLGE_CLASS_NAME)
+            .endControlFlow()
             .addStatement("return $N.memoryEstimation(size)", PageArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }

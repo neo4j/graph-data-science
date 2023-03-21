@@ -33,6 +33,7 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.valueArrayType;
@@ -41,29 +42,39 @@ final class PageArrayBuilder {
 
     static final String PAGED_CLASS_NAME = "Paged";
 
+    private PageArrayBuilder() {}
+
     static TypeSpec builder(
         TypeName interfaceType,
         ClassName baseClassName,
         TypeName valueType,
         TypeName unaryOperatorType,
-        FieldSpec arrayHandle,
-        FieldSpec pageShift,
-        FieldSpec pageSize,
-        FieldSpec pageMask
+        int specPageShift
     ) {
         var builder = TypeSpec.classBuilder(PAGED_CLASS_NAME)
             .addModifiers(Modifier.STATIC, Modifier.FINAL)
             .superclass(baseClassName)
             .addSuperinterface(interfaceType);
 
+        // class fields
+        var pageShift = pageShiftField(specPageShift);
+        var pageSize = pageSizeField(pageShift);
+        var pageMask = pageMaskField(pageSize);
+        builder.addField(pageShift);
+        builder.addField(pageSize);
+        builder.addField(pageMask);
+
         // instance fields
+        var arrayHandle = HugeAtomicArrayGenerator.arrayHandleField(valueType);
         var size = sizeField();
         var pages = pagesField(valueType);
         var memoryUsed = memoryUsedField(valueType);
+        builder.addField(arrayHandle);
         builder.addField(size);
         builder.addField(pages);
         builder.addField(memoryUsed);
 
+        builder.addMethod(ofMethod(valueType, interfaceType, pageMask, pageShift, pageSize));
         builder.addMethod(constructor(valueType));
 
         // static methods
@@ -84,6 +95,27 @@ final class PageArrayBuilder {
         builder.addMethod(copyToMethod(interfaceType, valueType, size, pages));
 
         return builder.build();
+    }
+
+    private static FieldSpec pageShiftField(int pageShift) {
+        return FieldSpec
+            .builder(TypeName.INT, "PAGE_SHIFT", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+            .initializer("$L", pageShift)
+            .build();
+    }
+
+    private static FieldSpec pageSizeField(FieldSpec pageShiftField) {
+        return FieldSpec
+            .builder(TypeName.INT, "PAGE_SIZE", Modifier.STATIC, Modifier.FINAL)
+            .initializer("1 << $N", pageShiftField)
+            .build();
+    }
+
+    private static FieldSpec pageMaskField(FieldSpec pageSizeField) {
+        return FieldSpec
+            .builder(TypeName.INT, "PAGE_MASK", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+            .initializer("$N - 1", pageSizeField)
+            .build();
     }
 
     private static FieldSpec sizeField() {
@@ -117,6 +149,7 @@ final class PageArrayBuilder {
             .addParameter(TypeName.LONG, "size")
             .returns(TypeName.LONG)
             .addStatement("assert size >= 0")
+            .addStatement("long instanceSize = $T.sizeOfInstance($N.class)", MemoryUsage.class, PAGED_CLASS_NAME)
             // TODO verify method on MemoryUsage exists during validation
             .addStatement(
                 "$T arrayMemoryEstimator = $T::sizeOf$NArray",
@@ -132,7 +165,30 @@ final class PageArrayBuilder {
             .addStatement("long memoryUsed = $T.sizeOfObjectArray(numberOfPages)", MemoryUsage.class)
             .addStatement("memoryUsed += (numberOfFullPages * bytesPerPage)")
             .addStatement("memoryUsed += bytesOfLastPage")
+            .addStatement("memoryUsed += instanceSize")
             .addStatement("return memoryUsed")
+            .build();
+    }
+
+    private static MethodSpec ofMethod(
+        TypeName valueType,
+        TypeName interfaceType,
+        FieldSpec pageMask,
+        FieldSpec pageShift,
+        FieldSpec pageSize
+    ) {
+        return MethodSpec.methodBuilder("of")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(TypeName.LONG, "size")
+            .returns(interfaceType)
+            .addStatement("int numPages = $T.numPagesFor(size, $N, $N)", PAGE_UTIL, pageShift, pageMask)
+            .addStatement("$T pages = new $T[numPages][]", valueArrayType(valueArrayType(valueType)), valueType)
+            .addStatement("int lastPageSize = $T.exclusiveIndexOfPage(size, $N)", PAGE_UTIL, pageMask)
+            .addStatement("int lastPageIndex = pages.length - 1")
+            .addStatement("$T.range(0, lastPageIndex).forEach(idx -> pages[idx] = new $T[$N])", IntStream.class, valueType, pageSize)
+            .addStatement("pages[lastPageIndex] = new $T[lastPageSize]", valueType)
+            .addStatement("long memoryUsed = memoryEstimation(size)")
+            .addStatement("return new $N(size, pages, memoryUsed)", PageArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }
 
@@ -412,7 +468,6 @@ final class PageArrayBuilder {
         long defaultValue = 0L;
 
         // FIXME also handle SingleHugeAtomicLongArray case
-        String pagedClassName = "Paged";
 
         return MethodSpec.methodBuilder("copyTo")
             .addAnnotation(Override.class)
@@ -420,10 +475,10 @@ final class PageArrayBuilder {
             .addParameter(interfaceType, "dest")
             .addParameter(TypeName.LONG, "length")
             .returns(TypeName.VOID)
-            .beginControlFlow("if (!(dest instanceof $N))", pagedClassName)
+            .beginControlFlow("if (!(dest instanceof $N))", PAGED_CLASS_NAME)
             .addStatement("throw new $T(\"Can only handle Paged version for now\")", RuntimeException.class)
             .endControlFlow()
-            .addStatement("$1N dst = ($1N) dest", pagedClassName)
+            .addStatement("$1N dst = ($1N) dest", PAGED_CLASS_NAME)
             .beginControlFlow("if (length > $N)", size)
             .addStatement("length = $N", size)
             .endControlFlow()
