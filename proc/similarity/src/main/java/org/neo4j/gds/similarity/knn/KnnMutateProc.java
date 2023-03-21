@@ -49,7 +49,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
-import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
@@ -114,7 +113,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
 
             SimilarityGraphResult similarityGraphResult;
             try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                similarityGraphResult = computeToGraph(
+                similarityGraphResult = KnnProc.computeToGraph(
                     computationResult.graph(),
                     algorithm.nodeCount(),
                     config.concurrency(),

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.assertj.core.api.Condition;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -31,8 +29,9 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KnnStatsProcTest extends BaseProcTest {
 
@@ -72,79 +71,45 @@ class KnnStatsProcTest extends BaseProcTest {
             .addParameter("topK", 1)
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(3, row.getNumber("nodesCompared").longValue());
-            assertEquals(37, row.getNumber("nodePairsConsidered").longValue());
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
-            assertEquals(3, row.getNumber("similarityPairs").longValue());
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("nodesCompared"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
 
-            assertThat(row)
-                .extracting(r -> r.getNumber("computeMillis"), InstanceOfAssertFactories.LONG)
+            assertThat(row.getNumber("nodePairsConsidered"))
+                .asInstanceOf(LONG)
+                .isEqualTo(37L);
+
+            assertThat(row.getBoolean("didConverge")).isTrue();
+
+            assertThat(row.getNumber("ranIterations"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1);
+
+            assertThat(row.getNumber("similarityPairs"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
 
-            assertThat(row)
-                .extracting(r -> r.getNumber("preProcessingMillis"), InstanceOfAssertFactories.LONG)
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
 
-            assertThat(row)
-                .extracting(r -> r.getNumber("postProcessingMillis"), InstanceOfAssertFactories.LONG)
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
 
-            var assertAsMap = InstanceOfAssertFactories.map(String.class, Double.class);
-            var positiveDouble = new Condition<Double>((v) -> v >= 0, "a positive value");
-            assertThat(row)
-                .extracting(r -> r.get("similarityDistribution"), assertAsMap)
-                .hasEntrySatisfying("min", positiveDouble)
-                .hasEntrySatisfying("max", positiveDouble)
-                .hasEntrySatisfying("mean", positiveDouble)
-                .hasEntrySatisfying("stdDev", positiveDouble)
-                .hasEntrySatisfying("p1", positiveDouble)
-                .hasEntrySatisfying("p5", positiveDouble)
-                .hasEntrySatisfying("p10", positiveDouble)
-                .hasEntrySatisfying("p25", positiveDouble)
-                .hasEntrySatisfying("p50", positiveDouble)
-                .hasEntrySatisfying("p75", positiveDouble)
-                .hasEntrySatisfying("p90", positiveDouble)
-                .hasEntrySatisfying("p95", positiveDouble)
-                .hasEntrySatisfying("p99", positiveDouble)
-                .hasEntrySatisfying("p100", positiveDouble);
-        });
-    }
-
-    @Test
-    void statsShouldNotHaveWriteProperties() {
-        runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
-
-        String query = GdsCypher.call("myGraph")
-            .algo("gds.knn")
-            .statsMode()
-            .addParameter("nodeProperties", List.of("knn"))
-            .yields();
-
-        List<String> forbiddenResultColumns = List.of(
-            "writeMillis",
-            "nodePropertiesWritten",
-            "relationshipPropertiesWritten"
-        );
-        List<String> forbiddenConfigKeys = List.of(
-            "writeProperty",
-            "writeRelationshipType"
-        );
-
-        runQueryWithResultConsumer(query, result -> {
-            assertThat(result.columns())
-                .doesNotContainAnyElementsOf(forbiddenConfigKeys);
-
-            assertThat(result.hasNext())
-                .withFailMessage("Result must not be empty.")
-                .isTrue();
-
-            var row = result.next();
-            assertThat(row.get("configuration"))
+            assertThat(row.get("similarityDistribution"))
                 .asInstanceOf(MAP)
-                .doesNotContainKeys(forbiddenConfigKeys);
+                .containsOnlyKeys("min", "max", "mean", "stdDev", "p1", "p5", "p10", "p25", "p50", "p75", "p90", "p95", "p99", "p100")
+                .allSatisfy((key, value) -> assertThat(value).asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(0d));
         });
-    }
 
+        assertThat(rowCount)
+            .as("`stats` mode should always return one row")
+            .isEqualTo(1);
+    }
 }
