@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -557,6 +558,31 @@ class KnnTest {
         assertThrows(IllegalArgumentException.class, configBuilder::build);
     }
 
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("negativeGraphs")
+    void supportNegativeArrays(String graphCreateQuery, String desc) {
+        var graphWithNegativeNodePropertyValues = GdlFactory.of(graphCreateQuery).build().getUnion();
+
+        var config = ImmutableKnnBaseConfig.builder()
+            .nodeProperties(List.of(new KnnNodePropertySpec("weight")))
+            .randomSeed(42L)
+            .concurrency(1)
+            .build();
+        var knnContext = KnnContext.empty();
+        var knn = Knn.createWithDefaults(graphWithNegativeNodePropertyValues, config, knnContext);
+        var result = knn.compute();
+        assertThat(result.streamSimilarityResult())
+            .hasSize(2);
+    }
+
+    private static Stream<Arguments> negativeGraphs() {
+        return Stream.of(
+            Arguments.of("CREATE ({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})", "negative float arrays"),
+            Arguments.of("CREATE ({weight: [1.0D, 2.0D]}), ({weight: [3.0D, -10.0D]})", "negative double arrays"),
+            Arguments.of("CREATE ({weight: -99}), ({weight: -10})", "negative long values")
+        );
+    }
+
     @Nested
     class IterationsLimitTest {
 
@@ -621,6 +647,7 @@ class KnnTest {
     }
 
     @Nested
+    @ExtendWith(SoftAssertionsExtension.class)
     class RandomWalkInitialSamplerTest {
 
         @GdlGraph
