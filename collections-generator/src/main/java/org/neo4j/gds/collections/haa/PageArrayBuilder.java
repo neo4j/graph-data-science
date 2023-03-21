@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.DEFAULT_VALUE_METHOD;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.valueArrayType;
 
@@ -464,8 +465,6 @@ final class PageArrayBuilder {
         FieldSpec size,
         FieldSpec pages
     ) {
-        // FIXME the default value is only used for the copyTo but still needs to be set
-        long defaultValue = 0L;
 
         // FIXME also handle SingleHugeAtomicLongArray case
 
@@ -494,17 +493,17 @@ final class PageArrayBuilder {
             .addStatement("$T.arraycopy(page, 0, dstPage, 0, page.length)", System.class)
             .addStatement("remaining -= page.length")
             .endControlFlow()
+            .addStatement("$T defaultValue = $N()", valueType, DEFAULT_VALUE_METHOD)
             .beginControlFlow("if (remaining > 0)")
             .addStatement("$1T.arraycopy($2N[lastPage], 0, dst.$2N[lastPage], 0, (int) remaining)", System.class, pages)
             .addStatement(
-                "$1T.fill(dst.$2N[lastPage], (int) remaining, dst.$2N[lastPage].length, $3L)",
+                "$1T.fill(dst.$2N[lastPage], (int) remaining, dst.$2N[lastPage].length, defaultValue)",
                 Arrays.class,
-                pages,
-                defaultValue
+                pages
             )
             .endControlFlow()
             .beginControlFlow("for (int i = pageLen; i < dst.$N.length; i++)", pages)
-            .addStatement("$T.fill(dst.pages[i], $L)", Arrays.class, defaultValue)
+            .addStatement("$T.fill(dst.pages[i], defaultValue)", Arrays.class)
             .endControlFlow()
             .build();
     }

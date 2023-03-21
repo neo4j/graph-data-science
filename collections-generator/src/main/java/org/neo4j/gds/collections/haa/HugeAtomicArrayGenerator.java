@@ -37,6 +37,8 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
 
     static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
 
+    static final String DEFAULT_VALUE_METHOD = "defaultValue";
+
     @Override
     public TypeSpec generate(HugeAtomicArrayValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className());

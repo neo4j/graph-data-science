@@ -33,6 +33,7 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 
+import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.DEFAULT_VALUE_METHOD;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.arrayHandleField;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.valueArrayType;
@@ -311,20 +312,18 @@ final class SingleArrayBuilder {
         TypeName valueType,
         FieldSpec page
     ) {
-        // FIXME the default value is only used for the copyTo but still needs to be set
-        long defaultValue = 0L;
-
         return MethodSpec.methodBuilder("copyTo")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(interfaceType, "dest")
             .addParameter(TypeName.LONG, "length")
             .returns(TypeName.VOID)
+            .addStatement("$T defaultValue = $N()", valueType, DEFAULT_VALUE_METHOD)
             .addCode(CodeBlock.builder()
                 .beginControlFlow("if (dest instanceof $N)", SINLGE_CLASS_NAME)
                 .addStatement("$1N dst = ($1N) dest", SINLGE_CLASS_NAME)
                 .addStatement("$1T.arraycopy($2N, 0, dst.$2N, 0, (int) length)", System.class, page)
-                .addStatement("$1T.fill(dst.$2N, (int) length, dst.size, $3L)", Arrays.class, page, defaultValue)
+                .addStatement("$1T.fill(dst.$2N, (int) length, dst.size, defaultValue)", Arrays.class, page)
                 .endControlFlow()
                 .build())
             .addCode(CodeBlock.builder()
@@ -339,12 +338,12 @@ final class SingleArrayBuilder {
                     .beginControlFlow("for($T dstPage: dst.pages)", valueArrayType(valueType))
                     .addStatement("int toCopy = $T.min(remaining, dstPage.length)", Math.class)
                     .beginControlFlow("if (toCopy == 0)")
-                    .addStatement("$T.fill(page, $L)", Arrays.class, defaultValue)
+                    .addStatement("$T.fill(page, defaultValue)", Arrays.class)
                     .endControlFlow()
                     .beginControlFlow("else")
                     .addStatement("$1T.arraycopy($2N, start, dstPage, 0, toCopy)", System.class, page)
                     .beginControlFlow("if (toCopy < dstPage.length)")
-                    .addStatement("$1T.fill(dstPage, toCopy, dstPage.length, $2L)", Arrays.class, defaultValue)
+                    .addStatement("$1T.fill(dstPage, toCopy, dstPage.length, defaultValue)", Arrays.class)
                     .endControlFlow()
                     .endControlFlow()
                     .endControlFlow()

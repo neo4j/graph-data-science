@@ -40,6 +40,14 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
     }
 
     /**
+     *
+     * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(HugeAtomicLongArray, long)}.
+     */
+    default long defaultValue() {
+        return 0L;
+    }
+
+    /**
      * @return the long value at the given index (volatile)
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */

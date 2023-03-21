@@ -37,6 +37,7 @@ import static org.neo4j.gds.collections.ValidatorUtils.hasSingleLongParameter;
 import static org.neo4j.gds.collections.ValidatorUtils.hasTypeAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.hasTypeKindAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.isAbstract;
+import static org.neo4j.gds.collections.ValidatorUtils.isDefault;
 import static org.neo4j.gds.collections.ValidatorUtils.isNotGeneric;
 import static org.neo4j.gds.collections.ValidatorUtils.mustReturn;
 
@@ -80,6 +81,8 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         }
 
         switch (e.getSimpleName().toString()) {
+            case "defaultValue":
+                return validateDefaultValueMethod(e, elementType);
             case "get":
                 return validateGetMethod(e, elementType);
             case "getAndAdd":
@@ -107,6 +110,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         }
 
         return false;
+    }
+
+    private boolean validateDefaultValueMethod(ExecutableElement e, TypeMirror elementType) {
+        return mustReturn(e, elementType.getKind(), messager)
+               && hasNoParameters(e, messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isDefault(e, messager);
     }
 
     private boolean validateGetMethod(ExecutableElement e, TypeMirror elementType) {
