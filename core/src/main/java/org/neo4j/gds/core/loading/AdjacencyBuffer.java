@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
@@ -171,6 +172,7 @@ public final class AdjacencyBuffer {
      * @param offsets        offsets into targets; every offset position indicates a source node group
      * @param length         length of offsets array (how many source tuples to import)
      */
+    @SuppressFBWarnings("UL_UNRELEASED_LOCK")
     void addAll(
         long[] batch,
         long[] targets,
@@ -201,8 +203,9 @@ public final class AdjacencyBuffer {
                     if (lock != null) {
                         lock.unlock();
                     }
-                    lock = this.chunkLocks[pageIndex];
-                    lock.lock();
+                    var newLock = this.chunkLocks[pageIndex];
+                    newLock.lock();
+                    lock = newLock;
                     lastPageIndex = pageIndex;
                 }
 
@@ -223,7 +226,7 @@ public final class AdjacencyBuffer {
                 startOffset = endOffset;
             }
         } finally {
-            if (lock != null) {
+            if (lock != null && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
