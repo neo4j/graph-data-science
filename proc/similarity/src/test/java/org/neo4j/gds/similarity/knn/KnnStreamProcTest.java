@@ -32,6 +32,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class KnnStreamProcTest extends BaseProcTest {
+
     @Neo4jGraph
     public static final String DB_CYPHER =
         "CREATE" +
