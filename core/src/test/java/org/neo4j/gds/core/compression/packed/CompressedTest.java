@@ -20,84 +20,101 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.compress.AdjacencyListBuilder;
+import org.neo4j.gds.api.compress.ModifiableSlice;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.internal.unsafe.UnsafeUtil;
+import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.SeededRandom.newRandom;
 
 class CompressedTest {
 
-    static Stream<Arguments> cursorFeaturesAndLengths() {
-        return TestSupport.crossArgument(
-            () -> Stream.of(
-                AdjacencyPackerTest.Features.Sort,
-                AdjacencyPackerTest.Features.SortAndDelta
-            ),
-            () -> Stream.of(
-                0,
-                1,
-                42,
-                AdjacencyPacking.BLOCK_SIZE,
-                AdjacencyPacking.BLOCK_SIZE * 2,
-                AdjacencyPacking.BLOCK_SIZE * 2 + 42,
-                1337
-            )
-        );
-    }
-
     @ParameterizedTest
-    @MethodSource("cursorFeaturesAndLengths")
-    void decompressConsecutiveLongsViaCursor(AdjacencyPackerTest.Features features, int length) {
+    @ValueSource(ints = {
+        0,
+        1,
+        42,
+        AdjacencyPacking.BLOCK_SIZE,
+        AdjacencyPacking.BLOCK_SIZE * 2,
+        AdjacencyPacking.BLOCK_SIZE * 2 + 42,
+        1337
+    })
+    void decompressConsecutiveLongsViaCursor(int length) {
         var data = LongStream.range(0, length).toArray();
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
-        var compressed = AdjacencyPacker.compress(alignedData, 0, length, features.flags());
 
-        var adjacencyList = HugeObjectArray.of(compressed);
-        var cursor = new DecompressingCursor(adjacencyList, features.flags());
+        try (var allocator = new TestAllocator()) {
+            var slice = ModifiableSlice.<Long>create();
+            var offset = AdjacencyPacker2.compress(
+                allocator,
+                slice,
+                alignedData,
+                length,
+                Aggregation.NONE
+            );
 
-        cursor.init(0, -1);
+            var pages = new long[]{slice.slice()};
+            var cursor = new DecompressingCursor(pages, PackedCompressor.FLAGS);
+            var degree = slice.length();
 
-        long[] decompressed = decompressCursor(compressed.length(), cursor);
+            assertThat(degree).isEqualTo(length);
 
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip")
-            .containsExactly(data);
+            cursor.init(offset, degree);
 
-        compressed.free();
+            long[] decompressed = decompressCursor(degree, cursor);
+
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip")
+                .containsExactly(data);
+        }
     }
 
     @ParameterizedTest
-    @MethodSource("cursorFeaturesAndLengths")
-    void decompressRandomLongsViaCursor(AdjacencyPackerTest.Features features, int length) {
+    @ValueSource(ints = {
+        0,
+        1,
+        42,
+        AdjacencyPacking.BLOCK_SIZE,
+        AdjacencyPacking.BLOCK_SIZE * 2,
+        AdjacencyPacking.BLOCK_SIZE * 2 + 42,
+        1337
+    })
+    void decompressRandomLongsViaCursor(int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
+        Arrays.sort(data);
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
-        var compressed = AdjacencyPacker.compress(alignedData, 0, length, features.flags());
 
-        var adjacencyList = HugeObjectArray.of(compressed);
-        var cursor = new DecompressingCursor(adjacencyList, features.flags());
+        try (var allocator = new TestAllocator()) {
+            var slice = ModifiableSlice.<Long>create();
+            var offset = AdjacencyPacker2.compress(
+                allocator,
+                slice,
+                alignedData,
+                length,
+                Aggregation.NONE
+            );
 
-        cursor.init(0, -1);
+            var pages = new long[]{slice.slice()};
+            var cursor = new DecompressingCursor(pages, PackedCompressor.FLAGS);
+            var degree = slice.length();
 
-        long[] decompressed = decompressCursor(compressed.length(), cursor);
+            assertThat(degree).isEqualTo(length);
 
-        if (features != AdjacencyPackerTest.Features.Delta) {
-            Arrays.sort(data);
+            cursor.init(offset, degree);
+            long[] decompressed = decompressCursor(degree, cursor);
+
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip, seed = %d", random.seed())
+                .containsExactly(data);
         }
-
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip, seed = %d", random.seed())
-            .containsExactly(data);
-
-        compressed.free();
     }
 
     private static long[] decompressCursor(int length, AdjacencyCursor cursor) {
@@ -113,4 +130,24 @@ class CompressedTest {
         return decompressed;
     }
 
+    static class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
+        private Address address;
+
+        @Override
+        public long allocate(int length, AdjacencyListBuilder.Slice<Long> into) {
+            var slice = (ModifiableSlice<Long>) into;
+            long ptr = UnsafeUtil.allocateMemory(length, EmptyMemoryTracker.INSTANCE);
+            this.address = Address.createAddress(ptr, length);
+            slice.setSlice(ptr);
+            slice.setOffset(0);
+            slice.setLength(length);
+            return 0;
+        }
+
+        @Override
+        public void close() {
+            // deallocate
+            this.address.run();
+        }
+    }
 }

@@ -22,33 +22,33 @@ package org.neo4j.gds.core.compression.packed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.PageUtil;
+import org.neo4j.gds.core.compression.common.BumpAllocator;
 
 final class DecompressingCursor implements AdjacencyCursor {
 
-    private final HugeObjectArray<Compressed> adjacencies;
+    private final long[] pages;
 
     private final BlockDecompressor decompressingReader;
 
     private int maxTargets;
     private int currentPosition;
 
-    DecompressingCursor(HugeObjectArray<Compressed> adjacencies, int flags) {
-        this.adjacencies = adjacencies;
+    DecompressingCursor(long[] pages, int flags) {
+        this.pages = pages;
         this.decompressingReader = new BlockDecompressor(flags);
-
-    }
-
-    void init(long node) {
-        init(node, 42);
     }
 
     @Override
-    public void init(long node, int ignore) {
-        var compressed = this.adjacencies.getOrDefault(node, Compressed.EMPTY);
-        this.maxTargets = compressed.length();
+    public void init(long offset, int degree) {
+        int pageIndex = PageUtil.pageIndex(offset, BumpAllocator.PAGE_SHIFT);
+        int idxInPage = PageUtil.indexInPage(offset, BumpAllocator.PAGE_MASK);
+
+        long pagePtr = this.pages[pageIndex];
+        long listPtr = pagePtr + idxInPage;
+        this.maxTargets = degree;
         this.currentPosition = 0;
-        this.decompressingReader.reset(compressed);
+        this.decompressingReader.reset(listPtr, degree);
     }
 
     @Override

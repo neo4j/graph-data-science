@@ -22,19 +22,25 @@ package org.neo4j.gds.core.compression.packed;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 public class PackedAdjacencyList implements AdjacencyList {
 
-    private final HugeObjectArray<Compressed> adjacencies;
+    // TODO: HLA?
+    private long[] pages;
+    private HugeIntArray degrees;
+    private HugeLongArray offsets;
 
-    PackedAdjacencyList(HugeObjectArray<Compressed> adjacencies) {
-        this.adjacencies = adjacencies;
+    PackedAdjacencyList(long[] pages, HugeIntArray degrees, HugeLongArray offsets) {
+        this.pages = pages;
+        this.degrees = degrees;
+        this.offsets = offsets;
     }
 
     @Override
     public int degree(long node) {
-        return adjacencies.getOrDefault(node, Compressed.EMPTY).length();
+        return this.degrees.get(node);
     }
 
     @Override
@@ -44,8 +50,9 @@ public class PackedAdjacencyList implements AdjacencyList {
             return AdjacencyCursor.empty();
         }
 
-        var cursor = new DecompressingCursor(this.adjacencies, PackedCompressor.FLAGS);
-        cursor.init(node);
+        long offset = this.offsets.get(node);
+        var cursor = new DecompressingCursor(this.pages, PackedCompressor.FLAGS);
+        cursor.init(offset, degree);
 
         return cursor;
     }
@@ -57,7 +64,8 @@ public class PackedAdjacencyList implements AdjacencyList {
             return AdjacencyCursor.empty();
         }
         if (reuse instanceof DecompressingCursor) {
-            ((DecompressingCursor) reuse).init(node);
+            long offset = this.offsets.get(node);
+            reuse.init(offset, degree);
             return reuse;
         }
         return adjacencyCursor(node, fallbackValue);
@@ -65,7 +73,7 @@ public class PackedAdjacencyList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
-        return new DecompressingCursor(this.adjacencies, PackedCompressor.FLAGS);
+        return new DecompressingCursor(this.pages, PackedCompressor.FLAGS);
     }
 }
 
