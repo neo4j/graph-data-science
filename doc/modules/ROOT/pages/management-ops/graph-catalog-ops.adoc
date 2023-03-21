@@ -30,11 +30,9 @@ See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph
 
 === Security
 
-[NOTE]
-====
-Projecting, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
-Graphs projected by a different Neo4j user are not accessible at any time.
-====
+Projecting, using, listing, and dropping named graphs are management operations bound to a specific database user.
+Graphs projected by a different database user are not accessible at any time, except for administrator users.
+Read more about that in xref:management-ops/administration.adoc[].
 
 
 == Graph projections
