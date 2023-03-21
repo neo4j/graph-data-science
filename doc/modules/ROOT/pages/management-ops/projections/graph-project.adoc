@@ -3,27 +3,29 @@
 :description: This section details projecting GDS graphs using `native` projections.
 
 
-A projected graph can be stored in the xref:management-ops/graph-catalog-ops.adoc[Graph Catalog] under a user-defined name.
-Using that name, the graph can be referred to by any algorithm in the library.
-This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
-
-Native projections provide the best performance by reading from the Neo4j store files.
-Recommended for both the development, and the production phase.
+A native projection is the fastest and most scalable way to project a graph from a Neo4j database into the xref:management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
+Native projections are recommended for any use case, and for both the development and the production phase (see xref:common-usage/index.adoc[Common usage]).
 
 
-[NOTE]
---
-There is also a way to generate a random graph, see xref:management-ops/projections/graph-generation.adoc[Graph Generation] documentation for more details.
---
+== Considerations
+
+=== Lifecycle
 
 [NOTE]
 --
-The projected graphs will reside in the catalog until:
+The projected graphs will reside in the catalog until either:
 
 - the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
 - the Neo4j database from which the graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
 --
+
+
+=== Node property support
+
+Native projections can only project a limited set of node property types from the Neo4j database.
+The xref:management-ops/node-properties.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
+Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a native projection.
 
 
 [[graph-project-native-syntax]]

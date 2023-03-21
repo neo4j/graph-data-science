@@ -2,28 +2,29 @@
 = Projecting graphs using Cypher
 :description: This section details projecting GDS graphs using `Cypher` projections.
 
-
-
-A projected graph can be stored in the catalog under a user-defined name.
-Using that name, the graph can be referred to by any algorithm in the library.
-This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
-
 Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
 Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
 
-[NOTE]
---
-There is also a way to generate a random graph, see xref:management-ops/projections/graph-generation.adoc[Graph Generation] documentation for more details.
---
+
+== Considerations
+
+=== Lifecycle
 
 [NOTE]
 --
-The projected graph will reside in the catalog until:
+The projected graphs will reside in the catalog until either:
 
 - the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
 - the Neo4j database from which the graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
 --
+
+
+=== Node property support
+
+Cypher projections can only project a limited set of node property types from a Cypher query.
+The xref:management-ops/node-properties.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
+Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Cypher projection.
 
 
 [[graph-project-cypher-syntax]]
