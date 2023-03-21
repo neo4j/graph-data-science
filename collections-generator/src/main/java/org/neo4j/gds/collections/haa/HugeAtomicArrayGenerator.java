@@ -28,13 +28,16 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.gds.collections.CollectionStep;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAtomicArrayValidation.Spec> {
@@ -82,6 +85,9 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
         // TODO idx to value producer as a parameter
         builder.addMethod(ofMethod(valueType, className, pageMask, pageShift, pageSize));
         builder.addMethod(constructor(valueType));
+
+        // static methods
+        builder.addMethod(memoryEstimationMethod(valueType, pageMask, pageShift, pageSize));
 
         // instance methods
         builder.addMethod(getMethod(valueType, arrayHandle, pages, pageShift, pageMask));
@@ -185,7 +191,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .addStatement("$T.range(0, lastPageIndex).forEach(idx -> pages[idx] = new $T[$N])", IntStream.class, valueType, pageSize)
             .addStatement("pages[lastPageIndex] = new $T[lastPageSize]", valueType)
             // FIXME either move memoryUsed out of impl correctly
-            .addStatement("long memoryUsed = -1")
+            .addStatement("long memoryUsed = memoryEstimation(size)")
             .addStatement("return new $T(size, pages, memoryUsed)", implType)
             .build();
     }
@@ -199,6 +205,38 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .addStatement("this.size = size")
             .addStatement("this.pages = pages")
             .addStatement("this.memoryUsed = memoryUsed")
+            .build();
+    }
+
+    private static MethodSpec memoryEstimationMethod(
+        TypeName valueType,
+        FieldSpec pageMask,
+        FieldSpec pageShift,
+        FieldSpec pageSize
+    ) {
+        var arrayMemoryEstimatorFuncType = ParameterizedTypeName.get(ClassName.get(Function.class), TypeName.INT.box(), TypeName.LONG.box());
+
+        return MethodSpec.methodBuilder("memoryEstimation")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(TypeName.LONG, "size")
+            .returns(TypeName.LONG)
+            .addStatement("assert size >= 0")
+            // TODO verify method on MemoryUsage exists during validation
+            .addStatement(
+                "$T arrayMemoryEstimator = $T::sizeOf$NArray",
+                arrayMemoryEstimatorFuncType,
+                MemoryUsage.class,
+                StringUtils.capitalize(valueType.toString())
+            )
+            .addStatement("int numberOfPages = $T.numPagesFor(size, $N, $N)", PAGE_UTIL, pageShift, pageMask)
+            .addStatement("int numberOfFullPages = numberOfPages - 1")
+            .addStatement("long bytesPerPage = arrayMemoryEstimator.apply($N)", pageSize)
+            .addStatement("int sizeOfLastPage = $T.exclusiveIndexOfPage(size, $N)", PAGE_UTIL, pageMask)
+            .addStatement("long bytesOfLastPage = arrayMemoryEstimator.apply(sizeOfLastPage)")
+            .addStatement("long memoryUsed = $T.sizeOfObjectArray(numberOfPages)", MemoryUsage.class)
+            .addStatement("memoryUsed += (numberOfFullPages * bytesPerPage)")
+            .addStatement("memoryUsed += bytesOfLastPage")
+            .addStatement("return memoryUsed")
             .build();
     }
 

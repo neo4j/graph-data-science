@@ -22,6 +22,9 @@ package org.neo4j.gds.collections.haa;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.opentest4j.AssertionFailedError;
 
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ import static io.qala.datagen.RandomShortApi.integer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources.
@@ -284,27 +288,30 @@ final class HugeAtomicLongArrayTest {
         testArray(size, array -> assertThat(array.size()).isEqualTo(size));
     }
 
-//    @Test
-//    void shouldFreeMemoryUsed() {
-//        int size = integer(10, 20);
-//        long expected = MemoryUsage.sizeOfLongArray(size);
-//        testArray(size, array -> {
-//            long freed = array.release();
-//            org.assertj.core.api.Assertions.assertThat(freed).matches(v -> v == expected || v == expected + 24);
-//        });
-//    }
+    @Test
+    void shouldFreeMemoryUsed() {
+        int size = integer(10, 20);
+        long expected = MemoryUsage.sizeOfLongArray(size);
+        testArray(size, array -> {
+            long freed = array.release();
+            org.assertj.core.api.Assertions.assertThat(freed).matches(v -> v == expected || v == expected + 24);
+        });
+    }
 
-//    @Test
-//    void shouldComputeMemoryEstimation() {
-//        assertThat(HugeAtomicLongArray.memoryEstimation(0L)).isEqualTo(40);
-//        assertThat(HugeAtomicLongArray.memoryEstimation(100L)).isEqualTo(840);
-//        assertThat(HugeAtomicLongArray.memoryEstimation(100_000_000_000L)).isEqualTo(800_122_070_368L);
-//    }
-//
-//    @Test
-//    void shouldFailForNegativeMemRecSize() {
-//        assertThrows(AssertionError.class, () -> HugeAtomicLongArray.memoryEstimation(-1L));
-//    }
+    @ParameterizedTest
+    @CsvSource({
+        "0, 40", // FIXME 0 case should use single paged version
+        "100, 840",
+        "100_000_000_000, 800_122_070_336",
+    })
+    void shouldComputeMemoryEstimation(long size, long estimation) {
+        assertThat(HugeAtomicLongArray.memoryEstimation(size)).isEqualTo(estimation);
+    }
+
+    @Test
+    void shouldFailForNegativeMemRecSize() {
+        assertThrows(AssertionError.class, () -> HugeAtomicLongArray.memoryEstimation(-1L));
+    }
 
     @Test
     void testSetAll() {
@@ -448,6 +455,7 @@ final class HugeAtomicLongArrayTest {
 
     private void testArray(int size, ThrowingConsumer<HugeAtomicLongArray> block) {
         if (bool()) {
+            // FIXME enable once singleArray exists
 //            block.accept(singleArray(size));
             block.accept(pagedArray(size));
         } else {

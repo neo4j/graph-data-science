@@ -35,6 +35,10 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
         return HugeAtomicLongArraySon.of(size);
     }
 
+    static long memoryEstimation(long size) {
+        return HugeAtomicLongArraySon.memoryEstimation(size);
+    }
+
     /**
      * @return the long value at the given index (volatile)
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
