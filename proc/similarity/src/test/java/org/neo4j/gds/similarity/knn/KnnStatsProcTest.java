@@ -21,24 +21,42 @@ package org.neo4j.gds.similarity.knn;
 
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
+class KnnStatsProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a { id: 1, knn: 1.0 } )" +
+        ", (b { id: 2, knn: 2.0 } )" +
+        ", (c { id: 3, knn: 5.0 } )" +
+        ", (a)-[:IGNORE]->(b)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            KnnStatsProc.class,
+            GraphProjectProc.class
+        );
+    }
+
 
     private static Stream<Arguments> negativeGraphs() {
         return Stream.of(
@@ -50,15 +68,15 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     @Test
     void testStatsYields() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+        var createQuery = GdsCypher.call("graph")
             .graphProject()
             .withNodeProperty("knn")
             .loadEverything()
             .yields();
         runQuery(createQuery);
 
-        String query = GdsCypher
-            .call(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher
+            .call("graph")
             .algo("gds.knn")
             .statsMode()
             .addParameter("sudo", true)
@@ -110,7 +128,9 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     @Test
     void statsShouldNotHaveWriteProperties() {
-        String query = GdsCypher.call(GRAPH_NAME)
+        runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
+
+        String query = GdsCypher.call("myGraph")
             .algo("gds.knn")
             .statsMode()
             .addParameter("nodeProperties", List.of("knn"))
@@ -125,19 +145,19 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
             "writeProperty",
             "writeRelationshipType"
         );
+
         runQueryWithResultConsumer(query, result -> {
-            List<String> badResultColumns = result.columns()
-                .stream()
-                .filter(forbiddenResultColumns::contains)
-                .collect(Collectors.toList());
-            assertEquals(List.of(), badResultColumns);
-            assertTrue(result.hasNext(), "Result must not be empty.");
-            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-            List<String> badConfigKeys = config.keySet()
-                .stream()
-                .filter(forbiddenConfigKeys::contains)
-                .collect(Collectors.toList());
-            assertEquals(List.of(), badConfigKeys);
+            assertThat(result.columns())
+                .doesNotContainAnyElementsOf(forbiddenConfigKeys);
+
+            assertThat(result.hasNext())
+                .withFailMessage("Result must not be empty.")
+                .isTrue();
+
+            var row = result.next();
+            assertThat(row.get("configuration"))
+                .asInstanceOf(MAP)
+                .doesNotContainKeys(forbiddenConfigKeys);
         });
     }
 
@@ -159,15 +179,5 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
             .yields("similarityPairs");
 
         assertCypherResult(algoQuery, List.of(Map.of("similarityPairs", 2L)));
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStatsConfig, ?>> getProcedureClazz() {
-        return KnnStatsProc.class;
-    }
-
-    @Override
-    public KnnStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnStatsConfig.of(mapWrapper);
     }
 }

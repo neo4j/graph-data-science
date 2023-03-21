@@ -19,62 +19,55 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutablePropertyMapping;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.WriteRelationshipWithPropertyTest;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
-import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, KnnWriteConfig, Knn.Result> {
+class KnnWriteProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnWriteConfig, ?>> getProcedureClazz() {
-        return KnnWriteProc.class;
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a { id: 1, knn: 1.0 } )" +
+        ", (b { id: 2, knn: 2.0 } )" +
+        ", (c { id: 3, knn: 5.0 } )" +
+        ", (a)-[:IGNORE]->(b)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            KnnWriteProc.class,
+            GraphProjectProc.class
+        );
+
     }
 
-    @Override
-    public KnnWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnWriteConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        var map = super.createMinimalConfig(mapWrapper);
-        if (!map.containsKey("writeProperty")) {
-            map = map.withString("writeProperty", writeProperty());
-        }
-        if (!map.containsKey("writeRelationshipType")) {
-            map = map.withString("writeRelationshipType", writeRelationshipType());
-        }
-        return map;
-    }
 
     @Test
     void shouldWriteResults() {
-        String query = GdsCypher.call(GRAPH_NAME)
+        runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
+
+        var query = GdsCypher.call("myGraph")
             .algo("gds.knn")
             .writeMode()
             .addParameter("sudo", true)
@@ -87,43 +80,30 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(3, row.getNumber("nodesCompared").longValue());
-            assertEquals(3, row.getNumber("relationshipsWritten").longValue());
-            assertEquals(37, row.getNumber("nodePairsConsidered").longValue());
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
+            assertThat(row.getNumber("nodesCompared")).asInstanceOf(LONG).isEqualTo(3);
+            assertThat(row.getNumber("relationshipsWritten")).asInstanceOf(LONG).isEqualTo(3);
+            assertThat(row.getNumber("nodePairsConsidered")).asInstanceOf(LONG).isEqualTo(37);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+            assertThat(row.getNumber("ranIterations")).asInstanceOf(LONG).isEqualTo(1);
+
 
             assertUserInput(row, "writeRelationshipType", "SIMILAR");
             assertUserInput(row, "writeProperty", "score");
-            assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-            assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
 
-            Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
-            assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
-            assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
-            assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
-            assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
-            assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
-            assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
-            assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
-            assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
-            assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
-            assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
-            assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
-            assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
-            assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
-            assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
+            assertThat(row.getNumber("computeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("preProcessingMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("writeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("postProcessingMillis")).asInstanceOf(LONG).isEqualTo(-1);
 
-            assertThat(
-                "Missing postProcessingMillis",
-                -1L,
-                equalTo(row.getNumber("postProcessingMillis").longValue())
-            );
+            assertThat(row.get("similarityDistribution"))
+                .asInstanceOf(MAP)
+                .hasSize(14)
+                .containsOnlyKeys("min", "max", "mean", "stdDev", "p1", "p5", "p10", "p25", "p50", "p75", "p90", "p95", "p99", "p100")
+                .allSatisfy((key, value) -> assertThat(value).asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(0d));
+
         });
 
-        String resultGraphName = "simGraph";
-        String loadQuery = GdsCypher.call(resultGraphName)
+        var loadQuery = GdsCypher.call("simGraph")
             .graphProject()
             .withAnyLabel()
             .withNodeProperty("id")
@@ -135,7 +115,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
         assertGraphEquals(
             fromGdl("(a {id: 1})-[:SIMILAR {w: 0.5}]->(b {id: 2}), (b)-[:SIMILAR {w: 0.5}]->(a), (c {id: 3})-[:SIMILAR {w: 0.25}]->(b)"),
-            GraphStoreCatalog.get(getUsername(), databaseId(), resultGraphName).graphStore().getUnion()
+            GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "simGraph").graphStore().getUnion()
         );
     }
 
@@ -165,39 +145,6 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .yields("relationshipsWritten");
 
         runQueryWithRowConsumer(query, row -> assertEquals(3, row.getNumber("relationshipsWritten").longValue()));
-    }
-
-    @Test
-    void testProgressTracking() {
-        var graphName = "undirectedGraph";
-
-        var graphCreateQuery = GdsCypher.call(graphName)
-            .graphProject()
-            .withAnyLabel()
-            .withNodeProperty("knn")
-            .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
-            .yields();
-
-        runQuery(graphCreateQuery);
-
-        applyOnProcedure(proc -> {
-            var pathProc = ((KnnWriteProc) proc);
-
-            var taskStore = new GlobalTaskStore();
-
-            pathProc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(
-                getUsername(),
-                taskStore,
-                jobId
-            ));
-
-            pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());
-
-            Assertions.assertThat(taskStore.query().map(TaskStore.UserTask::task).map(Task::description)).containsExactlyInAnyOrder(
-                "KnnWriteProc :: Relationships :: Write",
-                "Knn"
-            );
-        });
     }
 
     @Test
@@ -249,36 +196,5 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             ),
             knnGraph
         );
-    }
-
-    @Override
-    public String writeRelationshipType() {
-        return "KNN_REL";
-    }
-
-    @Override
-    public String writeProperty() {
-        return "similarity";
-    }
-
-    @Override
-    public void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {
-        var nodeProperties = config.get("nodeProperties");
-        if (nodeProperties != null) {
-            Iterable<String> properties = (List<String>) nodeProperties;
-            for (String property : properties) {
-                runQuery(
-                    graphDb(),
-                    "CALL db.createProperty($prop)",
-                    Map.of("prop", property)
-                );
-                storeLoaderBuilder.addNodeProperty(
-                    ImmutablePropertyMapping.builder()
-                        .propertyKey(property)
-                        .defaultValue(DefaultValue.forDouble())
-                        .build()
-                );
-            }
-        }
     }
 }

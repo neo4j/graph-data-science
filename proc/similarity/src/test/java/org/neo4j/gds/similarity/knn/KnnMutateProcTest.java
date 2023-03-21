@@ -19,20 +19,16 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutablePropertyMapping;
-import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -44,60 +40,36 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
-    implements MutateRelationshipWithPropertyTest<Knn, KnnMutateConfig, Knn.Result> {
+class KnnMutateProcTest extends BaseProcTest {
 
-    @Override
-    public String mutateRelationshipType() {
-        return "SIMILAR";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a { id: 1, knn: 1.0 } )" +
+        ", (b { id: 2, knn: 2.0 } )" +
+        ", (c { id: 3, knn: 5.0 } )" +
+        ", (a)-[:IGNORE]->(b)";
 
-    @Override
-    public String mutateProperty() {
-        return "score";
-    }
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            KnnMutateProc.class,
+            GraphProjectProc.class
+        );
 
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
+        String graphCreateQuery = GdsCypher.call("myGraph")
+            .graphProject()
+            .withAnyLabel()
+            .withNodeProperty("knn")
+            .withRelationshipType("IGNORE")
+            .yields();
 
-    @Override
-    public String expectedMutatedGraph() {
-        return "  (a { knn: 1.0 } )" +
-               ", (b { knn: 2.0 } )" +
-               ", (c { knn: 5.0 } )" +
-               ", (a)-[]->(b)" +
-               ", (a)-[:SIMILAR {w: 0.5}]->(b)" +
-               ", (b)-[:SIMILAR {w: 0.5}]->(a)" +
-               ", (c)-[:SIMILAR {w: 0.25}]->(b)";
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig, ?>> getProcedureClazz() {
-        return KnnMutateProc.class;
-    }
-
-    @Override
-    public KnnMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        var map = super.createMinimalConfig(mapWrapper);
-        if (!map.containsKey("mutateProperty")) {
-            map = map.withString("mutateProperty", mutateProperty());
-        }
-        if (!map.containsKey("mutateRelationshipType")) {
-            map = map.withString("mutateRelationshipType", mutateRelationshipType());
-        }
-        return map;
+        runQuery(graphCreateQuery);
     }
 
     @Test
     void shouldMutateResults() {
-        String query = GdsCypher.call(GRAPH_NAME)
+        String query = GdsCypher.call("myGraph")
             .algo("gds.knn")
             .mutateMode()
             .addParameter("sudo", true)
@@ -105,8 +77,8 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("topK", 1)
             .addParameter("randomSeed", 42)
             .addParameter("concurrency", 1)
-            .addParameter("mutateRelationshipType", mutateRelationshipType())
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateRelationshipType", "SIMILAR")
+            .addParameter("mutateProperty", "score")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -146,12 +118,6 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         });
     }
 
-
-    @Override
-    @Test
-    @Disabled("This test does not work for KNN")
-    public void testGraphMutationOnFilteredGraph() {}
-
     @Test
     void shouldMutateUniqueRelationships() {
         var graphName = "undirectedGraph";
@@ -178,27 +144,6 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .yields("relationshipsWritten");
 
         runQueryWithRowConsumer(query, row -> assertEquals(3, row.getNumber("relationshipsWritten").longValue()));
-    }
-
-    @Override
-    public void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {
-        var nodeProperties = config.get("nodeProperties");
-        if (nodeProperties != null) {
-            Iterable<String> properties = (List<String>) nodeProperties;
-            for (String property : properties) {
-                runQuery(
-                    graphDb(),
-                    "CALL db.createProperty($prop)",
-                    Map.of("prop", property)
-                );
-                storeLoaderBuilder.addNodeProperty(
-                    ImmutablePropertyMapping.builder()
-                        .propertyKey(property)
-                        .defaultValue(DefaultValue.forDouble())
-                        .build()
-                );
-            }
-        }
     }
 
     @Test
