@@ -39,11 +39,11 @@ import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.DEFAULT_VAL
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.valueArrayType;
 
-final class PageArrayBuilder {
+final class PagedArrayBuilder {
 
     static final String PAGED_CLASS_NAME = "Paged";
 
-    private PageArrayBuilder() {}
+    private PagedArrayBuilder() {}
 
     static TypeSpec builder(
         TypeName interfaceType,
@@ -189,7 +189,7 @@ final class PageArrayBuilder {
             .addStatement("$T.range(0, lastPageIndex).forEach(idx -> pages[idx] = new $T[$N])", IntStream.class, valueType, pageSize)
             .addStatement("pages[lastPageIndex] = new $T[lastPageSize]", valueType)
             .addStatement("long memoryUsed = memoryEstimation(size)")
-            .addStatement("return new $N(size, pages, memoryUsed)", PageArrayBuilder.PAGED_CLASS_NAME)
+            .addStatement("return new $N(size, pages, memoryUsed)", PagedArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }
 

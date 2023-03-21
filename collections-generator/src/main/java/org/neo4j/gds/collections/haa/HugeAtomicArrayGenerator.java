@@ -68,7 +68,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             unaryOperatorType
         ));
 
-        builder.addType(PageArrayBuilder.builder(
+        builder.addType(PagedArrayBuilder.builder(
             elementType,
             className,
             valueType,
@@ -104,7 +104,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .beginControlFlow("if (size <= $T.MAX_ARRAY_LENGTH)", PAGE_UTIL)
             .addStatement("return $N.of(size)", SingleArrayBuilder.SINLGE_CLASS_NAME)
             .endControlFlow()
-            .addStatement("return $N.of(size)", PageArrayBuilder.PAGED_CLASS_NAME)
+            .addStatement("return $N.of(size)", PagedArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }
 
@@ -117,7 +117,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .beginControlFlow("if (size <= $T.MAX_ARRAY_LENGTH)", PAGE_UTIL)
             .addStatement("return $N.memoryEstimation(size)", SingleArrayBuilder.SINLGE_CLASS_NAME)
             .endControlFlow()
-            .addStatement("return $N.memoryEstimation(size)", PageArrayBuilder.PAGED_CLASS_NAME)
+            .addStatement("return $N.memoryEstimation(size)", PagedArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }
 }

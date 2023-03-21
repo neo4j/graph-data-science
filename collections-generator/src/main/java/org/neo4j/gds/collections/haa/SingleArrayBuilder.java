@@ -37,7 +37,7 @@ import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.DEFAULT_VAL
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.arrayHandleField;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.valueArrayType;
-import static org.neo4j.gds.collections.haa.PageArrayBuilder.PAGED_CLASS_NAME;
+import static org.neo4j.gds.collections.haa.PagedArrayBuilder.PAGED_CLASS_NAME;
 
 final class SingleArrayBuilder {
 
