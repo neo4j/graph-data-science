@@ -223,7 +223,7 @@ public final class AdjacencyBuffer {
                 startOffset = endOffset;
             }
         } finally {
-            if (lock != null && lock.isHeldByCurrentThread()) {
+            if (lock != null) {
                 lock.unlock();
             }
         }
