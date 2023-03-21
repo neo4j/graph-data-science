@@ -19,15 +19,8 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,101 +28,21 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.ml.splitRelationships.mutate", description = "Splits a graph into holdout and remaining relationship types and adds them to the graph.", executionMode = MUTATE_RELATIONSHIP)
-public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships, SplitResult, SplitRelationshipsMutateProc.MutateResult, SplitRelationshipsMutateConfig> {
+public class SplitRelationshipsMutateProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ)
     @Description("Splits a graph into holdout and remaining relationship types and adds them to the graph.")
-    public Stream<SplitRelationshipsMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return mutate(computationResult);
+        return new ProcedureExecutor<>(
+            new SplitRelationshipsMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
-    @Override
-    protected SplitRelationshipsMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return SplitRelationshipsMutateConfig.of(config);
-    }
 
-    @Override
-    public GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
-        return new SplitRelationshipsAlgorithmFactory();
-
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new MutateResult.Builder();
-    }
-
-    @Override
-    public MutateComputationResultConsumer<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>(this::resultBuilder) {
-            @Override
-            protected void updateGraphStore(
-                AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
-                ExecutionContext executionContext
-            ) {
-                var graphStore = computationResult.graphStore();
-                var splitResult = computationResult.result();
-                var selectedRels = splitResult.selectedRels().build();
-                var remainingRels = splitResult.remainingRels().build();
-                var config = computationResult.config();
-
-                graphStore.addRelationshipType(remainingRels);
-                graphStore.addRelationshipType(selectedRels);
-
-                long holdoutWritten = selectedRels.topology().elementCount();
-                long remainingWritten = remainingRels.topology().elementCount();
-                resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
-            }
-        };
-    }
-
-    @SuppressWarnings("unused")
-    public static class MutateResult {
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> configuration;
-
-        MutateResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long relationshipsWritten,
-            Map<String, Object> configuration
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.relationshipsWritten = relationshipsWritten;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends AbstractResultBuilder<SplitRelationshipsMutateProc.MutateResult> {
-
-            @Override
-            public SplitRelationshipsMutateProc.MutateResult build() {
-                return new SplitRelationshipsMutateProc.MutateResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    mutateMillis,
-                    relationshipsWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }
