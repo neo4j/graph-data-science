@@ -33,7 +33,6 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
     T build(HugeIntArray degrees, HugeLongArray offsets);
 
-    // TODO: extra interface for the positional allocator
     interface Allocator<PAGE> extends AutoCloseable {
 
         long allocate(int length, Slice<PAGE> into);
