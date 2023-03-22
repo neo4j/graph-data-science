@@ -43,8 +43,8 @@ public final class AdjacencyPacker2 {
     static final int BYTE_ARRAY_BASE_OFFSET = UnsafeUtil.arrayBaseOffset(byte[].class);
 
     public static long compress(
-        AdjacencyListBuilder.Allocator<Long> allocator,
-        AdjacencyListBuilder.Slice<Long> slice,
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
         int length,
         Aggregation aggregation,
@@ -55,8 +55,8 @@ public final class AdjacencyPacker2 {
     }
 
     static long compressWithProperties(
-        AdjacencyListBuilder.Allocator<Long> allocator,
-        AdjacencyListBuilder.Slice<Long> slice,
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
         long[][] properties,
         int length,
@@ -81,8 +81,8 @@ public final class AdjacencyPacker2 {
     }
 
     private static long deltaCompress(
-        AdjacencyListBuilder.Allocator<Long> allocator,
-        AdjacencyListBuilder.Slice<Long> slice,
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
         int length,
         Aggregation aggregation,
@@ -98,8 +98,8 @@ public final class AdjacencyPacker2 {
     }
 
     private static long preparePacking(
-        AdjacencyListBuilder.Allocator<Long> allocator,
-        AdjacencyListBuilder.Slice<Long> slice,
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
         int length
     ) {
@@ -122,14 +122,13 @@ public final class AdjacencyPacker2 {
             header[blockIdx] = (byte) bits;
         }
 
-        return runPacking(allocator, slice, values, length, header, bytes);
+        return runPacking(allocator, slice, values, header, bytes);
     }
 
     private static long runPacking(
-        AdjacencyListBuilder.Allocator<Long> allocator,
-        AdjacencyListBuilder.Slice<Long> slice,
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length,
         byte[] header,
         long requiredBytes
     ) {
@@ -146,8 +145,8 @@ public final class AdjacencyPacker2 {
 
         long adjacencyOffset = allocator.allocate(allocationSize, slice);
 
-        long mem = slice.slice();
-        long ptr = mem + slice.offset();
+        Address address = slice.slice();
+        long ptr = address.address() + slice.offset();
 
         // write header
         UnsafeUtil.copyMemory(header, BYTE_ARRAY_BASE_OFFSET, null, ptr, headerSize);

@@ -44,7 +44,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
     public static AdjacencyCompressorFactory factory(
         LongSupplier nodeCountSupplier,
-        AdjacencyListBuilderFactory<Long, ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
+        AdjacencyListBuilderFactory<Address, ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         boolean noAggregation
@@ -61,11 +61,11 @@ public final class PackedCompressor implements AdjacencyCompressor {
         );
     }
 
-    static class Factory extends AbstractAdjacencyCompressorFactory<Long, long[]> {
+    static class Factory extends AbstractAdjacencyCompressorFactory<Address, long[]> {
 
         Factory(
             LongSupplier nodeCountSupplier,
-            AdjacencyListBuilder<Long, ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<Address, ? extends AdjacencyList> adjacencyBuilder,
             AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             boolean noAggregation,
             Aggregation[] aggregations
@@ -81,7 +81,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
         @Override
         protected AdjacencyCompressor createCompressorFromInternalState(
-            AdjacencyListBuilder<Long, ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<Address, ? extends AdjacencyList> adjacencyBuilder,
             AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             boolean noAggregation,
             Aggregation[] aggregations,
@@ -173,7 +173,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 //        }
     }
 
-    private final AdjacencyListBuilder.Allocator<Long> adjacencyAllocator;
+    private final AdjacencyListBuilder.Allocator<Address> adjacencyAllocator;
     private final @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator;
     private final AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators;
     private final HugeIntArray adjacencyDegrees;
@@ -183,12 +183,12 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final Aggregation[] aggregations;
 
     private final LongArrayBuffer buffer;
-    private final ModifiableSlice<Long> adjacencySlice;
+    private final ModifiableSlice<Address> adjacencySlice;
     private final ModifiableSlice<long[]> propertySlice;
     private final MutableInt degree;
 
     private PackedCompressor(
-        AdjacencyListBuilder.Allocator<Long> adjacencyAllocator,
+        AdjacencyListBuilder.Allocator<Address> adjacencyAllocator,
         @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator,
         AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators,
         HugeIntArray adjacencyDegrees,

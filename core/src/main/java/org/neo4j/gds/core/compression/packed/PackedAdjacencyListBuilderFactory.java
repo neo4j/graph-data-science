@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.compression.varlong;
+package org.neo4j.gds.core.compression.packed;
 
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
-import org.neo4j.gds.core.compression.packed.PackedAdjacencyList;
-import org.neo4j.gds.core.compression.packed.PackedAdjacencyListBuilder;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyList;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyListBuilder;
 
-public final class PackedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<Long, PackedAdjacencyList, long[], UncompressedAdjacencyList> {
+public final class PackedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<Address, PackedAdjacencyList, long[], UncompressedAdjacencyList> {
 
     public static PackedAdjacencyListBuilderFactory of() {
         return new PackedAdjacencyListBuilderFactory();

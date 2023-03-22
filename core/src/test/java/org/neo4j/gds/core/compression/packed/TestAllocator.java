@@ -31,12 +31,12 @@ import org.neo4j.memory.EmptyMemoryTracker;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
+class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     private Address address;
 
-    public static void test(BiConsumer<AdjacencyListBuilder.Allocator<Long>, AdjacencyListBuilder.Slice<Long>> code) {
+    public static void test(BiConsumer<AdjacencyListBuilder.Allocator<Address>, AdjacencyListBuilder.Slice<Address>> code) {
         try (var allocator = new TestAllocator()) {
-            var slice = ModifiableSlice.<Long>create();
+            var slice = ModifiableSlice.<Address>create();
             code.accept(allocator, slice);
         }
     }
@@ -59,9 +59,10 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
             );
 
             var pages = new long[]{degree.intValue()};
+            var allocationSizes = new int[]{Math.toIntExact(slice.slice().bytes())};
             var degrees = HugeIntArray.of(degree.intValue());
             var offsets = HugeLongArray.of(offset);
-            var list = new PackedAdjacencyList(pages, degrees, offsets);
+            var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
 
             code.accept(list);
         });
@@ -71,7 +72,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
         long[] values,
         int length,
         Aggregation aggregation,
-        BiConsumer<DecompressingCursor, AdjacencyListBuilder.Slice<Long>> code
+        BiConsumer<DecompressingCursor, AdjacencyListBuilder.Slice<Address>> code
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
@@ -84,7 +85,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
                 degree
             );
 
-            var pages = new long[]{slice.slice()};
+            var pages = new long[]{slice.slice().address()};
             var cursor = new DecompressingCursor(pages);
             cursor.init(offset, degree.intValue());
 
@@ -93,11 +94,11 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
     }
 
     @Override
-    public long allocate(int length, AdjacencyListBuilder.Slice<Long> into) {
-        var slice = (ModifiableSlice<Long>) into;
+    public long allocate(int length, AdjacencyListBuilder.Slice<Address> into) {
+        var slice = (ModifiableSlice<Address>) into;
         long ptr = UnsafeUtil.allocateMemory(length, EmptyMemoryTracker.INSTANCE);
         this.address = Address.createAddress(ptr, length);
-        slice.setSlice(ptr);
+        slice.setSlice(address);
         slice.setOffset(0);
         slice.setLength(length);
         return 0;
@@ -105,7 +106,6 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
 
     @Override
     public void close() {
-        // deallocate
-        this.address.run();
+        this.address.free();
     }
 }

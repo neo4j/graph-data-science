@@ -25,17 +25,23 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.lang.ref.Cleaner;
+
 public class PackedAdjacencyList implements AdjacencyList {
 
-    // TODO: HLA?
-    private long[] pages;
-    private HugeIntArray degrees;
-    private HugeLongArray offsets;
+    private static final Cleaner CLEANER = Cleaner.create();
 
-    PackedAdjacencyList(long[] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    private final long[] pages;
+    private final HugeIntArray degrees;
+    private final HugeLongArray offsets;
+
+    private final Cleaner.Cleanable cleanable;
+
+    PackedAdjacencyList(long[] pages, int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
     }
 
     @Override
@@ -74,6 +80,42 @@ public class PackedAdjacencyList implements AdjacencyList {
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
         return new DecompressingCursor(this.pages);
+    }
+
+    /**
+     * Free the underlying memory.
+     * <p>
+     * This list cannot be used afterwards.
+     * <p>
+     * When this list is garbage collected, the memory is freed as well,
+     * so it is not required to call this method to prevent memory leaks.
+     */
+    void free() {
+        this.cleanable.clean();
+    }
+
+    private static class AdjacencyListCleaner implements Runnable {
+        private final long[] pages;
+        private final int[] allocationSizes;
+
+        AdjacencyListCleaner(long[] pages, int[] allocationSizes) {
+            this.pages = pages;
+            this.allocationSizes = allocationSizes;
+        }
+
+        @Override
+        public void run() {
+            Address address = null;
+            for (int pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+                if (address == null) {
+                    address = Address.createAddress(pages[pageIdx], allocationSizes[pageIdx]);
+                } else {
+                    address.reset(pages[pageIdx], allocationSizes[pageIdx]);
+                }
+                address.free();
+                pages[pageIdx] = 0;
+            }
+        }
     }
 }
 

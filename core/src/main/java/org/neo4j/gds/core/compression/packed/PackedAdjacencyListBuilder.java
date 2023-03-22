@@ -27,11 +27,9 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
-import java.util.Arrays;
+public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Address, PackedAdjacencyList> {
 
-public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Long, PackedAdjacencyList> {
-
-    private final BumpAllocator<Long> builder;
+    private final BumpAllocator<Address> builder;
 
     public PackedAdjacencyListBuilder() {
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
@@ -43,44 +41,50 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Lo
     }
 
     @Override
-    public PositionalAllocator<Long> newPositionalAllocator() {
+    public PositionalAllocator<Address> newPositionalAllocator() {
         throw new UnsupportedOperationException("Packed adjacency lists do not support positional allocation.");
     }
 
     @Override
     public PackedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
-        Long[] intoPages = this.builder.intoPages();
+        Address[] intoPages = this.builder.intoPages();
         reorder(intoPages, offsets, degrees);
         long[] pages = new long[intoPages.length];
-        Arrays.setAll(pages, i -> intoPages[i]);
-        return new PackedAdjacencyList(pages, degrees, offsets);
+        int[] allocationSizes = new int[intoPages.length];
+        for (int i = 0; i < intoPages.length; i++) {
+            Address address = intoPages[i];
+            pages[i] = address.address();
+            allocationSizes[i] = Math.toIntExact(address.bytes());
+        }
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
     }
 
-    private enum Factory implements BumpAllocator.Factory<Long> {
+    private enum Factory implements BumpAllocator.Factory<Address> {
         INSTANCE;
 
         @Override
-        public Long[] newEmptyPages() {
-            return new Long[0];
+        public Address[] newEmptyPages() {
+            return new Address[0];
         }
 
         @Override
-        public Long newPage(int length) {
-            return UnsafeUtil.allocateMemory(length, EmptyMemoryTracker.INSTANCE);
+        public Address newPage(int length) {
+            long ptr = UnsafeUtil.allocateMemory(length, EmptyMemoryTracker.INSTANCE);
+            return Address.createAddress(ptr, length);
         }
     }
 
-    static final class Allocator implements AdjacencyListBuilder.Allocator<Long> {
+    static final class Allocator implements AdjacencyListBuilder.Allocator<Address> {
 
-        private final BumpAllocator.LocalAllocator<Long> allocator;
+        private final BumpAllocator.LocalAllocator<Address> allocator;
 
-        private Allocator(BumpAllocator.LocalAllocator<Long> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<Address> allocator) {
             this.allocator = allocator;
         }
 
         @Override
-        public long allocate(int length, Slice<Long> into) {
-            return this.allocator.insertInto(length, (ModifiableSlice<Long>) into);
+        public long allocate(int length, Slice<Address> into) {
+            return this.allocator.insertInto(length, (ModifiableSlice<Address>) into);
         }
 
         @Override

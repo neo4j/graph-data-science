@@ -45,6 +45,9 @@ public final class DecompressingCursor implements AdjacencyCursor {
         int idxInPage = PageUtil.indexInPage(offset, BumpAllocator.PAGE_MASK);
 
         long pagePtr = this.pages[pageIndex];
+        if (pagePtr == 0) {
+            throw new IllegalStateException("This page has already been freed.");
+        }
         long listPtr = pagePtr + idxInPage;
         this.maxTargets = degree;
         this.currentPosition = 0;

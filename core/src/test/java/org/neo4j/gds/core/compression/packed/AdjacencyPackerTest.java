@@ -92,7 +92,7 @@ class AdjacencyPackerTest {
             int maxBytes = 8 /* aligned header size */ + maxBytesPerBlock;
 
             assertThat(slice.length()).isLessThanOrEqualTo(maxBytes);
-            assertThat(slice.slice()).isNotZero();
+            assertThat(slice.slice().address()).isNotZero();
 
             long[] decompressed = decompressCursor(cursor);
 
@@ -109,7 +109,7 @@ class AdjacencyPackerTest {
             assertThat(slice.length())
                 .as("compressed exceeds original size, seed = %d", random.seed())
                 .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
-            assertThat(slice.slice()).isNotZero();
+            assertThat(slice.slice().address()).isNotZero();
 
             Arrays.sort(data);
             var decompressed = decompressCursor(cursor);
@@ -135,7 +135,7 @@ class AdjacencyPackerTest {
             assertThat(slice.length())
                 .as("compression uses more space than expected, seed = %s", random.seed())
                 .isLessThanOrEqualTo(maxBytes);
-            assertThat(slice.slice()).isNotZero();
+            assertThat(slice.slice().address()).isNotZero();
 
             int degree = cursor.remaining();
             long[] expectedData = Arrays.stream(data).distinct().toArray();
@@ -158,7 +158,7 @@ class AdjacencyPackerTest {
             assertThat(slice.length())
                 .as("compressed exceeds original size, seed = %d", random.seed())
                 .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
-            assertThat(slice.slice()).isNotZero();
+            assertThat(slice.slice().address()).isNotZero();
 
             var decompressed = decompressCursor(cursor);
 
@@ -184,7 +184,7 @@ class AdjacencyPackerTest {
             //        assertThat(compressed.bytesUsed())
             //            .as("compressed exceeds original size")
             //            .isLessThanOrEqualTo((long) valueCount * Long.BYTES);
-            assertThat(slice.slice()).isNotZero();
+            assertThat(slice.slice().address()).isNotZero();
 
             var decompressed = decompressCursor(cursor);
 
@@ -213,7 +213,7 @@ class AdjacencyPackerTest {
 //                .as("compressed exceeds original size, seed = %d", random.seed())
 //                .isLessThanOrEqualTo(valueCount * Long.BYTES);
 
-            assertThat(slice.slice()).isNotZero();
+            assertThat(slice.slice().address()).isNotZero();
 
             var decompressed = decompressCursor(cursor);
 
@@ -223,25 +223,4 @@ class AdjacencyPackerTest {
                 .containsExactly(data);
         });
     }
-
-    // TODO: Move to PackedAdjacencyListTest when this is implemented
-//    @Test
-//    void preventDoubleFree() {
-//        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
-//        var compressed = AdjacencyPacker.compress(data, 0, data.length);
-//        assertThatCode(compressed::free).doesNotThrowAnyException();
-//        assertThatThrownBy(compressed::free)
-//            .isInstanceOf(IllegalStateException.class)
-//            .hasMessage("This compressed memory has already been freed.");
-//    }
-//
-//    @Test
-//    void preventUseAfterFree() {
-//        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
-//        var compressed = AdjacencyPacker.compress(data, 0, data.length);
-//        assertThatCode(compressed::free).doesNotThrowAnyException();
-//        assertThatThrownBy(() -> AdjacencyPacker.decompress(compressed))
-//            .isInstanceOf(IllegalStateException.class)
-//            .hasMessage("This compressed memory has already been freed.");
-//    }
 }

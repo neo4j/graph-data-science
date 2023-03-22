@@ -28,9 +28,8 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
  * An address to some off-heap memory.
  * <p>
  * Separated address state to register with the {@link java.lang.ref.Cleaner}.
- * This is an auxiliary class to prevent accidental access to private members.
  */
-final class Address implements Runnable {
+public final class Address implements Runnable {
 
     static Address EMPTY = new Address(0, 0);
 
@@ -40,16 +39,36 @@ final class Address implements Runnable {
     );
 
     private volatile long address;
-    private final long bytes;
+    private long bytes;
 
     private Address(long address, long bytes) {
         this.address = address;
         this.bytes = bytes;
     }
 
-    static Address createAddress(long address, long bytes) {
+    public static Address createAddress(long address, long bytes) {
         requirePointerIsValid(address);
         return new Address(address, bytes);
+    }
+
+    public void reset(long address, long bytes) {
+        requirePointerIsValid(address);
+        long previousAddress = ADDRESS.getAndSet(this, address);
+        if (previousAddress != 0) {
+            throw new IllegalStateException("This address was not freed before being re-used.");
+        }
+        this.bytes = bytes;
+    }
+
+    /**
+     * Free the underlying memory.
+     * <p>
+     * The memory must not have been already freed.
+     *
+     * @throws IllegalStateException if the memory has already been freed.
+     */
+    public void free() {
+        this.run();
     }
 
     @Override
@@ -63,7 +82,7 @@ final class Address implements Runnable {
      * @return a valid (non zero) address.
      * @throws IllegalStateException if the address is NULL.
      */
-    long address() {
+    public long address() {
         var address = ADDRESS.get(this);
         requirePointerIsValid(address);
         return address;
