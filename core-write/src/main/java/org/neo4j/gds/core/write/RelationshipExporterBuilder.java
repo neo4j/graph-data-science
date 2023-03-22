@@ -20,10 +20,12 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
 public abstract class RelationshipExporterBuilder<T extends RelationshipExporter> {
@@ -35,6 +37,7 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     protected Graph graph;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
+    protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
 
     public abstract T build();
 
@@ -69,6 +72,11 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
      */
     public RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
+        return this;
+    }
+
+    public RelationshipExporterBuilder<T> withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+        this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
 

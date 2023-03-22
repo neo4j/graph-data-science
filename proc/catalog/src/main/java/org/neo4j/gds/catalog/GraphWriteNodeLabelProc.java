@@ -74,6 +74,7 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
             var nodeLabelExporter = nodeLabelExporterBuilder
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
+                .withArrowConnectionInfo(procedureConfig.arrowConnectionInfo())
                 .parallel(Pools.DEFAULT, procedureConfig.concurrency())
                 .build();
 

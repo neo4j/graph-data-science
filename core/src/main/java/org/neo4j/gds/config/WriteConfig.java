@@ -23,10 +23,15 @@ import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface WriteConfig extends ConcurrencyConfig {
 
@@ -45,6 +50,9 @@ public interface WriteConfig extends ConcurrencyConfig {
             .validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#parse")
+    Optional<ArrowConnectionInfo> arrowConnectionInfo();
+
     @Configuration.GraphStoreValidationCheck
     @Value.Default
     default void validateGraphIsSuitableForWrite(
@@ -54,6 +62,30 @@ public interface WriteConfig extends ConcurrencyConfig {
     ) {
         if (!graphStore.capabilities().canWriteToDatabase()) {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
+        }
+    }
+
+    @ValueClass
+    interface ArrowConnectionInfo {
+        String hostname();
+        int port();
+        String username();
+        String password();
+
+        static ArrowConnectionInfo parse(Object input) {
+            if (input instanceof Map) {
+                var map = (Map<String, String>) input;
+                var hostname = map.get("hostname");
+                var port = Integer.parseInt(map.get("port"));
+                var username = map.get("username");
+                var password = map.get("parssword");
+
+                return ImmutableArrowConnectionInfo.of(hostname, port, username, password);
+            }
+            throw new IllegalArgumentException(formatWithLocale(
+                "Expected input to be of type `map`, but got `%s`",
+                input.getClass().getSimpleName()
+            ));
         }
     }
 }
