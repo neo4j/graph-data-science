@@ -31,6 +31,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
@@ -104,6 +105,10 @@ class KnnMutateProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .as("Missing postProcessingMillis")
                 .isEqualTo(-1L);
+
+            assertThat(row.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
         });
 
         assertThat(rowCount)
@@ -193,6 +198,7 @@ class KnnMutateProcTest extends BaseProcTest {
         );
     }
 
+    // FIXME: do this really belong in the procedure test?
     @Test
     void shouldMutateWithSimilarityThreshold() {
         String relationshipType = "SIMILAR";
@@ -232,7 +238,7 @@ class KnnMutateProcTest extends BaseProcTest {
 
     @Test
     void shouldMutateWithFilteredNodesAndMultipleProperties() {
-        String nodeCreateQuery =
+        var nodeCreateQuery =
             "CREATE " +
             "  (alice:Person {age: 24, knn: 24})" +
             " ,(carol:Person {age: 24, knn: 24})" +
@@ -242,7 +248,7 @@ class KnnMutateProcTest extends BaseProcTest {
 
         runQuery(nodeCreateQuery);
 
-        String createQuery = GdsCypher.call("graph")
+        var createQuery = GdsCypher.call("graph")
             .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
@@ -253,10 +259,10 @@ class KnnMutateProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
-        String relationshipType = "SIMILAR";
-        String relationshipProperty = "score";
+        var relationshipType = "SIMILAR";
+        var relationshipProperty = "score";
 
-        String algoQuery = GdsCypher.call("graph")
+        var algoQuery = GdsCypher.call("graph")
             .algo("gds.knn")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))
@@ -265,7 +271,7 @@ class KnnMutateProcTest extends BaseProcTest {
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
+        var mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(
