@@ -27,6 +27,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.collections.CollectionStep;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
@@ -115,9 +116,17 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .returns(TypeName.LONG)
             .addStatement("assert size >= 0")
             .beginControlFlow("if (size <= $T.MAX_ARRAY_LENGTH)", PAGE_UTIL)
-            .addStatement("return $N.memoryEstimation(size)", SingleArrayBuilder.SINLGE_CLASS_NAME)
+            .addStatement(
+                "return $1T.sizeOfInstance($2N.class) + $2N.memoryEstimation(size)",
+                MemoryUsage.class,
+                SingleArrayBuilder.SINLGE_CLASS_NAME
+            )
             .endControlFlow()
-            .addStatement("return $N.memoryEstimation(size)", PagedArrayBuilder.PAGED_CLASS_NAME)
+            .addStatement(
+                "return $1T.sizeOfInstance($2N.class) + $2N.memoryEstimation(size)",
+                MemoryUsage.class,
+                PagedArrayBuilder.PAGED_CLASS_NAME
+            )
             .build();
     }
 }

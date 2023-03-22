@@ -72,7 +72,8 @@ final class SingleArrayBuilder {
 
         // instance methods
         builder.addMethod(getMethod(valueType, arrayHandle, page));
-        builder.addMethod(getAndAddMethod(valueType, arrayHandle, page));
+        builder.addMethod(getAndAddMethod(valueType, arrayHandle));
+        builder.addMethod(getAndReplaceMethod(valueType, arrayHandle));
         builder.addMethod(setMethod(valueType, arrayHandle, page));
         builder.addMethod(updateMethod(valueType, unaryOperatorType, arrayHandle, page));
         builder.addMethod(compareAndSetMethod(valueType, arrayHandle, page));
@@ -80,7 +81,7 @@ final class SingleArrayBuilder {
         builder.addMethod(newCursorMethod(valueType, page));
         builder.addMethod(sizeMethod(size));
         builder.addMethod(sizeOfMethod(valueType));
-        builder.addMethod(setAllMethod(page));
+        builder.addMethod(setAllMethod(valueType, page));
         builder.addMethod(releaseMethod(page, valueType));
         builder.addMethod(copyToMethod(interfaceType, valueType, page));
 
@@ -104,13 +105,11 @@ final class SingleArrayBuilder {
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addParameter(TypeName.LONG, "size")
             .returns(TypeName.LONG)
-            .addStatement("long instanceSize = $T.sizeOfInstance($N.class)", MemoryUsage.class, SINLGE_CLASS_NAME)
             .addStatement(
-                "long dataSize = $T.sizeOf$NArray((int) size)",
+                "return $T.sizeOf$NArray((int) size)",
                 MemoryUsage.class,
                 StringUtils.capitalize(valueType.toString())
             )
-            .addStatement("return instanceSize + dataSize")
             .build();
     }
 
@@ -152,14 +151,13 @@ final class SingleArrayBuilder {
 
     private static MethodSpec getAndAddMethod(
         TypeName valueType,
-        FieldSpec arrayHandle,
-        FieldSpec page
+        FieldSpec arrayHandle
     ) {
         return MethodSpec.methodBuilder("getAndAdd")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(TypeName.LONG, "index")
-            .addParameter(TypeName.LONG, "delta")
+            .addParameter(valueType, "delta")
             .returns(valueType)
             .addCode(CodeBlock.builder()
                 .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
@@ -172,6 +170,33 @@ final class SingleArrayBuilder {
                 )
                 .beginControlFlow("if (prev == current)")
                 .addStatement("return prev")
+                .endControlFlow()
+                .addStatement("prev = current")
+                .endControlFlow()
+                .build())
+            .build();
+    }
+
+    private static MethodSpec getAndReplaceMethod(
+        TypeName valueType,
+        FieldSpec arrayHandle
+    ) {
+        return MethodSpec.methodBuilder("getAndReplace")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(TypeName.LONG, "index")
+            .addParameter(valueType, "value")
+            .returns(valueType)
+            .addCode(CodeBlock.builder()
+                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
+                .beginControlFlow("while (true)")
+                .addStatement(
+                    "$1T current = ($1T) $2N.compareAndExchangeRelease(page, (int) index, prev, value)",
+                    valueType,
+                    arrayHandle
+                )
+                .beginControlFlow("if (prev == current)")
+                .addStatement("return current")
                 .endControlFlow()
                 .addStatement("prev = current")
                 .endControlFlow()
@@ -281,11 +306,11 @@ final class SingleArrayBuilder {
             .build();
     }
 
-    private static MethodSpec setAllMethod(FieldSpec page) {
+    private static MethodSpec setAllMethod(TypeName valueType, FieldSpec page) {
         return MethodSpec.methodBuilder("setAll")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(TypeName.LONG, "value")
+            .addParameter(valueType, "value")
             .returns(TypeName.VOID)
             .addStatement("$T.fill($N, value)", ClassName.get(Arrays.class), page)
             .addStatement("$T.storeStoreFence()", ClassName.get(VarHandle.class))

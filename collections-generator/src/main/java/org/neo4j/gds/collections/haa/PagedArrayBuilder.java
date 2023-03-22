@@ -70,7 +70,7 @@ final class PagedArrayBuilder {
         var arrayHandle = HugeAtomicArrayGenerator.arrayHandleField(valueType);
         var size = sizeField();
         var pages = pagesField(valueType);
-        var memoryUsed = memoryUsedField(valueType);
+        var memoryUsed = memoryUsedField();
         builder.addField(arrayHandle);
         builder.addField(size);
         builder.addField(pages);
@@ -85,6 +85,7 @@ final class PagedArrayBuilder {
         // instance methods
         builder.addMethod(getMethod(valueType, arrayHandle, pages, pageShift, pageMask));
         builder.addMethod(getAndAddMethod(valueType, arrayHandle, pages, pageShift, pageMask));
+        builder.addMethod(getAndReplaceMethod(valueType, arrayHandle, pages, pageShift, pageMask));
         builder.addMethod(setMethod(valueType, arrayHandle, pages, pageShift, pageMask));
         builder.addMethod(updateMethod(valueType, unaryOperatorType, arrayHandle, pages, pageShift, pageMask));
         builder.addMethod(compareAndSetMethod(valueType, arrayHandle, pages, pageShift, pageMask));
@@ -132,9 +133,9 @@ final class PagedArrayBuilder {
             .build();
     }
 
-    private static FieldSpec memoryUsedField(TypeName valueType) {
+    private static FieldSpec memoryUsedField() {
         return FieldSpec
-            .builder(valueType, "memoryUsed", Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.LONG, "memoryUsed", Modifier.PRIVATE, Modifier.FINAL)
             .build();
     }
 
@@ -151,7 +152,6 @@ final class PagedArrayBuilder {
             .addParameter(TypeName.LONG, "size")
             .returns(TypeName.LONG)
             .addStatement("assert size >= 0")
-            .addStatement("long instanceSize = $T.sizeOfInstance($N.class)", MemoryUsage.class, PAGED_CLASS_NAME)
             // TODO verify method on MemoryUsage exists during validation
             .addStatement(
                 "$T arrayMemoryEstimator = $T::sizeOf$NArray",
@@ -167,7 +167,6 @@ final class PagedArrayBuilder {
             .addStatement("long memoryUsed = $T.sizeOfObjectArray(numberOfPages)", MemoryUsage.class)
             .addStatement("memoryUsed += (numberOfFullPages * bytesPerPage)")
             .addStatement("memoryUsed += bytesOfLastPage")
-            .addStatement("memoryUsed += instanceSize")
             .addStatement("return memoryUsed")
             .build();
     }
@@ -244,7 +243,7 @@ final class PagedArrayBuilder {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(TypeName.LONG, "index")
-            .addParameter(TypeName.LONG, "delta")
+            .addParameter(valueType, "delta")
             .returns(valueType)
             .addCode(CodeBlock.builder()
                 .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
@@ -264,6 +263,43 @@ final class PagedArrayBuilder {
                 )
                 .beginControlFlow("if (prev == current)")
                 .addStatement("return prev")
+                .endControlFlow()
+                .addStatement("prev = current")
+                .endControlFlow()
+                .build())
+            .build();
+    }
+
+    private static MethodSpec getAndReplaceMethod(
+        TypeName valueType,
+        FieldSpec arrayHandle,
+        FieldSpec pages,
+        FieldSpec pageShift,
+        FieldSpec pageMask
+    ) {
+        return MethodSpec.methodBuilder("getAndReplace")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(TypeName.LONG, "index")
+            .addParameter(valueType, "value")
+            .returns(valueType)
+            .addCode(CodeBlock.builder()
+                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+                .addStatement(
+                    "int indexInPage = $T.indexInPage(index, $N)",
+                    PAGE_UTIL,
+                    pageMask
+                )
+                .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
+                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
+                .beginControlFlow("while (true)")
+                .addStatement(
+                    "$1T current = ($1T) $2N.compareAndExchangeRelease(page, indexInPage, prev, value)",
+                    valueType,
+                    arrayHandle
+                )
+                .beginControlFlow("if (current == prev)")
+                .addStatement("return current")
                 .endControlFlow()
                 .addStatement("prev = current")
                 .endControlFlow()
@@ -438,7 +474,7 @@ final class PagedArrayBuilder {
         return MethodSpec.methodBuilder("setAll")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(TypeName.LONG, "value")
+            .addParameter(valueType, "value")
             .returns(TypeName.VOID)
             .beginControlFlow("for ($T page: $N)", valueArrayType(valueType), pages)
             .addStatement("$T.fill(page, value)", ClassName.get(Arrays.class))

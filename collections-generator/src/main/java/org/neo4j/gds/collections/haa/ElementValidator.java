@@ -87,6 +87,8 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateGetMethod(e, elementType);
             case "getAndAdd":
                 return validateGetAndAddMethod(e, elementType);
+            case "getAndReplace":
+                return validateGetAndReplaceMethod(e, elementType);
             case "set":
                 return validateSetMethod(e, elementType);
             case "compareAndSet":
@@ -138,6 +140,17 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && isAbstract(e, messager);
     }
 
+    private boolean validateGetAndReplaceMethod(ExecutableElement e, TypeMirror elementType) {
+        return mustReturn(e, elementType.getKind(), messager)
+               && hasParameterCount(e, 2, messager)
+               && hasTypeKindAtIndex(e, 0, TypeKind.LONG, messager)
+               && hasTypeKindAtIndex(e, 1, elementType.getKind(), messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isAbstract(e, messager);
+    }
+
+
     private boolean validateSetMethod(ExecutableElement e, TypeMirror elementType) {
         return mustReturn(e, TypeKind.VOID, messager)
                && hasParameterCount(e, 2, messager)
@@ -160,7 +173,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     }
 
     private boolean validateCompareAndExchangeMethod(ExecutableElement e, TypeMirror elementType) {
-        return mustReturn(e, TypeKind.LONG, messager)
+        return mustReturn(e, elementType.getKind(), messager)
                && hasParameterCount(e, 3, messager)
                && hasTypeKindAtIndex(e, 0, TypeKind.LONG, messager)
                && hasTypeKindAtIndex(e, 1, elementType.getKind(), messager)
@@ -174,7 +187,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         return mustReturn(e, TypeKind.VOID, messager)
                && hasParameterCount(e, 2, messager)
                && hasTypeKindAtIndex(e, 0, TypeKind.LONG, messager)
-               && hasTypeKindAtIndex(e, 1, unaryOperatorType.getKind(), messager)
+               && hasTypeAtIndex(typeUtils, e, 1, unaryOperatorType, messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);

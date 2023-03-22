@@ -22,8 +22,8 @@ package org.neo4j.gds.collections.haa;
 import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
-@HugeAtomicArray(valueType = long.class, valueOperatorInterface = LongToLongFunction.class)
-public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
+@HugeAtomicArray(valueType = double.class, valueOperatorInterface = DoubleToDoubleFunction.class)
+public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
 
     /**
      * Creates a new array of the given size.
@@ -31,27 +31,27 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param size the length of the new array, the highest supported index is {@code size - 1}
      * @return new array
      */
-    static HugeAtomicLongArray of(long size) {
-        return HugeAtomicLongArraySon.of(size);
+    static HugeAtomicDoubleArray of(long size) {
+        return HugeAtomicDoubleArraySon.of(size);
     }
 
     static long memoryEstimation(long size) {
-        return HugeAtomicLongArraySon.memoryEstimation(size);
+        return HugeAtomicDoubleArraySon.memoryEstimation(size);
     }
 
     /**
      *
-     * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(HugeAtomicLongArray, long)}.
+     * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(org.neo4j.gds.collections.haa.HugeAtomicDoubleArray, long)}.
      */
-    default long defaultValue() {
-        return 0L;
+    default double defaultValue() {
+        return 0.0;
     }
 
     /**
      * @return the long value at the given index (volatile)
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    long get(long index);
+    double get(long index);
 
     /**
      * Atomically adds the given delta to the value at the given index.
@@ -60,21 +60,21 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param delta the value to add
      * @return the previous value at index
      */
-    long getAndAdd(long index, long delta);
+    double getAndAdd(long index, double delta);
 
     /**
      * Atomically returns the value at the given index and replaces it with the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    long getAndReplace(long index, long value);
+    double getAndReplace(long index, double value);
 
     /**
      * Sets the long value at the given index to the given value (volatile).
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    void set(long index, long value);
+    void set(long index, double value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -86,7 +86,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @return {@code true} if successful. False return indicates that
      *     the actual value was not equal to the expected value.
      */
-    boolean compareAndSet(long index, long expect, long update);
+    boolean compareAndSet(long index, double expect, double update);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -133,7 +133,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      *         which will be the same as the expected value if successful
      *         or the new current value if unsuccessful.
      */
-    long compareAndExchange(long index, long expect, long update);
+    double compareAndExchange(long index, double expect, double update);
 
     /**
      * Atomically updates the element at index {@code index} with the results
@@ -144,7 +144,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    void update(long index, LongToLongFunction updateFunction);
+    void update(long index, DoubleToDoubleFunction updateFunction);
 
     /**
      * Returns the length of this array.
@@ -165,7 +165,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * Set all entries in the array to the given value.
      * This method is not atomic!
      */
-    void setAll(long value);
+    void setAll(double value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -178,5 +178,5 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      */
     long release();
 
-    void copyTo(HugeAtomicLongArray dest, long length);
+    void copyTo(HugeAtomicDoubleArray dest, long length);
 }
