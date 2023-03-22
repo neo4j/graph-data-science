@@ -300,7 +300,7 @@ final class HugeAtomicLongArrayTest {
 
     @ParameterizedTest
     @CsvSource({
-        "0, 40", // FIXME 0 case should use single paged version
+        "0, 40",
         "100, 840",
         "100_000_000_000, 800_122_070_368",
     })
