@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -942,8 +943,12 @@ final class NodeSimilarityTest {
             .collect(Collectors.toSet());
 
         assertThat(result).containsExactlyInAnyOrder(expectedOutput);
+    }
 
-
+    @Test
+    void shouldThrowIfUpperIsSmaller() {
+        assertThatThrownBy(configBuilder().upperDegreeCutoff(3).degreeCutoff(4)::build)
+            .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
     }
 
 }

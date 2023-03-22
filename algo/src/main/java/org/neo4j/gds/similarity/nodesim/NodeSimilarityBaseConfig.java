@@ -154,6 +154,11 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
                 BOTTOM_N_KEY
             ));
         }
+        if (upperDegreeCutoff() < degreeCutoff()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of upperDegreeCutoff cannot be smaller than degreeCutoff"
+            ));
+        }
     }
 
 }
