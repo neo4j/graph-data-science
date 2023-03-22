@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -81,15 +82,29 @@ public interface WriteConfig extends ConcurrencyConfig {
         String username();
         String password();
 
-        static ArrowConnectionInfo parse(Object input) {
+        static @Nullable ArrowConnectionInfo parse(Object input) {
             if (input instanceof Map) {
                 var map = CypherMapWrapper.create((Map<String, Object>) input);
                 var hostname = map.getString("hostname").orElseThrow();
-                var port = Integer.parseInt(map.getString("port").orElseThrow());
+                var port = map.getLongAsInt("port");
                 var username = map.getString("username").orElseThrow();
                 var password = map.getString("password").orElseThrow();
 
                 return ImmutableArrowConnectionInfo.of(hostname, port, username, password);
+            }
+            if (input instanceof Optional<?>) {
+                Optional<?> optionalInput = (Optional<?>) input;
+                if (optionalInput.isEmpty()) {
+                    return null;
+                } else {
+                    var content = optionalInput.get();
+                    if (content instanceof ArrowConnectionInfo) {
+                        return (ArrowConnectionInfo) content;
+                    }
+                }
+            }
+            if (input instanceof ArrowConnectionInfo) {
+                return (ArrowConnectionInfo) input;
             }
             throw new IllegalArgumentException(formatWithLocale(
                 "Expected input to be of type `map`, but got `%s`",
