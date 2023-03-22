@@ -46,11 +46,11 @@ class CompressedTest {
         var data = LongStream.range(0, length).toArray();
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
 
-        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, cursor -> {
+        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
             assertThat(cursor.remaining()).isEqualTo(length);
 
-            long[] decompressed = decompressCursor(length, cursor);
+            long[] decompressed = decompressCursor(cursor);
 
             assertThat(decompressed)
                 .as("compressed data did not roundtrip")
@@ -71,14 +71,16 @@ class CompressedTest {
     void decompressRandomLongsViaCursor(int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
-        Arrays.sort(data);
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
 
-        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, cursor -> {
+        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
             assertThat(cursor.remaining()).isEqualTo(length);
 
-            long[] decompressed = decompressCursor(length, cursor);
+            long[] decompressed = decompressCursor(cursor);
+
+            // We need to sort due to random values.
+            Arrays.sort(data);
 
             assertThat(decompressed)
                 .as("compressed data did not roundtrip, seed = %d", random.seed())
@@ -86,7 +88,8 @@ class CompressedTest {
         });
     }
 
-    private static long[] decompressCursor(int length, AdjacencyCursor cursor) {
+    static long[] decompressCursor(AdjacencyCursor cursor) {
+        int length = cursor.remaining();
         var decompressed = new long[length];
 
         var idx = 0;

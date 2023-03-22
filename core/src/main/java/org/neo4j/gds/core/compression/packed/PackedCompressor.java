@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.function.LongSupplier;
 
 public final class PackedCompressor implements AdjacencyCompressor {
+
 
     public static AdjacencyCompressorFactory factory(
         LongSupplier nodeCountSupplier,
@@ -183,6 +185,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final LongArrayBuffer buffer;
     private final ModifiableSlice<Long> adjacencySlice;
     private final ModifiableSlice<long[]> propertySlice;
+    private final MutableInt degree;
 
     private PackedCompressor(
         AdjacencyListBuilder.Allocator<Long> adjacencyAllocator,
@@ -206,6 +209,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.buffer = new LongArrayBuffer();
         this.adjacencySlice = ModifiableSlice.create();
         this.propertySlice = ModifiableSlice.create();
+        this.degree = new MutableInt(0);
     }
 
     @Override
@@ -263,10 +267,11 @@ public final class PackedCompressor implements AdjacencyCompressor {
             uncompressedPropertiesPerProperty,
             targetsLength,
             this.aggregations,
-            this.noAggregation
+            this.noAggregation,
+            this.degree
         );
 
-        int degree = this.adjacencySlice.length();
+        int degree = this.degree.intValue();
 
         copyProperties(uncompressedPropertiesPerProperty, degree, nodeId);
 
@@ -299,9 +304,11 @@ public final class PackedCompressor implements AdjacencyCompressor {
             this.adjacencySlice,
             targets,
             targetsLength,
-            this.aggregations[0]
+            this.aggregations[0],
+            this.degree
         );
-        int degree = this.adjacencySlice.length();
+
+        int degree = this.degree.intValue();
 
         this.adjacencyOffsets.set(nodeId, offset);
         this.adjacencyDegrees.set(nodeId, degree);

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
@@ -47,16 +48,18 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
         Consumer<PackedAdjacencyList> code
     ) {
         test((allocator, slice) -> {
+            var degree = new MutableInt(0);
             var offset = AdjacencyPacker2.compress(
                 allocator,
                 slice,
                 values,
                 length,
-                aggregation
+                aggregation,
+                degree
             );
 
-            var pages = new long[]{slice.slice()};
-            var degrees = HugeIntArray.of(slice.length());
+            var pages = new long[]{degree.intValue()};
+            var degrees = HugeIntArray.of(degree.intValue());
             var offsets = HugeLongArray.of(offset);
             var list = new PackedAdjacencyList(pages, degrees, offsets);
 
@@ -68,22 +71,24 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Long> {
         long[] values,
         int length,
         Aggregation aggregation,
-        Consumer<DecompressingCursor> code
+        BiConsumer<DecompressingCursor, AdjacencyListBuilder.Slice<Long>> code
     ) {
         test((allocator, slice) -> {
+            var degree = new MutableInt();
             var offset = AdjacencyPacker2.compress(
                 allocator,
                 slice,
-                values,
+                values.clone(),
                 length,
-                aggregation
+                aggregation,
+                degree
             );
 
             var pages = new long[]{slice.slice()};
             var cursor = new DecompressingCursor(pages);
-            cursor.init(offset, slice.length());
+            cursor.init(offset, degree.intValue());
 
-            code.accept(cursor);
+            code.accept(cursor, slice);
         });
     }
 

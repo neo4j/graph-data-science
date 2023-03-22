@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
-import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
@@ -47,10 +47,11 @@ public final class AdjacencyPacker2 {
         AdjacencyListBuilder.Slice<Long> slice,
         long[] values,
         int length,
-        Aggregation aggregation
+        Aggregation aggregation,
+        MutableInt degree
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompress(allocator, slice, values, length, aggregation);
+        return deltaCompress(allocator, slice, values, length, aggregation, degree);
     }
 
     static long compressWithProperties(
@@ -60,7 +61,8 @@ public final class AdjacencyPacker2 {
         long[][] properties,
         int length,
         Aggregation[] aggregations,
-        boolean noAggregation
+        boolean noAggregation,
+        MutableInt degree
     ) {
         if (length > 0) {
             // sort, delta encode, reorder and aggregate properties
@@ -73,6 +75,8 @@ public final class AdjacencyPacker2 {
             );
         }
 
+        degree.setValue(length);
+
         return preparePacking(allocator, slice, values, length);
     }
 
@@ -81,11 +85,15 @@ public final class AdjacencyPacker2 {
         AdjacencyListBuilder.Slice<Long> slice,
         long[] values,
         int length,
-        Aggregation aggregation
+        Aggregation aggregation,
+        MutableInt degree
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
         }
+
+        degree.setValue(length);
+
         return preparePacking(allocator, slice, values, length);
     }
 
@@ -152,8 +160,6 @@ public final class AdjacencyPacker2 {
             in += AdjacencyPacking.BLOCK_SIZE;
         }
 
-        // TODO: do we need to return alignedBytes somehow?
-        ((ModifiableSlice<?>) slice).setLength(length);
         return adjacencyOffset;
     }
 

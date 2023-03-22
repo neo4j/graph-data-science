@@ -19,29 +19,22 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.OptionalLong;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.SeededRandom.newRandom;
+import static org.neo4j.gds.core.compression.packed.CompressedTest.decompressCursor;
 
 class AdjacencyPackerTest {
 
@@ -88,104 +81,71 @@ class AdjacencyPackerTest {
             .isLessThanOrEqualTo(requiredBytes);
     }
 
-    @ParameterizedTest
-    @EnumSource(Features.class)
-    void compressConsecutiveLongs(Features features) {
+    @Test
+    void compressConsecutiveLongs() {
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
 
-        int maxBitsPerValues = 6; // packing uses max. 6 bits for any value in this test
-        int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
-        int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
-        int maxBytes = 1 /* header size */ + maxBytesPerBlock;
-        assertThat(compressed.bytesUsed()).isLessThanOrEqualTo(maxBytes);
-        assertThat(compressed.address()).isNotZero();
+        TestAllocator.testCursor(data, data.length, Aggregation.NONE, (cursor, slice) -> {
+            int maxBitsPerValues = 1; // delta + packing uses 1 bit for any value in this test
+            int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
+            int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
+            int maxBytes = 8 /* aligned header size */ + maxBytesPerBlock;
 
-        var decompressed = features.decompress(compressed);
-        assertThat(decompressed).containsExactly(data);
+            assertThat(slice.length()).isLessThanOrEqualTo(maxBytes);
+            assertThat(slice.slice()).isNotZero();
 
-        compressed.free();
+            long[] decompressed = decompressCursor(cursor);
+
+            assertThat(decompressed).containsExactly(data);
+        });
     }
 
-    @ParameterizedTest
-    @EnumSource(Features.class)
-    void compressRandomLongs(Features features) {
+    @Test
+    void compressRandomLongs() {
         var random = newRandom();
         var data = random.random().longs(AdjacencyPacking.BLOCK_SIZE, 0, 1L << 50).toArray();
 
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
+        TestAllocator.testCursor(data, data.length, Aggregation.NONE, (cursor, slice) -> {
+            assertThat(slice.length())
+                .as("compressed exceeds original size, seed = %d", random.seed())
+                .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
+            assertThat(slice.slice()).isNotZero();
 
-        assertThat(compressed.bytesUsed())
-            .as("compressed exceeds original size, seed = %d", random.seed())
-            .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
-        assertThat(compressed.address()).isNotZero();
-
-        var decompressed = features.decompress(compressed);
-
-        if (features != Features.Delta) {
             Arrays.sort(data);
-        }
-
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip, seed = %d", random.seed())
-            .containsExactly(data);
-
-        compressed.free();
+            var decompressed = decompressCursor(cursor);
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip, seed = %d", random.seed())
+                .containsExactly(data);
+        });
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Features.class, mode = EnumSource.Mode.EXCLUDE, names = "Sort")
-    void compressDeltaLongs(Features features) {
-        var data = LongStream.rangeClosed(1, AdjacencyPacking.BLOCK_SIZE).toArray();
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
-
-        assertThat(compressed.bytesUsed()).isEqualTo(1 + Long.BYTES);
-        assertThat(compressed.address()).isNotZero();
-
-        var decompressed = AdjacencyPacker.decompress(compressed);
-
-        var deltas = new long[data.length];
-        Arrays.fill(deltas, 1L);
-        assertThat(decompressed).containsExactly(deltas);
-
-        decompressed = AdjacencyPacker.decompressAndPrefixSum(compressed);
-        assertThat(decompressed).containsExactly(data);
-
-        compressed.free();
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = Features.class)
-    void compressDuplicatedLongs(Features features) {
+    @Test
+    void compressDuplicatedLongs() {
         var random = newRandom();
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE)
             .flatMap(value -> random.random().nextBoolean() ? LongStream.of(value) : LongStream.of(value, value))
             .limit(AdjacencyPacking.BLOCK_SIZE)
             .toArray();
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags(Aggregation.SINGLE));
 
-        int maxBitsPerValues = 8; // tail compression is 1 byte per value
-        int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
-        int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
-        int maxBytes = 1 /* possible header size */ + maxBytesPerBlock;
-        assertThat(compressed.bytesUsed())
-            .as("compression uses more space than expected, seed = %s", random.seed())
-            .isLessThanOrEqualTo(maxBytes);
-        assertThat(compressed.address()).isNotZero();
+        TestAllocator.testCursor(data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
+            int maxBitsPerValues = 6; // packed uses at most 6 bits for any value in this test
+            int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
+            int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
+            int maxBytes = 1 /* header size */ + maxBytesPerBlock;
+            assertThat(slice.length())
+                .as("compression uses more space than expected, seed = %s", random.seed())
+                .isLessThanOrEqualTo(maxBytes);
+            assertThat(slice.slice()).isNotZero();
 
-        if (features != Features.Sort) {
-            data = Arrays.stream(data).distinct().toArray();
-        }
-
-        var decompressed = features.decompress(compressed);
-        assertThat(decompressed).containsExactly(data);
-
-        compressed.free();
+            int degree = cursor.remaining();
+            long[] expectedData = Arrays.stream(data).distinct().toArray();
+            long[] decompressed = Arrays.copyOf(decompressCursor(cursor), degree);
+            assertThat(decompressed).containsExactly(expectedData);
+        });
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Features.class)
-    void compressRandomDuplicatedLongs(Features features) {
+    @Test
+    void compressRandomDuplicatedLongs() {
         var random = newRandom();
         var data = random.random().longs(2 * AdjacencyPacking.BLOCK_SIZE, 0, 1L << 50)
             .distinct()
@@ -193,74 +153,45 @@ class AdjacencyPackerTest {
             .limit(AdjacencyPacking.BLOCK_SIZE)
             .toArray();
 
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags(Aggregation.SINGLE));
+        TestAllocator.testCursor(data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
 
-        assertThat(compressed.bytesUsed())
-            .as("compressed exceeds original size, seed = %d", random.seed())
-            .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
-        assertThat(compressed.address()).isNotZero();
+            assertThat(slice.length())
+                .as("compressed exceeds original size, seed = %d", random.seed())
+                .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
+            assertThat(slice.slice()).isNotZero();
 
-        var decompressed = features.decompress(compressed);
+            var decompressed = decompressCursor(cursor);
 
-        switch (features) {
-            case Sort:
-                Arrays.sort(data);
-                break;
-            case Delta:
-                var lastValue = new MutableObject<>(OptionalLong.empty());
-                data = Arrays.stream(data).filter(l -> {
-                    var last = lastValue.getValue();
-                    if (last.isEmpty() || last.getAsLong() < l) {
-                        lastValue.setValue(OptionalLong.of(l));
-                        return true;
-                    }
-                    return false;
-                }).toArray();
-                break;
-            case SortAndDelta:
-                Arrays.sort(data);
-                data = Arrays.stream(data).distinct().toArray();
-                break;
-        }
+            Arrays.sort(data);
+            var expectedData = Arrays.stream(data).distinct().toArray();
 
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip, seed = %d", random.seed())
-            .containsExactly(data);
-
-        compressed.free();
-    }
-
-    static Stream<Arguments> nonBlockAlignedArguments() {
-        return TestSupport.crossArgument(
-            () -> Arrays.stream(Features.values()),
-            () -> IntStream.of(42, 1337).boxed()
-        );
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip, seed = %d", random.seed())
+                .containsExactly(expectedData);
+        });
     }
 
     @ParameterizedTest
-    @MethodSource("nonBlockAlignedArguments")
-    void compressNonBlockAlignedConsecutiveLongs(Features features, int valueCount) {
+    @ValueSource(ints = {42, 1337})
+    void compressNonBlockAlignedConsecutiveLongs(int valueCount) {
         assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var data = LongStream.range(0, valueCount).toArray();
-
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
 
-        var compressed = AdjacencyPacker.compress(alignedData, 0, valueCount, features.flags());
+        TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
+            // TODO: we want to keep those assertions, but they fail with the current implementation
+            // We have plans to improve this and eventually re-enable those assertions
+            //        assertThat(compressed.bytesUsed())
+            //            .as("compressed exceeds original size")
+            //            .isLessThanOrEqualTo((long) valueCount * Long.BYTES);
+            assertThat(slice.slice()).isNotZero();
 
-// NOTE: we want to keep those assertions, but they fail with the current implementation
-// We have plans to improve this and eventuall re-enable those assertions
-//        assertThat(compressed.bytesUsed())
-//            .as("compressed exceeds original size")
-//            .isLessThanOrEqualTo((long) valueCount * Long.BYTES);
-        assertThat(compressed.address()).isNotZero();
+            var decompressed = decompressCursor(cursor);
 
-        var decompressed = features.decompress(compressed);
-
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip")
-            .containsExactly(data);
-
-        compressed.free();
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip")
+                .containsExactly(data);
+        });
     }
 
     @ParameterizedTest
@@ -275,24 +206,22 @@ class AdjacencyPackerTest {
 
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
 
-        var compressed = AdjacencyPacker.compress(alignedData, 0, valueCount, Features.SortAndDelta.flags());
+        TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
+            // TODO: we want to keep those assertions, but they fail with the current implementation
+            // We have plans to improve this and eventually re-enable those assertions
+//            assertThat(slice.length())
+//                .as("compressed exceeds original size, seed = %d", random.seed())
+//                .isLessThanOrEqualTo(valueCount * Long.BYTES);
 
-// NOTE: we want to keep those assertions, but they fail with the current implementation
-// We have plans to improve this and eventuall re-enable those assertions
-//        assertThat(compressed.bytesUsed())
-//            .as("compressed exceeds original size, seed = %d", random.seed())
-//            .isLessThanOrEqualTo((long) valueCount * Long.BYTES);
-        assertThat(compressed.address()).isNotZero();
+            assertThat(slice.slice()).isNotZero();
 
-        var decompressed = Features.SortAndDelta.decompress(compressed);
+            var decompressed = decompressCursor(cursor);
 
-        Arrays.sort(data);
-
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip, seed = %d", random.seed())
-            .containsExactly(data);
-
-        compressed.free();
+            Arrays.sort(data);
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip, seed = %d", random.seed())
+                .containsExactly(data);
+        });
     }
 
     @Test
