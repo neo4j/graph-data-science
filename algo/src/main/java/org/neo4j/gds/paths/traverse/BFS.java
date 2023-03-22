@@ -22,13 +22,13 @@ package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.LongPageCreator;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
@@ -177,9 +177,9 @@ public final class BFS extends Algorithm<HugeLongArray> {
 
         // The minimum position of a predecessor that contains a relationship to the node in the `traversedNodes`.
         // This is updated in `BFSTask` and is helping to maintain the correct traversal order for the output.
-        var minimumChunk = HugeAtomicLongArray.newArray(
+        var minimumChunk = HugeAtomicLongArray.of(
             graph.nodeCount(),
-            LongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
+            ParalleLongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
         );
 
         visited.set(sourceNodeId);

@@ -20,7 +20,9 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 
 public final class HugeArrayToNodeProperties {
 
@@ -30,6 +32,20 @@ public final class HugeArrayToNodeProperties {
         return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
+                return array.get(nodeId);
+            }
+
+            @Override
+            public long nodeCount() {
+                return array.size();
+            }
+        };
+    }
+
+    public static LongNodePropertyValues convert(HugeAtomicLongArray array) {
+        return new LongNodePropertyValues() {
+            @Override
+            public long longValue(long nodeId) {
                 return array.get(nodeId);
             }
 
