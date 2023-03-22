@@ -43,14 +43,14 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
 
     /**
      *
-     * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(HugeAtomicLongArray, long)}.
+     * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(org.neo4j.gds.collections.haa.HugeAtomicLongArray, long)}.
      */
     default long defaultValue() {
         return 0L;
     }
 
     /**
-     * @return the long value at the given index (volatile)
+     * @return the long value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     long get(long index);
@@ -72,7 +72,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
     long getAndReplace(long index, long value);
 
     /**
-     * Sets the long value at the given index to the given value (volatile).
+     * Sets the long value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
@@ -85,8 +85,8 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param index  the index
      * @param expect the expected value
      * @param update the new value
-     * @return {@code true} if successful. False return indicates that
-     *     the actual value was not equal to the expected value.
+     * @return {@code true} iff successful. {@code false} indicates that the actual
+     *     value was not equal to the expected value.
      */
     boolean compareAndSet(long index, long expect, long update);
 
@@ -132,8 +132,8 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param expect the expected value
      * @param update the new value
      * @return the result that is the witness value,
-     *         which will be the same as the expected value if successful
-     *         or the new current value if unsuccessful.
+     *     which will be the same as the expected value if successful≤
+     *     or the new current value if unsuccessful.
      */
     long compareAndExchange(long index, long expect, long update);
 
@@ -164,21 +164,33 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
     long sizeOf();
 
     /**
-     * Set all entries in the array to the given value.
-     * This method is not atomic!
+     * Sets all entries in the array to the given value.
+     *
+     * This method is not thread-safe.
      */
     void setAll(long value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
-     * The array is unusable after calling this method and will throw {@link NullPointerException}s on virtually every method invocation.
+     * The array is unusable after calling this method and will throw {@link NullPointerException}s
+     * on virtually every method invocation.
      * <p>
-     * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
-     * You have to {@link org.neo4j.gds.collections.cursor.HugeCursor#close()} every cursor instance as well.
+     * Note that the data might not immediately collectible if there are still cursors alive that
+     * reference this array. You have to {@link org.neo4j.gds.collections.cursor.HugeCursor#close()} every cursor instance as well.
+     * <p>
+     * The amount is not removed from the {@link java.util.function.LongConsumer} that had been
+     * provided in the constructor.
      *
      * @return the amount of memory freed, in bytes.
      */
     long release();
 
+    /**
+     * Copies the content of this array into the target array.
+     * <p>
+     * The behavior is identical to {@link System#arraycopy(Object, int, Object, int, int)}.
+     * <p>
+     * This method is not thread-safe.
+     */
     void copyTo(HugeAtomicLongArray dest, long length);
 }

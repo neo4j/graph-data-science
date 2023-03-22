@@ -22,9 +22,7 @@ package org.neo4j.gds.collections.haa;
 import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
-import static org.neo4j.gds.collections.haa.ValueTransformers.ByteToByteFunction;
-
-@HugeAtomicArray(valueType = byte.class, valueOperatorInterface = ByteToByteFunction.class, pageCreatorInterface = PageCreator.BytePageCreator.class)
+@HugeAtomicArray(valueType = byte.class, valueOperatorInterface = ValueTransformers.ByteToByteFunction.class, pageCreatorInterface = PageCreator.BytePageCreator.class)
 public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
 
     /**
@@ -50,7 +48,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
     }
 
     /**
-     * @return the long value at the given index (volatile)
+     * @return the long value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     byte get(long index);
@@ -72,7 +70,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
     byte getAndReplace(long index, byte value);
 
     /**
-     * Sets the long value at the given index to the given value (volatile).
+     * Sets the long value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
@@ -85,8 +83,8 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @param index  the index
      * @param expect the expected value
      * @param update the new value
-     * @return {@code true} if successful. False return indicates that
-     *     the actual value was not equal to the expected value.
+     * @return {@code true} iff successful. {@code false} indicates that the actual
+     *     value was not equal to the expected value.
      */
     boolean compareAndSet(long index, byte expect, byte update);
 
@@ -132,8 +130,8 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @param expect the expected value
      * @param update the new value
      * @return the result that is the witness value,
-     *         which will be the same as the expected value if successful
-     *         or the new current value if unsuccessful.
+     *     which will be the same as the expected value if successful≤
+     *     or the new current value if unsuccessful.
      */
     byte compareAndExchange(long index, byte expect, byte update);
 
@@ -146,7 +144,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    void update(long index, ByteToByteFunction updateFunction);
+    void update(long index, ValueTransformers.ByteToByteFunction updateFunction);
 
     /**
      * Returns the length of this array.
@@ -164,21 +162,33 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
     long sizeOf();
 
     /**
-     * Set all entries in the array to the given value.
-     * This method is not atomic!
+     * Sets all entries in the array to the given value.
+     *
+     * This method is not thread-safe.
      */
     void setAll(byte value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
-     * The array is unusable after calling this method and will throw {@link NullPointerException}s on virtually every method invocation.
+     * The array is unusable after calling this method and will throw {@link NullPointerException}s
+     * on virtually every method invocation.
      * <p>
-     * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
-     * You have to {@link org.neo4j.gds.collections.cursor.HugeCursor#close()} every cursor instance as well.
+     * Note that the data might not immediately collectible if there are still cursors alive that
+     * reference this array. You have to {@link org.neo4j.gds.collections.cursor.HugeCursor#close()} every cursor instance as well.
+     * <p>
+     * The amount is not removed from the {@link java.util.function.LongConsumer} that had been
+     * provided in the constructor.
      *
      * @return the amount of memory freed, in bytes.
      */
     long release();
 
+    /**
+     * Copies the content of this array into the target array.
+     * <p>
+     * The behavior is identical to {@link System#arraycopy(Object, int, Object, int, int)}.
+     * <p>
+     * This method is not thread-safe.
+     */
     void copyTo(HugeAtomicByteArray dest, long length);
 }
