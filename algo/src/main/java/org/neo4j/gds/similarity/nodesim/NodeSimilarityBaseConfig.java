@@ -60,6 +60,12 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int upperDegreeCutoff() {
+        return Integer.MAX_VALUE;
+    }
+
+    @Value.Default
     @Configuration.Key(TOP_K_KEY)
     @Configuration.IntegerRange(min = 1)
     default int topK() {
