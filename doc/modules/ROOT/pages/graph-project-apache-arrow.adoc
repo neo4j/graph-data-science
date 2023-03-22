@@ -235,6 +235,8 @@ The timeout can be configured via the `gds.arrow.abortion_timeout` setting, for 
 
 == Creating a Neo4j database
 
+include::partial$/common-usage/not-on-aurads-note.adoc[]
+
 The xref:graph-project-apache-arrow.adoc#arrow-client-server-protocol[Client-Server protocol] can also be used to create a new Neo4j database instead of an in-memory graph.
 To initialize a database import process, we need to change the initial action type to `CREATE_DATABASE`.
 The action body is a JSON document containing the configuration for the import process:
