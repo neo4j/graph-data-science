@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.SeededRandom.newRandom;
-import static org.neo4j.gds.core.compression.packed.CompressedTest.decompressCursor;
+import static org.neo4j.gds.core.compression.common.CursorUtil.decompressCursor;
 
 class AdjacencyPackerTest {
 
@@ -48,37 +48,39 @@ class AdjacencyPackerTest {
         var originalValues = Arrays.copyOf(values, values.length);
         var uncompressedSize = originalValues.length * Long.BYTES;
 
-        var compressed = AdjacencyPacker.compress(values, 0, values.length, AdjacencyPacker.DELTA);
-        var newRequiredBytes = compressed.bytesUsed();
-        System.out.printf(
-            Locale.ENGLISH,
-            "new compressed = %d ratio = %.2f%n",
-            newRequiredBytes,
-            (double) newRequiredBytes / uncompressedSize
-        );
+        TestAllocator.testCursor(values, values.length, Aggregation.NONE, (cursor, slice) -> {
 
-        var decompressed = AdjacencyPacker.decompressAndPrefixSum(compressed);
-        compressed.free();
-        assertThat(decompressed).containsExactly(originalValues);
+            var newRequiredBytes = slice.length();
+            System.out.printf(
+                Locale.ENGLISH,
+                "packed = %d ratio = %.2f%n",
+                newRequiredBytes,
+                (double) newRequiredBytes / uncompressedSize
+            );
 
-        var varLongCompressed = AdjacencyCompression.deltaEncodeAndCompress(
-            originalValues.clone(),
-            0,
-            originalValues.length,
-            Aggregation.NONE
-        );
-        int requiredBytes = varLongCompressed.length;
+            var decompressed = decompressCursor(cursor);
+            assertThat(decompressed).containsExactly(originalValues);
 
-        System.out.printf(
-            Locale.ENGLISH,
-            "dvl compressed = %d ratio = %.2f%n",
-            requiredBytes,
-            (double) requiredBytes / uncompressedSize
-        );
+            var varLongCompressed = AdjacencyCompression.deltaEncodeAndCompress(
+                originalValues.clone(),
+                0,
+                originalValues.length,
+                Aggregation.NONE
+            );
+            int requiredBytes = varLongCompressed.length;
 
-        assertThat(newRequiredBytes)
-            .as("new compressed should be less than dvl compressed, seed = %d", random.seed())
-            .isLessThanOrEqualTo(requiredBytes);
+            System.out.printf(
+                Locale.ENGLISH,
+                "var long = %d ratio = %.2f%n",
+                requiredBytes,
+                (double) requiredBytes / uncompressedSize
+            );
+
+            assertThat(newRequiredBytes)
+                .as("new compressed should be less than dvl compressed, seed = %d", random.seed())
+                .isLessThanOrEqualTo(requiredBytes);
+        });
+
     }
 
     @Test
@@ -176,7 +178,7 @@ class AdjacencyPackerTest {
     void compressNonBlockAlignedConsecutiveLongs(int valueCount) {
         assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var data = LongStream.range(0, valueCount).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(valueCount));
 
         TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
@@ -204,7 +206,7 @@ class AdjacencyPackerTest {
             .limit(valueCount)
             .toArray();
 
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(valueCount));
 
         TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
@@ -224,58 +226,24 @@ class AdjacencyPackerTest {
         });
     }
 
-    @Test
-    void preventDoubleFree() {
-        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
-        var compressed = AdjacencyPacker.compress(data, 0, data.length);
-        assertThatCode(compressed::free).doesNotThrowAnyException();
-        assertThatThrownBy(compressed::free)
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("This compressed memory has already been freed.");
-    }
-
-    @Test
-    void preventUseAfterFree() {
-        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
-        var compressed = AdjacencyPacker.compress(data, 0, data.length);
-        assertThatCode(compressed::free).doesNotThrowAnyException();
-        assertThatThrownBy(() -> AdjacencyPacker.decompress(compressed))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("This compressed memory has already been freed.");
-    }
-
-    enum Features {
-        Sort,
-        Delta,
-        SortAndDelta;
-
-        int flags() {
-            switch (this) {
-                case Sort:
-                    return AdjacencyPacker.SORT;
-                case Delta:
-                    return AdjacencyPacker.DELTA;
-                case SortAndDelta:
-                    return AdjacencyPacker.SORT | AdjacencyPacker.DELTA;
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
-
-        int flags(Aggregation aggregation) {
-            return flags() | aggregation.ordinal();
-        }
-
-        long[] decompress(Compressed compressed) {
-            switch (this) {
-                case Sort:
-                    return AdjacencyPacker.decompress(compressed);
-                case Delta:
-                case SortAndDelta:
-                    return AdjacencyPacker.decompressAndPrefixSum(compressed);
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
-    }
+    // TODO: Move to PackedAdjacencyListTest when this is implemented
+//    @Test
+//    void preventDoubleFree() {
+//        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+//        var compressed = AdjacencyPacker.compress(data, 0, data.length);
+//        assertThatCode(compressed::free).doesNotThrowAnyException();
+//        assertThatThrownBy(compressed::free)
+//            .isInstanceOf(IllegalStateException.class)
+//            .hasMessage("This compressed memory has already been freed.");
+//    }
+//
+//    @Test
+//    void preventUseAfterFree() {
+//        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+//        var compressed = AdjacencyPacker.compress(data, 0, data.length);
+//        assertThatCode(compressed::free).doesNotThrowAnyException();
+//        assertThatThrownBy(() -> AdjacencyPacker.decompress(compressed))
+//            .isInstanceOf(IllegalStateException.class)
+//            .hasMessage("This compressed memory has already been freed.");
+//    }
 }

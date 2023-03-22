@@ -21,8 +21,8 @@ package org.neo4j.gds.core.compression.packed;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.common.CursorUtil;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -44,13 +44,13 @@ class CompressedTest {
     })
     void decompressConsecutiveLongsViaCursor(int length) {
         var data = LongStream.range(0, length).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(length));
 
         TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
             assertThat(cursor.remaining()).isEqualTo(length);
 
-            long[] decompressed = decompressCursor(cursor);
+            long[] decompressed = CursorUtil.decompressCursor(cursor);
 
             assertThat(decompressed)
                 .as("compressed data did not roundtrip")
@@ -71,13 +71,13 @@ class CompressedTest {
     void decompressRandomLongsViaCursor(int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(length));
 
         TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
             assertThat(cursor.remaining()).isEqualTo(length);
 
-            long[] decompressed = decompressCursor(cursor);
+            long[] decompressed = CursorUtil.decompressCursor(cursor);
 
             // We need to sort due to random values.
             Arrays.sort(data);
@@ -86,19 +86,5 @@ class CompressedTest {
                 .as("compressed data did not roundtrip, seed = %d", random.seed())
                 .containsExactly(data);
         });
-    }
-
-    static long[] decompressCursor(AdjacencyCursor cursor) {
-        int length = cursor.remaining();
-        var decompressed = new long[length];
-
-        var idx = 0;
-        while (cursor.hasNextVLong()) {
-            long peek = cursor.peekVLong();
-            long next = cursor.nextVLong();
-            assertThat(peek).isEqualTo(next);
-            decompressed[idx++] = next;
-        }
-        return decompressed;
     }
 }

@@ -25,7 +25,7 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 
-final class DecompressingCursor implements AdjacencyCursor {
+public final class DecompressingCursor implements AdjacencyCursor {
 
     private final long[] pages;
 
@@ -34,7 +34,7 @@ final class DecompressingCursor implements AdjacencyCursor {
     private int maxTargets;
     private int currentPosition;
 
-    DecompressingCursor(long[] pages) {
+    public DecompressingCursor(long[] pages) {
         this.pages = pages;
         this.decompressingReader = new BlockDecompressor();
     }
