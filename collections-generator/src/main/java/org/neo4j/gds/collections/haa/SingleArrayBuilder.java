@@ -156,14 +156,15 @@ final class SingleArrayBuilder {
         TypeName valueType,
         FieldSpec arrayHandle
     ) {
-        return MethodSpec.methodBuilder("getAndAdd")
+        return MethodSpec
+            .methodBuilder("getAndAdd")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(TypeName.LONG, "index")
             .addParameter(valueType, "delta")
             .returns(valueType)
+            .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
             .addCode(CodeBlock.builder()
-                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
                 .beginControlFlow("while (true)")
                 .addStatement("$1T next = ($1T) (prev + delta)", valueType)
                 .addStatement(
@@ -190,9 +191,8 @@ final class SingleArrayBuilder {
             .addParameter(TypeName.LONG, "index")
             .addParameter(valueType, "value")
             .returns(valueType)
-            .addCode(CodeBlock.builder()
-                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
-                .beginControlFlow("while (true)")
+            .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
+            .addCode(CodeBlock.builder().beginControlFlow("while (true)")
                 .addStatement(
                     "$1T current = ($1T) $2N.compareAndExchangeRelease(page, (int) index, prev, value)",
                     valueType,
@@ -254,9 +254,8 @@ final class SingleArrayBuilder {
             .addParameter(TypeName.LONG, "index")
             .addParameter(unaryOperatorType, "updateFunction")
             .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("$1T prev = ($1T) $2N.getAcquire($3N, (int) index)", valueType, arrayHandle, page)
-                .beginControlFlow("while (true)")
+            .addStatement("$1T prev = ($1T) $2N.getAcquire($3N, (int) index)", valueType, arrayHandle, page)
+            .addCode(CodeBlock.builder().beginControlFlow("while (true)")
                 .addStatement("$T next = updateFunction.apply(prev)", valueType)
                 .addStatement(
                     "$1T current = ($1T) $2N.compareAndExchangeRelease($3N, (int) index, prev, next)",

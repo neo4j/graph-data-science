@@ -152,7 +152,6 @@ final class PagedArrayBuilder {
             .addParameter(TypeName.LONG, "size")
             .returns(TypeName.LONG)
             .addStatement("assert size >= 0")
-            // TODO verify method on MemoryUsage exists during validation
             .addStatement(
                 "$T arrayMemoryEstimator = $T::sizeOf$NArray",
                 arrayMemoryEstimatorFuncType,
@@ -245,16 +244,15 @@ final class PagedArrayBuilder {
             .addParameter(TypeName.LONG, "index")
             .addParameter(valueType, "delta")
             .returns(valueType)
-            .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                .addStatement(
-                    "int indexInPage = $T.indexInPage(index, $N)",
-                    PAGE_UTIL,
-                    pageMask
-                )
-                .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
-                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
-                .beginControlFlow("while (true)")
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement(
+                "int indexInPage = $T.indexInPage(index, $N)",
+                PAGE_UTIL,
+                pageMask
+            )
+            .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
+            .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
+            .addCode(CodeBlock.builder().beginControlFlow("while (true)")
                 .addStatement("$1T next = ($1T) (prev + delta)", valueType)
                 .addStatement(
                     "$1T current = ($1T) $2N.compareAndExchangeRelease(page, indexInPage, prev, next)",
@@ -283,16 +281,15 @@ final class PagedArrayBuilder {
             .addParameter(TypeName.LONG, "index")
             .addParameter(valueType, "value")
             .returns(valueType)
-            .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                .addStatement(
-                    "int indexInPage = $T.indexInPage(index, $N)",
-                    PAGE_UTIL,
-                    pageMask
-                )
-                .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
-                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
-                .beginControlFlow("while (true)")
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement(
+                "int indexInPage = $T.indexInPage(index, $N)",
+                PAGE_UTIL,
+                pageMask
+            )
+            .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
+            .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
+            .addCode(CodeBlock.builder().beginControlFlow("while (true)")
                 .addStatement(
                     "$1T current = ($1T) $2N.compareAndExchangeRelease(page, indexInPage, prev, value)",
                     valueType,
@@ -320,15 +317,13 @@ final class PagedArrayBuilder {
             .addParameter(TypeName.LONG, "index")
             .addParameter(valueType, "value")
             .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                .addStatement(
-                    "int indexInPage = $T.indexInPage(index, $N)",
-                    PAGE_UTIL,
-                    pageMask
-                )
-                .addStatement("$N.setVolatile($N[pageIndex], indexInPage, value)", arrayHandle, pages)
-                .build())
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement(
+                "int indexInPage = $T.indexInPage(index, $N)",
+                PAGE_UTIL,
+                pageMask
+            )
+            .addStatement("$N.setVolatile($N[pageIndex], indexInPage, value)", arrayHandle, pages)
             .build();
     }
 
@@ -346,19 +341,17 @@ final class PagedArrayBuilder {
             .addParameter(valueType, "expected")
             .addParameter(valueType, "update")
             .returns(TypeName.BOOLEAN)
-            .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                .addStatement(
-                    "int indexInPage = $T.indexInPage(index, $N)",
-                    PAGE_UTIL,
-                    pageMask
-                )
-                .addStatement(
-                    "return $N.compareAndSet($N[pageIndex], indexInPage, expected, update)",
-                    arrayHandle,
-                    pages
-                )
-                .build())
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement(
+                "int indexInPage = $T.indexInPage(index, $N)",
+                PAGE_UTIL,
+                pageMask
+            )
+            .addStatement(
+                "return $N.compareAndSet($N[pageIndex], indexInPage, expected, update)",
+                arrayHandle,
+                pages
+            )
             .build();
     }
 
@@ -376,20 +369,18 @@ final class PagedArrayBuilder {
             .addParameter(valueType, "expected")
             .addParameter(valueType, "update")
             .returns(valueType)
-            .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                .addStatement(
-                    "int indexInPage = $T.indexInPage(index, $N)",
-                    PAGE_UTIL,
-                    pageMask
-                )
-                .addStatement(
-                    "return ($T) $N.compareAndExchange($N[pageIndex], indexInPage, expected, update)",
-                    valueType,
-                    arrayHandle,
-                    pages
-                )
-                .build())
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement(
+                "int indexInPage = $T.indexInPage(index, $N)",
+                PAGE_UTIL,
+                pageMask
+            )
+            .addStatement(
+                "return ($T) $N.compareAndExchange($N[pageIndex], indexInPage, expected, update)",
+                valueType,
+                arrayHandle,
+                pages
+            )
             .build();
     }
 
@@ -407,16 +398,15 @@ final class PagedArrayBuilder {
             .addParameter(TypeName.LONG, "index")
             .addParameter(unaryOperatorType, "updateFunction")
             .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                .addStatement(
-                    "int indexInPage = $T.indexInPage(index, $N)",
-                    PAGE_UTIL,
-                    pageMask
-                )
-                .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
-                .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
-                .beginControlFlow("while (true)")
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement(
+                "int indexInPage = $T.indexInPage(index, $N)",
+                PAGE_UTIL,
+                pageMask
+            )
+            .addStatement("$T page = $N[pageIndex]", valueArrayType(valueType), pages)
+            .addStatement("$1T prev = ($1T) $2N.getAcquire(page, indexInPage)", valueType, arrayHandle)
+            .addCode(CodeBlock.builder().beginControlFlow("while (true)")
                 .addStatement("$T next = updateFunction.apply(prev)", valueType)
                 .addStatement(
                     "$1T current = ($1T) $2N.compareAndExchangeRelease(page, indexInPage, prev, next)",
