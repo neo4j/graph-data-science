@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.SimilarityStatsResult;
 
 import java.util.Map;
@@ -57,7 +57,7 @@ public class StatsResult extends SimilarityStatsResult {
         this.didConverge = didConverge;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<StatsResult> {
+    public static class Builder extends SimilarityResultBuilder<StatsResult> {
         private long ranIterations;
         private boolean didConverge;
         private long nodePairsConsidered;

@@ -42,6 +42,7 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -120,7 +121,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 );
             }
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
+            SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
                 SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
@@ -146,7 +147,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
         RelationshipType relationshipType, ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
-        SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder
+        SimilarityResultBuilder<SimilarityMutateResult> resultBuilder
     ) {
         SingleTypeRelationships relationships;
 

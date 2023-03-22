@@ -62,7 +62,6 @@ class KnnWriteProcTest extends BaseProcTest {
 
     }
 
-
     @Test
     void shouldWriteResults() {
         runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
@@ -79,7 +78,7 @@ class KnnWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "score")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("nodesCompared")).asInstanceOf(LONG).isEqualTo(3);
             assertThat(row.getNumber("relationshipsWritten")).asInstanceOf(LONG).isEqualTo(3);
             assertThat(row.getNumber("nodePairsConsidered")).asInstanceOf(LONG).isEqualTo(37);
@@ -102,6 +101,10 @@ class KnnWriteProcTest extends BaseProcTest {
                 .allSatisfy((key, value) -> assertThat(value).asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(0d));
 
         });
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
 
         var loadQuery = GdsCypher.call("simGraph")
             .graphProject()
@@ -144,7 +147,12 @@ class KnnWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "score")
             .yields("relationshipsWritten");
 
-        runQueryWithRowConsumer(query, row -> assertEquals(3, row.getNumber("relationshipsWritten").longValue()));
+        var rowCount = runQueryWithRowConsumer(query, row -> assertEquals(3, row.getNumber("relationshipsWritten").longValue()));
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
     }
 
     @Test

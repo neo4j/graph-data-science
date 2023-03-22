@@ -17,35 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
+import org.neo4j.gds.similarity.SimilarityWriteResult;
 
 import java.util.Map;
 
-public class FilteredKnnMutateProcResult extends SimilarityMutateResult {
+@SuppressWarnings("unused")
+public class WriteResult extends SimilarityWriteResult {
     public final long ranIterations;
-    public final long nodePairsConsidered;
     public final boolean didConverge;
+    public final long nodePairsConsidered;
 
-    public FilteredKnnMutateProcResult(
+    WriteResult(
         long preProcessingMillis,
         long computeMillis,
-        long mutateMillis,
+        long writeMillis,
         long postProcessingMillis,
         long nodesCompared,
         long relationshipsWritten,
-        Map<String, Object> similarityDistribution,
         boolean didConverge,
         long ranIterations,
-        long nodePairsConsidered,
+        long nodePairsCompared,
+        Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
         super(
             preProcessingMillis,
             computeMillis,
-            mutateMillis,
+            writeMillis,
             postProcessingMillis,
             nodesCompared,
             relationshipsWritten,
@@ -53,39 +54,40 @@ public class FilteredKnnMutateProcResult extends SimilarityMutateResult {
             configuration
         );
 
+        this.nodePairsConsidered = nodePairsCompared;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
-        this.nodePairsConsidered = nodePairsConsidered;
     }
 
-    public static class Builder extends SimilarityResultBuilder<SimilarityMutateResult> {
-        private long ranIterations;
-        private boolean didConverge;
-        private long nodePairsConsidered;
+    @SuppressWarnings("unused")
+    static class Builder extends SimilarityResultBuilder<WriteResult> {
+        public long ranIterations;
+        public boolean didConverge;
+        public long nodePairsConsidered;
 
         @Override
-        public FilteredKnnMutateProcResult build() {
-            return new FilteredKnnMutateProcResult(
+        public WriteResult build() {
+            return new WriteResult(
                 preProcessingMillis,
                 computeMillis,
-                mutateMillis,
+                writeMillis,
                 postProcessingMillis,
                 nodesCompared,
                 relationshipsWritten,
-                distribution(),
                 didConverge,
                 ranIterations,
                 nodePairsConsidered,
+                distribution(),
                 config.toMap()
             );
         }
 
-        public Builder didConverge(boolean didConverge) {
+        public Builder withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
 
-        public Builder ranIterations(long ranIterations) {
+        public Builder withRanIterations(long ranIterations) {
             this.ranIterations = ranIterations;
             return this;
         }
