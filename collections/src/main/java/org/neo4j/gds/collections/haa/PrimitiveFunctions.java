@@ -19,7 +19,20 @@
  */
 package org.neo4j.gds.collections.haa;
 
-@FunctionalInterface
-public interface DoubleToDoubleFunction {
-    double apply(double value);
+public class PrimitiveFunctions {
+
+    @FunctionalInterface
+    public interface ByteToByteFunction {
+        byte apply(byte value);
+    }
+
+    @FunctionalInterface
+    public interface DoubleToDoubleFunction {
+        double apply(double value);
+    }
+
+    @FunctionalInterface
+    public interface LongToLongFunction {
+        long apply(long value);
+    }
 }

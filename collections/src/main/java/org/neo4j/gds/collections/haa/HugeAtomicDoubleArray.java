@@ -22,6 +22,8 @@ package org.neo4j.gds.collections.haa;
 import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
+import static org.neo4j.gds.collections.haa.PrimitiveFunctions.DoubleToDoubleFunction;
+
 @HugeAtomicArray(valueType = double.class, valueOperatorInterface = DoubleToDoubleFunction.class)
 public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
 

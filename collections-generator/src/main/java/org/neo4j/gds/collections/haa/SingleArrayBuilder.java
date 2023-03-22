@@ -162,7 +162,7 @@ final class SingleArrayBuilder {
             .addCode(CodeBlock.builder()
                 .addStatement("$1T prev = ($1T) $2N.getAcquire(page, (int) index)", valueType, arrayHandle)
                 .beginControlFlow("while (true)")
-                .addStatement("$T next = prev + delta", valueType)
+                .addStatement("$1T next = ($1T) (prev + delta)", valueType)
                 .addStatement(
                     "$1T current = ($1T) $2N.compareAndExchangeRelease(page, (int) index, prev, next)",
                     valueType,

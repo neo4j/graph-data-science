@@ -91,7 +91,11 @@ final class HugeAtomicLongArrayTest {
             for (int index : new int[]{-1, SIZE}) {
                 assertThatThrownBy(() -> array.get(index)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
                 assertThatThrownBy(() -> array.set(index, 1)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
-                assertThatThrownBy(() -> array.compareAndSet(index, 1, 2)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
+                assertThatThrownBy(() -> array.compareAndSet(
+                    index,
+                    1,
+                    2
+                )).isInstanceOf(ArrayIndexOutOfBoundsException.class);
             }
         });
     }
@@ -192,7 +196,7 @@ final class HugeAtomicLongArrayTest {
         });
     }
 
-    private static long addLong17(long x) { return x + 17; }
+    private static long addLong17(long x) {return x + 17;}
 
     /**
      * getAndUpdate returns previous value and updates result of supplied function
@@ -227,7 +231,7 @@ final class HugeAtomicLongArrayTest {
         final HugeAtomicLongArray array;
         int decs;
 
-        Counter(HugeAtomicLongArray array) { this.array = array; }
+        Counter(HugeAtomicLongArray array) {this.array = array;}
 
         public void realRun() {
             for (; ; ) {
@@ -307,7 +311,7 @@ final class HugeAtomicLongArrayTest {
         long expected = MemoryUsage.sizeOfLongArray(size);
         testArray(size, array -> {
             long freed = array.release();
-            org.assertj.core.api.Assertions.assertThat(freed).matches(v -> v == expected || v == expected + 24);
+            assertThat(freed).matches(v -> v == expected || v == expected + 24);
         });
     }
 
