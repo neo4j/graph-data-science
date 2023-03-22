@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.IntStream;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
@@ -422,11 +423,11 @@ final class HugeAtomicDoubleArrayTest {
     }
 
     private HugeAtomicDoubleArray singleArray(final int size) {
-        return HugeAtomicDoubleArraySon.Single.of(size);
+        return HugeAtomicDoubleArraySon.Single.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     private HugeAtomicDoubleArray pagedArray(final int size) {
-        return HugeAtomicDoubleArraySon.Paged.of(size);
+        return HugeAtomicDoubleArraySon.Paged.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     /**
@@ -487,6 +488,28 @@ final class HugeAtomicDoubleArrayTest {
             } catch (Throwable fail) {
                 threadUnexpectedException(fail);
             }
+        }
+    }
+
+    private static class PassThroughPageCreator implements PageCreator.DoublePageCreator {
+
+        static PassThroughPageCreator INSTANCE = new PassThroughPageCreator();
+
+        private PassThroughPageCreator() {}
+
+        @Override
+        public void fill(double[][] pages, int lastPageSize, int pageShift) {
+            int lastPageIndex = pages.length - 1;
+            int pageSize = 1 << pageShift;
+
+            IntStream.range(0, lastPageIndex).forEach(idx -> pages[idx] = new double[pageSize] );
+
+            pages[lastPageIndex] = new double[lastPageSize];
+        }
+
+        @Override
+        public void fillPage(double[] page, long base) {
+            // NO-OP
         }
     }
 }

@@ -33,7 +33,6 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.DEFAULT_VALUE_METHOD;
 import static org.neo4j.gds.collections.haa.HugeAtomicArrayGenerator.PAGE_UTIL;
@@ -51,6 +50,7 @@ final class PagedArrayBuilder {
         ClassName baseClassName,
         TypeName valueType,
         TypeName unaryOperatorType,
+        TypeName pageCreatorType,
         int specPageShift
     ) {
         var builder = TypeSpec.classBuilder(PAGED_CLASS_NAME)
@@ -76,7 +76,7 @@ final class PagedArrayBuilder {
         builder.addField(pages);
         builder.addField(memoryUsed);
 
-        builder.addMethod(ofMethod(valueType, interfaceType, pageMask, pageShift, pageSize));
+        builder.addMethod(ofMethod(valueType, interfaceType, pageCreatorType, pageMask, pageShift));
         builder.addMethod(constructor(valueType));
 
         // static methods
@@ -174,20 +174,20 @@ final class PagedArrayBuilder {
     private static MethodSpec ofMethod(
         TypeName valueType,
         TypeName interfaceType,
+        TypeName pageCreatorType,
         FieldSpec pageMask,
-        FieldSpec pageShift,
-        FieldSpec pageSize
+        FieldSpec pageShift
     ) {
         return MethodSpec.methodBuilder("of")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addParameter(TypeName.LONG, "size")
+            .addParameter(pageCreatorType, "pageCreator")
             .returns(interfaceType)
             .addStatement("int numPages = $T.numPagesFor(size, $N, $N)", PAGE_UTIL, pageShift, pageMask)
             .addStatement("$T pages = new $T[numPages][]", valueArrayType(valueArrayType(valueType)), valueType)
             .addStatement("int lastPageSize = $T.exclusiveIndexOfPage(size, $N)", PAGE_UTIL, pageMask)
             .addStatement("int lastPageIndex = pages.length - 1")
-            .addStatement("$T.range(0, lastPageIndex).forEach(idx -> pages[idx] = new $T[$N])", IntStream.class, valueType, pageSize)
-            .addStatement("pages[lastPageIndex] = new $T[lastPageSize]", valueType)
+            .addStatement("pageCreator.fill(pages, lastPageSize, $N)", pageShift)
             .addStatement("long memoryUsed = memoryEstimation(size)")
             .addStatement("return new $N(size, pages, memoryUsed)", PagedArrayBuilder.PAGED_CLASS_NAME)
             .build();

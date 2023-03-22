@@ -49,7 +49,8 @@ final class SingleArrayBuilder {
         TypeName interfaceType,
         ClassName baseClassName,
         TypeName valueType,
-        TypeName unaryOperatorType
+        TypeName unaryOperatorType,
+        TypeName pageCreatorType
     ) {
         var builder = TypeSpec.classBuilder(SINLGE_CLASS_NAME)
             .addModifiers(Modifier.STATIC, Modifier.FINAL)
@@ -64,7 +65,7 @@ final class SingleArrayBuilder {
         builder.addField(size);
         builder.addField(page);
 
-        builder.addMethod(ofMethod(valueType, interfaceType));
+        builder.addMethod(ofMethod(valueType, interfaceType, pageCreatorType));
         builder.addMethod(constructor(valueType));
 
         // static methods
@@ -113,14 +114,16 @@ final class SingleArrayBuilder {
             .build();
     }
 
-    private static MethodSpec ofMethod(TypeName valueType, TypeName interfaceType) {
+    private static MethodSpec ofMethod(TypeName valueType, TypeName interfaceType, TypeName pageCreatorType) {
         return MethodSpec.methodBuilder("of")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addParameter(TypeName.LONG, "size")
+            .addParameter(pageCreatorType, "pageCreator")
             .returns(interfaceType)
             .addStatement("assert size <= $T.MAX_ARRAY_LENGTH", PAGE_UTIL)
             .addStatement("int intSize = (int) size")
             .addStatement("$T page = new $T[intSize]", valueArrayType(valueType), valueType)
+            .addStatement("pageCreator.fillPage(page, 0)")
             .addStatement("return new $N(intSize, page)", SingleArrayBuilder.SINLGE_CLASS_NAME)
             .build();
     }

@@ -35,6 +35,7 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.IntStream;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
@@ -417,11 +418,11 @@ final class HugeAtomicByteArrayTest {
     }
 
     private HugeAtomicByteArray singleArray(final int size) {
-        return HugeAtomicByteArraySon.Single.of(size);
+        return HugeAtomicByteArraySon.Single.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     private HugeAtomicByteArray pagedArray(final int size) {
-        return HugeAtomicByteArraySon.Paged.of(size);
+        return HugeAtomicByteArraySon.Paged.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     /**
@@ -475,6 +476,28 @@ final class HugeAtomicByteArrayTest {
             } catch (Throwable fail) {
                 threadUnexpectedException(fail);
             }
+        }
+    }
+
+    private static class PassThroughPageCreator implements PageCreator.BytePageCreator {
+
+        static PassThroughPageCreator INSTANCE = new PassThroughPageCreator();
+
+        private PassThroughPageCreator() {}
+
+        @Override
+        public void fill(byte[][] pages, int lastPageSize, int pageShift) {
+            int lastPageIndex = pages.length - 1;
+            int pageSize = 1 << pageShift;
+
+            IntStream.range(0, lastPageIndex).forEach(idx -> pages[idx] = new byte[pageSize] );
+
+            pages[lastPageIndex] = new byte[lastPageSize];
+        }
+
+        @Override
+        public void fillPage(byte[] page, long base) {
+            // NO-OP
         }
     }
 }

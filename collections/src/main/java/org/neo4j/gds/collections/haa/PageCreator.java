@@ -19,20 +19,15 @@
  */
 package org.neo4j.gds.collections.haa;
 
-public class PrimitiveFunctions {
+public interface PageCreator<T extends Object> {
 
-    @FunctionalInterface
-    public interface ByteToByteFunction {
-        byte apply(byte value);
-    }
+    void fill(T[] pages, int lastPageSize, int pageShift);
 
-    @FunctionalInterface
-    public interface DoubleToDoubleFunction {
-        double apply(double value);
-    }
+    void fillPage(T page, long base);
 
-    @FunctionalInterface
-    public interface LongToLongFunction {
-        long apply(long value);
-    }
+    interface BytePageCreator extends PageCreator<byte[]> { }
+
+    interface DoublePageCreator extends PageCreator<double[]> { }
+
+    interface LongPageCreator extends PageCreator<long[]> {}
 }

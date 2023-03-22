@@ -46,6 +46,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());
         var unaryOperatorType = TypeName.get(spec.valueOperatorInterface());
+        var pageCreatorType = TypeName.get(spec.pageCreatorInterface());
 
         var builder = TypeSpec.classBuilder(className)
             .addModifiers(Modifier.ABSTRACT)
@@ -59,14 +60,14 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
         builder.addMethod(memoryEstimationMethod());
 
         // constructor
-        // TODO idx to value producer as a parameter
-        builder.addMethod(ofMethod(elementType));
+        builder.addMethod(ofMethod(elementType, pageCreatorType));
 
         builder.addType(SingleArrayBuilder.builder(
             elementType,
             className,
             valueType,
-            unaryOperatorType
+            unaryOperatorType,
+            pageCreatorType
         ));
 
         builder.addType(PagedArrayBuilder.builder(
@@ -74,6 +75,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             className,
             valueType,
             unaryOperatorType,
+            pageCreatorType,
             spec.pageShift()
         ));
 
@@ -97,15 +99,16 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
             .build();
     }
 
-    private static MethodSpec ofMethod(TypeName interfaceType) {
+    private static MethodSpec ofMethod(TypeName interfaceType, TypeName pageCreatorType) {
         return MethodSpec.methodBuilder("of")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addParameter(TypeName.LONG, "size")
+            .addParameter(pageCreatorType, "pageCreator")
             .returns(interfaceType)
             .beginControlFlow("if (size <= $T.MAX_ARRAY_LENGTH)", PAGE_UTIL)
-            .addStatement("return $N.of(size)", SingleArrayBuilder.SINLGE_CLASS_NAME)
+            .addStatement("return $N.of(size, pageCreator)", SingleArrayBuilder.SINLGE_CLASS_NAME)
             .endControlFlow()
-            .addStatement("return $N.of(size)", PagedArrayBuilder.PAGED_CLASS_NAME)
+            .addStatement("return $N.of(size, pageCreator)", PagedArrayBuilder.PAGED_CLASS_NAME)
             .build();
     }
 

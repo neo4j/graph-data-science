@@ -22,9 +22,9 @@ package org.neo4j.gds.collections.haa;
 import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
-import static org.neo4j.gds.collections.haa.PrimitiveFunctions.DoubleToDoubleFunction;
+import static org.neo4j.gds.collections.haa.ValueTransformers.DoubleToDoubleFunction;
 
-@HugeAtomicArray(valueType = double.class, valueOperatorInterface = DoubleToDoubleFunction.class)
+@HugeAtomicArray(valueType = double.class, valueOperatorInterface = DoubleToDoubleFunction.class, pageCreatorInterface = PageCreator.DoublePageCreator.class)
 public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
 
     /**
@@ -33,8 +33,8 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @param size the length of the new array, the highest supported index is {@code size - 1}
      * @return new array
      */
-    static HugeAtomicDoubleArray of(long size) {
-        return HugeAtomicDoubleArraySon.of(size);
+    static HugeAtomicDoubleArray of(long size, PageCreator.DoublePageCreator pageCreator) {
+        return HugeAtomicDoubleArraySon.of(size, pageCreator);
     }
 
     static long memoryEstimation(long size) {

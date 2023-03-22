@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.IntStream;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
@@ -491,30 +492,20 @@ final class HugeAtomicLongArrayTest {
     }
 
     private HugeAtomicLongArray singleArray(final int size) {
-        return HugeAtomicLongArraySon.Single.of(size);
+        return singleArray(size, null);
     }
 
     private HugeAtomicLongArray singleArray(final int size, final LongUnaryOperator valueProducer) {
-        HugeAtomicLongArray array = HugeAtomicLongArraySon.Single.of(size);
-        // FIXME mimic setAll(LongUnaryOp valueProducer)
-        for (int i = 0; i < size; i++) {
-            array.set(i, valueProducer.applyAsLong(i));
-        }
 
-        return array;
+        return HugeAtomicLongArraySon.Single.of(size, new PageCreator(valueProducer));
     }
 
     private HugeAtomicLongArray pagedArray(final int size) {
-        return HugeAtomicLongArraySon.Paged.of(size);
+        return pagedArray(size, null);
     }
 
     private HugeAtomicLongArray pagedArray(final int size, final LongUnaryOperator valueProducer) {
-        var array = HugeAtomicLongArray.of(size);
-        // FIXME mimic setAll(LongUnaryOp valueProducer)
-        for (int i = 0; i < size; i++) {
-            array.set(i, valueProducer.applyAsLong(i));
-        }
-        return array;
+        return HugeAtomicLongArray.of(size, new PageCreator(valueProducer));
     }
 
     /**
@@ -567,6 +558,36 @@ final class HugeAtomicLongArrayTest {
                 realRun();
             } catch (Throwable fail) {
                 threadUnexpectedException(fail);
+            }
+        }
+    }
+
+    private static class PageCreator implements org.neo4j.gds.collections.haa.PageCreator.LongPageCreator {
+
+        private final LongUnaryOperator generator;
+
+        PageCreator(LongUnaryOperator generator) {this.generator = generator;}
+
+        @Override
+        public void fill(long[][] pages, int lastPageSize, int pageShift) {
+            int lastPageIndex = pages.length - 1;
+            int pageSize = 1 << pageShift;
+
+            IntStream.range(0, lastPageIndex).forEach(idx -> {
+                pages[idx] = new long[pageSize];
+                long base = ((long) idx) << pageShift;
+                fillPage(pages[idx], base);
+            });
+
+            pages[lastPageIndex] = new long[lastPageSize];
+        }
+
+        @Override
+        public void fillPage(long[] page, long base) {
+            if (generator != null) {
+                for (var i = 0; i < page.length; i++) {
+                    page[i] = generator.applyAsLong(i + base);
+                }
             }
         }
     }

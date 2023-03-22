@@ -55,6 +55,7 @@ final class HugeAtomicArrayValidation implements CollectionStep.Validation<HugeA
         var annotationMirror = MoreElements.getAnnotationMirror(element, HugeAtomicArray.class).get();
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
         var valueOperatorInterface = (TypeMirror) getAnnotationValue(annotationMirror, "valueOperatorInterface").getValue();
+        var pageCreatorInterface = (TypeMirror) getAnnotationValue(annotationMirror, "pageCreatorInterface").getValue();
 
         if (!isValidValueType(valueType)) {
             return Optional.empty();
@@ -79,6 +80,7 @@ final class HugeAtomicArrayValidation implements CollectionStep.Validation<HugeA
             .element(element)
             .valueType(valueType)
             .valueOperatorInterface(valueOperatorInterface)
+            .pageCreatorInterface(pageCreatorInterface)
             .rootPackage(rootPackage)
             .pageShift(pageShift)
             .build();
@@ -128,6 +130,8 @@ final class HugeAtomicArrayValidation implements CollectionStep.Validation<HugeA
         TypeMirror valueType();
 
         TypeMirror valueOperatorInterface();
+
+        TypeMirror pageCreatorInterface();
 
         int pageShift();
 
