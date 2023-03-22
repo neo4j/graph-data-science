@@ -24,16 +24,17 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 
-class BytePageCreatorTest {
+class ParallelBytePageCreatorTest {
 
     @Test
     void fillsPages() {
+        var pageShift = 14;
         var numPages = 3;
         var lastPageSize = 4;
 
         byte[][] pages = new byte[numPages][];
 
-        BytePageCreator.of(1).fill(pages, lastPageSize);
+        ParallelBytePageCreator.of(1).fill(pages, lastPageSize, pageShift);
 
         for (int pageIndex = 0; pageIndex < pages.length; pageIndex++) {
             byte[] page = pages[pageIndex];

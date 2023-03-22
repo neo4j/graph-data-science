@@ -20,11 +20,12 @@
 package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.core.utils.paged.ParallelBytePageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -84,7 +85,7 @@ public class LocalSearch {
         );
 
         // Used to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount());
+        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(config.concurrency()));
 
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
     }
