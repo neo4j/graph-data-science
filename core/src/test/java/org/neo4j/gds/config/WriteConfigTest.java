@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.Configuration;
@@ -35,6 +36,7 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 class WriteConfigTest {
@@ -72,6 +74,27 @@ class WriteConfigTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The provided graph does not support `write` execution mode.");
         }
+    }
+
+    @Test
+    void shouldParseArrowConnectionInfo() {
+        var cypherMap = CypherMapWrapper.create(Map.of(
+           "arrowConnectionInfo",
+            Map.of(
+               "hostname", "localhost",
+                "port", "4242",
+                "username", "ronny",
+                "password", "1234567"
+            )
+        ));
+
+        var config = new TestWriteConfigImpl(cypherMap);
+        var arrowConnectionInfo = config.arrowConnectionInfo();
+        assertThat(arrowConnectionInfo).isPresent();
+        assertThat(arrowConnectionInfo.get().hostname()).isEqualTo("localhost");
+        assertThat(arrowConnectionInfo.get().port()).isEqualTo(4242);
+        assertThat(arrowConnectionInfo.get().username()).isEqualTo("ronny");
+        assertThat(arrowConnectionInfo.get().password()).isEqualTo("1234567");
     }
 
     @Configuration

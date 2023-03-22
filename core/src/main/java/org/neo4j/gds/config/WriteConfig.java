@@ -26,6 +26,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
 import java.util.Map;
@@ -50,6 +51,14 @@ public interface WriteConfig extends ConcurrencyConfig {
             .validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
+    /**
+     * This config option will only exist temporarily for testing the "serverless"
+     * architecture. It should only be used for arrow write-back.
+     * In the final version we will no longer pass this information in procedure
+     * calls, but replace those calls with an arrow protocol.
+     * Note that not every write-back path supports forwarding this information to the
+     * export builders.
+     */
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#parse")
     Optional<ArrowConnectionInfo> arrowConnectionInfo();
 
@@ -74,11 +83,11 @@ public interface WriteConfig extends ConcurrencyConfig {
 
         static ArrowConnectionInfo parse(Object input) {
             if (input instanceof Map) {
-                var map = (Map<String, String>) input;
-                var hostname = map.get("hostname");
-                var port = Integer.parseInt(map.get("port"));
-                var username = map.get("username");
-                var password = map.get("parssword");
+                var map = CypherMapWrapper.create((Map<String, Object>) input);
+                var hostname = map.getString("hostname").orElseThrow();
+                var port = Integer.parseInt(map.getString("port").orElseThrow());
+                var username = map.getString("username").orElseThrow();
+                var password = map.getString("password").orElseThrow();
 
                 return ImmutableArrowConnectionInfo.of(hostname, port, username, password);
             }
