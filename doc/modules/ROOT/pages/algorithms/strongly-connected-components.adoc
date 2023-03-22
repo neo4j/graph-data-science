@@ -12,6 +12,11 @@ It is often used early in a graph analysis process to help us get an idea of how
 include::partial$/operations-reference/alpha-note.adoc[]
 
 
+:directed:
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 [[algorithms-strongly-connected-components-context]]
 == History and explanation
 
