@@ -17,21 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.harmonic;
+package org.neo4j.gds.core.utils.paged;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
-@ValueClass
-public interface HarmonicResult {
+public final class HugeArrayToNodeProperties {
 
-    HugeAtomicDoubleArray inverseFarness();
+    private HugeArrayToNodeProperties() {}
 
-    long nodeCount();
+    public static DoubleNodePropertyValues convert(HugeAtomicDoubleArray array) {
+        return new DoubleNodePropertyValues() {
+            @Override
+            public double doubleValue(long nodeId) {
+                return array.get(nodeId);
+            }
 
-    @Value.Derived
-    default double getCentralityScore(long nodeId) {
-        return inverseFarness().get(nodeId) / (double) (nodeCount() - 1);
+            @Override
+            public long nodeCount() {
+                return array.size();
+            }
+        };
     }
 }

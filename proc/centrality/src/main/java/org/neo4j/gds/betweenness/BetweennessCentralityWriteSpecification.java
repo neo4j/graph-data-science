@@ -20,7 +20,8 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeArrayToNodeProperties;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -61,7 +62,7 @@ public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<Be
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
-                computationResult.result().asNodeProperties()
+                HugeArrayToNodeProperties.convert(computationResult.result())
             )),
             name()
         );

@@ -24,9 +24,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -170,7 +171,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     }
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
-        var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.concurrency()));
         var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),

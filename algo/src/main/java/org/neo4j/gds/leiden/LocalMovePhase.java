@@ -20,13 +20,14 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -103,7 +104,7 @@ final class LocalMovePhase {
      * @return The new community count.
      */
     public void run() {
-        HugeAtomicDoubleArray atomicCommunityVolumes = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        var atomicCommunityVolumes = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         graph.forEachNode(v -> {
             atomicCommunityVolumes.set(v, communityVolumes.get(v));
             return true;

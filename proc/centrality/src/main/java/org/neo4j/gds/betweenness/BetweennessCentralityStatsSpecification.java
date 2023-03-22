@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;

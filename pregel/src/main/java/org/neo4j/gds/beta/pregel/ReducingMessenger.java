@@ -20,11 +20,12 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
 /**
  * A messenger implementation that is backed by two double arrays used
@@ -48,8 +49,8 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.config = config;
         this.reducer = reducer;
 
-        this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount());
-        this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        this.receiveArray = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.concurrency()));
+        this.sendArray = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.concurrency()));
     }
 
     static MemoryEstimation memoryEstimation() {
