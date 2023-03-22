@@ -19,6 +19,12 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
+
+import java.util.concurrent.ExecutorService;
+
 final class KnnProc {
 
     static final String KNN_DESCRIPTION =
@@ -27,4 +33,19 @@ final class KnnProc {
         "KNN computes distances based on the similarity of node properties";
 
     private KnnProc() {}
+
+    static SimilarityGraphResult computeToGraph(
+        Graph graph,
+        long nodeCount,
+        int concurrency,
+        Knn.Result result,
+        ExecutorService executor
+    ) {
+        Graph similarityGraph = new SimilarityGraphBuilder(
+            graph,
+            concurrency,
+            executor
+        ).build(result.streamSimilarityResult());
+        return new SimilarityGraphResult(similarityGraph, nodeCount, false);
+    }
 }

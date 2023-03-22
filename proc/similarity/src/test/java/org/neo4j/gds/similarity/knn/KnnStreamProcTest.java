@@ -19,45 +19,46 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
+class KnnStreamProcTest extends BaseProcTest {
 
-    private static final Collection<SimilarityResult> EXPECTED = new HashSet<>();
-    static {
-        EXPECTED.add(new SimilarityResult(0, 1, 0.5));
-        EXPECTED.add(new SimilarityResult(1, 0, 0.5));
-        EXPECTED.add(new SimilarityResult(2, 1, 0.25));
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a { id: 1, knn: 1.0 } )" +
+        ", (b { id: 2, knn: 2.0 } )" +
+        ", (c { id: 3, knn: 5.0 } )" +
+        ", (a)-[:IGNORE]->(b)";
 
-    @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStreamConfig, ?>> getProcedureClazz() {
-        return KnnStreamProc.class;
-    }
-
-    @Override
-    public KnnStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnStreamConfig.of(mapWrapper);
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            KnnStreamProc.class,
+            GraphProjectProc.class
+        );
     }
 
     @Test
     void shouldStreamResults() {
-        String query = "CALL gds.knn.stream($graph, {nodeProperties: ['knn'], topK: 1, randomSeed: 19, concurrency: 1})" +
-                       " YIELD node1, node2, similarity" +
-                       " RETURN node1, node2, similarity" +
-                       " ORDER BY node1";
-        assertCypherResult(query, Map.of("graph", GRAPH_NAME), List.of(
+        runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
+
+        var query =
+            "CALL gds.knn.stream($graph, {nodeProperties: ['knn'], topK: 1, randomSeed: 19, concurrency: 1})" +
+            " YIELD node1, node2, similarity" +
+            " RETURN node1, node2, similarity" +
+            " ORDER BY node1";
+        assertCypherResult(query, Map.of("graph", "myGraph"), List.of(
             Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
             Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),
             Map.of("node1", 2L, "node2", 1L, "similarity", 0.25)

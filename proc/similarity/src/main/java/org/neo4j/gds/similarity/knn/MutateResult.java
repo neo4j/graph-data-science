@@ -17,19 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 import java.util.Map;
 
-public class FilteredKnnMutateProcResult extends SimilarityMutateResult {
+@SuppressWarnings("unused")
+public class MutateResult extends SimilarityMutateResult {
     public final long ranIterations;
     public final long nodePairsConsidered;
     public final boolean didConverge;
 
-    public FilteredKnnMutateProcResult(
+    public MutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -64,8 +65,8 @@ public class FilteredKnnMutateProcResult extends SimilarityMutateResult {
         private long nodePairsConsidered;
 
         @Override
-        public FilteredKnnMutateProcResult build() {
-            return new FilteredKnnMutateProcResult(
+        public MutateResult build() {
+            return new MutateResult(
                 preProcessingMillis,
                 computeMillis,
                 mutateMillis,

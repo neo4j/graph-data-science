@@ -24,7 +24,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.SimilarityWriteProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -54,7 +54,7 @@ public class FilteredKnnWriteProc extends SimilarityWriteProc<FilteredKnn, Filte
     }
 
     @Override
-    protected SimilarityProc.SimilarityResultBuilder<FilteredKnnWriteProcResult> resultBuilder(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
+    protected SimilarityResultBuilder<FilteredKnnWriteProcResult> resultBuilder(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
         if (computationResult.isGraphEmpty()) {
             return new FilteredKnnWriteProcResult.Builder();
         }

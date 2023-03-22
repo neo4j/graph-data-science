@@ -26,7 +26,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.SimilarityWriteProc;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
 import org.neo4j.procedure.Description;
@@ -68,7 +68,7 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     }
 
     @Override
-    protected SimilarityProc.SimilarityResultBuilder<SimilarityWriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+    protected SimilarityResultBuilder<SimilarityWriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
         return new SimilarityWriteResult.Builder();
     }
 

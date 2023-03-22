@@ -52,7 +52,7 @@ public class SimilarityStatsResult {
         this.configuration = configuration;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityStatsResult> {
+    public static class Builder extends SimilarityResultBuilder<SimilarityStatsResult> {
 
         @Override
         public SimilarityStatsResult build() {
