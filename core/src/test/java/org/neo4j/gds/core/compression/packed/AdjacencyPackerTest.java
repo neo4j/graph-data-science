@@ -176,7 +176,7 @@ class AdjacencyPackerTest {
     void compressNonBlockAlignedConsecutiveLongs(int valueCount) {
         assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var data = LongStream.range(0, valueCount).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(valueCount));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
 
         TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
@@ -204,7 +204,7 @@ class AdjacencyPackerTest {
             .limit(valueCount)
             .toArray();
 
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(valueCount));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
 
         TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation

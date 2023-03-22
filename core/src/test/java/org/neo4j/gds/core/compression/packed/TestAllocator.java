@@ -49,7 +49,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt(0);
-            var offset = AdjacencyPacker2.compress(
+            var offset = AdjacencyPacker.compress(
                 allocator,
                 slice,
                 values,
@@ -76,7 +76,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
-            var offset = AdjacencyPacker2.compress(
+            var offset = AdjacencyPacker.compress(
                 allocator,
                 slice,
                 values.clone(),

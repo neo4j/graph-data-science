@@ -28,9 +28,9 @@ import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;
 
-public final class AdjacencyPacker2 {
+public final class AdjacencyPacker {
 
-    private AdjacencyPacker2() {}
+    private AdjacencyPacker() {}
 
     public static long align(long length) {
         return BitUtil.align(length, AdjacencyPacking.BLOCK_SIZE);

@@ -260,7 +260,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[] targets = this.buffer.buffer;
         int targetsLength = this.buffer.length;
 
-        long offset = AdjacencyPacker2.compressWithProperties(
+        long offset = AdjacencyPacker.compressWithProperties(
             this.adjacencyAllocator,
             this.adjacencySlice,
             targets,
@@ -299,7 +299,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[] targets = this.buffer.buffer;
         int targetsLength = this.buffer.length;
 
-        long offset = AdjacencyPacker2.compress(
+        long offset = AdjacencyPacker.compress(
             this.adjacencyAllocator,
             this.adjacencySlice,
             targets,

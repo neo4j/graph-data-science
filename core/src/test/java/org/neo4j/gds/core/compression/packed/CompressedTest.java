@@ -44,7 +44,7 @@ class CompressedTest {
     })
     void decompressConsecutiveLongsViaCursor(int length) {
         var data = LongStream.range(0, length).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(length));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
 
         TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
@@ -71,7 +71,7 @@ class CompressedTest {
     void decompressRandomLongsViaCursor(int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker2.align(length));
+        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
 
         TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 

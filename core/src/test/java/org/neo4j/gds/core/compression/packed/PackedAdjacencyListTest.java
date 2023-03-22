@@ -39,7 +39,7 @@ class PackedAdjacencyListTest {
         var allocator = new TestAllocator();
         var slice = ModifiableSlice.<Address>create();
         var degree = new MutableInt(0);
-        var offset = AdjacencyPacker2.compress(
+        var offset = AdjacencyPacker.compress(
             allocator,
             slice,
             data,
