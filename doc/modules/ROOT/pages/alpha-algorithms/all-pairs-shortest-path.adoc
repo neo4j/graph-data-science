@@ -69,7 +69,7 @@ YIELD startNodeId, targetNodeId, distance
 image::example-graphs/shortest-path_graph.png[]
 
 .The following will create a sample graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Loc {name: 'A'}),
        (b:Loc {name: 'B'}),
@@ -89,8 +89,10 @@ CREATE (a:Loc {name: 'A'}),
 
 ----
 
+=== Using native projection
+
 .The following will project and store a graph using native projection:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-project-query, group=native]
 ----
 CALL gds.graph.project(
   'nativeGraph',
@@ -104,8 +106,10 @@ CALL gds.graph.project(
 YIELD graphName
 ----
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay, group=native]
 ----
 CALL gds.alpha.allShortestPaths.stream('nativeGraph', {
   relationshipWeightProperty: 'cost'
@@ -126,42 +130,43 @@ LIMIT 10
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| Source | Target | Cost
-| A      | F      | 160
-| A      | E      | 120
-| B      | F      | 110
-| C      | F      | 110
-| A      | D      | 90
-| B      | E      | 70
-| C      | E      | 70
-| D      | F      | 70
-| A      | B      | 50
-| A      | C      | 50
+| source | target | distance
+| "A"    | "F"    | 160
+| "A"    | "E"    | 120
+| "B"    | "F"    | 110
+| "C"    | "F"    | 110
+| "A"    | "D"    | 90
+| "B"    | "E"    | 70
+| "C"    | "E"    | 70
+| "D"    | "F"    | 70
+| "A"    | "B"    | 50
+| "A"    | "C"    | 50
 |===
+--
 
 This query returned the top 10 pairs of nodes that are the furthest away from each other.
 F and E appear to be quite distant from the others.
 
-For now, only single-source shortest path support loading the relationship as undirected, but we can use Cypher loading to help us solve this.
-Undirected graph can be represented as https://en.wikipedia.org/wiki/Bidirected_graph[Bidirected graph], which is a directed graph in which the reverse of every relationship is also a relationship.
+=== Using Cypher aggregation
 
-We do not have to save this reversed relationship, we can project it using *Cypher loading*.
-Note that relationship query does not specify direction of the relationship.
-This is applicable to all other algorithms that use Cypher loading.
-
-.The following will project and store an undirected graph using cypher projection:
-[source, cypher, role=noplay]
+.The following will project and store an undirected graph using cypher aggregation:
+[source, cypher, role=noplay graph-project-query, group=cypher]
 ----
-CALL gds.graph.project.cypher(
+MATCH (src:Loc)-[r:ROAD]->(trg:Loc)
+RETURN gds.alpha.graph.project(
   'cypherGraph',
-  'MATCH (n:Loc) RETURN id(n) AS id',
-  'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'
-)
-YIELD graphName
+  src,
+  trg,
+  {},
+  {relationshipType: type(r), properties: {cost: r.cost}},
+  {undirectedRelationshipTypes: ['ROAD']
+})
 ----
 
+[role=query-example]
+--
 .The following will run the algorithm, treating the graph as undirected:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay, group=cypher]
 ----
 CALL gds.alpha.allShortestPaths.stream('cypherGraph', {
   relationshipWeightProperty: 'cost'
@@ -182,15 +187,16 @@ LIMIT 10
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| Source | Target | Cost
-| A      | F      | 160
-| F      | A      | 160
-| A      | E      | 120
-| E      | A      | 120
-| B      | F      | 110
-| C      | F      | 110
-| F      | B      | 110
-| F      | C      | 110
-| A      | D      | 90
-| D      | A      | 90
+| source | target | distance
+| "A"    | "F"    | 160
+| "F"    | "A"    | 160
+| "A"    | "E"    | 120
+| "E"    | "A"    | 120
+| "B"    | "F"    | 110
+| "C"    | "F"    | 110
+| "F"    | "B"    | 110
+| "F"    | "C"    | 110
+| "A"    | "D"    | 90
+| "D"    | "A"    | 90
 |===
+--
