@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -157,6 +158,7 @@ final class NodeSimilarityTest {
             .writeRelationshipType("writeRelationshipType")
             .similarityCutoff(0.0);
     }
+
     private static String resultString(long node1, long node2, double similarity) {
         return formatWithLocale("%d,%d %f", node1, node2, similarity);
     }
@@ -355,9 +357,9 @@ final class NodeSimilarityTest {
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
-            orientation == REVERSE
-                ? fromGdl("(i1:Item)-[:REL {w: 0.50000D}]->(i3:Item), (i2:Item), (i4:Item), (a:Person), (b:Person), (c:Person), (d:Person)")
-                : fromGdl("(a:Person), (b:Person)-[:REL {w: 0.00000D}]->(c:Person), (d:Person), (i1:Item), (i2:Item), (i3:Item), (i4:Item)"),
+            orientation == REVERSE ? fromGdl(
+                "(i1:Item)-[:REL {w: 0.50000D}]->(i3:Item), (i2:Item), (i4:Item), (a:Person), (b:Person), (c:Person), (d:Person)") : fromGdl(
+                "(a:Person), (b:Person)-[:REL {w: 0.00000D}]->(c:Person), (d:Person), (i1:Item), (i2:Item), (i3:Item), (i4:Item)"),
             similarityGraph
         );
     }
@@ -821,7 +823,7 @@ final class NodeSimilarityTest {
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
-    @ValueSource(ints = {1,2})
+    @ValueSource(ints = {1, 2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
         var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
@@ -890,18 +892,63 @@ final class NodeSimilarityTest {
 
         nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().relationshipWeightProperty("LIKES").concurrency(1).similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
+            configBuilder()
+                .relationshipWeightProperty("LIKES")
+                .concurrency(1)
+                .similarityMetric(MetricSimilarityComputer.parse("ovErLaP"))
+                .build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
-        result = nodeSimilarity
+        result = nodeSimilarity.computeToStream().map(NodeSimilarityTest::resultString).collect(Collectors.toSet());
+
+        assertThat(result).contains("0,1 0.333333");
+
+    }
+
+    static Stream<Arguments> degreeCutoffInput() {
+        return Stream.of(
+            arguments(2, Integer.MAX_VALUE,
+                new String[]{resultString(0, 1, 0.666667),
+                    resultString(3, 0, 1.0), resultString(3, 1, 0.666667),
+                    resultString(1, 3, 0.666667), resultString(1, 0, 0.666667),
+                    resultString(0, 3, 1.0)}
+            ),
+            arguments(1, 2,
+                new String[]{resultString(1, 2, 0.0),
+                    resultString(2, 1, 0.0)}  //their similarity is zero, but we still return them
+            ),
+            arguments(3, 3,
+                new String[]{resultString(0, 3, 1.0),
+                    resultString(3, 0, 1.0)}
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("degreeCutoffInput")
+    void shouldWorkForAllDegreeBoundsCombinations(int lowBound, int upperBound, String... expectedOutput) {
+
+        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+            naturalGraph,
+            configBuilder().upperDegreeCutoff(upperBound).degreeCutoff(lowBound).build(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        Set<String> result = nodeSimilarity
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
-        assertThat(result).contains("0,1 0.333333");
+        assertThat(result).containsExactlyInAnyOrder(expectedOutput);
+    }
 
+    @Test
+    void shouldThrowIfUpperIsSmaller() {
+        assertThatThrownBy(configBuilder().upperDegreeCutoff(3).degreeCutoff(4)::build)
+            .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
     }
 
 }

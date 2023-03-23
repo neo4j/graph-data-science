@@ -591,10 +591,14 @@ ORDER BY similarity DESC, Person1, Person2
 
 
 [[algorithms-node-similarity-examples-degree-similarity-cutoff]]
-=== Degree cutoff and similarity cutoff
+=== Degree cutoffs  and similarity cutoff
 
-Degree cutoff is a lower limit on the node degree for a node to be considered in the comparisons.
-This value can not be lower than 1.
+Node Similarity can be tuned to ignore certain nodes based on degree constraints via two integer parameters named `degreeCutoff` and `upperDegreeCutoff`.
+If set, `degreeCutoff`  imposes a lower limit on the degree in order for a node to be considered in the comparisons, and skips any nodes with degree below `degreeCutoff`.
+if set, `upperDegreeCutoff` imposes an upper limit on the node degree, and skips any nodes with degree higher than `upperDegreeCutoff`.
+The two parameters can also be combined so that only those nodes whose degree falls under a certain segment are considered.
+
+The minimum value for both parameters is `1`.
 
 [role=query-example]
 --

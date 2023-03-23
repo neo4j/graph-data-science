@@ -195,6 +195,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         DegreeComputer degreeComputer = new DegreeComputer();
         VectorComputer vectorComputer = VectorComputer.of(graph, weighted);
+        DegreeFilter degreeFilter = new DegreeFilter(config.degreeCutoff(), config.upperDegreeCutoff());
         vectors.setAll(node -> {
             graph.forEachRelationship(node, degreeComputer);
             int degree = degreeComputer.degree;
@@ -202,7 +203,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             vectorComputer.reset(degree);
 
             progressTracker.logProgress(graph.degree(node));
-            if (degree >= config.degreeCutoff()) {
+            if (degreeFilter.apply(degree)) {
                 if (sourceNodeFilter.test(node)) {
                     sourceNodes.set(node);
                 }
