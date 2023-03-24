@@ -53,5 +53,4 @@ task('processVersionResources', type: Copy, dependsOn: processResources) {
         into "META-INF"
     }
 }
-tasks.writeManifestProperties.outputs.upToDateWhen { false }
 classes.dependsOn(processVersionResources)
