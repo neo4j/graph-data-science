@@ -19,111 +19,78 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class NodeSimilarityMutateProcTest
-    extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
-    implements MutateRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
+class NodeSimilarityMutateProcTest extends BaseProcTest {
 
-    @Override
-    public String mutateRelationshipType() {
-        return "SIMILAR_TO";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Person {id: 0,  name: 'Alice'})" +
+        ", (b:Person {id: 1,  name: 'Bob'})" +
+        ", (c:Person {id: 2,  name: 'Charlie'})" +
+        ", (d:Person {id: 3,  name: 'Dave'})" +
+        ", (i1:Item  {id: 10, name: 'p1'})" +
+        ", (i2:Item  {id: 11, name: 'p2'})" +
+        ", (i3:Item  {id: 12, name: 'p3'})" +
+        ", (i4:Item  {id: 13, name: 'p4'})" +
+        ", (a)-[:LIKES]->(i1)" +
+        ", (a)-[:LIKES]->(i2)" +
+        ", (a)-[:LIKES]->(i3)" +
+        ", (b)-[:LIKES]->(i1)" +
+        ", (b)-[:LIKES]->(i2)" +
+        ", (c)-[:LIKES]->(i3)";
 
-    @Override
-    public String mutateProperty() {
-        return "similarity";
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig, ?>> getProcedureClazz() {
-        return NodeSimilarityMutateProc.class;
-    }
-
-    @Override
-    public NodeSimilarityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
-        }
-        if (!mapWrapper.containsKey("mutateRelationshipType")) {
-            mapWrapper = mapWrapper.withString("mutateRelationshipType", mutateRelationshipType());
-        }
-        return mapWrapper;
-    }
-
-    @Override
-    public String expectedMutatedGraph() {
-        return formatWithLocale(
-            "  (a)" +
-            ", (b)" +
-            ", (c)" +
-            ", (d)" +
-            ", (i1)" +
-            ", (i2)" +
-            ", (i3)" +
-            ", (i4)" +
-            // LIKES
-            ", (a)-[{w: 1.0d}]->(i1)" +
-            ", (a)-[{w: 1.0d}]->(i2)" +
-            ", (a)-[{w: 1.0d}]->(i3)" +
-            ", (b)-[{w: 1.0d}]->(i1)" +
-            ", (b)-[{w: 1.0d}]->(i2)" +
-            ", (c)-[{w: 1.0d}]->(i3)" +
-            // SIMILAR_TO
-            ", (a)-[:SIMILAR_TO {w: %f}]->(b)" +
-            ", (a)-[:SIMILAR_TO {w: %f}]->(c)" +
-            ", (b)-[:SIMILAR_TO {w: %f}]->(a)" +
-            ", (c)-[:SIMILAR_TO {w: %f}]->(a)",
-            2 / 3.0,
-            1 / 3.0,
-            2 / 3.0,
-            1 / 3.0
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            NodeSimilarityMutateProc.class,
+            GraphProjectProc.class
         );
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
     void testMutateYields() {
-        loadGraph("graph");
+        String graphProject = GdsCypher.call("myGraph")
+            .graphProject()
+            .withAnyLabel()
+            .withRelationshipType("LIKES")
+            .yields();
+        runQuery(graphProject);
 
-        String query = GdsCypher.call("graph")
+        String query = GdsCypher.call("myGraph")
             .algo("nodeSimilarity")
             .mutateMode()
             .addParameter("similarityCutoff", 0.0)
-            .addParameter("mutateRelationshipType", mutateRelationshipType())
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateRelationshipType", "FOO")
+            .addParameter("mutateProperty", "foo")
             .yields(
                 "computeMillis",
                 "preProcessingMillis",
@@ -135,41 +102,43 @@ class NodeSimilarityMutateProcTest
                 "configuration"
             );
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(3, row.getNumber("nodesCompared").longValue());
-            assertEquals(6, row.getNumber("relationshipsWritten").longValue());
-            assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-            assertThat("Missing mutateMillis", -1L, lessThan(row.getNumber("mutateMillis").longValue()));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("nodesCompared")).asInstanceOf(LONG).isEqualTo(3);
+            assertThat(row.getNumber("relationshipsWritten")).asInstanceOf(LONG).isEqualTo(6);
 
-            Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
-            assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
-            assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
-            assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
-            assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
-            assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
-            assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
-            assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
-            assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
-            assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
-            assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
-            assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
-            assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
-            assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
-            assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
+            assertThat(row.getNumber("computeMillis"))
+                .as("Missing computeMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("preProcessingMillis"))
+                .as("Missing preProcessingMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("mutateMillis"))
+                .as("Missing mutateMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0);
 
-            assertThat(
-                "Missing postProcessingMillis",
-                -1L,
-                equalTo(row.getNumber("postProcessingMillis").longValue())
-            );
+            assertThat(row.get("similarityDistribution"))
+                .asInstanceOf(MAP)
+                .containsOnlyKeys("min", "max", "mean", "stdDev", "p1", "p5", "p10", "p25", "p50", "p75", "p90", "p95", "p99", "p100")
+                .allSatisfy((key, value) -> assertThat(value).asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(0d));
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .as("Missing postProcessingMillis")
+                .isEqualTo(-1L);
+
+            assertThat(row.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
         });
-    }
 
-    @Override
-    @Test
-    @Disabled("This test does not work for NodeSimilarity")
-    public void testGraphMutationOnFilteredGraph() { }
+        assertThat(rowCount)
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 10})
@@ -187,16 +156,20 @@ class NodeSimilarityMutateProcTest
         var query = GdsCypher.call(graphName)
             .algo("gds", "nodeSimilarity")
             .mutateMode()
-            .addParameter("sudo", true)
             .addParameter("topK", 1)
             .addParameter("topN", topN)
             .addParameter("mutateRelationshipType", "SIMILAR")
             .addParameter("mutateProperty", "score")
             .yields("relationshipsWritten");
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(6, row.getNumber("relationshipsWritten").longValue());
-        });
+        var rowCount = runQueryWithRowConsumer(
+            query,
+            row -> assertThat(row.getNumber("relationshipsWritten")).asInstanceOf(LONG).isEqualTo(6)
+        );
+
+        assertThat(rowCount)
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @ParameterizedTest
