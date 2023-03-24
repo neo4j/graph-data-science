@@ -97,13 +97,19 @@ public abstract class FileToGraphStoreImporter {
     public UserGraphStore run() {
         var fileInput = fileInput(importPath);
         this.progressTracker = createProgressTracker(fileInput);
-        progressTracker.beginSubTask();
+
         try {
+            progressTracker.beginSubTask();
             importGraphStore(fileInput);
             graphStoreBuilder.schema(graphSchemaBuilder.build());
-            return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
-        } finally {
+            var userGraphStore = ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
             progressTracker.endSubTask();
+
+            return userGraphStore;
+        } catch (Exception e) {
+            progressTracker.endSubTaskWithFailure();
+
+            throw e;
         }
     }
 
