@@ -38,6 +38,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -174,7 +175,10 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         progressTracker.endSubTask("create walks");
 
         try {
-            walks.put(tombstone);
+            boolean finished = false;
+            while (!finished && terminationFlag.running()) {
+                finished = walks.offer(tombstone, 100, TimeUnit.MILLISECONDS);
+            }
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }
@@ -322,9 +326,13 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         private boolean flushBuffer(int bufferLength) {
             bufferLength = Math.min(bufferLength, this.buffer.length);
 
-            for (int i = 0; i < bufferLength && terminationFlag.running(); i++) {
+            int i = 0;
+            while (i < bufferLength && terminationFlag.running()) {
                 try {
-                    walks.put(this.buffer[i]);
+                    // allow termination to occur if queue is full
+                    if (walks.offer(this.buffer[i], 100, TimeUnit.MILLISECONDS)) {
+                        i++;
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return false;
