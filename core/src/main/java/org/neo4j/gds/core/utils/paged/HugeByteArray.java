@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.eclipse.collections.api.block.function.primitive.LongToByteFunction;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.Arrays;

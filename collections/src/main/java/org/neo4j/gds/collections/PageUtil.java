@@ -23,6 +23,11 @@ import org.neo4j.gds.mem.BitUtil;
 
 public final class PageUtil {
 
+    // Arrays larger than this have a higher risk of triggering a full GC
+    // Prevents full GC more often as not so much consecutive memory is allocated in one go as
+    // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
+    public static final int MAX_ARRAY_LENGTH = 1 << 28;
+
     public static final int PAGE_SIZE_4KB = 1 << 12;
     public static final int PAGE_SIZE_32KB = 1 << 15;
 
@@ -58,6 +63,11 @@ public final class PageUtil {
     public static int indexInPage(long index, long pageMask) {
         return (int) (index & pageMask);
     }
+
+    public static int exclusiveIndexOfPage(long index, int pageMask) {
+        return 1 + (int) ((index - 1L) & pageMask);
+    }
+
 
     private PageUtil() {
         throw new UnsupportedOperationException("No instances");

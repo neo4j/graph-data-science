@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
+import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 

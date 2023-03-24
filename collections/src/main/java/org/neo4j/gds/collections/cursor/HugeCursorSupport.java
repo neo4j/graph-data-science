@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.cursor;
 
 public interface HugeCursorSupport<Array> {
 
@@ -69,7 +69,7 @@ public interface HugeCursorSupport<Array> {
      * Resetting the {@link HugeCursor} of an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
      *
-     * @see HugeIntArray#initCursor(HugeCursor)
+     * @see org.neo4j.gds.collections.haa.HugeAtomicLongArray#initCursor(HugeCursor)
      */
     default HugeCursor<Array> initCursor(HugeCursor<Array> cursor, long start, long end) {
         if (start < 0L || start > size()) {

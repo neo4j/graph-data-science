@@ -161,7 +161,7 @@ public abstract class HugeAtomicDoubleArray {
      * The array is unusable after calling this method and will throw {@link NullPointerException}s on virtually every method invocation.
      * <p>
      * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
-     * You have to {@link HugeCursor#close()} every cursor instance as well.
+     * You have to {@link org.neo4j.gds.collections.cursor.HugeCursor#close()} every cursor instance as well.
      *
      * @return the amount of memory freed, in bytes.
      */
