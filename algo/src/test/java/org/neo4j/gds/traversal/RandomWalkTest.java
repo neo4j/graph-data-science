@@ -414,10 +414,9 @@ class RandomWalkTest {
 
     /**
      * Ensure that when termination flag is set externally, we terminate the walk
-     * @throws InterruptedException
      */
     @Test
-    void testPartialReadMultipleRuns() {
+    void testSetTerminationFlagAndMultipleRuns() {
         for (int i = 0; i < 3; i++) {
             Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
                     .walkBufferSize(1)
