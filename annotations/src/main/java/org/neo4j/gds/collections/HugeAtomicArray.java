@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 public @interface HugeAtomicArray {
 
     /**
-     * The type which is stored in the generated HugeSparseArray.
+     * The type which is stored in the generated HugeAtomicArray.
      */
     Class<?> valueType();
 

@@ -64,7 +64,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     @Override
     protected Boolean defaultAction(Element e, TypeMirror aClass) {
         messager.printMessage(Diagnostic.Kind.ERROR, "Unexpected enclosed element", e);
-        return super.defaultAction(e, aClass);
+        return false;
     }
 
     @Override

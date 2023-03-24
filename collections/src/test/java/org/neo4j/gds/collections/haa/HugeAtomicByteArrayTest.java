@@ -51,7 +51,7 @@ import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources, and then adjusted for
  * `byte`.
- * We also extend RandomizedTest as this class also includes a check that we don't leak threads.
+ * We also include a check that we don't leak threads.
  *
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/AtomicLongArrayTest.java">OpenJDK sources for AtomicLongArrayTest.java</a>
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/Atomic8Test.java">OpenJDK sources for Atomic8Test.java</a>
