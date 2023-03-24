@@ -364,10 +364,12 @@ class NodeSimilarityStreamProcTest extends BaseProcTest {
             .addParameter("topN", topN)
             .yields("node1", "node2", "similarity");
 
-        runQueryWithRowConsumer(algoQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(algoQuery, row -> {
             assertThat(row.getNumber("node1")).isIn(11L, 12L);
             assertThat(row.getNumber("node2")).isIn(11L, 12L);
             assertThat(row.getNumber("similarity")).isEqualTo(1.0);
         });
+
+        assertThat(rowCount).isEqualTo(2l);
     }
 }
