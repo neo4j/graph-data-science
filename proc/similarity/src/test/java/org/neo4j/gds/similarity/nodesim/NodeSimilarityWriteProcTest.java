@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -245,9 +246,13 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "score")
             .yields("relationshipsWritten");
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertEquals(6, row.getNumber("relationshipsWritten").longValue());
         });
+
+        Assertions.assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @ParameterizedTest
