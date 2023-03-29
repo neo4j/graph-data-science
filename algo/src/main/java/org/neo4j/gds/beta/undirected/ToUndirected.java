@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -116,17 +117,26 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             .orientation(Orientation.UNDIRECTED)
             .validateRelationships(false);
 
-        config.aggregation().ifPresent(relationshipsBuilderBuilder::aggregation);
+
+        config
+            .aggregation()
+            .map(ToUndirectedAggregations::globalAggregation)
+            .ifPresent(relationshipsBuilderBuilder::aggregation);
 
 
         propertySchemas.forEach(propertySchema ->
-            relationshipsBuilderBuilder.addPropertyConfig(
-                propertySchema.key(),
-                // FIXME aggregation per property
-                config.aggregation().orElse(propertySchema.aggregation()),
-                propertySchema.defaultValue(),
-                propertySchema.state()
-            )
+            {
+                Aggregation aggregation = config.aggregation()
+                    .map(aggregations -> aggregations.localAggregation(propertySchema.key()))
+                    .orElse(propertySchema.aggregation());
+
+                relationshipsBuilderBuilder.addPropertyConfig(
+                    propertySchema.key(),
+                    aggregation,
+                    propertySchema.defaultValue(),
+                    propertySchema.state()
+                );
+            }
         );
 
         return relationshipsBuilderBuilder.build();

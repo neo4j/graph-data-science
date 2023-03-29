@@ -37,6 +37,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -219,8 +220,7 @@ class ToUndirectedTest {
     }
 
     @Test
-    void shouldAggregateWithProperties() {
-        // FIXME test aggregation per property (or globally)
+    void shouldAggregateWithPropertiesAndGlobalAggregation() {
         var input = GdlFactory.of(
             "  (a), (b)" +
             ", (a)-[:T {prop1: 42.0D, prop2: 84.0D}]->(b)" +
@@ -258,6 +258,47 @@ class ToUndirectedTest {
 
 
         assertGraphEquals(expectedGraphProp1, input.getGraph(RelationshipType.of("TU"), Optional.of("prop1")));
+        assertGraphEquals(expectedGraphProp2, input.getGraph(RelationshipType.of("TU"), Optional.of("prop2")));
+    }
+
+    @Test
+    void shouldAggregateWithPropertiesAndLocalAggregation() {
+        var input = GdlFactory.of(
+            "  (a), (b)" +
+            ", (a)-[:T {prop1: 42.0D, prop2: 84.0D}]->(b)" +
+            ", (a)-[:T {prop1: 1.0D, prop2: 2.0D}]->(b)" +
+            ", (a)-[:T {prop1: 4.0D, prop2: 5.0D}]->(a)").build();
+
+        var config = ToUndirectedConfigImpl
+            .builder()
+            .concurrency(4)
+            .relationshipType("T")
+            .mutateRelationshipType("TU")
+            .aggregation(Map.of("prop1", "min", "prop2", "max"))
+            .build();
+
+        SingleTypeRelationships aggregatedUndirectedRelationships = new ToUndirected(
+            input,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        ).compute();
+
+        input.addRelationshipType(aggregatedUndirectedRelationships);
+
+        var expectedGraphProp1 = GdlFactory.of(
+            "(a)-[:TU {prop1: 1.0}]->(b)" +
+            ", (b)-[:TU {prop1: 1.0}]->(a)" +
+            ", (a)-[:TU {prop1: 4.0}]->(a)").build().getUnion();
+
+
+        assertGraphEquals(expectedGraphProp1, input.getGraph(RelationshipType.of("TU"), Optional.of("prop1")));
+
+        var expectedGraphProp2 = GdlFactory.of(
+            "(a)-[:TU {prop2: 84.0}]->(b)" +
+            ", (b)-[:TU {prop2: 84.0}]->(a)" +
+            ", (a)-[:TU {prop2: 5.0D}]->(a)").build().getUnion();
+
         assertGraphEquals(expectedGraphProp2, input.getGraph(RelationshipType.of("TU"), Optional.of("prop2")));
     }
 

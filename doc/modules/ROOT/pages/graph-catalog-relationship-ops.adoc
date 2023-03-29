@@ -197,6 +197,7 @@ YIELD
 | Name                   | Type                  | Default | Optional | Description
 | relationshipType       | String                | n/a     | no       | The relationship type to make undirected.
 | mutateRelationshipType | String                | n/a     | no       | The relationship type to be added to the graph.
+| aggregation            | Map or String         | n/a     | no       | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`. Using map allows specifying aggregations per relationship property. By default we will use the existing aggregation used during the initial projection.
 include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 |===
 
