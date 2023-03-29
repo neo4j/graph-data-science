@@ -87,7 +87,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     }
 
     @SuppressWarnings("unused")
-    public static class MutateResult extends TriangleCountStatsProc.StatsResult {
+    public static class MutateResult extends StatsResult {
 
         public long mutateMillis;
         public long nodePropertiesWritten;

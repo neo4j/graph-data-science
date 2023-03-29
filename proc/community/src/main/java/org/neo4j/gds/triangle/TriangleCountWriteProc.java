@@ -85,7 +85,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @SuppressWarnings("unused")
-    public static class WriteResult extends TriangleCountStatsProc.StatsResult {
+    public static class WriteResult extends StatsResult {
 
         public long writeMillis;
         public long nodePropertiesWritten;
