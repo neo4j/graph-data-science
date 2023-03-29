@@ -19,134 +19,27 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.knn.filtered.mutate", executionMode = MUTATE_RELATIONSHIP)
-public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, FilteredKnnMutateProcResult> {
+public class FilteredKnnMutateProc extends BaseProc {
     @Procedure(name = "gds.alpha.knn.filtered.mutate", mode = READ)
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
     public Stream<FilteredKnnMutateProcResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
-    }
-
-    @Override
-    protected FilteredKnnMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return FilteredKnnMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<FilteredKnn, FilteredKnnMutateConfig> algorithmFactory() {
-        return new FilteredKnnFactory<>();
-    }
-
-    @Override
-    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<FilteredKnnMutateProcResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging("Graph mutation failed", () -> {
-            FilteredKnnMutateConfig config = computationResult.config();
-            FilteredKnnResult result = computationResult.result();
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.of(
-                    new FilteredKnnMutateProcResult(
-                        computationResult.preProcessingMillis(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        Collections.emptyMap(),
-                        true,
-                        0,
-                        0,
-                        config.toMap()
-                    )
-                );
-            }
-
-            FilteredKnn algorithm = Objects.requireNonNull(computationResult.algorithm());
-
-            var mutateMillis = new AtomicLong();
-
-            SimilarityGraphResult similarityGraphResult;
-            try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                similarityGraphResult = FilteredKnnHelpers.computeToGraph(
-                    computationResult.graph(),
-                    algorithm.nodeCount(),
-                    config.concurrency(),
-                    Objects.requireNonNull(result),
-                    algorithm.executorService()
-                );
-            }
-
-            FilteredKnnMutateProcResult.Builder resultBuilder = new FilteredKnnMutateProcResult.Builder()
-                .ranIterations(result.ranIterations())
-                .didConverge(result.didConverge())
-                .withNodePairsConsidered(result.nodePairsConsidered());
-
-            SimilarityProc.withGraphsizeAndTimings(resultBuilder, computationResult, (ignore) -> similarityGraphResult);
-
-
-            try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-                computeHistogram(similarityGraph, resultBuilder);
-
-                RelationshipType relationshipType = RelationshipType.of(config.mutateRelationshipType());
-                computationResult
-                    .graphStore()
-                    .addRelationshipType(
-                        SingleTypeRelationships.of(
-                            relationshipType,
-                            similarityGraph.relationshipTopology(),
-                            similarityGraphResult.direction(),
-                            similarityGraph.relationshipProperties(),
-                            Optional.of(RelationshipPropertySchema.of(config.mutateProperty(), ValueType.DOUBLE))
-                        )
-                    );
-            }
-
-            resultBuilder.withMutateMillis(mutateMillis.get());
-
-            return Stream.of(resultBuilder.build());
-        });
-    }
-
-    private void computeHistogram(
-        Graph similarityGraph,
-        FilteredKnnMutateProcResult.Builder resultBuilder
-    ) {
-        if (shouldComputeHistogram(executionContext().returnColumns())) {
-            resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
-        }
+        return new ProcedureExecutor<>(
+            new FilteredKnnMutateSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 }
