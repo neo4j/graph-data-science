@@ -17,26 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClosenessCentralityStatsProcTest extends BaseProcTest implements AlgoBaseProcTest<ClosenessCentrality, ClosenessCentralityStatsConfig, ClosenessCentralityResult> {
+class ClosenessCentralityStatsProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -92,26 +87,24 @@ class ClosenessCentralityStatsProcTest extends BaseProcTest implements AlgoBaseP
             ClosenessCentralityStatsProc.class,
             GraphProjectProc.class
         );
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+
     }
 
-    @Override
-    public Class<ClosenessCentralityStatsProc> getProcedureClazz() {
-        return ClosenessCentralityStatsProc.class;
-    }
-
-    @Override
-    public ClosenessCentralityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ClosenessCentralityStatsConfig.of(mapWrapper);
-    }
 
     @Test
-    void testStats() {
-        loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+    void shouldComputeStats() {
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.closeness")
             .statsMode()
-            .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis", "configuration");
+            .yields(
+                "centralityDistribution",
+                "preProcessingMillis",
+                "computeMillis",
+                "postProcessingMillis",
+                "configuration"
+            );
 
         runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("preProcessingMillis").longValue()).isGreaterThan(-1L);
@@ -136,30 +129,5 @@ class ClosenessCentralityStatsProcTest extends BaseProcTest implements AlgoBaseP
 
         });
     }
-
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
-    @Override
-    public void assertResultEquals(ClosenessCentralityResult result1, ClosenessCentralityResult result2) {
-        var assertions = new SoftAssertions();
-
-        var left = result1.centralities();
-        var right = result2.centralities();
-
-        assertions.assertThat(left.size()).as("Result size").isEqualTo(right.size());
-
-        for (long i = 0; i < left.size(); i++) {
-            assertions.assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
-        }
-
-        assertions.assertAll();
-    }
-
-    @Test
-    @Disabled("Stats on empty graph has not been covered in AlgoBaseProcTest 🙈")
-    public void testRunOnEmptyGraph() {
-    }
+    
 }

@@ -17,10 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.beta.closeness.ClosenessCentrality;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityConfig;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
@@ -31,9 +35,6 @@ import java.util.List;
 
 public final class ClosenessCentralityProc {
 
-    static final String DESCRIPTION =
-        "Closeness centrality is a way of detecting nodes that are " +
-        "able to spread information very efficiently through a graph.";
 
     private ClosenessCentralityProc() {}
 

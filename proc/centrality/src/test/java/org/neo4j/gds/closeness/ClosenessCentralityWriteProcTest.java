@@ -17,22 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
-import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +36,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ClosenessCentralityWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<ClosenessCentrality, ClosenessCentralityWriteConfig, ClosenessCentralityResult> {
+class ClosenessCentralityWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -116,30 +112,13 @@ class ClosenessCentralityWriteProcTest extends BaseProcTest implements AlgoBaseP
             Map.of("nodeId", idFunction.of("n9"), "score", Matchers.closeTo(0.588, 0.01)),
             Map.of("nodeId", idFunction.of("n10"), "score", Matchers.closeTo(0.588, 0.01))
         );
+
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+
     }
-
-
-    @Override
-    public Class<ClosenessCentralityWriteProc> getProcedureClazz() {
-        return ClosenessCentralityWriteProc.class;
-    }
-
-    @Override
-    public ClosenessCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ClosenessCentralityWriteConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
-    }
-
+    
     @Test
-    void testClosenessWrite() {
-        loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+    void shouldWrite() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.closeness")
             .writeMode()
@@ -178,24 +157,4 @@ class ClosenessCentralityWriteProcTest extends BaseProcTest implements AlgoBaseP
         );
     }
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
-    @Override
-    public void assertResultEquals(ClosenessCentralityResult result1, ClosenessCentralityResult result2) {
-        var assertions = new SoftAssertions();
-
-        var left = result1.centralities();
-        var right = result2.centralities();
-
-        assertions.assertThat(left.size()).as("Result size").isEqualTo(right.size());
-
-        for (long i = 0; i < left.size(); i++) {
-            assertions.assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
-        }
-
-        assertions.assertAll();
-    }
 }
