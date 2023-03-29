@@ -34,13 +34,13 @@ final class TriangleCountCompanion {
         "determine the number of triangles passing through each node in the graph.";
 
 
-    static <CONFIG extends TriangleCountBaseConfig> NodePropertyValues nodePropertyTranslator(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult) {
+    static <CONFIG extends TriangleCountBaseConfig> NodePropertyValues nodePropertyTranslator(ComputationResult<IntersectingTriangleCount, TriangleCountResult, CONFIG> computeResult) {
         return computeResult.result().asNodeProperties();
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, CONFIG> computeResult
     ) {
         var result = Optional.ofNullable(computeResult.result()).orElse(EmptyResult.EMPTY_RESULT);
         return procResultBuilder.withGlobalTriangleCount(result.globalTriangles());
@@ -59,7 +59,7 @@ final class TriangleCountCompanion {
 
     private TriangleCountCompanion() {}
 
-    private static final class EmptyResult implements IntersectingTriangleCount.TriangleCountResult {
+    private static final class EmptyResult implements TriangleCountResult {
 
         static final EmptyResult EMPTY_RESULT = new EmptyResult();
 

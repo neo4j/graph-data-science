@@ -41,7 +41,7 @@ import static org.neo4j.gds.triangle.TriangleCountCompanion.nodePropertyTranslat
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.triangleCount.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig> {
+public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig> {
 
     @Procedure(value = "gds.triangleCount.mutate", mode = READ)
     @Description(DESCRIPTION)
@@ -73,14 +73,14 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
 
     @Override
     protected NodePropertyValues nodeProperties(
-        ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig> computationResult
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig> computationResult
     ) {
         return nodePropertyTranslator(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig> computeResult,
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return TriangleCountCompanion.resultBuilder(new TriangleCountMutateBuilder(), computeResult);

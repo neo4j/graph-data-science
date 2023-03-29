@@ -39,7 +39,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 
 class TriangleCountMutateProcTest
     extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
-    implements MutateNodePropertyTest<IntersectingTriangleCount, TriangleCountMutateConfig, IntersectingTriangleCount.TriangleCountResult> {
+    implements MutateNodePropertyTest<IntersectingTriangleCount, TriangleCountMutateConfig, TriangleCountResult> {
 
     @Override
     public String mutateProperty() {
@@ -136,7 +136,7 @@ class TriangleCountMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, ?>> getProcedureClazz() {
         return TriangleCountMutateProc.class;
     }
 

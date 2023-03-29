@@ -40,7 +40,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig> {
+public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig> {
 
     @Procedure(value = "gds.triangleCount.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -62,7 +62,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig> computeResult,
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return TriangleCountCompanion.resultBuilder(new TriangleCountStatsBuilder(), computeResult);

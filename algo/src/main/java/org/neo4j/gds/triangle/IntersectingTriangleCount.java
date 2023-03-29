@@ -21,7 +21,6 @@ package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
@@ -54,7 +53,7 @@ import java.util.concurrent.atomic.LongAdder;
  * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
 @SuppressWarnings("FieldCanBeLocal")
-public final class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount.TriangleCountResult> {
+public final class IntersectingTriangleCount extends Algorithm<TriangleCountResult> {
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
 
@@ -167,26 +166,4 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         }
     }
 
-    @ValueClass
-    public interface TriangleCountResult {
-        // value at index `i` is number of triangles for node with id `i`
-        HugeAtomicLongArray localTriangles();
-
-        long globalTriangles();
-
-        static TriangleCountResult of(
-            HugeAtomicLongArray triangles,
-            long globalTriangles
-        ) {
-            return ImmutableTriangleCountResult
-                .builder()
-                .localTriangles(triangles)
-                .globalTriangles(globalTriangles)
-                .build();
-        }
-
-        default LongNodePropertyValues asNodeProperties() {
-            return HugeArrayToNodeProperties.convert(localTriangles());
-        }
-    }
 }

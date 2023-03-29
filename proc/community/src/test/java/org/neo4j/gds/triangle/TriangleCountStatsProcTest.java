@@ -75,7 +75,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, ?>> getProcedureClazz() {
         return TriangleCountStatsProc.class;
     }
 

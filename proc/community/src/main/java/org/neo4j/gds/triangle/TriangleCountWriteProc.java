@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.triangleCount.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteProc.WriteResult, TriangleCountWriteConfig> {
+public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteProc.WriteResult, TriangleCountWriteConfig> {
 
     @Procedure(value = "gds.triangleCount.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -72,13 +72,13 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computationResult) {
         return TriangleCountCompanion.nodePropertyTranslator(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computeResult,
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return TriangleCountCompanion.resultBuilder(new TriangleCountWriteBuilder(), computeResult);
