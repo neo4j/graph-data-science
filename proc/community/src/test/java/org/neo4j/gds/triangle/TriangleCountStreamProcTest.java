@@ -19,19 +19,37 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCountStreamConfig> {
+class TriangleCountStreamProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A)-[:T]->(b:A), " +
+                                           "(b)-[:T]->(c:A), " +
+                                           "(c)-[:T]->(a)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            TriangleCountStreamProc.class
+        );
+
+        runQuery("CALL gds.graph.project('graph', 'A', {T: { orientation: 'UNDIRECTED'}})");
+    }
 
     @Test
-    void testStreaming() {
+    void shouldStream() {
 
-        var query = "CALL gds.triangleCount.stream('" + DEFAULT_GRAPH_NAME + "')";
+        var query = "CALL gds.triangleCount.stream('graph');";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("triangleCount"))
@@ -42,14 +60,5 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
         assertThat(rowCount).isEqualTo(3L);
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, ?>> getProcedureClazz() {
-        return TriangleCountStreamProc.class;
-    }
-
-    @Override
-    public TriangleCountStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStreamConfig.of(mapWrapper);
-    }
 
 }
