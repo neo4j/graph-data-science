@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.undirected;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
@@ -28,12 +29,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
@@ -43,6 +46,11 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipConfig {
     @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
     String relationshipType();
+
+    @Value.Default
+    @Configuration.ConvertWith(method = "org.neo4j.gds.core.Aggregation#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.core.Aggregation#toString")
+    Optional<Aggregation> aggregation();
 
     @Configuration.Ignore
     default RelationshipType internalRelationshipType() {

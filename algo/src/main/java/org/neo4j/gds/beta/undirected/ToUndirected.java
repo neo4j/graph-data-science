@@ -116,10 +116,14 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             .orientation(Orientation.UNDIRECTED)
             .validateRelationships(false);
 
+        config.aggregation().ifPresent(relationshipsBuilderBuilder::aggregation);
+
+
         propertySchemas.forEach(propertySchema ->
             relationshipsBuilderBuilder.addPropertyConfig(
                 propertySchema.key(),
-                propertySchema.aggregation(),
+                // FIXME aggregation per property
+                config.aggregation().orElse(propertySchema.aggregation()),
                 propertySchema.defaultValue(),
                 propertySchema.state()
             )
@@ -138,7 +142,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         if (propertyKeys.size() == 1) {
             Graph graph = graphStore.getGraph(fromRelationshipType, Optional.of(propertyKeys.get(0)));
 
-            taskCreator = (partition) -> new ToUndirectedTaskWithSingleProperty(
+            taskCreator = partition -> new ToUndirectedTaskWithSingleProperty(
                 relationshipsBuilder,
                 graph.concurrentCopy(),
                 partition,
@@ -151,7 +155,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
                 propertyKeys
             );
 
-            taskCreator = (partition) -> new ToUndirectedTaskWithMultipleProperties(
+            taskCreator = partition -> new ToUndirectedTaskWithMultipleProperties(
                 relationshipsBuilder,
                 relationshipIterator.concurrentCopy(),
                 partition,
