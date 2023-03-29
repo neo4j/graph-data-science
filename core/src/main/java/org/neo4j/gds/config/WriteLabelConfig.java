@@ -28,7 +28,7 @@ import java.util.Map;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface WriteLabelConfig extends BaseConfig, ConcurrencyConfig {
+public interface WriteLabelConfig extends BaseConfig, WriteConfig {
 
     static WriteLabelConfig of(Map<String, Object> rawConfig) {
         return new WriteLabelConfigImpl(CypherMapWrapper.create(rawConfig));

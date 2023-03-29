@@ -20,13 +20,20 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface WriteConfig extends ConcurrencyConfig {
 
@@ -45,6 +52,17 @@ public interface WriteConfig extends ConcurrencyConfig {
             .validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
+    /**
+     * This config option will only exist temporarily for testing the "serverless"
+     * architecture. It should only be used for arrow write-back.
+     * In the final version we will no longer pass this information in procedure
+     * calls, but replace those calls with an arrow protocol.
+     * Note that not every write-back path supports forwarding this information to the
+     * export builders.
+     */
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#parse")
+    Optional<ArrowConnectionInfo> arrowConnectionInfo();
+
     @Configuration.GraphStoreValidationCheck
     @Value.Default
     default void validateGraphIsSuitableForWrite(
@@ -54,6 +72,44 @@ public interface WriteConfig extends ConcurrencyConfig {
     ) {
         if (!graphStore.capabilities().canWriteToDatabase()) {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
+        }
+    }
+
+    @ValueClass
+    interface ArrowConnectionInfo {
+        String hostname();
+        int port();
+        String username();
+        String password();
+
+        static @Nullable ArrowConnectionInfo parse(Object input) {
+            if (input instanceof Map) {
+                var map = CypherMapWrapper.create((Map<String, Object>) input);
+                var hostname = map.getString("hostname").orElseThrow();
+                var port = map.getLongAsInt("port");
+                var username = map.getString("username").orElseThrow();
+                var password = map.getString("password").orElseThrow();
+
+                return ImmutableArrowConnectionInfo.of(hostname, port, username, password);
+            }
+            if (input instanceof Optional<?>) {
+                Optional<?> optionalInput = (Optional<?>) input;
+                if (optionalInput.isEmpty()) {
+                    return null;
+                } else {
+                    var content = optionalInput.get();
+                    if (content instanceof ArrowConnectionInfo) {
+                        return (ArrowConnectionInfo) content;
+                    }
+                }
+            }
+            if (input instanceof ArrowConnectionInfo) {
+                return (ArrowConnectionInfo) input;
+            }
+            throw new IllegalArgumentException(formatWithLocale(
+                "Expected input to be of type `map`, but got `%s`",
+                input.getClass().getSimpleName()
+            ));
         }
     }
 }
