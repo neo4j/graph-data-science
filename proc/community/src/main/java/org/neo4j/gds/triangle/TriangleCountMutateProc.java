@@ -25,7 +25,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -35,13 +34,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.nodePropertyTranslator;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.triangleCount.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig> {
+public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTriangleCount, TriangleCountResult, MutateResult, TriangleCountMutateConfig> {
 
     @Procedure(value = "gds.triangleCount.mutate", mode = READ)
     @Description(DESCRIPTION)
@@ -84,33 +81,6 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
         ExecutionContext executionContext
     ) {
         return TriangleCountCompanion.resultBuilder(new TriangleCountMutateBuilder(), computeResult);
-    }
-
-    @SuppressWarnings("unused")
-    public static class MutateResult extends StatsResult {
-
-        public long mutateMillis;
-        public long nodePropertiesWritten;
-
-        MutateResult(
-            long globalTriangleCount,
-            long nodeCount,
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                globalTriangleCount,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                configuration
-            );
-            this.mutateMillis = mutateMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
     }
 
     static class TriangleCountMutateBuilder extends TriangleCountCompanion.TriangleCountResultBuilder<MutateResult> {

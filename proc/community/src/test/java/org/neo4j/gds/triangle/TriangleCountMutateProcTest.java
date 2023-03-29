@@ -19,76 +19,108 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class TriangleCountMutateProcTest
-    extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
-    implements MutateNodePropertyTest<IntersectingTriangleCount, TriangleCountMutateConfig, TriangleCountResult> {
+class TriangleCountMutateProcTest extends BaseProcTest {
 
-    @Override
-    public String mutateProperty() {
-        return "mutatedTriangleCount";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A)-[:T]->(b:A), " +
+                                           "(b)-[:T]->(c:A), " +
+                                           "(c)-[:T]->(a)";
 
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.LONG;
-    }
+    String expectedMutatedGraph =
+        "  (a: A { mutatedTriangleCount: 1 })" +
+        ", (b: A { mutatedTriangleCount: 1 })" +
+        ", (c: A { mutatedTriangleCount: 1 })" +
+        // Graph is UNDIRECTED, e.g. each rel twice
+        ", (a)-[:T]->(b)" +
+        ", (b)-[:T]->(a)" +
+        ", (b)-[:T]->(c)" +
+        ", (c)-[:T]->(b)" +
+        ", (a)-[:T]->(c)" +
+        ", (c)-[:T]->(a)";
 
-    @Override
-    public String expectedMutatedGraph() {
-        return
-            "  (a { mutatedTriangleCount: 1 })" +
-            ", (b { mutatedTriangleCount: 1 })" +
-            ", (c { mutatedTriangleCount: 1 })" +
-            // Graph is UNDIRECTED, e.g. each rel twice
-            ", (a)-->(b)" +
-            ", (b)-->(a)" +
-            ", (b)-->(c)" +
-            ", (c)-->(b)" +
-            ", (a)-->(c)" +
-            ", (c)-->(a)";
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            TriangleCountMutateProc.class
+        );
+
+        runQuery("CALL gds.graph.project('graph', 'A', {T: { orientation: 'UNDIRECTED'}})");
     }
 
     @Test
-    void testMutateYields() {
+    void shouldMutateYield() {
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateProperty", "mutatedTriangleCount")
             .yields();
 
-        assertCypherResult(query, List.of(Map.of(
-            "globalTriangleCount", 1L,
-            "nodeCount", 3L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "mutateMillis", greaterThan(-1L),
-            "nodePropertiesWritten", 3L
-        )));
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("globalTriangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1L);
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("mutateMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
+        });
+
+        Graph mutatedGraph = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db), "graph")
+            .graphStore()
+            .getUnion();
+
+        assertThat(rowCount).isEqualTo(1L);
+        assertGraphEquals(fromGdl(expectedMutatedGraph), mutatedGraph);
     }
 
     @Test
-    void testMutateWithMaxDegree() {
+    void shouldMutateWithMaxDegree() {
         // Add a single node and connect it to the triangle
         // to be able to apply the maxDegree filter.
         runQuery("MATCH (n) " +
@@ -105,17 +137,30 @@ class TriangleCountMutateProcTest
         var query = GdsCypher.call("testGraph")
             .algo("triangleCount")
             .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateProperty", "mutatedTriangleCount")
             .addParameter("maxDegree", 2)
             .yields("globalTriangleCount", "nodeCount", "nodePropertiesWritten");
 
-        assertCypherResult(query, List.of(Map.of(
-            "globalTriangleCount", 0L,
-            "nodeCount", 4L,
-            "nodePropertiesWritten", 4L
-        )));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("globalTriangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(0L);
 
-        Graph actualGraph = GraphStoreCatalog.get(getUsername(), databaseId(), "testGraph").graphStore().getUnion();
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(4L);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(4L);
+        });
+
+        assertThat(rowCount).isEqualTo(1L);
+
+        Graph mutatedGraph = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db), "testGraph")
+            .graphStore()
+            .getUnion();
 
         assertGraphEquals(
             fromGdl(
@@ -132,16 +177,8 @@ class TriangleCountMutateProcTest
                 ", (c)-->(a)" +
                 ", (d)-->(a)" +
                 ", (a)-->(d)"
-            ), actualGraph);
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, ?>> getProcedureClazz() {
-        return TriangleCountMutateProc.class;
-    }
-
-    @Override
-    public TriangleCountMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountMutateConfig.of(mapWrapper);
+            ), mutatedGraph);
     }
 }
+
+
