@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,13 +34,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.triangleCount.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteProc.WriteResult, TriangleCountWriteConfig> {
+public class TriangleCountWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.triangleCount.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -49,7 +49,10 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new TriangleCountWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.triangleCount.write.estimate", mode = READ)
@@ -58,72 +61,16 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new TriangleCountWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected TriangleCountWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return TriangleCountWriteConfig.of(config);
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
-    @Override
-    public GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory() {
-        return new IntersectingTriangleCountFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computationResult) {
-        return TriangleCountCompanion.nodePropertyTranslator(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return TriangleCountCompanion.resultBuilder(new TriangleCountWriteBuilder(), computeResult);
-    }
-
-    @SuppressWarnings("unused")
-    public static class WriteResult extends StatsResult {
-
-        public long writeMillis;
-        public long nodePropertiesWritten;
-
-        public WriteResult(
-            long globalTriangleCount,
-            long nodeCount,
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                globalTriangleCount,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                configuration
-            );
-            this.writeMillis = writeMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-    }
-
-    static class TriangleCountWriteBuilder extends TriangleCountCompanion.TriangleCountResultBuilder<WriteResult> {
-
-        @Override
-        public WriteResult build() {
-            return new WriteResult(
-                globalTriangleCount,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
-    }
 }

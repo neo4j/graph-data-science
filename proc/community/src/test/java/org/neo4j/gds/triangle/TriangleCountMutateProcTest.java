@@ -109,13 +109,14 @@ class TriangleCountMutateProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isEqualTo(3L);
         });
+        assertThat(rowCount).isEqualTo(1L);
 
+        
         Graph mutatedGraph = GraphStoreCatalog
             .get(getUsername(), DatabaseId.of(db), "graph")
             .graphStore()
             .getUnion();
 
-        assertThat(rowCount).isEqualTo(1L);
         assertGraphEquals(fromGdl(expectedMutatedGraph), mutatedGraph);
     }
 
