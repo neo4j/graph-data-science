@@ -19,13 +19,6 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
-
-import java.util.Optional;
 
 final class TriangleCountCompanion {
 
@@ -33,47 +26,4 @@ final class TriangleCountCompanion {
         "Triangle counting is a community detection graph algorithm that is used to " +
         "determine the number of triangles passing through each node in the graph.";
 
-
-    static <CONFIG extends TriangleCountBaseConfig> NodePropertyValues nodePropertyTranslator(ComputationResult<IntersectingTriangleCount, TriangleCountResult, CONFIG> computeResult) {
-        return computeResult.result().asNodeProperties();
-    }
-
-    static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
-        TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<IntersectingTriangleCount, TriangleCountResult, CONFIG> computeResult
-    ) {
-        var result = Optional.ofNullable(computeResult.result()).orElse(EmptyResult.EMPTY_RESULT);
-        return procResultBuilder.withGlobalTriangleCount(result.globalTriangles());
-    }
-
-    abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
-
-        long globalTriangleCount = 0;
-
-        TriangleCountResultBuilder<PROC_RESULT> withGlobalTriangleCount(long globalTriangleCount) {
-            this.globalTriangleCount = globalTriangleCount;
-            return this;
-        }
-
-    }
-
-    private TriangleCountCompanion() {}
-
-    private static final class EmptyResult implements TriangleCountResult {
-
-        static final EmptyResult EMPTY_RESULT = new EmptyResult();
-
-        private EmptyResult() {}
-
-        @Override
-        public HugeAtomicLongArray localTriangles() {
-            return HugeAtomicLongArray.of(0, ParalleLongPageCreator.passThrough(1));
-        }
-
-        @Override
-        public long globalTriangles() {
-            return 0;
-        }
-
-    }
 }
