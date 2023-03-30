@@ -20,7 +20,8 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -66,7 +67,7 @@ final class TriangleCountCompanion {
 
         @Override
         public HugeAtomicLongArray localTriangles() {
-            return HugeAtomicLongArray.newArray(0);
+            return HugeAtomicLongArray.of(0, ParalleLongPageCreator.passThrough(1));
         }
 
         @Override

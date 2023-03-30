@@ -259,7 +259,7 @@ final class PagedArrayBuilder {
                     valueType,
                     arrayHandle
                 )
-                .beginControlFlow("if (prev == current)")
+                .beginControlFlow("if ($T.compare(prev, current) == 0)", valueType.box())
                 .addStatement("return prev")
                 .endControlFlow()
                 .addStatement("prev = current")
@@ -295,7 +295,7 @@ final class PagedArrayBuilder {
                     valueType,
                     arrayHandle
                 )
-                .beginControlFlow("if (current == prev)")
+                .beginControlFlow("if ($T.compare(prev, current) == 0)", valueType.box())
                 .addStatement("return current")
                 .endControlFlow()
                 .addStatement("prev = current")
@@ -413,7 +413,7 @@ final class PagedArrayBuilder {
                     valueType,
                     arrayHandle
                 )
-                .beginControlFlow("if (prev == current)")
+                .beginControlFlow("if ($T.compare(prev, current) == 0)", valueType.box())
                 .addStatement("return")
                 .endControlFlow()
                 .addStatement("prev = current")

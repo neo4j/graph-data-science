@@ -20,10 +20,11 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
@@ -42,7 +43,7 @@ final class ModularityManager {
     static ModularityManager create(Graph graph, int concurrency) {
         return new ModularityManager(
             graph,
-            HugeAtomicDoubleArray.newArray(graph.nodeCount()),
+            HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency)),
             concurrency
         );
     }
@@ -54,7 +55,7 @@ final class ModularityManager {
     }
 
     double calculateModularity() {
-        HugeAtomicDoubleArray insideRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        var insideRelationships = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),

@@ -24,19 +24,21 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 
-class LongPageCreatorTest {
+class ParallelDoublePageCreatorTest {
 
     @Test
     void fillsPages() {
         var numPages = 3;
         var lastPageSize = 4;
 
-        long[][] pages = new long[numPages][];
+        double[][] pages = new double[numPages][];
 
-        LongPageCreator.of(1, (d) -> d).fill(pages, lastPageSize);
+        int pageShift = 14;
+
+        ParallelDoublePageCreator.of(1, (d) -> d).fill(pages, lastPageSize, pageShift);
 
         for (int pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-            long[] page = pages[pageIndex];
+            double[] page = pages[pageIndex];
 
             if(pageIndex < numPages - 1) {
                 assertEquals(PAGE_SIZE, page.length);
@@ -45,7 +47,7 @@ class LongPageCreatorTest {
             }
 
             for (int indexInPage = 0; indexInPage < page.length; indexInPage++) {
-                long value = page[indexInPage];
+                double value = page[indexInPage];
                 assertEquals(indexInPage + (pageIndex * PAGE_SIZE), value);
             }
         }

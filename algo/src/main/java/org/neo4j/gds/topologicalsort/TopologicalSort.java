@@ -22,9 +22,10 @@ package org.neo4j.gds.topologicalsort;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -64,7 +65,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.nodeCount = graph.nodeCount();
         this.concurrency = config.concurrency();
         this.result = new TopologicalSortResult(nodeCount);
-        this.inDegrees = HugeAtomicLongArray.newArray(nodeCount);
+        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(config.concurrency()));
     }
 
     @Override

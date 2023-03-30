@@ -31,10 +31,11 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -139,7 +140,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
         if (config.hasRelationshipWeightProperty()) {
-            var totalWeights = HugeAtomicDoubleArray.newArray(nodeCount);
+            var totalWeights = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(config.concurrency()));
             totalWeights.setAll(TOTAL_WEIGHT_MISSING);
             return Optional.of(totalWeights);
         }
