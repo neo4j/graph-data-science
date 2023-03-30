@@ -100,34 +100,43 @@ In this section we will demonstrate the usage of the CNARW sampling algorithm on
 
 :algorithm-name: Common neighbor awareness random walk sampling
 :graph-description: social network
-:image-file: two-user-communities.svg
+:image-file: graph-rj.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
+
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
-  CREATE
-  (A:point {id:'a'}),
-  (B:point {id:'b'}),
-  (C:point {id:'c'}),
-  (D:point {id:'d'}),
-  (E:point {id:'e'}),
-  (F:point {id:'f'}),
-  (G:point {id:'g'}),
-  (H:point {id:'h'}),
+CREATE
+  (J:female {id:'Juliette'}),
+  (R:male {id:'Romeo'}),
+  (r1:male {id:'Ryan'}),
+  (r2:male {id:'Robert'}),
+  (r3:male {id:'Riley'}),
+  (r4:female {id:'Ruby'}),
+  (j1:female {id:'Josie'}),
+  (j2:male {id:'Joseph'}),
+  (j3:female {id:'Jasmine'}),
+  (j4:female {id:'June'}),
 
-  (A)-[:edge]->(B),
-  (B)-[:edge]->(C),
-  (C)-[:edge]->(D),
-  (D)-[:edge]->(C),
-  (D)-[:edge]->(A),
-  (A)-[:edge]->(C),
-  (D)-[:edge]->(B),
-  (D)-[:edge]->(E),
-  (E)-[:edge]->(F),
-  (F)-[:edge]->(G),
-  (G)-[:edge]->(H),
-  (H)-[:edge]->(E);
+  (J)-[:LINK]->(R),
+  (R)-[:LINK]->(J),
+  (r1)-[:LINK]->(R),
+  (r2)-[:LINK]->(R),
+  (r3)-[:LINK]->(R),
+  (r4)-[:LINK]->(R),
+  (R)-[:LINK]->(r1),
+  (R)-[:LINK]->(r2),
+  (R)-[:LINK]->(r3),
+  (R)-[:LINK]->(r4),
+  (j1)-[:LINK]->(J),
+  (j2)-[:LINK]->(J),
+  (j3)-[:LINK]->(J),
+  (j4)-[:LINK]->(J),
+  (J)-[:LINK]->(j1),
+  (J)-[:LINK]->(j2),
+  (J)-[:LINK]->(j3),
+  (J)-[:LINK]->(j4);
 ----
 
 This graph has two clusters of _Users_, that are closely connected.
@@ -140,7 +149,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project( 'myGraph', 'point', 'edge' )
+CALL gds.graph.project( 'myGraph', '*', 'LINK' )
 ----
 
 

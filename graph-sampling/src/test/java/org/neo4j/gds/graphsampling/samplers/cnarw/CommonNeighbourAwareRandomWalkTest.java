@@ -33,6 +33,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfigImpl;
+import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
+import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,6 +132,11 @@ class CommonNeighbourAwareRandomWalkTest {
         ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
         ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
+
+    @Inject
+    private TestGraph naturalGraph;
+
+
     @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL)
     private static final String DB_CYPHER_UNION =
         "CREATE" +
@@ -152,13 +159,10 @@ class CommonNeighbourAwareRandomWalkTest {
         ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
 
     @Inject
-    private TestGraph naturalGraph;
+    private TestGraph naturalUnionGraph;
 
     @Inject
     private IdFunction naturalIdFunction;
-
-    @Inject
-    private TestGraph naturalUnionGraph;
 
 
     Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
@@ -492,5 +496,104 @@ class CommonNeighbourAwareRandomWalkTest {
         for (int i = 0; i < result1.size(); i++) {
             assertEquals(result1.get(i), result2.get(i));
         }
+    }
+
+    @GdlGraph(graphNamePrefix = "testdoc", orientation = NATURAL)
+    private static final String DB_CYPHER_TESTDOC =
+        "CREATE " +
+        "(J:female  {id:0}), " +
+        "(R:male    {id:1}), " +
+        "(r1:male   {id:2}), " +
+        "(r2:male   {id:3}), " +
+        "(r3:male   {id:4}), " +
+        "(r4:male   {id:5}), " +
+        "(j1:female {id:6}), " +
+        "(j2:female {id:7}), " +
+        "(j3:female {id:8}), " +
+        "(j4:female {id:9}), " +
+        "(J)-[:LINK]->(R), " +
+        "(R)-[:LINK]->(J), " +
+        "(r1)-[:LINK]->(R),  (R)-[:LINK]->(r1), " +
+        "(r2)-[:LINK]->(R),  (R)-[:LINK]->(r2), " +
+        "(r3)-[:LINK]->(R),  (R)-[:LINK]->(r3), " +
+        "(r4)-[:LINK]->(R),  (R)-[:LINK]->(r4), " +
+        "(r1)-[:LINK]->(r2),  (r2)-[:LINK]->(r1), " +
+        "(r1)-[:LINK]->(r3),  (r3)-[:LINK]->(r1), " +
+        "(r1)-[:LINK]->(r4),  (r4)-[:LINK]->(r1), " +
+        "(r2)-[:LINK]->(r3),  (r3)-[:LINK]->(r2), " +
+        "(r2)-[:LINK]->(r4),  (r4)-[:LINK]->(r2), " +
+        "(r3)-[:LINK]->(r4),  (r4)-[:LINK]->(r3), " +
+        "(j1)-[:LINK]->(J),  (J)-[:LINK]->(j1), " +
+        "(j2)-[:LINK]->(J),  (J)-[:LINK]->(j2), " +
+        "(j3)-[:LINK]->(J),  (J)-[:LINK]->(j3), " +
+        "(j4)-[:LINK]->(J),  (J)-[:LINK]->(j4), " +
+        "(j1)-[:LINK]->(j2),  (j2)-[:LINK]->(j1), " +
+        "(j1)-[:LINK]->(j3),  (j3)-[:LINK]->(j1), " +
+        "(j1)-[:LINK]->(j4),  (j4)-[:LINK]->(j1), " +
+        "(j2)-[:LINK]->(j3),  (j3)-[:LINK]->(j2), " +
+        "(j2)-[:LINK]->(j4),  (j4)-[:LINK]->(j2), " +
+        "(j3)-[:LINK]->(j4),  (j4)-[:LINK]->(j3) ";
+
+    @Inject
+    private TestGraph testdocGraph;
+
+    @Inject
+    private IdFunction testdocIdFunction;
+
+    @Test
+    void documentationSampleTest() {
+        var N = 100;
+        var RPickedRWR = 0;
+        var RPickedCNARW = 0;
+        for (long i = 0; i < N; i++) {
+            var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+                .startNodes(List.of(testdocIdFunction.of("J")))
+                .samplingRatio(0.5)
+                .concurrency(1)
+                .randomSeed(i)
+                .build();
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            var nodes = cnarw.compute(testdocGraph, ProgressTracker.NULL_TRACKER);
+
+            if (nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R")))) {
+                RPickedCNARW++;
+            }
+        }
+        for (long i = 0; i < N; i++) {
+            var config = RandomWalkWithRestartsConfigImpl.builder()
+                .startNodes(List.of(testdocIdFunction.of("J")))
+                .samplingRatio(0.5)
+                .concurrency(1)
+                .randomSeed(i)
+                .build();
+            var rwr = new RandomWalkWithRestarts(config);
+            var nodes = rwr.compute(testdocGraph, ProgressTracker.NULL_TRACKER);
+
+            if (nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R")))) {
+                RPickedRWR++;
+            }
+//            assertThat(nodes.cardinality()).isEqualTo(5);
+//            assertThat(nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R")))).isTrue();
+//            assertThat(nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("J")))).isTrue();
+        }
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .startNodes(List.of(testdocIdFunction.of("J")))
+            .samplingRatio(0.5)
+            .concurrency(1)
+            .randomSeed(777L)
+            .restartProbability(0.001)
+            .build();
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
+        var nodes = cnarw.compute(testdocGraph, ProgressTracker.NULL_TRACKER);
+        System.out.println("R "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R"))));
+        System.out.println("r1 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r1"))));
+        System.out.println("r2 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r2"))));
+        System.out.println("r3 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r3"))));
+        System.out.println("r4 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r4"))));
+        System.out.println("J "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("J"))));
+        System.out.println("j1 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j1"))));
+        System.out.println("j2 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j2"))));
+        System.out.println("j3 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j3"))));
+        System.out.println("j4 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j4"))));
     }
 }
