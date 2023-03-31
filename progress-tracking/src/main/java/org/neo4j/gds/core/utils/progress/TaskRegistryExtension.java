@@ -33,7 +33,7 @@ import org.neo4j.logging.internal.LogService;
 public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryExtension.Dependencies> {
 
     public TaskRegistryExtension() {
-        super(ExtensionType.DATABASE, "gds.task.registry");
+        super(ExtensionType.GLOBAL, "gds.task.registry");
     }
 
     @Override

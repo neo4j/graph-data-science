@@ -31,7 +31,7 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 public class OpenGdsExportBuildersExtension extends ExtensionFactory<OpenGdsExportBuildersExtension.Dependencies> {
 
     public OpenGdsExportBuildersExtension() {
-        super(ExtensionType.DATABASE, "GDS");
+        super(ExtensionType.GLOBAL, "GDS");
     }
 
     @Override

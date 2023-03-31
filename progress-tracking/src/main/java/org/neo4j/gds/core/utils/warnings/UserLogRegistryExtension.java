@@ -39,13 +39,13 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
     private final Supplier<GlobalUserLogStore> userLogStoreSupplier;
 
     public UserLogRegistryExtension() {
-        super(ExtensionType.DATABASE, "gds.warnings.registry");
+        super(ExtensionType.GLOBAL, "gds.warnings.registry");
         this.userLogStoreSupplier = GlobalUserLogStore::new;
     }
 
     @TestOnly
     public UserLogRegistryExtension(Supplier<GlobalUserLogStore> userLogStoreSupplier) {
-        super(ExtensionType.DATABASE, "gds.warnings.registry");
+        super(ExtensionType.GLOBAL, "gds.warnings.registry");
         this.userLogStoreSupplier = userLogStoreSupplier;
     }
 
