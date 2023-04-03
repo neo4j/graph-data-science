@@ -26,6 +26,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class TriangleCountStreamProcTest extends BaseProcTest {
@@ -60,5 +61,12 @@ class TriangleCountStreamProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(3L);
     }
 
+    @Test
+    void shouldThrowForNotUndirected() {
+        runQuery("CALL gds.graph.project('graph2', 'A', {T: { orientation: 'NATURAL'}})");
+        
+        var query = "CALL gds.triangleCount.stream('graph2');";
+        assertThatThrownBy(() -> runQuery(query)).hasMessageContaining("not all undirected");
+    }
 
 }
