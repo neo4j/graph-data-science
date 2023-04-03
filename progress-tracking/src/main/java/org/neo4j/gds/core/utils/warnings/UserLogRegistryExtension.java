@@ -39,13 +39,13 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
     private final Supplier<GlobalUserLogStore> userLogStoreSupplier;
 
     public UserLogRegistryExtension() {
-        super(ExtensionType.GLOBAL, "gds.warnings.registry");
+        super(ExtensionType.DATABASE, "gds.warnings.registry");
         this.userLogStoreSupplier = GlobalUserLogStore::new;
     }
 
     @TestOnly
     public UserLogRegistryExtension(Supplier<GlobalUserLogStore> userLogStoreSupplier) {
-        super(ExtensionType.GLOBAL, "gds.warnings.registry");
+        super(ExtensionType.DATABASE, "gds.warnings.registry");
         this.userLogStoreSupplier = userLogStoreSupplier;
     }
 
@@ -57,9 +57,12 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
             var globalWarningStore = userLogStoreSupplier.get();
             registry.registerComponent(UserLogStore.class, ctx -> globalWarningStore, true);
             registry.registerComponent(UserLogRegistryFactory.class, globalWarningStore, true);
+            context.dependencySatisfier().satisfyDependency(globalWarningStore);
         } else {
             registry.registerComponent(UserLogRegistryFactory.class, ctx -> EmptyUserLogRegistryFactory.INSTANCE, true);
             registry.registerComponent(UserLogStore.class, ctx -> EmptyUserLogStore.INSTANCE, true);
+            context.dependencySatisfier().satisfyDependency(EmptyUserLogRegistryFactory.INSTANCE);
+            context.dependencySatisfier().satisfyDependency(EmptyUserLogStore.INSTANCE);
 
         }
         return new LifecycleAdapter();

@@ -33,7 +33,7 @@ import org.neo4j.logging.internal.LogService;
 public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryExtension.Dependencies> {
 
     public TaskRegistryExtension() {
-        super(ExtensionType.GLOBAL, "gds.task.registry");
+        super(ExtensionType.DATABASE, "gds.task.registry");
     }
 
     @Override
@@ -48,6 +48,8 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
+            context.dependencySatisfier().satisfyDependency(EmptyTaskRegistryFactory.INSTANCE);
+            context.dependencySatisfier().satisfyDependency(EmptyTaskStore.INSTANCE);
         }
         return new LifecycleAdapter();
     }
