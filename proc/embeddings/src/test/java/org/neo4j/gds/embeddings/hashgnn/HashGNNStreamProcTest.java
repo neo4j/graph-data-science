@@ -19,26 +19,35 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
-class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
+class HashGNNStreamProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<HashGNN, HashGNNResult, HashGNNStreamConfig, ?>> getProcedureClazz() {
-        return HashGNNStreamProc.class;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:N {f1: 1, f2: [0.0, 0.0]})" +
+        ", (b:N {f1: 0, f2: [1.0, 0.0]})" +
+        ", (c:N {f1: 0, f2: [0.0, 1.0]})" +
+        ", (b)-[:R1]->(a)" +
+        ", (b)-[:R2]->(c)";
 
-    @Override
-    public HashGNNStreamConfig createConfig(CypherMapWrapper userInput) {
-        return HashGNNStreamConfig.of(userInput);
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            HashGNNStreamProc.class,
+            GraphProjectProc.class
+        );
+
     }
 
     @Test
@@ -63,11 +72,12 @@ class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
 
         String query = queryBuilder.yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("embedding"))
                 .asList()
                 .hasSize(3)
                 .anySatisfy(value -> assertThat(value).isNotEqualTo(0.0));
         });
+        assertThat(rowCount).isEqualTo(3);
     }
 }
