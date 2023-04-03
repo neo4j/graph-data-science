@@ -32,8 +32,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
@@ -43,6 +45,10 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipConfig {
     @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
     String relationshipType();
+
+    @Configuration.ConvertWith(method = "org.neo4j.gds.beta.undirected.ToUndirectedAggregations#of")
+    @Configuration.ToMapValue("org.neo4j.gds.beta.undirected.ToUndirectedAggregations#toString")
+    Optional<ToUndirectedAggregations> aggregation();
 
     @Configuration.Ignore
     default RelationshipType internalRelationshipType() {
@@ -111,6 +117,61 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         ElementTypeValidator.validateTypes(graphStore, selectedRelationshipTypes, "`relationshipType`");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateLocalAggregationsOnlyContainExistingProps(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        Set<String> propertiesToAggregate = aggregation().map(ToUndirectedAggregations::propertyKeys).orElseGet(Set::of);
+        var isGlobal = aggregation().map(i -> i.globalAggregation().isPresent()).orElse(true);
+
+        if (Boolean.FALSE.equals(isGlobal)) {
+            Collection<String> storedRelProps = graphStore.relationshipPropertyKeys(selectedRelationshipTypes);
+
+            var missingProps = new HashSet<>(propertiesToAggregate);
+            missingProps.removeAll(storedRelProps);
+            if (!missingProps.isEmpty()) {
+                throw new IllegalArgumentException(String.format(
+                    Locale.US,
+                    "The `aggregation` parameter defines aggregations for %s, which are not present on relationship type '%s'." +
+                    " Available properties are: %s.",
+                    StringJoining.join(missingProps),
+                    internalRelationshipType().name,
+                    StringJoining.join(storedRelProps)
+                ));
+            }
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateLocalAggregationsAreComplete(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        Set<String> propertiesToAggregate = aggregation().map(ToUndirectedAggregations::propertyKeys).orElseGet(Set::of);
+        var isGlobal = aggregation().map(i -> i.globalAggregation().isPresent()).orElse(true);
+
+        if (Boolean.FALSE.equals(isGlobal)) {
+            Collection<String> storedRelProps = graphStore.relationshipPropertyKeys(selectedRelationshipTypes);
+
+            var missingProps = new HashSet<>(storedRelProps);
+
+            if (!propertiesToAggregate.containsAll(storedRelProps)) {
+                missingProps.removeAll(propertiesToAggregate);
+
+                throw new IllegalArgumentException(String.format(
+                    Locale.US,
+                    "The `aggregation` parameter needs to define aggregations for each property on relationship type '%s'." +
+                    " Missing aggregations for %s.",
+                    internalRelationshipType().name,
+                    StringJoining.join(missingProps)
+                ));
+            }
+        }
     }
 
     static @Nullable String validateRelationshipTypeIdentifier(String input) {

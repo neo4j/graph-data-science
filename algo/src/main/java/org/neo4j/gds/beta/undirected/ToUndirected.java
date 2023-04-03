@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -116,13 +117,26 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             .orientation(Orientation.UNDIRECTED)
             .validateRelationships(false);
 
+
+        config
+            .aggregation()
+            .map(ToUndirectedAggregations::globalAggregation)
+            .ifPresent(relationshipsBuilderBuilder::aggregation);
+
+
         propertySchemas.forEach(propertySchema ->
-            relationshipsBuilderBuilder.addPropertyConfig(
-                propertySchema.key(),
-                propertySchema.aggregation(),
-                propertySchema.defaultValue(),
-                propertySchema.state()
-            )
+            {
+                Aggregation aggregation = config.aggregation()
+                    .map(aggregations -> aggregations.localAggregation(propertySchema.key()))
+                    .orElse(propertySchema.aggregation());
+
+                relationshipsBuilderBuilder.addPropertyConfig(
+                    propertySchema.key(),
+                    aggregation,
+                    propertySchema.defaultValue(),
+                    propertySchema.state()
+                );
+            }
         );
 
         return relationshipsBuilderBuilder.build();
@@ -138,7 +152,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         if (propertyKeys.size() == 1) {
             Graph graph = graphStore.getGraph(fromRelationshipType, Optional.of(propertyKeys.get(0)));
 
-            taskCreator = (partition) -> new ToUndirectedTaskWithSingleProperty(
+            taskCreator = partition -> new ToUndirectedTaskWithSingleProperty(
                 relationshipsBuilder,
                 graph.concurrentCopy(),
                 partition,
@@ -151,7 +165,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
                 propertyKeys
             );
 
-            taskCreator = (partition) -> new ToUndirectedTaskWithMultipleProperties(
+            taskCreator = partition -> new ToUndirectedTaskWithMultipleProperties(
                 relationshipsBuilder,
                 relationshipIterator.concurrentCopy(),
                 partition,
