@@ -42,7 +42,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
  */
-public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
+public class HashGNN extends Algorithm<HashGNNResult> {
     private static final long DEGREE_PARTITIONS_PER_THREAD = 4;
     private final long randomSeed;
     private final Graph graph;
@@ -187,18 +187,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         MinAndArgmin() {
             this.min = -1;
             this.argMin = Integer.MAX_VALUE;
-        }
-    }
-
-    public static class HashGNNResult {
-        private final NodePropertyValues embeddings;
-
-        public HashGNNResult(NodePropertyValues embeddings) {
-            this.embeddings = embeddings;
-        }
-
-        public NodePropertyValues embeddings() {
-            return embeddings;
         }
     }
 

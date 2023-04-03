@@ -40,8 +40,8 @@ import java.util.Map;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 abstract class HashGNNProcTest<CONFIG extends HashGNNConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<HashGNN, CONFIG, HashGNN.HashGNNResult>,
-    MemoryEstimateTest<HashGNN, CONFIG, HashGNN.HashGNNResult> {
+    AlgoBaseProcTest<HashGNN, CONFIG, HashGNNResult>,
+    MemoryEstimateTest<HashGNN, CONFIG, HashGNNResult> {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -85,10 +85,12 @@ abstract class HashGNNProcTest<CONFIG extends HashGNNConfig> extends BaseProcTes
     }
 
     @Override
-    public void assertResultEquals(HashGNN.HashGNNResult result1, HashGNN.HashGNNResult result2) {
+    public void assertResultEquals(HashGNNResult result1, HashGNNResult result2) {
         assertThat(result1.embeddings().nodeCount()).isEqualTo(result2.embeddings().nodeCount());
         for (int i = 0; i < result1.embeddings().nodeCount(); i++) {
-            assertThat(result1.embeddings().doubleArrayValue(i)).containsExactly(result2.embeddings().doubleArrayValue(i));
+            assertThat(result1.embeddings().doubleArrayValue(i)).containsExactly(result2
+                .embeddings()
+                .doubleArrayValue(i));
         }
     }
 

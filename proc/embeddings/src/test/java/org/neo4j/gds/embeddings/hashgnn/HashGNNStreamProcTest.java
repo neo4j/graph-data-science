@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<HashGNN, HashGNN.HashGNNResult, HashGNNStreamConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<HashGNN, HashGNNResult, HashGNNStreamConfig, ?>> getProcedureClazz() {
         return HashGNNStreamProc.class;
     }
 

@@ -25,7 +25,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 class HashGNNMutateProcTest extends HashGNNProcTest<HashGNNMutateConfig> implements
-    MutateNodePropertyTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult> {
+    MutateNodePropertyTest<HashGNN, HashGNNMutateConfig, HashGNNResult> {
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
@@ -38,7 +38,7 @@ class HashGNNMutateProcTest extends HashGNNProcTest<HashGNNMutateConfig> impleme
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<HashGNN, HashGNNResult, HashGNNMutateConfig, ?>> getProcedureClazz() {
         return HashGNNMutateProc.class;
     }
 

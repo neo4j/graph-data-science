@@ -40,7 +40,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.hashgnn.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateProc.MutateResult, HashGNNMutateConfig> {
+public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNNResult, HashGNNMutateProc.MutateResult, HashGNNMutateConfig> {
 
     @Procedure(value = "gds.beta.hashgnn.mutate", mode = READ)
     @Description(DESCRIPTION)
@@ -48,7 +48,7 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig> computationResult = compute(
+        ComputationResult<HashGNN, HashGNNResult, HashGNNMutateConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -65,13 +65,13 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNNResult, HashGNNMutateConfig> computationResult) {
         return computationResult.result().embeddings();
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig> computeResult,
+        ComputationResult<HashGNN, HashGNNResult, HashGNNMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder();

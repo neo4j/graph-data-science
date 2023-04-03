@@ -42,7 +42,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.hashgnn.stream", description = DESCRIPTION, executionMode = STREAM)
-public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult, HashGNNStreamProc.StreamResult, HashGNNStreamConfig> {
+public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNNResult, HashGNNStreamProc.StreamResult, HashGNNStreamConfig> {
 
     @Procedure(value = "gds.beta.hashgnn.stream", mode = READ)
     @Description(DESCRIPTION)
@@ -50,7 +50,7 @@ public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNStreamConfig> computationResult = compute(
+        ComputationResult<HashGNN, HashGNNResult, HashGNNStreamConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -67,7 +67,7 @@ public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult
     }
 
     @Override
-    protected Stream<HashGNNStreamProc.StreamResult> stream(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNStreamConfig> computationResult) {
+    protected Stream<HashGNNStreamProc.StreamResult> stream(ComputationResult<HashGNN, HashGNNResult, HashGNNStreamConfig> computationResult) {
         return runWithExceptionLogging("HashGNN streaming failed", () -> {
             var graph = computationResult.graph();
             var result = computationResult.result();
@@ -85,7 +85,7 @@ public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNNResult, HashGNNStreamConfig> computationResult) {
         return computationResult.result().embeddings();
     }
 
