@@ -10,22 +10,6 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 
 == Pipelines
 
-[[pipelines-production-tier]]
-=== Production tier
-
-.List of all production tier machine learning pipelines operations in the GDS library. Functions are written in _italic_.
-[[pipelines-table-beta]]
-[role=procedure-listing]
-[opts=header,cols="1, 2"]
-|===
-|Algorithm name | Operation
-.1+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
-| `gds.pipeline.linkPrediction.addRandomForest`
-.1+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
-| `gds.pipeline.nodeClassification.addRandomForest`
-|===
-
-
 [[pipelines-beta-tier]]
 === Beta tier
 
@@ -35,11 +19,12 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.11+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.12+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
 | `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+| `gds.beta.pipeline.linkPrediction.addRandomForest`
 | `gds.beta.pipeline.linkPrediction.configureSplit`
 | `gds.beta.pipeline.linkPrediction.train`
 | `gds.beta.pipeline.linkPrediction.train.estimate`
@@ -47,11 +32,12 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
 | `gds.beta.pipeline.linkPrediction.predict.stream`
 | `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.13+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+.14+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.beta.pipeline.nodeClassification.create`
 | `gds.beta.pipeline.nodeClassification.addNodeProperty`
 | `gds.beta.pipeline.nodeClassification.selectFeatures`
 | `gds.beta.pipeline.nodeClassification.addLogisticRegression`
+| `gds.beta.pipeline.nodeClassification.addRandomForest`
 | `gds.beta.pipeline.nodeClassification.configureSplit`
 | `gds.beta.pipeline.nodeClassification.train`
 | `gds.beta.pipeline.nodeClassification.train.estimate`

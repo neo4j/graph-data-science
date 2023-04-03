@@ -130,7 +130,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void addRandomForest() {
         assertCypherResult(
-            "CALL gds.pipeline.linkPrediction.addRandomForest('myPipeline', {criterion: 'ENTROPY', maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
+            "CALL gds.beta.pipeline.linkPrediction.addRandomForest('myPipeline', {criterion: 'ENTROPY', maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,

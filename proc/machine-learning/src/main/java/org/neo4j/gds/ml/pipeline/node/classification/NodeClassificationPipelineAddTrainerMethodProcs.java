@@ -59,7 +59,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
 
-    @Procedure(name = "gds.pipeline.nodeClassification.addRandomForest", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.addRandomForest", mode = READ)
     @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
     public Stream<NodePipelineInfoResult> addRandomForest(
         @Name("pipelineName") String pipelineName,

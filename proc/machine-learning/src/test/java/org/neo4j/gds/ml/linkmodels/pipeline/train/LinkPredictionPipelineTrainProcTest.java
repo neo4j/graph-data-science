@@ -342,7 +342,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
-        runQuery("CALL gds.pipeline.linkPrediction.addRandomForest('pipe', {})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addRandomForest('pipe', {})");
         assertError(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, {" +
@@ -367,7 +367,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.pipeline.linkPrediction.addRandomForest('pipe', {})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addRandomForest('pipe', {})");
 
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +

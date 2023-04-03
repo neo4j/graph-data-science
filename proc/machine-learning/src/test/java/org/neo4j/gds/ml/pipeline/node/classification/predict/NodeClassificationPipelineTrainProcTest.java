@@ -186,7 +186,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            "CALL gds.beta.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
             pipe
         );
         runQuery(
@@ -328,7 +328,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            "CALL gds.beta.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
             pipe
         );
         assertError(
@@ -360,7 +360,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            "CALL gds.beta.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
             pipe
         );
         assertCypherResult(

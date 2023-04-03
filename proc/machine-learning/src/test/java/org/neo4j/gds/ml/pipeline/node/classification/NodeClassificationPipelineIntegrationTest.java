@@ -238,7 +238,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  "  testFraction: 0.2, " +
                  "  validationFolds: 5" +
                  "})");
-        runQuery("CALL gds.pipeline.nodeClassification.addRandomForest('p', {" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addRandomForest('p', {" +
                  "maxFeaturesRatio: 1.0, numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 2" +
                  "})");
 
