@@ -191,6 +191,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
+        return recordStore.getHighId();
+    }
+
+    @Override
     public List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
         int[] labelIds,
