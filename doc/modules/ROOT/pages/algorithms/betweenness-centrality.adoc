@@ -29,7 +29,7 @@ The implementation requires _O(n + m)_ space and runs in _O(n * m)_ time, where 
 
 For more information on this algorithm, see:
 
-* http://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf[A Faster Algorithm for Betweenness Centrality^]
+* https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf[A Faster Algorithm for Betweenness Centrality^]
 * https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Centrality Estimation in Large Networks^]
 * http://moreno.ss.uci.edu/23.pdf[A Set of Measures of Centrality Based on Betweenness^]
 
