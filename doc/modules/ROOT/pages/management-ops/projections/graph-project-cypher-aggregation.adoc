@@ -228,7 +228,7 @@ WITH gds.alpha.graph.project(
     relationshipType: type(r)
   }
 ) AS g
-RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results
@@ -269,7 +269,7 @@ The Cypher Aggregation will treat every relationship returned by the relationshi
 
 ==== Reverse relationships
 
-Achieving the reverse orientation can be achieved by simply switched the source and target nodes.
+The orientation of a relationship can be reversed by switching the source and target nodes.
 
 [role=query-example]
 --
@@ -285,7 +285,7 @@ WITH gds.alpha.graph.project(
   {},
   {}
 ) as g
-RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results
@@ -298,7 +298,7 @@ RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
 
 ==== Undirected relationships
 
-To project relationships as undirected, you can specify the `undirectedRelationshipTypes` parameter.
+Relationships can be projected as undirected by specifying the `undirectedRelationshipTypes` parameter.
 
 [role=query-example]
 --
@@ -315,7 +315,7 @@ WITH gds.alpha.graph.project(
   {},
   {undirectedRelationshipTypes: ['*']}
 ) as g
-RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results
@@ -352,7 +352,7 @@ WITH gds.alpha.graph.project(
     targetNodeProperties: target { age: coalesce(target.age, 18), price: coalesce(target.price, 5.0), .ratings }
   }
 ) as g
-RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results
