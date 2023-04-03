@@ -10,6 +10,22 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 
 == Pipelines
 
+[[pipelines-production-tier]]
+=== Production tier
+
+.List of all production tier machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+[[pipelines-table-beta]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+|Algorithm name | Operation
+.1+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+| `gds.pipeline.linkPrediction.addRandomForest`
+.1+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+| `gds.pipeline.nodeClassification.addRandomForest`
+|===
+
+
 [[pipelines-beta-tier]]
 === Beta tier
 
@@ -56,13 +72,11 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.3+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.2+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.alpha.pipeline.linkPrediction.addMLP`
-| `gds.alpha.pipeline.linkPrediction.addRandomForest`
 | `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
-.3+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+.2+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.alpha.pipeline.nodeClassification.addMLP`
-| `gds.alpha.pipeline.nodeClassification.addRandomForest`
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
 .10+<.^| xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
 | `gds.alpha.pipeline.nodeRegression.create`

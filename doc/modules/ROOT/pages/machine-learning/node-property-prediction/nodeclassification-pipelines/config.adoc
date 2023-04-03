@@ -279,7 +279,7 @@ When a range is present, values from the range are determined automatically by a
 One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
 
 * `gds.beta.pipeline.nodeClassification.addLogisticRegression`
-* `gds.alpha.pipeline.nodeClassification.addRandomForest`
+* `gds.pipeline.nodeClassification.addRandomForest`
 * `gds.alpha.pipeline.nodeClassification.addMLP`
 
 For information about the available training methods in GDS, logistic regression, random forest and multilayer perceptron, see xref:machine-learning/training-methods/index.adoc[Training methods].
@@ -346,7 +346,7 @@ include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.a
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.pipeline.nodeClassification.addRandomForest(
+CALL gds.pipeline.nodeClassification.addRandomForest(
   pipelineName: String,
   config: Map
 )
@@ -430,7 +430,7 @@ YIELD parameterSpace
 [source, cypher, role=noplay query-example, no-result=true, group=nc]
 .The following will add a random forest model:
 --
-CALL gds.alpha.pipeline.nodeClassification.addRandomForest('pipe', {numberOfDecisionTrees: 5})
+CALL gds.pipeline.nodeClassification.addRandomForest('pipe', {numberOfDecisionTrees: 5})
 YIELD parameterSpace
 --
 
