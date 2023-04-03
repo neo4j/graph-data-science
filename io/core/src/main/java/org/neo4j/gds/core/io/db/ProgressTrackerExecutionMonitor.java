@@ -114,8 +114,8 @@ public final class ProgressTrackerExecutionMonitor implements CompatExecutionMon
         this.stageProgressCurrent.set(0);
 
         var neoStores = this.dependencyResolver.resolveDependency(BatchingNeoStores.class);
-        var relationshipRecordIdCount = neoStores.getRelationshipStore().getHighId();
-        var groupCount = neoStores.getTemporaryRelationshipGroupStore().getHighId();
+        var relationshipRecordIdCount = Neo4jProxy.getHighId(neoStores.getRelationshipStore());
+        var groupCount = Neo4jProxy.getHighId(neoStores.getTemporaryRelationshipGroupStore());
 
         switch (execution.getStageName()) {
             case NodeDegreeCountStage.NAME:

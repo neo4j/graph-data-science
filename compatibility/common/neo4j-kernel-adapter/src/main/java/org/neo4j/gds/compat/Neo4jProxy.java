@@ -131,6 +131,10 @@ public final class Neo4jProxy {
         return IMPL.getHighestPossibleIdInUse(recordStore, kernelTransaction);
     }
 
+    public static long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
+        return IMPL.getHighId(recordStore);
+    };
+
     public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
         int[] labelIds,
