@@ -31,6 +31,7 @@ dependencies {
     testImplementation project(':progress-tracking')
     testImplementation project(':pipeline')
     testImplementation project(':proc-sysinfo')
+    testImplementation project(':ml-algo')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 }

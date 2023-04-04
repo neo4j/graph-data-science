@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.ml.training.TrainBaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.HashMap;
@@ -43,7 +44,7 @@ import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 public abstract class TrainProc<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
-    TRAIN_CONFIG extends AlgoBaseConfig & ModelConfig,
+    TRAIN_CONFIG extends TrainBaseConfig,
     PROC_RESULT
     > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
 
@@ -60,20 +61,18 @@ public abstract class TrainProc<
             var modelCatelog = modelCatalog();
             modelCatalog().set(model);
 
-            try {
-                modelCatelog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
-                var modelDir = modelCatelog.getModelDirectory(databaseService);
-                modelCatelog.store(model.creator(), model.name(), modelDir);
-            } catch (Exception e) {
-                log.warn("failed to store model", e);
+            if (computationResult.config().storeModelToDisk()) {
+                try {
+                    modelCatelog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
+                    var modelDir = modelCatelog.getModelDirectory(databaseService);
+                    modelCatelog.store(model.creator(), model.name(), modelDir);
+                } catch (Exception e) {
+                    log.warn("failed to store model", e);
+                }
             }
             return Stream.of(constructProcResult(computationResult));
         };
     }
-
-//    protected boolean storeModelAfterTraining(TRAIN_CONFIG trainConfig) {
-//
-//    }
 
     protected Stream<PROC_RESULT> trainAndSetModelWithResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult) {
         return computationResultConsumer().consume(computationResult, executionContext());

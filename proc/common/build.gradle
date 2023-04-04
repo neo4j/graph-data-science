@@ -32,6 +32,7 @@ dependencies {
     implementation project(':transaction')
     implementation project(':string-formatting')
     implementation project(':defaults-and-limits-configuration')
+    implementation project(':ml-algo')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'

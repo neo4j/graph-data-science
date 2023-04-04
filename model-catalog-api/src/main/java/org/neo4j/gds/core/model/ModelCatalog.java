@@ -24,7 +24,6 @@ import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -63,7 +62,7 @@ public interface ModelCatalog {
 
     Path getModelDirectory(GraphDatabaseService db);
 
-    Model<?, ?, ?> store(String username, String modelName, Path modelDir) throws IOException;
+    Model<?, ?, ?> store(String username, String modelName, Path modelDir);
 
     boolean isEmpty();
 
@@ -140,7 +139,7 @@ public interface ModelCatalog {
         public Path getModelDirectory(GraphDatabaseService db) { return null; }
 
         @Override
-        public Model<?, ?, ?> store(String username, String modelName, Path modelDir) throws IOException { return null; }
+        public Model<?, ?, ?> store(String username, String modelName, Path modelDir) { return null; }
 
         @Override
         public boolean isEmpty() {

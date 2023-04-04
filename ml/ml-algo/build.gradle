@@ -31,6 +31,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':string-formatting')
     implementation project(':graph-schema-api')
+    implementation project(':model-catalog-api')
 
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')
