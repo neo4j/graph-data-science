@@ -38,6 +38,7 @@ class KCoreDecompositionTask implements Runnable {
     private int scanningDegree;
     private final AtomicLong remainingNodes;
     private final ProgressTracker progressTracker;
+    private KCoreDecompositionPhase phase;
 
     KCoreDecompositionTask(
         Graph localGraph,
@@ -54,17 +55,21 @@ class KCoreDecompositionTask implements Runnable {
         this.examinationStack = HugeLongArrayStack.newStack(localGraph.nodeCount());
         this.nodeIndex = nodeIndex;
         this.remainingNodes = remainingNodes;
+        this.phase = KCoreDecompositionPhase.SCAN;
     }
 
     @Override
     public void run() {
-        boolean locatedScannindDegree = scan();
-        if (locatedScannindDegree) {
+        if (phase == KCoreDecompositionPhase.SCAN) {
+            scan();
+            phase = KCoreDecompositionPhase.ACT;
+        } else {
             act();
+            phase = KCoreDecompositionPhase.SCAN;
         }
     }
 
-    private boolean scan() {
+    private void scan() {
 
         long upperBound = localGraph.nodeCount();
         smallestActiveDegree = -1;
@@ -81,7 +86,6 @@ class KCoreDecompositionTask implements Runnable {
                 }
             }
         }
-        return smallestActiveDegree == scanningDegree;
     }
 
     void setScanningDegree(int scanningDegree) {
@@ -94,5 +98,9 @@ class KCoreDecompositionTask implements Runnable {
 
     private void act() {
 
+    }
+
+    enum KCoreDecompositionPhase {
+        SCAN, ACT
     }
 }

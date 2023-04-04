@@ -65,10 +65,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
             RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
 
-            //this is a minor optimization not in paper:
-            // if we do not do any updates this round, let's skip directly to the smallest active degree remaining
-            //instead of reaching there  by doing scannindDegree+1.
-            
+
             int nextScanningDegree = tasks
                 .stream()
                 .mapToInt(KCoreDecompositionTask::getSmallestActiveDegree)
@@ -76,8 +73,13 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 .orElseThrow();
 
             if (nextScanningDegree == scanningDegree) {
+                RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
                 scanningDegree++;
             } else {
+                //this is a minor optimization not in paper:
+                // if we do not do any updates this round, let's skip directly to the smallest active degree remaining
+                //instead of reaching there eventually by doing scanningDegree+1, then +2, etc.
+                // Generally degeneracy is usually small though it shouldn't be super effective.
                 scanningDegree = nextScanningDegree;
             }
 
