@@ -20,7 +20,6 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -41,7 +40,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class CELFWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.beta.influenceMaximization.celf.write", mode = WRITE)
     @Description(DESCRIPTION)

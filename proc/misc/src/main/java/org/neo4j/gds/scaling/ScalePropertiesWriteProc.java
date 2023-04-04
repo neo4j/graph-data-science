@@ -20,7 +20,6 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -44,7 +43,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class ScalePropertiesWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.beta.scaleProperties.write", mode = WRITE)
     @Description(SCALE_PROPERTIES_DESCRIPTION)

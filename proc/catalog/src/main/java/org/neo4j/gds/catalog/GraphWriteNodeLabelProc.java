@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.NodeLabelExporter;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Context;
@@ -43,7 +42,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class GraphWriteNodeLabelProc extends CatalogProc {
 
     @Context
-    public NodeLabelExporterBuilder<? extends NodeLabelExporter> nodeLabelExporterBuilder;
+    public NodeLabelExporterBuilder nodeLabelExporterBuilder;
 
     @Procedure(name = "gds.alpha.graph.nodeLabel.write", mode = WRITE)
     @Description("Writes the given node Label to an online Neo4j database.")

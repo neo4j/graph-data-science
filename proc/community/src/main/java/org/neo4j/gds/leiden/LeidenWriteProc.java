@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -40,7 +39,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class LeidenWriteProc extends BaseProc {
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.beta.leiden.write", mode = WRITE)
     @Description(DESCRIPTION)

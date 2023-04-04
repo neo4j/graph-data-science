@@ -97,7 +97,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationships() {
-        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        var exporter = setupExportTest(/* includeProperties */ true);
         exporter.write("FOOBAR", "weight");
         validateWrittenGraph();
     }
@@ -133,7 +133,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithoutProperties() {
-        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
+        var exporter = setupExportTest(/* includeProperties */ false);
         exporter.write("FOOBAR");
         validateWrittenGraphWithoutProperties();
 
@@ -147,7 +147,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsExcludePresentProperties() {
-        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        var exporter = setupExportTest(/* includeProperties */ true);
         exporter.write("FOOBAR");
         validateWrittenGraphWithoutProperties();
 
@@ -161,7 +161,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithAfterWriteConsumer() {
-        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        var exporter = setupExportTest(/* includeProperties */ true);
         MutableInt count = new MutableInt();
         exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
@@ -173,7 +173,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
-        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
+        var exporter = setupExportTest(/* includeProperties */ false);
         MutableInt count = new MutableInt();
         exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
@@ -231,7 +231,7 @@ class NativeRelationshipExporterTest extends BaseTest {
             );
     }
 
-    private NativeRelationshipExporter setupExportTest(boolean includeProperties) {
+    private RelationshipExporter setupExportTest(boolean includeProperties) {
         // create graph to export
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);

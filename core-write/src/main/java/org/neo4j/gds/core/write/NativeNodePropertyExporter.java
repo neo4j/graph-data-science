@@ -50,7 +50,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
 
-    public static NodePropertyExporterBuilder<NativeNodePropertyExporter> builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
+    public static NodePropertyExporterBuilder builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
         return new NativeNodePropertiesExporterBuilder(transactionContext)
             .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);
