@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 class KCoreDecompositionTask implements Runnable {
@@ -36,7 +35,7 @@ class KCoreDecompositionTask implements Runnable {
     private final HugeLongArrayStack examinationStack;
     private final AtomicLong nodeIndex;
     private int smallestActiveDegree;
-    private final AtomicInteger currentCore;
+    private int scanningDegree;
     private final AtomicLong remainingNodes;
     private final ProgressTracker progressTracker;
 
@@ -45,7 +44,6 @@ class KCoreDecompositionTask implements Runnable {
         HugeAtomicIntArray currentDegrees,
         HugeIntArray core,
         AtomicLong nodeIndex,
-        AtomicInteger currentCore,
         AtomicLong remainingNodes,
         ProgressTracker progressTracker
     ) {
@@ -55,18 +53,43 @@ class KCoreDecompositionTask implements Runnable {
         this.core = core;
         this.examinationStack = HugeLongArrayStack.newStack(localGraph.nodeCount());
         this.nodeIndex = nodeIndex;
-        this.currentCore = currentCore;
         this.remainingNodes = remainingNodes;
     }
 
     @Override
     public void run() {
-        scan();
-        act();
+        boolean locatedScannindDegree = scan();
+        if (locatedScannindDegree) {
+            act();
+        }
     }
 
-    private void scan() {
+    private boolean scan() {
 
+        long upperBound = localGraph.nodeCount();
+        smallestActiveDegree = -1;
+        long offset;
+        while ((offset = nodeIndex.getAndAdd(64)) < upperBound) {
+            var chunkSize = Math.min(offset + 64, upperBound);
+            for (long nodeId = offset; nodeId < chunkSize; nodeId++) {
+                int nodeDegree = currentDegrees.get(nodeId);
+                if (nodeDegree == scanningDegree) {
+                    smallestActiveDegree = nodeDegree;
+                    examinationStack.push(nodeId);
+                } else if (smallestActiveDegree == -1 || smallestActiveDegree > nodeDegree) {
+                    smallestActiveDegree = nodeDegree;
+                }
+            }
+        }
+        return smallestActiveDegree == scanningDegree;
+    }
+
+    void setScanningDegree(int scanningDegree) {
+        this.scanningDegree = scanningDegree;
+    }
+
+    int getSmallestActiveDegree() {
+        return smallestActiveDegree;
     }
 
     private void act() {

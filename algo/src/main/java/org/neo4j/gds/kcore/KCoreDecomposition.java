@@ -23,13 +23,13 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
@@ -57,11 +57,29 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
         AtomicLong remainingNodes = new AtomicLong(graph.nodeCount());
         AtomicLong nodeIndex = new AtomicLong(0);
-        AtomicInteger currentCore = new AtomicInteger(0);
+        int scanningDegree = 0;
 
-        var tasks = createTasks(currentDegrees, core, nodeIndex, currentCore, remainingNodes);
+        var tasks = createTasks(currentDegrees, core, nodeIndex, remainingNodes);
 
         while (remainingNodes.get() > 0) {
+
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+
+            //this is a minor optimization not in paper:
+            // if we do not do any updates this round, let's skip directly to the smallest active degree remaining
+            //instead of reaching there  by doing scannindDegree+1.
+            
+            int nextScanningDegree = tasks
+                .stream()
+                .mapToInt(KCoreDecompositionTask::getSmallestActiveDegree)
+                .min()
+                .orElseThrow();
+
+            if (nextScanningDegree == scanningDegree) {
+                scanningDegree++;
+            } else {
+                scanningDegree = nextScanningDegree;
+            }
 
         }
 
@@ -72,7 +90,6 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         HugeAtomicIntArray currentDegrees,
         HugeIntArray core,
         AtomicLong nodeIndex,
-        AtomicInteger currentCore,
         AtomicLong remainingNodes
     ) {
         List<KCoreDecompositionTask> tasks = new ArrayList<>();
@@ -82,7 +99,6 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 currentDegrees,
                 core,
                 nodeIndex,
-                currentCore,
                 remainingNodes,
                 progressTracker
             ));
