@@ -35,4 +35,9 @@ public class ValueTransformers {
     public interface LongToLongFunction {
         long apply(long value);
     }
+
+    @FunctionalInterface
+    public interface IntToIntFunction {
+        int apply(long value);
+    }
 }
