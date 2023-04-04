@@ -67,7 +67,8 @@ public abstract class TrainProc<
                     var modelDir = modelCatelog.getModelDirectory(databaseService);
                     modelCatelog.store(model.creator(), model.name(), modelDir);
                 } catch (Exception e) {
-                    log.warn("failed to store model", e);
+                    log.error("Failed to store model to disk after training.", e.getMessage());
+                    throw e;
                 }
             }
             return Stream.of(constructProcResult(computationResult));
