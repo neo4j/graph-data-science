@@ -36,13 +36,13 @@ public class EditionFactory extends ExtensionFactory<EditionFactory.Dependencies
     private final Optional<LicenseState> licenseState;
 
     public EditionFactory() {
-        super(ExtensionType.DATABASE, "gds.edition_factory");
+        super(ExtensionType.GLOBAL, "gds.edition_factory");
         this.licenseState = Optional.empty();
     }
 
     @TestOnly
     public EditionFactory(LicenseState licenseState) {
-        super(ExtensionType.DATABASE, "gds.edition_factory");
+        super(ExtensionType.GLOBAL, "gds.edition_factory");
         this.licenseState = Optional.of(licenseState);
     }
 
