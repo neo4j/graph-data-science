@@ -23,7 +23,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -121,6 +123,27 @@ public final class OpenModelCatalog implements ModelCatalog {
     public Model<?, ?, ?> publish(String username, String modelName) {
         throw new IllegalStateException(
             "Publishing models is not available in openGDS. " +
+            "Please consider licensing the Graph Data Science library. " +
+            "See documentation at https://neo4j.com/docs/graph-data-science/"
+        );
+    }
+
+    @Override
+    public void checkLicenseBeforeStoreModel(GraphDatabaseService db, String detail) { }
+
+    @Override
+    public Path getModelDirectory(org.neo4j.graphdb.GraphDatabaseService db) {
+        throw new IllegalStateException(
+            "There is no model directory path. Storing models is not available in openGDS. " +
+            "Please consider licensing the Graph Data Science library. " +
+            "See documentation at https://neo4j.com/docs/graph-data-science/"
+        );
+    }
+
+    @Override
+    public Model<?, ?, ?> store(String username, String modelName, Path modelDir) {
+        throw new IllegalStateException(
+            "Storing models is not available in openGDS. " +
             "Please consider licensing the Graph Data Science library. " +
             "See documentation at https://neo4j.com/docs/graph-data-science/"
         );

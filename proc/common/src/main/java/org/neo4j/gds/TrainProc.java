@@ -56,12 +56,26 @@ public abstract class TrainProc<
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            modelCatalog().set(extractModel(computationResult.result()));
+            var model = extractModel(computationResult.result());
+            var modelCatelog = modelCatalog();
+            modelCatalog().set(model);
+
+            try {
+                modelCatelog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
+                var modelDir = modelCatelog.getModelDirectory(databaseService);
+                modelCatelog.store(model.creator(), model.name(), modelDir);
+            } catch (Exception e) {
+                log.warn("failed to store model", e);
+            }
             return Stream.of(constructProcResult(computationResult));
         };
     }
 
-    protected Stream<PROC_RESULT> trainAndStoreModelWithResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult) {
+//    protected boolean storeModelAfterTraining(TRAIN_CONFIG trainConfig) {
+//
+//    }
+
+    protected Stream<PROC_RESULT> trainAndSetModelWithResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult) {
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
