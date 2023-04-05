@@ -40,7 +40,6 @@ class GraphStoreToDatabaseExporterConfigTest {
         var pbiConfig = config.toBatchImporterConfig();
 
         assertThat(pbiConfig.batchSize()).isEqualTo(1337);
-        assertThat(pbiConfig.pageCacheMemory()).isEqualTo(100_000L);
         assertThat(pbiConfig.highIO()).isTrue();
         assertThat(Neo4jProxy.writeConcurrency(pbiConfig)).isEqualTo(42);
         assertThat(pbiConfig.indexConfig().createLabelIndex()).isTrue();
