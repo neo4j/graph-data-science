@@ -24,14 +24,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.result.HistogramUtils;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
@@ -82,37 +76,4 @@ public final class SimilarityProc {
         return histogram;
     }
 
-    public abstract static class SimilarityResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
-
-        public long nodesCompared = 0L;
-
-        public long postProcessingMillis = -1L;
-
-        Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-
-        public Map<String, Object> distribution() {
-            if (maybeHistogram.isPresent()) {
-                return HistogramUtils.similaritySummary(maybeHistogram.get());
-            }
-            return Collections.emptyMap();
-        }
-
-        public SimilarityResultBuilder<PROC_RESULT> withNodesCompared(long nodesCompared) {
-            this.nodesCompared = nodesCompared;
-            return this;
-        }
-
-        public SimilarityResultBuilder<PROC_RESULT> withHistogram(DoubleHistogram histogram) {
-            this.maybeHistogram = Optional.of(histogram);
-            return this;
-        }
-
-        public ProgressTimer timePostProcessing() {
-            return ProgressTimer.start(this::setPostProcessingMillis);
-        }
-
-        public void setPostProcessingMillis(long postProcessingMillis) {
-            this.postProcessingMillis = postProcessingMillis;
-        }
-    }
 }

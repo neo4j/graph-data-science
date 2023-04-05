@@ -20,11 +20,9 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -34,6 +32,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,52 +58,17 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
 
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenWriteConfig, Stream<WriteResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var leidenResult = computationResult.result();
-            var graph = computationResult.graph();
-            var builder = new WriteResult.Builder(executionContext.returnColumns(), computationResult.config().concurrency())
-                .withLevels(leidenResult.ranLevels())
-                .withDidConverge(leidenResult.didConverge())
-                .withModularities(Arrays.stream(leidenResult.modularities())
-                    .boxed()
-                    .collect(Collectors.toList()))
-                .withModularity(leidenResult.modularity())
-                .withCommunityFunction(leidenResult.communitiesFunction())
-                .withNodeCount(graph.nodeCount())
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withConfig(computationResult.config());
-
-            try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-                var writeConcurrency = computationResult.config().writeConcurrency();
-                var algorithm = computationResult.algorithm();
-                var config = computationResult.config();
-
-                NodePropertyExporter exporter =  executionContext.nodePropertyExporterBuilder()
-                    .withIdMap(graph)
-                    .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                        name(),
-                        graph.nodeCount(),
-                        writeConcurrency,
-                        executionContext
-                    ))
-                    .parallel(Pools.DEFAULT, writeConcurrency)
-                    .build();
-
-                var properties = LeidenCompanion.leidenNodeProperties(
+        return new WriteNodePropertiesComputationResultConsumer<>(
+            this::resultBuilder,
+            computationResult -> List.of(ImmutableNodeProperty.of(
+                computationResult.config().writeProperty(),
+                LeidenCompanion.leidenNodeProperties(
                     computationResult,
                     computationResult.config().writeProperty()
-                );
-
-                exporter.write(
-                    config.writeProperty(),
-                    properties
-                );
-                builder.withNodePropertiesWritten(exporter.propertiesWritten());
-            }
-            return Stream.of(builder.build());
-        };
+                )
+            )),
+            name()
+        );
     }
 
     @NotNull

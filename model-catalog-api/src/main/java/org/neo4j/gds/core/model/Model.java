@@ -21,6 +21,7 @@ package org.neo4j.gds.core.model;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.ValueClass;
@@ -71,6 +72,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         return now();
     }
 
+    String gdsVersion();
+
     INFO customInfo();
 
     Optional<Path> fileLocation();
@@ -91,6 +94,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
     }
 
     static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
+        String gdsVersion,
         String algoType,
         GraphSchema graphSchema,
         D modelData,
@@ -100,6 +104,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         return ImmutableModel.<D, C, INFO>builder()
             .creator(trainConfig.username())
             .name(trainConfig.modelName())
+            .gdsVersion(gdsVersion)
             .algoType(algoType)
             .graphSchema(graphSchema)
             .data(modelData)
@@ -107,6 +112,18 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .customInfo(customInfo)
             .build();
     }
+
+    @TestOnly
+    static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
+        String algoType,
+        GraphSchema graphSchema,
+        D modelData,
+        C trainConfig,
+        INFO customInfo
+    ) {
+        return of("default", algoType, graphSchema, modelData, trainConfig, customInfo);
+    }
+
 
     interface CustomInfo extends ToMapConvertible, Serializable{
         Optional<TrainingMethod> optionalTrainerMethod();

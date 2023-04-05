@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.node.regression;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
+import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
@@ -67,7 +68,8 @@ public class NodeRegressionPipelineTrainProc extends TrainProc<
 
     @Override
     public GraphStoreAlgorithmFactory<NodeRegressionTrainAlgorithm, NodeRegressionPipelineTrainConfig> algorithmFactory() {
-        return new NodeRegressionTrainPipelineAlgorithmFactory(executionContext());
+        var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
+        return new NodeRegressionTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
     }
 
     @Override

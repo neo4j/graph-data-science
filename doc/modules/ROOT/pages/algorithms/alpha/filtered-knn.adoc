@@ -11,6 +11,10 @@
 include::partial$/operations-reference/alpha-note.adoc[]
 
 
+:heterogeneous-nodes:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 [[algorithms-filtered-knn-intro]]
 == Introduction
 

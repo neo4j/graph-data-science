@@ -28,6 +28,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -94,11 +95,22 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             relationshipTypeTokens.put(key, i++);
         }
 
+        var nodePropertyDimensions = filteredGraph
+            .availableNodeProperties()
+            .stream()
+            .collect(Collectors.toMap(
+                Function.identity(),
+                property -> filteredGraph
+                    .nodeProperties(property)
+                    .dimension()
+            ));
+
         return ImmutableGraphDimensions.builder()
             .nodeCount(filteredGraph.nodeCount())
             .relationshipCounts(filteredGraphRelationshipCounts(typeFilter.stream(), filteredGraph))
             .relCountUpperBound(relCount)
             .relationshipPropertyTokens(relationshipTypeTokens)
+            .nodePropertyDimensions(new DimensionsMap(nodePropertyDimensions))
             .build();
     }
 

@@ -33,6 +33,8 @@ public final class AdjacencyPacker {
 
     private AdjacencyPacker() {}
 
+    private static final Aggregation[] AGGREGATIONS = Aggregation.values();
+
     public static final int PASS = 0;
     public static final int SORT = 1 << 22;
     public static final int DELTA = 1 << 23;
@@ -46,19 +48,30 @@ public final class AdjacencyPacker {
 
         if ((flags & DELTA) == DELTA) {
             var ordinal = flags & MASK;
-            var aggregation = Aggregation.resolve(Aggregation.values()[ordinal]);
+            var aggregation = Aggregation.resolve(AGGREGATIONS[ordinal]);
             return deltaCompress(values, offset, length, aggregation);
         } else {
             return compress(values, offset, length);
         }
     }
 
-    public static Compressed compressWithProperties(long[] values, long[][] properties, int length, int flags) {
+    public static Compressed compressWithProperties(long[] values, long[][] properties, int length, Aggregation[] aggregations, boolean noAggregation) {
         // TODO: works only for sorted + delta compression; do we need more?
-        // TODO: only supports a single aggregation for now
-        var ordinal = flags & MASK;
-        var aggregation = Aggregation.resolve(Aggregation.values()[ordinal]);
-        return deltaCompressWithProperties(values, properties, length, aggregation);
+        if (length > 0) {
+            // sort, delta encode, reorder and aggregate properties
+            length = AdjacencyCompression.applyDeltaEncoding(
+                values,
+                length,
+                properties,
+                aggregations,
+                noAggregation
+            );
+        }
+        // pack targets
+        var compressed = preparePacking(values, 0, length);
+        // link properties
+        compressed.properties(properties);
+        return compressed;
     }
 
     public static Compressed compress(long[] values, int offset, int length) {
@@ -70,24 +83,6 @@ public final class AdjacencyPacker {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
         }
         return preparePacking(values, offset, length);
-    }
-
-    private static Compressed deltaCompressWithProperties(long[] values, long[][] properties, int length, Aggregation aggregation) {
-        if (length > 0) {
-            // sort, delta encode, reorder and aggregate properties
-            length = AdjacencyCompression.applyDeltaEncoding(
-                values,
-                length,
-                properties,
-                new Aggregation[]{aggregation},
-                aggregation == Aggregation.NONE
-            );
-        }
-        // pack targets
-        var compressed = preparePacking(values, 0, length);
-        // link properties
-        compressed.properties(properties);
-        return compressed;
     }
 
     private static Compressed preparePacking(long[] values, int offset, int length) {

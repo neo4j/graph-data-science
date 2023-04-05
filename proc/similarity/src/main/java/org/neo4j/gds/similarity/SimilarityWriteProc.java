@@ -44,7 +44,7 @@ public abstract class SimilarityWriteProc<
 
     public abstract String procedureName();
 
-    protected abstract SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    protected abstract SimilarityResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
     protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return computationResultConsumer().consume(computationResult, executionContext());
@@ -73,7 +73,7 @@ public abstract class SimilarityWriteProc<
                 ? similarityGraph
                 : computationResult.graphStore().nodes();
 
-            SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder = resultBuilder(computationResult);
+            SimilarityResultBuilder<PROC_RESULT> resultBuilder = resultBuilder(computationResult);
 
             SimilarityProc.withGraphsizeAndTimings(resultBuilder, computationResult, (ignore) -> similarityGraphResult);
 

@@ -43,6 +43,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.TopKGraph;
@@ -85,7 +86,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
         ExecutionContext executionContext
     ) {
 
-        SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
+        SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
             SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
         return resultBuilder;
     }
@@ -107,7 +108,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                     computationResult,
                     computationResult.result().graphResult(),
                     config.mutateProperty(),
-                    (SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
+                    (SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
                     executionContext.returnColumns()
                 );
 
@@ -127,7 +128,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
         ComputationResult<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
-        SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder,
+        SimilarityResultBuilder<SimilarityMutateResult> resultBuilder,
         ProcedureReturnColumns returnColumns
     ) {
         SingleTypeRelationships resultRelationships;

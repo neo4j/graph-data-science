@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphWriteRelationshipConfig;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -118,7 +119,13 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         try (var ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long relationshipsWritten = runWithExceptionLogging(
                 "Writing relationships failed",
-                () -> writeRelationshipType(graphStore, config.relationshipProperty(), relationshipType, progressTracker)
+                () -> writeRelationshipType(
+                    graphStore,
+                    config.relationshipProperty(),
+                    relationshipType,
+                    config.arrowConnectionInfo(),
+                    progressTracker
+                )
             );
             builder.withRelationshipsWritten(relationshipsWritten);
         }
@@ -131,6 +138,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         GraphStore graphStore,
         Optional<String> relationshipProperty,
         RelationshipType relationshipType,
+        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo,
         ProgressTracker progressTracker
     ) {
         var graph = graphStore.getGraph(relationshipType, relationshipProperty);
@@ -139,6 +147,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
+            .withArrowConnectionInfo(arrowConnectionInfo)
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

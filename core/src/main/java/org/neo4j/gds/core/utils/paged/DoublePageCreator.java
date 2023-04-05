@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.mem.HugeArrays;
 
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.LongToDoubleFunction;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
@@ -30,9 +30,9 @@ import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 public final class DoublePageCreator {
 
     private final int concurrency;
-    private final DoubleUnaryOperator gen;
+    private final LongToDoubleFunction gen;
 
-    private DoublePageCreator(int concurrency, DoubleUnaryOperator gen) {
+    private DoublePageCreator(int concurrency, LongToDoubleFunction gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
@@ -67,7 +67,7 @@ public final class DoublePageCreator {
         fillPage(page, base);
     }
 
-    public static DoublePageCreator of(int concurrency, DoubleUnaryOperator gen) {
+    public static DoublePageCreator of(int concurrency, LongToDoubleFunction gen) {
         return new DoublePageCreator(concurrency, gen);
     }
 

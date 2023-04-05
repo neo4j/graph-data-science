@@ -41,6 +41,7 @@ import org.neo4j.graphdb.QueryExecutionException;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,6 +78,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         });
 
         var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
+        assertThat(model.gdsVersion()).isEqualTo("Unknown");
 
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());

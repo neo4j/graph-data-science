@@ -19,21 +19,10 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -41,12 +30,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.betweenness.stats", description = BETWEENNESS_DESCRIPTION, executionMode = STATS)
-public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsProc.StatsResult, BetweennessCentralityStatsConfig> {
+public class BetweennessCentralityStatsProc extends BaseProc {
 
     @Procedure(value = "gds.betweenness.stats", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
@@ -54,7 +41,10 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new BetweennessCentralityStatsSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.stats.estimate", mode = READ)
@@ -63,71 +53,11 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new BetweennessCentralityStatsSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected BetweennessCentralityStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return BetweennessCentralityStatsConfig.of(config);
-    }
-
-    @Override
-    public ValidationConfiguration<BetweennessCentralityStatsConfig> validationConfig(ExecutionContext executionContext) {
-        return BetweennessCentralityProc.getValidationConfig();
-    }
-
-    @Override
-    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory() {
-        return BetweennessCentralityProc.algorithmFactory();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computationResult) {
-        return BetweennessCentralityProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        ), computeResult);
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final Map<String, Object> centralityDistribution;
-
-        StatsResult(
-            @Nullable Map<String, Object> centralityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-            this.centralityDistribution = centralityDistribution;
-        }
-
-        static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
-            protected Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            public StatsResult buildResult() {
-                return new StatsResult(
-                    centralityHistogram,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

@@ -20,9 +20,11 @@
 package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -35,6 +37,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected long relationshipCount = -1L;
+    protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo;
 
     public abstract T build();
 
@@ -75,6 +78,11 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
      */
     public RelationshipStreamExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
+        return this;
+    }
+
+    public RelationshipStreamExporterBuilder<T> withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+        this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
 }

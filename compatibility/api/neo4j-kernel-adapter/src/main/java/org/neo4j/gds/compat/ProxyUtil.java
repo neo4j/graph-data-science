@@ -196,7 +196,7 @@ public final class ProxyUtil {
         }
     }
 
-    private static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
+    public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
 
     private static GdsVersionInfo loadGdsVersion() {
         var builder = ImmutableGdsVersionInfo.builder();

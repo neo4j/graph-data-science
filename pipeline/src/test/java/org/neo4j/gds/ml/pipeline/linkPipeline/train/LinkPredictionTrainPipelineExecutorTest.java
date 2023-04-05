@@ -90,6 +90,8 @@ import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.TRAIN;
 
 final class LinkPredictionTrainPipelineExecutorTest {
 
+    String gdsVersion = "2.4.0";
+
     static Stream<Arguments> invalidSplits() {
         return Stream.of(
             Arguments.of(
@@ -215,7 +217,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    gdsVersion
                 ).compute();
 
                 var actualModel = result.model();
@@ -260,7 +263,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     trainConfig,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    gdsVersion
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -293,7 +297,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     linkPredictionTrainConfig,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    gdsVersion
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -336,7 +341,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     linkPredictionTrainConfig,
                     caller.executionContext(),
                     invalidGraphStore,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    gdsVersion
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -395,7 +401,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    progressTracker
+                    progressTracker,
+                    gdsVersion
                 ).compute();
 
                 assertThat(progressTracker.log().getMessages(TestLog.WARN))
@@ -566,7 +573,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    gdsVersion
                 ).compute();
             }))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -579,7 +587,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    gdsVersion
                 ).compute();
             }))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -691,7 +700,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                gdsVersion
             ).compute();
 
             // mainly a smoke test
@@ -732,7 +742,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                gdsVersion
             ).generateDatasetSplitGraphFilters();
 
             assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
@@ -788,7 +799,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 trainConfig,
                 ExecutionContext.EMPTY,
                 graphStore,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                gdsVersion
             );
 
             assertThatThrownBy(executor::compute)

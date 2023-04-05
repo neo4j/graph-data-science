@@ -1,4 +1,4 @@
-| nodeProperty      | String    | n/a       | no        | A node property to be used by the algorithm.
+| nodeProperty      | String    | n/a       | no        | A node property corresponding to an array of floats used by K-Means to cluster nodes into communities.
 | k                 | Integer   | 10        | yes       | Number of desired clusters.
 | maxIterations     | Integer   | 10        | yes       | The maximum number of iterations of K-Means to run.
 | deltaThreshold    | Float     | 0.05      | yes       | Value as a percentage to determine when to stop early. If fewer  than 'deltaThreshold * \|nodes\|'  nodes change their cluster , the algorithm stops. Value must be between 0 (exclusive) and 1 (inclusive).

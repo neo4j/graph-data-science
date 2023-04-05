@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
+
 @GdlExtension
 class NodeClassificationTrainAlgorithmTest {
 
@@ -85,7 +87,7 @@ class NodeClassificationTrainAlgorithmTest {
             .build();
 
 
-        var factory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY);
+        var factory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY, testGdsVersion);
         Supplier<NodeClassificationTrainAlgorithm> algoSupplier = () -> factory.build(
             graphStore,
             config,

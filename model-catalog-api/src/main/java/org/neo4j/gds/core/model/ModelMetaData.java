@@ -45,4 +45,6 @@ public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomIn
     ZonedDateTime creationTime();
 
     INFO customInfo();
+
+    String gdsVersion();
 }

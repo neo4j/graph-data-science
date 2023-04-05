@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
 
 import java.util.Map;
@@ -82,7 +82,7 @@ public final class FilteredKnnHelpers {
         }
 
         @SuppressWarnings("unused")
-        static class Builder extends SimilarityProc.SimilarityResultBuilder<Result> {
+        static class Builder extends SimilarityResultBuilder<Result> {
             public long ranIterations;
             public boolean didConverge;
             public long nodePairsConsidered;

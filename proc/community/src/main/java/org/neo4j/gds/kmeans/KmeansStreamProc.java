@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -35,19 +32,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class KmeansStreamProc extends AlgoBaseProc<
-    Kmeans,
-    KmeansResult,
-    KmeansStreamConfig,
-    KmeansStreamProc.StreamResult
-    > {
-
-    static final String KMEANS_DESCRIPTION =
-        "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
+public class KmeansStreamProc extends BaseProc {
 
     @Procedure(value = "gds.beta.kmeans.stream", mode = READ)
-    @Description(KMEANS_DESCRIPTION)
-    public Stream<KmeansStreamProc.StreamResult> stream(
+    @Description(Kmeans.KMEANS_DESCRIPTION)
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -72,40 +61,5 @@ public class KmeansStreamProc extends AlgoBaseProc<
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
-    }
-
-    @Override
-    public AlgorithmFactory<?, Kmeans, KmeansStreamConfig> algorithmFactory() {
-        return new KmeansStreamSpec().algorithmFactory();
-    }
-
-    @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return new KmeansStreamSpec().computationResultConsumer();
-    }
-
-    @Override
-    protected KmeansStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return new KmeansStreamSpec().newConfigFunction().apply(username, config);
-    }
-
-
-    @SuppressWarnings("unused")
-    public static class StreamResult {
-
-        public final long nodeId;
-
-        public final long communityId;
-        public final double distanceFromCentroid;
-
-        public final double silhouette;
-
-
-        public StreamResult(long nodeId, long communityId, double distanceFromCentroid, double silhouette) {
-            this.nodeId = nodeId;
-            this.communityId = communityId;
-            this.distanceFromCentroid = distanceFromCentroid;
-            this.silhouette = silhouette;
-        }
     }
 }

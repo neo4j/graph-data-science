@@ -10,6 +10,12 @@
 include::partial$/operations-reference/alpha-note.adoc[]
 
 
+:directed:
+:undirected:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 [[algorithms-approx-max-k-cut-intro]]
 == Introduction
 

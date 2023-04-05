@@ -26,9 +26,12 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class BetweennessCentralityStreamProcTest extends BaseProcTest {
 
@@ -79,7 +82,7 @@ class BetweennessCentralityStreamProcTest extends BaseProcTest {
             ));
     }
 
-    // This should not be tested here
+    // FIXME: This should not be tested here
     @Test
     void shouldValidateSampleSize() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
@@ -91,4 +94,22 @@ class BetweennessCentralityStreamProcTest extends BaseProcTest {
         assertError(query, "Configuration parameter 'samplingSize' must be a positive number, got -42.");
     }
 
+    @Test
+    void shouldFailOnMixedProjections() {
+        runQuery(
+            "CALL gds.graph.project(" +
+            "   'mixedGraph', " +
+            "   '*', " +
+            "   {" +
+            "       N: {type: 'REL', orientation: 'NATURAL'}, " +
+            "       U: {type: 'REL', orientation: 'UNDIRECTED'}" +
+            "   }" +
+            ")"
+        );
+
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery("CALL gds.betweenness.stream('mixedGraph', {})"))
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported.");
+    }
 }

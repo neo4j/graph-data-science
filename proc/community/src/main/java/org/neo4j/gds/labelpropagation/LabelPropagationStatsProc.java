@@ -19,16 +19,10 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,20 +30,21 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.labelPropagation.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagationResult, LabelPropagationStatsProc.StatsResult, LabelPropagationStatsConfig> {
+public class LabelPropagationStatsProc extends BaseProc {
 
     @Procedure(value = "gds.labelPropagation.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LabelPropagationStatsSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
@@ -58,74 +53,10 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @Override
-    protected LabelPropagationStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return LabelPropagationStatsConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory() {
-        return new LabelPropagationFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final long ranIterations;
-        public final boolean didConverge;
-        public final long communityCount;
-        public final Map<String, Object> communityDistribution;
-
-        StatsResult(
-            long ranIterations,
-            boolean didConverge,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.communityCount = communityCount;
-            this.communityDistribution = communityDistribution;
-        }
-
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected StatsResult buildResult() {
-                return new StatsResult(
-                    ranIterations,
-                    didConverge,
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    config.toMap()
-                );
-            }
-        }
+        return new MemoryEstimationExecutor<>(
+            new LabelPropagationStatsSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

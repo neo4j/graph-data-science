@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.config;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.DatabaseId;
@@ -34,7 +37,10 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 class WriteConfigTest {
@@ -72,6 +78,48 @@ class WriteConfigTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The provided graph does not support `write` execution mode.");
         }
+    }
+
+    @Test
+    void shouldParseArrowConnectionInfo() {
+        var cypherMap = CypherMapWrapper.create(Map.of(
+           "arrowConnectionInfo",
+            Map.of(
+               "hostname", "localhost",
+                "port", 4242,
+                "username", "ronny",
+                "password", "1234567"
+            )
+        ));
+
+        var config = new TestWriteConfigImpl(cypherMap);
+        var arrowConnectionInfo = config.arrowConnectionInfo();
+        assertThat(arrowConnectionInfo).isPresent();
+        assertThat(arrowConnectionInfo.get().hostname()).isEqualTo("localhost");
+        assertThat(arrowConnectionInfo.get().port()).isEqualTo(4242);
+        assertThat(arrowConnectionInfo.get().username()).isEqualTo("ronny");
+        assertThat(arrowConnectionInfo.get().password()).isEqualTo("1234567");
+    }
+
+    static Stream<Arguments> baseConfigs() {
+        return Stream.of(
+            Arguments.of(TestWriteConfigImpl
+                .builder()
+                .arrowConnectionInfo(Optional.of(ImmutableArrowConnectionInfo.of("locaLhost", 4242, "username", "password")))
+                .concurrency(2)
+                .build()),
+            Arguments.of(TestWriteConfigImpl
+                .builder()
+                .concurrency(2)
+                .build()
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("baseConfigs")
+    void shouldCreateFromExistingConfig(TestWriteConfig baseConfig) {
+        assertThatCode(() -> TestWriteConfigImpl.Builder.from(baseConfig).build()).doesNotThrowAnyException();
     }
 
     @Configuration

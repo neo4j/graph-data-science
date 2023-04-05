@@ -17,4 +17,5 @@ dependencies {
     implementation group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     implementation group: 'com.google.auto', name: 'auto-common', version: ver.'auto-common'
     implementation group: 'com.squareup', name: 'javapoet', version: ver.'javapoet'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
 }

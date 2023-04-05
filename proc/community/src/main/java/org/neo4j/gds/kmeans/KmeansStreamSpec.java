@@ -29,10 +29,10 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
+import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.kmeans.stream", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamProc.StreamResult>, KmeansAlgorithmFactory<KmeansStreamConfig>> {
+public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>, KmeansAlgorithmFactory<KmeansStreamConfig>> {
     @Override
     public String name() {
         return "KmeansStream";
@@ -49,7 +49,7 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     }
 
     @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamProc.StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
             var result = computationResult.result();
@@ -59,7 +59,7 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .mapToObj(nodeId -> new KmeansStreamProc.StreamResult(
+                .mapToObj(nodeId -> new StreamResult(
                     graph.toOriginalNodeId(nodeId),
                     communities.get(nodeId),
                     distances.get(nodeId),

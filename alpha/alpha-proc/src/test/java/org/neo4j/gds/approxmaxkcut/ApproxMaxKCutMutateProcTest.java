@@ -19,37 +19,26 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
-    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult>,
-    MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult> {
+class ApproxMaxKCutMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    @Language("Cypher")
     private static final
     String DB_CYPHER =
         "CREATE" +
@@ -79,11 +68,6 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
 
     static final String GRAPH_NAME = "myGraph";
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
@@ -100,54 +84,59 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
         runQuery(createQuery);
     }
 
-    @Override
-    public String mutateProperty() {
-        return "community";
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.LONG;
-    }
-
-    @Override
-    public Class<ApproxMaxKCutMutateProc> getProcedureClazz() {
-        return ApproxMaxKCutMutateProc.class;
-    }
-
-    @Override
-    public ApproxMaxKCutMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ApproxMaxKCutMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        return mapWrapper
-            .withEntryIfMissing("k", 2)
-            .withEntryIfMissing("iterations", 8)
-            .withEntryIfMissing("vnsMaxNeighborhoodOrder", 0)
-            .withEntryIfMissing("concurrency", 1)
-            .withEntryIfMissing("randomSeed", 1337L)
-            .withEntryIfMissing("mutateProperty", this.mutateProperty());
-    }
 
     // We override this in order to be able to specify an algo config yielding a deterministic result.
-    @Override
     @Test
-    public void testGraphMutation() {
-        GraphStore graphStore = runMutation(ensureGraphExists(), createMinimalConfig(CypherMapWrapper.empty()));
+    void shouldMutate() {
 
-        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
-        GraphSchema schema = graphStore.schema();
-        if (mutateProperty() != null) {
-            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema());
-            boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema());
-            assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
-        }
+        String query = GdsCypher
+            .call(GRAPH_NAME)
+            .algo("gds.alpha.maxkcut")
+            .mutateMode()
+            .addParameter("k", 2)
+            .addParameter("iterations", 8)
+            .addParameter("vnsMaxNeighborhoodOrder", 0)
+            .addParameter("concurrency", 1)
+            .addParameter("randomSeed", 1337L)
+            .addParameter("mutateProperty", "community").yields();
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+
+            assertThat(row.getNumber("cutCost"))
+                .asInstanceOf(DOUBLE)
+                .isEqualTo(13.0);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("mutateMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(7L);
+        });
+
+        assertThat(rowCount).isEqualTo(1L);
+
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME)
+            .graphStore()
+            .getUnion();
+
+        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), actualGraph);
     }
 
-    @Override
-    public String expectedMutatedGraph() {
+    String expectedMutatedGraph() {
         return
             "  (a { community: 1 })" +
             ", (b { community: 1 })" +
@@ -174,11 +163,6 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
             ", (g)-[{w: 1.0d}]->(c)";
     }
 
-    @Override
-    public void assertResultEquals(ApproxMaxKCut.CutResult result1, ApproxMaxKCut.CutResult result2) {
-        assertThat(result1.cutCost())
-            .isEqualTo(result2.cutCost());
-    }
 
     @AfterEach
     void clearStore() {

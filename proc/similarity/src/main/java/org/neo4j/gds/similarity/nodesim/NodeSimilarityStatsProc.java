@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.SimilarityStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -102,7 +103,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
                 );
             }
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityStatsResult> resultBuilder =
+            SimilarityResultBuilder<SimilarityStatsResult> resultBuilder =
                 SimilarityProc.withGraphsizeAndTimings(new SimilarityStatsResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             if (shouldComputeHistogram(executionContext().returnColumns())) {

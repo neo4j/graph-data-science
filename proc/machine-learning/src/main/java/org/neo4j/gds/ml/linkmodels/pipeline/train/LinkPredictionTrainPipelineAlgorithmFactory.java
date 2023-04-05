@@ -36,8 +36,11 @@ import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final ExecutionContext executionContext;
 
-    LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
+    private final String gdsVersion;
+
+    LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext, String gdsVersion) {
         this.executionContext = executionContext;
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -59,7 +62,8 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             trainConfig,
             executionContext,
             graphStore,
-            progressTracker
+            progressTracker,
+            gdsVersion
         );
     }
 

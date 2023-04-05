@@ -12,6 +12,11 @@ It is often used early in a graph analysis process to help us get an idea of how
 include::partial$/operations-reference/alpha-note.adoc[]
 
 
+:directed:
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 [[algorithms-strongly-connected-components-context]]
 == History and explanation
 
@@ -109,12 +114,13 @@ YIELD nodeId, componentId
 
 
 [[algorithms-strongly-connected-components-example]]
-== Strongly Connected Components algorithm example
+== Strongly Connected Components algorithm examples
 
 image::strongly_connected_components.png[]
 
+
 .The following will create a sample graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (nAlice:User {name:'Alice'})
 CREATE (nBridget:User {name:'Bridget'})
@@ -136,27 +142,15 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 ----
 
 .The following will project and store a named graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
-.The following will run the algorithm and write back results:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.scc.write('graph', {
-  writeProperty: 'componentId'
-})
-YIELD setCount, maxSetSize, minSetSize;
-----
+=== Stream
 
-.Results
-[opts="header",cols="1m,1m,1m"]
-|===
-| setCount | maxSetSize | minSetSize
-| 3        | 3          | 1
-|===
-
+[role=query-example]
+--
 .The following will run the algorithm and stream back results:
 [source, cypher, role=noplay]
 ----
@@ -177,14 +171,39 @@ ORDER BY Component DESC
 | "Bridget" | 0
 | "Michael" | 0
 |===
-
+--
 // tag::stream-sample-graph-explanation[]
 We have 3 strongly connected components in our sample graph.
 
 The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
 Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
+
+=== Write
+
+[role=query-example, group=writeAndMax]
+--
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scc.write('graph', {
+  writeProperty: 'componentId'
+})
+YIELD setCount, maxSetSize, minSetSize;
+----
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| setCount | maxSetSize | minSetSize
+| 3        | 3          | 1
+|===
+--
+
 // end::stream-sample-graph-explanation[]
 
+[role=query-example, group=writeAndMax]
+
+--
 .The following will find the largest partition:
 [source, cypher, role=noplay]
 ----
@@ -200,7 +219,7 @@ LIMIT 1
 | Component | ComponentSize
 | 0         | 3
 |===
-
+--
 
 ifndef::env-docs[]
 == References

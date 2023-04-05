@@ -22,8 +22,10 @@ package org.neo4j.gds.kmeans;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KmeansProcHelper {
-    public static List<List<Double>> arrayMatrixToListMatrix(double[][] matrix) {
+final class KmeansProcHelper {
+    private KmeansProcHelper() {}
+
+    static List<List<Double>> arrayMatrixToListMatrix(double[][] matrix) {
         var result = new ArrayList<List<Double>>();
 
         for (double[] row : matrix) {

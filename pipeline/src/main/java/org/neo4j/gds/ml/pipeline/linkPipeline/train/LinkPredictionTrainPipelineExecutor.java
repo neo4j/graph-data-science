@@ -59,12 +59,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     private final Set<RelationshipType> availableRelationshipTypesForNodeProperty;
 
+    private final String gdsVersion;
+
     public LinkPredictionTrainPipelineExecutor(
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        String gdsVersion
     ) {
         super(
             pipeline,
@@ -73,6 +76,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             graphStore,
             progressTracker
         );
+        this.gdsVersion = gdsVersion;
 
         this.availableRelationshipTypesForNodeProperty = graphStore.relationshipTypes()
             .stream()
@@ -192,6 +196,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         ).compute();
 
         var model = Model.of(
+            gdsVersion,
             MODEL_TYPE,
             schemaBeforeSteps,
             trainResult.classifier().data(),

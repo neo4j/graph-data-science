@@ -28,7 +28,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DegreeCentralityStreamProcTest extends BaseProcTest {
 
@@ -94,11 +94,14 @@ class DegreeCentralityStreamProcTest extends BaseProcTest {
             idFunction.of("i"), 0.0D,
             idFunction.of("j"), 0.0D
         );
-        runQueryWithRowConsumer(streamQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(streamQuery, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double score = row.getNumber("score").doubleValue();
-            assertEquals(expected.get(nodeId), score);
+            assertThat(expected).containsEntry(nodeId, score);
         });
 
+        assertThat(rowCount)
+            .as("Streamed rows should match the expected")
+            .isEqualTo(expected.size());
     }
 }

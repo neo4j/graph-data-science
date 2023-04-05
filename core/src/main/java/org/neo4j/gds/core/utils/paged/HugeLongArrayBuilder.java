@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.loading.IdMapAllocator;
 import org.neo4j.gds.mem.HugeArrays;
 

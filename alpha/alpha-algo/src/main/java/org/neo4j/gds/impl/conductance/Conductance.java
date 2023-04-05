@@ -36,10 +36,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
-public class Conductance extends Algorithm<Conductance.Result> {
+public class Conductance extends Algorithm<ConductanceResult> {
+
+    public static final String CONDUCTANCE_DESCRIPTION = "Evaluates a division of nodes into communities based on the proportion of relationships that cross community boundaries.";
 
     private static final double DEFAULT_WEIGHT = 0.0D;
 
@@ -68,50 +68,9 @@ public class Conductance extends Algorithm<Conductance.Result> {
         double accept(double weight);
     }
 
-    @ValueClass
-    public interface CommunityResult {
-        long community();
-
-        double conductance();
-
-        static CommunityResult of(long community, double conductance) {
-            return ImmutableCommunityResult
-                .builder()
-                .community(community)
-                .conductance(conductance)
-                .build();
-        }
-    }
-
-    @ValueClass
-    public interface Result {
-        HugeSparseDoubleArray communityConductances();
-
-        double globalAverageConductance();
-
-        static Result of(
-            HugeSparseDoubleArray communityConductances,
-            double globalAverageConductance
-        ) {
-            return ImmutableResult
-                .builder()
-                .communityConductances(communityConductances)
-                .globalAverageConductance(globalAverageConductance)
-                .build();
-        }
-
-        default Stream<CommunityResult> streamCommunityResults() {
-            var condunctances = communityConductances();
-
-            return LongStream
-                .range(0, condunctances.capacity())
-                .filter(c -> !Double.isNaN(condunctances.get(c)))
-                .mapToObj(c -> CommunityResult.of(c, condunctances.get(c)));
-        }
-    }
 
     @Override
-    public Result compute() {
+    public ConductanceResult compute() {
         progressTracker.beginSubTask();
 
         var relCountTasks = countRelationships();
@@ -120,7 +79,12 @@ public class Conductance extends Algorithm<Conductance.Result> {
         long communitiesPerBatch = maxCommunityId / config.concurrency();
         long communitiesRemainder = Math.floorMod(maxCommunityId, config.concurrency());
 
-        var accumulatedCounts = accumulateCounts(communitiesPerBatch, communitiesRemainder, maxCommunityId, relCountTasks);
+        var accumulatedCounts = accumulateCounts(
+            communitiesPerBatch,
+            communitiesRemainder,
+            maxCommunityId,
+            relCountTasks
+        );
 
         var result = computeConductances(communitiesPerBatch, communitiesRemainder, maxCommunityId, accumulatedCounts);
 
@@ -223,7 +187,7 @@ public class Conductance extends Algorithm<Conductance.Result> {
         return ImmutableRelationshipCounts.of(internalCountsBuilder.build(), externalCountsBuilder.build());
     }
 
-    private Result computeConductances(
+    private ConductanceResult computeConductances(
         long communitiesPerBatch,
         long communitiesRemainder,
         long maxCommunityId,
@@ -274,7 +238,10 @@ public class Conductance extends Algorithm<Conductance.Result> {
 
         progressTracker.endSubTask();
 
-        return Result.of(conductancesBuilder.build(), globalConductanceSum.get() / globalValidCommunities.longValue());
+        return ConductanceResult.of(
+            conductancesBuilder.build(),
+            globalConductanceSum.get() / globalValidCommunities.longValue()
+        );
     }
 
     private final class CountRelationships implements Runnable {

@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.beta.closeness.ClosenessCentralityMutateProc;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityStatsProc;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityStreamProc;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityWriteProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateProc;
+import org.neo4j.gds.closeness.ClosenessCentralityStatsProc;
+import org.neo4j.gds.closeness.ClosenessCentralityStreamProc;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;

@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import com.carrotsearch.hppc.AbstractIterator;
+import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 

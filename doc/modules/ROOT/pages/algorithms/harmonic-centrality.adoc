@@ -4,6 +4,11 @@
 :description: This section describes the Harmonic Centrality algorithm
 
 
+:directed:
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 // tag::introduction[]
 Harmonic centrality (also known as valued centrality) is a variant of closeness centrality, that was invented to solve the problem the original formula had when dealing with unconnected graphs.
 As with many of the centrality algorithms, it originates from the field of social network analysis.

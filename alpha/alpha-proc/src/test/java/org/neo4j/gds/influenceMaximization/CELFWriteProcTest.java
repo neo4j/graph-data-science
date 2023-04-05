@@ -125,7 +125,7 @@ class CELFWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "celf")
             .yields();
 
-        runQueryWithRowConsumer(cypher, resultRow -> {
+        var rowCount = runQueryWithRowConsumer(cypher, resultRow -> {
             assertThat(resultRow.getNumber("writeMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThanOrEqualTo(0L);
@@ -134,16 +134,22 @@ class CELFWriteProcTest extends BaseProcTest {
                 .isEqualTo(NODE_COUNT);
         });
 
-        runQueryWithRowConsumer("MATCH (n) WHERE n.celf > 0 RETURN count(n) AS influentialNodes", resultRow -> {
+        assertThat(rowCount).isEqualTo(1);
+
+        var influentialQueryRow = runQueryWithRowConsumer("MATCH (n) WHERE n.celf > 0 RETURN count(n) AS influentialNodes", resultRow -> {
             assertThat(resultRow.getNumber("influentialNodes"))
                 .asInstanceOf(LONG)
                 .isEqualTo(seedSetSize);
         });
 
-        runQueryWithRowConsumer("MATCH (n) WHERE n.celf = 0 RETURN count(n) AS notInfluentialNodes", resultRow -> {
+        assertThat(influentialQueryRow).isEqualTo(1);
+
+        var nonInfluentialQueryRow = runQueryWithRowConsumer("MATCH (n) WHERE n.celf = 0 RETURN count(n) AS notInfluentialNodes", resultRow -> {
             assertThat(resultRow.getNumber("notInfluentialNodes"))
                 .asInstanceOf(LONG)
                 .isEqualTo(NODE_COUNT - seedSetSize);
         });
+
+        assertThat(nonInfluentialQueryRow).isEqualTo(1);
     }
 }

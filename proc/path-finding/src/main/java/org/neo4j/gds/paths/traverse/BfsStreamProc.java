@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -37,7 +33,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamConfig, BfsStreamResult> {
+public class BfsStreamProc extends BaseProc {
     static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
@@ -70,21 +66,6 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamCon
             streamSpec,
             executionContext(),
             transactionContext()
-        ).computeEstimate(graphName, configuration);    }
-
-    @Override
-    public GraphAlgorithmFactory<BFS, BfsStreamConfig> algorithmFactory() {
-        return new BfsStreamSpec().algorithmFactory();
+        ).computeEstimate(graphName, configuration);
     }
-
-    @Override
-    protected BfsStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return new BfsStreamSpec().newConfigFunction().apply(username, config);
-    }
-
-    @Override
-    public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
-        return new BfsStreamSpec().computationResultConsumer();
-    }
-
 }

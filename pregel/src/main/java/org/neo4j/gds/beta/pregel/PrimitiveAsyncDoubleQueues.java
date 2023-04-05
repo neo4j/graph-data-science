@@ -20,10 +20,10 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.mem.MemoryUsage;

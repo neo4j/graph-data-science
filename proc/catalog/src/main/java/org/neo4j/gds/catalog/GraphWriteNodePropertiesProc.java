@@ -171,6 +171,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                     .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .build();
 
                 var writeNodeProperties =

@@ -298,7 +298,7 @@ public final class ParallelUtil {
         final Collection<? extends Runnable> tasks,
         final boolean allowSynchronousRun,
         final ExecutorService executor,
-        Collection<Future<?>> futures
+        @Nullable Collection<Future<?>> futures
     ) {
 
         boolean noExecutor = !canRunInParallel(executor);
