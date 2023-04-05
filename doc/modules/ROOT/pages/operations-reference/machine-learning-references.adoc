@@ -58,12 +58,14 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.2+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.3+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.alpha.pipeline.linkPrediction.addMLP`
 | `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
-.2+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+| `gds.alpha.pipeline.linkPrediction.addRandomForest` (deprecated)
+.3+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.alpha.pipeline.nodeClassification.addMLP`
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
+| `gds.alpha.pipeline.nodeClassification.addRandomForest` (deprecated)
 .10+<.^| xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
 | `gds.alpha.pipeline.nodeRegression.create`
 | `gds.alpha.pipeline.nodeRegression.addNodeProperty`
