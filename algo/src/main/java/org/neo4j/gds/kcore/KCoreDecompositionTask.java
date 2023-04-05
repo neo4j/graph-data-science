@@ -39,6 +39,7 @@ class KCoreDecompositionTask implements Runnable {
     private final AtomicLong remainingNodes;
     private final ProgressTracker progressTracker;
     private KCoreDecompositionPhase phase;
+    private final int chunkSize;
 
     KCoreDecompositionTask(
         Graph localGraph,
@@ -46,6 +47,7 @@ class KCoreDecompositionTask implements Runnable {
         HugeIntArray core,
         AtomicLong nodeIndex,
         AtomicLong remainingNodes,
+        int chunkSize,
         ProgressTracker progressTracker
     ) {
         this.progressTracker = progressTracker;
@@ -56,6 +58,7 @@ class KCoreDecompositionTask implements Runnable {
         this.nodeIndex = nodeIndex;
         this.remainingNodes = remainingNodes;
         this.phase = KCoreDecompositionPhase.SCAN;
+        this.chunkSize = chunkSize;
     }
 
     @Override
@@ -74,15 +77,17 @@ class KCoreDecompositionTask implements Runnable {
         long upperBound = localGraph.nodeCount();
         smallestActiveDegree = -1;
         long offset;
-        while ((offset = nodeIndex.getAndAdd(64)) < upperBound) {
-            var chunkSize = Math.min(offset + 64, upperBound);
-            for (long nodeId = offset; nodeId < chunkSize; nodeId++) {
+        while ((offset = nodeIndex.getAndAdd(chunkSize)) < upperBound) {
+            var currentChunk = Math.min(offset + chunkSize, upperBound);
+            for (long nodeId = offset; nodeId < currentChunk; nodeId++) {
                 int nodeDegree = currentDegrees.get(nodeId);
-                if (nodeDegree == scanningDegree) {
-                    smallestActiveDegree = nodeDegree;
-                    examinationStack.push(nodeId);
-                } else if (smallestActiveDegree == -1 || smallestActiveDegree > nodeDegree) {
-                    smallestActiveDegree = nodeDegree;
+                if (nodeDegree >= scanningDegree) {
+                    if (nodeDegree == scanningDegree) {
+                        smallestActiveDegree = nodeDegree;
+                        examinationStack.push(nodeId);
+                    } else if (smallestActiveDegree == -1 || smallestActiveDegree > nodeDegree) {
+                        smallestActiveDegree = nodeDegree;
+                    }
                 }
             }
         }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kcore;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
@@ -36,11 +37,22 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
     private final Graph graph;
     private final int concurrency;
+    private static final int CHUNK_SIZE = 64;
+    private int chunkSize;
 
-    protected KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
+    KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
+        this.chunkSize = CHUNK_SIZE;
+    }
+
+    @TestOnly
+    KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker, int chunkSize) {
+        super(progressTracker);
+        this.graph = graph;
+        this.concurrency = concurrency;
+        this.chunkSize = chunkSize;
     }
 
     @Override
@@ -53,22 +65,37 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
         HugeIntArray core = HugeIntArray.newArray(graph.nodeCount());
         int degeneracy = -1;
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, v -> currentDegrees.set(v, graph.degree(v)));
 
         AtomicLong remainingNodes = new AtomicLong(graph.nodeCount());
+
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency,
+            v -> {
+                int degree = graph.degree(v);
+                currentDegrees.set(v, degree);
+                if (degree == 0)
+                    remainingNodes.decrementAndGet();
+            }
+
+        );
+
         AtomicLong nodeIndex = new AtomicLong(0);
-        int scanningDegree = 0;
+        int scanningDegree = 1;
 
         var tasks = createTasks(currentDegrees, core, nodeIndex, remainingNodes);
 
         while (remainingNodes.get() > 0) {
+
             nodeIndex.set(0L);
+            for (var task : tasks) {
+                task.setScanningDegree(scanningDegree);
+            }
 
             RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
-            
+
             int nextScanningDegree = tasks
                 .stream()
                 .mapToInt(KCoreDecompositionTask::getSmallestActiveDegree)
+                .filter(v -> v > -1)
                 .min()
                 .orElseThrow();
 
@@ -103,6 +130,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 core,
                 nodeIndex,
                 remainingNodes,
+                chunkSize,
                 progressTracker
             ));
         }
