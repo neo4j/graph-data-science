@@ -19,11 +19,12 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.11+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.12+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
 | `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+| `gds.beta.pipeline.linkPrediction.addRandomForest`
 | `gds.beta.pipeline.linkPrediction.configureSplit`
 | `gds.beta.pipeline.linkPrediction.train`
 | `gds.beta.pipeline.linkPrediction.train.estimate`
@@ -31,11 +32,12 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
 | `gds.beta.pipeline.linkPrediction.predict.stream`
 | `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.13+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+.14+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.beta.pipeline.nodeClassification.create`
 | `gds.beta.pipeline.nodeClassification.addNodeProperty`
 | `gds.beta.pipeline.nodeClassification.selectFeatures`
 | `gds.beta.pipeline.nodeClassification.addLogisticRegression`
+| `gds.beta.pipeline.nodeClassification.addRandomForest`
 | `gds.beta.pipeline.nodeClassification.configureSplit`
 | `gds.beta.pipeline.nodeClassification.train`
 | `gds.beta.pipeline.nodeClassification.train.estimate`
@@ -58,12 +60,12 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 |Algorithm name | Operation
 .3+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.alpha.pipeline.linkPrediction.addMLP`
-| `gds.alpha.pipeline.linkPrediction.addRandomForest`
 | `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
+| `gds.alpha.pipeline.linkPrediction.addRandomForest` (deprecated)
 .3+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.alpha.pipeline.nodeClassification.addMLP`
-| `gds.alpha.pipeline.nodeClassification.addRandomForest`
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
+| `gds.alpha.pipeline.nodeClassification.addRandomForest` (deprecated)
 .10+<.^| xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
 | `gds.alpha.pipeline.nodeRegression.create`
 | `gds.alpha.pipeline.nodeRegression.addNodeProperty`

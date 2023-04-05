@@ -130,6 +130,33 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void addRandomForest() {
         assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.addRandomForest('myPipeline', {criterion: 'ENTROPY', maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
+            List.of(Map.of("name",
+                "myPipeline",
+                "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "nodePropertySteps", List.of(),
+                "featureSteps", List.of(),
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForestClassification.toString(),
+                    List.of(RandomForestClassifierTrainerConfigImpl.builder()
+                        .criterion(ClassifierImpurityCriterionType.ENTROPY)
+                        .maxDepth(42)
+                        .maxFeaturesRatio(0.5)
+                        .numberOfDecisionTrees(10)
+                        .minSplitSize(2)
+                        .build()
+                        .toMapWithTrainerMethod()),
+                    TrainingMethod.LogisticRegression.name(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of()
+                )
+            ))
+        );
+    }
+
+    @Test
+    void addRandomForestAlphaBackwardCompat() {
+        assertCypherResult(
             "CALL gds.alpha.pipeline.linkPrediction.addRandomForest('myPipeline', {criterion: 'ENTROPY', maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
             List.of(Map.of("name",
                 "myPipeline",

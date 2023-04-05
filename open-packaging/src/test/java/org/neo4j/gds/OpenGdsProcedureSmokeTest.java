@@ -136,7 +136,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.linkPrediction.addNodeProperty",
         "gds.beta.pipeline.linkPrediction.addLogisticRegression",
         "gds.alpha.pipeline.linkPrediction.addMLP",
-        "gds.alpha.pipeline.linkPrediction.addRandomForest",
+        "gds.beta.pipeline.linkPrediction.addRandomForest",
+        "gds.alpha.pipeline.linkPrediction.addRandomForest",  //Deprecated
         "gds.alpha.pipeline.linkPrediction.configureAutoTuning",
         "gds.beta.pipeline.linkPrediction.configureSplit",
         "gds.beta.pipeline.linkPrediction.create",
@@ -162,8 +163,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.nodeClassification.addNodeProperty",
         "gds.beta.pipeline.nodeClassification.addLogisticRegression",
         "gds.alpha.pipeline.nodeClassification.addMLP",
-        "gds.alpha.pipeline.nodeClassification.addRandomForest",
+        "gds.beta.pipeline.nodeClassification.addRandomForest",
         "gds.alpha.pipeline.nodeClassification.configureAutoTuning",
+        "gds.alpha.pipeline.nodeClassification.addRandomForest",  //Deprecated
         "gds.beta.pipeline.nodeClassification.configureSplit",
         "gds.beta.pipeline.nodeClassification.create",
         "gds.beta.pipeline.nodeClassification.predict.mutate",
@@ -548,7 +550,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 394;
+        int expectedCount = 396;
         assertEquals(
             expectedCount,
             returnedRows,
