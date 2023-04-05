@@ -50,7 +50,7 @@ public class StratifiedKFoldSplitter {
     private final ReadOnlyHugeLongArray ids;
     private final LongToLongFunction targets;
     private final SplittableRandom random;
-    private final SortedSet<Long> distinctTargets;
+    private final SortedSet<Long> distinctInternalTargets;
 
     public static MemoryEstimation memoryEstimationForNodeSet(int k, double trainFraction) {
         return memoryEstimation(k, dim -> (long) (dim.nodeCount() * trainFraction));
@@ -79,12 +79,12 @@ public class StratifiedKFoldSplitter {
         );
     }
 
-    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, LongToLongFunction targets, Optional<Long> randomSeed, SortedSet<Long> distinctTargets) {
+    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, LongToLongFunction targets, Optional<Long> randomSeed, SortedSet<Long> distinctInternalTargets) {
         this.k = k;
         this.ids = ids;
         this.targets = targets;
         this.random = ShuffleUtil.createRandomDataGenerator(randomSeed);
-        this.distinctTargets = distinctTargets;
+        this.distinctInternalTargets = distinctInternalTargets;
     }
 
     public List<TrainingExamplesSplit> splits() {
@@ -97,7 +97,7 @@ public class StratifiedKFoldSplitter {
         allocateArrays(nodeCount, trainSets, testSets);
 
         var roundRobinPointer = new MutableInt();
-        distinctTargets.forEach(currentClass -> {
+        distinctInternalTargets.forEach(currentClass -> {
             for (long offset = 0; offset < ids.size(); offset++) {
                 var id = ids.get(offset);
                 if (targets.applyAsLong(id) == currentClass) {
