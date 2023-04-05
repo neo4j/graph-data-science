@@ -14,7 +14,6 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':algo')
     implementation project(':graph-schema-api')
     implementation project(':progress-tracking')
     implementation project(':subgraph-filtering')

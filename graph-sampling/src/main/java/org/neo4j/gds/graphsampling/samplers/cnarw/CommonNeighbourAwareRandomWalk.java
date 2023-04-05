@@ -26,11 +26,11 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.functions.similairty.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
-import org.neo4j.gds.similarity.nodesim.OverlapSimilarityComputer;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -93,7 +93,6 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
 
     static class Walker extends RandomWalkWithRestarts.Walker {
 
-        private final OverlapSimilarityComputer overlapSimilarity;
         final boolean isWeighted;
 
         Walker(
@@ -107,7 +106,6 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
             ProgressTracker progressTracker
         ) {
             super(seenNodes, totalWeights, qualityThreshold, walkQualities, rng, inputGraph, config, progressTracker);
-            this.overlapSimilarity = new OverlapSimilarityComputer(0.0);
             this.isWeighted = totalWeights.isPresent();
         }
 
@@ -204,11 +202,9 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
             if (isWeighted) {
                 assert weightsU.isPresent();
                 assert weightsV.isPresent();
-                similarity = overlapSimilarity.computeWeightedSimilarity(
-                    neighsU, neighsV, weightsU.get(), weightsV.get()
-                );
+                similarity = OverlapSimilarity.computeWeightedSimilarity(neighsU, neighsV, weightsU.get(), weightsV.get());
             } else {
-                similarity = overlapSimilarity.computeSimilarity(neighsU, neighsV);
+                similarity = OverlapSimilarity.computeSimilarity(neighsU, neighsV);
             }
             if (!Double.isNaN(similarity))
                 return similarity;
