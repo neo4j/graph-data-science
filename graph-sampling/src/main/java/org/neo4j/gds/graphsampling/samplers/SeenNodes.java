@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 
@@ -37,6 +38,26 @@ public interface SeenNodes {
 
     long totalExpectedNodes();
 
+    static SeenNodes create(
+        Graph inputGraph, ProgressTracker progressTracker, boolean nodeLabelStratification,
+        int concurrency, double samplingRatio
+    ) {
+        if (nodeLabelStratification) {
+            var nodeLabelHistogram = NodeLabelHistogram.compute(
+                inputGraph,
+                concurrency,
+                progressTracker
+            );
+
+            return new SeenNodes.SeenNodesByLabelSet(inputGraph, nodeLabelHistogram, samplingRatio);
+        }
+
+        return new SeenNodes.GlobalSeenNodes(
+            HugeAtomicBitSet.create(inputGraph.nodeCount()),
+            Math.round(inputGraph.nodeCount() * samplingRatio)
+        );
+    }
+
     class SeenNodesByLabelSet implements SeenNodes {
         private final Graph inputGraph;
         private final LongLongHashMap seenNodesPerLabels;
@@ -45,7 +66,11 @@ public interface SeenNodes {
         private final HugeAtomicBitSet seenBitSet;
         private final long totalExpectedNodes;
 
-        public SeenNodesByLabelSet(Graph inputGraph, NodeLabelHistogram.Result nodeLabelHistogram, double samplingRatio) {
+        public SeenNodesByLabelSet(
+            Graph inputGraph,
+            NodeLabelHistogram.Result nodeLabelHistogram,
+            double samplingRatio
+        ) {
             this.inputGraph = inputGraph;
             this.availableNodeLabels = nodeLabelHistogram.availableNodeLabels();
             this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());

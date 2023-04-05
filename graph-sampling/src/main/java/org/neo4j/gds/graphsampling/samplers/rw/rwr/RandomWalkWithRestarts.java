@@ -33,7 +33,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
-import org.neo4j.gds.graphsampling.samplers.NodeLabelHistogram;
 import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.Walker;
@@ -61,9 +60,15 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         progressTracker.beginSubTask("Sample nodes");
 
-        var seenNodes = getSeenNodes(inputGraph, progressTracker);
+        var seenNodes = SeenNodes.create(
+            inputGraph,
+            progressTracker,
+            config.nodeLabelStratification(),
+            config.concurrency(),
+            config.samplingRatio()
+        );
 
-        progressTracker.beginSubTask(getSubTaskMessage());
+        progressTracker.beginSubTask("Do random walks");
         progressTracker.setSteps(seenNodes.totalExpectedNodes());
 
         startNodesUsed = new LongHashSet();
@@ -89,29 +94,12 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .run();
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
-        progressTracker.endSubTask(getSubTaskMessage());
+        progressTracker.endSubTask("Do random walks");
 
         progressTracker.endSubTask("Sample nodes");
 
         return seenNodes.sampledNodes();
     }
-
-    protected Runnable getWalker(
-        SeenNodes seenNodes,
-        Optional<HugeAtomicDoubleArray> totalWeights,
-        double v,
-        WalkQualities walkQualities,
-        SplittableRandom split,
-        Graph concurrentCopy,
-        RandomWalkWithRestartsConfig config,
-        ProgressTracker progressTracker
-    ) {
-        return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker,
-            new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
-        );
-    }
-
-    protected String getSubTaskMessage() {return "Do random walks";}
 
     @Override
     public Task progressTask(GraphStore graphStore) {
@@ -134,23 +122,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return "Random walk with restarts sampling";
     }
 
-    private SeenNodes getSeenNodes(Graph inputGraph, ProgressTracker progressTracker) {
-        if (config.nodeLabelStratification()) {
-            var nodeLabelHistogram = NodeLabelHistogram.compute(
-                inputGraph,
-                config.concurrency(),
-                progressTracker
-            );
-
-            return new SeenNodes.SeenNodesByLabelSet(inputGraph, nodeLabelHistogram, config.samplingRatio());
-        }
-
-        return new SeenNodes.GlobalSeenNodes(
-            HugeAtomicBitSet.create(inputGraph.nodeCount()),
-            Math.round(inputGraph.nodeCount() * config.samplingRatio())
-        );
-    }
-
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
         if (config.hasRelationshipWeightProperty()) {
             var totalWeights = HugeAtomicDoubleArray.newArray(nodeCount);
@@ -162,5 +133,20 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     public LongSet startNodesUsed() {
         return startNodesUsed;
+    }
+
+    protected Runnable getWalker(
+        SeenNodes seenNodes,
+        Optional<HugeAtomicDoubleArray> totalWeights,
+        double v,
+        WalkQualities walkQualities,
+        SplittableRandom split,
+        Graph concurrentCopy,
+        RandomWalkWithRestartsConfig config,
+        ProgressTracker progressTracker
+    ) {
+        return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker,
+            new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
+        );
     }
 }
