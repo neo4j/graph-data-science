@@ -20,7 +20,7 @@
 package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 
 import java.util.concurrent.atomic.DoubleAdder;

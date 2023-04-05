@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -40,7 +39,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class BellmanFordWriteProc extends BaseProc {
     @Context
-    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
+    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.bellmanFord.write", mode = WRITE)
     @Description(BellmanFord.DESCRIPTION)

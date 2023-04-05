@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -41,7 +40,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class KnnWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(name = "gds.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)

@@ -114,6 +114,8 @@ public interface Neo4jProxyApi {
         KernelTransaction kernelTransaction
     );
 
+    long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore);
+
     List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
         int[] labelIds,

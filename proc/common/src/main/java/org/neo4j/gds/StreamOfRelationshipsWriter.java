@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.procedure.Context;
@@ -29,7 +28,7 @@ public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO_RE
     extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
     @Context
-    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
+    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Override
     public ExecutionContext executionContext() {

@@ -21,8 +21,9 @@ package org.neo4j.gds.modularity;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -60,8 +61,8 @@ class RelationshipCountCollectorTest {
 
     @Test
     void collect() {
-        var insideRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
-        var totalCommunityRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        var insideRelationships = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(1));
+        var totalCommunityRelationships = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(1));
         var communities = HugeLongArray.of(0, 0, 5, 0, 5, 5);
         var totalRelationshipWeight = new DoubleAdder();
 

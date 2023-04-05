@@ -26,8 +26,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.HugeArrayToNodeProperties;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
@@ -105,7 +107,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         this.intersectConfig = ImmutableRelationshipIntersectConfig.of(config.maxDegree());
         this.config = config;
         this.executorService = executorService;
-        this.triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount());
+        this.triangleCounts = HugeAtomicLongArray.of(graph.nodeCount(), ParalleLongPageCreator.passThrough(config.concurrency()));
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
     }
@@ -184,7 +186,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         }
 
         default LongNodePropertyValues asNodeProperties() {
-            return localTriangles().asNodeProperties();
+            return HugeArrayToNodeProperties.convert(localTriangles());
         }
     }
 }

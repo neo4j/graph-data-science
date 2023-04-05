@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.transaction.TransactionContext;
 
-public class NativeNodeLabelExporterBuilder extends NodeLabelExporterBuilder<NativeNodeLabelExporter> {
+public class NativeNodeLabelExporterBuilder extends NodeLabelExporterBuilder {
     private final TransactionContext transactionContext;
 
     public NativeNodeLabelExporterBuilder(TransactionContext transactionContext) {

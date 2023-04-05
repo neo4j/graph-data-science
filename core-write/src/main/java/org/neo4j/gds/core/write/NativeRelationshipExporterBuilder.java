@@ -23,7 +23,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Objects;
 
-public final class NativeRelationshipExporterBuilder extends RelationshipExporterBuilder<NativeRelationshipExporter> {
+public final class NativeRelationshipExporterBuilder extends RelationshipExporterBuilder {
 
     private final TransactionContext transactionContext;
 

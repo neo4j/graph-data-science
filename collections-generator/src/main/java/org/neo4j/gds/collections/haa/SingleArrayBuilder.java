@@ -172,7 +172,7 @@ final class SingleArrayBuilder {
                     valueType,
                     arrayHandle
                 )
-                .beginControlFlow("if (prev == current)")
+                .beginControlFlow("if ($T.compare(prev, current) == 0)", valueType.box())
                 .addStatement("return prev")
                 .endControlFlow()
                 .addStatement("prev = current")
@@ -198,7 +198,7 @@ final class SingleArrayBuilder {
                     valueType,
                     arrayHandle
                 )
-                .beginControlFlow("if (prev == current)")
+                .beginControlFlow("if ($T.compare(prev, current) == 0)", valueType.box())
                 .addStatement("return current")
                 .endControlFlow()
                 .addStatement("prev = current")
@@ -263,7 +263,7 @@ final class SingleArrayBuilder {
                     arrayHandle,
                     page
                 )
-                .beginControlFlow("if (prev == current)")
+                .beginControlFlow("if ($T.compare(prev, current) == 0)", valueType.box())
                 .addStatement("return")
                 .endControlFlow()
                 .addStatement("prev = current")

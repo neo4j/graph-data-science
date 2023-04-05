@@ -44,7 +44,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
-    public static RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> builder(
+    public static RelationshipStreamExporterBuilder builder(
         TransactionContext transactionContext,
         IdMap idMap,
         Stream<Relationship> relationships,

@@ -86,9 +86,9 @@ abstract class HashGNNProcTest<CONFIG extends HashGNNConfig> extends BaseProcTes
 
     @Override
     public void assertResultEquals(HashGNN.HashGNNResult result1, HashGNN.HashGNNResult result2) {
-        assertThat(result1.embeddings().size()).isEqualTo(result2.embeddings().size());
-        for (int i = 0; i < result1.embeddings().size(); i++) {
-            assertThat(result1.embeddings().get(i)).containsExactly(result2.embeddings().get(i));
+        assertThat(result1.embeddings().nodeCount()).isEqualTo(result2.embeddings().nodeCount());
+        for (int i = 0; i < result1.embeddings().nodeCount(); i++) {
+            assertThat(result1.embeddings().doubleArrayValue(i)).containsExactly(result2.embeddings().doubleArrayValue(i));
         }
     }
 

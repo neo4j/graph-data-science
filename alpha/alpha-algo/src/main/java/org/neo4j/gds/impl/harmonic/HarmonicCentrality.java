@@ -21,7 +21,8 @@ package org.neo4j.gds.impl.harmonic;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
@@ -47,7 +48,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        this.inverseFarness = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         this.nodeCount = graph.nodeCount();
     }
 

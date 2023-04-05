@@ -20,10 +20,10 @@
 package org.neo4j.gds.paths.delta;
 
 
-import org.neo4j.gds.core.utils.paged.DoublePageCreator;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.LongPageCreator;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
 import java.util.Optional;
 
@@ -64,9 +64,9 @@ public interface TentativeDistances {
         long size,
         int concurrency
     ) {
-        var distances = HugeAtomicDoubleArray.newArray(
+        var distances = HugeAtomicDoubleArray.of(
             size,
-            DoublePageCreator.of(concurrency, index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
         );
         return new DistanceOnly(distances);
     }
@@ -75,14 +75,14 @@ public interface TentativeDistances {
         long size,
         int concurrency
     ) {
-        var distances = HugeAtomicDoubleArray.newArray(
+        var distances = HugeAtomicDoubleArray.of(
             size,
-            DoublePageCreator.of(concurrency, index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
         );
 
-        var predecessors = HugeAtomicLongArray.newArray(
+        var predecessors = HugeAtomicLongArray.of(
             size,
-            LongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
+            ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
         );
 
         return new DistanceAndPredecessor(predecessors, distances);

@@ -19,31 +19,38 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.haa.PageCreator;
+
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
-import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 
-public final class BytePageCreator {
+public final class ParallelBytePageCreator implements PageCreator.BytePageCreator {
 
     private final int concurrency;
 
-    private BytePageCreator(int concurrency) {
+    public ParallelBytePageCreator(int concurrency) {
         this.concurrency = concurrency;
     }
 
-    public void fill(byte[][] pages, int lastPageSize) {
+    public void fill(byte[][] pages, int lastPageSize, int pageShift) {
         int lastPageIndex = pages.length - 1;
+        int pageSize = 1 << pageShift;
 
         parallelStreamConsume(
             IntStream.range(0, lastPageIndex),
             concurrency,
             stream -> stream.forEach(pageIndex -> {
-                createPage(pages, pageIndex, PAGE_SIZE);
+                createPage(pages, pageIndex, pageSize);
             })
         );
 
         createPage(pages, lastPageIndex, lastPageSize);
+    }
+
+    @Override
+    public void fillPage(byte[] page, long base) {
+        // NO-OP
     }
 
     private void createPage(byte[][] pages, int pageIndex, int pageSize) {
@@ -51,7 +58,7 @@ public final class BytePageCreator {
         pages[pageIndex] = page;
     }
 
-    public static BytePageCreator of(int concurrency) {
-        return new BytePageCreator(concurrency);
+    public static ParallelBytePageCreator of(int concurrency) {
+        return new ParallelBytePageCreator(concurrency);
     }
 }

@@ -79,14 +79,14 @@ public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult
             return LongStream.range(0, graph.nodeCount())
                 .mapToObj(i -> new HashGNNStreamProc.StreamResult(
                     graph.toOriginalNodeId(i),
-                    result.embeddings().get(i)
+                    result.embeddings().doubleArrayValue(i)
                 ));
         });
     }
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNStreamConfig> computationResult) {
-        return HashGNNProcCompanion.getNodeProperties(computationResult);
+        return computationResult.result().embeddings();
     }
 
     @Override

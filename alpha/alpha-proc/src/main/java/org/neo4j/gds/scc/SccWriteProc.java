@@ -20,7 +20,6 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -39,7 +38,7 @@ public class SccWriteProc extends BaseProc {
 
 
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.alpha.scc.write", mode = WRITE)
     @Description(SCC_DESCRIPTION)

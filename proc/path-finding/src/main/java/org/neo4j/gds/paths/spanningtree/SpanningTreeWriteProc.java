@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.spanningtree;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -43,7 +42,7 @@ public class SpanningTreeWriteProc extends BaseProc {
         "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +
         "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
     @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(value = procedure, mode = WRITE)
     @Description(DESCRIPTION)

@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.harmonic;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 @ValueClass
 public interface HarmonicResult {

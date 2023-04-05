@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -45,7 +44,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class AllShortestPathsDeltaWriteProc extends BaseProc {
 
     @Context
-    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
+    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.allShortestPaths.delta.write", mode = WRITE)
     @Description(DeltaStepping.DESCRIPTION)

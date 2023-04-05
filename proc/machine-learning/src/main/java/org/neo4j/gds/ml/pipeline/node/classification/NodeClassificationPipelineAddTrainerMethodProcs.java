@@ -59,9 +59,28 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
 
-    @Procedure(name = "gds.alpha.pipeline.nodeClassification.addRandomForest", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.addRandomForest", mode = READ)
     @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
     public Stream<NodePipelineInfoResult> addRandomForest(
+        @Name("pipelineName") String pipelineName,
+        @Name(value = "config") Map<String, Object> randomForestClassifierConfig
+    ) {
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
+
+        var allowedKeys = RandomForestClassifierTrainerConfig.DEFAULT.configKeys();
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestClassifierConfig.keySet());
+
+        var tunableTrainerConfig = TunableTrainerConfig.of(randomForestClassifierConfig, TrainingMethod.RandomForestClassification);
+        pipeline.addTrainerConfig(
+            tunableTrainerConfig
+        );
+
+        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+    }
+
+    @Procedure(name = "gds.alpha.pipeline.nodeClassification.addRandomForest", mode = READ, deprecatedBy = "gds.beta.pipeline.nodeClassification.addRandomForest")
+    @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
+    public Stream<NodePipelineInfoResult> addRandomForestAlpha(
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {

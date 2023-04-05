@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.mem.HugeArrays;
+import org.neo4j.gds.collections.haa.PageCreator;
 
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.IntStream;
@@ -27,28 +27,29 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 
-public final class DoublePageCreator {
+public final class ParallelDoublePageCreator implements PageCreator.DoublePageCreator {
 
     private final int concurrency;
     private final LongToDoubleFunction gen;
 
-    private DoublePageCreator(int concurrency, LongToDoubleFunction gen) {
+    private ParallelDoublePageCreator(int concurrency, LongToDoubleFunction gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
 
-    public void fill(double[][] pages, int lastPageSize) {
+    public void fill(double[][] pages, int lastPageSize, int pageShift) {
         int lastPageIndex = pages.length - 1;
+        int pageSize = 1 << pageShift;
 
         parallelStreamConsume(
             IntStream.range(0, lastPageIndex),
             concurrency,
             stream -> stream.forEach(pageIndex -> {
-                createAndFillPage(pages, pageIndex, HugeArrays.PAGE_SIZE);
+                createAndFillPage(pages, pageIndex, pageSize, pageShift);
             })
         );
 
-        createAndFillPage(pages, lastPageIndex, lastPageSize);
+        createAndFillPage(pages, lastPageIndex, lastPageSize, pageShift);
     }
 
     public void fillPage(double[] page, long base) {
@@ -59,23 +60,23 @@ public final class DoublePageCreator {
         }
     }
 
-    private void createAndFillPage(double[][] pages, int pageIndex, int pageSize) {
+    private void createAndFillPage(double[][] pages, int pageIndex, int pageSize, int pageShift) {
         var page = new double[pageSize];
         pages[pageIndex] = page;
 
-        long base = ((long) pageIndex) << HugeArrays.PAGE_SHIFT;
+        long base = ((long) pageIndex) << pageShift;
         fillPage(page, base);
     }
 
-    public static DoublePageCreator of(int concurrency, LongToDoubleFunction gen) {
-        return new DoublePageCreator(concurrency, gen);
+    public static ParallelDoublePageCreator of(int concurrency, LongToDoubleFunction gen) {
+        return new ParallelDoublePageCreator(concurrency, gen);
     }
 
-    public static DoublePageCreator identity(int concurrency) {
-        return new DoublePageCreator(concurrency, i -> i);
+    public static ParallelDoublePageCreator identity(int concurrency) {
+        return new ParallelDoublePageCreator(concurrency, i -> i);
     }
 
-    public static DoublePageCreator passThrough(int concurrency) {
-        return new DoublePageCreator(concurrency, null);
+    public static ParallelDoublePageCreator passThrough(int concurrency) {
+        return new ParallelDoublePageCreator(concurrency, null);
     }
 }

@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.haa;
 
+import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.opentest4j.AssertionFailedError;
 
@@ -33,13 +35,12 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.IntStream;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,14 +51,14 @@ import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources, and then adjusted for
  * `byte`.
- * We also extend RandomizedTest as this class also includes a check that we don't leak threads.
+ * We also include a check that we don't leak threads.
  *
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/AtomicLongArrayTest.java">OpenJDK sources for AtomicLongArrayTest.java</a>
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/Atomic8Test.java">OpenJDK sources for Atomic8Test.java</a>
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/JSR166TestCase.java">OpenJDK sources for JSR166TestCase.java</a>
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/atomic/LongAdderDemo.java">OpenJDK sources for LongAdderDemo.java</a>
  */
-final class HugeAtomicByteArrayTest {
+final class HugeAtomicIntArrayTest {
 
     private static final int SIZE = 20;
     private static final long LONG_DELAY_MS = 10_000L;
@@ -79,8 +80,8 @@ final class HugeAtomicByteArrayTest {
         testArray(SIZE, array -> {
             for (int index : new int[]{-1, SIZE}) {
                 assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.get(index));
-                assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.set(index, (byte)1));
-                assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.compareAndSet(index, (byte)1, (byte)2));
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.set(index, 1));
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.compareAndSet(index, 1, 2));
             }
         });
     }
@@ -92,12 +93,12 @@ final class HugeAtomicByteArrayTest {
     void testGetSet() {
         testArray(SIZE, array -> {
             for (int i = 0; i < SIZE; i++) {
-                array.set(i, (byte)1);
-                Assertions.assertEquals((byte)1, array.get(i));
-                array.set(i, (byte)2);
-                Assertions.assertEquals((byte)2, array.get(i));
-                array.set(i, (byte)-3);
-                Assertions.assertEquals((byte)-3, array.get(i));
+                array.set(i, 1);
+                Assertions.assertEquals(1, array.get(i));
+                array.set(i, 2);
+                Assertions.assertEquals(2, array.get(i));
+                array.set(i, -3);
+                Assertions.assertEquals(-3, array.get(i));
             }
         });
     }
@@ -109,14 +110,14 @@ final class HugeAtomicByteArrayTest {
     void testCompareAndSet() {
         testArray(SIZE, array -> {
             for (int i = 0; i < SIZE; i++) {
-                array.set(i, (byte)1);
-                Assertions.assertTrue(array.compareAndSet(i, (byte)1, (byte)2));
-                Assertions.assertTrue(array.compareAndSet(i, (byte)2, (byte)-4));
-                Assertions.assertEquals((byte)-4, array.get(i));
-                Assertions.assertFalse(array.compareAndSet(i, (byte)-5, (byte)7));
-                Assertions.assertEquals((byte)-4, array.get(i));
-                Assertions.assertTrue(array.compareAndSet(i, (byte)-4, (byte)7));
-                Assertions.assertEquals((byte)7, array.get(i));
+                array.set(i, 1);
+                Assertions.assertTrue(array.compareAndSet(i, 1, 2));
+                Assertions.assertTrue(array.compareAndSet(i, 2, -4));
+                Assertions.assertEquals(-4, array.get(i));
+                Assertions.assertFalse(array.compareAndSet(i, -5, 7));
+                Assertions.assertEquals(-4, array.get(i));
+                Assertions.assertTrue(array.compareAndSet(i, -4, 7));
+                Assertions.assertEquals(7, array.get(i));
             }
         });
     }
@@ -128,17 +129,17 @@ final class HugeAtomicByteArrayTest {
     @Test
     void testCompareAndSetInMultipleThreads() throws InterruptedException {
         testArray(1, array -> {
-            array.set(0, (byte)1);
+            array.set(0, 1);
             Thread t = new Thread(new CheckedRunnable() {
                 public void realRun() {
-                    while (!array.compareAndSet(0, (byte)2, (byte)3)) {
+                    while (!array.compareAndSet(0, 2, 3)) {
                         Thread.yield();
                     }
                 }
             });
 
             t.start();
-            Assertions.assertTrue(array.compareAndSet(0, (byte)1, (byte)2));
+            Assertions.assertTrue(array.compareAndSet(0, 1, 2));
             t.join(LONG_DELAY_MS);
             assertFalse(t.isAlive());
             Assertions.assertEquals(3, array.get(0));
@@ -149,14 +150,14 @@ final class HugeAtomicByteArrayTest {
     void testCompareAndExchange() {
         testArray(SIZE, array -> {
             for (int i = 0; i < SIZE; i++) {
-                array.set(i, (byte)1);
-                Assertions.assertEquals((byte)1, array.compareAndExchange(i, (byte)1, (byte)2));
-                Assertions.assertEquals((byte)2, array.compareAndExchange(i, (byte)2, (byte)-4));
-                Assertions.assertEquals((byte)-4, array.get(i));
-                Assertions.assertEquals((byte)-4, array.compareAndExchange(i, (byte)-5, (byte)7));
-                Assertions.assertEquals((byte)-4, array.get(i));
-                Assertions.assertEquals((byte)-4, array.compareAndExchange(i, (byte)-4, (byte)7));
-                Assertions.assertEquals((byte)7, array.get(i));
+                array.set(i, 1);
+                Assertions.assertEquals(1, array.compareAndExchange(i, 1, 2));
+                Assertions.assertEquals(2, array.compareAndExchange(i, 2, -4));
+                Assertions.assertEquals(-4, array.get(i));
+                Assertions.assertEquals(-4, array.compareAndExchange(i, -5, 7));
+                Assertions.assertEquals(-4, array.get(i));
+                Assertions.assertEquals(-4, array.compareAndExchange(i, -4, 7));
+                Assertions.assertEquals(7, array.get(i));
             }
         });
     }
@@ -164,38 +165,38 @@ final class HugeAtomicByteArrayTest {
     @Test
     void testCompareAndExchangeInMultipleThreads() throws InterruptedException {
         testArray(1, array -> {
-            array.set(0, (byte)1);
+            array.set(0, 1);
             Thread t = new Thread(new CheckedRunnable() {
                 public void realRun() {
-                    while (array.compareAndExchange(0, (byte)2, (byte)3) != (byte)2) {
+                    while (array.compareAndExchange(0, 2, 3) != 2) {
                         Thread.yield();
                     }
                 }
             });
 
             t.start();
-            Assertions.assertEquals(1L, array.compareAndExchange(0, (byte)1, (byte)2));
+            Assertions.assertEquals(1L, array.compareAndExchange(0, 1, 2));
             t.join(LONG_DELAY_MS);
             assertFalse(t.isAlive());
-            Assertions.assertEquals((byte)3, array.get(0));
+            Assertions.assertEquals(3, array.get(0));
         });
     }
 
     static class Counter extends CheckedRunnable {
-        final HugeAtomicByteArray array;
+        final HugeAtomicIntArray array;
         int decs;
 
-        Counter(HugeAtomicByteArray array) { this.array = array; }
+        Counter(HugeAtomicIntArray array) { this.array = array; }
 
         public void realRun() {
             for (; ; ) {
                 boolean done = true;
                 for (int i = 0; i < array.size(); i++) {
-                    byte v = array.get(i);
+                    var v = array.get(i);
                     assertTrue(v >= 0);
                     if (v != 0) {
                         done = false;
-                        if (array.compareAndSet(i, v, (byte)(v - 1))) {
+                        if (array.compareAndSet(i, v, (v - 1))) {
                             decs++;
                         }
                     }
@@ -214,7 +215,7 @@ final class HugeAtomicByteArrayTest {
     @Test
     void testCountingInMultipleThreads() throws InterruptedException {
         testArray(SIZE, array -> {
-            byte countdown = (byte)100;
+            byte countdown = 100;
             for (int i = 0; i < SIZE; i++) {
                 array.set(i, countdown);
             }
@@ -228,15 +229,15 @@ final class HugeAtomicByteArrayTest {
         });
     }
 
-    private byte randomByte(byte min, byte max) {
-        return (byte)(ThreadLocalRandom.current().nextInt(min, max));
+    private int randomInt(int min, int max) {
+        return (ThreadLocalRandom.current().nextInt(min, max));
     }
 
     @Test
     void shouldSetAndGet() {
         testArray(10, array -> {
             int index = integer(2, 8);
-            byte value = randomByte((byte)42, (byte)120);
+            var value = randomInt(42, 120);
 
             array.set(index, value);
             assertEquals(value, array.get(index));
@@ -247,13 +248,13 @@ final class HugeAtomicByteArrayTest {
     void shouldAddAndGet() {
         testArray(10, array -> {
             int index = integer(2, 8);
-            byte value = randomByte((byte)42, (byte)120);
-            byte delta = randomByte((byte)0, (byte)42);
+            var value = randomInt(42, 120);
+            var delta = randomInt(0, 42);
 
             array.set(index, value);
             array.getAndAdd(index, delta);
 
-            assertEquals((byte)(value + delta), array.get(index));
+            assertEquals((value + delta), array.get(index));
         });
     }
 
@@ -266,20 +267,22 @@ final class HugeAtomicByteArrayTest {
     @Test
     void shouldFreeMemoryUsed() {
         int size = integer(10, 20);
-        long expected = MemoryUsage.sizeOfByteArray(size);
+        long expected = MemoryUsage.sizeOfIntArray(size);
         testArray(size, array -> {
             long freed = array.release();
-            assertThat(freed, anyOf(is(expected), is(expected + 24)));
+            assertThat(freed).matches(v -> v == expected || v == expected + 24);
         });
     }
 
-    @Test
-    void shouldComputeMemoryEstimation() {
-        assertEquals(40, HugeAtomicByteArray.memoryEstimation(0L));
-        assertEquals(144, HugeAtomicByteArray.memoryEstimation(100L));
-        assertEquals(100_122_070_368L, HugeAtomicByteArray.memoryEstimation(100_000_000_000L));
+    @ParameterizedTest
+    @CsvSource({
+        "0, 40",
+        "100, 440",
+        "100_000_000_000, 400_122_070_368",
+    })
+    void shouldComputeMemoryEstimation(long size, long estimation) {
+        assertThat(HugeAtomicIntArray.memoryEstimation(size)).isEqualTo(estimation);
     }
-
     @Test
     void shouldFailForNegativeMemRecSize() {
         assertThrows(AssertionError.class, () -> HugeAtomicByteArray.memoryEstimation(-1L));
@@ -294,7 +297,7 @@ final class HugeAtomicByteArrayTest {
             var phaser = new Phaser(nthreads + 1);
             var aa = singleArray(arraySize); // 1 page
             var tasks = new ArrayList<GetTask>();
-            aa.setAll((byte)42);
+            aa.setAll(42);
             for (int i = 0; i < nthreads; ++i) {
                 var t = new GetTask(aa, phaser);
                 tasks.add(t);
@@ -310,11 +313,11 @@ final class HugeAtomicByteArrayTest {
     }
 
     private static final class GetTask implements Runnable {
-        private final HugeAtomicByteArray array;
+        private final HugeAtomicIntArray array;
         private final Phaser phaser;
         volatile long result;
 
-        private GetTask(HugeAtomicByteArray array, Phaser phaser) {
+        private GetTask(HugeAtomicIntArray array, Phaser phaser) {
             this.array = array;
             this.phaser = phaser;
         }
@@ -331,7 +334,7 @@ final class HugeAtomicByteArrayTest {
     @FunctionalInterface
     interface HalaFunction {
 
-        void apply(HugeAtomicByteArray array);
+        void apply(HugeAtomicIntArray array);
     }
 
     @Test
@@ -339,7 +342,7 @@ final class HugeAtomicByteArrayTest {
         var size = PAGE_SIZE * 2 + 1; // We want an array with three pages
         var index = PAGE_SIZE + 1;    // and look up some index larger than what fits in a single page
         var array = pagedArray(size);
-        assertDoesNotThrow(() -> array.getAndAdd(index, (byte) 1));
+        assertDoesNotThrow(() -> array.getAndAdd(index,  1));
     }
 
     @Test
@@ -352,8 +355,8 @@ final class HugeAtomicByteArrayTest {
         try {
             testArray(1, array -> {
                 for (int i = 1; i <= maxThreads; i <<= 1) {
-                    array.set(0, (byte)0);
-                    casTest(i, incsPerThread, array, pool, a -> a.getAndAdd(0, (byte)1));
+                    array.set(0, 0);
+                    casTest(i, incsPerThread, array, pool, a -> a.getAndAdd(0, 1));
                 }
             });
         } finally {
@@ -365,7 +368,7 @@ final class HugeAtomicByteArrayTest {
     private static void casTest(
         int nthreads,
         int incs,
-        HugeAtomicByteArray array,
+        HugeAtomicIntArray array,
         Executor pool,
         HalaFunction arrayFn
     ) {
@@ -376,17 +379,17 @@ final class HugeAtomicByteArrayTest {
         phaser.arriveAndAwaitAdvance();
         phaser.arriveAndAwaitAdvance();
         long total = (long) nthreads * incs;
-        assertEquals(array.get(0), (byte)total);
+        assertEquals(array.get(0), total);
     }
 
     private static final class CasTask implements Runnable {
-        final HugeAtomicByteArray adder;
+        final HugeAtomicIntArray adder;
         final Phaser phaser;
         final int incs;
         volatile long result;
         final HalaFunction arrayFn;
 
-        CasTask(HugeAtomicByteArray adder, Phaser phaser, int incs, HalaFunction arrayFn) {
+        CasTask(HugeAtomicIntArray adder, Phaser phaser, int incs, HalaFunction arrayFn) {
             this.adder = adder;
             this.phaser = phaser;
             this.incs = incs;
@@ -395,7 +398,7 @@ final class HugeAtomicByteArrayTest {
 
         public void run() {
             phaser.arriveAndAwaitAdvance();
-            HugeAtomicByteArray array = adder;
+            HugeAtomicIntArray array = adder;
             for (int i = 0; i < incs; ++i) {
                 arrayFn.apply(array);
             }
@@ -404,7 +407,7 @@ final class HugeAtomicByteArrayTest {
         }
     }
 
-    private <E extends Exception> void testArray(int size, ThrowingConsumer<HugeAtomicByteArray, E> block) throws E {
+    private void testArray(int size, ThrowingConsumer<HugeAtomicIntArray> block) {
         if (bool()) {
             block.accept(singleArray(size));
             block.accept(pagedArray(size));
@@ -414,12 +417,12 @@ final class HugeAtomicByteArrayTest {
         }
     }
 
-    private HugeAtomicByteArray singleArray(final int size) {
-        return HugeAtomicByteArray.newSingleArray(size);
+    private HugeAtomicIntArray singleArray(final int size) {
+        return HugeAtomicIntArraySon.Single.of(size, PassThroughPageCreator.INSTANCE);
     }
 
-    private HugeAtomicByteArray pagedArray(final int size) {
-        return HugeAtomicByteArray.newPagedArray(size, BytePageCreator.of(1));
+    private HugeAtomicIntArray pagedArray(final int size) {
+        return HugeAtomicIntArraySon.Paged.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     /**
@@ -436,7 +439,7 @@ final class HugeAtomicByteArrayTest {
      * The first exception encountered if any threadAssertXXX method fails.
      */
     private static final AtomicReference<Throwable> threadFailure
-            = new AtomicReference<>(null);
+        = new AtomicReference<>(null);
 
     /**
      * Records an exception so that it can be rethrown later in the test
@@ -473,6 +476,28 @@ final class HugeAtomicByteArrayTest {
             } catch (Throwable fail) {
                 threadUnexpectedException(fail);
             }
+        }
+    }
+
+    private static class PassThroughPageCreator implements PageCreator.IntPageCreator {
+
+        static PassThroughPageCreator INSTANCE = new PassThroughPageCreator();
+
+        private PassThroughPageCreator() {}
+
+        @Override
+        public void fill(int[][] pages, int lastPageSize, int pageShift) {
+            int lastPageIndex = pages.length - 1;
+            int pageSize = 1 << pageShift;
+
+            IntStream.range(0, lastPageIndex).forEach(idx -> pages[idx] = new int[pageSize] );
+
+            pages[lastPageIndex] = new int[lastPageSize];
+        }
+
+        @Override
+        public void fillPage(int[] page, long base) {
+            // NO-OP
         }
     }
 }

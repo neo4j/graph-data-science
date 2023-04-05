@@ -31,12 +31,13 @@ import org.neo4j.gds.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.beta.k1coloring.K1Coloring;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStreamConfig;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -229,7 +230,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nextCommunities = HugeLongArray.newArray(nodeCount);
         this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount);
 
-        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
+        this.communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
 
         var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
                 new InitTask(
@@ -348,7 +349,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
+        communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
         return nextStartingCoordinate;
     }
 

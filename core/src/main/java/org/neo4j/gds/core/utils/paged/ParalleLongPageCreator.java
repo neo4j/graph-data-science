@@ -19,35 +19,36 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.haa.PageCreator;
+
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
-import static org.neo4j.gds.mem.HugeArrays.PAGE_SHIFT;
-import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 
-public final class LongPageCreator {
+public final class ParalleLongPageCreator implements PageCreator.LongPageCreator {
 
     private final int concurrency;
     private final LongUnaryOperator gen;
 
-    private LongPageCreator(int concurrency, LongUnaryOperator gen) {
+    private ParalleLongPageCreator(int concurrency, LongUnaryOperator gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
 
-    public void fill(long[][] pages, int lastPageSize) {
+    public void fill(long[][] pages, int lastPageSize, int pageShift) {
         int lastPageIndex = pages.length - 1;
+        int pageSize = 1 << pageShift;
 
         parallelStreamConsume(
             IntStream.range(0, lastPageIndex),
             concurrency,
             stream -> stream.forEach(pageIndex -> {
-                createAndFillPage(pages, pageIndex, PAGE_SIZE);
+                createAndFillPage(pages, pageIndex, pageSize, pageShift);
             })
         );
 
-        createAndFillPage(pages, lastPageIndex, lastPageSize);
+        createAndFillPage(pages, lastPageIndex, lastPageSize, pageShift);
     }
 
     public void fillPage(long[] page, long base) {
@@ -58,23 +59,23 @@ public final class LongPageCreator {
         }
     }
 
-    private void createAndFillPage(long[][] pages, int pageIndex, int pageSize) {
+    private void createAndFillPage(long[][] pages, int pageIndex, int pageSize, int pageShift) {
         var page = new long[pageSize];
         pages[pageIndex] = page;
 
-        long base = ((long) pageIndex) << PAGE_SHIFT;
+        long base = ((long) pageIndex) << pageShift;
         fillPage(page, base);
     }
 
-    public static LongPageCreator of(int concurrency, LongUnaryOperator gen) {
-        return new LongPageCreator(concurrency, gen);
+    public static ParalleLongPageCreator of(int concurrency, LongUnaryOperator gen) {
+        return new ParalleLongPageCreator(concurrency, gen);
     }
 
-    public static LongPageCreator identity(int concurrency) {
-        return new LongPageCreator(concurrency, i -> i);
+    public static ParalleLongPageCreator identity(int concurrency) {
+        return new ParalleLongPageCreator(concurrency, i -> i);
     }
 
-    public static LongPageCreator passThrough(int concurrency) {
-        return new LongPageCreator(concurrency, null);
+    public static ParalleLongPageCreator passThrough(int concurrency) {
+        return new ParalleLongPageCreator(concurrency, null);
     }
 }

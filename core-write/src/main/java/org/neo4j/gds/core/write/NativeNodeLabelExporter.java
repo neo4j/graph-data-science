@@ -49,7 +49,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
         void accept(Write ops, long value) throws Exception;
     }
 
-    public static NodeLabelExporterBuilder<NativeNodeLabelExporter> builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
+    public static NodeLabelExporterBuilder builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
         return new NativeNodeLabelExporterBuilder(transactionContext)
             .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);

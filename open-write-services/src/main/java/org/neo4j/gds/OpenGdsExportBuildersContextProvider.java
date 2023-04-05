@@ -19,17 +19,13 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.write.NativeNodeLabelExporter;
 import org.neo4j.gds.core.write.NativeNodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -72,19 +68,19 @@ final class OpenGdsExportBuildersContextProvider extends LifecycleAdapter {
         );
     }
 
-    private static NodePropertyExporterBuilder<NativeNodePropertyExporter> nativeNodePropertyExporterBuilder(Context ctx) {
+    private static NodePropertyExporterBuilder nativeNodePropertyExporterBuilder(Context ctx) {
         return new NativeNodePropertiesExporterBuilder(transactionContext(ctx));
     }
 
-    private static RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder(Context ctx) {
+    private static RelationshipStreamExporterBuilder relationshipStreamExporterBuilder(Context ctx) {
         return new NativeRelationshipStreamExporterBuilder(transactionContext(ctx));
     }
 
-    private static RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder(Context ctx) {
+    private static RelationshipExporterBuilder relationshipExporterBuilder(Context ctx) {
         return new NativeRelationshipExporterBuilder(transactionContext(ctx));
     }
 
-    private static NodeLabelExporterBuilder<NativeNodeLabelExporter> nativeNodeLabelExporterNodeLabelExporterBuilder(Context ctx) {
+    private static NodeLabelExporterBuilder nativeNodeLabelExporterNodeLabelExporterBuilder(Context ctx) {
         return new NativeNodeLabelExporterBuilder(transactionContext(ctx));
     }
 
