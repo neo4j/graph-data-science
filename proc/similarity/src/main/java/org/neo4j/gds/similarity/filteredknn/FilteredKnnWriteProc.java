@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -37,7 +36,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class FilteredKnnWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(name = "gds.alpha.knn.filtered.write", mode = WRITE)
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)

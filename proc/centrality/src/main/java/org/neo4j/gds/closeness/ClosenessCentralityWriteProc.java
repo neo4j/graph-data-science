@@ -20,7 +20,6 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -37,7 +36,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class ClosenessCentralityWriteProc extends BaseProc {
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.beta.closeness.write", mode = WRITE)
     @Description(CLOSENESS_DESCRIPTION)

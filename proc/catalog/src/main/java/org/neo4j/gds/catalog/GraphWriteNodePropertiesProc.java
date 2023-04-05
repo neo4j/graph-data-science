@@ -52,7 +52,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class GraphWriteNodePropertiesProc extends CatalogProc {
 
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(name = "gds.graph.nodeProperties.write", mode = WRITE)
     @Description("Writes the given node properties to an online Neo4j database.")

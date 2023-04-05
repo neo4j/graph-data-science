@@ -20,7 +20,6 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -40,7 +39,7 @@ public class KSpanningWriteTreeProc extends BaseProc {
         "The K-spanning tree algorithm starts from a root node and returns a spanning tree with exactly k nodes";
 
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
     
     @Procedure(value = "gds.alpha.kSpanningTree.write", mode = WRITE)
     @Description(DESCRIPTION)

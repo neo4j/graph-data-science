@@ -50,7 +50,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class GraphWriteRelationshipProc extends CatalogProc {
 
     @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(name = "gds.graph.relationship.write", mode = WRITE)
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")

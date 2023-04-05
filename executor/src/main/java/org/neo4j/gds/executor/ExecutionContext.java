@@ -34,11 +34,8 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -73,15 +70,15 @@ public interface ExecutionContext {
     boolean isGdsAdmin();
 
     @Nullable
-    RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder();
+    RelationshipStreamExporterBuilder relationshipStreamExporterBuilder();
 
     @Nullable
-    RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder();
+    RelationshipExporterBuilder relationshipExporterBuilder();
 
     @Nullable
-    NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
+    NodePropertyExporterBuilder nodePropertyExporterBuilder();
 
-    default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
+    default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
         return ImmutableExecutionContext
             .builder()
             .from(this)
@@ -89,7 +86,7 @@ public interface ExecutionContext {
             .build();
     }
 
-    default ExecutionContext withRelationshipStreamExporterBuilder(RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder) {
+    default ExecutionContext withRelationshipStreamExporterBuilder(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
         return ImmutableExecutionContext
             .builder()
             .from(this)
@@ -97,7 +94,7 @@ public interface ExecutionContext {
             .build();
     }
 
-    default ExecutionContext withRelationshipExporterBuilder(RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder) {
+    default ExecutionContext withRelationshipExporterBuilder(RelationshipExporterBuilder relationshipExporterBuilder) {
         return ImmutableExecutionContext
             .builder()
             .from(this)
@@ -168,17 +165,17 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder() {
+        public @Nullable RelationshipStreamExporterBuilder relationshipStreamExporterBuilder() {
             return null;
         }
 
         @Override
-        public @Nullable RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder() {
+        public @Nullable RelationshipExporterBuilder relationshipExporterBuilder() {
             return null;
         }
 
         @Override
-        public @Nullable NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder() {
+        public @Nullable NodePropertyExporterBuilder nodePropertyExporterBuilder() {
             return null;
         }
 
