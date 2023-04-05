@@ -77,6 +77,25 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
 
+    @Procedure(name = "gds.alpha.pipeline.linkPrediction.addRandomForest", mode = READ, deprecatedBy = "gds.beta.pipeline.linkPrediction.addRandomForest")
+    @Description("Add a random forest configuration to the parameter space of the link prediction train pipeline.")
+    public Stream<PipelineInfoResult> addRandomForestAlpha(
+        @Name("pipelineName") String pipelineName,
+        @Name(value = "config") Map<String, Object> randomForestClassifierConfig
+    ) {
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
+
+        var allowedKeys = RandomForestClassifierTrainerConfig.DEFAULT.configKeys();
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestClassifierConfig.keySet());
+
+        var tunableTrainerConfig = TunableTrainerConfig.of(randomForestClassifierConfig, TrainingMethod.RandomForestClassification);
+        pipeline.addTrainerConfig(
+            tunableTrainerConfig
+        );
+
+        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+    }
+
     @Procedure(name = "gds.alpha.pipeline.linkPrediction.addMLP", mode = READ)
     @Description("Add a multilayer perceptron configuration to the parameter space of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> addMLP(
