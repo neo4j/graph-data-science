@@ -62,10 +62,10 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         var tasks = createTasks(currentDegrees, core, nodeIndex, remainingNodes);
 
         while (remainingNodes.get() > 0) {
+            nodeIndex.set(0L);
 
             RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
-
-
+            
             int nextScanningDegree = tasks
                 .stream()
                 .mapToInt(KCoreDecompositionTask::getSmallestActiveDegree)
@@ -73,6 +73,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 .orElseThrow();
 
             if (nextScanningDegree == scanningDegree) {
+                degeneracy = scanningDegree;
                 RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
                 scanningDegree++;
             } else {

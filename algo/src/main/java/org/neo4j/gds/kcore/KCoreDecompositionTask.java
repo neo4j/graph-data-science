@@ -98,6 +98,22 @@ class KCoreDecompositionTask implements Runnable {
 
     private void act() {
 
+        long nodesExamined = 0;
+        while (!examinationStack.isEmpty()) {
+
+            long nodeId = examinationStack.pop();
+            core.set(nodeId, scanningDegree);
+            nodesExamined++;
+
+            localGraph.forEachRelationship(nodeId, (s, t) -> {
+                var degree = currentDegrees.getAndAdd(t, -1);
+                if (degree == scanningDegree + 1) {
+                    examinationStack.push(t);
+                }
+                return true;
+            });
+        }
+        remainingNodes.addAndGet(-nodesExamined);
     }
 
     enum KCoreDecompositionPhase {
