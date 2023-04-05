@@ -207,6 +207,7 @@ public final class LinkPredictionTrain {
         crossValidation.selectModel(
             trainRelationshipIds,
             trainData.labels()::get,
+            //LP always have 2 classes 0,1 the original ids happen to be the same as internal
             new TreeSet<>(classIdMap.originalIdsList()),
             trainingStatistics,
             modelCandidates
