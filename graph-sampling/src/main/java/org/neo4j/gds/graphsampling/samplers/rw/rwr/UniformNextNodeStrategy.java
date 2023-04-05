@@ -35,7 +35,7 @@ public class UniformNextNodeStrategy implements NextNodeStrategy {
     protected final Graph inputGraph;
     private final Optional<HugeAtomicDoubleArray> totalWeights;
 
-    public UniformNextNodeStrategy(
+    UniformNextNodeStrategy(
         SplittableRandom rng,
         Graph inputGraph,
         Optional<HugeAtomicDoubleArray> totalWeights

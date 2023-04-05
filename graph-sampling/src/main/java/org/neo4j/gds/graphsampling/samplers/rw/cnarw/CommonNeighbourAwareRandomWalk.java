@@ -35,6 +35,7 @@ import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
+import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.Walker;
 
@@ -144,15 +145,29 @@ public class CommonNeighbourAwareRandomWalk implements NodesSampler {
     public Runnable getWalker(
         SeenNodes seenNodes,
         Optional<HugeAtomicDoubleArray> totalWeights,
-        double v,
+        double qualityThreshold,
         WalkQualities walkQualities,
         SplittableRandom split,
         Graph concurrentCopy,
         RandomWalkWithRestartsConfig config,
         ProgressTracker progressTracker
     ) {
-        return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker,
-            new CommonNeighbourAwareNextNodeStrategy(concurrentCopy, totalWeights.isPresent(), split)
+        NextNodeStrategy strategy;
+        if (totalWeights.isPresent()) {
+            strategy = new WeightedCommonNeighbourAwareNextNodeStrategy(concurrentCopy, split);
+        } else {
+            strategy = new CommonNeighbourAwareNextNodeStrategy(concurrentCopy, split);
+        }
+        return new Walker(
+            seenNodes,
+            totalWeights,
+            qualityThreshold,
+            walkQualities,
+            split,
+            concurrentCopy,
+            config,
+            progressTracker,
+            strategy
         );
     }
 }

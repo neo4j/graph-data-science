@@ -138,14 +138,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
     protected Runnable getWalker(
         SeenNodes seenNodes,
         Optional<HugeAtomicDoubleArray> totalWeights,
-        double v,
+        double qualityThreshold,
         WalkQualities walkQualities,
         SplittableRandom split,
         Graph concurrentCopy,
         RandomWalkWithRestartsConfig config,
         ProgressTracker progressTracker
     ) {
-        return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker,
+        return new Walker(seenNodes, totalWeights, qualityThreshold, walkQualities, split, concurrentCopy, config, progressTracker,
             new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
         );
     }
