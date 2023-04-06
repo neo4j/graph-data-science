@@ -130,11 +130,6 @@ class CommonNeighbourAwareRandomWalkTest {
         ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
         ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
-
-    @Inject
-    private TestGraph naturalGraph;
-
-
     @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL)
     private static final String DB_CYPHER_UNION =
         "CREATE" +
@@ -155,6 +150,9 @@ class CommonNeighbourAwareRandomWalkTest {
         ", (d)-[:LIKES2 {prop: 0.5}]->(i1)" +
         ", (d)-[:LIKES3 {prop: 1.0}]->(i2)" +
         ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
+
+    @Inject
+    private TestGraph naturalGraph;
 
     @Inject
     private IdFunction naturalIdFunction;
