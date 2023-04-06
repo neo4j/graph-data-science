@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers.rwr;
+package org.neo4j.gds.graphsampling.samplers;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 
@@ -37,6 +38,26 @@ public interface SeenNodes {
 
     long totalExpectedNodes();
 
+    static SeenNodes create(
+        Graph inputGraph, ProgressTracker progressTracker, boolean nodeLabelStratification,
+        int concurrency, double samplingRatio
+    ) {
+        if (nodeLabelStratification) {
+            var nodeLabelHistogram = NodeLabelHistogram.compute(
+                inputGraph,
+                concurrency,
+                progressTracker
+            );
+
+            return new SeenNodes.SeenNodesByLabelSet(inputGraph, nodeLabelHistogram, samplingRatio);
+        }
+
+        return new SeenNodes.GlobalSeenNodes(
+            HugeAtomicBitSet.create(inputGraph.nodeCount()),
+            Math.round(inputGraph.nodeCount() * samplingRatio)
+        );
+    }
+
     class SeenNodesByLabelSet implements SeenNodes {
         private final Graph inputGraph;
         private final LongLongHashMap seenNodesPerLabels;
@@ -45,7 +66,11 @@ public interface SeenNodes {
         private final HugeAtomicBitSet seenBitSet;
         private final long totalExpectedNodes;
 
-        SeenNodesByLabelSet(Graph inputGraph, NodeLabelHistogram.Result nodeLabelHistogram, double samplingRatio) {
+        public SeenNodesByLabelSet(
+            Graph inputGraph,
+            NodeLabelHistogram.Result nodeLabelHistogram,
+            double samplingRatio
+        ) {
             this.inputGraph = inputGraph;
             this.availableNodeLabels = nodeLabelHistogram.availableNodeLabels();
             this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());
@@ -97,7 +122,7 @@ public interface SeenNodes {
         private final HugeAtomicBitSet seenBitSet;
         private final long expectedNodes;
 
-        GlobalSeenNodes(HugeAtomicBitSet seenBitSet, long expectedNodes) {
+        public GlobalSeenNodes(HugeAtomicBitSet seenBitSet, long expectedNodes) {
             this.seenBitSet = seenBitSet;
             this.expectedNodes = expectedNodes;
         }

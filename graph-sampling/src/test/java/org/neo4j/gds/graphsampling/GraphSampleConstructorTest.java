@@ -39,7 +39,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
-import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 
 import java.util.List;
 import java.util.Set;
