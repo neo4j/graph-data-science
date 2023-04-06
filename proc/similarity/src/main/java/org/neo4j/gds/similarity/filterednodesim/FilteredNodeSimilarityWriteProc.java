@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -42,7 +41,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class FilteredNodeSimilarityWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.write", mode = WRITE)
     @Description(DESCRIPTION)

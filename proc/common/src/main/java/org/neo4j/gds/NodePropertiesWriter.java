@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.procedure.Context;
 
@@ -29,5 +28,5 @@ public abstract class NodePropertiesWriter<ALGO extends Algorithm<ALGO_RESULT>, 
     extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
     @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 }

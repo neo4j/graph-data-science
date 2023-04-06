@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
 
 import java.util.Map;
@@ -59,7 +59,7 @@ public final class FilteredKnnWriteProcResult extends SimilarityWriteResult {
     }
 
     @SuppressWarnings("unused")
-    static class Builder extends SimilarityProc.SimilarityResultBuilder<FilteredKnnWriteProcResult> {
+    static class Builder extends SimilarityResultBuilder<FilteredKnnWriteProcResult> {
         public long ranIterations;
         public boolean didConverge;
         public long nodePairsConsidered;

@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.transaction.TransactionContext;
 
-public final class NativeRelationshipStreamExporterBuilder extends RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> {
+public final class NativeRelationshipStreamExporterBuilder extends RelationshipStreamExporterBuilder {
     private final TransactionContext transactionContext;
 
     public NativeRelationshipStreamExporterBuilder(TransactionContext transactionContext) {

@@ -28,7 +28,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
 
 import java.util.stream.Stream;
 

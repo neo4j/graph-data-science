@@ -3,27 +3,29 @@
 :description: This section details projecting GDS graphs using `Cypher` aggregations.
 
 
-
-A projected graph can be stored in the catalog under a user-defined name.
-Using that name, the graph can be referred to by any algorithm in the library.
-This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
-
 Using Cypher aggregations is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
-Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
+Cypher aggregations are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
+
+
+== Considerations
+
+=== Lifecycle
 
 [NOTE]
 --
-There is also a way to generate a random graph, see xref:management-ops/projections/graph-generation.adoc[Graph Generation] documentation for more details.
---
-
-[NOTE]
---
-The projected graph will reside in the catalog until:
+The projected graphs will reside in the catalog until either:
 
 - the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
 - the Neo4j database from which the graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
 --
+
+
+=== Node property support
+
+Cypher aggregations can only project a limited set of node property types from a Cypher query.
+The xref:management-ops/node-properties.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
+Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Cypher aggregation.
 
 
 [[graph-project-cypher-aggregation-syntax]]
@@ -228,7 +230,7 @@ WITH gds.alpha.graph.project(
     relationshipType: type(r)
   }
 ) AS g
-RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results
@@ -265,13 +267,65 @@ The value for `relationshipType` must be a `String`:
 === Relationship orientation
 
 The native projection supports specifying an orientation per relationship type.
-The Cypher Aggregation will treat every relationship returned by the relationship query as if it was in `NATURAL` orientation.
-It is thus not possible to project graphs in `UNDIRECTED` or `REVERSE` orientation when Cypher projections are used.
+The Cypher Aggregation will treat every relationship returned by the relationship query as if it was in `NATURAL` orientation by default.
 
-[NOTE]
+==== Reverse relationships
+
+The orientation of a relationship can be reversed by switching the source and target nodes.
+
+[role=query-example]
 --
-Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
-These algorithms can not be used with a graph projected by a Cypher Aggregation.
+.Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:KNOWS|READ]->(target)
+WHERE source:Book OR source:Person
+WITH gds.alpha.graph.project(
+  'graphWithReverseRelationships',
+  target,
+  source,
+  {},
+  {}
+) as g
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                 | nodes  | rels
+| "graphWithReverseRelationships" | 5      | 6
+|===
+--
+
+==== Undirected relationships
+
+Relationships can be projected as undirected by specifying the `undirectedRelationshipTypes` parameter.
+
+[role=query-example]
+--
+.Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:KNOWS|READ]->(target)
+WHERE source:Book OR source:Person
+WITH gds.alpha.graph.project(
+  'graphWithUndirectedRelationships',
+  source,
+  target,
+  {},
+  {},
+  {undirectedRelationshipTypes: ['*']}
+) as g
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                 | nodes  | rels
+| "graphWithUndirectedRelationships" | 5      | 12
+|===
 --
 
 
@@ -300,7 +354,7 @@ WITH gds.alpha.graph.project(
     targetNodeProperties: target { age: coalesce(target.age, 18), price: coalesce(target.price, 5.0), .ratings }
   }
 ) as g
-RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results

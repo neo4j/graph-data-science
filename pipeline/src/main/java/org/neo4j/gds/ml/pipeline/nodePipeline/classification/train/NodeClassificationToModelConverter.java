@@ -30,12 +30,16 @@ public class NodeClassificationToModelConverter implements ResultToModelConverte
     private final NodeClassificationTrainingPipeline pipeline;
     private final NodeClassificationPipelineTrainConfig config;
 
+    private final String gdsVersion;
+
     public NodeClassificationToModelConverter(
         NodeClassificationTrainingPipeline pipeline,
-        NodeClassificationPipelineTrainConfig config
+        NodeClassificationPipelineTrainConfig config,
+        String gdsVersion
     ) {
         this.pipeline = pipeline;
         this.config = config;
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -43,6 +47,7 @@ public class NodeClassificationToModelConverter implements ResultToModelConverte
         NodeClassificationTrainResult result, GraphSchema originalSchema
     ) {
         var catalogModel = Model.of(
+            gdsVersion,
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             originalSchema,
             result.classifier().data(),

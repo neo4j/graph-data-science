@@ -26,13 +26,6 @@ The `gds.model.store_location` parameter must be configured for this feature.
 * xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification model]
 * xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction model]
 
-For xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification] and xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction], storing a model is only supported for a subset of xref:machine-learning/training-methods/index.adoc[trainer-methods].
-The trainer method of a model can be inspected in the `modelInfo` under `bestParameters`.
-
-Currently, we only support xref:machine-learning/training-methods/logistic-regression.adoc[Logistic Regression]
-and xref:machine-learning/training-methods/mlp.adoc[MLP].
-
-
 === Syntax
 
 [.model-store-syntax]
@@ -188,3 +181,11 @@ YIELD
   deleteMillis
 ----
 --
+
+
+[[model-version-compatibility]]
+== Models from older GDS versions
+
+Before GDS 2.4, for node classification ad link prediction models, only Logistic Regression trainer method can be stored.
+
+Any stored models from older GDS versions can be loaded in the most recent GDS version.

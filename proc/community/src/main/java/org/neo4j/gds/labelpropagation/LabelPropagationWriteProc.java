@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,20 +33,25 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.labelPropagation.write", description = LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, LabelPropagationResult, LabelPropagationWriteProc.WriteResult, LabelPropagationWriteConfig> {
+public class LabelPropagationWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
-    @Description(LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION)
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LabelPropagationWriteSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
@@ -58,93 +60,15 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new LabelPropagationWriteSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computationResult) {
-        return LabelPropagationProc.nodeProperties(
-            computationResult,
-            computationResult.config().writeProperty()
-        );
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LabelPropagationProc.resultBuilder(
-            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @Override
-    public LabelPropagationWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return LabelPropagationWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
-        return new LabelPropagationFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static class WriteResult extends LabelPropagationStatsProc.StatsResult {
-
-        public final long writeMillis;
-        public final long nodePropertiesWritten;
-
-        WriteResult(
-            long ranIterations,
-            boolean didConverge,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                ranIterations,
-                didConverge,
-                communityCount,
-                communityDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.writeMillis = writeMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    ranIterations,
-                    didConverge,
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    writeMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
-
 }

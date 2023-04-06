@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.utils.paged.dss;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.LongPageCreator;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -82,7 +82,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     private final AtomicLong maxCommunityId;
 
     public HugeAtomicDisjointSetStruct(long capacity, int concurrency) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency));
+        this.parent = HugeAtomicLongArray.of(capacity, ParalleLongPageCreator.identity(concurrency));
         this.communities = null;
         this.maxCommunityId = null;
     }
@@ -92,10 +92,10 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         NodePropertyValues communityMapping,
         int concurrency
     ) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency));
-        this.communities = HugeAtomicLongArray.newArray(
+        this.parent = HugeAtomicLongArray.of(capacity, ParalleLongPageCreator.identity(concurrency));
+        this.communities = HugeAtomicLongArray.of(
             capacity,
-            LongPageCreator.of(concurrency, nodeId -> {
+            ParalleLongPageCreator.of(concurrency, nodeId -> {
                 var seedCommunity = communityMapping.longValue(nodeId);
                 return seedCommunity < 0 ? -1 : seedCommunity;
             })

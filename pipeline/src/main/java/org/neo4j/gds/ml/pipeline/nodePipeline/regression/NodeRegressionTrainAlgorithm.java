@@ -36,9 +36,10 @@ public class NodeRegressionTrainAlgorithm extends PipelineTrainAlgorithm<
         NodeRegressionTrainingPipeline pipeline,
         GraphStore graphStore,
         NodeRegressionPipelineTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        String gdsVersion
     ) {
-        super(pipelineTrainer, pipeline, new NodeRegressionToModelConverter(pipeline, config), graphStore, config, progressTracker);
+        super(pipelineTrainer, pipeline, new NodeRegressionToModelConverter(pipeline, config, gdsVersion), graphStore, config, progressTracker);
     }
 
 }

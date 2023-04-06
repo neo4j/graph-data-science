@@ -20,13 +20,15 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
-public abstract class RelationshipExporterBuilder<T extends RelationshipExporter> {
+public abstract class RelationshipExporterBuilder {
 
     public static final int DEFAULT_WRITE_CONCURRENCY = 1;
 
@@ -35,25 +37,26 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     protected Graph graph;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
+    protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
 
-    public abstract T build();
+    public abstract RelationshipExporter build();
 
-    public RelationshipExporterBuilder<T> withRelationPropertyTranslator(RelationshipPropertyTranslator propertyTranslator) {
+    public RelationshipExporterBuilder withRelationPropertyTranslator(RelationshipPropertyTranslator propertyTranslator) {
         this.propertyTranslator = propertyTranslator;
         return this;
     }
 
-    public RelationshipExporterBuilder<T> withGraph(Graph graph) {
+    public RelationshipExporterBuilder withGraph(Graph graph) {
         this.graph = graph;
         return this;
     }
 
-    public RelationshipExporterBuilder<T> withIdMappingOperator(LongUnaryOperator toOriginalId) {
+    public RelationshipExporterBuilder withIdMappingOperator(LongUnaryOperator toOriginalId) {
         this.toOriginalId = toOriginalId;
         return this;
     }
 
-    public RelationshipExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
+    public RelationshipExporterBuilder withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }
@@ -67,8 +70,13 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
      * @param progressTracker The progress tracker to use for logging progress during export.
      * @return this
      */
-    public RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+    public RelationshipExporterBuilder withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
+        return this;
+    }
+
+    public RelationshipExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+        this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
 

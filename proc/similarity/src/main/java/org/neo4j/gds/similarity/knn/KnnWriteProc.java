@@ -19,41 +19,39 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
-import org.neo4j.gds.similarity.SimilarityWriteProc;
-import org.neo4j.gds.similarity.SimilarityWriteResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteProc.Result, KnnWriteConfig> {
+public class KnnWriteProc extends BaseProc {
+
+    @Context
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(name = "gds.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
-    public Stream<Result> write(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new KnnWriteSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.write.estimate", mode = READ)
@@ -62,136 +60,16 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new KnnWriteSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    public String procedureName() {
-        return "KNN";
+    public ExecutionContext executionContext() {
+        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
     }
 
-    @Override
-    protected SimilarityProc.SimilarityResultBuilder<Result> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
-        if (computationResult.isGraphEmpty()) {
-            return new Result.Builder();
-        }
-
-        return new Result.Builder()
-            .withDidConverge(computationResult.result().didConverge())
-            .withNodePairsConsidered(computationResult.result().nodePairsConsidered())
-            .withRanIterations(computationResult.result().ranIterations());
-    }
-
-    @Override
-    protected KnnWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return KnnWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Knn, KnnWriteConfig> algorithmFactory() {
-        return new KnnFactory<>();
-    }
-
-    @Override
-    protected SimilarityGraphResult similarityGraphResult(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
-        Knn algorithm = Objects.requireNonNull(computationResult.algorithm());
-        KnnWriteConfig config = computationResult.config();
-        return computeToGraph(
-            computationResult.graph(),
-            algorithm.nodeCount(),
-            config.concurrency(),
-            Objects.requireNonNull(computationResult.result()),
-            algorithm.executorService()
-        );
-    }
-
-    static SimilarityGraphResult computeToGraph(
-        Graph graph,
-        long nodeCount,
-        int concurrency,
-        Knn.Result result,
-        ExecutorService executor
-    ) {
-        Graph similarityGraph = new SimilarityGraphBuilder(
-            graph,
-            concurrency,
-            executor
-        ).build(result.streamSimilarityResult());
-        return new SimilarityGraphResult(similarityGraph, nodeCount, false);
-    }
-
-    @SuppressWarnings("unused")
-    public static class Result extends SimilarityWriteResult {
-        public final long ranIterations;
-        public final boolean didConverge;
-        public final long nodePairsConsidered;
-
-        Result(
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long postProcessingMillis,
-            long nodesCompared,
-            long relationshipsWritten,
-            boolean didConverge,
-            long ranIterations,
-            long nodePairsCompared,
-            Map<String, Object> similarityDistribution,
-            Map<String, Object> configuration
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                postProcessingMillis,
-                nodesCompared,
-                relationshipsWritten,
-                similarityDistribution,
-                configuration
-            );
-
-            this.nodePairsConsidered = nodePairsCompared;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-        }
-
-        @SuppressWarnings("unused")
-        static class Builder extends SimilarityProc.SimilarityResultBuilder<Result> {
-            public long ranIterations;
-            public boolean didConverge;
-            public long nodePairsConsidered;
-
-            @Override
-            public Result build() {
-                return new Result(
-                    preProcessingMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingMillis,
-                    nodesCompared,
-                    relationshipsWritten,
-                    didConverge,
-                    ranIterations,
-                    nodePairsConsidered,
-                    distribution(),
-                    config.toMap()
-                );
-            }
-
-            public Builder withDidConverge(boolean didConverge) {
-                this.didConverge = didConverge;
-                return this;
-            }
-
-            public Builder withRanIterations(long ranIterations) {
-                this.ranIterations = ranIterations;
-                return this;
-            }
-
-            Builder withNodePairsConsidered(long nodePairsConsidered) {
-                this.nodePairsConsidered = nodePairsConsidered;
-                return this;
-            }
-        }
-    }
 }

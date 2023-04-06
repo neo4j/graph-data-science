@@ -2,8 +2,6 @@
 [.alpha]
 = Random forest
 
-include::partial$/operations-reference/alpha-note.adoc[]
-
 Random forest is a popular supervised machine learning method for classification and regression that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
 To train the random forest is to train each of its decision trees independently.
 Each decision tree is typically trained on a slightly different part of the training set, and may look at different features for its node splits.
@@ -14,6 +12,8 @@ The approach of combining several predictors (in this case decision trees) is al
 
 == Classification
 
+include::partial$/operations-reference/beta-note.adoc[]
+
 For classification, a random forest prediction is made by simply taking a majority vote of its decision trees' predictions.
 The impurity criteria available for computing the potential of a node split in decision tree classifier training in GDS are https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity] (default) and https://en.wikipedia.org/wiki/Entropy_(information_theory)[Entropy].
 
@@ -21,6 +21,8 @@ Random forest classification is available for the training of xref:machine-learn
 
 
 == Regression
+
+include::partial$/operations-reference/alpha-note.adoc[]
 
 For regression, a random forest prediction is made by simply taking the average of its decision trees' predictions.
 The impurity criterion used for computing the potential of a node split in decision tree regressor training in GDS is https://en.wikipedia.org/wiki/Mean_squared_error[Mean squared error].

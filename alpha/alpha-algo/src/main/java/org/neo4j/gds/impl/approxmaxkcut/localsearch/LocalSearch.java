@@ -20,11 +20,13 @@
 package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.core.utils.paged.ParallelBytePageCreator;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -76,10 +78,14 @@ public class LocalSearch {
         // Used to keep track of the costs for swapping a node to another community.
         // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
         //  double array.
-        this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k());
+        this.nodeToCommunityWeights = HugeAtomicDoubleArray.of(
+            graph.nodeCount() * config.k(),
+            ParallelDoublePageCreator.passThrough(
+                config.concurrency())
+        );
 
         // Used to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount());
+        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(config.concurrency()));
 
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
     }

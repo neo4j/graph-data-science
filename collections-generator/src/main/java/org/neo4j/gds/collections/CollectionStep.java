@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
+import javax.annotation.Nullable;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -45,9 +46,10 @@ public abstract class CollectionStep<SPEC extends CollectionStep.Spec> implement
     private final Validation<SPEC> validation;
     private final Path sourcePath;
     private final Generator<SPEC> mainGenerator;
+    @Nullable
     private final Generator<SPEC> testGenerator;
 
-    public CollectionStep(ProcessingEnvironment processingEnv, Path sourcePath, Validation<SPEC> validation, Generator<SPEC> mainGenerator, Generator<SPEC> testGenerator) {
+    public CollectionStep(ProcessingEnvironment processingEnv, Path sourcePath, Validation<SPEC> validation, Generator<SPEC> mainGenerator, @Nullable Generator<SPEC> testGenerator) {
         this.validation = validation;
         this.messager = processingEnv.getMessager();
         this.filer = processingEnv.getFiler();
@@ -91,13 +93,12 @@ public abstract class CollectionStep<SPEC extends CollectionStep.Spec> implement
         var mainFile = javaFile(spec.rootPackage().toString(), typeSpec);
 
         var result = writeFile(element, mainFile);
-        if (result != ProcessResult.PROCESSED) {
+        if (result != ProcessResult.PROCESSED || testGenerator == null) {
             return result;
         }
 
         var testTypeSpec = testGenerator.generate(spec);
         var testFile = javaFile(spec.rootPackage().toString(), testTypeSpec);
-
         return writeTestFile(element, testFile);
     }
 

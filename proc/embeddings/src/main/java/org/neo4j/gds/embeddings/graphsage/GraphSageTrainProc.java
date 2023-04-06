@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
+import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -69,7 +70,8 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
 
     @Override
     public GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
-        return new GraphSageTrainAlgorithmFactory();
+        var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
+        return new GraphSageTrainAlgorithmFactory(gdsVersion);
     }
 
     @Override

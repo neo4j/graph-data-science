@@ -19,30 +19,66 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
-public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimilarityStatsConfig> {
+public class NodeSimilarityStatsProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Person {id: 0,  name: 'Alice'})" +
+        ", (b:Person {id: 1,  name: 'Bob'})" +
+        ", (c:Person {id: 2,  name: 'Charlie'})" +
+        ", (d:Person {id: 3,  name: 'Dave'})" +
+        ", (i1:Item  {id: 10, name: 'p1'})" +
+        ", (i2:Item  {id: 11, name: 'p2'})" +
+        ", (i3:Item  {id: 12, name: 'p3'})" +
+        ", (i4:Item  {id: 13, name: 'p4'})" +
+        ", (a)-[:LIKES]->(i1)" +
+        ", (a)-[:LIKES]->(i2)" +
+        ", (a)-[:LIKES]->(i3)" +
+        ", (b)-[:LIKES]->(i1)" +
+        ", (b)-[:LIKES]->(i2)" +
+        ", (c)-[:LIKES]->(i3)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            NodeSimilarityStatsProc.class,
+            GraphProjectProc.class
+        );
+
+            String name = "myGraph";
+            String createQuery = GdsCypher.call(name)
+                .graphProject()
+                .withAnyLabel()
+                .withRelationshipType("LIKES")
+                .yields();
+            runQuery(createQuery);
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
 
     @Test
     void testStatsYields() {
-        loadGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call("myGraph")
             .algo("nodeSimilarity")
             .statsMode()
             .addParameter("similarityCutoff", 0.0)
@@ -56,71 +92,35 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
                 "configuration"
             );
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(3, row.getNumber("nodesCompared").longValue());
-            assertEquals(6, row.getNumber("similarityPairs").longValue());
-            assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-            assertThat("Missing postProcessingMillis", -1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("nodesCompared")).asInstanceOf(LONG).isEqualTo(3);
+            assertThat(row.getNumber("similarityPairs")).asInstanceOf(LONG).isEqualTo(6);
 
-            Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
-            assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
-            assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
-            assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
-            assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
-            assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
-            assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
-            assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
-            assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
-            assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
-            assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
-            assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
-            assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
-            assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
-            assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
+            assertThat(row.getNumber("computeMillis"))
+                .as("Missing computeMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("preProcessingMillis"))
+                .as("Missing preProcessingMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .as("Missing postProcessingMillis")
+                .isGreaterThanOrEqualTo(0);
+
+            assertThat(row.get("similarityDistribution"))
+                .asInstanceOf(MAP)
+                .containsOnlyKeys("min", "max", "mean", "stdDev", "p1", "p5", "p10", "p25", "p50", "p75", "p90", "p95", "p99", "p100")
+                .allSatisfy((key, value) -> assertThat(value).asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(0d));
+
+            assertThat(row.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
         });
-    }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
-    void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
-        String query = queryBuilder
-            .algo("nodeSimilarity")
-            .statsMode()
-            .yields();
-
-        List<String> forbiddenResultColumns = Arrays.asList(
-            "writeMillis",
-            "nodePropertiesWritten",
-            "relationshipPropertiesWritten"
-        );
-        List<String> forbiddenConfigKeys = Arrays.asList(
-            "writeProperty",
-            "writeRelationshipType"
-        );
-        runQueryWithResultConsumer(query, result -> {
-            List<String> badResultColumns = result.columns()
-                .stream()
-                .filter(forbiddenResultColumns::contains)
-                .collect(Collectors.toList());
-            assertEquals(Collections.emptyList(), badResultColumns);
-            assertTrue(result.hasNext(), "Result must not be empty.");
-            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-            List<String> badConfigKeys = config.keySet()
-                .stream()
-                .filter(forbiddenConfigKeys::contains)
-                .collect(Collectors.toList());
-            assertEquals(Collections.emptyList(), badConfigKeys);
-        });
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig, ?>> getProcedureClazz() {
-        return NodeSimilarityStatsProc.class;
-    }
-
-    @Override
-    public NodeSimilarityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityStatsConfig.of(mapWrapper);
+        assertThat(rowCount)
+            .as("`stats` mode should always return one row")
+            .isEqualTo(1);
     }
 }

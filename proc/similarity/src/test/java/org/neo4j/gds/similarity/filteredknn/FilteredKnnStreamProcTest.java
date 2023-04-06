@@ -19,26 +19,48 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Fail.fail;
+class FilteredKnnStreamProcTest extends BaseProcTest {
 
-class FilteredKnnStreamProcTest extends FilteredKnnProcTest<FilteredKnnStreamConfig> {
-    @Override
-    public Class<? extends AlgoBaseProc<FilteredKnn, FilteredKnnResult, FilteredKnnStreamConfig, ?>> getProcedureClazz() {
-        return FilteredKnnStreamProc.class;
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a { id: 1, knn: 1.0 } )" +
+        ", (b { id: 2, knn: 2.0 } )" +
+        ", (c { id: 3, knn: 5.0 } )" +
+        ", (a)-[:IGNORE]->(b)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            FilteredKnnStreamProc.class,
+            GraphProjectProc.class
+        );
+
+        String graphCreateQuery = GdsCypher.call("filteredKnnGraph")
+            .graphProject()
+            .withAnyLabel()
+            .withNodeProperty("knn")
+            .withRelationshipType("IGNORE")
+            .yields();
+
+        runQuery(graphCreateQuery);
     }
 
-    @Override
-    public FilteredKnnStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return FilteredKnnStreamConfig.of(mapWrapper);
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -48,7 +70,7 @@ class FilteredKnnStreamProcTest extends FilteredKnnProcTest<FilteredKnnStreamCon
                        " RETURN node1, node2, similarity" +
                        " ORDER BY node1";
 
-        assertCypherResult(query, Map.of("graph", GRAPH_NAME), List.of(
+        assertCypherResult(query, Map.of("graph", "filteredKnnGraph"), List.of(
             Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
             Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),
             Map.of("node1", 2L, "node2", 1L, "similarity", 0.25)
@@ -153,11 +175,5 @@ class FilteredKnnStreamProcTest extends FilteredKnnProcTest<FilteredKnnStreamCon
         assertCypherResult(algoQuery, List.of(
             Map.of("node1", 6L, "node2", 7L, "similarity", 1.0)
         ));
-    }
-
-    @Disabled
-    @Test
-    void shouldSeed() {
-        fail("Hopeless to try and test here, see FilteredKnnFactoryTest");
     }
 }

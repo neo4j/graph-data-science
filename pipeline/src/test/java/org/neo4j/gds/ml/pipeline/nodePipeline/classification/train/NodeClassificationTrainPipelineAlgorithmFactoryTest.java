@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 
 @GdlExtension
 public class NodeClassificationTrainPipelineAlgorithmFactoryTest {
@@ -58,7 +59,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactoryTest {
 
     @Test
     void shouldValidateContextConfigsForNodePropertySteps() {
-        var ncAlgoFactory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY);
+        var ncAlgoFactory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY, testGdsVersion);
         var ncTrainConfig = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline("")
             .graphName("g")

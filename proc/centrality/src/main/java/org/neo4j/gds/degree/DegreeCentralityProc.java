@@ -27,8 +27,6 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 public final class DegreeCentralityProc {
 
-    static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
-
     private DegreeCentralityProc() {}
 
     static <CONFIG extends DegreeCentralityConfig> GraphAlgorithmFactory<DegreeCentrality, CONFIG> algorithmFactory() {

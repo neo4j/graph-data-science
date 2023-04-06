@@ -92,7 +92,7 @@ class DegreeCentralityMutateProcTest extends BaseProcTest {
             .addParameter("mutateProperty", "degreeScore")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
@@ -124,6 +124,10 @@ class DegreeCentralityMutateProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isEqualTo(10L);
         });
+
+        assertThat(rowCount)
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
 
         var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "dcGraph")
             .graphStore()

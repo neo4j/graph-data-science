@@ -40,8 +40,11 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
 
     private final ExecutionContext executionContext;
 
-    public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
+    private final String gdsVersion;
+
+    public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext, String gdsVersion) {
         this.executionContext = executionContext;
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -83,7 +86,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
             pipeline,
             graphStore,
             configuration,
-            progressTracker
+            progressTracker,
+            gdsVersion
         );
     }
 

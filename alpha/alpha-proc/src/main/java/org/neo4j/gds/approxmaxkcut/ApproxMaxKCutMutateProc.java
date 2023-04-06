@@ -19,18 +19,10 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,12 +30,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCutProc.APPROX_MAX_K_CUT_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.maxkcut.mutate", description = APPROX_MAX_K_CUT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateProc.MutateResult, ApproxMaxKCutMutateConfig> {
+public class ApproxMaxKCutMutateProc extends BaseProc {
 
     @Procedure(value = "gds.alpha.maxkcut.mutate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
@@ -51,7 +41,10 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ApproxMaxKCutMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.maxkcut.mutate.estimate", mode = READ)
@@ -60,77 +53,11 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new ApproxMaxKCutMutateSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected ApproxMaxKCutMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return ApproxMaxKCutMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutMutateConfig> algorithmFactory() {
-        return ApproxMaxKCutProc.algorithmFactory();
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new MutateResult.Builder(computeResult.result().cutCost());
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig> computationResult) {
-        return ApproxMaxKCutProc.nodeProperties(computationResult);
-    }
-
-    public static final class MutateResult extends StandardMutateResult {
-
-        public final long nodePropertiesWritten;
-        public final double cutCost;
-
-        MutateResult(
-            long nodePropertiesWritten,
-            double cutCost,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            Map<String, Object> config
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                mutateMillis,
-                config
-            );
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.cutCost = cutCost;
-        }
-
-        static final class Builder extends AbstractResultBuilder<MutateResult> {
-
-            private final double cutCost;
-
-            Builder(double cutCost) {
-                this.cutCost = cutCost;
-            }
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    nodePropertiesWritten,
-                    cutCost,
-                    preProcessingMillis,
-                    computeMillis,
-                    0L,
-                    mutateMillis,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

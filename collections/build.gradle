@@ -15,6 +15,7 @@ dependencies {
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
 }
 
 sourceSets {

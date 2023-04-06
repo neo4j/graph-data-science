@@ -395,7 +395,7 @@ When a range is present, values from the range are determined automatically by a
 One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
 
 * `gds.beta.pipeline.linkPrediction.addLogisticRegression`
-* `gds.alpha.pipeline.linkPrediction.addRandomForest`
+* `gds.beta.pipeline.linkPrediction.addRandomForest`
 * `gds.alpha.pipeline.linkPrediction.addMLP`
 
 For information about the available training methods in GDS, logistic regression, random forest and multilayer perceptron, see xref:machine-learning/training-methods/index.adoc[Training methods].
@@ -462,7 +462,7 @@ include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.ad
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.pipeline.linkPrediction.addRandomForest(
+CALL gds.beta.pipeline.linkPrediction.addRandomForest(
   pipelineName: String,
   config: Map
 )
@@ -545,7 +545,7 @@ YIELD parameterSpace
 [source, cypher, role=noplay query-example, no-result=true, group=lp]
 .The following will add a random forest model:
 --
-CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 10})
+CALL gds.beta.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 10})
 YIELD parameterSpace
 --
 

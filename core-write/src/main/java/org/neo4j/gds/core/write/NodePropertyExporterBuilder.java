@@ -21,14 +21,16 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
-public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter> {
+public abstract class NodePropertyExporterBuilder {
     protected LongUnaryOperator toOriginalId;
     protected long nodeCount;
     protected TerminationFlag terminationFlag;
@@ -36,17 +38,18 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
     protected ExecutorService executorService;
     protected int writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
+    protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
 
-    public abstract T build();
+    public abstract NodePropertyExporter build();
 
-    public NodePropertyExporterBuilder<T> withIdMap(IdMap idMap) {
+    public NodePropertyExporterBuilder withIdMap(IdMap idMap) {
         Objects.requireNonNull(idMap);
         this.nodeCount = idMap.nodeCount();
         this.toOriginalId = idMap::toOriginalNodeId;
         return this;
     }
 
-    public NodePropertyExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
+    public NodePropertyExporterBuilder withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }
@@ -60,12 +63,17 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
      * @param progressTracker The progress tracker to use for logging progress during export.
      * @return this
      */
-    public NodePropertyExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+    public NodePropertyExporterBuilder withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
         return this;
     }
 
-    public NodePropertyExporterBuilder<T> parallel(ExecutorService es, int writeConcurrency) {
+    public NodePropertyExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo) {
+        this.arrowConnectionInfo = arrowConnectionInfo;
+        return this;
+    }
+
+    public NodePropertyExporterBuilder parallel(ExecutorService es, int writeConcurrency) {
         this.executorService = es;
         this.writeConcurrency = writeConcurrency;
         return this;

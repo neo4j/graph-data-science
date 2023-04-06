@@ -23,13 +23,14 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
@@ -37,6 +38,7 @@ import java.util.function.Consumer;
 
 public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
+    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
     private final Graph graph;
     private final long nodeCount;
     private final double divisor;
@@ -62,7 +64,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
-        this.centrality = HugeAtomicDoubleArray.newArray(nodeCount);
+        this.centrality = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.schema().isUndirected() ? 2.0 : 1.0;

@@ -19,64 +19,83 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCountWriteConfig> {
-
-    @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
-    }
+class TriangleCountWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +
-           "(a:A { name: 'a' })-[:T]->(b:A { name: 'b' }), " +
-           "(b)-[:T]->(c:A { name: 'c' }), " +
-           "(c)-[:T]->(a), " +
-           "(a)-[:T]->(d:A { name: 'd' }), " +
-           "(b)-[:T]->(d), " +
-           "(c)-[:T]->(d), " +
-           "(a)-[:T]->(e:A { name: 'e' }), " +
-           "(b)-[:T]->(e) ";
+                                           "(a:A { name: 'a' })-[:T]->(b:A { name: 'b' }), " +
+                                           "(b)-[:T]->(c:A { name: 'c' }), " +
+                                           "(c)-[:T]->(a), " +
+                                           "(a)-[:T]->(d:A { name: 'd' }), " +
+                                           "(b)-[:T]->(d), " +
+                                           "(c)-[:T]->(d), " +
+                                           "(a)-[:T]->(e:A { name: 'e' }), " +
+                                           "(b)-[:T]->(e) ";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            TriangleCountWriteProc.class
+        );
+
+        runQuery("CALL gds.graph.project('graph', 'A', {T: { orientation: 'UNDIRECTED'}})");
+    }
 
     @Test
-    void testWrite() {
+    void shouldWrite() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")
             .yields();
 
-        assertCypherResult(query, List.of(Map.of(
-            "globalTriangleCount", 5L,
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "nodePropertiesWritten", 5L,
-            "writeMillis", greaterThan(-1L)
-        )));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("globalTriangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("writeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+        });
+        assertThat(rowCount).isEqualTo(1L);
 
         Map<String, Long> expectedResult = Map.of(
             "a", 4L,
@@ -90,7 +109,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
     }
 
     @Test
-    void testWriteWithMaxDegree() {
+    void shouldWriteWithMaxDegree() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .writeMode()
@@ -98,11 +117,20 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
             .addParameter("maxDegree", 2)
             .yields("globalTriangleCount", "nodeCount", "nodePropertiesWritten");
 
-        assertCypherResult(query, List.of(Map.of(
-            "globalTriangleCount", 0L,
-            "nodeCount", 5L,
-            "nodePropertiesWritten", 5L
-        )));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("globalTriangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(0L);
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+        });
+        assertThat(rowCount).isEqualTo(1L);
 
         Map<String, Long> expectedResult = Map.of(
             "a", -1L,
@@ -115,29 +143,13 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
         assertWriteResult(expectedResult, "triangles");
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig, ?>> getProcedureClazz() {
-        return TriangleCountWriteProc.class;
-    }
 
-    @Override
-    public TriangleCountWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountWriteConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", "writeProperty");
-        }
-        return mapWrapper;
-    }
 
     private void assertWriteResult(
         Map<String, Long> expectedResult,
         String writeProperty
     ) {
-        runQueryWithRowConsumer(formatWithLocale(
+        var rowCount = runQueryWithRowConsumer(formatWithLocale(
             "MATCH (n) RETURN n.name AS name, n.%s AS triangles",
             writeProperty
         ), (row) -> {
@@ -147,6 +159,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
                 .asInstanceOf(LONG)
                 .isEqualTo(expectedTriangles);
         });
+        assertThat(rowCount).isEqualTo(expectedResult.keySet().size());
     }
 
 }

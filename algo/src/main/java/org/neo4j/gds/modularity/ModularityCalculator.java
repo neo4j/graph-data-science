@@ -23,10 +23,11 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -72,8 +73,8 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
         var nodeCount = graph.nodeCount();
 
         var communityCount = communityMapper.size();
-        var insideRelationships = HugeAtomicDoubleArray.newArray(communityCount);
-        var totalCommunityRelationships = HugeAtomicDoubleArray.newArray(communityCount);
+        var insideRelationships = HugeAtomicDoubleArray.of(communityCount, ParallelDoublePageCreator.passThrough(concurrency));
+        var totalCommunityRelationships = HugeAtomicDoubleArray.of(communityCount, ParallelDoublePageCreator.passThrough(concurrency));
         var totalRelationshipWeight = new DoubleAdder();
 
         var tasks = PartitionUtils.rangePartition(

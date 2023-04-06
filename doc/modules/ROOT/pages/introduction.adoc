@@ -64,11 +64,6 @@ The algorithm is well-defined on a directed graph.
 Undirected::
 The algorithm is well-defined on an undirected graph.
 
-[[introduction-algorithms-homogeneous]]
-Homogeneous::
-The algorithm will treat all nodes and relationships in its input graph(s) similarly, as if they were all of the same type.
-If multiple types of nodes or relationships exist in the graph, this must be taken into account when analysing the results of the algorithm.
-
 [[introduction-algorithms-heterogeneous]]
 Heterogeneous::
 The algorithm has the ability to distinguish between nodes and/or relationships of different types.

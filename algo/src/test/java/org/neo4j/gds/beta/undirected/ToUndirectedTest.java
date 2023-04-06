@@ -24,8 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -33,7 +35,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -64,7 +68,6 @@ class ToUndirectedTest {
     GraphStore directedGraphStore;
     @Inject
     GraphStore undirectedGraphStore;
-
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationships(int concurrency) {
@@ -152,6 +155,7 @@ class ToUndirectedTest {
         ", (b)-[:T2]->(a)" +
         ", (b)-[:T2]->(c)" +
         ", (a)-[:T2]->(a)";
+
     @Inject
     GraphStore noPropertyDirectedGraphStore;
     @Inject
@@ -180,6 +184,122 @@ class ToUndirectedTest {
             noPropertyUndirectedGraphStore.getGraph(RelationshipType.of("T2")),
             noPropertyDirectedGraphStore.getGraph(RelationshipType.of("T2"))
         );
+    }
+
+    @Test
+    void shouldAggregateWithoutProperties() {
+        var inputGraphStore = GdlFactory.of(
+            "  (a), (b)" +
+            ", (a)-[:T]->(b)" +
+            ", (a)-[:T]->(b)" +
+            ", (a)-[:T]->(a)").build();
+
+        var config = ToUndirectedConfigImpl
+            .builder()
+            .concurrency(4)
+            .relationshipType("T")
+            .mutateRelationshipType("TU")
+            .aggregation(Aggregation.SINGLE)
+            .build();
+
+
+        SingleTypeRelationships undirectedRels = new ToUndirected(
+            inputGraphStore,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        ).compute();
+
+        inputGraphStore.addRelationshipType(undirectedRels);
+
+        Graph actualGraph = inputGraphStore.getGraph(RelationshipType.of("TU"));
+
+        var expectedGraph =  GdlFactory.of("(a)-[:TU]->(b), (b)-[:TU]->(a), (a)-[:TU]->(a)").build().getUnion();
+
+        assertGraphEquals(expectedGraph, actualGraph);
+    }
+
+    @Test
+    void shouldAggregateWithPropertiesAndGlobalAggregation() {
+        var input = GdlFactory.of(
+            "  (a), (b)" +
+            ", (a)-[:T {prop1: 42.0D, prop2: 84.0D}]->(b)" +
+            ", (a)-[:T {prop1: 1.0D, prop2: 2.0D}]->(b)" +
+            ", (a)-[:T {prop1: 4.0D, prop2: 5.0D}]->(a)").build();
+
+        var config = ToUndirectedConfigImpl
+            .builder()
+            .concurrency(4)
+            .relationshipType("T")
+            .mutateRelationshipType("TU")
+            .aggregation(Aggregation.MAX)
+            .build();
+
+
+        SingleTypeRelationships aggregatedUndirectedRelationships = new ToUndirected(
+            input,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        ).compute();
+
+        input.addRelationshipType(aggregatedUndirectedRelationships);
+
+        var expectedGraphProp2 = GdlFactory.of(
+            "(a)-[:TU {prop2: 84.0}]->(b)" +
+            ", (b)-[:TU {prop2: 84.0}]->(a)" +
+            ", (a)-[:TU {prop2: 5.0D}]->(a)").build().getUnion();
+
+
+        var expectedGraphProp1 = GdlFactory.of(
+            "(a)-[:TU {prop1: 42.0}]->(b)" +
+            ", (b)-[:TU {prop1: 42.0}]->(a)" +
+            ", (a)-[:TU {prop1: 4.0D}]->(a)").build().getUnion();
+
+
+        assertGraphEquals(expectedGraphProp1, input.getGraph(RelationshipType.of("TU"), Optional.of("prop1")));
+        assertGraphEquals(expectedGraphProp2, input.getGraph(RelationshipType.of("TU"), Optional.of("prop2")));
+    }
+
+    @Test
+    void shouldAggregateWithPropertiesAndLocalAggregation() {
+        var input = GdlFactory.of(
+            "  (a), (b)" +
+            ", (a)-[:T {prop1: 42.0D, prop2: 84.0D}]->(b)" +
+            ", (a)-[:T {prop1: 1.0D, prop2: 2.0D}]->(b)" +
+            ", (a)-[:T {prop1: 4.0D, prop2: 5.0D}]->(a)").build();
+
+        var config = ToUndirectedConfigImpl
+            .builder()
+            .concurrency(4)
+            .relationshipType("T")
+            .mutateRelationshipType("TU")
+            .aggregation(Map.of("prop1", "min", "prop2", "max"))
+            .build();
+
+        SingleTypeRelationships aggregatedUndirectedRelationships = new ToUndirected(
+            input,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        ).compute();
+
+        input.addRelationshipType(aggregatedUndirectedRelationships);
+
+        var expectedGraphProp1 = GdlFactory.of(
+            "(a)-[:TU {prop1: 1.0}]->(b)" +
+            ", (b)-[:TU {prop1: 1.0}]->(a)" +
+            ", (a)-[:TU {prop1: 4.0}]->(a)").build().getUnion();
+
+
+        assertGraphEquals(expectedGraphProp1, input.getGraph(RelationshipType.of("TU"), Optional.of("prop1")));
+
+        var expectedGraphProp2 = GdlFactory.of(
+            "(a)-[:TU {prop2: 84.0}]->(b)" +
+            ", (b)-[:TU {prop2: 84.0}]->(a)" +
+            ", (a)-[:TU {prop2: 5.0D}]->(a)").build().getUnion();
+
+        assertGraphEquals(expectedGraphProp2, input.getGraph(RelationshipType.of("TU"), Optional.of("prop2")));
     }
 
     @Test

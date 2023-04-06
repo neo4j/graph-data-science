@@ -20,13 +20,15 @@
 package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-public abstract class RelationshipStreamExporterBuilder<T extends RelationshipStreamExporter> {
+public abstract class RelationshipStreamExporterBuilder {
     protected Stream<Relationship> relationships;
 
     // FIXME: This looks very dodgy; only being overriden in the Cypher implementation and in some tests...
@@ -35,31 +37,32 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected long relationshipCount = -1L;
+    protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo;
 
-    public abstract T build();
+    public abstract RelationshipStreamExporter build();
 
-    public RelationshipStreamExporterBuilder<T> withIdMappingOperator(LongUnaryOperator toOriginalNodeId) {
+    public RelationshipStreamExporterBuilder withIdMappingOperator(LongUnaryOperator toOriginalNodeId) {
         this.toOriginalId = toOriginalNodeId;
         return this;
     }
 
-    public RelationshipStreamExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
+    public RelationshipStreamExporterBuilder withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }
 
-    public RelationshipStreamExporterBuilder<T> withRelationships(Stream<Relationship> relationships) {
+    public RelationshipStreamExporterBuilder withRelationships(Stream<Relationship> relationships) {
         this.relationships = relationships;
         return this;
     }
 
-    public RelationshipStreamExporterBuilder<T> withRelationshipCount(long relationshipCount) {
+    public RelationshipStreamExporterBuilder withRelationshipCount(long relationshipCount) {
         this.relationshipCount = relationshipCount;
         return this;
     }
 
     @TestOnly
-    public RelationshipStreamExporterBuilder<T> withBatchSize(int batchSize) {
+    public RelationshipStreamExporterBuilder withBatchSize(int batchSize) {
         this.batchSize = batchSize;
         return this;
     }
@@ -73,8 +76,13 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
      * @param progressTracker The progress tracker to use for logging progress during export.
      * @return this
      */
-    public RelationshipStreamExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+    public RelationshipStreamExporterBuilder withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
+        return this;
+    }
+
+    public RelationshipStreamExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+        this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
 }

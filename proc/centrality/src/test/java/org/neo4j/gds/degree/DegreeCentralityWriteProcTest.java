@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.degree;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +30,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class DegreeCentralityWriteProcTest extends BaseProcTest {
@@ -86,37 +86,41 @@ class DegreeCentralityWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "degreeScore")
             .yields();
 
-        runQueryWithRowConsumer(writeQuery, row -> {
-            Assertions.assertThat(row.get("centralityDistribution"))
+        var rowCount = runQueryWithRowConsumer(writeQuery, row -> {
+            assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
                 .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsEntry("min", 0.0)
                 .hasEntrySatisfying("max",
-                    value -> Assertions.assertThat(value)
+                    value -> assertThat(value)
                         .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
                         .isEqualTo(3.0, Offset.offset(1e-4))
                 );
 
-            Assertions.assertThat(row.getNumber("preProcessingMillis"))
+            assertThat(row.getNumber("preProcessingMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
 
-            Assertions.assertThat(row.getNumber("computeMillis"))
+            assertThat(row.getNumber("computeMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
 
-            Assertions.assertThat(row.getNumber("postProcessingMillis"))
+            assertThat(row.getNumber("postProcessingMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
 
-            Assertions.assertThat(row.getNumber("writeMillis"))
+            assertThat(row.getNumber("writeMillis"))
                 .asInstanceOf(LONG)
                 .isGreaterThan(-1L);
 
-            Assertions.assertThat(row.getNumber("nodePropertiesWritten"))
+            assertThat(row.getNumber("nodePropertiesWritten"))
                 .asInstanceOf(LONG)
                 .isEqualTo(10L);
         });
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 }

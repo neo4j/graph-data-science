@@ -29,12 +29,16 @@ public class NodeRegressionToModelConverter implements ResultToModelConverter<No
     private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig config;
 
+    private final String gdsVersion;
+
     public NodeRegressionToModelConverter(
         NodeRegressionTrainingPipeline pipeline,
-        NodeRegressionPipelineTrainConfig config
+        NodeRegressionPipelineTrainConfig config,
+        String gdsVersion
     ) {
         this.pipeline = pipeline;
         this.config = config;
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -43,6 +47,7 @@ public class NodeRegressionToModelConverter implements ResultToModelConverter<No
         GraphSchema originalSchema
     ) {
         var catalogModel = Model.of(
+            gdsVersion,
             NodeRegressionTrainingPipeline.MODEL_TYPE,
             originalSchema,
             trainResult.regressor().data(),

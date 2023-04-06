@@ -21,13 +21,12 @@ package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
@@ -52,7 +51,7 @@ import java.util.concurrent.atomic.LongAdder;
  * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
 @SuppressWarnings("FieldCanBeLocal")
-public final class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount.TriangleCountResult> {
+public final class IntersectingTriangleCount extends Algorithm<TriangleCountResult> {
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
 
@@ -105,7 +104,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         this.intersectConfig = ImmutableRelationshipIntersectConfig.of(config.maxDegree());
         this.config = config;
         this.executorService = executorService;
-        this.triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount());
+        this.triangleCounts = HugeAtomicLongArray.of(graph.nodeCount(), ParalleLongPageCreator.passThrough(config.concurrency()));
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
     }
@@ -165,26 +164,4 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         }
     }
 
-    @ValueClass
-    public interface TriangleCountResult {
-        // value at index `i` is number of triangles for node with id `i`
-        HugeAtomicLongArray localTriangles();
-
-        long globalTriangles();
-
-        static TriangleCountResult of(
-            HugeAtomicLongArray triangles,
-            long globalTriangles
-        ) {
-            return ImmutableTriangleCountResult
-                .builder()
-                .localTriangles(triangles)
-                .globalTriangles(globalTriangles)
-                .build();
-        }
-
-        default LongNodePropertyValues asNodeProperties() {
-            return localTriangles().asNodeProperties();
-        }
-    }
 }

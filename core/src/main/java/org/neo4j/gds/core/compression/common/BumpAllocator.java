@@ -21,6 +21,7 @@ package org.neo4j.gds.core.compression.common;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.collections.PageUtil;
 
 import java.lang.invoke.MethodHandles;
@@ -71,8 +72,8 @@ public final class BumpAllocator<PAGE> {
         return new LocalAllocator<>(this);
     }
 
-    public LocalPositionalAllocator<PAGE> newLocalPositionalAllocator() {
-        return new LocalPositionalAllocator<>(this);
+    public LocalPositionalAllocator<PAGE> newLocalPositionalAllocator(PositionalFactory<PAGE> positionalFactory) {
+        return new LocalPositionalAllocator<>(this, positionalFactory);
     }
 
     public PAGE[] intoPages() {
@@ -175,6 +176,9 @@ public final class BumpAllocator<PAGE> {
         PAGE[] newEmptyPages();
 
         PAGE newPage(int length);
+    }
+
+    public interface PositionalFactory<PAGE> {
 
         PAGE copyOfPage(PAGE page, int length);
 
@@ -196,30 +200,31 @@ public final class BumpAllocator<PAGE> {
         }
 
         /**
-         * Inserts slice into the allocator, returns global address
+         * Allocate some memory into the slice, returns global address
          */
-        public long insert(@NotNull PAGE targets, int length) {
-            // targetLength is the length of the array that is provided ({@code == targets.length}).
-            // This value can be greater than `length` if the provided array is some sort of a buffer.
-            // We need this to determine if we need to make a slice-copy of the targets array or not.
-            var targetLength = globalAllocator.pageFactory.lengthOfPage(targets);
-            return insertData(targets, Math.min(length, targetLength), this.top, targetLength);
-        }
-
-        private long insertData(@NotNull PAGE targets, int length, long address, int targetsLength) {
+        public long insertInto(int length, ModifiableSlice<PAGE> slice) {
             int maxOffset = PAGE_SIZE - length;
             if (maxOffset >= this.offset) {
-                doAllocate(targets, length);
+                long address = this.top;
+                bumpAllocate(length, slice);
                 return address;
             }
-            return slowPathAllocate(targets, length, maxOffset, targetsLength);
+            return slowPathAllocate(length, maxOffset, slice);
         }
 
-        private long slowPathAllocate(@NotNull PAGE targets, int length, int maxOffset, int targetsLength) {
+        private void bumpAllocate(int length, ModifiableSlice<PAGE> slice) {
+            slice.setSlice(this.page);
+            slice.setOffset(this.offset);
+            slice.setLength(length);
+            this.offset += length;
+            this.top += length;
+        }
+
+        private long slowPathAllocate(int length, int maxOffset, ModifiableSlice<PAGE> slice) {
             if (maxOffset < 0) {
-                return oversizingAllocate(targets, length, targetsLength);
+                return oversizingAllocate(length, slice);
             }
-            return prefetchAllocate(targets, length);
+            return prefetchAllocate(length, slice);
         }
 
         /**
@@ -227,44 +232,39 @@ public final class BumpAllocator<PAGE> {
          * Since we are storing all degrees into a single page and thus never have to switch pages
          * and keep the offsets as if this page would be of the correct size, we might just get by.
          */
-        private long oversizingAllocate(@NotNull PAGE targets, int length, int targetsLength) {
-            if (length < targetsLength) {
-                // need to create a smaller slice
-                targets = globalAllocator.pageFactory.copyOfPage(targets, length);
-            }
-            return globalAllocator.insertExistingPage(targets);
+        private long oversizingAllocate(int length, ModifiableSlice<PAGE> slice) {
+            var page = this.globalAllocator.pageFactory.newPage(length);
+            slice.setSlice(page);
+            slice.setOffset(0);
+            slice.setLength(length);
+            return globalAllocator.insertExistingPage(page);
         }
 
-        private long prefetchAllocate(@NotNull PAGE targets, int length) {
+        private long prefetchAllocate(int length, ModifiableSlice<PAGE> slice) {
             long address = prefetchAllocate();
-            doAllocate(targets, length);
+            bumpAllocate(length, slice);
             return address;
         }
 
         private long prefetchAllocate() {
-            long address = top = globalAllocator.insertDefaultSizedPage();
+            long address = this.top = globalAllocator.insertDefaultSizedPage();
             assert PageUtil.indexInPage(address, PAGE_MASK) == 0;
             var currentPageIndex = PageUtil.pageIndex(address, PAGE_SHIFT);
             this.page = globalAllocator.pages[currentPageIndex];
             this.offset = 0;
             return address;
         }
-
-        @SuppressWarnings("SuspiciousSystemArraycopy")
-        private void doAllocate(@NotNull PAGE targets, int length) {
-            System.arraycopy(targets, 0, this.page, offset, length);
-            offset += length;
-            top += length;
-        }
     }
 
     public static final class LocalPositionalAllocator<PAGE> {
 
         private final BumpAllocator<PAGE> globalAllocator;
+        private final PositionalFactory<PAGE> pageFactory;
         private long capacity;
 
-        private LocalPositionalAllocator(BumpAllocator<PAGE> globalAllocator) {
+        private LocalPositionalAllocator(BumpAllocator<PAGE> globalAllocator, PositionalFactory<PAGE> pageFactory) {
             this.globalAllocator = globalAllocator;
+            this.pageFactory = pageFactory;
             this.capacity = 0;
         }
 
@@ -275,7 +275,7 @@ public final class BumpAllocator<PAGE> {
             // targetLength is the length of the array that is provided ({@code == page.length}).
             // This value can be greater than `length` if the provided array is a buffer of some sort.
             // We need this to determine if we need to make a slice-copy of the page array or not.
-            var targetLength = globalAllocator.pageFactory.lengthOfPage(page);
+            var targetLength = this.pageFactory.lengthOfPage(page);
             insertData(offset, page, Math.min(length, targetLength), this.capacity, targetLength);
         }
 
@@ -305,7 +305,7 @@ public final class BumpAllocator<PAGE> {
                 if (length < targetsLength) {
                     // We have an oversized page but it contains additional buffer space at the end
                     // We create a new copy of that page that is the exact size to fit all data
-                    page = globalAllocator.pageFactory.copyOfPage(page, length);
+                    page = this.pageFactory.copyOfPage(page, length);
                 }
                 existingPage = page;
             }

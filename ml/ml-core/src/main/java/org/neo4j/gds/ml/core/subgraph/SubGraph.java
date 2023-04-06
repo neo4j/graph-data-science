@@ -69,24 +69,22 @@ public final class SubGraph implements BatchNeighbors {
     }
 
     public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, RelationshipWeights weightFunction) {
-        int[][] adjacency = new int[batchNodeIds.length][];
-        int[] batchedNodeIds = new int[batchNodeIds.length];
+        int[] mappedBatchNodeIds = new int[batchNodeIds.length];
 
         // mapping original long-based nodeIds into consecutive int-based ids
         LocalIdMap idmap = new LocalIdMap();
 
         // map the input node ids
         // this assures they are in consecutive order
-        for (long nodeId : batchNodeIds) {
-            idmap.toMapped(nodeId);
-        }
-
         for (int nodeOffset = 0, nodeIdsLength = batchNodeIds.length; nodeOffset < nodeIdsLength; nodeOffset++) {
-            long nodeId = batchNodeIds[nodeOffset];
+            int mappedNodeId = idmap.toMapped(batchNodeIds[nodeOffset]);
+            mappedBatchNodeIds[nodeOffset] = mappedNodeId;
+        }
+        int[][] adjacency = new int[idmap.size()][];
 
-            batchedNodeIds[nodeOffset] = idmap.toMapped(nodeId);
+        for (int mappedNodeId = 0, mappedBatchIds = idmap.size(); mappedNodeId < mappedBatchIds; mappedNodeId++) {
 
-            var nodeNeighbors = neighborhoodFunction.sample(nodeId);
+            var nodeNeighbors = neighborhoodFunction.sample(idmap.toOriginal(mappedNodeId));
 
             // map sampled neighbors into local id space
             // this also expands the id mapping as the neighbours could be not in the nodeIds[]
@@ -94,10 +92,10 @@ public final class SubGraph implements BatchNeighbors {
                 .mapToInt(idmap::toMapped)
                 .toArray();
 
-            adjacency[nodeOffset] = neighborInternalIds;
+            adjacency[mappedNodeId] = neighborInternalIds;
         }
 
-        return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), weightFunction);
+        return new SubGraph(adjacency, mappedBatchNodeIds, idmap.originalIds(), weightFunction);
     }
 
     @Override

@@ -20,13 +20,14 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -56,7 +57,7 @@ public final class ModularityComputer {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        HugeAtomicDoubleArray relationshipsOutsideCommunity = HugeAtomicDoubleArray.newArray(workingGraph.nodeCount());
+        var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             workingGraph.nodeCount(),

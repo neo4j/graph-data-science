@@ -39,15 +39,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
-    implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
-    OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
-    MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
+    implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, TriangleCountResult>,
+    OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, TriangleCountResult>,
+    MemoryEstimateTest<IntersectingTriangleCount, CONFIG, TriangleCountResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +
-           "(a:A)-[:T]->(b:A), " +
-           "(b)-[:T]->(c:A), " +
-           "(c)-[:T]->(a)";
+                                           "(a:A)-[:T]->(b:A), " +
+                                           "(b)-[:T]->(c:A), " +
+                                           "(c)-[:T]->(a)";
 
 
     @BeforeEach
@@ -71,7 +71,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
     @Override
     public void assertResultEquals(
-        IntersectingTriangleCount.TriangleCountResult result1, IntersectingTriangleCount.TriangleCountResult result2
+        TriangleCountResult result1, TriangleCountResult result2
     ) {
         // TODO: add checks for the HugeArrays
         assertEquals(result1.globalTriangles(), result2.globalTriangles());

@@ -23,23 +23,22 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class SccTest {
@@ -79,18 +78,35 @@ class SccTest {
 
     @Test
     void testDirect() {
-        SccAlgorithm scc = new SccAlgorithm(graph, ProgressTracker.NULL_TRACKER);
+        Scc scc = new Scc(graph, ProgressTracker.NULL_TRACKER);
         HugeLongArray components = scc.compute();
 
         assertCC(components);
-        assertEquals(3, scc.getMaxSetSize());
-        assertEquals(3, scc.getMinSetSize());
-        assertEquals(3, scc.getSetCount());
+
+        HashMap<Long, Long> componentsMap = new HashMap<>();
+        for (long nodeId = 0; nodeId < components.size(); ++nodeId) {
+            long componentId = components.get(nodeId);
+            long componentValue = componentsMap.getOrDefault(componentId, 0L);
+            componentsMap.put(componentId, 1 + componentValue);
+        }
+
+        long max = 0;
+        long min = Long.MAX_VALUE;
+        for (var entry : componentsMap.entrySet()) {
+            min = Math.min(entry.getValue(), min);
+            max = Math.max(entry.getValue(), max);
+
+        }
+
+        assertThat(componentsMap.keySet().size()).isEqualTo(3L);
+        assertThat(min).isEqualTo(3L);
+        assertThat(max).isEqualTo(3L);
+
     }
 
     @Test
     void testHugeIterativeScc() {
-        SccAlgorithm algo = new SccAlgorithm(graph, ProgressTracker.NULL_TRACKER);
+        Scc algo = new Scc(graph, ProgressTracker.NULL_TRACKER);
         HugeLongArray components = algo.compute();
         assertCC(components);
     }
@@ -118,7 +134,7 @@ class SccTest {
         // check if all belong to same set
         final long needle = data.get(expected[0]);
         for (long l : expected) {
-            assertEquals(needle, data.get(l));
+            assertThat(data.get(l)).isEqualTo(needle);
         }
 
         final List<Long> exp = Arrays.asList(expected);
@@ -127,33 +143,34 @@ class SccTest {
             if (exp.contains(i)) {
                 continue;
             }
-            assertNotEquals(needle, data.get(i));
+            assertThat(data.get(i)).isNotEqualTo(needle);
         }
     }
 
     @Test
-    void testLogging() {
-        var task = Tasks.leaf("My task");
+    void shouldLogProgress() {
+        var config = SccStreamConfigImpl.builder().build();
+        var factory = new SccAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
-
-        var algo = new SccAlgorithm(
-            graph,
-            progressTracker
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, config),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
         );
+        factory.build(graph, config, progressTracker).compute();
 
-        algo.compute();
-
-        assertThat(log.getMessages(INFO))
-            // avoid asserting on the thread id
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
+            .extracting(replaceTimings())
             .containsExactly(
-                "My task :: Start",
-                "My task 11%",
-                "My task 22%",
-                "My task 100%",
-                "My task :: Finished"
+                "Scc :: Start",
+                "Scc 11%",
+                "Scc 22%",
+                "Scc 100%",
+                "Scc :: Finished"
             );
-    }
 
+    }
+    
 }

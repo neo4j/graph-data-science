@@ -44,8 +44,9 @@ YIELD
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
-| Name        | Type    | Default | Description
-| concurrency | Integer | 4       | The number of concurrent threads used for performing the backup.
+| Name          | Type    | Default | Description
+| concurrency   | Integer | 4       | The number of concurrent threads used for performing the backup.
+| includeGraphs | Boolean | true    | Flag to decide whether only models or also graphs should be backed up.
 |===
 
 .Results

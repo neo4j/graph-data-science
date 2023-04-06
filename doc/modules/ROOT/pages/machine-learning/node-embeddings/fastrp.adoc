@@ -7,7 +7,6 @@
 
 :directed:
 :undirected:
-:homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
@@ -65,7 +64,7 @@ In general, it is recommended to first use `UNDIRECTED` as this is what the orig
 For more information on this algorithm see:
 
 * https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
-* https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
+* https://www.sciencedirect.com/science/article/pii/S0022000003000254[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 
 === Node properties

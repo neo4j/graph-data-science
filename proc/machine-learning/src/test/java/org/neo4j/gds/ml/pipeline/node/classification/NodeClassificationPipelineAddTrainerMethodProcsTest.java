@@ -83,7 +83,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void shouldSetRFParams() {
         assertCypherResult(
-            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest('myPipeline', {maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
+            "CALL gds.beta.pipeline.nodeClassification.addRandomForest('myPipeline', {maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
@@ -102,6 +102,32 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                     TrainingMethod.LogisticRegression.toString(), List.of(),
                     TrainingMethod.MLPClassification.toString(), List.of()
                     )
+            ))
+        );
+    }
+
+    @Test
+    void shouldSetRFParamsAlphaBackwardCompat() {
+        assertCypherResult(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest('myPipeline', {maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
+            List.of(Map.of(
+                "name", "myPipeline",
+                "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
+                "nodePropertySteps", List.of(),
+                "featureProperties", List.of(),
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForestClassification.toString(),
+                    List.of(RandomForestClassifierTrainerConfigImpl.builder()
+                        .maxDepth(42)
+                        .maxFeaturesRatio(0.5)
+                        .numberOfDecisionTrees(10)
+                        .minSplitSize(2)
+                        .build()
+                        .toMapWithTrainerMethod()),
+                    TrainingMethod.LogisticRegression.toString(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of()
+                )
             ))
         );
     }

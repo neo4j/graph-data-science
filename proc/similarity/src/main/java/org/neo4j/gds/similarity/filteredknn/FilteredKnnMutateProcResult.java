@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.similarity.SimilarityMutateResult;
-import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 import java.util.Map;
 
@@ -58,7 +58,7 @@ public class FilteredKnnMutateProcResult extends SimilarityMutateResult {
         this.nodePairsConsidered = nodePairsConsidered;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> {
+    public static class Builder extends SimilarityResultBuilder<SimilarityMutateResult> {
         private long ranIterations;
         private boolean didConverge;
         private long nodePairsConsidered;

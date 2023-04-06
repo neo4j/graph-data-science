@@ -73,6 +73,15 @@ public final class ValidatorUtils {
         return false;
     }
 
+    public static boolean isDefault(ExecutableElement e, Messager messager) {
+        if (e.isDefault()) {
+            return true;
+        }
+
+        messager.printMessage(Diagnostic.Kind.ERROR, "Method must be default", e);
+        return false;
+    }
+
     public static boolean isStatic(ExecutableElement e, Messager messager) {
         if (!e.isDefault() && e.getModifiers().containsAll(List.of(Modifier.STATIC, Modifier.PUBLIC))) {
             return true;

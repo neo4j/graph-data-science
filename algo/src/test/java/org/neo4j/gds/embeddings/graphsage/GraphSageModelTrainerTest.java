@@ -26,10 +26,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.beta.generator.PropertyProducer;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -77,6 +81,7 @@ class GraphSageModelTrainerTest {
     private Graph unweightedGraph;
     @Inject
     private Graph arrayGraph;
+
     private HugeObjectArray<double[]> features;
     private GraphSageTrainConfigImpl.Builder configBuilder;
 
@@ -95,6 +100,53 @@ class GraphSageModelTrainerTest {
             .modelUser("DUMMY")
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .embeddingDimension(EMBEDDING_DIMENSION);
+    }
+
+    // This reproduced bug in https://trello.com/c/BQ3e12K3/7826-250-graphsage-returns-nan-when-using-relationship-weights
+    // https://github.com/neo4j/graph-data-science/issues/250
+    @ParameterizedTest
+    @EnumSource(AggregatorType.class)
+    void trainsWithRelationshipWeight(AggregatorType aggregatorType) {
+
+        var config = GraphSageTrainConfigImpl.builder()
+            .randomSeed(42L)
+            .batchSize(100)
+            .relationshipWeightProperty("p")
+            .embeddingDimension(2)
+            .aggregator(aggregatorType)
+            .activationFunction(ActivationFunction.SIGMOID)
+            .featureProperties(List.of("features"))
+            .modelName("model")
+            .modelUser("")
+            .build();
+
+        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+
+        int nodeCount = 5_000;
+        var bigGraph = RandomGraphGenerator
+            .builder()
+            .nodeCount(nodeCount)
+            .averageDegree(1)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(PropertyProducer.randomEmbedding("features", 1, -100, 100))
+            .relationshipPropertyProducer(PropertyProducer.fixedDouble("p", 0.5))
+            .seed(42L)
+            .build()
+            .generate();
+
+        features = HugeObjectArray.newArray(double[].class, nodeCount);
+
+        LongStream.range(0, nodeCount).forEach(n -> features.set(n, bigGraph.nodeProperties().get("features").doubleArrayValue(n)));
+
+        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(
+            bigGraph,
+            features
+        );
+
+        assertThat(result.layers())
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()))
+            );
     }
 
     @ParameterizedTest
@@ -236,18 +288,7 @@ class GraphSageModelTrainerTest {
         assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 100, 100, 100, 100);
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
-            .contains(new double[]{
-                18.25,
-                16.31,
-                16.41,
-                16.21,
-                14.96,
-                14.97,
-                14.31,
-                16.17,
-                14.90,
-                15.58
-                }, Offset.offset(0.05)
+            .contains(new double[]{19.55, 21.24, 19.90, 19.42, 17.87, 17.03, 17.04, 20.42, 15.86, 20.56}, Offset.offset(0.05)
             );
     }
 
@@ -280,18 +321,7 @@ class GraphSageModelTrainerTest {
         assertThat(metrics.ranIterationsPerEpoch()).containsOnly(10);
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
-            .contains(new double[]{
-                23.41,
-                19.94,
-                19.70,
-                21.62,
-                19.06,
-                24.11,
-                19.72,
-                16.47,
-                19.74,
-                20.97
-                }, Offset.offset(0.05)
+            .contains(new double[]{19.73, 21.25, 20.81, 23.13, 19.70, 25.34, 20.65, 17.10, 20.48, 21.51}, Offset.offset(0.05)
             );
     }
 

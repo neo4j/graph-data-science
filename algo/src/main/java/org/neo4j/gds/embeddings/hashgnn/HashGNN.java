@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -41,7 +42,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
  */
-public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
+public class HashGNN extends Algorithm<HashGNNResult> {
     private static final long DEGREE_PARTITIONS_PER_THREAD = 4;
     private final long randomSeed;
     private final Graph graph;
@@ -155,9 +156,9 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
         var binaryOutputVectors = (config.iterations() - 1) % 2 == 0 ? embeddingsA : embeddingsB;
 
-        HugeObjectArray<double[]> outputVectors;
+        NodePropertyValues outputVectors;
         if (config.outputDimension().isPresent()) {
-            outputVectors = DensifyTask.compute(
+            var denseVectors = DensifyTask.compute(
                 graph,
                 rangePartition,
                 config,
@@ -166,9 +167,10 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 progressTracker,
                 terminationFlag
             );
+
+            outputVectors = EmbeddingsToNodePropertyValues.fromDense(denseVectors);
         } else {
-            outputVectors = HugeObjectArray.newArray(double[].class, graph.nodeCount());
-            outputVectors.setAll(nodeId -> bitSetToArray(binaryOutputVectors.get(nodeId), embeddingDimension));
+            outputVectors = EmbeddingsToNodePropertyValues.fromBinary(binaryOutputVectors, embeddingDimension);
         }
 
         progressTracker.endSubTask("HashGNN");
@@ -176,13 +178,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         return new HashGNNResult(outputVectors);
     }
 
-    private double[] bitSetToArray(HugeAtomicBitSet bitSet, int dimension) {
-        var array = new double[dimension];
-        bitSet.forEachSetBit(bit -> {
-            array[(int) bit] = 1.0;
-        });
-        return array;
-    }
+
 
     static final class MinAndArgmin {
         public int min;
@@ -191,18 +187,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         MinAndArgmin() {
             this.min = -1;
             this.argMin = Integer.MAX_VALUE;
-        }
-    }
-
-    public static class HashGNNResult {
-        private final HugeObjectArray<double[]> embeddings;
-
-        public HashGNNResult(HugeObjectArray<double[]> embeddings) {
-            this.embeddings = embeddings;
-        }
-
-        public HugeObjectArray<double[]> embeddings() {
-            return embeddings;
         }
     }
 

@@ -29,8 +29,8 @@ import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
-import org.neo4j.gds.graphsampling.samplers.cnarw.CommonNeighbourAwareRandomWalk;
-import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,7 +43,6 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphSampleProc extends CatalogProc {
 
     private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
-    private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on Common Neighbor Awareness Random Walks";
 
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
     @Description(RWR_DESCRIPTION)

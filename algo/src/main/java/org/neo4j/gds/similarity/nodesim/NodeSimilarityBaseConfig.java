@@ -60,6 +60,12 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int upperDegreeCutoff() {
+        return Integer.MAX_VALUE;
+    }
+
+    @Value.Default
     @Configuration.Key(TOP_K_KEY)
     @Configuration.IntegerRange(min = 1)
     default int topK() {
@@ -146,6 +152,11 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
                 "Invalid parameter combination: %s combined with %s",
                 TOP_N_KEY,
                 BOTTOM_N_KEY
+            ));
+        }
+        if (upperDegreeCutoff() < degreeCutoff()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of upperDegreeCutoff cannot be smaller than degreeCutoff"
             ));
         }
     }

@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -33,10 +30,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
+import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KmeansMutateProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansMutateConfig, MutateResult> {
+public class KmeansMutateProc extends BaseProc {
 
     @Procedure(value = "gds.beta.kmeans.mutate", mode = READ)
     @Description(KMEANS_DESCRIPTION)
@@ -65,20 +62,5 @@ public class KmeansMutateProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansM
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
-    }
-
-    @Override
-    public AlgorithmFactory<?, Kmeans, KmeansMutateConfig> algorithmFactory() {
-        return new KmeansMutateSpec().algorithmFactory();
-    }
-
-    @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new KmeansMutateSpec().computationResultConsumer();
-    }
-
-    @Override
-    protected KmeansMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return new KmeansMutateSpec().newConfigFunction().apply(username, config);
     }
 }

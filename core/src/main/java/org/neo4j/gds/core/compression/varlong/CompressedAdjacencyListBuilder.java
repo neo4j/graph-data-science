@@ -20,11 +20,10 @@
 package org.neo4j.gds.core.compression.varlong;
 
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
+import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-
-import java.util.Arrays;
 
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
@@ -40,8 +39,8 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     }
 
     @Override
-    public Allocator newPositionalAllocator() {
-        return newAllocator();
+    public PositionalAllocator<byte[]> newPositionalAllocator() {
+        throw new UnsupportedOperationException("Compressed adjacency lists do not support positional allocation.");
     }
 
     @Override
@@ -63,16 +62,6 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         public byte[] newPage(int length) {
             return new byte[length];
         }
-
-        @Override
-        public byte[] copyOfPage(byte[] bytes, int length) {
-            return Arrays.copyOf(bytes, length);
-        }
-
-        @Override
-        public int lengthOfPage(byte[] bytes) {
-            return bytes.length;
-        }
     }
 
     static final class Allocator implements AdjacencyListBuilder.Allocator<byte[]> {
@@ -84,12 +73,12 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         }
 
         @Override
-        public void close() {
+        public long allocate(int length, Slice<byte[]> into) {
+            return allocator.insertInto(length, (ModifiableSlice<byte[]>) into);
         }
 
         @Override
-        public long write(byte[] targets, int length, long address) {
-            return allocator.insert(targets, length);
+        public void close() {
         }
     }
 }

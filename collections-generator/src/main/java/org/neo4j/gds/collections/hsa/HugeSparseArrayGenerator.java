@@ -69,11 +69,9 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
         var pageShift = pageShiftField(spec.pageShift());
         var pageSize = pageSizeField(pageShift);
         var pageMask = pageMaskField(pageSize);
-        var pageSizeInBytes = pageSizeInBytesField(pageSize);
         builder.addField(pageShift);
         builder.addField(pageSize);
         builder.addField(pageMask);
-        builder.addField(pageSizeInBytes);
 
         // instance fields
         var capacity = capacityField();
@@ -134,13 +132,6 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
         return FieldSpec
             .builder(TypeName.INT, "PAGE_MASK", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$N - 1", pageSizeField)
-            .build();
-    }
-
-    private static FieldSpec pageSizeInBytesField(FieldSpec pageSizeField) {
-        return FieldSpec
-            .builder(TypeName.LONG, "PAGE_SIZE_IN_BYTES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("$T.sizeOfLongArray($N)", MemoryUsage.class, pageSizeField)
             .build();
     }
 

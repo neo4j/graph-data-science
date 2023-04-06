@@ -19,24 +19,44 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStatsConfig> {
+class TriangleCountStatsProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A)-[:T]->(b:A), " +
+                                           "(b)-[:T]->(c:A), " +
+                                           "(c)-[:T]->(a)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            TriangleCountStatsProc.class
+        );
+
+        runQuery("CALL gds.graph.project('graph', 'A', {T: { orientation: 'UNDIRECTED'}})");
+    }
 
     @Test
-    void testStats() {
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+    void shouldRunStats() {
+        var query = GdsCypher.call("graph")
             .algo("triangleCount")
             .statsMode()
             .yields();
@@ -49,6 +69,34 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("globalTriangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1L);
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+        });
+
+        assertThat(rowCount).isEqualTo(1L);
+
     }
 
     @Test
@@ -60,7 +108,8 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
                  "CREATE (d)-[:REL]->(n)");
 
         GraphStoreCatalog.removeAllLoadedGraphs();
-        loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+
+        loadCompleteGraph("graph", Orientation.UNDIRECTED);
 
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
@@ -68,20 +117,20 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             .addParameter("maxDegree", 2)
             .yields("globalTriangleCount", "nodeCount");
 
-        assertCypherResult(query, List.of(Map.of(
-            "globalTriangleCount", 0L,
-            "nodeCount", 4L
-        )));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("globalTriangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(0L);
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(4L);
+
+        });
+
+        assertThat(rowCount).isEqualTo(1L);
+
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig, ?>> getProcedureClazz() {
-        return TriangleCountStatsProc.class;
-    }
-
-    @Override
-    public TriangleCountStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStatsConfig.of(mapWrapper);
-    }
 
 }

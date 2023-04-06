@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.steiner;
 
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -83,7 +82,7 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
                 );
                 var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-                RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder = executionContext.relationshipExporterBuilder();
+                RelationshipExporterBuilder relationshipExporterBuilder = executionContext.relationshipExporterBuilder();
                 relationshipExporterBuilder
                     .withGraph(spanningGraph)
                     .withIdMappingOperator(spanningGraph::toOriginalNodeId)

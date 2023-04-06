@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -98,7 +99,8 @@ class MultiLabelGraphSageTrainTest {
             weightedGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -118,7 +120,8 @@ class MultiLabelGraphSageTrainTest {
             weightedGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion
         );
         // should not fail
         var model = multiLabelGraphSageTrain.compute();
@@ -146,7 +149,8 @@ class MultiLabelGraphSageTrainTest {
             weightedGraph,
             graphSageTrainConfig,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion
         );
 
         var model = graphSageTrain.compute();
@@ -188,7 +192,8 @@ class MultiLabelGraphSageTrainTest {
             unequalGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion
         );
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -212,7 +217,8 @@ class MultiLabelGraphSageTrainTest {
             graph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(multiLabelGraphSageTrain::compute)

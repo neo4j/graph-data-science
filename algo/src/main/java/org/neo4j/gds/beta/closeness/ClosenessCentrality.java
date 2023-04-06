@@ -40,6 +40,10 @@ import java.util.concurrent.ExecutorService;
  */
 public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
+    public static final String CLOSENESS_DESCRIPTION =
+        "Closeness centrality is a way of detecting nodes that are " +
+        "able to spread information very efficiently through a graph.";
+
     private final Graph graph;
     private final long nodeCount;
     private final int concurrency;

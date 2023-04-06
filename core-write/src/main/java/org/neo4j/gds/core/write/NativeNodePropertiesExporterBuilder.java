@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.transaction.TransactionContext;
 
-public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBuilder<NativeNodePropertyExporter> {
+public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBuilder {
     protected final TransactionContext transactionContext;
 
     public NativeNodePropertiesExporterBuilder(TransactionContext transactionContext) {

@@ -1,1 +1,2 @@
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | communityProperty | String | n/a     | no       | The node property that holds the community ID as an integer for each node. Note that only non-negative community IDs are considered valid and will have their conductance computed.

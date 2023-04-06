@@ -20,12 +20,13 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -46,9 +47,9 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         int initialQueueCapacity
     ) {
         var heads = HugeIntArray.newArray(nodeCount);
-        var tails = HugeAtomicLongArray.newArray(nodeCount);
+        var tails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
         var queues = HugeObjectArray.newArray(double[].class, nodeCount);
-        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount);
+        var referenceCounts = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
 
         var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         queues.setAll(value -> {

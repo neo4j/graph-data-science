@@ -21,6 +21,7 @@ package org.neo4j.gds.collections;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.service.AutoService;
+import org.neo4j.gds.collections.haa.HugeAtomicArrayStep;
 import org.neo4j.gds.collections.hsa.HugeSparseArrayStep;
 import org.neo4j.gds.collections.hsl.HugeSparseListStep;
 
@@ -48,7 +49,8 @@ public class CollectionsProcessor extends BasicAnnotationProcessor {
 
         return List.of(
             HugeSparseArrayStep.of(processingEnv, sourcePath),
-            HugeSparseListStep.of(processingEnv, sourcePath)
+            HugeSparseListStep.of(processingEnv, sourcePath),
+            HugeAtomicArrayStep.of(processingEnv, sourcePath)
         );
     }
 

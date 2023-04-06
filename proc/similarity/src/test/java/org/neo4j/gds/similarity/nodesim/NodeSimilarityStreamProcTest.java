@@ -19,41 +19,82 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphDropProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
+class NodeSimilarityStreamProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, ?>> getProcedureClazz() {
-        return NodeSimilarityStreamProc.class;
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Person {id: 0,  name: 'Alice'})" +
+        ", (b:Person {id: 1,  name: 'Bob'})" +
+        ", (c:Person {id: 2,  name: 'Charlie'})" +
+        ", (d:Person {id: 3,  name: 'Dave'})" +
+        ", (i1:Item  {id: 10, name: 'p1'})" +
+        ", (i2:Item  {id: 11, name: 'p2'})" +
+        ", (i3:Item  {id: 12, name: 'p3'})" +
+        ", (i4:Item  {id: 13, name: 'p4'})" +
+        ", (a)-[:LIKES]->(i1)" +
+        ", (a)-[:LIKES]->(i2)" +
+        ", (a)-[:LIKES]->(i3)" +
+        ", (b)-[:LIKES]->(i1)" +
+        ", (b)-[:LIKES]->(i2)" +
+        ", (c)-[:LIKES]->(i3)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            NodeSimilarityStreamProc.class,
+            GraphProjectProc.class
+        );
+
+        TestSupport.allDirectedProjections().forEach(orientation -> {
+            String name = "myGraph" + orientation.name();
+            String createQuery = GdsCypher.call(name)
+                .graphProject()
+                .withAnyLabel()
+                .withRelationshipType(
+                    "LIKES",
+                    RelationshipProjection.builder().type("LIKES").orientation(orientation).build()
+                )
+                .yields();
+            runQuery(createQuery);
+        });
     }
 
-    @Override
-    public NodeSimilarityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityStreamConfig.of(mapWrapper);
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();
@@ -102,7 +143,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("allValidGraphVariationsWithProjections")
     void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")
@@ -127,7 +168,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("allValidGraphVariationsWithProjections")
     void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         int topN = 2;
         String query = queryBuilder
@@ -153,7 +194,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("allValidGraphVariationsWithProjections")
     void shouldStreamWithDegreeCutOff(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         int degreeCutoff = 2;
 
@@ -180,7 +221,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("allValidGraphVariationsWithProjections")
     void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         // Add parallel edges
         runQuery("" +
@@ -218,19 +259,26 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
         );
     }
 
-    @Override
-    @Test
-    public void checkStatsModeExists() {
-        applyOnProcedure((proc) -> {
-            boolean inStreamClass = methodExists(proc, "stream");
-            if (inStreamClass) {
-                assertFalse(
-                    methodExists(proc, "stats"),
-                    "Stats method was moved to its own class"
-                );
-            }
-        });
+
+    static Stream<Arguments> allGraphVariations() {
+        return graphVariationForProjection(NATURAL).map(args -> arguments(args.get()[0], args.get()[2]));
     }
+
+    static Stream<Arguments> allValidGraphVariationsWithProjections() {
+        return TestSupport.allDirectedProjections().flatMap(NodeSimilarityStreamProcTest::graphVariationForProjection);
+    }
+
+    private static Stream<Arguments> graphVariationForProjection(Orientation orientation) {
+        String name = "myGraph" + orientation.name();
+        return Stream.of(
+            arguments(
+                GdsCypher.call(name),
+                orientation,
+                "explicit graph - " + orientation
+            )
+        );
+    }
+
 
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_METHOD)
@@ -241,7 +289,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             "CREATE (:IncrementIdSpace)" + DB_CYPHER;
 
         @ParameterizedTest(name = "{1}")
-        @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
+        @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamProcTest#allGraphVariations")
         void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
             String graphCreate =
                 "CALL gds.graph.project(" +
@@ -316,10 +364,12 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             .addParameter("topN", topN)
             .yields("node1", "node2", "similarity");
 
-        runQueryWithRowConsumer(algoQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(algoQuery, row -> {
             assertThat(row.getNumber("node1")).isIn(11L, 12L);
             assertThat(row.getNumber("node2")).isIn(11L, 12L);
             assertThat(row.getNumber("similarity")).isEqualTo(1.0);
         });
+
+        assertThat(rowCount).isEqualTo(2l);
     }
 }

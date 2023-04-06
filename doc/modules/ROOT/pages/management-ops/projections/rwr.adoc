@@ -7,7 +7,6 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 :directed:
 :undirected:
-:homogeneous:
 :heterogeneous-nodes:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]

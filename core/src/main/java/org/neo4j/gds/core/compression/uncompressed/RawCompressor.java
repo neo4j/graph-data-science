@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.uncompressed;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -28,6 +29,7 @@ import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
+import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
@@ -39,14 +41,6 @@ import java.util.Arrays;
 import java.util.function.LongSupplier;
 
 public final class RawCompressor implements AdjacencyCompressor {
-
-    private final AdjacencyListBuilder.Allocator<long[]> adjacencyAllocator;
-    private final AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators;
-    private final HugeIntArray adjacencyDegrees;
-    private final HugeLongArray adjacencyOffsets;
-    private final HugeLongArray propertyOffsets;
-    private final boolean noAggregation;
-    private final Aggregation[] aggregations;
 
     public static AdjacencyCompressorFactory factory(
         LongSupplier nodeCountSupplier,
@@ -68,9 +62,79 @@ public final class RawCompressor implements AdjacencyCompressor {
         );
     }
 
+    private static final class Factory extends AbstractAdjacencyCompressorFactory<long[], long[]> {
+
+        Factory(
+            LongSupplier nodeCountSupplier,
+            AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
+            boolean noAggregation,
+            Aggregation[] aggregations
+        ) {
+            super(
+                nodeCountSupplier,
+                adjacencyBuilder,
+                propertyBuilders,
+                noAggregation,
+                aggregations
+            );
+        }
+
+        @Override
+        protected AdjacencyCompressor createCompressorFromInternalState(
+            AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
+            boolean noAggregation,
+            Aggregation[] aggregations,
+            HugeIntArray adjacencyDegrees,
+            HugeLongArray adjacencyOffsets,
+            HugeLongArray propertyOffsets
+        ) {
+            AdjacencyListBuilder.Allocator<long[]> firstAllocator;
+            AdjacencyListBuilder.PositionalAllocator<long[]>[] otherAllocators;
+
+            if (propertyBuilders.length > 0) {
+                firstAllocator = propertyBuilders[0].newAllocator();
+                //noinspection unchecked
+                otherAllocators = new AdjacencyListBuilder.PositionalAllocator[propertyBuilders.length - 1];
+                Arrays.setAll(
+                    otherAllocators,
+                    i -> propertyBuilders[i + 1].newPositionalAllocator()
+                );
+            } else {
+                firstAllocator = null;
+                otherAllocators = null;
+            }
+
+            return new RawCompressor(
+                adjacencyBuilder.newAllocator(),
+                firstAllocator,
+                otherAllocators,
+                adjacencyDegrees,
+                adjacencyOffsets,
+                propertyOffsets,
+                noAggregation,
+                aggregations
+            );
+        }
+    }
+
+    private final AdjacencyListBuilder.Allocator<long[]> adjacencyAllocator;
+    private final @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator;
+    private final AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators;
+    private final HugeIntArray adjacencyDegrees;
+    private final HugeLongArray adjacencyOffsets;
+    private final HugeLongArray propertyOffsets;
+    private final boolean noAggregation;
+    private final Aggregation[] aggregations;
+
+    private final LongArrayBuffer buffer;
+    private final ModifiableSlice<long[]> slice;
+
     private RawCompressor(
         AdjacencyListBuilder.Allocator<long[]> adjacencyAllocator,
-        AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators,
+        @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator,
+        AdjacencyListBuilder.PositionalAllocator<long[]> @Nullable [] otherPropertyAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray propertyOffsets,
@@ -78,12 +142,16 @@ public final class RawCompressor implements AdjacencyCompressor {
         Aggregation[] aggregations
     ) {
         this.adjacencyAllocator = adjacencyAllocator;
-        this.propertiesAllocators = propertiesAllocators;
+        this.firstPropertyAllocator = firstPropertyAllocator;
+        this.otherPropertyAllocators = otherPropertyAllocators;
         this.adjacencyDegrees = adjacencyDegrees;
         this.adjacencyOffsets = adjacencyOffsets;
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
+
+        this.buffer = new LongArrayBuffer();
+        this.slice = ModifiableSlice.create();
     }
 
     @Override
@@ -93,7 +161,6 @@ public final class RawCompressor implements AdjacencyCompressor {
         long[][] properties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
-        LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
         if (properties != null) {
@@ -103,20 +170,31 @@ public final class RawCompressor implements AdjacencyCompressor {
                 properties,
                 numberOfCompressedTargets,
                 compressedBytesSize,
-                buffer,
                 mapper
             );
         } else {
-            return withoutProperties(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
+            return withoutProperties(
+                nodeId,
+                targets,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                mapper
+            );
         }
     }
 
     @Override
     public void close() {
-        adjacencyAllocator.close();
-        for (var propertiesAllocator : propertiesAllocators) {
-            if (propertiesAllocator != null) {
-                propertiesAllocator.close();
+        this.adjacencyAllocator.close();
+        if (this.firstPropertyAllocator != null) {
+            this.firstPropertyAllocator.close();
+        }
+        if (this.otherPropertyAllocators != null) {
+            for (var otherPropertyAllocator : this.otherPropertyAllocators) {
+                // TODO: Do we need this null check here?
+                if (otherPropertyAllocator != null) {
+                    otherPropertyAllocator.close();
+                }
             }
         }
     }
@@ -126,15 +204,20 @@ public final class RawCompressor implements AdjacencyCompressor {
         byte[] targets,
         int numberOfCompressedTargets,
         int compressedBytesSize,
-        LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
         // decompress target ids
-        AdjacencyCompression.zigZagUncompressFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
+        AdjacencyCompression.zigZagUncompressFrom(
+            this.buffer,
+            targets,
+            numberOfCompressedTargets,
+            compressedBytesSize,
+            mapper
+        );
 
-        int degree = aggregate(buffer, aggregations[0]);
+        int degree = aggregate(this.aggregations[0]);
 
-        long address = copy(buffer.buffer, degree, adjacencyAllocator);
+        long address = copy(this.buffer.buffer, degree);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
@@ -142,9 +225,9 @@ public final class RawCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private int aggregate(LongArrayBuffer targets, Aggregation aggregation) {
-        var values = targets.buffer;
-        var length = targets.length;
+    private int aggregate(Aggregation aggregation) {
+        var values = this.buffer.buffer;
+        var length = this.buffer.length;
 
         Arrays.sort(values, 0, length);
 
@@ -184,7 +267,7 @@ public final class RawCompressor implements AdjacencyCompressor {
 
         int in = 1, out = 1;
 
-        if (noAggregation) {
+        if (this.noAggregation) {
             for (; in < length; ++in) {
                 int sortIdx = order[in];
 
@@ -234,16 +317,21 @@ public final class RawCompressor implements AdjacencyCompressor {
         long[][] uncompressedProperties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
-        LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        AdjacencyCompression.zigZagUncompressFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
+        AdjacencyCompression.zigZagUncompressFrom(
+            this.buffer,
+            targets,
+            numberOfCompressedTargets,
+            compressedBytesSize,
+            mapper
+        );
 
-        int degree = aggregateWithProperties(buffer, uncompressedProperties, aggregations);
+        int degree = aggregateWithProperties(this.buffer, uncompressedProperties, this.aggregations);
 
-        long address = copy(buffer.buffer, degree, adjacencyAllocator);
+        long address = copy(this.buffer.buffer, degree);
 
-        copyProperties(uncompressedProperties, degree, nodeId, propertyOffsets);
+        copyProperties(uncompressedProperties, degree, nodeId);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
@@ -251,64 +339,25 @@ public final class RawCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray offsets) {
-        long offset = propertiesAllocators[0].write(properties[0], degree, -1L);
+    private long copy(long[] data, int degree) {
+        var slice = this.slice;
+        long address = this.adjacencyAllocator.allocate(degree, slice);
+        System.arraycopy(data, 0, slice.slice(), slice.offset(), degree);
+        return address;
+    }
+
+    private void copyProperties(long[][] properties, int degree, long nodeId) {
+        assert this.firstPropertyAllocator != null;
+        assert this.otherPropertyAllocators != null;
+
+        var slice = this.slice;
+        long address = this.firstPropertyAllocator.allocate(degree, slice);
+        System.arraycopy(properties[0], 0, slice.slice(), slice.offset(), degree);
 
         for (int i = 1; i < properties.length; i++) {
-            propertiesAllocators[i].write(properties[i], degree, offset);
+            this.otherPropertyAllocators[i - 1].writeAt(address, properties[i], degree);
         }
 
-        offsets.set(nodeId, offset);
-    }
-
-    private long copy(long[] data, int degree, AdjacencyListBuilder.Allocator<long[]> allocator) {
-        return allocator.write(data, degree, -1L);
-    }
-
-    private static final class Factory extends AbstractAdjacencyCompressorFactory<long[], long[]> {
-
-        Factory(
-            LongSupplier nodeCountSupplier,
-            AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
-            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
-            boolean noAggregation,
-            Aggregation[] aggregations
-        ) {
-            super(
-                nodeCountSupplier,
-                adjacencyBuilder,
-                propertyBuilders,
-                noAggregation,
-                aggregations
-            );
-        }
-
-        @Override
-        protected AdjacencyCompressor createCompressorFromInternalState(
-            AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
-            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
-            boolean noAggregation,
-            Aggregation[] aggregations,
-            HugeIntArray adjacencyDegrees,
-            HugeLongArray adjacencyOffsets,
-            HugeLongArray propertyOffsets
-        ) {
-            var propertyAllocators = new AdjacencyListBuilder.Allocator[propertyBuilders.length];
-            Arrays.setAll(
-                propertyAllocators,
-                i -> i == 0 ? propertyBuilders[i].newAllocator() : propertyBuilders[i].newPositionalAllocator()
-            );
-
-            //noinspection unchecked
-            return new RawCompressor(
-                adjacencyBuilder.newAllocator(),
-                propertyAllocators,
-                adjacencyDegrees,
-                adjacencyOffsets,
-                propertyOffsets,
-                noAggregation,
-                aggregations
-            );
-        }
+        this.propertyOffsets.set(nodeId, address);
     }
 }

@@ -32,7 +32,11 @@ class KnnFilteredGraphTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(GraphProjectProc.class, KnnMutateProc.class, GraphStreamRelationshipPropertiesProc.class);
+        registerProcedures(
+            GraphProjectProc.class,
+            KnnMutateProc.class,
+            GraphStreamRelationshipPropertiesProc.class
+        );
     }
 
     @Neo4jGraph
@@ -54,7 +58,7 @@ class KnnFilteredGraphTest extends BaseProcTest {
 
     @Test
     void shouldComputeAndMutateOnFilteredGraph() {
-        var create = "CALL gds.graph.project(" +
+        var graphProjectQuery = "CALL gds.graph.project(" +
                      "'g'," +
                      "['Person', 'Horse']," +
                      "['LIKES', 'KNOWS']" +
@@ -62,7 +66,7 @@ class KnnFilteredGraphTest extends BaseProcTest {
                      "nodeProperties: ['knn']" +
                      "}" +
                      ")";
-        runQuery(create);
+        runQuery(graphProjectQuery);
         var knnQuery1 = "CALL gds.knn.mutate('g', {" +
                         "    nodeLabels: ['Horse']," +
                         "    mutateRelationshipType: 'FOO1'," +

@@ -19,38 +19,31 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.triangleCount.stream", description = TriangleCountCompanion.DESCRIPTION, executionMode = STREAM)
-public class TriangleCountStreamProc
-    extends StreamProc<IntersectingTriangleCount, TriangleCountResult,
-    TriangleCountStreamProc.Result, TriangleCountStreamConfig> {
-
+public class TriangleCountStreamProc extends BaseProc {
     @Description(TriangleCountCompanion.DESCRIPTION)
     @Procedure(name = "gds.triangleCount.stream", mode = Mode.READ)
-    public Stream<Result> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new TriangleCountStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.triangleCount.stream.estimate", mode = READ)
@@ -59,55 +52,12 @@ public class TriangleCountStreamProc
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new TriangleCountStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
-        return runWithExceptionLogging("Graph streaming failed", () -> {
-            var graph = computationResult.graph();
-            var result = computationResult.result();
 
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new Result(
-                    graph.toOriginalNodeId(i),
-                    result.localTriangles().get(i)
-                ));
-        });
-    }
-
-    @Override
-    protected Result streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        throw new UnsupportedOperationException("TriangleCount handles result building individually.");
-    }
-
-    @Override
-    protected TriangleCountStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return TriangleCountStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
-        return new IntersectingTriangleCountFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult
-    ) {
-        return TriangleCountCompanion.nodePropertyTranslator(computationResult);
-    }
-
-    @SuppressWarnings("unused")
-    public static class Result {
-
-        public final long nodeId;
-        public final long triangleCount;
-
-        public Result(long nodeId, long triangleCount) {
-            this.nodeId = nodeId;
-            this.triangleCount = triangleCount;
-        }
-    }
 }

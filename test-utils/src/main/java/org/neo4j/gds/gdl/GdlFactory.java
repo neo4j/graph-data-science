@@ -33,6 +33,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
@@ -51,6 +52,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
+import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
@@ -212,7 +214,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @NotNull
-    private Object convertListProperty(List<?> list) {
+    private static Object convertListProperty(List<?> list) {
         var firstType = list.get(0).getClass();
 
         var isLong = firstType.equals(Long.class);
@@ -382,10 +384,24 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .orElse((long) nodeCount);
             var relCount = gdlHandler.getEdges().size();
 
+            var nodePropertyDimensions = new HashMap<String, Optional<Integer>>();
+            gdlHandler.getVertices().forEach(v -> v.getProperties().forEach((propertyKey, propertyValue) -> {
+                if (propertyValue instanceof List<?>) {
+                    var array = convertListProperty(((List<?>) propertyValue));
+                    nodePropertyDimensions.put(
+                        propertyKey,
+                        Optional.of(((ArrayValue) Values.of(array)).length())
+                    );
+                } else {
+                    nodePropertyDimensions.put(propertyKey, Optional.of(1));
+                }
+            }));
+
             return ImmutableGraphDimensions.builder()
                 .nodeCount(nodeCount)
                 .highestPossibleNodeCount(highestId + 1)
                 .relCountUpperBound(relCount)
+                .nodePropertyDimensions(new DimensionsMap(nodePropertyDimensions))
                 .build();
         }
     }

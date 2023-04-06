@@ -19,50 +19,103 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.WriteRelationshipWithPropertyTest;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeSimilarityWriteProcTest
-    extends NodeSimilarityProcTest<NodeSimilarityWriteConfig>
-    implements WriteRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityWriteConfig, NodeSimilarityResult> {
+class NodeSimilarityWriteProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, ?>> getProcedureClazz() {
-        return NodeSimilarityWriteProc.class;
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Person {id: 0,  name: 'Alice'})" +
+        ", (b:Person {id: 1,  name: 'Bob'})" +
+        ", (c:Person {id: 2,  name: 'Charlie'})" +
+        ", (d:Person {id: 3,  name: 'Dave'})" +
+        ", (i1:Item  {id: 10, name: 'p1'})" +
+        ", (i2:Item  {id: 11, name: 'p2'})" +
+        ", (i3:Item  {id: 12, name: 'p3'})" +
+        ", (i4:Item  {id: 13, name: 'p4'})" +
+        ", (a)-[:LIKES]->(i1)" +
+        ", (a)-[:LIKES]->(i2)" +
+        ", (a)-[:LIKES]->(i3)" +
+        ", (b)-[:LIKES]->(i1)" +
+        ", (b)-[:LIKES]->(i2)" +
+        ", (c)-[:LIKES]->(i3)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            NodeSimilarityWriteProc.class,
+            GraphProjectProc.class
+        );
+
+        TestSupport.allDirectedProjections().forEach(orientation -> {
+            String name = "myGraph" + orientation.name();
+            String createQuery = GdsCypher.call(name)
+                .graphProject()
+                .withAnyLabel()
+                .withRelationshipType(
+                    "LIKES",
+                    RelationshipProjection.builder().type("LIKES").orientation(orientation).build()
+                )
+                .yields();
+            runQuery(createQuery);
+        });
     }
 
-    @Override
-    public NodeSimilarityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityWriteConfig.of(mapWrapper);
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    static Stream<Arguments> allValidGraphVariationsWithProjections() {
+        return TestSupport.allDirectedProjections().flatMap(orientation -> {
+            String name = "myGraph" + orientation.name();
+            return Stream.of(
+                arguments(
+                    GdsCypher.call(name),
+                    orientation,
+                    "explicit graph - " + orientation
+                )
+            );
+        });
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("allValidGraphVariationsWithProjections")
     void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")
@@ -166,35 +219,8 @@ public class NodeSimilarityWriteProcTest
                         0.0
                     )
                 ),
-            GraphStoreCatalog.get(getUsername(), databaseId(), resultGraphName).graphStore().getUnion()
+            GraphStoreCatalog.get(getUsername(), DatabaseId.from(db.databaseName()), resultGraphName).graphStore().getUnion()
         );
-    }
-
-    @ParameterizedTest(name = "missing parameter: {0}")
-    @ValueSource(strings = {"writeProperty", "writeRelationshipType"})
-    void shouldFailIfConfigIsMissingWriteParameters(String parameter) {
-        CypherMapWrapper input = createMinimalConfig(CypherMapWrapper.empty())
-            .withoutEntry(parameter);
-
-        IllegalArgumentException illegalArgumentException = assertThrows(
-            IllegalArgumentException.class,
-            () -> createConfig(input)
-        );
-        assertThat(
-            illegalArgumentException.getMessage(),
-            startsWith(formatWithLocale("No value specified for the mandatory configuration parameter `%s`", parameter))
-        );
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", writeProperty());
-        }
-        if (!mapWrapper.containsKey("writeRelationshipType")) {
-            mapWrapper = mapWrapper.withString("writeRelationshipType", writeRelationshipType());
-        }
-        return mapWrapper;
     }
 
     @ParameterizedTest
@@ -220,9 +246,13 @@ public class NodeSimilarityWriteProcTest
             .addParameter("writeProperty", "score")
             .yields("relationshipsWritten");
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertEquals(6, row.getNumber("relationshipsWritten").longValue());
         });
+
+        Assertions.assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -279,15 +309,5 @@ public class NodeSimilarityWriteProcTest
             ),
             knnGraph
         );
-    }
-
-    @Override
-    public String writeRelationshipType() {
-        return "NODE_SIM_REL";
-    }
-
-    @Override
-    public String writeProperty() {
-        return "similarity";
     }
 }

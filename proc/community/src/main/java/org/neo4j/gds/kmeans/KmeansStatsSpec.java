@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
+import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.kmeans.stats", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStatsConfig, Stream<StatsResult>, KmeansAlgorithmFactory<KmeansStatsConfig>> {

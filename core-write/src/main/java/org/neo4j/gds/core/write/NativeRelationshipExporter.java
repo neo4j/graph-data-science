@@ -52,7 +52,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private final ProgressTracker progressTracker;
     private final ExecutorService executorService;
 
-    public static RelationshipExporterBuilder<NativeRelationshipExporter> builder(
+    public static RelationshipExporterBuilder builder(
         TransactionContext transactionContext,
         Graph graph,
         TerminationFlag terminationFlag
@@ -65,7 +65,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         );
     }
 
-    public static RelationshipExporterBuilder<NativeRelationshipExporter> builder(
+    public static RelationshipExporterBuilder builder(
         TransactionContext transactionContext,
         IdMap idMap,
         Graph graph,

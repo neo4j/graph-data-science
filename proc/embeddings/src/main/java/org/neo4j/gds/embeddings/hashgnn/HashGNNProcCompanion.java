@@ -19,30 +19,9 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.executor.ComputationResult;
-
 final class HashGNNProcCompanion {
 
     public static final String DESCRIPTION = "HashGNN creates node embeddings by hashing and message passing.";
 
     private HashGNNProcCompanion() {}
-
-    static <CONFIG extends HashGNNConfig> NodePropertyValues getNodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, CONFIG> computationResult) {
-        var nodeCount = computationResult.graph().nodeCount();
-        var embeddings = computationResult.result().embeddings();
-
-        return new DoubleArrayNodePropertyValues() {
-            @Override
-            public double[] doubleArrayValue(long nodeId) {
-                return embeddings.get(nodeId);
-            }
-
-            @Override
-            public long nodeCount() {
-                return nodeCount;
-            }
-        };
-    }
 }
