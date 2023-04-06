@@ -40,12 +40,12 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     private static final int CHUNK_SIZE = 64;
     private int chunkSize;
 
-    KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
-        super(progressTracker);
-        this.graph = graph;
-        this.concurrency = concurrency;
-        this.chunkSize = CHUNK_SIZE;
-    }
+   public KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
+       super(progressTracker);
+       this.graph = graph;
+       this.concurrency = concurrency;
+       this.chunkSize = CHUNK_SIZE;
+   }
 
     @TestOnly
     KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker, int chunkSize) {
