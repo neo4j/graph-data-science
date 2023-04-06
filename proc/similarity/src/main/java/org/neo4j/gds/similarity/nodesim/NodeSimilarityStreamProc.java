@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
@@ -39,8 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.nodeSimilarity.stream", description = NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSimilarityResult, SimilarityResult, NodeSimilarityStreamConfig> {
+public class NodeSimilarityStreamProc extends BaseProc {
 
     @Procedure(value = "gds.nodeSimilarity.stream", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -48,8 +42,11 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+
+        return new ProcedureExecutor<>(
+            new NodeSimilarityStreamSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = READ)
@@ -58,41 +55,10 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected NodeSimilarityStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeSimilarityStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory() {
-        return new NodeSimilarityFactory<>();
-    }
-
-    @Override
-    protected SimilarityResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
-    }
-
-    @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.empty();
-            }
-
-            return computationResult.result().streamResult()
-                .map(similarityResult -> {
-                    similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                    similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                    return similarityResult;
-                });
-        };
+        return new MemoryEstimationExecutor<>(
+            new NodeSimilarityStreamSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
