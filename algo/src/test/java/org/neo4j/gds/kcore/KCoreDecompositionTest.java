@@ -84,7 +84,80 @@ class KCoreDecompositionTest {
             assertThat(coreValues.get(idFunction.of("f"))).isEqualTo(2);
             assertThat(coreValues.get(idFunction.of("g"))).isEqualTo(2);
             assertThat(coreValues.get(idFunction.of("h"))).isEqualTo(2);
-            
+
+        }
+    }
+
+    // Graph is copied from https://www.researchgate.net/figure/Illustration-of-the-k-core-decomposition-of-a-small-network-The-sets-of-nodes-belonging_fig1_347212713
+    //ids wrt to different color class are given based on clockwise order (starting from highest element (or highst and most right for red))
+    @GdlExtension
+    @Nested
+    class ThreeCoreGraph {
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+            "  (z:node)," +
+            "  (green1:node)," +
+            "  (green2:node)," +
+            "  (green3:node)," +
+            "  (green4:node)," +
+            "  (green5:node)," +
+            "  (green6:node)," +
+            "  (green7:node)," +
+            "  (green8:node)," +
+            "  (yellow1:node)," +
+            "  (yellow2:node)," +
+            "  (red1:node)," +
+            "  (red2:node)," +
+            "  (red3:node)," +
+            "  (red4:node)," +
+            "(green1)-[:R]->(green2)," +
+            "(green2)-[:R]->(green3)," +
+            "(green2)-[:R]->(yellow1)," +
+            "(green4)-[:R]->(red1)," +
+            "(green5)-[:R]->(yellow2)," +
+            "(green6)-[:R]->(yellow2)," +
+            "(green7)-[:R]->(yellow2)," +
+            "(green8)-[:R]->(red3)," +
+            "(yellow1)-[:R]->(red1)," +
+            "(yellow1)-[:R]->(red4)," +
+            "(yellow2)-[:R]->(red2)," +
+            "(yellow2)-[:R]->(red3)," +
+            "(red1)-[:R]->(red4)," +
+            "(red1)-[:R]->(red2)," +
+            "(red1)-[:R]->(red3)," +
+            "(red2)-[:R]->(red4)," +
+            "(red2)-[:R]->(red3)," +
+            "(red3)-[:R]->(red4)";
+
+
+        @Inject
+        private TestGraph graph;
+
+        @Inject
+        private IdFunction idFunction;
+
+        @ParameterizedTest
+        @ValueSource(ints = {1, 4})
+        void shouldComputeCoreDecomposition(int concurrency) {
+
+            var kcore = new KCoreDecomposition(graph, concurrency, ProgressTracker.NULL_TRACKER, 1).compute();
+            assertThat(kcore.degeneracy()).isEqualTo(3);
+            var coreValues = kcore.coreValues();
+
+            assertThat(coreValues.get(idFunction.of("z"))).isEqualTo(0L);
+
+            for (int i = 1; i <= 8; ++i) {
+                assertThat(coreValues.get(idFunction.of("green" + i))).isEqualTo(1L);
+            }
+
+            assertThat(coreValues.get(idFunction.of("yellow1"))).isEqualTo(2L);
+            assertThat(coreValues.get(idFunction.of("yellow2"))).isEqualTo(2L);
+
+            for (int i = 1; i <= 4; ++i) {
+                assertThat(coreValues.get(idFunction.of("red" + i))).isEqualTo(3L);
+            }
+
         }
     }
 
