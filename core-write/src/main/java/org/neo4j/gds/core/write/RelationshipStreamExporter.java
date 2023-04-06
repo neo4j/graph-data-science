@@ -19,12 +19,27 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public interface RelationshipStreamExporter {
 
-    long write(String relationshipType, String... propertyKeys);
+    @TestOnly
+    default long write(String relationshipType, String... propertyKeys) {
+        return write(
+            relationshipType,
+            Arrays.stream(propertyKeys).collect(Collectors.toMap(Function.identity(), __ -> ValueType.DOUBLE))
+        );
+    }
+
+    long write(String relationshipType, Map<String, ValueType> propertyKeys);
 
     static Task baseTask(String operationName) {
         return Tasks.leaf(operationName + " :: WriteRelationshipStream");

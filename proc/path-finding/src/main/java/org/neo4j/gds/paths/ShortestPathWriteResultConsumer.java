@@ -21,6 +21,7 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -35,6 +36,7 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -113,17 +115,27 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
         });
     }
 
-    private String[] createKeys(boolean writeNodeIds, boolean writeCosts) {
+    private Map<String, ValueType> createKeys(boolean writeNodeIds, boolean writeCosts) {
         if (writeNodeIds && writeCosts) {
-            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY, COSTS_KEY};
+            return Map.of(
+                TOTAL_COST_KEY, ValueType.DOUBLE,
+                NODE_IDS_KEY, ValueType.LONG_ARRAY,
+                COSTS_KEY, ValueType.DOUBLE_ARRAY
+            );
         }
         if (writeNodeIds) {
-            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY};
+            return Map.of(
+                TOTAL_COST_KEY, ValueType.DOUBLE,
+                NODE_IDS_KEY, ValueType.LONG_ARRAY
+            );
         }
         if (writeCosts) {
-            return new String[]{TOTAL_COST_KEY, COSTS_KEY};
+            return Map.of(
+                TOTAL_COST_KEY,ValueType.DOUBLE,
+                COSTS_KEY,ValueType.DOUBLE_ARRAY
+            );
         }
-        return new String[]{TOTAL_COST_KEY};
+        return Map.of(TOTAL_COST_KEY, ValueType.DOUBLE);
     }
 
     private Value[] createValues(IdMap idMap, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
