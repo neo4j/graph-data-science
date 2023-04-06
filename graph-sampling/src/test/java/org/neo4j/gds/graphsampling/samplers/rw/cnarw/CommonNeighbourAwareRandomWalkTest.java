@@ -33,8 +33,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfigImpl;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
-import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 
 import java.util.HashMap;
 import java.util.HashSet;
