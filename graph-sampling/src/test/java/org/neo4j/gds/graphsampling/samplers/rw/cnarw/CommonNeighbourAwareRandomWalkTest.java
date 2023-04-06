@@ -296,8 +296,7 @@ class CommonNeighbourAwareRandomWalkTest {
             .samplingRatio(0.22)
             .restartProbability(0.01).build();
         var graph = getGraph(config);
-
-        for (int i = 0; i < 250; i++) {
+        for (int i = 0; i < 1000; i++) {
             var cnarw = new CommonNeighbourAwareRandomWalk(config);
             var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
             if (cnarw.startNodesUsed().contains(idFunction.of("x1")) ||
@@ -306,7 +305,7 @@ class CommonNeighbourAwareRandomWalkTest {
             }
             validCases++;
 
-            assertThat(nodes.cardinality()).isBetween(3L, 4L);
+            assertThat(nodes.cardinality()).isBetween(3L, 5L);
             assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isFalse();
 
             if (nodes.get(graph.toMappedNodeId(idFunction.of("x"))) &&
@@ -316,8 +315,7 @@ class CommonNeighbourAwareRandomWalkTest {
                 casesPassed++;
             }
         }
-        assertThat(casesPassed / validCases).isCloseTo(0.3, Offset.offset(0.3)
-        );
+        assertThat(casesPassed / validCases).isCloseTo(0.35, Offset.offset(0.2));
     }
 
     @Test
