@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -42,7 +41,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class NodeSimilarityWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
