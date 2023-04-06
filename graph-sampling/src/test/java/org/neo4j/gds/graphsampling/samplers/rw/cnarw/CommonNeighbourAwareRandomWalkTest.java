@@ -542,12 +542,12 @@ class CommonNeighbourAwareRandomWalkTest {
 
     @Test
     void documentationSampleTest() {
-        var N = 100;
+        var N = 1000;
         var RPickedRWR = 0;
         var RPickedCNARW = 0;
         for (long i = 0; i < N; i++) {
             var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
-                .startNodes(List.of(testdocIdFunction.of("J")))
+                .startNodes(List.of(testdocIdFunction.of("j1")))
                 .samplingRatio(0.5)
                 .concurrency(1)
                 .randomSeed(i)
@@ -561,7 +561,7 @@ class CommonNeighbourAwareRandomWalkTest {
         }
         for (long i = 0; i < N; i++) {
             var config = RandomWalkWithRestartsConfigImpl.builder()
-                .startNodes(List.of(testdocIdFunction.of("J")))
+                .startNodes(List.of(testdocIdFunction.of("j1")))
                 .samplingRatio(0.5)
                 .concurrency(1)
                 .randomSeed(i)
@@ -576,24 +576,53 @@ class CommonNeighbourAwareRandomWalkTest {
 //            assertThat(nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R")))).isTrue();
 //            assertThat(nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("J")))).isTrue();
         }
-        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
-            .startNodes(List.of(testdocIdFunction.of("J")))
-            .samplingRatio(0.5)
-            .concurrency(1)
-            .randomSeed(777L)
-            .restartProbability(0.001)
-            .build();
-        var cnarw = new CommonNeighbourAwareRandomWalk(config);
-        var nodes = cnarw.compute(testdocGraph, ProgressTracker.NULL_TRACKER);
-        System.out.println("R "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R"))));
-        System.out.println("r1 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r1"))));
-        System.out.println("r2 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r2"))));
-        System.out.println("r3 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r3"))));
-        System.out.println("r4 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r4"))));
-        System.out.println("J "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("J"))));
-        System.out.println("j1 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j1"))));
-        System.out.println("j2 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j2"))));
-        System.out.println("j3 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j3"))));
-        System.out.println("j4 "+nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j4"))));
+        {
+            var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+                .startNodes(List.of(testdocIdFunction.of("J")))
+                .samplingRatio(0.5)
+                .concurrency(1)
+                .randomSeed(777L)
+                .restartProbability(0.001)
+                .build();
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            var nodes = cnarw.compute(testdocGraph, ProgressTracker.NULL_TRACKER);
+            System.out.print(" R " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R"))));
+            System.out.print(" r1 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r1"))));
+            System.out.print(" r2 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r2"))));
+            System.out.print(" r3 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r3"))));
+            System.out.print(" r4 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r4"))));
+            System.out.print(" J " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("J"))));
+            System.out.print(" j1 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j1"))));
+            System.out.print(" j2 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j2"))));
+            System.out.print(" j3 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j3"))));
+            System.out.print(" j4 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j4"))));
+
+            System.out.println();
+        }
+        {
+            var config = RandomWalkWithRestartsConfigImpl.builder()
+                .startNodes(List.of(testdocIdFunction.of("J")))
+                .samplingRatio(0.5)
+                .concurrency(1)
+                .randomSeed(777L)
+                .restartProbability(0.001)
+                .build();
+            var rw = new RandomWalkWithRestarts(config);
+            var nodes = rw.compute(testdocGraph, ProgressTracker.NULL_TRACKER);
+            System.out.print(" R " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("R"))));
+            System.out.print(" r1 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r1"))));
+            System.out.print(" r2 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r2"))));
+            System.out.print(" r3 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r3"))));
+            System.out.print(" r4 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("r4"))));
+            System.out.print(" J " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("J"))));
+            System.out.print(" j1 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j1"))));
+            System.out.print(" j2 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j2"))));
+            System.out.print(" j3 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j3"))));
+            System.out.print(" j4 " + nodes.get(testdocGraph.toMappedNodeId(testdocIdFunction.of("j4"))));
+
+            System.out.println();
+        }
+        System.out.println("RPickedRWR = " + RPickedRWR);
+        System.out.println("RPickedCNARW = " + RPickedCNARW);
     }
 }
