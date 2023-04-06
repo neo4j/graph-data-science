@@ -157,10 +157,10 @@ class CommonNeighbourAwareRandomWalkTest {
         ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
 
     @Inject
-    private TestGraph naturalUnionGraph;
+    private IdFunction naturalIdFunction;
 
     @Inject
-    private IdFunction naturalIdFunction;
+    private TestGraph naturalUnionGraph;
 
 
     Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
