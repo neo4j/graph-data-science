@@ -21,6 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.properties.nodes.EmptyLongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
@@ -38,10 +39,15 @@ final class LouvainProc {
         ComputationResult<Louvain, LouvainResult, CONFIG> computationResult,
         String resultProperty
     ) {
+
+        if (computationResult.result().isEmpty()) {
+            return EmptyLongArrayNodePropertyValues.INSTANCE;
+        }
+
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
 
-        var result = computationResult.result();
+        var result = computationResult.result().get();
 
         if (!includeIntermediateCommunities) {
             return CommunityProcCompanion.nodeProperties(
@@ -51,13 +57,11 @@ final class LouvainProc {
                 () -> computationResult.graphStore().nodeProperty(config.seedProperty())
             );
         } else {
-            return longArrayNodePropertyValues(computationResult, result);
+            return longArrayNodePropertyValues(computationResult.graph().nodeCount(), result);
         }
     }
 
-    static <CONFIG extends LouvainBaseConfig> LongArrayNodePropertyValues longArrayNodePropertyValues(ComputationResult<Louvain, LouvainResult, CONFIG> computationResult, LouvainResult result) {
-        var size = computationResult.graph().nodeCount();
-
+    private static LongArrayNodePropertyValues longArrayNodePropertyValues(long size, LouvainResult result) {
         return new LongArrayNodePropertyValues() {
             @Override
             public long nodeCount() {return size;
@@ -74,14 +78,16 @@ final class LouvainProc {
         LouvainResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<Louvain, LouvainResult, CONFIG> computeResult
     ) {
-        var result = computeResult.result();
-        boolean nonEmpty = !computeResult.isGraphEmpty();
+        computeResult.result().ifPresent(result -> {
+            procResultBuilder
+                .withLevels(result.ranLevels())
+                .withModularity(result.modularity())
+                .withModularities(result.modularities())
+                .withCommunityFunction(result::getCommunity);
+        });
 
-        return procResultBuilder
-            .withLevels(nonEmpty ? result.ranLevels() : 0)
-            .withModularity(nonEmpty ? result.modularity() : 0)
-            .withModularities(nonEmpty ? result.modularities() : new double[0])
-            .withCommunityFunction(nonEmpty ? result::getCommunity : null);
+        return procResultBuilder;
+
     }
 
     abstract static class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {

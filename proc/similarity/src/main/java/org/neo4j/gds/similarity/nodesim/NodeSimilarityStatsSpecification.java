@@ -79,7 +79,9 @@ public class NodeSimilarityStatsSpecification implements AlgorithmSpec<NodeSimil
 
                 if (shouldComputeHistogram(executionContext.returnColumns())) {
                     try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                        resultBuilder.withHistogram(computeHistogram(computationResult.result().graphResult().similarityGraph()));
+                        computationResult.result().ifPresent(result -> {
+                            resultBuilder.withHistogram(computeHistogram(result.graphResult().similarityGraph()));
+                        });
                     }
                 }
                 return Stream.of(resultBuilder.build());

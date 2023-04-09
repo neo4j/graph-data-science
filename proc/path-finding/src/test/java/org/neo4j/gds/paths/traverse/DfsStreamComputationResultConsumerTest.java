@@ -31,6 +31,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.graphdb.Path;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +57,7 @@ class DfsStreamComputationResultConsumerTest {
         when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
         when(computationResultMock.graph()).thenReturn(graphMock);
-        when(computationResultMock.result()).thenReturn(HugeLongArray.of(1L, 2L));
+        when(computationResultMock.result()).thenReturn(Optional.of(HugeLongArray.of(1L, 2L)));
 
         when(configMock.sourceNode()).thenReturn(0L);
         when(computationResultMock.config()).thenReturn(configMock);
@@ -84,7 +86,7 @@ class DfsStreamComputationResultConsumerTest {
         when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
         when(computationResultMock.graph()).thenReturn(graphMock);
-        when(computationResultMock.result()).thenReturn(HugeLongArray.of(1L, 2L));
+        when(computationResultMock.result()).thenReturn(Optional.of(HugeLongArray.of(1L, 2L)));
 
         when(configMock.sourceNode()).thenReturn(0L);
         when(computationResultMock.config()).thenReturn(configMock);

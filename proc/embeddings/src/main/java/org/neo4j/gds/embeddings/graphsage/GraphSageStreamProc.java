@@ -76,14 +76,14 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
             var graph = computationResult.graph();
             var result = computationResult.result();
 
-            if (result == null) {
+            if (result.isEmpty()) {
                 return Stream.empty();
             }
 
             return LongStream.range(0, graph.nodeCount())
                 .mapToObj(i -> new GraphSageStreamResult(
                     graph.toOriginalNodeId(i),
-                    result.embeddings().get(i)
+                    result.get().embeddings().get(i)
                 ));
         });
     }

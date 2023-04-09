@@ -72,13 +72,12 @@ public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, Map
                 ComputationResult<InverseRelationships, Map<RelationshipType, SingleTypeRelationships>, InverseRelationshipsConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                var result = computationResult.result();
                 var graphStore = computationResult.graphStore();
-                if (result != null) {
+                computationResult.result().ifPresent(result -> {
                     result.forEach((type, inverseRelationships) -> {
                         graphStore.addInverseIndex(type, inverseRelationships.topology(), inverseRelationships.properties());
                     });
-                }
+                });
             }
         };
     }

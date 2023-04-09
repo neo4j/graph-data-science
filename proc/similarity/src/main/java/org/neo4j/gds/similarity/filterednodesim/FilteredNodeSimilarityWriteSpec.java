@@ -70,12 +70,12 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
             var config = computationResult.config();
             var resultBuilder = new SimilarityWriteResult.Builder();
 
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(resultBuilder.withConfig(config).build());
             }
 
             var algorithm = computationResult.algorithm();
-            var similarityGraphResult = computationResult.result().graphResult();
+            var similarityGraphResult = computationResult.result().get().graphResult();
             var similarityGraph = similarityGraphResult.similarityGraph();
             // The relationships in the similarity graph refer to the node id space
             // of the graph store. Because of that, we must not use the similarity

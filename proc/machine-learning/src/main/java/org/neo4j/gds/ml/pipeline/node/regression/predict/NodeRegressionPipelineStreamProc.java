@@ -63,7 +63,9 @@ public class NodeRegressionPipelineStreamProc
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig> computationResult) {
-        return computationResult.result().asNodeProperties();
+        return computationResult.result()
+            .orElseGet(() -> HugeDoubleArray.newArray(0))
+            .asNodeProperties();
     }
 
     @Override

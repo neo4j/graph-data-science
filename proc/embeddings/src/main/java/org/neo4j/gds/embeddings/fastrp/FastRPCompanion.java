@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.ComputationResult;
 
 final class FastRPCompanion {
@@ -31,7 +32,9 @@ final class FastRPCompanion {
 
     static <CONFIG extends FastRPBaseConfig> NodePropertyValues getNodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
         var nodeCount = computationResult.graph().nodeCount();
-        var embeddings = computationResult.result().embeddings();
+        var embeddings = computationResult.result()
+            .map(FastRP.FastRPResult::embeddings)
+            .orElseGet(() -> HugeObjectArray.newArray(float[].class, 0));
 
         return new FloatArrayNodePropertyValues() {
             @Override

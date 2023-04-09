@@ -34,20 +34,19 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
     public Stream<StreamResult> consume(
         ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult, ExecutionContext executionContext
     ) {
-        var graph = computationResult.graph();
 
-        if (computationResult.isGraphEmpty()) {
+        if (computationResult.result().isEmpty()) {
             return Stream.empty();
         }
 
+        var graph = computationResult.graph();
         var shouldReturnPath = executionContext
             .returnColumns()
             .contains("path");
 
         var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
 
-        var resultStream = computationResult
-            .result()
+        var resultStream = computationResult.result().get()
             .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
 
         // this is necessary in order to close the result stream which triggers

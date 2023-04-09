@@ -63,9 +63,11 @@ public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, 
         ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesStatsConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var result = computationResult.result();
-        return new StatsResult.Builder()
-            .withScalerStatistics(result.scalerStatistics());
+        var builder = new StatsResult.Builder();
+
+        computationResult.result().ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
+
+        return builder;
     }
 
 

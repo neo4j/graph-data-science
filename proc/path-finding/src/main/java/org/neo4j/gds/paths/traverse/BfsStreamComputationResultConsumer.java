@@ -39,9 +39,13 @@ class BfsStreamComputationResultConsumer implements ComputationResultConsumer<BF
         ComputationResult<BFS, HugeLongArray, BfsStreamConfig> computationResult,
         ExecutionContext executionContext
     ) {
+        if (computationResult.result().isEmpty()) {
+            return Stream.empty();
+        }
+
         return TraverseStreamComputationResultConsumer.consume(
             computationResult.config().sourceNode(),
-            computationResult.result(),
+            computationResult.result().get(),
             computationResult.graph()::toOriginalNodeId,
             computationResult.graph().isEmpty(),
             BfsStreamResult::new,

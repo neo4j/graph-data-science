@@ -296,7 +296,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             configMap
         );
 
-        assertResultEquals(resultRun1.result(), resultRun2.result());
+        assertResultEquals(resultRun1.result().get(), resultRun2.result().get());
     }
 
     @Test

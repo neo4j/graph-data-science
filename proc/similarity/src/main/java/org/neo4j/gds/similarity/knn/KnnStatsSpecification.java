@@ -27,7 +27,6 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityProc;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
@@ -57,39 +56,38 @@ public class KnnStatsSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
             var config = computationResult.config();
             var builder = new StatsResult.Builder();
 
-            Optional.ofNullable(computationResult.result())
-                .ifPresent(result -> {
-                    builder
-                        .withRanIterations(result.ranIterations())
-                        .withNodePairsConsidered(result.nodePairsConsidered())
-                        .withDidConverge(result.didConverge());
+            computationResult.result().ifPresent(result -> {
+                builder
+                    .withRanIterations(result.ranIterations())
+                    .withNodePairsConsidered(result.nodePairsConsidered())
+                    .withDidConverge(result.didConverge());
 
-                    // algorithm is only null if the result is null
-                    var knn = Objects.requireNonNull(computationResult.algorithm());
+                // algorithm is only null if the result is null
+                var knn = Objects.requireNonNull(computationResult.algorithm());
 
-                    if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
-                        try (ProgressTimer ignored = builder.timePostProcessing()) {
-                            var similarityGraphResult = KnnProc.computeToGraph(
-                                computationResult.graph(),
-                                knn.nodeCount(),
-                                config.concurrency(),
-                                result,
-                                knn.executorService()
-                            );
+                if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
+                    try (ProgressTimer ignored = builder.timePostProcessing()) {
+                        var similarityGraphResult = KnnProc.computeToGraph(
+                            computationResult.graph(),
+                            knn.nodeCount(),
+                            config.concurrency(),
+                            result,
+                            knn.executorService()
+                        );
 
-                            var similarityGraph = similarityGraphResult.similarityGraph();
+                        var similarityGraph = similarityGraphResult.similarityGraph();
 
-                            builder
-                                .withHistogram(SimilarityProc.computeHistogram(similarityGraph))
-                                .withNodesCompared(similarityGraphResult.comparedNodes())
-                                .withRelationshipsWritten(similarityGraph.relationshipCount());
-                        }
-                    } else {
                         builder
-                            .withNodesCompared(knn.nodeCount())
-                            .withRelationshipsWritten(result.totalSimilarityPairs());
+                            .withHistogram(SimilarityProc.computeHistogram(similarityGraph))
+                            .withNodesCompared(similarityGraphResult.comparedNodes())
+                            .withRelationshipsWritten(similarityGraph.relationshipCount());
                     }
-                });
+                } else {
+                    builder
+                        .withNodesCompared(knn.nodeCount())
+                        .withRelationshipsWritten(result.totalSimilarityPairs());
+                }
+            });
 
 
             return Stream.of(

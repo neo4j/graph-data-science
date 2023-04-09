@@ -22,6 +22,7 @@ package org.neo4j.gds.wcc;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -89,7 +90,9 @@ public class WccStreamProc extends StreamProc<
     protected NodePropertyValues nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         return CommunityProcCompanion.nodeProperties(
                 computationResult.config(),
-                computationResult.result().asNodeProperties()
+                computationResult.result()
+                    .map(DisjointSetStruct::asNodeProperties)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
         );
     }
 

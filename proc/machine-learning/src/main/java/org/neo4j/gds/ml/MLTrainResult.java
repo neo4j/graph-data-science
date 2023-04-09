@@ -21,7 +21,9 @@ package org.neo4j.gds.ml;
 
 import org.neo4j.gds.core.model.Model;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,20 +38,26 @@ public class MLTrainResult {
     public final Map<String, Object> configuration;
 
     public MLTrainResult(
-        Model<?, ?, ?> trainedModel,
+        Optional<Model<?, ?, ?>> maybeTrainedModel,
         long trainMillis
     ) {
-        this.modelInfo = Stream.concat(
-            Map.of(
-                MODEL_NAME_KEY, trainedModel.name(),
-                MODEL_TYPE_KEY, trainedModel.algoType()
-            ).entrySet().stream(),
-            trainedModel.customInfo().toMap().entrySet().stream()
-        ).collect(Collectors.toMap(
-            Map.Entry::getKey,
-            Map.Entry::getValue)
-        );
-        this.configuration = trainedModel.trainConfig().toMap();
+        if(maybeTrainedModel.isPresent()) {
+            var trainedModel = maybeTrainedModel.get();
+            this.modelInfo = Stream.concat(
+                Map.of(
+                    MODEL_NAME_KEY, trainedModel.name(),
+                    MODEL_TYPE_KEY, trainedModel.algoType()
+                ).entrySet().stream(),
+                trainedModel.customInfo().toMap().entrySet().stream()
+            ).collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue)
+            );
+            this.configuration = trainedModel.trainConfig().toMap();
+        } else {
+            modelInfo = Collections.emptyMap();
+            configuration = Collections.emptyMap();
+        }
         this.trainMillis = trainMillis;
     }
 }

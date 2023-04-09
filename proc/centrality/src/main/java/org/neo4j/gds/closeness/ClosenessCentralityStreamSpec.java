@@ -25,6 +25,7 @@ import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.common.CentralityStreamResult;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -62,7 +63,10 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
                 return Stream.empty();
             }
 
-            var nodePropertyValues = computationResult.result().centralities().asNodeProperties();
+            var nodePropertyValues = computationResult.result()
+                .map(ClosenessCentralityResult::centralities)
+                .orElseGet(() -> HugeDoubleArray.newArray(0))
+                .asNodeProperties();
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())

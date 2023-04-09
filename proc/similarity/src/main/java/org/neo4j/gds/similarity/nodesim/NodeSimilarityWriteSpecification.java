@@ -23,6 +23,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
 
@@ -52,7 +53,9 @@ public class NodeSimilarityWriteSpecification implements AlgorithmSpec<NodeSimil
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
         return new SimilarityWriteConsumer<>(
             (computationResult) -> new SimilarityWriteResult.Builder(),
-            (computationResult) -> computationResult.result().graphResult(),
+            (computationResult) -> computationResult.result()
+                .map(NodeSimilarityResult::graphResult)
+                .orElseGet(() -> new SimilarityGraphResult(computationResult.graph(), 0, false)),
             name()
         );
     }

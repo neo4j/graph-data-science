@@ -77,12 +77,12 @@ public class TopologicalSortStreamProc extends StreamProc<TopologicalSort, Topol
     public ComputationResultConsumer<TopologicalSort, TopologicalSortResult, TopologicalSortConfig, Stream<StreamResult>> computationResultConsumer() {
         return (ComputationResult<TopologicalSort, TopologicalSortResult, TopologicalSortConfig> computationResult, ExecutionContext executionContext) ->
             runWithExceptionLogging("Result streaming failed", () -> {
-                    if (computationResult.isGraphEmpty()) {
+                    if (computationResult.result().isEmpty()) {
                         return Stream.empty();
                     }
 
                     Graph graph = computationResult.graph();
-                    return LongStream.of(computationResult.result().value().toArray())
+                    return LongStream.of(computationResult.result().get().value().toArray())
                         .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, null));
                 }
             );

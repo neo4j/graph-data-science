@@ -36,6 +36,7 @@ import org.neo4j.gds.model.ModelConfig;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
@@ -57,21 +58,25 @@ public abstract class TrainProc<
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var model = extractModel(computationResult.result());
-            var modelCatalog = modelCatalog();
-            modelCatalog().set(model);
+            if (computationResult.result().isPresent()) {
+                var model = extractModel(computationResult.result().get());
+                var modelCatalog = modelCatalog();
+                modelCatalog().set(model);
 
-            if (computationResult.config().storeModelToDisk()) {
-                try {
-                    modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
-                    var modelDir = modelCatalog.getModelDirectory(databaseService);
-                    modelCatalog.store(model.creator(), model.name(), modelDir);
-                } catch (Exception e) {
-                    log.error("Failed to store model to disk after training.", e.getMessage());
-                    throw e;
+                if (computationResult.config().storeModelToDisk()) {
+                    try {
+                        modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
+                        var modelDir = modelCatalog.getModelDirectory(databaseService);
+                        modelCatalog.store(model.creator(), model.name(), modelDir);
+                    } catch (Exception e) {
+                        log.error("Failed to store model to disk after training.", e.getMessage());
+                        throw e;
+                    }
                 }
+                return Stream.of(constructProcResult(computationResult));
             }
-            return Stream.of(constructProcResult(computationResult));
+
+            return Stream.empty();
         };
     }
 
@@ -132,19 +137,23 @@ public abstract class TrainProc<
         public final long trainMillis;
 
         public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends CustomInfo> TrainResult(
-            Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
+            Optional<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>> maybeTrainedModel,
             long trainMillis,
             long nodeCount,
             long relationshipCount
         ) {
-            TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
-
             this.modelInfo = new HashMap<>();
-            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-            modelInfo.putAll(trainedModel.customInfo().toMap());
+            this.configuration = new HashMap<>();
 
-            this.configuration = trainConfig.toMap();
+            maybeTrainedModel.ifPresent(trainedModel -> {
+                TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
+
+                modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
+                modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+                modelInfo.putAll(trainedModel.customInfo().toMap());
+                configuration.putAll(trainConfig.toMap());
+            });
+
             this.trainMillis = trainMillis;
         }
     }

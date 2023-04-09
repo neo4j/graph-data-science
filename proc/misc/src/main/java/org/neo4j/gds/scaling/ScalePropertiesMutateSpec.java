@@ -71,8 +71,9 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
         ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var result = computationResult.result();
-        return new ScalePropertiesMutateProc.MutateResult.Builder()
-            .withScalerStatistics(result.scalerStatistics());
+        var builder = new ScalePropertiesMutateProc.MutateResult.Builder();
+        computationResult.result()
+            .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
+        return builder;
     }
 }

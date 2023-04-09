@@ -31,12 +31,15 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineT
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
+import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
@@ -91,9 +94,12 @@ public class NodeRegressionPipelineTrainProc extends TrainProc<
 
         public final Map<String, Object> modelSelectionStats;
 
-        public NRTrainResult(NodeRegressionTrainPipelineResult pipelineResult, long trainMillis) {
-            super(pipelineResult.model(), trainMillis);
-            this.modelSelectionStats = pipelineResult.trainingStatistics().toMap();
+        public NRTrainResult(Optional<NodeRegressionTrainPipelineResult> pipelineResult, long trainMillis) {
+            super(pipelineResult.map(NodeRegressionTrainPipelineResult::model), trainMillis);
+            this.modelSelectionStats = pipelineResult
+                .map(NodeRegressionTrainPipelineResult::trainingStatistics)
+                .map(TrainingStatistics::toMap)
+                .orElseGet(Collections::emptyMap);
         }
     }
 }

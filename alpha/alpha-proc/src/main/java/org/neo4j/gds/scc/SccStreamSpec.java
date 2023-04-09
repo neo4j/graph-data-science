@@ -57,7 +57,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
     public ComputationResultConsumer<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
-            HugeLongArray components = computationResult.result();
+            HugeLongArray components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
 
             if (graph.isEmpty()) {
                 return Stream.empty();

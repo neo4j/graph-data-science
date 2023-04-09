@@ -17,37 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
+public final class EmptyLongArrayNodePropertyValues implements LongArrayNodePropertyValues{
 
-import java.util.Optional;
+    public static final EmptyLongArrayNodePropertyValues INSTANCE = new EmptyLongArrayNodePropertyValues();
 
-@ValueClass
-public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
-    long preProcessingMillis();
+    private EmptyLongArrayNodePropertyValues() {}
 
-    long computeMillis();
+    @Override
+    public long[] longArrayValue(long nodeId) {
+        return new long[0];
+    }
 
-    @Nullable
-    A algorithm();
-
-    Optional<ALGO_RESULT> result();
-
-    Graph graph();
-
-    GraphStore graphStore();
-
-    CONFIG config();
-
-    @Value.Default
-    default boolean isGraphEmpty() {
-        return false;
+    @Override
+    public long nodeCount() {
+        return 0;
     }
 }

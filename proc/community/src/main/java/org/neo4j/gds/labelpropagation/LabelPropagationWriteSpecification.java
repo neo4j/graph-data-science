@@ -22,6 +22,7 @@ package org.neo4j.gds.labelpropagation;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -32,7 +33,6 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -72,7 +72,10 @@ public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPr
                 CommunityProcCompanion.nodeProperties(
                     computationResult.config(),
                     computationResult.config().writeProperty(),
-                    computationResult.result().labels().asNodeProperties(),
+                    computationResult.result()
+                        .map(LabelPropagationResult::labels)
+                        .orElseGet(() -> HugeLongArray.newArray(0))
+                        .asNodeProperties(),
                     () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
                 )
             ));
@@ -88,7 +91,7 @@ public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPr
             computationResult.config().concurrency()
         );
 
-        Optional.ofNullable(computationResult.result())
+        computationResult.result()
             .ifPresent(result -> {
                     builder
                         .didConverge(result.didConverge())

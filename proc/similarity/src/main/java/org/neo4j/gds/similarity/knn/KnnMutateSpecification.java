@@ -67,60 +67,59 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, Knn.Result, Kn
 
                 var resultBuilder = new MutateResult.Builder();
 
-                Optional.ofNullable(computationResult.result())
-                    .ifPresent(result -> {
-                        resultBuilder
-                            .ranIterations(result.ranIterations())
-                            .didConverge(result.didConverge())
-                            .withNodePairsConsidered(result.nodePairsConsidered());
+                computationResult.result().ifPresent(result -> {
+                    resultBuilder
+                        .ranIterations(result.ranIterations())
+                        .didConverge(result.didConverge())
+                        .withNodePairsConsidered(result.nodePairsConsidered());
 
-                        var knn = Objects.requireNonNull(computationResult.algorithm());
+                    var knn = Objects.requireNonNull(computationResult.algorithm());
 
-                        var mutateMillis = new AtomicLong();
+                    var mutateMillis = new AtomicLong();
 
-                        SimilarityGraphResult similarityGraphResult;
-                        try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                            similarityGraphResult = KnnProc.computeToGraph(
-                                computationResult.graph(),
-                                knn.nodeCount(),
-                                config.concurrency(),
-                                Objects.requireNonNull(result),
-                                knn.executorService()
-                            );
-                        }
-
-                        SimilarityProc.withGraphsizeAndTimings(
-                            resultBuilder,
-                            computationResult,
-                            (ignore) -> similarityGraphResult
+                    SimilarityGraphResult similarityGraphResult;
+                    try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
+                        similarityGraphResult = KnnProc.computeToGraph(
+                            computationResult.graph(),
+                            knn.nodeCount(),
+                            config.concurrency(),
+                            Objects.requireNonNull(result),
+                            knn.executorService()
                         );
+                    }
+
+                    SimilarityProc.withGraphsizeAndTimings(
+                        resultBuilder,
+                        computationResult,
+                        (ignore) -> similarityGraphResult
+                    );
 
 
-                        try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                            var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-                            if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
-                                resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
-                            }
-
-                            var relationshipType = RelationshipType.of(config.mutateRelationshipType());
-                            computationResult
-                                .graphStore()
-                                .addRelationshipType(
-                                    SingleTypeRelationships.of(
-                                        relationshipType,
-                                        similarityGraph.relationshipTopology(),
-                                        similarityGraphResult.direction(),
-                                        similarityGraph.relationshipProperties(),
-                                        Optional.of(RelationshipPropertySchema.of(
-                                            config.mutateProperty(),
-                                            ValueType.DOUBLE
-                                        ))
-                                    )
-                                );
+                    try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
+                        var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
+                        if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
+                            resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
                         }
 
-                        resultBuilder.withMutateMillis(mutateMillis.get());
-                    });
+                        var relationshipType = RelationshipType.of(config.mutateRelationshipType());
+                        computationResult
+                            .graphStore()
+                            .addRelationshipType(
+                                SingleTypeRelationships.of(
+                                    relationshipType,
+                                    similarityGraph.relationshipTopology(),
+                                    similarityGraphResult.direction(),
+                                    similarityGraph.relationshipProperties(),
+                                    Optional.of(RelationshipPropertySchema.of(
+                                        config.mutateProperty(),
+                                        ValueType.DOUBLE
+                                    ))
+                                )
+                            );
+                    }
+
+                    resultBuilder.withMutateMillis(mutateMillis.get());
+                });
 
                 return Stream.of(resultBuilder.build());
             }

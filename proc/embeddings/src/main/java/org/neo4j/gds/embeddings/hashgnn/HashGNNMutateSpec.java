@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -58,7 +59,9 @@ public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                computationResult.result().embeddings()
+                computationResult.result()
+                    .map(HashGNNResult::embeddings)
+                    .orElse(EmptyDoubleArrayNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder
         );
@@ -69,8 +72,6 @@ public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
         ComputationResult<HashGNN, HashGNNResult, HashGNNMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder();
-
-        return builder;
+        return new MutateResult.Builder();
     }
 }

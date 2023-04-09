@@ -40,8 +40,7 @@ public class DfsMutateComputationResultConsumer extends MutateComputationResultC
         ComputationResult<DFS, HugeLongArray, DfsMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var result = computationResult.result();
-        if (result != null) {
+        computationResult.result().ifPresent(result -> {
             TraverseMutateResultConsumer.updateGraphStore(
                 computationResult.graph(),
                 resultBuilder,
@@ -49,6 +48,6 @@ public class DfsMutateComputationResultConsumer extends MutateComputationResultC
                 computationResult.config().mutateRelationshipType(),
                 computationResult.graphStore()
             );
-        }
+        });
     }
 }

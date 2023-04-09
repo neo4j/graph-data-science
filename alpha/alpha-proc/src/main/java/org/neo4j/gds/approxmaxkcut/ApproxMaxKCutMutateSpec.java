@@ -21,6 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -62,7 +63,12 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                CommunityProcCompanion.considerSizeFilter(computationResult.config(), computationResult.result().asNodeProperties())
+                CommunityProcCompanion.considerSizeFilter(
+                    computationResult.config(),
+                    computationResult.result()
+                        .map(MaxKCutResult::asNodeProperties)
+                        .orElse(EmptyLongNodePropertyValues.INSTANCE)
+                )
             )),
             this::resultBuilder
         );
@@ -71,12 +77,10 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
             ComputationResult<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutMutateConfig> computationResult,
             ExecutionContext executionContext
      ) {
-
-            var result=computationResult.result();
-            var builder = new MutateResult.Builder(
-                result.cutCost()
+            return new MutateResult.Builder(
+                computationResult.result()
+                    .map(MaxKCutResult::cutCost)
+                    .orElse(-1d)
             );
-
-            return builder;
         }
 }

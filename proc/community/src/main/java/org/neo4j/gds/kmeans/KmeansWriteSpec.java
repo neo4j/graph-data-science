@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
@@ -63,18 +63,22 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                 computationResult.config().concurrency()
             );
 
-            if (returnColumns.contains("centroids")) {
-                builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult.result().centers()));
-            }
-            if (returnColumns.contains("averageDistanceToCentroid")) {
-                builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
-            }
+            computationResult.result().ifPresent(result -> {
+                if (returnColumns.contains("centroids")) {
+                    builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
+                }
+                if (returnColumns.contains("averageDistanceToCentroid")) {
+                    builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
+                }
 
-            if (returnColumns.contains("averageSilhouette")) {
-                builder.withAverageSilhouette(computationResult.result().averageSilhouette());
-            }
-            HugeIntArray communities = computationResult.result().communities();
-            builder.withCommunityFunction(communities::get)
+                if (returnColumns.contains("averageSilhouette")) {
+                    builder.withAverageSilhouette(result.averageSilhouette());
+                }
+                builder.withCommunityFunction(result.communities()::get);
+
+            });
+
+            builder
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(graph.nodeCount())
@@ -98,17 +102,23 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 
-                var properties = new LongNodePropertyValues() {
-                    @Override
-                    public long nodeCount() {
-                        return graph.nodeCount();
-                    }
+                LongNodePropertyValues properties;
+                if (computationResult.result().isPresent()) {
+                    var communities = computationResult.result().get().communities();
+                    properties = new LongNodePropertyValues() {
+                        @Override
+                        public long nodeCount() {
+                            return graph.nodeCount();
+                        }
 
-                    @Override
-                    public long longValue(long nodeId) {
-                        return communities.get(nodeId);
-                    }
-                };
+                        @Override
+                        public long longValue(long nodeId) {
+                            return communities.get(nodeId);
+                        }
+                    };
+                } else {
+                    properties = EmptyLongNodePropertyValues.INSTANCE;
+                }
 
                 exporter.write(
                     config.writeProperty(),

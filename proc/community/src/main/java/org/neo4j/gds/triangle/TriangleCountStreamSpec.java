@@ -50,13 +50,13 @@ public class TriangleCountStreamSpec  implements AlgorithmSpec<IntersectingTrian
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
-            var graph = computationResult.graph();
-            var result = computationResult.result();
 
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of();
             }
 
+            var graph = computationResult.graph();
+            var result = computationResult.result().get();
             return LongStream.range(0, graph.nodeCount())
                 .mapToObj(i -> new StreamResult(
                     graph.toOriginalNodeId(i),

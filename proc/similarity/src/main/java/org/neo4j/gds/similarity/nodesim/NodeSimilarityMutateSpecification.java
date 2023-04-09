@@ -99,7 +99,9 @@ public class NodeSimilarityMutateSpecification implements AlgorithmSpec<NodeSimi
                 var resultRelationships = getRelationships(
                     relationshipType,
                     computationResult,
-                    computationResult.result().graphResult(),
+                    computationResult.result()
+                        .map(NodeSimilarityResult::graphResult)
+                        .orElseGet(() -> new SimilarityGraphResult(computationResult.graph(), 0, false)),
                     config.mutateProperty(),
                     resultBuilder,
                     executionContext.returnColumns()

@@ -21,6 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -59,11 +60,16 @@ public class ApproxMaxKCutStreamSpec implements AlgorithmSpec<ApproxMaxKCut, Max
                 if (computationResult.isGraphEmpty()){
                     return  Stream.empty();
                 }
-                var nodeProperties= CommunityProcCompanion.considerSizeFilter(computationResult.config(), computationResult.result().asNodeProperties());
+            var nodeProperties = CommunityProcCompanion.considerSizeFilter(
+                computationResult.config(),
+                computationResult.result()
+                    .map(MaxKCutResult::asNodeProperties)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
+            );
                 var graph = computationResult.graph();
 
                 return LongStream.range(0,graph.nodeCount())
-                    .filter( v-> nodeProperties.hasValue(v))
+                    .filter(nodeProperties::hasValue)
                     .mapToObj( nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId),nodeProperties.longValue(nodeId)));
         };
     }

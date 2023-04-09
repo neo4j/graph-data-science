@@ -29,7 +29,6 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -63,7 +62,7 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
                 var config = computationResult.config();
                 var resultBuilder = new FilteredKnnStatsResult.Builder();
 
-                Optional.ofNullable(computationResult.result())
+                computationResult.result()
                     .ifPresent(result -> {
                         resultBuilder
                             .withRanIterations(result.ranIterations())

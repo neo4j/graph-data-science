@@ -55,10 +55,10 @@ public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties,
     @Override
     public ComputationResultConsumer<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamProc.Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var result = computationResult.result();
-            if (result == null) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
+
             var graph = computationResult.graph();
 
             NodePropertyValues nodeProperties = ScalePropertiesProc.nodeProperties(computationResult);

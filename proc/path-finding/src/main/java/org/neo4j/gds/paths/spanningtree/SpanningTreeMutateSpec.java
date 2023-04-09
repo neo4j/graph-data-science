@@ -61,15 +61,16 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<MutateResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            SpanningTree spanningTree = computationResult.result();
-            SpanningTreeMutateConfig config = computationResult.config();
-
             MutateResult.Builder builder = new MutateResult.Builder();
 
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
+
+            Graph graph = computationResult.graph();
+            SpanningTree spanningTree = computationResult.result().get();
+            SpanningTreeMutateConfig config = computationResult.config();
+
 
             var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
             var relationshipsBuilder = GraphFactory

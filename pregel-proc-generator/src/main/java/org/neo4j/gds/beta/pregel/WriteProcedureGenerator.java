@@ -80,8 +80,8 @@ class WriteProcedureGenerator extends ProcedureGenerator {
                 pregelSpec.configTypeName()
             ), "computeResult")
             .addParameter(ExecutionContext.class, "executionContext")
-            .addStatement("var ranIterations = computeResult.result().ranIterations()")
-            .addStatement("var didConverge = computeResult.result().didConverge()")
+            .addStatement("var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0)")
+            .addStatement("var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false)")
             .addStatement("return new $T().withRanIterations(ranIterations).didConverge(didConverge)", procResultBuilderClass())
             .build();
     }

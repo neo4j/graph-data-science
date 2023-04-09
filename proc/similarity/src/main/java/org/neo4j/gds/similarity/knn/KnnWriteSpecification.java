@@ -24,10 +24,9 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
@@ -56,11 +55,15 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
         return new SimilarityWriteConsumer<>(
             this::resultBuilderFunction,
             (computationResult) -> {
+                if(computationResult.result().isEmpty()) {
+                    return new SimilarityGraphResult(computationResult.graph(), 0, false);
+                }
+
                 return computeToGraph(
                     computationResult.graph(),
                     computationResult.algorithm().nodeCount(),
                     computationResult.config().concurrency(),
-                    Objects.requireNonNull(computationResult.result()),
+                    computationResult.result().get(),
                     computationResult.algorithm().executorService()
                 );
             },
@@ -71,7 +74,7 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
     private WriteResult.Builder resultBuilderFunction(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
         var builder = new WriteResult.Builder();
 
-        Optional.ofNullable(computationResult.result()).ifPresent(result -> {
+        computationResult.result().ifPresent(result -> {
             builder
                 .withDidConverge(result.didConverge())
                 .withNodePairsConsidered(result.nodePairsConsidered())

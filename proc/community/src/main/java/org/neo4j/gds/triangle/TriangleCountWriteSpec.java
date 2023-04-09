@@ -20,6 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -30,7 +31,6 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -59,7 +59,9 @@ public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangl
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
-                computationResult.result().asNodeProperties()
+                computationResult.result()
+                    .map(TriangleCountResult::asNodeProperties)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
             )),
             name()
 
@@ -72,7 +74,7 @@ public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangl
     ) {
         var builder = new WriteResult.Builder();
 
-        Optional.ofNullable(computationResult.result())
+        computationResult.result()
             .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
         
         return builder;

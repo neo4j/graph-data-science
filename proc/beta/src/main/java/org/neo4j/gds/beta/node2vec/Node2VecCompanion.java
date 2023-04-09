@@ -36,7 +36,10 @@ final class Node2VecCompanion {
         ComputationResult<Node2Vec, Node2VecModel.Result, CONFIG> computationResult
     ) {
         var nodeCount = computationResult.graph().nodeCount();
-        HugeObjectArray<FloatVector> embeddings = computationResult.result().embeddings();
+        var embeddings = computationResult
+            .result()
+            .map(Node2VecModel.Result::embeddings)
+            .orElseGet(() -> HugeObjectArray.newArray(FloatVector.class, 0));
 
         return new FloatArrayNodePropertyValues() {
             @Override

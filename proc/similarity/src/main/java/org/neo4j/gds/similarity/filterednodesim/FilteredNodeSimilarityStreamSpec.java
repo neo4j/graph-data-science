@@ -28,7 +28,6 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
@@ -61,8 +60,7 @@ public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
-            var similarityResultStream = Optional
-                .ofNullable(computationResult.result())
+            var similarityResultStream = computationResult.result()
                 .map(NodeSimilarityResult::streamResult)
                 .orElseGet(Stream::empty);
 

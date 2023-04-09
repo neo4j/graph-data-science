@@ -87,10 +87,14 @@ public class NodeClassificationPipelineStreamProc
             > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
+            if (computationResult.result().isEmpty()) {
+                return Stream.empty();
+            }
+
             var pipelineGraphFilter = computationResult.algorithm().nodePropertyStepFilter();
             var graph = computationResult.graphStore().getGraph(pipelineGraphFilter.nodeLabels());
 
-            var result = computationResult.result();
+            var result = computationResult.result().get();
             var predictedClasses = result.predictedClasses();
             var predictedProbabilities = result.predictedProbabilities();
             return LongStream

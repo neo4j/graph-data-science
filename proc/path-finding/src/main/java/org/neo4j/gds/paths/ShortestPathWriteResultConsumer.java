@@ -56,7 +56,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
                 .withComputeMillis(computationResult.computeMillis())
                 .withConfig(config);
 
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(new StandardWriteRelationshipsResult(
                     computationResult.preProcessingMillis(),
                     0L,
@@ -68,7 +68,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
             }
 
             var algorithm = computationResult.algorithm();
-            var result = computationResult.result();
+            var result = computationResult.result().get();
 
             var writeRelationshipType = config.writeRelationshipType();
 

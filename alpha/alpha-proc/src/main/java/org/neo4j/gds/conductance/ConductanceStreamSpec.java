@@ -56,10 +56,10 @@ public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, Conduct
     @Override
     public ComputationResultConsumer<Conductance, ConductanceResult, ConductanceStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
-            var result=computationResult.result();
+            var result=computationResult.result().get();
             var condunctances = result.communityConductances();
 
             return LongStream

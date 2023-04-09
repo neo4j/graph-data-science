@@ -40,6 +40,7 @@ import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -122,7 +123,12 @@ public final class PregelBaseProc {
     static <ALGO extends Algorithm<PregelResult>, CONFIG extends PregelConfig> List<NodeProperty> nodeProperties(
         ComputationResult<ALGO, PregelResult, CONFIG> computationResult, String propertyPrefix
     ) {
-        var compositeNodeValue = computationResult.result().nodeValues();
+        if (computationResult.result().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        var result = computationResult.result().get();
+        var compositeNodeValue = result.nodeValues();
         var schema = compositeNodeValue.schema();
         // TODO change this to generic prefix setting
 

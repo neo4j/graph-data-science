@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
@@ -35,7 +36,9 @@ public final class ScalePropertiesProc {
         ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult
     ) {
         var size = computationResult.graph().nodeCount();
-        var scaledProperties = computationResult.result().scaledProperties();
+        var scaledProperties = computationResult.result()
+            .map(ScaleProperties.Result::scaledProperties)
+            .orElseGet(() -> HugeObjectArray.newArray(double[].class, 0));
 
         return new DoubleArrayNodePropertyValues() {
             @Override

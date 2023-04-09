@@ -21,6 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
@@ -41,7 +42,10 @@ final class WccProc {
         AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
     ) {
-        return procResultBuilder.withCommunityFunction(!computationResult.isGraphEmpty() ? computationResult.result()::setIdOf : null);
+        computationResult.result().ifPresent(result -> {
+            procResultBuilder.withCommunityFunction(result::setIdOf);
+        });
+        return procResultBuilder;
     }
 
     static <CONFIG extends WccBaseConfig> NodePropertyValues nodeProperties(
@@ -53,7 +57,9 @@ final class WccProc {
         return CommunityProcCompanion.nodeProperties(
             config,
             resultProperty,
-            computationResult.result().asNodeProperties(),
+            computationResult.result()
+                .map(DisjointSetStruct::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE),
             () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }

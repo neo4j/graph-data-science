@@ -52,7 +52,11 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            var result = computationResult.result();
+            if(computationResult.result().isEmpty()) {
+                return Stream.empty();
+            }
+
+            var result = computationResult.result().get();
             var communities = result.communities();
             var distances = result.distanceFromCenter();
             var silhuette = result.silhouette();

@@ -56,10 +56,12 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
     @Override
     public ComputationResultConsumer<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
-            (computationResult, __) ->
-                new ScalePropertiesWriteProc.WriteResult.Builder().withScalerStatistics(
-                    computationResult.result().scalerStatistics()
-                ),
+            (computationResult, __) -> {
+                var builder = new ScalePropertiesWriteProc.WriteResult.Builder();
+                computationResult.result()
+                    .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
+                return builder;
+            },
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 ScalePropertiesProc.nodeProperties(computationResult)

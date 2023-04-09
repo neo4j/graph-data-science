@@ -24,7 +24,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -56,14 +55,15 @@ public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "HashGNN streaming failed",
             executionContext.log(),
-            ()  -> Optional.ofNullable(computationResult.result())
+            () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
                     return LongStream
                         .range(0, graph.nodeCount())
                         .mapToObj(i -> new StreamResult(
                             graph.toOriginalNodeId(i),
-                            result.embeddings().doubleArrayValue(i)));
+                            result.embeddings().doubleArrayValue(i)
+                        ));
                 }).orElseGet(Stream::empty)
         );
     }

@@ -57,7 +57,6 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
     @Override
     public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, Stream<CentralityScore.Stats>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var result = computationResult.result();
             var algorithm = computationResult.algorithm();
             var config = computationResult.config();
             var graph = computationResult.graph();
@@ -73,11 +72,12 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                 .withComputeMillis(computationResult.computeMillis())
                 .withPreProcessingMillis(computationResult.preProcessingMillis());
 
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
 
-            builder.withCentralityFunction(computationResult.result()::getCentralityScore);
+            var result = computationResult.result().get();
+            builder.withCentralityFunction(result::getCentralityScore);
 
             try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
                 var writeConcurrency = computationResult.config().writeConcurrency();

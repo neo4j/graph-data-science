@@ -58,7 +58,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
 
             var graph = computationResult.graph();
 
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 
@@ -66,7 +66,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
                 .returnColumns()
                 .contains("route");
 
-            var result = computationResult.result();
+            var result = computationResult.result().get();
             var containsNegativeCycle = result.containsNegativeCycle();
 
             var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup())

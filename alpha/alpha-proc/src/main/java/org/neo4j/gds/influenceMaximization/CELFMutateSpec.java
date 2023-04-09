@@ -59,7 +59,8 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> {
-                var celfSeedSet = computationResult.result();
+                var celfSeedSet = computationResult.result()
+                    .orElseGet(() -> new LongDoubleScatterMap(0));
 
                 var nodeCount = computationResult.graph().nodeCount();
                 var celfSeedSetNodeProperty = ImmutableNodeProperty.of(
@@ -79,8 +80,11 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
         ComputationResult<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
+        var celfSpreadSetValues = computationResult.result()
+            .orElseGet(() -> new LongDoubleScatterMap(0))
+            .values;
         return MutateResult.builder()
-            .withTotalSpread(Arrays.stream(computationResult.result().values).sum())
+            .withTotalSpread(Arrays.stream(celfSpreadSetValues).sum())
             .withNodeCount(computationResult.graph().nodeCount())
             .withComputeMillis(computationResult.computeMillis())
             .withConfig(computationResult.config());

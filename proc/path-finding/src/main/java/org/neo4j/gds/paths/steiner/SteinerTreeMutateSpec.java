@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.steiner;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -60,15 +59,16 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
 
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            var steinerTreeResult = computationResult.result();
-            var config = computationResult.config();
+            var builder = new MutateResult.Builder();
 
-            MutateResult.Builder builder = new MutateResult.Builder();
-
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
+
+            var steinerTreeResult = computationResult.result().get();
+            var graph = computationResult.graph();
+            var config = computationResult.config();
+
 
             var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
             var relationshipsBuilder = GraphFactory
@@ -82,7 +82,6 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
             builder
                 .withTotalWeight(steinerTreeResult.totalCost())
                 .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount());
-
 
             SingleTypeRelationships relationships;
 
@@ -121,13 +120,5 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
             return Stream.of(builder.build());
         };
 
-//        return (computationResult, executionContext) -> {
-//            var sourceNode = computationResult.config().sourceNode();
-//            Graph graph = computationResult.graph();
-//            var steinerTreeResult = computationResult.result();
-//            var parentArray=steinerTreeResult.parentArray();
-//            var costArray=steinerTreeResult.relationshipToParentCost();
-//            return Stream.empty();
-//        };
     }
 }

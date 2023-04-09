@@ -77,8 +77,8 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
         ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
         ExecutionContext executionContext) {
-        var ranIterations = computeResult.result().ranIterations();
-        var didConverge = computeResult.result().didConverge();
+        var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0);
+        var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false);
         return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
     }
 

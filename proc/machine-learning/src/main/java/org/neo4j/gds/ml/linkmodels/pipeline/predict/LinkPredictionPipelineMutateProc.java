@@ -50,6 +50,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -87,7 +88,9 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         ExecutionContext executionContext
     ) {
         var builder = new MutateResult.Builder()
-            .withSamplingStats(computeResult.result().samplingStats());
+            .withSamplingStats(computeResult.result()
+                .map(LinkPredictionResult::samplingStats)
+                .orElseGet(Collections::emptyMap));
 
         if (executionContext.returnColumns().contains("probabilityDistribution")) {
             builder.withHistogram();
@@ -123,8 +126,11 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                     .build();
 
                 var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;
+                var predictedLinkStream = computationResult.result()
+                    .map(LinkPredictionResult::stream)
+                    .orElseGet(Stream::empty);
                 ParallelUtil.parallelStreamConsume(
-                    computationResult.result().stream(),
+                    predictedLinkStream,
                     concurrency,
                     stream -> stream.forEach(predictedLink -> {
                         relationshipsBuilder.addFromInternal(

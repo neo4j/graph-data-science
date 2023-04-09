@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -82,7 +83,10 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         return CommunityProcCompanion.nodeProperties(
             computationResult.config(),
             computationResult.config().mutateProperty(),
-            computationResult.result().labels().asNodeProperties(),
+            computationResult.result()
+                .map(LabelPropagationResult::labels)
+                .orElseGet(() -> HugeLongArray.newArray(0))
+                .asNodeProperties(),
             () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
         );
     }

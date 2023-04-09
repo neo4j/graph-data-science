@@ -22,15 +22,13 @@ package org.neo4j.gds.degree;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 
-import java.util.Optional;
-
 final class DegreeCentralityNodePropertyValues implements DoubleNodePropertyValues {
 
     private final long nodeCount;
     private final DegreeCentrality.DegreeFunction degreeFunction;
 
     static DegreeCentralityNodePropertyValues from(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
-        return Optional.ofNullable(computationResult.result())
+        return computationResult.result()
             .map(result -> new DegreeCentralityNodePropertyValues(computationResult.graph().nodeCount(), result))
             .orElseGet(() -> new DegreeCentralityNodePropertyValues(0, (nodeId) -> -1L));
     }

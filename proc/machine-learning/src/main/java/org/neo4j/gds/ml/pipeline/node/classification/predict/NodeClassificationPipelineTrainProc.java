@@ -32,13 +32,16 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
+import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
@@ -110,9 +113,12 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
         public final Map<String, Object> modelSelectionStats;
 
-        public NCTrainResult(NodeClassificationModelResult pipelineResult, long trainMillis) {
-            super(pipelineResult.model(), trainMillis);
-            this.modelSelectionStats = pipelineResult.trainingStatistics().toMap();
+        public NCTrainResult(Optional<NodeClassificationModelResult> pipelineResult, long trainMillis) {
+            super(pipelineResult.map(NodeClassificationModelResult::model), trainMillis);
+            this.modelSelectionStats = pipelineResult
+                .map(NodeClassificationModelResult::trainingStatistics)
+                .map(TrainingStatistics::toMap)
+                .orElseGet(Collections::emptyMap);
         }
     }
 }

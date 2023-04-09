@@ -71,14 +71,15 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
         var celfSeedSet = computationResult.result();
         var graph = computationResult.graph();
 
-        return new CelfNodeProperties(celfSeedSet, graph.nodeCount());
+        return new CelfNodeProperties(celfSeedSet.orElseGet(() -> new LongDoubleScatterMap(0)), graph.nodeCount());
     }
 
     private AbstractResultBuilder<WriteResult> resultBuilder(
         ComputationResult<CELF, LongDoubleScatterMap, InfluenceMaximizationWriteConfig> computationResult,
         ExecutionContext context
     ) {
-        var celfSeedSet = computationResult.result();
+        var celfSeedSet = computationResult.result()
+            .orElseGet(() -> new LongDoubleScatterMap(0));
         var graph = computationResult.graph();
         return WriteResult.builder()
             .withTotalSpread(Arrays.stream(celfSeedSet.values).sum())

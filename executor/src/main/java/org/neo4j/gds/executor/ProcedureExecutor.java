@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ProcedureExecutor<
@@ -96,7 +97,7 @@ public class ProcedureExecutor<
                 .graphStore(graphStore)
                 .config(config)
                 .computeMillis(0)
-                .result(null)
+                .result(Optional.empty())
                 .algorithm(null)
                 .build();
             return algoSpec.computationResultConsumer().consume(emptyComputationResult, executionContext);

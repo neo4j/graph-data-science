@@ -62,46 +62,47 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
             var terminationFlag = computationResult.algorithm().getTerminationFlag();
             var sourceNode = config.sourceNode();
             var graph = computationResult.graph();
-            var steinerTreeResult = computationResult.result();
 
             var builder = new WriteResult.Builder();
 
-            builder
-                .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount())
-                .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
-                .withTotalWeight(steinerTreeResult.totalCost());
+            computationResult.result().ifPresent(steinerTreeResult -> {
+                builder
+                    .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount())
+                    .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
+                    .withTotalWeight(steinerTreeResult.totalCost());
 
-            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-                var spanningTree = new SpanningTree(
-                    graph.toMappedNodeId(sourceNode),
-                    graph.nodeCount(),
-                    steinerTreeResult.effectiveNodeCount(),
-                    steinerTreeResult.parentArray(),
-                    steinerTreeResult.relationshipToParentCost(),
-                    steinerTreeResult.totalCost()
-                );
-                var spanningGraph = new SpanningGraph(graph, spanningTree);
-
-                RelationshipExporterBuilder relationshipExporterBuilder = executionContext.relationshipExporterBuilder();
-                relationshipExporterBuilder
-                    .withGraph(spanningGraph)
-                    .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-                    .withTerminationFlag(terminationFlag)
-                    .withProgressTracker(ProgressTracker.NULL_TRACKER)
-                    .build()
-                    .write(
-                        config.writeRelationshipType(),
-                        config.writeProperty()
+                try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+                    var spanningTree = new SpanningTree(
+                        graph.toMappedNodeId(sourceNode),
+                        graph.nodeCount(),
+                        steinerTreeResult.effectiveNodeCount(),
+                        steinerTreeResult.parentArray(),
+                        steinerTreeResult.relationshipToParentCost(),
+                        steinerTreeResult.totalCost()
                     );
+                    var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-            }
-            builder
+                    RelationshipExporterBuilder relationshipExporterBuilder = executionContext.relationshipExporterBuilder();
+                    relationshipExporterBuilder
+                        .withGraph(spanningGraph)
+                        .withIdMappingOperator(spanningGraph::toOriginalNodeId)
+                        .withTerminationFlag(terminationFlag)
+                        .withProgressTracker(ProgressTracker.NULL_TRACKER)
+                        .build()
+                        .write(
+                            config.writeRelationshipType(),
+                            config.writeProperty()
+                        );
+
+                }
+                builder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
+            });
+
+            return Stream.of(builder
                 .withComputeMillis(computationResult.computeMillis())
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1)
-                .withConfig(config);
-
-            return Stream.of(builder.build());
+                .withConfig(config)
+                .build());
         };
     }
 }

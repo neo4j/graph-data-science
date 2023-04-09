@@ -52,14 +52,15 @@ public class CELFStatsSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
     public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var celfSpreadSet = computationResult.result();
-            if (celfSpreadSet == null) {
+            if (celfSpreadSet.isEmpty()) {
                 return Stream.empty();
             }
 
             var statsBuilder = StatsResult.builder();
 
+            var celfSpreadSetValues = celfSpreadSet.get().values;
             var statsResult = statsBuilder
-                .withTotalSpread(Arrays.stream(celfSpreadSet.values).sum())
+                .withTotalSpread(Arrays.stream(celfSpreadSetValues).sum())
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withComputeMillis(computationResult.computeMillis())
                 .withConfig(computationResult.config())

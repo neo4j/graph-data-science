@@ -51,11 +51,11 @@ public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var leidenResult = computationResult.result();
-            if (leidenResult == null) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 
+            var leidenResult = computationResult.result().get();
             var statsBuilder = new StatsResult.StatsBuilder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()

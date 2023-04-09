@@ -21,7 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
@@ -35,13 +35,14 @@ final class ModularityOptimizationProc {
         ModularityOptimizationResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, CONFIG> computeResult
     ) {
-        var result = computeResult.result();
-
+        computeResult.result().ifPresent(result -> {
+            procResultBuilder
+                .withModularity(result.modularity())
+                .withRanIterations(result.ranIterations())
+                .didConverge(result.didConverge())
+                .withCommunityFunction(result::communityId);
+        });
         return procResultBuilder
-            .withModularity(result.modularity())
-            .withRanIterations(result.ranIterations())
-            .didConverge(result.didConverge())
-            .withCommunityFunction(result::communityId)
             .withConfig(computeResult.config());
 
     }
@@ -49,7 +50,9 @@ final class ModularityOptimizationProc {
     static <CONFIG extends ModularityOptimizationConfig> NodePropertyValues nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, CONFIG> computationResult
     ) {
-        LongNodePropertyValues resultCommunities = computationResult.result().asNodeProperties();
+        var resultCommunities = computationResult.result()
+            .map(ModularityOptimizationResult::asNodeProperties)
+            .orElse(EmptyLongNodePropertyValues.INSTANCE);
         if (computationResult.config().consecutiveIds()) {
             return new ConsecutiveLongNodePropertyValues(resultCommunities);
         } else {
@@ -63,10 +66,12 @@ final class ModularityOptimizationProc {
     ) {
         var config = computationResult.config();
         return CommunityProcCompanion.nodeProperties(
-                config,
-                resultProperty,
-                computationResult.result().asNodeProperties(),
-                () -> computationResult.graphStore().nodeProperty(config.seedProperty())
+            config,
+            resultProperty,
+            computationResult.result()
+                .map(ModularityOptimizationResult::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE),
+            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }
 

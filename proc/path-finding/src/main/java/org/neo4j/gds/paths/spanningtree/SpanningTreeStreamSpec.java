@@ -56,9 +56,13 @@ public class SpanningTreeStreamSpec implements AlgorithmSpec<Prim, SpanningTree,
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeStreamConfig, Stream<StreamResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
+            if (computationResult.result().isEmpty()) {
+                return Stream.empty();
+            }
+
             var sourceNode = computationResult.config().sourceNode();
             Graph graph = computationResult.graph();
-            SpanningTree spanningTree = computationResult.result();
+            SpanningTree spanningTree = computationResult.result().get();
             return LongStream.range(0, graph.nodeCount())
                 .filter(nodeId -> spanningTree.parent(nodeId) >= 0 || sourceNode == graph.toOriginalNodeId(nodeId))
                 .mapToObj(nodeId -> new StreamResult(

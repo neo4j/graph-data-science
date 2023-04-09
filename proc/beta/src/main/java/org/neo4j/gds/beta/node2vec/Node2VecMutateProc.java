@@ -91,7 +91,12 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, Node2VecMod
         ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder().withLossPerIteration(computeResult.result().lossPerIteration());
+        var builder = new MutateResult.Builder();
+        computeResult.result().ifPresent(result -> {
+            builder.withLossPerIteration(result.lossPerIteration());
+        });
+
+        return builder;
     }
 
     public static final class MutateResult extends StandardMutateResult {

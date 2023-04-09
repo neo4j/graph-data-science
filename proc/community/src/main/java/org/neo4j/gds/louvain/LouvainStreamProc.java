@@ -24,8 +24,10 @@ import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -77,7 +79,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
     @Override
     protected Stream<StreamResult> stream(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 
@@ -87,7 +89,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
 
             Graph graph = computationResult.graph();
 
-            var louvain = computationResult.result();
+            var louvain = computationResult.result().get();
             var nodeProperties = nodeProperties(computationResult);
 
             return LongStream.range(0, graph.nodeCount())
@@ -105,7 +107,11 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
     protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
         return CommunityProcCompanion.nodeProperties(
             computationResult.config(),
-            computationResult.result().dendrogramManager().getCurrent().asNodeProperties()
+            computationResult.result()
+                .map(LouvainResult::dendrogramManager)
+                .map(LouvainDendrogramManager::getCurrent)
+                .map(HugeLongArray::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE)
         );
     }
 

@@ -24,6 +24,7 @@ import org.neo4j.gds.beta.closeness.ClosenessCentrality;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityWriteConfig;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -34,8 +35,6 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
@@ -65,7 +64,10 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
         return new WriteNodePropertiesComputationResultConsumer<>( this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
-                Objects.requireNonNull(computationResult.result()).centralities().asNodeProperties()
+                computationResult.result()
+                    .map(ClosenessCentralityResult::centralities)
+                    .orElseGet(() -> HugeDoubleArray.newArray(0))
+                    .asNodeProperties()
             )),
             name());
     }
@@ -78,8 +80,7 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
             computationResult.config().concurrency()
         );
 
-        Optional.ofNullable(computationResult.result())
-            .ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
 
         return builder;
     }
