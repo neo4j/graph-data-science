@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._56;
+package org.neo4j.gds.compat._57;
 
 import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.set.ImmutableSet;
@@ -43,7 +43,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.LenientStoreInput;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.ScanOnOpenReadOnlyIdGeneratorFactory;
-import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory56;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory57;
 import org.neo4j.internal.recordstorage.StoreTokens;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
@@ -114,10 +114,10 @@ import java.util.function.Function;
 @ServiceProvider
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-56";
+    static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-57";
 
     public InMemoryStorageEngineFactory() {
-        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_6, StorageEngineFactory.class);
+        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_7, StorageEngineFactory.class);
     }
 
     // Record storage = 0, Freki = 1
@@ -447,7 +447,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public CommandReaderFactory commandReaderFactory() {
-        return InMemoryStorageCommandReaderFactory56.INSTANCE;
+        return InMemoryStorageCommandReaderFactory57.INSTANCE;
     }
 
     @Override
@@ -528,6 +528,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         Monitor monitor,
         JobScheduler jobScheduler,
         Collector badCollector,
+        LogFilesInitializer logFilesInitializer,
         IndexImporterFactory indexImporterFactory,
         MemoryTracker memoryTracker,
         CursorContextFactory contextFactory,
