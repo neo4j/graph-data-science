@@ -63,6 +63,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
 | xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
+| storeModelToDisk                                              | Boolean           | false                | yes       | Automatically store model to disk after training.
 |===
 
 .Results
