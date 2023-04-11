@@ -17,13 +17,9 @@ allprojects { proj ->
 //                endWithNewline()
 //            }
             java {
-                importOrder()
-
                 removeUnusedImports()
 
-                palantirJavaFormat()
-
-                formatAnnotations()
+                eclipse().configFile(rootProject.file("public/etc/codestyle.xml"))
 
                 def projectDirectoryPath = proj.getProjectDir().getPath()
                 def sourceFileHeader = null
