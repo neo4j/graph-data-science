@@ -58,14 +58,14 @@ public abstract class TrainProc<
     public ComputationResultConsumer<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var model = extractModel(computationResult.result());
-            var modelCatelog = modelCatalog();
+            var modelCatalog = modelCatalog();
             modelCatalog().set(model);
 
             if (computationResult.config().storeModelToDisk()) {
                 try {
-                    modelCatelog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
-                    var modelDir = modelCatelog.getModelDirectory(databaseService);
-                    modelCatelog.store(model.creator(), model.name(), modelDir);
+                    modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
+                    var modelDir = modelCatalog.getModelDirectory(databaseService);
+                    modelCatalog.store(model.creator(), model.name(), modelDir);
                 } catch (Exception e) {
                     log.error("Failed to store model to disk after training.", e.getMessage());
                     throw e;
