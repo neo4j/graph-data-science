@@ -85,7 +85,7 @@ public class CrossValidation<MODEL_TYPE> {
     public void selectModel(
         ReadOnlyHugeLongArray outerTrainSet,
         LongToLongFunction targets,
-        SortedSet<Long> distinctTargets,
+        SortedSet<Long> distinctInternalTargets,
         TrainingStatistics trainingStatistics,
         Iterator<TrainerConfig> modelCandidates
     ) {
@@ -95,7 +95,7 @@ public class CrossValidation<MODEL_TYPE> {
             outerTrainSet,
             targets,
             randomSeed,
-            distinctTargets
+            distinctInternalTargets
         ).splits();
         progressTracker.endSubTask("Create validation folds");
 
