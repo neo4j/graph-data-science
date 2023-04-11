@@ -23,11 +23,13 @@ public final class EmptyDoubleArrayNodePropertyValues implements DoubleArrayNode
 
     public static final EmptyDoubleArrayNodePropertyValues INSTANCE = new EmptyDoubleArrayNodePropertyValues();
 
+    private static final double[] EMPTY_ARRAY = new double[0];
+
     private EmptyDoubleArrayNodePropertyValues() {}
 
     @Override
     public double[] doubleArrayValue(long nodeId) {
-        return new double[0];
+        return EMPTY_ARRAY;
     }
 
     @Override

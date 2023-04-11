@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-public final class EmptyLongArrayNodePropertyValues implements LongArrayNodePropertyValues{
+public final class EmptyLongArrayNodePropertyValues implements LongArrayNodePropertyValues {
 
     public static final EmptyLongArrayNodePropertyValues INSTANCE = new EmptyLongArrayNodePropertyValues();
+
+    private static final long[] EMPTY_ARRAY = new long[0];
 
     private EmptyLongArrayNodePropertyValues() {}
 
     @Override
     public long[] longArrayValue(long nodeId) {
-        return new long[0];
+        return EMPTY_ARRAY;
     }
 
     @Override
