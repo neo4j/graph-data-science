@@ -25,7 +25,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BatchSizeConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -37,7 +36,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.ml.training.TrainBaseConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,8 +49,7 @@ import java.util.stream.Collectors;
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageTrainConfig extends
-    AlgoBaseConfig,
-    ModelConfig,
+    TrainBaseConfig,
     BatchSizeConfig,
     IterationsConfig,
     ToleranceConfig,

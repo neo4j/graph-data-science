@@ -59,7 +59,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return trainAndStoreModelWithResult(compute(graphName, configuration));
+        return trainAndSetModelWithResult(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train.estimate", mode = Mode.READ)

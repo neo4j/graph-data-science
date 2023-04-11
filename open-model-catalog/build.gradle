@@ -10,6 +10,7 @@ dependencies {
     compileOnly group: 'org.immutables',name: 'value-annotations',  version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
     compileOnly group: 'org.neo4j', name: 'annotations', version: ver.neo4j, transitive: false
+    compileOnly group: 'org.neo4j', name: 'neo4j-graphdb-api',   version: ver.neo4j, transitive: false
 
     implementation project(':annotations')
     implementation project(':config-api')

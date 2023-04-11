@@ -58,7 +58,7 @@ public class NodeRegressionPipelineTrainProc extends TrainProc<
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return trainAndStoreModelWithResult(compute(graphName, configuration));
+        return trainAndSetModelWithResult(compute(graphName, configuration));
     }
 
     @Override

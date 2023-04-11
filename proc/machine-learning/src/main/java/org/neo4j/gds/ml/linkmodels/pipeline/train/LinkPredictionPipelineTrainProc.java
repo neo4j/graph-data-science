@@ -59,7 +59,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
         PipelineCompanion.preparePipelineConfig(graphName, config);
-        return trainAndStoreModelWithResult(compute(graphName, config));
+        return trainAndSetModelWithResult(compute(graphName, config));
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.train.estimate", mode = READ)
