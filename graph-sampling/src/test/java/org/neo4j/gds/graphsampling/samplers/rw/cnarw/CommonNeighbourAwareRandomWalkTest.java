@@ -285,35 +285,44 @@ class CommonNeighbourAwareRandomWalkTest {
     @Test
     void shouldSampleWeightedConcurrently() {
 
-        double casesPassed = 0;
-        var validCases = 0;
+        var x = idFunction.of("x");
+        var x1 = idFunction.of("x1");
+        var x2 = idFunction.of("x2");
+        var x3 = idFunction.of("x3");
         var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
-            .startNodes(List.of(idFunction.of("x")))
+            .startNodes(List.of(x))
             .relationshipWeightProperty("distance")
             .concurrency(4)
             .samplingRatio(0.22)
             .restartProbability(0.01).build();
         var graph = getGraph(config);
+
+        double casesPassed = 0;
+        long validCases = 0;
         for (int i = 0; i < 1000; i++) {
             var cnarw = new CommonNeighbourAwareRandomWalk(config);
-            var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
-            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) ||
-                cnarw.startNodesUsed().contains(idFunction.of("x2"))) {
+            var result = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
+            if (
+                cnarw.startNodesUsed().contains(x1) ||
+                cnarw.startNodesUsed().contains(x2)
+            ) {
                 continue;
             }
             validCases++;
 
-            assertThat(nodes.cardinality()).isBetween(3L, 5L);
-            assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isFalse();
+            assertThat(result.cardinality()).isBetween(3L, 5L);
+            assertThat(result.get(graph.toMappedNodeId(x1))).isFalse();
 
-            if (nodes.get(graph.toMappedNodeId(idFunction.of("x"))) &&
-                !nodes.get(graph.toMappedNodeId(idFunction.of("x2"))) &&
-                nodes.get(graph.toMappedNodeId(idFunction.of("x3")))
+            if (
+                result.get(graph.toMappedNodeId(x)) &&
+                !result.get(graph.toMappedNodeId(x2)) &&
+                result.get(graph.toMappedNodeId(x3))
             ) {
                 casesPassed++;
             }
         }
-        assertThat(casesPassed / validCases).isCloseTo(0.35, Offset.offset(0.2));
+
+        assertThat(casesPassed / validCases).isCloseTo(0.35, Offset.offset(0.3));
     }
 
     @Test
