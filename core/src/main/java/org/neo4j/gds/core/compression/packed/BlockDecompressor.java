@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.neo4j.gds.api.compress.ByteArrayBuffer;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
@@ -29,9 +30,8 @@ final class BlockDecompressor {
     private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
 
     // Compressed
+    private final ByteArrayBuffer header;
     private long targetPtr;
-    // TODO: reuse some array buffer
-    private byte[] header;
     private int headerLength;
 
     // Decompression state
@@ -43,6 +43,7 @@ final class BlockDecompressor {
 
     BlockDecompressor() {
         this.block = new long[BLOCK_SIZE];
+        this.header = new ByteArrayBuffer();
     }
 
     void reset(long ptr, int degree) {
@@ -50,10 +51,9 @@ final class BlockDecompressor {
         long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);
 
         // Read header bytes
-        // TODO: reuse byte buffer
         this.headerLength = headerSize;
-        this.header = new byte[headerSize];
-        UnsafeUtil.copyMemory(null, ptr, this.header, BYTE_ARRAY_BASE_OFFSET, headerSize);
+        this.header.ensureCapacity(headerSize);
+        UnsafeUtil.copyMemory(null, ptr, this.header.buffer, BYTE_ARRAY_BASE_OFFSET, headerSize);
 
         this.targetPtr = ptr + alignedHeaderSize;
         this.idxInBlock = 0;
@@ -80,7 +80,7 @@ final class BlockDecompressor {
     private void decompressBlock() {
         if (this.blockId < this.headerLength) {
             // block unpacking
-            byte blockHeader = this.header[blockId];
+            byte blockHeader = this.header.buffer[blockId];
             this.targetPtr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.targetPtr);
             long value = this.lastValue;
             for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
