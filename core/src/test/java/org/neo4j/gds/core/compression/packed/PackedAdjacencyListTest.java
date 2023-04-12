@@ -48,7 +48,8 @@ class PackedAdjacencyListTest {
             degree
         );
 
-        var pages = new long[]{degree.intValue()};
+        long ptr = slice.slice().address();
+        var pages = new long[]{ptr};
         var allocationSizes = new int[]{Math.toIntExact(slice.slice().bytes())};
         var degrees = HugeIntArray.of(degree.intValue());
         var offsets = HugeLongArray.of(offset);
