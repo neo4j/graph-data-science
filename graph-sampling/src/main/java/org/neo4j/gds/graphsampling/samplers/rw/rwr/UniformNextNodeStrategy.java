@@ -57,7 +57,7 @@ public class UniformNextNodeStrategy implements NextNodeStrategy {
         return currentNode;
     }
 
-    long weightedNextNode(long currentNode) {
+    private long weightedNextNode(long currentNode) {
         var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
         var target = new MutableLong(RandomWalkWithRestarts.INVALID_NODE_ID);
 
@@ -75,7 +75,7 @@ public class UniformNextNodeStrategy implements NextNodeStrategy {
         return target.getValue();
     }
 
-    protected double computeDegree(long currentNode) {
+    private double computeDegree(long currentNode) {
         if (totalWeights.isEmpty()) {
             return inputGraph.degree(currentNode);
         }

@@ -143,7 +143,7 @@ public class CommonNeighbourAwareRandomWalk implements NodesSampler {
         return "Common neighbour aware random walks sampling";
     }
 
-    public Runnable getWalker(
+    private Runnable getWalker(
         SeenNodes seenNodes,
         Optional<HugeAtomicDoubleArray> totalWeights,
         double qualityThreshold,
@@ -166,7 +166,7 @@ public class CommonNeighbourAwareRandomWalk implements NodesSampler {
             walkQualities,
             split,
             concurrentCopy,
-            config,
+            config.restartProbability(),
             progressTracker,
             strategy
         );
