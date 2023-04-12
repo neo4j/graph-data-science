@@ -26,12 +26,8 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 /**
  * An address to some off-heap memory.
- * <p>
- * Separated address state to register with the {@link java.lang.ref.Cleaner}.
  */
-public final class Address implements Runnable {
-
-    static Address EMPTY = new Address(0, 0);
+public final class Address {
 
     private static final AtomicLongFieldUpdater<Address> ADDRESS = AtomicLongFieldUpdater.newUpdater(
         Address.class,
@@ -68,11 +64,6 @@ public final class Address implements Runnable {
      * @throws IllegalStateException if the memory has already been freed.
      */
     public void free() {
-        this.run();
-    }
-
-    @Override
-    public void run() {
         long address = ADDRESS.getAndSet(this, 0L);
         requirePointerIsValid(address);
         UnsafeUtil.free(address, bytes, EmptyMemoryTracker.INSTANCE);
