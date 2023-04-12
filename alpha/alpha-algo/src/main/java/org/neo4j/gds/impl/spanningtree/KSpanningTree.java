@@ -237,7 +237,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         //post-processing step: anything not touched is reset to -1
         pruneUntouchedNodes(parent, costToParent, included);
         progressTracker.endSubTask();
-        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent, totalCost);
+        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent::get, totalCost);
 
     }
 

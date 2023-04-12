@@ -50,10 +50,9 @@ class SpanningTreeAlgorithmFactoryTest {
                 4
             );
         var expected =
-            "Prim: 392 KiB" + System.lineSeparator() +
+            "Prim: 314 KiB" + System.lineSeparator() +
             "|-- this.instance: 48 Bytes" + System.lineSeparator() +
             "|-- Parent array: 78 KiB" + System.lineSeparator() +
-            "|-- Parent cost array: 78 KiB" + System.lineSeparator() +
             "|-- Priority queue: 234 KiB" + System.lineSeparator() +
             "    |-- this.instance: 40 Bytes" + System.lineSeparator() +
             "    |-- heap: 78 KiB" + System.lineSeparator() +
