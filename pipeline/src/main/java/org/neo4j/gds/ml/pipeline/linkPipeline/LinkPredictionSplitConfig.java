@@ -28,7 +28,6 @@ import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +41,6 @@ import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TEST_COMPLEMENT_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateRelSetSize;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface LinkPredictionSplitConfig extends ToMapConvertible {
@@ -131,10 +129,9 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .collect(Collectors.toList());
 
         if (!invalidTypes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The relationship types %s are in the input graph, but are reserved for splitting.",
-                StringJoining.join(invalidTypes)
-            ));
+            throw new IllegalArgumentException(
+                "You might have two parallel pipelines running on the same graph which is not supported."
+            );
         }
 
         if (negativeRelationshipType().isPresent()) {
