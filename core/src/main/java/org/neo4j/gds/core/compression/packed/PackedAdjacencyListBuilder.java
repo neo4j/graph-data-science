@@ -31,7 +31,7 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
 
     private final BumpAllocator<Address> builder;
 
-    public PackedAdjacencyListBuilder() {
+    PackedAdjacencyListBuilder() {
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
     }
 

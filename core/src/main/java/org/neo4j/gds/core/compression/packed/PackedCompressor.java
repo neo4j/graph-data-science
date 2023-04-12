@@ -41,7 +41,6 @@ import java.util.function.LongSupplier;
 
 public final class PackedCompressor implements AdjacencyCompressor {
 
-
     public static AdjacencyCompressorFactory factory(
         LongSupplier nodeCountSupplier,
         AdjacencyListBuilderFactory<Address, ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
@@ -116,61 +115,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 aggregations
             );
         }
-
-//        private final LongSupplier nodeCountSupplier;
-//        private final PropertyMappings propertyMappings;
-//        private final Aggregation[] aggregations;
-//        private final boolean noAggregation;
-//
-//        private final LongAdder relationshipCounter;
-//
-//        private HugeObjectArray<Compressed> adjacencies;
-//
-//        Factory(
-//            LongSupplier nodeCountSupplier,
-//            PropertyMappings propertyMappings,
-//            Aggregation[] aggregations,
-//            boolean noAggregation
-//        ) {
-//            this.nodeCountSupplier = nodeCountSupplier;
-//            this.propertyMappings = propertyMappings;
-//            this.aggregations = aggregations;
-//            this.noAggregation = noAggregation;
-//            this.relationshipCounter = new LongAdder();
-//        }
-//
-//        @Override
-//        public void init() {
-//            long nodeCount = this.nodeCountSupplier.getAsLong();
-//            this.adjacencies = HugeObjectArray.newArray(Compressed.class, nodeCount);
-//        }
-//
-//        @Override
-//        public AdjacencyCompressor createCompressor() {
-//            return new PackedCompressor(this.adjacencies, this.aggregations, this.noAggregation);
-//        }
-//
-//        @Override
-//        public LongAdder relationshipCounter() {
-//            return this.relationshipCounter;
-//        }
-//
-//        @Override
-//        public AdjacencyListsWithProperties build() {
-//            var adjacency = new PackedAdjacencyList(this.adjacencies);
-//
-//            var builder = ImmutableAdjacencyListsWithProperties.builder()
-//                .adjacency(adjacency)
-//                .relationshipCount(this.relationshipCounter.longValue());
-//
-//            var mappings = this.propertyMappings.mappings();
-//            for (int i = 0; i < mappings.size(); i++) {
-//                var property = new PackedPropertyList(this.adjacencies, i);
-//                builder.addProperty(property);
-//            }
-//
-//            return builder.build();
-//        }
     }
 
     private final AdjacencyListBuilder.Allocator<Address> adjacencyAllocator;
