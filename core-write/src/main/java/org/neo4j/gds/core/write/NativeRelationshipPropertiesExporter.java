@@ -53,7 +53,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
 
     private final TerminationFlag terminationFlag;
 
-    protected NativeRelationshipPropertiesExporter(
+    public NativeRelationshipPropertiesExporter(
         TransactionContext tx,
         GraphStore graphStore,
         ProgressTracker progressTracker,
