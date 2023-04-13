@@ -125,6 +125,21 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.usePackedAdjacencyList")
+    @Description("Toggle whether the adjacency list should use bit packing compression during graph creation.")
+    public void usePackedAdjacencyList(@Name(value = "usePackedAdjacencyList") boolean usePackedAdjacencyList) {
+        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.toggle(usePackedAdjacencyList);
+    }
+
+    @Internal
+    @Procedure("gds.features.usePackedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to use bit packing compression for adjacency lists during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUsePackedAdjacencyList() {
+        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()));
+    }
+
+    @Internal
     @Procedure("gds.features.useReorderedAdjacencyList")
     @Description("Toggle whether the adjacency list should be reordered during graph creation.")
     public void useReorderedAdjacencyList(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {

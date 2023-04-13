@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARTITIONED_SCAN;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
@@ -146,6 +147,31 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled());
+    }
+    
+    @Test
+    void toggleUsePackedAdjacencyList() {
+        var usePackedAdjacencyList = USE_PACKED_ADJACENCY_LIST.isEnabled();
+        runQuery(
+            "CALL gds.features.usePackedAdjacencyList($value)",
+            Map.of("value", !usePackedAdjacencyList)
+        );
+        assertEquals(!usePackedAdjacencyList, USE_PACKED_ADJACENCY_LIST.isEnabled());
+        runQuery(
+            "CALL gds.features.usePackedAdjacencyList($value)",
+            Map.of("value", usePackedAdjacencyList)
+        );
+        assertEquals(usePackedAdjacencyList, USE_PACKED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @Test
+    void resetUsePackedAdjacencyList() {
+        USE_PACKED_ADJACENCY_LIST.reset();
+        assertCypherResult(
+            "CALL gds.features.usePackedAdjacencyList.reset()",
+            List.of(Map.of("enabled", false))
+        );
+        assertFalse(USE_PACKED_ADJACENCY_LIST.isEnabled());
     }
 
     @Test
