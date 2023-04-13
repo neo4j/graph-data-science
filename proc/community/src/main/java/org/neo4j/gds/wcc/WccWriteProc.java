@@ -19,19 +19,15 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,8 +39,10 @@ import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.wcc.write", description = WCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc.WriteResult, WccWriteConfig> {
+public class WccWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.wcc.write", mode = WRITE)
     @Description(WCC_DESCRIPTION)
@@ -52,15 +50,10 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return write(computationResult);
-    }
-
-    ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> compute(Map<String, Object> configuration, String graphName) {
-        return compute(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new WccWriteSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.write.estimate", mode = READ)
@@ -69,35 +62,16 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new WccWriteSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected WccWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return WccWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
-        return WccProc.algorithmFactory();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
-    ) {
-        return WccProc.nodeProperties(computationResult, computationResult.config().writeProperty());
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return WccProc.resultBuilder(
-            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
     @SuppressWarnings("unused")

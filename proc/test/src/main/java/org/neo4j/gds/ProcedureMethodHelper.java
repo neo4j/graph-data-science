@@ -38,27 +38,27 @@ public final class ProcedureMethodHelper {
         return name;
     }
 
-    public static Stream<Method> nonEstimateMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> nonEstimateMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> !methodName(procMethod).endsWith(".estimate"));
     }
 
-    public static Stream<Method> writeMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> writeMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".write"));
     }
 
-    public static Stream<Method> mutateMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> mutateMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".mutate"));
     }
 
-    public static Stream<Method> streamMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> streamMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".stream"));
     }
 
-    public static Stream<Method> statsMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> statsMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".stats"));
     }
 
-    private static Stream<Method> methods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    private static Stream<Method> methods(BaseProc proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
     }

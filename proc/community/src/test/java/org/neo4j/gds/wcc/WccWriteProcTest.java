@@ -55,12 +55,15 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -451,14 +454,18 @@ class WccWriteProcTest extends BaseProcTest {
             wccWriteProc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = Map.<String, Object>of("writeProperty", WRITE_PROPERTY);
-            wccWriteProc.compute(
-                configMap,
-                loadedGraphName
-            ).result().get();
-            wccWriteProc.compute(
-                configMap,
-                loadedGraphName
-            ).result().get();
+
+            var spec = new WccWriteSpecification() {
+                @Override
+                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteProc.WriteResult>> computationResultConsumer() {
+                    return (computationResult, executionContext) -> {
+                        computationResult.result().get();
+                        return Stream.empty();
+                    };
+                }
+            };
+            new ProcedureExecutor<>(spec, wccWriteProc.executionContext()).compute(loadedGraphName, configMap);
+            new ProcedureExecutor<>(spec, wccWriteProc.executionContext()).compute(loadedGraphName, configMap);
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -490,7 +497,16 @@ class WccWriteProcTest extends BaseProcTest {
                 "writeProperty", WRITE_PROPERTY
             );
 
-            wccWriteProc.compute(configMap, loadedGraphName);
+            var spec = new WccWriteSpecification() {
+                @Override
+                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteProc.WriteResult>> computationResultConsumer() {
+                    return (computationResult, executionContext) -> {
+                        computationResult.result().get();
+                        return Stream.empty();
+                    };
+                }
+            };
+            new ProcedureExecutor<>(spec, wccWriteProc.executionContext()).compute(loadedGraphName, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
