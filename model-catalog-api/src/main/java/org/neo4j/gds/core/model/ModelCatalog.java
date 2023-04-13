@@ -30,6 +30,8 @@ import java.util.stream.Stream;
 
 public interface ModelCatalog {
 
+    void registerListener(ModelCatalogListener listener);
+
     void set(Model<?, ?, ?> model);
 
     <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
@@ -71,6 +73,11 @@ public interface ModelCatalog {
     void verifyModelCanBeStored(String username, String modelName, String modelType);
 
     ModelCatalog EMPTY = new ModelCatalog() {
+        @Override
+        public void registerListener(ModelCatalogListener listener) {
+
+        }
+
         @Override
         public void set(Model<?, ?, ?> model) {
 
