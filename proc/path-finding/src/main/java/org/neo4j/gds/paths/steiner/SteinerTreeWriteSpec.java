@@ -72,12 +72,13 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
                     .withTotalWeight(steinerTreeResult.totalCost());
 
                 try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+                    var relationshipToParentCost = steinerTreeResult.relationshipToParentCost();
                     var spanningTree = new SpanningTree(
                         graph.toMappedNodeId(sourceNode),
                         graph.nodeCount(),
                         steinerTreeResult.effectiveNodeCount(),
                         steinerTreeResult.parentArray(),
-                        steinerTreeResult.relationshipToParentCost(),
+                        nodeId -> relationshipToParentCost.get(nodeId),
                         steinerTreeResult.totalCost()
                     );
                     var spanningGraph = new SpanningGraph(graph, spanningTree);
