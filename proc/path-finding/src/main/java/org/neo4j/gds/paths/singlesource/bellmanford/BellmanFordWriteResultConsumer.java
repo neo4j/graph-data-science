@@ -35,7 +35,7 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -114,7 +114,8 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                     resultBuilder.withRelationshipsWritten(exporter.write(
                         writeRelationshipType,
-                        createKeys(writeNodeIds, writeCosts)
+                        createKeys(writeNodeIds, writeCosts),
+                        createTypes(writeNodeIds, writeCosts)
                     ));
                 }
             });
@@ -123,27 +124,50 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
         });
     }
 
-    private Map<String, ValueType> createKeys(boolean writeNodeIds, boolean writeCosts) {
+    private List<String> createKeys(boolean writeNodeIds, boolean writeCosts) {
         if (writeNodeIds && writeCosts) {
-            return Map.of(
-                TOTAL_COST_KEY, ValueType.DOUBLE,
-                NODE_IDS_KEY, ValueType.LONG_ARRAY,
-                COSTS_KEY, ValueType.DOUBLE_ARRAY
+            return List.of(
+                TOTAL_COST_KEY,
+                NODE_IDS_KEY,
+                COSTS_KEY
             );
         }
         if (writeNodeIds) {
-            return Map.of(
-                TOTAL_COST_KEY, ValueType.DOUBLE,
-                NODE_IDS_KEY, ValueType.LONG_ARRAY
+            return List.of(
+                TOTAL_COST_KEY,
+                NODE_IDS_KEY
             );
         }
         if (writeCosts) {
-            return Map.of(
-                TOTAL_COST_KEY,ValueType.DOUBLE,
-                COSTS_KEY,ValueType.DOUBLE_ARRAY
+            return List.of(
+                TOTAL_COST_KEY,
+                COSTS_KEY
             );
         }
-        return Map.of(TOTAL_COST_KEY, ValueType.DOUBLE);
+        return List.of(TOTAL_COST_KEY);
+    }
+
+    private List<ValueType> createTypes(boolean writeNodeIds, boolean writeCosts) {
+        if (writeNodeIds && writeCosts) {
+            return List.of(
+                ValueType.DOUBLE,
+                ValueType.LONG_ARRAY,
+                ValueType.DOUBLE_ARRAY
+            );
+        }
+        if (writeNodeIds) {
+            return List.of(
+                ValueType.DOUBLE,
+                ValueType.LONG_ARRAY
+            );
+        }
+        if (writeCosts) {
+            return List.of(
+                ValueType.DOUBLE,
+                ValueType.DOUBLE_ARRAY
+            );
+        }
+        return List.of(ValueType.DOUBLE);
     }
 
     private Value[] createValues(IdMap idMap, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -74,12 +74,12 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     }
 
     @Override
-    public long write(String relationshipType, Map<String, ValueType> propertyKeys) {
+    public long write(String relationshipType, List<String> propertyKeys, List<ValueType> __) {
         progressTracker.beginSubTask();
 
         try {
             var relationshipToken = getOrCreateRelationshipToken(relationshipType);
-            var propertyTokens = propertyKeys.keySet().stream().mapToInt(this::getOrCreatePropertyToken).toArray();
+            var propertyTokens = propertyKeys.stream().mapToInt(this::getOrCreatePropertyToken).toArray();
 
             var writeQueue = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
             var bufferPool = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);

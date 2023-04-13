@@ -24,9 +24,10 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public interface RelationshipStreamExporter {
@@ -35,11 +36,15 @@ public interface RelationshipStreamExporter {
     default long write(String relationshipType, String... propertyKeys) {
         return write(
             relationshipType,
-            Arrays.stream(propertyKeys).collect(Collectors.toMap(Function.identity(), __ -> ValueType.DOUBLE))
-        );
+            Arrays.stream(propertyKeys).collect(Collectors.toList()),
+            new ArrayList<>(Collections.nCopies( propertyKeys.length, ValueType.DOUBLE)));
     }
 
-    long write(String relationshipType, Map<String, ValueType> propertyKeys);
+    /**
+     * @param propertyKeys - keys of the properties to write
+     * @param propertyTypes - types of the properties, corresponding to the keys
+     */
+    long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes);
 
     static Task baseTask(String operationName) {
         return Tasks.leaf(operationName + " :: WriteRelationshipStream");
