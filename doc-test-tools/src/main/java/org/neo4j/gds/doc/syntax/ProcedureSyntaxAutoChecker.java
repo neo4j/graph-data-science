@@ -166,6 +166,8 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
                     .getCells()
                     .get(0)) // Get the first column in the row --> corresponds to the return column names
                 .map(Cell::getText)
+                // remove any potential links in the names
+                .map(name -> name.replaceAll("<a.*\">|<\\/a>", ""))
                 // as java identifier cannot contain white spaces, remove anything after the first space such as footnote:
                 .map(name -> name.split("\\s+")[0])
                 .collect(Collectors.toList());
@@ -176,7 +178,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
         };
     }
 
-    private Iterable<String> extractDocResultFields(String syntaxCode) {
+    private static Iterable<String> extractDocResultFields(String syntaxCode) {
         var yield = syntaxCode.substring(syntaxCode.indexOf(YIELD_KEYWORD) + YIELD_KEYWORD.length()).trim();
         return Arrays.stream(yield.split(YIELD_FIELD_SEPARATOR))
             .map(yieldField -> yieldField.split(YIELD_NAME_DATA_TYPE_SEPARATOR)[0].trim())

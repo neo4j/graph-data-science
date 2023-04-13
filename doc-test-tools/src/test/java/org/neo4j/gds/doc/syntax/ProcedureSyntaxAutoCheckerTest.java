@@ -23,11 +23,14 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -48,6 +51,9 @@ class ProcedureSyntaxAutoCheckerTest {
 
     private static final String newLine = System.lineSeparator();
 
+    @InjectSoftAssertions
+    private SoftAssertions softAssertions;
+
     @BeforeEach
     void setUp() {
         // By default we are forced to use relative path which we don't want.
@@ -57,10 +63,11 @@ class ProcedureSyntaxAutoCheckerTest {
 
     }
 
-    @Test
-    void correctSyntaxSectionTest(SoftAssertions softAssertions) throws URISyntaxException {
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {"include-with-syntax.adoc", "include-with-syntax-parameter-with-link.adoc"})
+    void correctSyntaxSectionTest(String positiveResource) throws URISyntaxException {
         try (var asciidoctor = createAsciidoctor(softAssertions)) {
-            var file = Paths.get(getClass().getClassLoader().getResource("include-with-syntax.adoc").toURI()).toFile();
+            var file = Paths.get(getClass().getClassLoader().getResource(positiveResource).toURI()).toFile();
             assertTrue(file.exists() && file.canRead());
 
             asciidoctor.convertFile(file, options);
@@ -68,7 +75,7 @@ class ProcedureSyntaxAutoCheckerTest {
     }
 
     @Test
-    void shouldFailOnMissingResultsTable(SoftAssertions softAssertions) throws URISyntaxException {
+    void shouldFailOnMissingResultsTable() throws URISyntaxException {
         try (var asciidoctor = createAsciidoctor(softAssertions)) {
             var file = Paths
                 .get(getClass()
@@ -85,7 +92,7 @@ class ProcedureSyntaxAutoCheckerTest {
     }
 
     @Test
-    void shouldFailOnMoreThanOneResultsTable(SoftAssertions softAssertions) throws URISyntaxException {
+    void shouldFailOnMoreThanOneResultsTable() throws URISyntaxException {
         try (var asciidoctor = createAsciidoctor(softAssertions)) {
             var file = Paths
                 .get(getClass()
@@ -102,7 +109,7 @@ class ProcedureSyntaxAutoCheckerTest {
     }
 
     @Test
-    void shouldFailOnMissingCodeBlock(SoftAssertions softAssertions) throws URISyntaxException {
+    void shouldFailOnMissingCodeBlock() throws URISyntaxException {
         try (var asciidoctor = createAsciidoctor(softAssertions)) {
             var file = Paths
                 .get(getClass().getClassLoader().getResource("invalid-include-with-syntax-no-code-block.adoc").toURI())
@@ -116,7 +123,7 @@ class ProcedureSyntaxAutoCheckerTest {
     }
 
     @Test
-    void shouldFailOnMoreThanOneCodeBlock(SoftAssertions softAssertions) throws URISyntaxException {
+    void shouldFailOnMoreThanOneCodeBlock() throws URISyntaxException {
         try (var asciidoctor = createAsciidoctor(softAssertions)) {
             var file = Paths
                 .get(getClass()
