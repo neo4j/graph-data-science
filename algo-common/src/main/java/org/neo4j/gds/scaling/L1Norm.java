@@ -31,6 +31,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * @deprecated Does not scale very well when node count is large. Maintained for legacy `alpha.scaleProperties` procs.
+ */
+@Deprecated(forRemoval = true, since = "2.4.0")
 public final class L1Norm extends ScalarScaler {
 
     public static final String TYPE = "l1norm";
