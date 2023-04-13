@@ -51,7 +51,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
         return this;
     }
 
-    public RelationshipStreamExporterBuilder<T> withRelationships(Stream<ExportedRelationship> relationships) {
+    public RelationshipStreamExporterBuilder withRelationships(Stream<ExportedRelationship> relationships) {
         this.relationships = relationships;
         return this;
     }
