@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -267,7 +268,8 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
             .containsEntry(Settings.pageCacheMemory().name(), Settings.pageCacheMemoryValue("42M"))
             .containsEntry(Settings.transactionStateAllocation().name(), "ON_HEAP")
-            .containsEntry(Settings.transactionStateMaxOffHeapMemory().name(), 1337L);
+            .containsEntry(Settings.transactionStateMaxOffHeapMemory().name(), 1337L)
+            .containsEntry("featurePackedAdjacencyList", GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled());
     }
 
     @Test
