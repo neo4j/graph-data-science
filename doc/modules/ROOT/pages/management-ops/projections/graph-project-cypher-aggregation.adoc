@@ -30,7 +30,8 @@ Other types of node properties have to be transformed or encoded into one of the
 === Selection of node properties and labels
 
 If a node occurs multiple times, the node properties and labels of the first occurrence will be used for the projection.
-This is important when a node can be a source node as well as a target node.
+This is important when a node can be a source node as well as a target node and their configuration differs.
+Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties`, `sourceNodeLabels` and `targetNodeLabels`.
 
 
 [[graph-project-cypher-aggregation-syntax]]
@@ -38,7 +39,7 @@ This is important when a node can be a source node as well as a target node.
 
 A Cypher aggregation is used in a query as an aggregation over the relationships that are being projected.
 It takes three mandatory arguments: `graphName`, `sourceNode` and `targetNode`.
-In addition, the optional `nodesConfig`, `relationshipConfig` parameters can be used to project properties and label or types.
+In addition, two optional parameters can be used to project node properties and labels (`nodesConfig`) or relationship properties and type (`relationshipConfig`).
 The optional `configuration` parameter can be used for general configuration of the projection such as `readConcurrency`.
 
 [.graph-project-cypher-aggregation-syntax]
@@ -67,9 +68,9 @@ RETURN gds.alpha.graph.project(
 | graphName          | no       | The name under which the graph is stored in the catalog.
 | sourceNode         | no       | The source node of the relationship. Must not be null.
 | targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
-| <<graph-project-cypher-aggregation-syntax-nodesConfig, nodesConfig>>        | yes      | Properties and Labels configuration for the source and target nodes.
-| <<graph-project-cypher-aggregation-syntax-relationshipConfig, relationshipConfig>> | yes      | Properties and Type configuration for the relationship.
-| <<graph-project-cypher-aggregation-syntax-configuration, configuration>>      | yes      | Additional parameters to configure the cypher aggregation projection.
+| <<graph-project-cypher-aggregation-syntax-nodesConfig, nodesConfig>>        | yes      | Properties and labels configuration for the source and target nodes.
+| <<graph-project-cypher-aggregation-syntax-relationshipConfig, relationshipConfig>> | yes      | Properties and type configuration for the relationship.
+| <<graph-project-cypher-aggregation-syntax-configuration, configuration>>      | yes      | Additional parameters to configure the projection.
 |===
 
 [[graph-project-cypher-aggregation-syntax-nodesConfig]]
