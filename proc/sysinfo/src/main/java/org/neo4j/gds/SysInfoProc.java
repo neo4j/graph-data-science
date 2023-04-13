@@ -175,7 +175,8 @@ public class SysInfoProc {
                 "featurePackedAdjacencyList",
                 GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()
             ))
-            .add(value("featureReorderedAdjacencyList", GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled()));
+            .add(value("featureReorderedAdjacencyList", GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled()))
+            .add(value("featureArrowDatabaseImport", GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled()));
 
     }
 
