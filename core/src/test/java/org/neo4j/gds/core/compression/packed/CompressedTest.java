@@ -20,97 +20,71 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.common.CursorUtil;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.SeededRandom.newRandom;
 
 class CompressedTest {
 
-    static Stream<Arguments> cursorFeaturesAndLengths() {
-        return TestSupport.crossArgument(
-            () -> Stream.of(
-                AdjacencyPackerTest.Features.Sort,
-                AdjacencyPackerTest.Features.SortAndDelta
-            ),
-            () -> Stream.of(
-                0,
-                1,
-                42,
-                AdjacencyPacking.BLOCK_SIZE,
-                AdjacencyPacking.BLOCK_SIZE * 2,
-                AdjacencyPacking.BLOCK_SIZE * 2 + 42,
-                1337
-            )
-        );
-    }
-
     @ParameterizedTest
-    @MethodSource("cursorFeaturesAndLengths")
-    void decompressConsecutiveLongsViaCursor(AdjacencyPackerTest.Features features, int length) {
+    @ValueSource(ints = {
+        0,
+        1,
+        42,
+        AdjacencyPacking.BLOCK_SIZE,
+        AdjacencyPacking.BLOCK_SIZE * 2,
+        AdjacencyPacking.BLOCK_SIZE * 2 + 42,
+        1337
+    })
+    void decompressConsecutiveLongsViaCursor(int length) {
         var data = LongStream.range(0, length).toArray();
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
-        var compressed = AdjacencyPacker.compress(alignedData, 0, length, features.flags());
 
-        var adjacencyList = HugeObjectArray.of(compressed);
-        var cursor = new DecompressingCursor(adjacencyList, features.flags());
+        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
-        cursor.init(0, -1);
+            assertThat(cursor.remaining()).isEqualTo(length);
 
-        long[] decompressed = decompressCursor(compressed.length(), cursor);
+            long[] decompressed = CursorUtil.decompressCursor(cursor);
 
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip")
-            .containsExactly(data);
-
-        compressed.free();
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip")
+                .containsExactly(data);
+        });
     }
 
     @ParameterizedTest
-    @MethodSource("cursorFeaturesAndLengths")
-    void decompressRandomLongsViaCursor(AdjacencyPackerTest.Features features, int length) {
+    @ValueSource(ints = {
+        0,
+        1,
+        42,
+        AdjacencyPacking.BLOCK_SIZE,
+        AdjacencyPacking.BLOCK_SIZE * 2,
+        AdjacencyPacking.BLOCK_SIZE * 2 + 42,
+        1337
+    })
+    void decompressRandomLongsViaCursor(int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
-        var compressed = AdjacencyPacker.compress(alignedData, 0, length, features.flags());
 
-        var adjacencyList = HugeObjectArray.of(compressed);
-        var cursor = new DecompressingCursor(adjacencyList, features.flags());
+        TestAllocator.testCursor(alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
-        cursor.init(0, -1);
+            assertThat(cursor.remaining()).isEqualTo(length);
 
-        long[] decompressed = decompressCursor(compressed.length(), cursor);
+            long[] decompressed = CursorUtil.decompressCursor(cursor);
 
-        if (features != AdjacencyPackerTest.Features.Delta) {
+            // We need to sort due to random values.
             Arrays.sort(data);
-        }
 
-        assertThat(decompressed)
-            .as("compressed data did not roundtrip, seed = %d", random.seed())
-            .containsExactly(data);
-
-        compressed.free();
+            assertThat(decompressed)
+                .as("compressed data did not roundtrip, seed = %d", random.seed())
+                .containsExactly(data);
+        });
     }
-
-    private static long[] decompressCursor(int length, AdjacencyCursor cursor) {
-        var decompressed = new long[length];
-
-        var idx = 0;
-        while (cursor.hasNextVLong()) {
-            long peek = cursor.peekVLong();
-            long next = cursor.nextVLong();
-            assertThat(peek).isEqualTo(next);
-            decompressed[idx++] = next;
-        }
-        return decompressed;
-    }
-
 }

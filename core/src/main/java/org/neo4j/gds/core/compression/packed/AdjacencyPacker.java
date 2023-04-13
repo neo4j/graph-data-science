@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
-import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.Arrays;
 
@@ -39,30 +40,30 @@ public final class AdjacencyPacker {
         return (int) BitUtil.align(length, AdjacencyPacking.BLOCK_SIZE);
     }
 
-    private static final Aggregation[] AGGREGATIONS = Aggregation.values();
+    static final int BYTE_ARRAY_BASE_OFFSET = UnsafeUtil.arrayBaseOffset(byte[].class);
 
-    public static final int PASS = 0;
-    public static final int SORT = 1 << 22;
-    public static final int DELTA = 1 << 23;
-
-    private static final int MASK = ~(SORT | DELTA);
-
-    public static Compressed compress(long[] values, int offset, int length, int flags) {
-        if ((flags & SORT) == SORT) {
-            Arrays.sort(values, offset, offset + length);
-        }
-
-        if ((flags & DELTA) == DELTA) {
-            var ordinal = flags & MASK;
-            var aggregation = Aggregation.resolve(AGGREGATIONS[ordinal]);
-            return deltaCompress(values, offset, length, aggregation);
-        } else {
-            return compress(values, offset, length);
-        }
+    public static long compress(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        int length,
+        Aggregation aggregation,
+        MutableInt degree
+    ) {
+        Arrays.sort(values, 0, length);
+        return deltaCompress(allocator, slice, values, length, aggregation, degree);
     }
 
-    public static Compressed compressWithProperties(long[] values, long[][] properties, int length, Aggregation[] aggregations, boolean noAggregation) {
-        // TODO: works only for sorted + delta compression; do we need more?
+    static long compressWithProperties(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        long[][] properties,
+        int length,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        MutableInt degree
+    ) {
         if (length > 0) {
             // sort, delta encode, reorder and aggregate properties
             length = AdjacencyCompression.applyDeltaEncoding(
@@ -73,32 +74,40 @@ public final class AdjacencyPacker {
                 noAggregation
             );
         }
-        // pack targets
-        var compressed = preparePacking(values, 0, length);
-        // link properties
-        compressed.properties(properties);
-        return compressed;
+
+        degree.setValue(length);
+
+        return preparePacking(allocator, slice, values, length);
     }
 
-    public static Compressed compress(long[] values, int offset, int length) {
-        return preparePacking(values, offset, length);
-    }
-
-    private static Compressed deltaCompress(long[] values, int offset, int length, Aggregation aggregation) {
+    private static long deltaCompress(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        int length,
+        Aggregation aggregation,
+        MutableInt degree
+    ) {
         if (length > 0) {
-            length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
+            length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
         }
-        return preparePacking(values, offset, length);
+
+        degree.setValue(length);
+
+        return preparePacking(allocator, slice, values, length);
     }
 
-    private static Compressed preparePacking(long[] values, int start, int length) {
-        int end = start + length;
-
+    private static long preparePacking(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        int length
+    ) {
         int blocks = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
         var header = new byte[blocks];
 
         long bytes = 0L;
-        int offset = start;
+        int offset = 0;
         int blockIdx = 0;
 
         for (; blockIdx < blocks - 1; blockIdx++, offset += AdjacencyPacking.BLOCK_SIZE) {
@@ -108,71 +117,49 @@ public final class AdjacencyPacker {
         }
         // "tail" block, may be smaller than BLOCK_SIZE
         {
-            int bits = bitsNeeded(values, offset, end - offset);
+            int bits = bitsNeeded(values, offset, length - offset);
             bytes += bytesNeeded(bits);
             header[blockIdx] = (byte) bits;
         }
 
-        return runPacking(values, start, length, header, bytes);
+        return runPacking(allocator, slice, values, header, bytes);
     }
 
-    private static Compressed runPacking(
+    private static long runPacking(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int offset,
-        int length,
         byte[] header,
         long requiredBytes
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
+        long headerSize = header.length * Byte.BYTES;
+        // we must add padding between the header and the data bytes
+        // to avoid writing unaligned longs
+        long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);
+        long fullSize = alignedHeaderSize + requiredBytes;
         // we must align to long because we write in terms of longs, not single bytes
-        var alignedBytes = BitUtil.align(requiredBytes, Long.BYTES);
+        long alignedFullSize = BitUtil.align(fullSize, Long.BYTES);
+        int allocationSize = Math.toIntExact(alignedFullSize);
 
-        long mem = UnsafeUtil.allocateMemory(alignedBytes, EmptyMemoryTracker.INSTANCE);
-        long ptr = mem;
+        long adjacencyOffset = allocator.allocate(allocationSize, slice);
+
+        Address address = slice.slice();
+        long ptr = address.address() + slice.offset();
+
+        // write header
+        UnsafeUtil.copyMemory(header, BYTE_ARRAY_BASE_OFFSET, null, ptr, headerSize);
+        ptr += alignedHeaderSize;
 
         // main packing loop
-        int in = offset;
+        int in = 0;
         for (byte bits : header) {
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
 
-        return new Compressed(mem, alignedBytes, header, length);
-    }
-
-    public static long[] decompressAndPrefixSum(Compressed compressed) {
-        long ptr = compressed.address();
-        byte[] header = compressed.header();
-        long[] values = new long[(int) BitUtil.align(compressed.length(), AdjacencyPacking.BLOCK_SIZE)];
-
-        // main unpacking loop
-        int offset = 0;
-        long value = 0L;
-        for (byte bits : header) {
-            ptr = AdjacencyUnpacking.unpack(bits, values, offset, ptr);
-            for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
-                value = values[offset + i] += value;
-            }
-            offset += AdjacencyPacking.BLOCK_SIZE;
-        }
-
-        return Arrays.copyOf(values, compressed.length());
-    }
-
-    public static long[] decompress(Compressed compressed) {
-        long ptr = compressed.address();
-        byte[] header = compressed.header();
-        long[] values = new long[(int) BitUtil.align(compressed.length(), AdjacencyPacking.BLOCK_SIZE)];
-
-        // main unpacking loop
-        int offset = 0;
-        for (byte bits : header) {
-            ptr = AdjacencyUnpacking.unpack(bits, values, offset, ptr);
-            offset += AdjacencyPacking.BLOCK_SIZE;
-        }
-
-        return Arrays.copyOf(values, compressed.length());
+        return adjacencyOffset;
     }
 
     private static int bitsNeeded(long[] values, int offset, int length) {
