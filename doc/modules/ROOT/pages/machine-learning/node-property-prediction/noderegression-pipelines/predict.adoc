@@ -124,9 +124,9 @@ RETURN
 [opts="header",cols="m,m"]
 |===
 | houseColor | predictedPrice
-| "Tan"      | 98.786
+| "Tan"      | 87.26599999999999
 | "Yellow"   | 107.572
-| "Pink"     | 126.46000000000001
+| "Pink"     | 124.43800000000002
 |===
 
 As we can see, the model is predicting the "Tan" house to be the cheaper than the "Yellow" house.
