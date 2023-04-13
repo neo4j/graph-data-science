@@ -25,6 +25,10 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
+import org.neo4j.gds.utils.StringJoining;
+
+import static org.neo4j.gds.scaling.ScalerFactory.SUPPORTED_SCALER_NAMES;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ScalePropertiesProc {
 
@@ -53,4 +57,13 @@ public final class ScalePropertiesProc {
         };
     }
 
+    static void validateLegacyScalers(ScalePropertiesBaseConfig config, boolean allowL1L2Scalers) {
+        if (!allowL1L2Scalers && (config.scaler().type().equals(L1Norm.TYPE) || config.scaler().type().equals(L2Norm.TYPE))) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
+                config.scaler().type(),
+                StringJoining.join(SUPPORTED_SCALER_NAMES)
+            ));
+        }
+    }
 }

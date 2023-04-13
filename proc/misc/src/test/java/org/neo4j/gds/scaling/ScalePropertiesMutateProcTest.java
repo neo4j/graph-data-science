@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -105,13 +106,36 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void alphaMutate() {
-        String query = GdsCypher
+    void betaDoesNotAllowL1OrL2() {
+        var queryL1 = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .mutateMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "L1Norm")
+            .addParameter("mutateProperty", "scaledProperty")
+            .yields();
+        var queryL2 = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .mutateMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "L2Norm")
+            .addParameter("mutateProperty", "scaledProperty")
+            .yields();
+
+        assertError(queryL1, "Unrecognised scaler type specified: `l1norm`");
+        assertError(queryL2, "Unrecognised scaler type specified: `l2norm`");
+    }
+
+    @Test
+    void alphaMutatel1() {
+        var query = GdsCypher
             .call("g")
             .algo("gds.alpha.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("myProp"))
-            .addParameter("scaler", "max")
+            .addParameter("scaler", "L1Norm")
             .addParameter("mutateProperty", "scaledProperty")
             .yields();
 
@@ -119,7 +143,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
                 "nodePropertiesWritten", 6L,
                 "scalerStatistics", hasEntry(
                     equalTo("myProp"),
-                    Matchers.allOf(hasEntry(equalTo("absMax"), hasSize(2)))
+                    anEmptyMap()
                 ),
                 "configuration", isA(Map.class),
                 "mutateMillis", greaterThan(-1L),
@@ -129,8 +153,35 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
-        assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graph);
+        assertGraphExists("g");
+    }
+
+    @Test
+    void alphaMutatel2() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.alpha.scaleProperties")
+            .mutateMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "L2Norm")
+            .addParameter("mutateProperty", "scaledProperty")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "nodePropertiesWritten", 6L,
+                "scalerStatistics", hasEntry(
+                    equalTo("myProp"),
+                    anEmptyMap()
+                ),
+                "configuration", isA(Map.class),
+                "mutateMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L
+            ))
+        );
+
+        assertGraphExists("g");
     }
 
     @Test

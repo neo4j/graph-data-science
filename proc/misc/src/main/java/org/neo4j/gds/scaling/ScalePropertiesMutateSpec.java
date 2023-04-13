@@ -37,9 +37,16 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
 @GdsCallable(name = "gds.beta.scaleProperties.mutate", aliases = {"gds.alpha.scaleProperties.mutate"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateProc.MutateResult>, ScalePropertiesFactory<ScalePropertiesMutateConfig>> {
+
+    private boolean allowL1L2Scalers = false;
+
+    void setAllowL1L2Scalers(boolean allowL1L2Scalers) {
+        this.allowL1L2Scalers = allowL1L2Scalers;
+    }
 
     @Override
     public String name() {
@@ -53,7 +60,11 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
 
     @Override
     public NewConfigFunction<ScalePropertiesMutateConfig> newConfigFunction() {
-        return (__, userInput) -> ScalePropertiesMutateConfig.of(userInput);
+        return (__, userInput) -> {
+            var config = ScalePropertiesMutateConfig.of(userInput);
+            validateLegacyScalers(config, allowL1L2Scalers);
+            return config;
+        };
     }
 
     @Override
