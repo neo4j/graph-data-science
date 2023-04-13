@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -90,6 +91,7 @@ public class PackedAdjacencyList implements AdjacencyList {
      * When this list is garbage collected, the memory is freed as well,
      * so it is not required to call this method to prevent memory leaks.
      */
+    @TestOnly
     void free() {
         this.cleanable.clean();
     }
