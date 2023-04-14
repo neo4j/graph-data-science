@@ -133,7 +133,7 @@ include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.a
 ----
 CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe', 'beta.scaleProperties', {
   nodeProperties: 'sizePerStory',
-  scaler: 'L1Norm',
+  scaler: 'Mean',
   mutateProperty:'scaledSizes'
 })
 YIELD name, nodePropertySteps
@@ -143,7 +143,7 @@ YIELD name, nodePropertySteps
 [opts="header",cols="1,9"]
 |===
 | name     | nodePropertySteps
-| "pipe"   | [{name=gds.beta.scaleProperties.mutate, config={scaler=L1Norm, contextRelationshipTypes=[], contextNodeLabels=[], mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
+| "pipe"   | [{name=gds.beta.scaleProperties.mutate, config={scaler=Mean, contextRelationshipTypes=[], contextNodeLabels=[], mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
 |===
 
 The `scaledSizes` property can be later used as a feature.

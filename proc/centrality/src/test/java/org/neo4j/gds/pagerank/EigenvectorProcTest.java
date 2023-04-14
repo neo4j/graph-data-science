@@ -28,8 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.scaling.L1Norm;
-import org.neo4j.gds.scaling.L2Norm;
+import org.neo4j.gds.scaling.Center;
 import org.neo4j.gds.scaling.Max;
 import org.neo4j.gds.scaling.Mean;
 import org.neo4j.gds.scaling.MinMax;
@@ -81,12 +80,11 @@ class EigenvectorProcTest extends BaseProcTest {
 
     static Stream<Arguments> scalers() {
         return Stream.of(
-            Arguments.of(NoneScaler.TYPE,   0.04371, 0.99904),
-            Arguments.of(L1Norm.TYPE, 0.04192, 0.95807),
-            Arguments.of(L2Norm.TYPE, 0.04371, 0.99904),
+            Arguments.of(NoneScaler.TYPE, 0.04371, 0.99904),
+            Arguments.of(Center.TYPE,    -0.47766, 0.47766),
             Arguments.of(Mean.TYPE,      -0.5, 0.5),
             Arguments.of(MinMax.TYPE,     0.0, 1.0),
-            Arguments.of(Max.TYPE,    0.04375, 1.0)
+            Arguments.of(Max.TYPE,        0.04375, 1.0)
         );
     }
 

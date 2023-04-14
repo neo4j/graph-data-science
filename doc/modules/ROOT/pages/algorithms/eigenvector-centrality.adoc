@@ -559,7 +559,6 @@ As a consequence, the final values are already normalized.
 This behavior cannot be changed as it is part of the power iteration method.
 
 However, to normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
-A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
 A description of all available scalers can be found in the documentation for the xref:algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
@@ -568,7 +567,7 @@ A description of all available scalers can be found in the documentation for the
 [source, cypher, role=noplay]
 ----
 CALL gds.eigenvector.stream('myGraph', {
-  scaler: "L1Norm"
+  scaler: "MINMAX"
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
@@ -579,14 +578,14 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 0.31291106560043064
-| "About"   | 0.1424967320371402
-| "Links"   | 0.1424967320371402
-| "Product" | 0.1424967320371402
-| "Site A"  | 0.06489968457203725
-| "Site B"  | 0.06489968457203725
-| "Site C"  | 0.06489968457203725
-| "Site D"  | 0.06489968457203725
+| "Home"    | 1
+| "About"   | 0.312876962110942
+| "Links"   | 0.312876962110942
+| "Product" | 0.312876962110942
+| "Site A"  | 0
+| "Site B"  | 0
+| "Site C"  | 0
+| "Site D"  | 0
 |===
 --
 

@@ -170,7 +170,7 @@ class ScalePropertiesTest {
     @MethodSource("org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfigTest#scalers")
     void supportLongAndFloatArrays(String scaler) {
         var baseConfigBuilder = ScalePropertiesStreamConfigImpl.builder()
-            .scaler(ScalerFactory.SUPPORTED_SCALERS.get(scaler).apply(CypherMapWrapper.empty()));
+            .scaler(ScalerFactory.ALL_SCALERS.get(scaler).apply(CypherMapWrapper.empty()));
         var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
         var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();

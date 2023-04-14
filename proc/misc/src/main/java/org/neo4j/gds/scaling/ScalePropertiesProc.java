@@ -53,4 +53,10 @@ public final class ScalePropertiesProc {
         };
     }
 
+    static void validateLegacyScalers(ScalePropertiesBaseConfig config, boolean allowL1L2Scalers) {
+        var specifiedScaler = config.scaler().type();
+        if (!allowL1L2Scalers && (specifiedScaler.equals(L1Norm.TYPE) || specifiedScaler.equals(L2Norm.TYPE))) {
+            ScalerFactory.throwForInvalidScaler(specifiedScaler);
+        }
+    }
 }

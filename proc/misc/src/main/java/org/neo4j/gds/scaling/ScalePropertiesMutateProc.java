@@ -71,7 +71,12 @@ public class ScalePropertiesMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(graphName, configuration);
+        var spec = new ScalePropertiesMutateSpec();
+        spec.setAllowL1L2Scalers(true);
+        return new ProcedureExecutor<>(
+            spec,
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     public static final class MutateResult extends StandardMutateResult {

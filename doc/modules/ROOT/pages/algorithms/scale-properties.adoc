@@ -92,22 +92,6 @@ image::equations/scale-properties/center.svg[p minus average value of p,align="c
 The average value is reported as statistic when this scaler is used.
 
 
-[[algorithms-scale-properties-l1norm]]
-=== L1 Norm
-
-Scales all property values into the range `[0.0, 1.0]`.
-
-image::equations/scale-properties/l1norm.svg[scaled p equals p divided by l1 norm of p ,align="center"]
-
-
-[[algorithms-scale-properties-l2norm]]
-=== L2 Norm
-
-Scales all property values using the https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 Norm (Wikipedia)].
-
-image::equations/scale-properties/l2norm.svg[scaled p equals p divided by l2 norm of p ,align="center"]
-
-
 [NOTE]
 ====
 Some scalers must do divisions as part of their computation.
@@ -292,7 +276,7 @@ The log scaler supports specific configuration, which we document here.
 [opts="header",cols="1,1,1m,1,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-| type          | String | n/a     | no       | Type of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
+| type          | String | n/a     | no       | Type of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `Center`, and `StdScore`, case insensitively.
 | offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
 |===
 

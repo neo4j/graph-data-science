@@ -119,22 +119,63 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void alphaStream() {
+    void betaDoesNotAllowL1OrL2() {
+        var queryL1 = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .streamMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "L1Norm")
+            .yields();
+        var queryL2 = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .streamMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "L2Norm")
+            .yields();
+
+        assertError(queryL1, "Unrecognised scaler type specified: `l1norm`");
+        assertError(queryL2, "Unrecognised scaler type specified: `l2norm`");
+    }
+
+    @Test
+    void alphaStreaml1() {
         var query = GdsCypher
             .call("g")
             .algo("gds.alpha.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("myProp"))
-            .addParameter("scaler", "Mean")
+            .addParameter("scaler", "L1Norm")
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D, 0D)),
-            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D, 0D)),
-            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D, 0D)),
-            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D, 0D)),
-            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D, 0D)),
-            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D, 0D))
+            Map.of("nodeId", 0L, "scaledProperty", List.of(0.0, 1/6D)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(1/15D, 1/6D)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(2/15D, 1/6D)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(0.2, 1/6D)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(4/15D, 1/6D)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(1/3D, 1/6D))
+        ));
+    }
+
+    @Test
+    void alphaStreaml2() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.alpha.scaleProperties")
+            .streamMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "L2Norm")
+            .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of("nodeId", 0L, "scaledProperty", List.of(0.0, 0.4082482904638631)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(0.13483997249264842, 0.4082482904638631)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(0.26967994498529685, 0.4082482904638631)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(0.40451991747794525, 0.4082482904638631)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(0.5393598899705937, 0.4082482904638631)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(0.674199862463242, 0.4082482904638631))
         ));
     }
 }

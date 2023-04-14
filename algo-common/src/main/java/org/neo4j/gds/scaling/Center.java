@@ -31,9 +31,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class Center extends ScalarScaler {
+public final class Center extends ScalarScaler {
 
-    static final String TYPE = "center";
+    public static final String TYPE = "center";
     final double avg;
 
     private Center(NodePropertyValues properties, double avg) {
