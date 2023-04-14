@@ -389,6 +389,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.nodeProperty.stream",
         "gds.graph.streamRelationshipProperties",
         "gds.graph.relationshipProperties.stream",
+        "gds.graph.relationshipProperties.write",
         "gds.graph.streamRelationshipProperty",
         "gds.graph.relationshipProperty.stream",
         "gds.graph.writeNodeProperties",
