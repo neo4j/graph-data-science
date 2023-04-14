@@ -77,6 +77,18 @@ final class BlockDecompressor {
         return block[this.idxInBlock];
     }
 
+    long advanceBy(int steps) {
+        // Due to delta encoded target ids, we can't yet skip blocks
+        // as we need to decompress all the previous blocks to get
+        // the correct target id.
+        while (this.idxInBlock + steps >= BLOCK_SIZE) {
+            steps = this.idxInBlock + steps - BLOCK_SIZE;
+            decompressBlock();
+        }
+        this.idxInBlock += steps;
+        return block[this.idxInBlock++];
+    }
+
     private void decompressBlock() {
         if (this.blockId < this.headerLength) {
             // block unpacking

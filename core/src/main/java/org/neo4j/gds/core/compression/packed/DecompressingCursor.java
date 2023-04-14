@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.loading.MutableIntValue;
 
 public final class DecompressingCursor implements AdjacencyCursor {
 
@@ -104,7 +105,17 @@ public final class DecompressingCursor implements AdjacencyCursor {
 
     @Override
     public long advanceBy(int n) {
-        throw new UnsupportedOperationException("not yet implemented");
+        assert n >= 0;
+
+        if (remaining() <= n) {
+            // we need to signal that the cursor is exhausted
+            this.currentPosition = this.maxTargets;
+            return NOT_FOUND;
+        }
+
+        // we consume n targets and need to set the current position to the next target
+        this.currentPosition += n + 1;
+        return this.decompressingReader.advanceBy(n);
     }
 
     @Override
