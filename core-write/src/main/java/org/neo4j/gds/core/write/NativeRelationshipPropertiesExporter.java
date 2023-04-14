@@ -36,7 +36,6 @@ import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +53,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
 
     private final TerminationFlag terminationFlag;
 
-    public NativeRelationshipPropertiesExporter(
+    NativeRelationshipPropertiesExporter(
         TransactionContext tx,
         GraphStore graphStore,
         RelationshipPropertyTranslator propertyTranslator,
