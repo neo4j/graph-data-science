@@ -79,18 +79,16 @@ public interface WriteConfig extends ConcurrencyConfig {
     interface ArrowConnectionInfo {
         String hostname();
         int port();
-        String username();
-        String password();
+        String bearerToken();
 
         static @Nullable ArrowConnectionInfo parse(Object input) {
             if (input instanceof Map) {
                 var map = CypherMapWrapper.create((Map<String, Object>) input);
                 var hostname = map.getString("hostname").orElseThrow();
                 var port = map.getLongAsInt("port");
-                var username = map.getString("username").orElseThrow();
-                var password = map.getString("password").orElseThrow();
+                var bearerToken = map.getString("bearerToken").orElseThrow();
 
-                return ImmutableArrowConnectionInfo.of(hostname, port, username, password);
+                return ImmutableArrowConnectionInfo.of(hostname, port, bearerToken);
             }
             if (input instanceof Optional<?>) {
                 Optional<?> optionalInput = (Optional<?>) input;
