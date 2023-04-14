@@ -32,6 +32,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.values.storable.Values;
 
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,7 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
         var exporter = new NativeRelationshipPropertiesExporter(
             TestSupport.fullAccessTransaction(db),
             graphStore,
+            Values::doubleValue,
             ProgressTracker.NULL_TRACKER,
             Pools.DEFAULT_SINGLE_THREAD_POOL,
             TerminationFlag.RUNNING_TRUE

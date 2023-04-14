@@ -47,6 +47,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
 
     private final GraphStore graphStore;
 
+    private final RelationshipPropertyTranslator propertyTranslator;
     private final ProgressTracker progressTracker;
 
     private final ExecutorService executorService;
@@ -56,12 +57,14 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
     public NativeRelationshipPropertiesExporter(
         TransactionContext tx,
         GraphStore graphStore,
+        RelationshipPropertyTranslator propertyTranslator,
         ProgressTracker progressTracker,
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
         super(tx);
         this.graphStore = graphStore;
+        this.propertyTranslator = propertyTranslator;
         this.progressTracker = progressTracker;
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
@@ -117,7 +120,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
             terminationFlag.assertRunning();
             var ops = stmt.dataWrite();
 
-            var writeConsumer = new WriteConsumer(toOriginalId, ops, Values::doubleValue, relationshipToken, propertyTokens, progressTracker);
+            var writeConsumer = new WriteConsumer(toOriginalId, ops, propertyTranslator, relationshipToken, propertyTokens, progressTracker);
 
             partition.consume(nodeId -> {
                 relationshipIterator.forEachRelationship(nodeId, writeConsumer);
