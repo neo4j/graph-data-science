@@ -230,6 +230,24 @@ class TransientCsrListTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void shallowCopy(TestMethodRunner runner) {
+        runner.run(() -> {
+            var sourceCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(sourceCursor.nextVLong()).isEqualTo(0);
+
+            var targetCursor = adjacencyCursor(1);
+            targetCursor = sourceCursor.shallowCopy(targetCursor);
+            
+            assertThat(targetCursor.nextVLong()).isEqualTo(1);
+            assertThat(targetCursor.nextVLong()).isEqualTo(2);
+            assertThat(targetCursor.nextVLong()).isEqualTo(3);
+            assertThat(targetCursor.nextVLong()).isEqualTo(4);
+            assertFalse(targetCursor.hasNextVLong());
+        });
+    }
+
     static Stream<Arguments> testRunnersAndDegrees() {
         return TestSupport.crossArguments(
             () -> TestMethodRunner.adjacencyCompressions().map(Arguments::of),
@@ -316,6 +334,7 @@ class TransientCsrListTest {
     }
 
     static AdjacencyCursor adjacencyCursor(int length) {
+        assert length > 0 : "length must be greater than 0";
         return adjacencyCursorFromTargets(IntStream.range(0, length).mapToLong(i -> i).toArray());
     }
 
