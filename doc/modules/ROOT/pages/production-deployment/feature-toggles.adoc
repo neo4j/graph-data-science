@@ -34,11 +34,52 @@ To enable the sharded id map the following procedure call can be used:
 CALL gds.features.useShardedIdMap(true)
 ----
 
+[[packed-adjacency-list-feature-toggle]]
+== Packed Adjacency List Toggle
+
+The in-memory graph for GDS is based on the https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format)[Compressed Sparse Row] (CSR) layout.
+By default, the adjacency list for a single node within the CSR data structure is stored compressed using a combination of variable-length- and delta-encoding.
+The compression strategy can be changed to xref:production-deployment/feature-toggles.adoc#uncompressed-adjacency-list-feature-toggle[uncompressed] or to an integer packing approach.
+
+Integer packing is an alternative compression strategy in GDS that - compared to the default compression - leads to an at least similar but mostly better compression ratio.
+A better compression ratio results in a reduced memory consumption of an in-memory graph, i.e., we can fit more graph data into the same amount of memory.
+In terms of compression performance, integer packing achieves a better compression performance than the default compression.
+While the compression performance is better, a graph projection will mostly be as fast as before as the runtime is not necessarily dominated by compressing relationship, but by other parts of the graph projection, such as id mapping or property loading.
+The decompression performance is always better than the default compression strategy, due to better memory locality and less branching.
+Traversal-heavy algorithms in particular will benefit from this performance gain.
+
+WARNING: One important difference compared to the default compression strategy is that the integer packing implementation uses off-heap memory to store the CSR data structure.
+This needs to be considered when sizing JVM heap and page cache memory for Neo4j and the remaining OS memory.
+If the feature is enabled, data will be stored in the memory region that is shared with the OS, similar to the page cache, but without a size limitation.
+If there is not enough free memory available during graph projection, the allocation will lead to undefined behaviour and most likely a crashing JVM.
+
+To switch to using packed adjacency lists, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.usePackedAdjacencyList(true)
+----
+
+To switch back to default compression or uncompressed (if enabled) adjacency lists, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.usePackedAdjacencyList(false)
+----
+
+To reset the setting to the default value, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.usePackedAdjacencyList.reset() YIELD enabled
+----
+
 [[uncompressed-adjacency-list-feature-toggle]]
 == Uncompressed Adjacency List Toggle
 
-The in-memory graph for GDS is based on the https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format)[Compressed Sparse Row] (CSR) layout and uses compressed adjacency lists by default.
-The compression lowers the memory usage for a graph but requires additional computation time to decompress during algorithm execution.
+The in-memory graph for GDS is based on the https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format)[Compressed Sparse Row] (CSR) layout.
+By default, the adjacency list for a single node within the CSR data structure is stored compressed.
+That compression lowers the memory usage for a graph but requires additional computation time to decompress during algorithm execution.
 Using an uncompressed adjacency list will result in higher memory consumption in order to provide faster traversals.
 It can also have negative performance impacts due to the increased resident memory size.
 Using more memory requires a higher memory bandwidth to read the same adjacency list.
