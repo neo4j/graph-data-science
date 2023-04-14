@@ -120,6 +120,12 @@ public final class DecompressingCursor implements AdjacencyCursor {
 
     @Override
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        throw new UnsupportedOperationException("not yet implemented");
+        var dest = destination instanceof DecompressingCursor
+            ? (DecompressingCursor) destination
+            : new DecompressingCursor(this.pages);
+        dest.decompressingReader.copyFrom(this.decompressingReader);
+        dest.currentPosition = this.currentPosition;
+        dest.maxTargets = this.maxTargets;
+        return dest;
     }
 }

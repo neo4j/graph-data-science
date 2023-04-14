@@ -46,6 +46,16 @@ final class BlockDecompressor {
         this.header = new ByteArrayBuffer();
     }
 
+    void copyFrom(BlockDecompressor other) {
+        System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
+        System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.headerLength);
+        this.targetPtr = other.targetPtr;
+        this.headerLength = other.headerLength;
+        this.idxInBlock = other.idxInBlock;
+        this.blockId = other.blockId;
+        this.lastValue = other.lastValue;
+    }
+
     void reset(long ptr, int degree) {
         int headerSize = BitUtil.ceilDiv(degree, AdjacencyPacking.BLOCK_SIZE);
         long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);

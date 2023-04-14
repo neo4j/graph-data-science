@@ -239,7 +239,7 @@ class TransientCsrListTest {
 
             var targetCursor = adjacencyCursor(1);
             targetCursor = sourceCursor.shallowCopy(targetCursor);
-            
+
             assertThat(targetCursor.nextVLong()).isEqualTo(1);
             assertThat(targetCursor.nextVLong()).isEqualTo(2);
             assertThat(targetCursor.nextVLong()).isEqualTo(3);
