@@ -37,7 +37,7 @@ import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 public interface ScalerFactory {
     String SCALER_KEY = "type";
 
-    Map<String, Function<CypherMapWrapper, ScalerFactory>> SUPPORTED_SCALERS = Map.of(
+    Map<String, Function<CypherMapWrapper, ScalerFactory>> ALL_SCALERS = Map.of(
         NoneScaler.TYPE, NoneScaler::buildFrom,
         Mean.TYPE, Mean::buildFrom,
         Max.TYPE, Max::buildFrom,
@@ -49,7 +49,7 @@ public interface ScalerFactory {
         MinMax.TYPE, MinMax::buildFrom
     );
 
-    List<String> SUPPORTED_SCALER_NAMES = SUPPORTED_SCALERS
+    List<String> SUPPORTED_SCALER_NAMES = ALL_SCALERS
         .keySet()
         .stream()
         .filter(s -> !(s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))
@@ -71,7 +71,7 @@ public interface ScalerFactory {
             var scalerSpec = inputMap.get(SCALER_KEY);
             if (scalerSpec instanceof String) {
                 var scalerType = toLowerCaseWithLocale((String) scalerSpec);
-                var selectedScaler = SUPPORTED_SCALERS.get(scalerType);
+                var selectedScaler = ALL_SCALERS.get(scalerType);
                 if (selectedScaler == null) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
