@@ -82,9 +82,13 @@ public interface ScalerFactory {
                 return selectedScaler.apply(CypherMapWrapper.create(inputMap).withoutEntry(SCALER_KEY));
             }
         }
+        return throwForInvalidScaler(userInput);
+    }
+
+    static ScalerFactory throwForInvalidScaler(Object inputScaler) {
         throw new IllegalArgumentException(formatWithLocale(
             "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
-            userInput,
+            inputScaler,
             StringJoining.join(SUPPORTED_SCALER_NAMES)
         ));
     }
