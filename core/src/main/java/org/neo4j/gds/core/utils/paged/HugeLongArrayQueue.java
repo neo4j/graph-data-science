@@ -63,6 +63,13 @@ public final class HugeLongArrayQueue {
         return removed;
     }
 
+    public long peek() {
+        if (isEmpty()) {
+            throw new IndexOutOfBoundsException("Queue is empty.");
+        }
+        return array.get(head);
+    }
+
     public long size() {
         long diff = tail - head;
         if (diff < 0) {

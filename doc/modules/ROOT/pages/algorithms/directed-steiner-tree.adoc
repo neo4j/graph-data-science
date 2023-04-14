@@ -419,10 +419,16 @@ The relationships added back to the graph are always directed, even if the input
 
 
 [[algorithms-steiner-tree-examples-rerouting]]
-=== Rerouting
+=== Rerouting examples
+
 
 It is also possible to try and augment the solution discovered by the heuristic via a post-processing rerouting phase.
 This option can be enabled by setting `applyRerouting: true` in the configuration.
+
+The algorithm supports two forms of rerouting: _simple_ and _extended_.
+Extended is more involved than simple and can get better quality improvements, but it requires having an inverse index for the adjacency list.
+
+==== Simple Rerouting
 
 The rerouting phase re-examines the relationships in the discovered steiner tree and tries to reroute nodes (that is change their parent with another node in the tree) so as to decrease the cost.
 After the rerouting phase some nodes might end up being childless, that is not part of any path between the source and a target.
@@ -462,7 +468,55 @@ ORDER BY node
 
 As can be seen, thanks to the rerouting step, D's parent has been replaced with F and the overall weight of the steiner tree is reduced by 2.
 
+==== Extended Rerouting
 
+We now demonstrate the usage of extended rerouting.
+For that, first we need to project the graph once more, this time creating an inverse index.
+[role=query-example, no-result=true, group=extended]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project(
+  'inverseGraph',
+  'Place',
+  {
+    LINK: {
+      properties: 'cost', indexInverse: true
+    }
+  }
+)
+----
+--
+We know repeat the algorithm; this time with the extended rerouting heuristic.
+
+[role=query-example, group=extended]
+--
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.beta.steinerTree.stream('inverseGraph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  applyRerouting: true
+})
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent, weight
+ORDER BY node
+----
+
+.Results
+[opts="header"]
+|===
+| node | parent | weight
+| "A"  | "A"    | 0
+| "D"  | "F"    | 3
+| "E"  | "A"    | 7
+| "F"  | "A"    | 10
+|===
+--
+
+As you can see, thanks to the extended rerouting, we can further reduce the cost  and return the optimal steiner tree having a weight of 20.
 [NOTE]
 ====
 Unlike the main algorithm, the rerouting phase runs sequentially and is not affected by the concurrency parameter.

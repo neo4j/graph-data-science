@@ -26,28 +26,39 @@ import org.neo4j.gds.extension.IdFunction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SteinerTestUtils {
-    final static Offset  offset= Offset.offset(1e-5);
 
-     static void assertTreeIsCorrect(IdFunction idFunction,SteinerTreeResult steinerTreeResult, long[] expectedParent, double[] expectedParentCost, double expectedCost){
-         var parent=steinerTreeResult.parentArray();
-         var parentCost=steinerTreeResult.relationshipToParentCost();
-         var cost=steinerTreeResult.totalCost();
-         SoftAssertions softAssertions=new SoftAssertions();
-         assertThat(cost).isCloseTo(expectedCost,offset);
-        long nodeCount=parent.size();
-        for (int indexId=0;indexId<nodeCount;++indexId){
-            long nodeId=idFunction.of("a"+indexId);
+    final static Offset offset = Offset.offset(1e-5);
+
+    static void assertTreeIsCorrect(
+        IdFunction idFunction,
+        SteinerTreeResult steinerTreeResult,
+        long[] expectedParent,
+        double[] expectedParentCost,
+        double expectedCost
+    ) {
+
+        var parent = steinerTreeResult.parentArray();
+        var parentCost = steinerTreeResult.relationshipToParentCost();
+        var cost = steinerTreeResult.totalCost();
+        SoftAssertions softAssertions = new SoftAssertions();
+        assertThat(cost).isCloseTo(expectedCost, offset);
+        long nodeCount = parent.size();
+
+        for (int indexId = 0; indexId < nodeCount; ++indexId) {
+            long nodeId = idFunction.of("a" + indexId);
             softAssertions.assertThat(parent.get(nodeId)).isEqualTo(expectedParent[indexId]);
-            softAssertions.assertThat(parentCost.get(nodeId)).isCloseTo(expectedParentCost[indexId],offset);
+            softAssertions.assertThat(parentCost.get(nodeId)).isCloseTo(expectedParentCost[indexId], offset);
         }
+
         softAssertions.assertAll();
     }
 
-    static long[] getNodes(IdFunction idFunction,int n){
-            long[] nodes=new long[n];
-            for (int i=0;i<n;++i){
-                nodes[i]=idFunction.of("a"+i);
-            }
-            return  nodes;
+    static long[] getNodes(IdFunction idFunction, int n) {
+
+        long[] nodes = new long[n];
+        for (int i = 0; i < n; ++i) {
+            nodes[i] = idFunction.of("a" + i);
+        }
+        return nodes;
     }
 }
