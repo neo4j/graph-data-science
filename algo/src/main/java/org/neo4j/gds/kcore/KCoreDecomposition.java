@@ -64,7 +64,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         );
 
         HugeIntArray core = HugeIntArray.newArray(graph.nodeCount());
-        int degeneracy = -1;
+        int degeneracy = 0;
 
         AtomicLong remainingNodes = new AtomicLong(graph.nodeCount());
 

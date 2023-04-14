@@ -20,6 +20,7 @@
 package org.neo4j.gds.kcore;
 
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
@@ -161,4 +162,32 @@ class KCoreDecompositionTest {
         }
     }
 
+    @GdlExtension
+    @Nested
+    class EmptyGraph {
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+            "  (a:node)," +
+            "  (b:node)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Inject
+        private IdFunction idFunction;
+
+        @Test
+        void shouldComputeCoreDecomposition() {
+
+            var kcore = new KCoreDecomposition(graph, 1, ProgressTracker.NULL_TRACKER, 1).compute();
+            assertThat(kcore.degeneracy()).isEqualTo(0);
+            var coreValues = kcore.coreValues();
+
+            assertThat(coreValues.get(idFunction.of("a"))).isEqualTo(0L);
+            assertThat(coreValues.get(idFunction.of("b"))).isEqualTo(0L);
+
+        }
+
+    }
 }
