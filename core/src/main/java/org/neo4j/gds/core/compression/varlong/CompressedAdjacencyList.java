@@ -239,6 +239,8 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
             int targetsLeftToBeDecoded = remaining();
             if (targetsLeftToBeDecoded <= n) {
+                // we need signal that the cursor is exhausted
+                this.currentPosition = maxTargets;
                 return AdjacencyCursor.NOT_FOUND;
             }
 
