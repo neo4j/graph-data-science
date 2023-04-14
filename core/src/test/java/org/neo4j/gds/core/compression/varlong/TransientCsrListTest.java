@@ -179,6 +179,35 @@ class TransientCsrListTest {
             assertEquals(targetCount, adjacencyCursor.nextVLong());
         });
     }
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void advanceBy(TestMethodRunner runner) {
+        runner.run(() -> {
+            var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(0)).isEqualTo(0);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(1);
+            assertTrue(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(1)).isEqualTo(1);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(2);
+            assertTrue(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(2)).isEqualTo(2);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(3);
+            assertTrue(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(3)).isEqualTo(3);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(4);
+            assertFalse(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(5)).isEqualTo(NOT_FOUND);
+            assertFalse(adjacencyCursor.hasNextVLong());
+        });
+    }
 
     static Stream<Arguments> testRunnersAndDegrees() {
         return TestSupport.crossArguments(
