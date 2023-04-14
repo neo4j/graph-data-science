@@ -48,7 +48,7 @@ final class BlockDecompressor {
 
     void copyFrom(BlockDecompressor other) {
         System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
-        System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.headerLength);
+        System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
         this.targetPtr = other.targetPtr;
         this.headerLength = other.headerLength;
         this.idxInBlock = other.idxInBlock;
