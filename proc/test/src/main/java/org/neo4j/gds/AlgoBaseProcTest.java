@@ -100,10 +100,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     GraphDatabaseService graphDb();
 
-    default DatabaseId databaseId() {
-        return DatabaseId.of(graphDb());
-    }
-
     CONFIG createConfig(CypherMapWrapper mapWrapper);
 
     default CypherMapWrapper createMinimalConfig() {

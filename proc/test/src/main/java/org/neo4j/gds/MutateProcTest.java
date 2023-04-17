@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.TestLog;
@@ -57,6 +58,10 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
     String expectedMutatedGraph();
 
     String failOnExistingTokenMessage();
+
+    default DatabaseId databaseId() {
+        return DatabaseId.of(graphDb());
+    }
 
     @Test
     default void testExceptionLogging() {
