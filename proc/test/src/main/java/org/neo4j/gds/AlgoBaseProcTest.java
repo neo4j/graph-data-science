@@ -106,12 +106,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return DatabaseId.of(graphDb());
     }
 
-    default GraphDatabaseService emptyDb() {
-        var db = graphDb();
-        runQuery(db, "MATCH (n) DETACH DELETE n");
-        return db;
-    }
-
     CONFIG createConfig(CypherMapWrapper mapWrapper);
 
     void assertResultEquals(RESULT result1, RESULT result2);

@@ -45,7 +45,7 @@ public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<R
 
     @Test
     default void testWriteOnFilteredGraph() {
-        emptyDb();
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         if (writeRelationshipType().equals("REL")) {
