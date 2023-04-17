@@ -19,19 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonMap;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 public interface GraphProjectConfigSupport {
 
@@ -83,33 +76,6 @@ public interface GraphProjectConfigSupport {
             graphName,
             nodes,
             rels
-        );
-    }
-
-    default GraphProjectFromCypherConfig emptyWithNameCypher(String userName, String graphName, List<String> nodeProperties
-    ) {
-        return withNameAndRelationshipQuery(
-            userName,
-            graphName,
-            ALL_RELATIONSHIPS_QUERY,
-            nodeProperties
-        );
-    }
-
-    default GraphProjectFromCypherConfig withNameAndRelationshipQuery(
-        String userName,
-        String graphName,
-        String relationshipQuery,
-        List<String> nodeProperties
-    ) {
-        String propertyPart = nodeProperties.stream().map(p -> "n." + p + " AS " + p).collect(Collectors.joining(", "));
-        String nodesQuery = nodeProperties.isEmpty() ? ALL_NODES_QUERY : ALL_NODES_QUERY + ", " + propertyPart;
-        return GraphProjectFromCypherConfig.of(
-            userName,
-            graphName,
-            nodesQuery,
-            relationshipQuery,
-            CypherMapWrapper.empty()
         );
     }
 }
