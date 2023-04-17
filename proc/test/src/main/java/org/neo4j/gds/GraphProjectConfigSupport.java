@@ -35,32 +35,25 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIP
 
 public interface GraphProjectConfigSupport {
 
-    default GraphProjectFromStoreConfig emptyWithNameNative(String userName, String graphName, List<String> nodeProperties
-    ) {
+    default GraphProjectFromStoreConfig emptyWithNameNative(String userName, String graphName) {
         return withNameAndRelationshipProjections(
             userName,
             graphName,
-            RelationshipProjections.ALL,
-            nodeProperties
+            RelationshipProjections.ALL
         );
     }
 
     default GraphProjectFromStoreConfig withNameAndRelationshipProjections(
         String userName,
         String graphName,
-        RelationshipProjections rels,
-        List<String> nodeProperties
+        RelationshipProjections rels
     ) {
-        var propertyMappings = nodeProperties
-            .stream()
-            .map(PropertyMapping::of)
-            .collect(Collectors.toList());
         return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
             NodeProjections.create(singletonMap(
                 ALL_NODES,
-                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of(propertyMappings))
+                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
             )),
             rels
         );

@@ -87,9 +87,6 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
-        nodeProperties().forEach(p -> {
-            runQuery(graphDb(), "MATCH (n) SET n." + p + "=0.0");
-        });
         var relationshipProjections = relationshipProjections();
         var orientation = relationshipProjections
             .projections()
@@ -100,10 +97,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
             .orElse(Orientation.NATURAL);
         GraphStore graphStore = new TestNativeGraphLoader(graphDb())
             .withLabels("A", "B")
-            .withNodeProperties(ImmutablePropertyMappings.of(nodeProperties()
-                .stream()
-                .map(PropertyMapping::of)
-                .collect(Collectors.toList())))
+            .withNodeProperties(ImmutablePropertyMappings.of())
             .withDefaultOrientation(orientation)
             .graphStore();
 
@@ -111,8 +105,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         var graphProjectConfig = withNameAndRelationshipProjections(
             "",
             graphName,
-            relationshipProjections,
-            nodeProperties()
+            relationshipProjections
         );
         GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
@@ -127,14 +120,13 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
 
         var expectedProperties = new ArrayList<String>();
         expectedProperties.add(mutateProperty());
-        expectedProperties.addAll(nodeProperties());
         Assertions.assertEquals(
             new HashSet<>(expectedProperties),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("A"))
         );
 
         assertEquals(
-            new HashSet<>(nodeProperties()),
+            new HashSet<>(),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("B"))
         );
     }

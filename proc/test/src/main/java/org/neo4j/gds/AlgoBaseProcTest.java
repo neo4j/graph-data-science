@@ -55,12 +55,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -179,8 +177,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         var graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
-            relationshipProjections(),
-            nodeProperties()
+            relationshipProjections()
         );
 
         GraphStoreCatalog.set(
@@ -219,8 +216,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
-            relationshipProjections(),
-            nodeProperties()
+            relationshipProjections()
         );
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
@@ -248,10 +244,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return RelationshipProjections.ALL;
     }
 
-    default List<String> nodeProperties() {
-        return List.of();
-    }
-
     @Test
     default void testRunOnEmptyGraph() {
         // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
@@ -261,13 +253,12 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
             var loadedGraphName = "graph";
-            var propertyMappings = nodeProperties().stream().map(prop -> PropertyMapping.of(prop, 1.0)).collect(Collectors.toList());
             GraphProjectConfig graphProjectConfig = withNameAndProjections(
                 "",
                 loadedGraphName,
                 ImmutableNodeProjections.of(
                     Map.of(
-                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of(propertyMappings))
+                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of())
                     )
                 ),
                 relationshipProjections()
@@ -325,7 +316,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GdsCypher.call(graphName)
                 .graphProject()
                 .loadEverything(orientation)
-                .withNodeProperties(nodeProperties(), DefaultValue.DEFAULT)
                 .yields()
         );
     }

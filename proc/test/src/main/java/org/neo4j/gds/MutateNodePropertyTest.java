@@ -55,9 +55,6 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
-        nodeProperties().forEach(p -> {
-            runQuery(graphDb(), "MATCH (n) SET n." + p + "=0.0");
-        });
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
@@ -65,11 +62,11 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
             .graphName(graphName)
             .addNodeProjection(ImmutableNodeProjection.of(
                 "A",
-                PropertyMappings.fromObject(nodeProperties())
+                PropertyMappings.of()
             ))
             .addNodeProjection(ImmutableNodeProjection.of(
                 "B",
-                PropertyMappings.fromObject(nodeProperties())
+                PropertyMappings.of()
             ));
 
 
