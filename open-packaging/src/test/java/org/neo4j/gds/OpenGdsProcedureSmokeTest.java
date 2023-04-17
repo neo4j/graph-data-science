@@ -514,7 +514,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.kcore.stats",
         "gds.kcore.stream",
-        "gds.kcore.mutate"
+        "gds.kcore.mutate",
+        "gds.kcore.write"
 
     );
 
@@ -554,7 +555,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 399;
+        int expectedCount = 400;
         assertEquals(
             expectedCount,
             returnedRows,

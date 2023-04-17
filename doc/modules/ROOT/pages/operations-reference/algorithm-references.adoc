@@ -380,8 +380,9 @@
 .2+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
 | `gds.alpha.scaleProperties.mutate` (deprecated)
 | `gds.alpha.scaleProperties.stream` (deprecated)
-.3+<.^| K-Core Decomposition
-| `gds.kcore.stream`
+.4+<.^| K-Core Decomposition
 | `gds.kcore.stats`
+| `gds.kcore.stream`
 | `gds.kcore.mutate`
+| `gds.kcore.write`
 |===
