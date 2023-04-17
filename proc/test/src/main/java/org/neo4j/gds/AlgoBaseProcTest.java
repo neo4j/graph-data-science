@@ -68,7 +68,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
@@ -375,24 +374,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 .withNodeProperties(nodeProperties(), DefaultValue.DEFAULT)
                 .yields()
         );
-    }
-
-    @Test
-    default void checkStatsModeExists() {
-        applyOnProcedure((proc) -> {
-            boolean inStatsClass = methodExists(proc, "stats");
-            if (inStatsClass) {
-                assertTrue(
-                    methodExists(proc, "stats"),
-                    formatWithLocale("Expected %s to have a `stats` method", proc.getClass().getSimpleName())
-                );
-            }
-        });
-    }
-
-    default boolean methodExists(AlgoBaseProc<?, RESULT, CONFIG, ?> proc, String methodSuffix) {
-        return getProcedureMethods(proc)
-            .anyMatch(method -> getProcedureMethodName(method).endsWith(methodSuffix));
     }
 
     default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {
