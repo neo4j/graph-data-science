@@ -28,6 +28,7 @@ import org.neo4j.gds.ConfigurableSeedConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -114,13 +115,6 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     }
 
     @Override
-    public void assertResultEquals(
-        LocalClusteringCoefficient.Result result1, LocalClusteringCoefficient.Result result2
-    ) {
-
-    }
-
-    @Override
     public RelationshipProjections relationshipProjections() {
         return RelationshipProjections.ALL_UNDIRECTED;
     }
@@ -148,8 +142,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
         applyOnProcedure(proc -> {
             proc.log = testLog;
-            getProcedureMethods(proc)
-                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
+            ProcedureMethodHelper.nonEstimateMethods(proc)
                 .forEach(noneEstimateMethod -> {
                     try {
                         noneEstimateMethod.invoke(proc, "nonagg", config.toMap());

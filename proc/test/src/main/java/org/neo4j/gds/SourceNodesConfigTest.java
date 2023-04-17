@@ -58,7 +58,6 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
         );
 
         var graphProjectConfig = withNameAndNodeProjections(
-            "",
             graphName,
             NodeProjections.ALL
         );
@@ -83,7 +82,6 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
         runQuery(graphDb(), "CREATE (), (), ()");
 
         var graphProjectConfig = withNameAndNodeProjections(
-            "",
             graphName,
             NodeProjections.ALL
         );
@@ -105,7 +103,6 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
         var sourceNodes = List.of("0L", "1L");
 
         var graphProjectConfig = withNameAndNodeProjections(
-            "",
             graphName,
             NodeProjections.ALL
         );

@@ -50,7 +50,12 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
 
     @Test
     void testStats() {
-        loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+        runQuery(
+            GdsCypher.call(DEFAULT_GRAPH_NAME)
+                .graphProject()
+                .loadEverything(Orientation.UNDIRECTED)
+                .yields()
+        );
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("fastRP")
             .statsMode()

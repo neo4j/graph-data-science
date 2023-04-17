@@ -245,14 +245,6 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest implements Mutat
         return ModularityOptimizationMutateConfig.of(mapWrapper);
     }
 
-    @Override
-    public void assertResultEquals(ModularityOptimizationResult result1, ModularityOptimizationResult result2) {
-        assertThat(result1.modularity())
-                .isEqualTo(result2.modularity());
-        assertThat(result1.ranIterations())
-            .isEqualTo(result2.ranIterations());
-    }
-
     private static String graphProjectQuery() {
         GraphProjectFromStoreConfig config = GraphProjectFromStoreConfigImpl
             .builder()

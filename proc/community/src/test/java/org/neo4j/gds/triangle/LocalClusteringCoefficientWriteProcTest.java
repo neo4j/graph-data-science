@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class LocalClusteringCoefficientWriteProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig> {
@@ -42,8 +43,19 @@ class LocalClusteringCoefficientWriteProcTest
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
         ).flatMap(Collection::stream);
+    }
+
+    private AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, ?> proc() {
+        try {
+            return getProcedureClazz()
+                .getConstructor()
+                .newInstance();
+        } catch (Exception e) {
+            fail("unable to instantiate procedure", e);
+        }
+        return null;
     }
 
     @Test

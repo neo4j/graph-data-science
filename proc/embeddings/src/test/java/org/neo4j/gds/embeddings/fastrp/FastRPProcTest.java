@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
@@ -75,15 +74,6 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
 
     public GraphDatabaseService graphDb() {
         return db;
-    }
-
-    @Override
-    public void assertResultEquals(
-        FastRP.FastRPResult result1, FastRP.FastRPResult result2
-    ) {
-        // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
-        assertThat(result1.embeddings().get(0))
-            .hasSameSizeAs(result2.embeddings().get(0));
     }
 
     private static Stream<Arguments> weights() {

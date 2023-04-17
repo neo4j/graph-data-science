@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.TestLog;
@@ -58,6 +59,10 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
 
     String failOnExistingTokenMessage();
 
+    default DatabaseId databaseId() {
+        return DatabaseId.of(graphDb());
+    }
+
     @Test
     default void testExceptionLogging() {
         List<TestLog> log = new ArrayList<>(1);
@@ -78,8 +83,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
         String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     config.remove("nodeWeightProperty");
@@ -106,10 +110,8 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
         return mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
             GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-                TEST_USERNAME,
                 loadedGraphName,
-                relationshipProjections(),
-                nodeProperties()
+                relationshipProjections()
             );
             GraphStoreCatalog.set(
                 graphProjectConfig,
@@ -127,8 +129,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
     @NotNull
     default GraphStore runMutation(String graphName, CypherMapWrapper additionalConfig) {
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(additionalConfig).toMap();
                     try {
