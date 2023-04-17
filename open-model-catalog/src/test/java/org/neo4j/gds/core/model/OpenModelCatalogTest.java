@@ -129,7 +129,7 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of(USERNAME, "testModel"),
-            new TestCustomInfo()
+            Map::of
         );
 
         assertThat(counter.getCount()).isEqualTo(0);
