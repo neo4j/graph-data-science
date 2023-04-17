@@ -22,6 +22,7 @@ package org.neo4j.gds;
 
 import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.Timeout;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -38,6 +39,7 @@ import org.neo4j.test.extension.ImpermanentDbmsExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -49,6 +51,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ImpermanentDbmsExtension(configurationCallback = "configuration")
 @Neo4jGraphExtension
+@Timeout(value = 30, unit = TimeUnit.MINUTES)
 public abstract class BaseTest {
 
     protected static final String DEFAULT_GRAPH_NAME = "graph";
