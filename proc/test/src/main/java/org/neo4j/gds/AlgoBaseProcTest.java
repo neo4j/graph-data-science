@@ -23,8 +23,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -210,7 +208,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
-            runTwiceAndAssertEqualResult(loadedGraphName, proc);
+            var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+            var resultRun1 = proc.compute(
+                loadedGraphName,
+                configMap
+            );
+            var resultRun2 = proc.compute(
+                loadedGraphName,
+                configMap
+            );
+
+            assertResultEquals(resultRun1.result().get(), resultRun2.result().get());
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -264,38 +272,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     default List<String> nodeProperties() {
         return List.of();
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    default void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
-        var loadedGraphName = "loadedGraph";
-        var graphProjectConfig = cypherProjection
-            ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName, nodeProperties())
-            : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections(),
-                nodeProperties()
-            );
-
-        GraphStoreCatalog.set(
-            graphProjectConfig,
-            graphLoader(graphProjectConfig).graphStore()
-        );
-
-        applyOnProcedure(proc -> runTwiceAndAssertEqualResult(loadedGraphName, proc));
-    }
-
-    private void runTwiceAndAssertEqualResult(String loadedGraphName, AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?> proc) {
-        var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-        var resultRun1 = proc.compute(
-            loadedGraphName,
-            configMap
-        );
-        var resultRun2 = proc.compute(
-            loadedGraphName,
-            configMap
-        );
-
-        assertResultEquals(resultRun1.result().get(), resultRun2.result().get());
     }
 
     @Test

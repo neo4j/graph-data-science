@@ -181,10 +181,4 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
         runQuery(graphCreateQuery);
     }
-
-    @Override
-    public void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
-        // LCC only works on UNDIRECTED, and Cypher only projects directed
-        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(false);
-    }
 }

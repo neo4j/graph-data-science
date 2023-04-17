@@ -104,10 +104,4 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     public void loadGraph(String graphName){
         loadGraph(graphName, Orientation.UNDIRECTED);
     }
-
-    @Override
-    public void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
-        // TC only works on UNDIRECTED, and Cypher only projects directed
-        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(false);
-    }
 }
