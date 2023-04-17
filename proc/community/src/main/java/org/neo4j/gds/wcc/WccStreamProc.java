@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
@@ -58,6 +59,11 @@ public class WccStreamProc extends StreamProc<
             configuration
         );
         return stream(computationResult);
+    }
+
+    @TestOnly
+    ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.stream.estimate", mode = READ)
