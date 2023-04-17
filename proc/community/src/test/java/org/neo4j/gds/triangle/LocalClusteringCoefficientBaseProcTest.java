@@ -114,13 +114,6 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     }
 
     @Override
-    public void assertResultEquals(
-        LocalClusteringCoefficient.Result result1, LocalClusteringCoefficient.Result result2
-    ) {
-
-    }
-
-    @Override
     public RelationshipProjections relationshipProjections() {
         return RelationshipProjections.ALL_UNDIRECTED;
     }

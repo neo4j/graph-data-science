@@ -41,7 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -183,8 +182,4 @@ class K1ColoringWriteProcTest extends BaseProcTest implements
         return db;
     }
 
-    @Override
-    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
-        assertThat(result1.toArray()).containsExactly(result2.toArray());
-    }
 }

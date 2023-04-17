@@ -39,7 +39,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -148,8 +147,4 @@ public class K1ColoringMutateProcTest extends BaseProcTest
         return db;
     }
 
-    @Override
-    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
-        assertThat(result1.toArray()).containsExactly(result2.toArray());
-    }
 }

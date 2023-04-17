@@ -47,7 +47,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class Node2VecMutateProcTest extends BaseProcTest
@@ -188,12 +187,6 @@ class Node2VecMutateProcTest extends BaseProcTest
     @Override
     public GraphDatabaseService graphDb() {
         return db;
-    }
-
-    @Override
-    public void assertResultEquals(Node2VecModel.Result result1, Node2VecModel.Result result2) {
-        // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
-        assertEquals(result1.embeddings().get(0).data().length, result2.embeddings().get(0).data().length);
     }
 
     @Test

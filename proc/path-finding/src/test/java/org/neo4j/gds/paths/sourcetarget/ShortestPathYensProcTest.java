@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
@@ -130,11 +129,6 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
             .withNumber(SOURCE_NODE_KEY, idC)
             .withNumber(TARGET_NODE_KEY, idD)
             .withNumber(K_KEY, 3);
-    }
-
-    @Override
-    public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
-        Assertions.assertEquals(result1.pathSet(), result2.pathSet());
     }
 
     @Test

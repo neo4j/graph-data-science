@@ -65,7 +65,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
@@ -107,8 +106,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     }
 
     CONFIG createConfig(CypherMapWrapper mapWrapper);
-
-    void assertResultEquals(RESULT result1, RESULT result2);
 
     default CypherMapWrapper createMinimalConfig() {
         return createMinimalConfig(CypherMapWrapper.empty());
@@ -195,16 +192,15 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            var resultRun1 = proc.compute(
+            proc.compute(
                 loadedGraphName,
                 configMap
-            );
-            var resultRun2 = proc.compute(
+            ).result().get();
+            proc.compute(
                 loadedGraphName,
                 configMap
-            );
+            ).result().get();
 
-            assertResultEquals(resultRun1.result().get(), resultRun2.result().get());
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(

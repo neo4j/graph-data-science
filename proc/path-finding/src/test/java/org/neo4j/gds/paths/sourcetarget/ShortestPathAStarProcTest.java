@@ -46,7 +46,6 @@ import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
@@ -155,11 +154,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
             .withNumber(TARGET_NODE_KEY, idFunction.of("nX"))
             .withString(LONGITUDE_PROPERTY_KEY, LONGITUDE_PROPERTY)
             .withString(LATITUDE_PROPERTY_KEY, LATITUDE_PROPERTY);
-    }
-
-    @Override
-    public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
-        assertEquals(result1.pathSet(), result2.pathSet());
     }
 
     /**

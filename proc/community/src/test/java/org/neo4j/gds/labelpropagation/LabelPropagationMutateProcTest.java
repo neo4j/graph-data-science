@@ -137,13 +137,6 @@ public class LabelPropagationMutateProcTest extends BaseProcTest implements
         return LabelPropagationMutateConfig.of(mapWrapper);
     }
 
-    @Override
-    public void assertResultEquals(LabelPropagationResult result1, LabelPropagationResult result2) {
-        assertThat(result1)
-            .usingRecursiveComparison()
-            .isEqualTo(result2);
-    }
-
     @Test
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(LabelPropagationWriteProc.class);

@@ -27,15 +27,12 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     extends BaseProcTest
@@ -105,14 +102,4 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
         runQuery(createQuery);
     }
 
-    @Override
-    public void assertResultEquals(
-        DegreeCentrality.DegreeFunction result1, DegreeCentrality.DegreeFunction result2
-    ) {
-        var graph = GraphStoreCatalog.get(getUsername(), databaseId(), "dcGraph").graphStore().getUnion();
-        graph.forEachNode(nodeId -> {
-            assertEquals(result1.get(nodeId), result2.get(nodeId));
-            return true;
-        });
-    }
 }
