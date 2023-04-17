@@ -19,12 +19,17 @@
  */
 package org.neo4j.gds.kcore;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -32,6 +37,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class KCoreDecompositionTest {
@@ -86,6 +93,32 @@ class KCoreDecompositionTest {
             assertThat(coreValues.get(idFunction.of("g"))).isEqualTo(2);
             assertThat(coreValues.get(idFunction.of("h"))).isEqualTo(2);
 
+        }
+
+        @Test
+        void shouldLogProgress() {
+            var config = KCoreDecompositionStreamConfigImpl.builder().build();
+
+            var factory = new KCoreDecompositionAlgorithmFactory<>();
+
+            var progressTask = factory.progressTask(graph, config);
+            var log = Neo4jProxy.testLog();
+            var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+
+            factory
+                .build(graph, config, progressTracker)
+                .compute();
+
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "KCoreDecomposition :: Start",
+                    "KCoreDecomposition 11%",
+                    "KCoreDecomposition 33%",
+                    "KCoreDecomposition 100%",
+                    "KCoreDecomposition :: Finished"
+                );
         }
     }
 

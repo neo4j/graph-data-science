@@ -127,6 +127,7 @@ class KCoreDecompositionTask implements Runnable {
             });
         }
         remainingNodes.addAndGet(-nodesExamined);
+        progressTracker.logProgress(nodesExamined);
     }
 
     enum KCoreDecompositionPhase {
