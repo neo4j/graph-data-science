@@ -43,6 +43,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphSampleProc extends CatalogProc {
 
     private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
+    private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
 
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
     @Description(RWR_DESCRIPTION)
