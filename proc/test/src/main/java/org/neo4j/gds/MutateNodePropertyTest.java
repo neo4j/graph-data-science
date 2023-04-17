@@ -81,8 +81,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
                         "nodeLabels",

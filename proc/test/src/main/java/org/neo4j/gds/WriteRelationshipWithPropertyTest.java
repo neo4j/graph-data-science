@@ -77,8 +77,7 @@ public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<R
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".write"))
+            ProcedureMethodHelper.writeMethods(procedure)
                 .forEach(writeMethod -> {
                     try {
                         writeMethod.invoke(procedure, graphName, config);

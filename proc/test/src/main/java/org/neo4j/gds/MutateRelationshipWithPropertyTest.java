@@ -79,8 +79,7 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     try {
                         mutateMethod.invoke(procedure, graphName, config);

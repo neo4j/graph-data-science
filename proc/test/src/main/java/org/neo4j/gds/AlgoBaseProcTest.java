@@ -48,13 +48,9 @@ import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -138,10 +134,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             relationshipProjections()
         );
 
-        GraphStoreCatalog.set(
-            graphProjectConfig,
-            graphLoader(graphProjectConfig).graphStore()
-        );
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
 
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
@@ -201,11 +194,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     @Test
     default void testRunOnEmptyGraph() {
         applyOnProcedure((proc) -> {
-            var methods = getProcedureMethods(proc)
-                .filter(method -> {
-                    String procedureMethodName = getProcedureMethodName(method);
-                    return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
-                }).collect(Collectors.toList());
+            var methods = Stream.concat(
+                ProcedureMethodHelper.writeMethods(proc),
+                ProcedureMethodHelper.streamMethods(proc)
+            ).collect(Collectors.toList());
+
             if (!methods.isEmpty()) {
                 // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
                 runQuery(graphDb(), "CALL db.createLabel('X')");
@@ -247,7 +240,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
                     try {
                         Stream<?> result = (Stream<?>) method.invoke(proc, graphName, configMap);
-                        if (getProcedureMethodName(method).endsWith("stream")) {
+                        if (ProcedureMethodHelper.methodName(method).endsWith("stream")) {
                             assertEquals(0, result.count(), "Stream result should be empty.");
                         } else {
                             assertEquals(1, result.count());
@@ -268,21 +261,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 .loadEverything(Orientation.NATURAL)
                 .yields()
         );
-    }
-
-    default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {
-        return Arrays.stream(proc.getClass().getDeclaredMethods())
-            .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
-    }
-
-    default String getProcedureMethodName(Method method) {
-        Procedure procedureAnnotation = method.getDeclaredAnnotation(Procedure.class);
-        Objects.requireNonNull(procedureAnnotation, method + " is not annotation with " + Procedure.class);
-        String name = procedureAnnotation.name();
-        if (name.isEmpty()) {
-            name = procedureAnnotation.value();
-        }
-        return name;
     }
 
     @NotNull

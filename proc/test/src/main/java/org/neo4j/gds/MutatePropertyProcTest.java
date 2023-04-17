@@ -135,8 +135,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {

@@ -42,8 +42,7 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty());
 
         applyOnProcedure(proc -> {
-            getProcedureMethods(proc)
-                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
+            ProcedureMethodHelper.nonEstimateMethods(proc)
                 .forEach(nonEstimateMethod -> assertThatThrownBy(() -> nonEstimateMethod.invoke(
                     proc,
                     "directed",
@@ -70,8 +69,7 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
             .withEntry("relationshipTypes", filter));
 
         applyOnProcedure(proc ->
-            getProcedureMethods(proc)
-                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
+            ProcedureMethodHelper.nonEstimateMethods(proc)
                 .forEach(noneEstimateMethod -> assertThatThrownBy(() ->
                         noneEstimateMethod.invoke(
                             proc,

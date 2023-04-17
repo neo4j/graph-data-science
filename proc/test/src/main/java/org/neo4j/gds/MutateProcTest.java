@@ -83,8 +83,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
         String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     config.remove("nodeWeightProperty");
@@ -130,8 +129,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
     @NotNull
     default GraphStore runMutation(String graphName, CypherMapWrapper additionalConfig) {
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(additionalConfig).toMap();
                     try {

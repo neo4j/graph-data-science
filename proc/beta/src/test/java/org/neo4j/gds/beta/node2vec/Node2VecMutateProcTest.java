@@ -27,6 +27,7 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -110,8 +111,7 @@ class Node2VecMutateProcTest extends BaseProcTest
         String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
