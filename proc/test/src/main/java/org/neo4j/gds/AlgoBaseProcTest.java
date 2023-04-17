@@ -170,6 +170,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         }
     }
 
+    default void consumeResult(RESULT result) {}
+
     @Test
     default void shouldUnregisterTaskAfterComputation() {
         var taskStore = new InvocationCountingTaskStore();
@@ -189,15 +191,18 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            proc.compute(
-                loadedGraphName,
-                configMap
-            ).result().get();
-            proc.compute(
-                loadedGraphName,
-                configMap
-            ).result().get();
-
+            consumeResult(
+                proc.compute(
+                    loadedGraphName,
+                    configMap
+                ).result().get()
+            );
+            consumeResult(
+                proc.compute(
+                    loadedGraphName,
+                    configMap
+                ).result().get()
+            );
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(

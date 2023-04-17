@@ -143,6 +143,11 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     }
 
     @Override
+    public void consumeResult(DijkstraResult dijkstraResult) {
+        dijkstraResult.pathSet();
+    }
+
+    @Override
     public GraphDatabaseService graphDb() {
         return db;
     }

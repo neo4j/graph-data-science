@@ -115,6 +115,11 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     }
 
     @Override
+    public void consumeResult(DijkstraResult dijkstraResult) {
+        dijkstraResult.pathSet();
+    }
+
+    @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
             .withNumber(SOURCE_NODE_KEY, idFunction.of("a"))

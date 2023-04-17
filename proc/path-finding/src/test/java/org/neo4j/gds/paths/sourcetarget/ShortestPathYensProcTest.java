@@ -124,6 +124,11 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     }
 
     @Override
+    public void consumeResult(DijkstraResult dijkstraResult) {
+        dijkstraResult.pathSet();
+    }
+
+    @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
             .withNumber(SOURCE_NODE_KEY, idC)
