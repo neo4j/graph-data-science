@@ -152,14 +152,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         );
     }
 
-    default void assertMissingProperty(String error, Runnable runnable) {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            runnable::run
-        );
-        assertThat(exception).hasMessageContaining(error);
-    }
-
     class InvocationCountingTaskStore extends GlobalTaskStore {
         public int registerTaskInvocations;
         public int removeTaskInvocations;
