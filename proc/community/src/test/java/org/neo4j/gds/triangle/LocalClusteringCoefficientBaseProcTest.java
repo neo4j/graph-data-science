@@ -126,11 +126,6 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     }
 
     @Override
-    public boolean requiresUndirected() {
-        return true;
-    }
-
-    @Override
     public String seedPropertyKeyOverride() {
         return "triangleCountProperty";
     }

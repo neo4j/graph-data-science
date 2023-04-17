@@ -129,4 +129,9 @@ class LocalClusteringCoefficientMutateProcTest
     public LocalClusteringCoefficientMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return LocalClusteringCoefficientMutateConfig.of(mapWrapper);
     }
+
+    @Override
+    public boolean requiresUndirected() {
+        return true;
+    }
 }

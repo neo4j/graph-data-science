@@ -260,10 +260,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return RelationshipProjections.ALL;
     }
 
-    default boolean requiresUndirected() {
-        return false;
-    }
-
     default List<String> nodeProperties() {
         return List.of();
     }

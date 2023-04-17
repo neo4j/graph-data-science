@@ -45,6 +45,10 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
 
     ValueType mutatePropertyType();
 
+    default boolean requiresUndirected() {
+        return false;
+    }
+
     @Test
     default void testWriteBackGraphMutationOnFilteredGraph() {
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");

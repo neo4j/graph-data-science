@@ -80,11 +80,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
         return RelationshipProjections.ALL_UNDIRECTED;
     }
 
-    @Override
-    public boolean requiresUndirected() {
-        return true;
-    }
-
     @Test
     void testMaxDegreeValidation() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty().withNumber("maxDegree", 1L));
