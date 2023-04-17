@@ -58,6 +58,10 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         return stats(computationResult);
     }
 
+    ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
+    }
+
     @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(

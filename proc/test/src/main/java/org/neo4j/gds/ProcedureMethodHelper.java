@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public final class ProcedureMethodHelper {
 
-    static String methodName(Method method) {
+    public static String methodName(Method method) {
         Procedure procedureAnnotation = method.getDeclaredAnnotation(Procedure.class);
         Objects.requireNonNull(procedureAnnotation, method + " is not annotation with " + Procedure.class);
         String name = procedureAnnotation.name();
@@ -42,7 +42,7 @@ public final class ProcedureMethodHelper {
         return methods(proc).filter(procMethod -> !methodName(procMethod).endsWith(".estimate"));
     }
 
-    static Stream<Method> writeMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> writeMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".write"));
     }
 
@@ -50,8 +50,12 @@ public final class ProcedureMethodHelper {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".mutate"));
     }
 
-    static Stream<Method> streamMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> streamMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".stream"));
+    }
+
+    public static Stream<Method> statsMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+        return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".stats"));
     }
 
     private static Stream<Method> methods(AlgoBaseProc<?, ?, ?, ?> proc) {
