@@ -87,24 +87,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?>> getProcedureClazz();
 
-    default AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?> proc() {
-        try {
-            return getProcedureClazz()
-                .getConstructor()
-                .newInstance();
-        } catch (Exception e) {
-            fail("unable to instantiate procedure", e);
-        }
-        return null;
-    }
-
     GraphDatabaseService graphDb();
 
     CONFIG createConfig(CypherMapWrapper mapWrapper);
-
-    default CypherMapWrapper createMinimalConfig() {
-        return createMinimalConfig(CypherMapWrapper.empty());
-    }
 
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
@@ -301,15 +286,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     }
 
     default void loadGraph(String graphName) {
-        loadGraph(graphName, Orientation.NATURAL);
-    }
-
-    default void loadGraph(String graphName, Orientation orientation) {
         runQuery(
             graphDb(),
             GdsCypher.call(graphName)
                 .graphProject()
-                .loadEverything(orientation)
+                .loadEverything(Orientation.NATURAL)
                 .yields()
         );
     }
@@ -331,14 +312,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     @NotNull
     default GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return graphLoader(graphDb(), graphProjectConfig);
-    }
-
-    @NotNull
-    default GraphLoader graphLoader(
-        GraphDatabaseService db,
-        GraphProjectConfig graphProjectConfig
-    ) {
+        GraphDatabaseService db = graphDb();
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
@@ -353,5 +327,4 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             .projectConfig(graphProjectConfig)
             .build();
     }
-
 }

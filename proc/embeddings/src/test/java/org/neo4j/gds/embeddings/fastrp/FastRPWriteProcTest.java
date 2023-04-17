@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.FLOAT_ARRAY;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 
@@ -46,10 +47,20 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
         ).flatMap(Collection::stream);
     }
 
+    private AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPWriteConfig, ?> proc() {
+        try {
+            return getProcedureClazz()
+                .getConstructor()
+                .newInstance();
+        } catch (Exception e) {
+            fail("unable to instantiate procedure", e);
+        }
+        return null;
+    }
     @Override
     GdsCypher.ExecutionModes mode() {
         return GdsCypher.ExecutionModes.WRITE;

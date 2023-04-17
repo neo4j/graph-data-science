@@ -29,7 +29,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -181,13 +180,12 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
                 .nodeQuery(NODE_QUERY)
                 .build();
 
-        return graphLoader(graphDb(), configWithNodeProperty);
+        return graphLoader(configWithNodeProperty);
     }
 
     @Override
     public void loadGraph(String graphName) {
-        QueryRunner.runQuery(
-            graphDb(),
+        runQuery(
             GdsCypher.call(graphName)
                 .graphProject()
                 .withAnyLabel()
