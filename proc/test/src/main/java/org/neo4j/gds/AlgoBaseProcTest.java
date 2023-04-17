@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -220,19 +221,13 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(
-                graphProjectConfig,
-                graphStore
-            );
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
             var someJobId = new JobId();
             Map<String, Object> mapWithJobId = Map.of("jobId", someJobId);
 
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(mapWithJobId)).toMap();
-            proc.compute(
-                loadedGraphName,
-                configMap
-            );
+            proc.compute(loadedGraphName, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
@@ -244,40 +239,41 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     @Test
     default void testRunOnEmptyGraph() {
-        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-        runQuery(graphDb(), "CREATE (n: X)");
-        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
-
         applyOnProcedure((proc) -> {
-            GraphStoreCatalog.removeAllLoadedGraphs();
-            var loadedGraphName = "graph";
-            GraphProjectConfig graphProjectConfig = withNameAndProjections(
-                "",
-                loadedGraphName,
-                ImmutableNodeProjections.of(
-                    Map.of(
-                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of())
-                    )
-                ),
-                relationshipProjections()
-            );
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(graphProjectConfig, graphStore);
-            getWriteAndStreamProcedures(proc)
-                .forEach(method -> {
+            var methods = getProcedureMethods(proc)
+                .filter(method -> {
+                    String procedureMethodName = getProcedureMethodName(method);
+                    return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
+                }).collect(Collectors.toList());
+            if (!methods.isEmpty()) {
+                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+                runQuery(graphDb(), "CALL db.createLabel('X')");
+                runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+                GraphStoreCatalog.removeAllLoadedGraphs();
+
+                var graphName = "graph";
+                var graphProjectConfig = withNameAndProjections(
+                    graphName,
+                    ImmutableNodeProjections.of(
+                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                    ),
+                    relationshipProjections()
+                );
+                var graphStore = graphLoader(graphProjectConfig).graphStore();
+                GraphStoreCatalog.set(graphProjectConfig, graphStore);
+                methods.forEach(method -> {
                     Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
 
                     configMap.remove(NODE_PROPERTIES_KEY);
                     configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
                     configMap.remove("relationshipWeightProperty");
 
-                    var nodeWeightProperty = configMap.get("nodeWeightProperty");
-                    if (nodeWeightProperty != null) {
-                        var nodeProperty = String.valueOf(nodeWeightProperty);
+                    if (configMap.containsKey("nodeWeightProperty")) {
+                        var nodeProperty = String.valueOf(configMap.get("nodeWeightProperty"));
                         runQuery(
                             graphDb(),
                             "CALL db.createProperty($prop)",
-                            Map.of("prop", nodeWeightProperty)
+                            Map.of("prop", nodeProperty)
                         );
                         configMap.put(NODE_PROPERTIES_KEY, Map.ofEntries(ImmutablePropertyMapping
                             .builder()
@@ -289,18 +285,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                     }
 
                     try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, loadedGraphName, configMap);
-
+                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, configMap);
                         if (getProcedureMethodName(method).endsWith("stream")) {
                             assertEquals(0, result.count(), "Stream result should be empty.");
                         } else {
                             assertEquals(1, result.count());
                         }
-
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
                 });
+            }
         });
     }
 
@@ -331,14 +326,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             name = procedureAnnotation.value();
         }
         return name;
-    }
-
-    default Stream<Method> getWriteAndStreamProcedures(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {
-        return getProcedureMethods(proc)
-            .filter(method -> {
-                String procedureMethodName = getProcedureMethodName(method);
-                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
-            });
     }
 
     @NotNull
