@@ -59,6 +59,10 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         return write(computationResult);
     }
 
+    ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
+    }
+
     @Procedure(value = "gds.wcc.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
