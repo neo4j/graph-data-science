@@ -37,7 +37,6 @@ import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -54,10 +53,8 @@ import org.neo4j.procedure.Procedure;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -127,28 +124,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 func.accept(proc);
             }
         );
-    }
-
-    class InvocationCountingTaskStore extends GlobalTaskStore {
-        public int registerTaskInvocations;
-        public int removeTaskInvocations;
-        Set<JobId> seenJobIds = new HashSet<>();
-
-        @Override
-        public void store(
-            String username, JobId jobId, Task task
-        ) {
-            super.store(username, jobId, task);
-            registerTaskInvocations++;
-
-            seenJobIds.add(jobId);
-        }
-
-        @Override
-        public void remove(String username, JobId jobId) {
-            super.remove(username, jobId);
-            removeTaskInvocations++;
-        }
     }
 
     default void consumeResult(RESULT result) {}
