@@ -116,7 +116,6 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
     default void shouldFailWithInvalidSeedProperty() {
         String loadedGraphName = "loadedGraph";
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             loadedGraphName,
             allRelationshipsProjection()
         );

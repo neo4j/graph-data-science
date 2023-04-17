@@ -28,21 +28,14 @@ import static org.neo4j.gds.NodeLabel.ALL_NODES;
 
 public interface GraphProjectConfigSupport {
 
-    default GraphProjectFromStoreConfig emptyWithNameNative(String userName, String graphName) {
-        return withNameAndRelationshipProjections(
-            userName,
-            graphName,
-            RelationshipProjections.ALL
-        );
-    }
+    String USERNAME = "";
 
     default GraphProjectFromStoreConfig withNameAndRelationshipProjections(
-        String userName,
         String graphName,
         RelationshipProjections rels
     ) {
         return ImmutableGraphProjectFromStoreConfig.of(
-            userName,
+            USERNAME,
             graphName,
             NodeProjections.create(singletonMap(
                 ALL_NODES,
@@ -53,12 +46,11 @@ public interface GraphProjectConfigSupport {
     }
 
     default GraphProjectFromStoreConfig withNameAndNodeProjections(
-        String userName,
         String graphName,
         NodeProjections nodes
     ) {
         return ImmutableGraphProjectFromStoreConfig.of(
-            userName,
+            USERNAME,
             graphName,
             nodes,
             RelationshipProjections.ALL
@@ -66,13 +58,12 @@ public interface GraphProjectConfigSupport {
     }
 
     default GraphProjectFromStoreConfig withNameAndProjections(
-        String userName,
         String graphName,
         NodeProjections nodes,
         RelationshipProjections rels
     ) {
         return ImmutableGraphProjectFromStoreConfig.of(
-            userName,
+            USERNAME,
             graphName,
             nodes,
             rels

@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,7 +102,6 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
 
         String graphName = "myGraph";
         var graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             graphName,
             relationshipProjections
         );

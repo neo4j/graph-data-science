@@ -106,7 +106,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
         return mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
             GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-                TEST_USERNAME,
                 loadedGraphName,
                 relationshipProjections()
             );

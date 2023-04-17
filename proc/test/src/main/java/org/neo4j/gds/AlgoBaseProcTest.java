@@ -175,7 +175,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
         var loadedGraphName = "loadedGraph";
         var graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             loadedGraphName,
             relationshipProjections()
         );
@@ -214,7 +213,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
         String loadedGraphName = "loadedGraph";
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             loadedGraphName,
             relationshipProjections()
         );
