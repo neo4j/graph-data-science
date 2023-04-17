@@ -25,7 +25,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -40,10 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     extends BaseProcTest
-    implements
-    AlgoBaseProcTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
-    MemoryEstimateTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>
-{
+    implements AlgoBaseProcTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {

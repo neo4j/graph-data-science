@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
@@ -40,8 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, TriangleCountResult>,
-    OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, TriangleCountResult>,
-    MemoryEstimateTest<IntersectingTriangleCount, CONFIG, TriangleCountResult> {
+    OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, TriangleCountResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +

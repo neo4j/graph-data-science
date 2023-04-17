@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -53,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class Node2VecMutateProcTest extends BaseProcTest
     implements
-        MemoryEstimateTest<Node2Vec, Node2VecMutateConfig, Node2VecModel.Result>,
+        AlgoBaseProcTest<Node2Vec, Node2VecMutateConfig, Node2VecModel.Result>,
         MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, Node2VecModel.Result> {
 
     @Neo4jGraph

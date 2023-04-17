@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
@@ -55,7 +54,6 @@ import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGI
 
 abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
-    MemoryEstimateTest<AStar, CONFIG, DijkstraResult>,
     SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
     TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
 
@@ -200,13 +198,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
                 .withRelationshipProperty(COST_PROPERTY)
                 .yields()
         );
-    }
-
-    @Test
-    @Disabled
-    @Override
-    public void testMemoryEstimateOnExplicitDimensions() {
-        // test assumes one node property, we load two
     }
 
     @Test

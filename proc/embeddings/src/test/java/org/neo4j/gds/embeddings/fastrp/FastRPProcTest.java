@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -47,8 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
 public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult>,
-    MemoryEstimateTest<FastRP, CONFIG, FastRP.FastRPResult> {
+    AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult> {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
