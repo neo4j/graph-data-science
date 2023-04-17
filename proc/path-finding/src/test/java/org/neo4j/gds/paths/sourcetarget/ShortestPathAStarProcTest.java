@@ -31,14 +31,22 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
@@ -180,7 +188,19 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
                 .nodeQuery(NODE_QUERY)
                 .build();
 
-        return graphLoader(configWithNodeProperty);
+        return ImmutableGraphLoader
+            .builder()
+            .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+                .transactionContext(TestSupport.fullAccessTransaction(db))
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .log(Neo4jProxy.testLog())
+                .build())
+            .username("")
+            .projectConfig(configWithNodeProperty)
+            .build();
     }
 
     @Override
