@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
+    public static final String KCORE_DESCRIPTION = "It computes the k-core values in a network";
     private final Graph graph;
     private final int concurrency;
     private static final int CHUNK_SIZE = 64;
