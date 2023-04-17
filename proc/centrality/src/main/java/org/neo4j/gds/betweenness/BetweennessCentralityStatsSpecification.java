@@ -27,7 +27,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
@@ -58,8 +57,7 @@ public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<Be
                 computationResult.config().concurrency()
             );
 
-            Optional.ofNullable(computationResult.result())
-                .ifPresent(result -> builder.withCentralityFunction(result::get));
+            computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
 
             return Stream.of(
                 builder.withPreProcessingMillis(computationResult.preProcessingMillis())

@@ -38,7 +38,7 @@ public class BellmanFordMutateResultConsumer extends MutateComputationResultCons
 
     BellmanFordMutateResultConsumer() {
         super((computationResult, executionContext) -> new BellmanFordMutateResult.Builder()
-            .withContainsNegativeCycle(computationResult.result().containsNegativeCycle())
+            .withContainsNegativeCycle(computationResult.result().map(BellmanFordResult::containsNegativeCycle).orElse(false))
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withConfig(computationResult.config())
@@ -51,39 +51,40 @@ public class BellmanFordMutateResultConsumer extends MutateComputationResultCons
         ComputationResult<BellmanFord, BellmanFordResult, BellmanFordMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var config = computationResult.config();
-        var result = computationResult.result();
+        computationResult.result().ifPresent(result -> {
+            var config = computationResult.config();
 
-        var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
+            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
-        var relationshipsBuilder = GraphFactory
-            .initRelationshipsBuilder()
-            .relationshipType(mutateRelationshipType)
-            .nodes(computationResult.graph())
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
-            .orientation(Orientation.NATURAL)
-            .build();
+            var relationshipsBuilder = GraphFactory
+                .initRelationshipsBuilder()
+                .relationshipType(mutateRelationshipType)
+                .nodes(computationResult.graph())
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
+                .orientation(Orientation.NATURAL)
+                .build();
 
-        SingleTypeRelationships relationships;
+            SingleTypeRelationships relationships;
 
-        DijkstraResult dijkstraResult = result.shortestPaths();
-        if (result.containsNegativeCycle() && config.mutateNegativeCycles()) {
-            dijkstraResult = result.negativeCycles();
-        }
+            DijkstraResult dijkstraResult = result.shortestPaths();
+            if (result.containsNegativeCycle() && config.mutateNegativeCycles()) {
+                dijkstraResult = result.negativeCycles();
+            }
 
-        dijkstraResult.forEachPath(pathResult -> {
-            relationshipsBuilder.addFromInternal(
-                pathResult.sourceNode(),
-                pathResult.targetNode(),
-                pathResult.totalCost()
-            );
+            dijkstraResult.forEachPath(pathResult -> {
+                relationshipsBuilder.addFromInternal(
+                    pathResult.sourceNode(),
+                    pathResult.targetNode(),
+                    pathResult.totalCost()
+                );
+            });
+
+            relationships = relationshipsBuilder.build();
+            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+
+            computationResult
+                .graphStore()
+                .addRelationshipType(relationships);
         });
-
-        relationships = relationshipsBuilder.build();
-        resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
-
-        computationResult
-            .graphStore()
-            .addRelationshipType(relationships);
     }
 }

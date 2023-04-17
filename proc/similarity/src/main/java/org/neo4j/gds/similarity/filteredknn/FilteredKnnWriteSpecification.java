@@ -27,7 +27,6 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<FilteredKnnWriteProcResult>, FilteredKnnFactory<FilteredKnnWriteConfig>> {
@@ -58,7 +57,7 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
     private FilteredKnnWriteProcResult.Builder resultBuilderFunction(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
         var builder = new FilteredKnnWriteProcResult.Builder();
 
-        Optional.ofNullable(computationResult.result()).ifPresent(result -> {
+        computationResult.result().ifPresent(result -> {
             builder
                 .withDidConverge(result.didConverge())
                 .withNodePairsConsidered(result.nodePairsConsidered())
@@ -69,13 +68,17 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
     }
 
     protected SimilarityGraphResult similarityGraphResult(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
+        if (computationResult.result().isEmpty()) {
+            return new SimilarityGraphResult(computationResult.graph(), 0, false);
+        }
+
         FilteredKnn algorithm = Objects.requireNonNull(computationResult.algorithm());
         FilteredKnnWriteConfig config = computationResult.config();
         return FilteredKnnHelpers.computeToGraph(
             computationResult.graph(),
             algorithm.nodeCount(),
             config.concurrency(),
-            Objects.requireNonNull(computationResult.result()),
+            computationResult.result().get(),
             algorithm.executorService()
         );
     }

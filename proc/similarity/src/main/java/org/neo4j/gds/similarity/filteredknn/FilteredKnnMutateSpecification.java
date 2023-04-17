@@ -66,7 +66,7 @@ public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn
                 var config = computationResult.config();
                 var resultBuilder = new FilteredKnnMutateProcResult.Builder();
 
-                Optional.ofNullable(computationResult.result())
+                computationResult.result()
                     .ifPresent(result -> {
                         resultBuilder
                             .ranIterations(result.ranIterations())

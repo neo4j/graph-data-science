@@ -81,7 +81,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     @Override
     public ComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 
@@ -89,7 +89,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
             Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
             var graph = graphStore.getGraph(labelFilter);
 
-            return computationResult.result().stream()
+            return computationResult.result().get().stream()
                 .map(predictedLink -> new Result(
                     graph.toOriginalNodeId(predictedLink.sourceId()),
                     graph.toOriginalNodeId(predictedLink.targetId()),

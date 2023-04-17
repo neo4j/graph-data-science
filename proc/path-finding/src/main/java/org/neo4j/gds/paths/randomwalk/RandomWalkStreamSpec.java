@@ -33,7 +33,6 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -77,7 +76,8 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
             )
                 : (List<Long> nodes) -> null;
 
-            return Optional.ofNullable(computationResult.result()).orElseGet(Stream::empty)
+            return computationResult.result()
+                .orElseGet(Stream::empty)
                 .map(nodes -> {
                     var translatedNodes = translateInternalToNeoIds(nodes, graph);
                     var path = pathCreator.apply(translatedNodes);

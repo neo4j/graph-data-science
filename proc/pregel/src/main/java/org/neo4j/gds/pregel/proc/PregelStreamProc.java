@@ -42,10 +42,10 @@ public abstract class PregelStreamProc<
     protected Stream<PregelStreamResult> stream(
         ComputationResult<ALGO, PregelResult, CONFIG> computationResult
     ) {
-        if (computationResult.isGraphEmpty()) {
+        if (computationResult.result().isEmpty()) {
             return Stream.empty();
         }
-        var result = computationResult.result().nodeValues();
+        var result = computationResult.result().get().nodeValues();
         return LongStream.range(IdMap.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
             Map<String, Object> values = result.schema().elements()
                 .stream()

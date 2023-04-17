@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
+import org.eclipse.collections.impl.Counter;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
@@ -115,6 +116,30 @@ class OpenModelCatalogTest {
             model2,
             modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, CustomInfo.class)
         );
+    }
+
+    @Test
+    void shouldNotifyListeners() {
+        var counter = new Counter();
+        modelCatalog.registerListener(model -> counter.increment());
+
+        var model = Model.of(
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
+            TestTrainConfig.of(USERNAME, "testModel"),
+            new TestCustomInfo()
+        );
+
+        assertThat(counter.getCount()).isEqualTo(0);
+
+        modelCatalog.set(model);
+
+        assertThat(counter.getCount()).isEqualTo(1);
+
+        assertThatThrownBy(() -> modelCatalog.set(model));
+        // not be called if the set is not successful
+        assertThat(counter.getCount()).isEqualTo(1);
     }
 
     @Test

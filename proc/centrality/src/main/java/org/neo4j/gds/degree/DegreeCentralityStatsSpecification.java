@@ -24,7 +24,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION;
@@ -55,8 +54,7 @@ public class DegreeCentralityStatsSpecification implements AlgorithmSpec<DegreeC
                 computationResult.config().concurrency()
             );
 
-            Optional.ofNullable(computationResult.result())
-                .ifPresent(result -> builder.withCentralityFunction(result::get));
+            computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
 
             return Stream.of(
                 builder.withPreProcessingMillis(computationResult.preProcessingMillis())

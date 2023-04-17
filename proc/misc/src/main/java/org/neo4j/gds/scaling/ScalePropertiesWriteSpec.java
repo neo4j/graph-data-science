@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
 @GdsCallable(name = "gds.beta.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
@@ -50,16 +51,22 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
 
     @Override
     public NewConfigFunction<ScalePropertiesWriteConfig> newConfigFunction() {
-        return (__, userInput) -> ScalePropertiesWriteConfig.of(userInput);
+        return (__, userInput) -> {
+            var config = ScalePropertiesWriteConfig.of(userInput);
+            validateLegacyScalers(config, false);
+            return config;
+        };
     }
 
     @Override
     public ComputationResultConsumer<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
-            (computationResult, __) ->
-                new ScalePropertiesWriteProc.WriteResult.Builder().withScalerStatistics(
-                    computationResult.result().scalerStatistics()
-                ),
+            (computationResult, __) -> {
+                var builder = new ScalePropertiesWriteProc.WriteResult.Builder();
+                computationResult.result()
+                    .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
+                return builder;
+            },
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 ScalePropertiesProc.nodeProperties(computationResult)

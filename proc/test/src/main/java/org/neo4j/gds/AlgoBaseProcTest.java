@@ -23,8 +23,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -68,7 +66,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
@@ -107,12 +104,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     default DatabaseId databaseId() {
         return DatabaseId.of(graphDb());
-    }
-
-    default GraphDatabaseService emptyDb() {
-        var db = graphDb();
-        runQuery(db, "MATCH (n) DETACH DELETE n");
-        return db;
     }
 
     CONFIG createConfig(CypherMapWrapper mapWrapper);
@@ -211,7 +202,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
-            runTwiceAndAssertEqualResult(loadedGraphName, proc);
+            var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+            var resultRun1 = proc.compute(
+                loadedGraphName,
+                configMap
+            );
+            var resultRun2 = proc.compute(
+                loadedGraphName,
+                configMap
+            );
+
+            assertResultEquals(resultRun1.result().get(), resultRun2.result().get());
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -265,38 +266,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     default List<String> nodeProperties() {
         return List.of();
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    default void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
-        var loadedGraphName = "loadedGraph";
-        var graphProjectConfig = cypherProjection
-            ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName, nodeProperties())
-            : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections(),
-                nodeProperties()
-            );
-
-        GraphStoreCatalog.set(
-            graphProjectConfig,
-            graphLoader(graphProjectConfig).graphStore()
-        );
-
-        applyOnProcedure(proc -> runTwiceAndAssertEqualResult(loadedGraphName, proc));
-    }
-
-    private void runTwiceAndAssertEqualResult(String loadedGraphName, AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?> proc) {
-        var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-        var resultRun1 = proc.compute(
-            loadedGraphName,
-            configMap
-        );
-        var resultRun2 = proc.compute(
-            loadedGraphName,
-            configMap
-        );
-
-        assertResultEquals(resultRun1.result(), resultRun2.result());
     }
 
     @Test
@@ -375,24 +344,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 .withNodeProperties(nodeProperties(), DefaultValue.DEFAULT)
                 .yields()
         );
-    }
-
-    @Test
-    default void checkStatsModeExists() {
-        applyOnProcedure((proc) -> {
-            boolean inStatsClass = methodExists(proc, "stats");
-            if (inStatsClass) {
-                assertTrue(
-                    methodExists(proc, "stats"),
-                    formatWithLocale("Expected %s to have a `stats` method", proc.getClass().getSimpleName())
-                );
-            }
-        });
-    }
-
-    default boolean methodExists(AlgoBaseProc<?, RESULT, CONFIG, ?> proc, String methodSuffix) {
-        return getProcedureMethods(proc)
-            .anyMatch(method -> getProcedureMethodName(method).endsWith(methodSuffix));
     }
 
     default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {

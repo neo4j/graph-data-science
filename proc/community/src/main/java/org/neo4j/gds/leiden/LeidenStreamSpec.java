@@ -20,7 +20,9 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -53,10 +55,11 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var leidenResult = computationResult.result();
-            if (leidenResult == null) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
+
+            var leidenResult = computationResult.result().get();
             var graph = computationResult.graph();
             var nodeProperties = nodeProperties(computationResult);
 
@@ -86,11 +89,13 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
     private static <CONFIG extends LeidenBaseConfig> NodePropertyValues getCommunities(
             ComputationResult<Leiden, LeidenResult, CONFIG> computationResult
     ) {
-        var leidenResult = computationResult.result();
-
         return CommunityProcCompanion.nodeProperties(
-                computationResult.config(),
-                leidenResult.dendrogramManager().getCurrent().asNodeProperties()
+            computationResult.config(),
+            computationResult.result()
+                .map(LeidenResult::dendrogramManager)
+                .map(LeidenDendrogramManager::getCurrent)
+                .map(HugeLongArray::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE)
         );
     }
 }

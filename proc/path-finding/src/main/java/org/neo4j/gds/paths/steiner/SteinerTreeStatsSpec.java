@@ -56,24 +56,21 @@ public class SteinerTreeStatsSpec implements AlgorithmSpec<ShortestPathsSteinerA
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStatsConfig, Stream<StatsResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            var steinerAlgorithm = computationResult.algorithm();
-            var steinerTreeResult = computationResult.result();
-            SteinerTreeStatsConfig config = computationResult.config();
-
             var builder = new StatsResult.Builder();
 
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
 
-            builder.withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount());
-            builder.withTotalWeight(steinerTreeResult.totalCost());
-            builder.withEffectiveTargetNodesCount(steinerTreeResult.effectiveTargetNodesCount());
+            var steinerTreeResult = computationResult.result().get();
 
-            builder.withComputeMillis(computationResult.computeMillis());
-            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withConfig(config);
+            builder
+                .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount())
+                .withTotalWeight(steinerTreeResult.totalCost())
+                .withEffectiveTargetNodesCount(steinerTreeResult.effectiveTargetNodesCount())
+                .withComputeMillis(computationResult.computeMillis())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
+                .withConfig(computationResult.config());
             return Stream.of(builder.build());
         };
     }

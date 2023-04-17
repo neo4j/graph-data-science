@@ -21,10 +21,10 @@ package org.neo4j.gds.spanningtree;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Objects;
+import java.util.function.LongToDoubleFunction;
 
 /**
  * group of nodes that form a spanning tree
@@ -34,7 +34,7 @@ public class SpanningTree {
     final long head;
     final long nodeCount;
     final long effectiveNodeCount;
-    final HugeDoubleArray costToParent;
+    final LongToDoubleFunction costToParent;
     final HugeLongArray parent;
     final double totalWeight;
 
@@ -43,7 +43,7 @@ public class SpanningTree {
         long nodeCount,
         long effectiveNodeCount,
         HugeLongArray parent,
-        HugeDoubleArray costToParent,
+        LongToDoubleFunction costToParent,
         double totalWeight
     ) {
         this.head = head;
@@ -54,6 +54,7 @@ public class SpanningTree {
         this.totalWeight = totalWeight;
     }
 
+ 
     public long effectiveNodeCount() {
         return effectiveNodeCount;
     }
@@ -69,7 +70,7 @@ public class SpanningTree {
     public long parent(long nodeId) {return parent.get(nodeId);}
 
     public double costToParent(long nodeId) {
-        return costToParent.get(nodeId);
+        return costToParent.applyAsDouble(nodeId);
     }
 
     public void forEach(RelationshipWithPropertyConsumer consumer) {

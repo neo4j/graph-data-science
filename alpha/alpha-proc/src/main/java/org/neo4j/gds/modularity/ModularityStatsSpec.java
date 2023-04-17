@@ -24,7 +24,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
@@ -54,7 +53,7 @@ public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, 
 
             var config = computationResult.config();
             var statsBuilder = new StatsResult.StatsBuilder(executionContext.returnColumns(), config.concurrency());
-            var result = Optional.ofNullable(computationResult.result())
+            var result = computationResult.result()
                 .orElseGet(ModularityResult::empty);
 
             var statsResult = statsBuilder

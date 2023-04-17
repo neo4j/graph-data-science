@@ -61,18 +61,20 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                     computationResult.config().concurrency()
                 );
 
-                if (returnColumns.contains("centroids")) {
-                    builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult
-                        .result()
-                        .centers()));
-                }
-                if (returnColumns.contains("averageDistanceToCentroid")) {
-                    builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
-                }
-                if (returnColumns.contains("averageSilhouette")) {
-                    builder.withAverageSilhouette(computationResult.result().averageSilhouette());
-                }
-                builder.withCommunityFunction(computationResult.result().communities()::get)
+                computationResult.result().ifPresent(result -> {
+                    if (returnColumns.contains("centroids")) {
+                        builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
+                    }
+                    if (returnColumns.contains("averageDistanceToCentroid")) {
+                        builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
+                    }
+                    if (returnColumns.contains("averageSilhouette")) {
+                        builder.withAverageSilhouette(result.averageSilhouette());
+                    }
+                    builder.withCommunityFunction(result.communities()::get);
+                });
+
+                builder
                     .withPreProcessingMillis(computationResult.preProcessingMillis())
                     .withComputeMillis(computationResult.computeMillis())
                     .withNodeCount(computationResult.graph().nodeCount())

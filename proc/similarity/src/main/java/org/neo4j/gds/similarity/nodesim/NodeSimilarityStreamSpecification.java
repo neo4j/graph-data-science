@@ -26,7 +26,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
@@ -52,7 +51,7 @@ public class NodeSimilarityStreamSpecification implements AlgorithmSpec<NodeSimi
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            return Optional.ofNullable(computationResult.result())
+            return computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
 

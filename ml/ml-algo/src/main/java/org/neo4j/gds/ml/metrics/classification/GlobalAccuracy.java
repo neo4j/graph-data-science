@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
+import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -69,7 +70,7 @@ public class GlobalAccuracy implements ClassificationMetric{
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(NAME);
     }
 
     @Override

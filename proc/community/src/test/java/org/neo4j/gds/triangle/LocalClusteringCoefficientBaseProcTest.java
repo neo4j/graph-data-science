@@ -26,7 +26,6 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ConfigurableSeedConfigTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
@@ -48,8 +47,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     OnlyUndirectedTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    ConfigurableSeedConfigTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
+    ConfigurableSeedConfigTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
 
     protected static final String TEST_GRAPH_NAME = "g";
 
@@ -182,11 +180,5 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
             .yields();
 
         runQuery(graphCreateQuery);
-    }
-
-    @Override
-    public void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
-        // LCC only works on UNDIRECTED, and Cypher only projects directed
-        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(false);
     }
 }

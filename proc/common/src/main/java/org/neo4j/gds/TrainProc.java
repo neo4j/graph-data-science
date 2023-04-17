@@ -30,11 +30,13 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.ml.training.TrainBaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
@@ -43,7 +45,7 @@ import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 public abstract class TrainProc<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
-    TRAIN_CONFIG extends AlgoBaseConfig & ModelConfig,
+    TRAIN_CONFIG extends TrainBaseConfig,
     PROC_RESULT
     > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
 
@@ -56,12 +58,29 @@ public abstract class TrainProc<
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            modelCatalog().set(extractModel(computationResult.result()));
-            return Stream.of(constructProcResult(computationResult));
+            if (computationResult.result().isPresent()) {
+                var model = extractModel(computationResult.result().get());
+                var modelCatalog = modelCatalog();
+                modelCatalog().set(model);
+
+                if (computationResult.config().storeModelToDisk()) {
+                    try {
+                        modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
+                        var modelDir = modelCatalog.getModelDirectory(databaseService);
+                        modelCatalog.store(model.creator(), model.name(), modelDir);
+                    } catch (Exception e) {
+                        log.error("Failed to store model to disk after training.", e.getMessage());
+                        throw e;
+                    }
+                }
+                return Stream.of(constructProcResult(computationResult));
+            }
+
+            return Stream.empty();
         };
     }
 
-    protected Stream<PROC_RESULT> trainAndStoreModelWithResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult) {
+    protected Stream<PROC_RESULT> trainAndSetModelWithResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult) {
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
@@ -118,19 +137,23 @@ public abstract class TrainProc<
         public final long trainMillis;
 
         public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends CustomInfo> TrainResult(
-            Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
+            Optional<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>> maybeTrainedModel,
             long trainMillis,
             long nodeCount,
             long relationshipCount
         ) {
-            TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
-
             this.modelInfo = new HashMap<>();
-            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-            modelInfo.putAll(trainedModel.customInfo().toMap());
+            this.configuration = new HashMap<>();
 
-            this.configuration = trainConfig.toMap();
+            maybeTrainedModel.ifPresent(trainedModel -> {
+                TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
+
+                modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
+                modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+                modelInfo.putAll(trainedModel.customInfo().toMap());
+                configuration.putAll(trainConfig.toMap());
+            });
+
             this.trainMillis = trainMillis;
         }
     }

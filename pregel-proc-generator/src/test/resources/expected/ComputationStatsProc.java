@@ -77,8 +77,8 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
     protected AbstractResultBuilder<PregelStatsResult> resultBuilder(
         ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
         ExecutionContext executionContext) {
-        var ranIterations = computeResult.result().ranIterations();
-        var didConverge = computeResult.result().didConverge();
+        var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0);
+        var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false);
         return new PregelStatsResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
     }
 

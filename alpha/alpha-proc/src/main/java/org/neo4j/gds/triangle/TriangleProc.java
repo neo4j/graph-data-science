@@ -81,13 +81,11 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     @Override
     public ComputationResultConsumer<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, Stream<TriangleStream.Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 
-            var resultStream = computationResult.result();
+            var resultStream = computationResult.result().get();
             try(var statement = transaction.acquireStatement()) {
                 statement.registerCloseableResource(resultStream);
             }

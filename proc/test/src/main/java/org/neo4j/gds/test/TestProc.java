@@ -67,7 +67,9 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithmResult, Test
         ComputationResult<TestAlgorithm, TestAlgorithmResult, TestWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
+        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
+            .map(TestAlgorithmResult::relationshipCount)
+            .orElse(-1L));
     }
 
     @Override

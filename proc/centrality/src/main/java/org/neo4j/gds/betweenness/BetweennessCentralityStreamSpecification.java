@@ -30,7 +30,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -61,7 +60,7 @@ public class BetweennessCentralityStreamSpecification implements AlgorithmSpec<B
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            ()  -> Optional.ofNullable(computationResult.result())
+            ()  -> computationResult.result()
                 .map(result -> {
                     var nodePropertyValues = HugeArrayToNodeProperties.convert(result);
                     var graph = computationResult.graph();

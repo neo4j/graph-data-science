@@ -81,7 +81,9 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
         ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
+        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
+            .map(TestAlgorithmResult::relationshipCount)
+            .orElse(-1L));
     }
 
     @Override

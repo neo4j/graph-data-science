@@ -26,7 +26,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
@@ -52,7 +51,7 @@ public class KnnStreamSpecification implements AlgorithmSpec<Knn, Knn.Result, Kn
     @Override
     public ComputationResultConsumer<Knn, Knn.Result, KnnStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            return Optional.ofNullable(computationResult.result())
+            return computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
                     return result.streamSimilarityResult()

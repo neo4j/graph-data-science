@@ -74,15 +74,23 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
         ComputationResult<Leiden, LeidenResult, LeidenMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var leidenResult = computationResult.result();
-        return new MutateResult.Builder(executionContext.returnColumns(), computationResult.config().concurrency())
-            .withLevels(leidenResult.ranLevels())
-            .withDidConverge(leidenResult.didConverge())
-            .withModularities(Arrays.stream(leidenResult.modularities())
-                .boxed()
-                .collect(Collectors.toList()))
-            .withModularity(leidenResult.modularity())
-            .withCommunityFunction(leidenResult.communitiesFunction())
+        var builder = new MutateResult.Builder(
+            executionContext.returnColumns(),
+            computationResult.config().concurrency()
+        );
+
+        computationResult.result().ifPresent(leidenResult -> {
+            builder
+                .withLevels(leidenResult.ranLevels())
+                .withDidConverge(leidenResult.didConverge())
+                .withModularities(Arrays.stream(leidenResult.modularities())
+                    .boxed()
+                    .collect(Collectors.toList()))
+                .withModularity(leidenResult.modularity())
+                .withCommunityFunction(leidenResult.communitiesFunction());
+        });
+
+        return builder
             .withConfig(computationResult.config());
     }
 }

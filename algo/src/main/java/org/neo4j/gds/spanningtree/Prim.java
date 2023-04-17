@@ -22,7 +22,6 @@ package org.neo4j.gds.spanningtree;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -68,7 +67,6 @@ public class Prim extends Algorithm<SpanningTree> {
     public SpanningTree compute() {
         progressTracker.beginSubTask("SpanningTree");
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
-        HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
         HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
         BitSet visited = new BitSet(nodeCount);
         parent.fill(-1);
@@ -81,7 +79,6 @@ public class Prim extends Algorithm<SpanningTree> {
             totalWeight += cost;
             queue.pop();
 
-            costToParent.set(node, minMax.applyAsDouble(cost));
             if (visited.get(node)) {
                 continue;
             }
@@ -102,7 +99,6 @@ public class Prim extends Algorithm<SpanningTree> {
                     parent.set(t, s);
                 }
 
-
                 return true;
             });
             progressTracker.logProgress(graph.degree(node));
@@ -112,7 +108,7 @@ public class Prim extends Algorithm<SpanningTree> {
             nodeCount,
             effectiveNodeCount,
             parent,
-            costToParent,
+            nodeId -> minMax.applyAsDouble(queue.cost(nodeId)),
             minMax.applyAsDouble(totalWeight)
         );
         progressTracker.endSubTask("SpanningTree");

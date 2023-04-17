@@ -21,6 +21,8 @@ package org.neo4j.gds.kmeans;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -59,7 +61,10 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
         MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<Kmeans, KmeansResult, KmeansMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                computationResult.result().communities().asNodeProperties()
+                computationResult.result()
+                    .map(KmeansResult::communities)
+                    .map(HugeIntArray::asNodeProperties)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
             ));
         return new MutatePropertyComputationResultConsumer<>(
             mutateConfigNodePropertyListFunction,
@@ -77,17 +82,22 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
             returnColumns,
             computationResult.config().concurrency()
         );
-        if (returnColumns.contains("centroids")) {
-            builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult.result().centers()));
-        }
-        if (returnColumns.contains("averageDistanceToCentroid")) {
-            builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
-        }
-        
-        if (returnColumns.contains("averageSilhouette")) {
-            builder.withAverageSilhouette(computationResult.result().averageSilhouette());
-        }
-        builder.withCommunityFunction(computationResult.result().communities()::get)
+
+        computationResult.result().ifPresent(result -> {
+            if (returnColumns.contains("centroids")) {
+                builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
+            }
+            if (returnColumns.contains("averageDistanceToCentroid")) {
+                builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
+            }
+
+            if (returnColumns.contains("averageSilhouette")) {
+                builder.withAverageSilhouette(result.averageSilhouette());
+            }
+            builder.withCommunityFunction(result.communities()::get);
+        });
+
+        builder
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withNodeCount(computationResult.graph().nodeCount())

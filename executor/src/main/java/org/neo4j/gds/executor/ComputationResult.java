@@ -27,6 +27,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
+import java.util.Optional;
+
 @ValueClass
 public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
     long preProcessingMillis();
@@ -36,8 +38,7 @@ public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT
     @Nullable
     A algorithm();
 
-    @Nullable
-    ALGO_RESULT result();
+    Optional<ALGO_RESULT> result();
 
     Graph graph();
 

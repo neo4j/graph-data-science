@@ -51,7 +51,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return trainAndStoreModelWithResult(compute(graphName, configuration));
+        return trainAndSetModelWithResult(compute(graphName, configuration));
     }
 
     @Description(ESTIMATE_DESCRIPTION)

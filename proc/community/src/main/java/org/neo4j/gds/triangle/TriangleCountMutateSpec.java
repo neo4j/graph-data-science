@@ -20,6 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -30,7 +31,6 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -58,7 +58,9 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                computationResult.result().asNodeProperties()
+                computationResult.result()
+                    .map(TriangleCountResult::asNodeProperties)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder
         );
@@ -71,7 +73,7 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
     ) {
         var builder = new MutateResult.Builder();
 
-        Optional.ofNullable(computationResult.result())
+        computationResult.result()
             .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
 
         return builder;

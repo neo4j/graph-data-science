@@ -22,6 +22,7 @@ package org.neo4j.gds.betweenness;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeArrayToNodeProperties;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -33,7 +34,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -60,7 +60,9 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                HugeArrayToNodeProperties.convert(computationResult.result())
+                HugeArrayToNodeProperties.convert(computationResult.result()
+                    .orElseGet(() -> HugeAtomicDoubleArray.of(0, ParallelDoublePageCreator.passThrough(1)))
+                )
             )),
             this::resultBuilder
         );
@@ -80,8 +82,7 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
             computationResult.config().concurrency()
         );
 
-        Optional.ofNullable(computationResult.result())
-            .ifPresent(result -> builder.withCentralityFunction(result::get));
+        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
 
         return builder;
     }

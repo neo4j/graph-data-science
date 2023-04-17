@@ -24,7 +24,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -51,7 +50,7 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
     @Override
     public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var modularityResult = Optional.ofNullable(computationResult.result())
+            var modularityResult = computationResult.result()
                 .orElseGet(ModularityResult::empty);
 
             var communityModularities = modularityResult.modularityScores();

@@ -38,6 +38,7 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,13 +83,13 @@ class WriteConfigTest {
 
     @Test
     void shouldParseArrowConnectionInfo() {
+        var bearerToken = UUID.randomUUID().toString();
         var cypherMap = CypherMapWrapper.create(Map.of(
            "arrowConnectionInfo",
             Map.of(
                "hostname", "localhost",
                 "port", 4242,
-                "username", "ronny",
-                "password", "1234567"
+                "bearerToken", bearerToken
             )
         ));
 
@@ -97,15 +98,18 @@ class WriteConfigTest {
         assertThat(arrowConnectionInfo).isPresent();
         assertThat(arrowConnectionInfo.get().hostname()).isEqualTo("localhost");
         assertThat(arrowConnectionInfo.get().port()).isEqualTo(4242);
-        assertThat(arrowConnectionInfo.get().username()).isEqualTo("ronny");
-        assertThat(arrowConnectionInfo.get().password()).isEqualTo("1234567");
+        assertThat(arrowConnectionInfo.get().bearerToken()).isEqualTo(bearerToken);
     }
 
     static Stream<Arguments> baseConfigs() {
         return Stream.of(
             Arguments.of(TestWriteConfigImpl
                 .builder()
-                .arrowConnectionInfo(Optional.of(ImmutableArrowConnectionInfo.of("locaLhost", 4242, "username", "password")))
+                .arrowConnectionInfo(Optional.of(ImmutableArrowConnectionInfo.of(
+                    "localhost",
+                    4242,
+                    UUID.randomUUID().toString()
+                )))
                 .concurrency(2)
                 .build()),
             Arguments.of(TestWriteConfigImpl

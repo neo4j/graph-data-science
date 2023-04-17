@@ -59,7 +59,16 @@ public final class StringJoining {
         CharSequence prefix,
         CharSequence suffix
     ) {
-        return alternatives.stream().sorted().collect(joining(delimiter, prefix, suffix));
+        return join(alternatives.stream(), delimiter, prefix, suffix);
+    }
+
+    public static String join(
+        Stream<String> alternatives,
+        CharSequence delimiter,
+        CharSequence prefix,
+        CharSequence suffix
+    ) {
+        return alternatives.sorted().collect(joining(delimiter, prefix, suffix));
     }
 
     public static String joinVerbose(Collection<String> alternatives) {

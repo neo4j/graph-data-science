@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -55,16 +54,15 @@ public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, 
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeStatsConfig, Stream<StatsResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            Prim prim = computationResult.algorithm();
-            SpanningTree spanningTree = computationResult.result();
-            SpanningTreeStatsConfig config = computationResult.config();
 
             StatsResult.Builder builder = new StatsResult.Builder();
 
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
+
+            SpanningTree spanningTree = computationResult.result().get();
+            SpanningTreeStatsConfig config = computationResult.config();
 
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             builder.withTotalWeight(spanningTree.totalWeight());

@@ -70,6 +70,7 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
@@ -374,10 +375,10 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             trainConfig.randomSeed()
         );
 
-        var sortedClassIds = new TreeSet<Long>();
-        for (long clazz : classCounts.keys()) {
-            sortedClassIds.add(clazz);
-        }
+        var sortedClassIds = LongStream
+            .range(0, classCounts.size())
+            .boxed()
+            .collect(Collectors.toCollection(TreeSet::new));
 
         crossValidation.selectModel(
             trainNodeIds,

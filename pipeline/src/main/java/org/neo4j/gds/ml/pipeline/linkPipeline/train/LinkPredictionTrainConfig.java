@@ -25,14 +25,13 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.ml.training.TrainBaseConfig;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +43,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig {
+public interface LinkPredictionTrainConfig extends TrainBaseConfig, GraphNameConfig, RandomSeedConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, minInclusive = false)

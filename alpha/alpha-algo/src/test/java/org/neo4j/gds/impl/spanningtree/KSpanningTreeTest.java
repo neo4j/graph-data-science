@@ -103,6 +103,7 @@ class KSpanningTreeTest {
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(c));
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(x));
         assertThat(spanningTree.head(c)).isNotEqualTo(spanningTree.head(x));
+        assertThat(spanningTree.totalWeight()).isEqualTo(3L);
     }
 
     @Test

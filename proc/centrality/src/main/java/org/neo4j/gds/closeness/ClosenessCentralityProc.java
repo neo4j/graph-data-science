@@ -25,6 +25,7 @@ import org.neo4j.gds.beta.closeness.ClosenessCentrality;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
@@ -39,7 +40,10 @@ public final class ClosenessCentralityProc {
     private ClosenessCentralityProc() {}
 
     static <CONFIG extends ClosenessCentralityConfig> NodePropertyValues nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, CONFIG> computeResult) {
-        return computeResult.result().centralities().asNodeProperties();
+        return computeResult.result()
+            .map(ClosenessCentralityResult::centralities)
+            .orElseGet(() -> HugeDoubleArray.newArray(0))
+            .asNodeProperties();
     }
 
     static <CONFIG extends ClosenessCentralityConfig> GraphAlgorithmFactory<ClosenessCentrality, CONFIG> algorithmFactory() {
@@ -50,10 +54,10 @@ public final class ClosenessCentralityProc {
         AbstractCentralityResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<ClosenessCentrality, ClosenessCentralityResult, CONFIG> computeResult
     ) {
-        if (computeResult.result() != null) {
-            var centralities = computeResult.result().centralities();
-            procResultBuilder.withCentralityFunction(centralities::get);
-        }
+        computeResult.result().ifPresent(result -> {
+            procResultBuilder.withCentralityFunction(result.centralities()::get);
+        });
+
         return procResultBuilder;
     }
 

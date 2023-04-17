@@ -61,7 +61,7 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
     public ComputationResultConsumer<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Scc algorithm = computationResult.algorithm();
-            HugeLongArray components = computationResult.result();
+            HugeLongArray components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
             var config = computationResult.config();
             Graph graph = computationResult.graph();
 

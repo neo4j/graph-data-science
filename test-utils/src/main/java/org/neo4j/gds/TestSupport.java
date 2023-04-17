@@ -97,20 +97,33 @@ public final class TestSupport {
     }
 
     @SafeVarargs
-    public static Stream<Arguments> crossArguments(Supplier<Stream<Arguments>> firstFn, Supplier<Stream<Arguments>>... otherFns) {
+    public static Stream<Arguments> crossArguments(
+        Supplier<Stream<Arguments>> firstFn,
+        Supplier<Stream<Arguments>>... otherFns
+    ) {
         return Arrays
-                .stream(otherFns)
-                .reduce(firstFn, (l, r) -> () -> crossArguments(l, r))
-                .get();
+            .stream(otherFns)
+            .reduce(firstFn, (l, r) -> () -> crossArguments(l, r))
+            .get();
     }
 
-    public static Stream<Arguments> crossArguments(Supplier<Stream<Arguments>> leftFn, Supplier<Stream<Arguments>> rightFn) {
+    public static Stream<Arguments> crossArguments(
+        Supplier<Stream<Arguments>> leftFn,
+        Supplier<Stream<Arguments>> rightFn
+    ) {
         return leftFn.get().flatMap(leftArgs ->
-                rightFn.get().map(rightArgs -> {
-                    Collection<Object> leftObjects = new ArrayList<>(Arrays.asList(leftArgs.get()));
-                    leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
-                    return Arguments.of(leftObjects.toArray());
-                }));
+            rightFn.get().map(rightArgs -> {
+                Collection<Object> leftObjects = new ArrayList<>(Arrays.asList(leftArgs.get()));
+                leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
+                return Arguments.of(leftObjects.toArray());
+            }));
+    }
+
+    public static <Left, Right> Stream<Arguments> crossArgument(
+        Supplier<Stream<Left>> leftFn,
+        Supplier<Stream<Right>> rightFn
+    ) {
+        return leftFn.get().flatMap(leftArg -> rightFn.get().map(rightArg -> Arguments.of(leftArg, rightArg)));
     }
 
     public static Stream<Arguments> trueFalseArguments() {

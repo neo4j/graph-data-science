@@ -58,19 +58,21 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            Prim prim = computationResult.algorithm();
-            SpanningTree spanningTree = computationResult.result();
-            SpanningTreeWriteConfig config = computationResult.config();
-
             WriteResult.Builder builder = new WriteResult.Builder();
 
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
 
-            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-            builder.withTotalWeight(spanningTree.totalWeight());
+            Graph graph = computationResult.graph();
+            Prim prim = computationResult.algorithm();
+            SpanningTree spanningTree = computationResult.result().get();
+            SpanningTreeWriteConfig config = computationResult.config();
+
+            builder
+                .withEffectiveNodeCount(spanningTree.effectiveNodeCount())
+                .withTotalWeight(spanningTree.totalWeight());
+
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
                 var spanningGraph = new SpanningGraph(graph, spanningTree);

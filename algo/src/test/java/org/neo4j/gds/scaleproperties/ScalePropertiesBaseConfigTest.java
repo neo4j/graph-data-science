@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ScalePropertiesBaseConfigTest {
 
     static Stream<Arguments> scalers() {
-        return ScalerFactory.SUPPORTED_SCALERS.keySet().stream().map(Arguments::of);
+        return ScalerFactory.ALL_SCALERS.keySet().stream().map(Arguments::of);
     }
 
     @ParameterizedTest

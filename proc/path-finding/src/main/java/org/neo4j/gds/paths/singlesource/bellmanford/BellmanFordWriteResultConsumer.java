@@ -52,7 +52,7 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
             var config = computationResult.config();
 
 
-            if (computationResult.isGraphEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(new BellmanFordWriteResult(
                     computationResult.preProcessingMillis(),
                     0L,
@@ -65,7 +65,7 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
             }
 
             var algorithm = computationResult.algorithm();
-            var result = computationResult.result();
+            var result = computationResult.result().get();
 
             var resultBuilder = BellmanFordWriteResult.builder()
                 .withContainsNegativeCycle(result.containsNegativeCycle())

@@ -22,6 +22,7 @@ package org.neo4j.gds.modularityoptimization;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -74,7 +75,9 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     ) {
         return CommunityProcCompanion.nodeProperties(
                 computationResult.config(),
-                computationResult.result().asNodeProperties()
+                computationResult.result()
+                    .map(ModularityOptimizationResult::asNodeProperties)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
         );
     }
 

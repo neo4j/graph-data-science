@@ -22,9 +22,9 @@ package org.neo4j.gds.beta.node2vec;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class Node2VecWriteProcTest extends BaseProcTest implements MemoryEstimateTest<Node2Vec, Node2VecWriteConfig, Node2VecModel.Result> {
+class Node2VecWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<Node2Vec, Node2VecWriteConfig, Node2VecModel.Result> {
 
     @Neo4jGraph
     public static final String DB_CYPHER =

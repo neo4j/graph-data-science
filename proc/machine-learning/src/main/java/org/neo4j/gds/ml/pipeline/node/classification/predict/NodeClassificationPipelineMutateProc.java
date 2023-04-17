@@ -40,6 +40,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -87,9 +88,13 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
+        if (computationResult.result().isEmpty()) {
+            return Collections.emptyList();
+        }
+
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();
-        var result = computationResult.result();
+        var result = computationResult.result().get();
         var classProperties = result.predictedClasses().asNodeProperties();
         var nodeProperties = new ArrayList<NodeProperty>();
         nodeProperties.add(NodeProperty.of(mutateProperty, classProperties));

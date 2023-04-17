@@ -39,9 +39,13 @@ class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DF
         ComputationResult<DFS, HugeLongArray, DfsStreamConfig> computationResult,
         ExecutionContext executionContext
     ) {
+        if (computationResult.result().isEmpty()) {
+            return Stream.empty();
+        }
+
         return TraverseStreamComputationResultConsumer.consume(
             computationResult.config().sourceNode(),
-            computationResult.result(),
+            computationResult.result().get(),
             computationResult.graph()::toOriginalNodeId,
             computationResult.graph().isEmpty(),
             DfsStreamResult::new,

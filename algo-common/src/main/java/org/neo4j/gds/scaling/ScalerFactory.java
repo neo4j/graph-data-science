@@ -24,10 +24,12 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
@@ -35,7 +37,7 @@ import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 public interface ScalerFactory {
     String SCALER_KEY = "type";
 
-    Map<String, Function<CypherMapWrapper, ScalerFactory>> SUPPORTED_SCALERS = Map.of(
+    Map<String, Function<CypherMapWrapper, ScalerFactory>> ALL_SCALERS = Map.of(
         NoneScaler.TYPE, NoneScaler::buildFrom,
         Mean.TYPE, Mean::buildFrom,
         Max.TYPE, Max::buildFrom,
@@ -46,6 +48,12 @@ public interface ScalerFactory {
         L2Norm.TYPE, L2Norm::buildFrom,
         MinMax.TYPE, MinMax::buildFrom
     );
+
+    List<String> SUPPORTED_SCALER_NAMES = ALL_SCALERS
+        .keySet()
+        .stream()
+        .filter(s -> !(s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))
+        .collect(Collectors.toList());
 
     static String toString(ScalerFactory factory) {
         return factory.type().toUpperCase(Locale.ENGLISH);
@@ -63,21 +71,25 @@ public interface ScalerFactory {
             var scalerSpec = inputMap.get(SCALER_KEY);
             if (scalerSpec instanceof String) {
                 var scalerType = toLowerCaseWithLocale((String) scalerSpec);
-                var selectedScaler = SUPPORTED_SCALERS.get(scalerType);
+                var selectedScaler = ALL_SCALERS.get(scalerType);
                 if (selectedScaler == null) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
                         scalerSpec,
-                        StringJoining.join(SUPPORTED_SCALERS.keySet())
+                        StringJoining.join(SUPPORTED_SCALER_NAMES)
                     ));
                 }
                 return selectedScaler.apply(CypherMapWrapper.create(inputMap).withoutEntry(SCALER_KEY));
             }
         }
+        return throwForInvalidScaler(userInput);
+    }
+
+    static ScalerFactory throwForInvalidScaler(Object inputScaler) {
         throw new IllegalArgumentException(formatWithLocale(
             "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
-            userInput,
-            StringJoining.join(SUPPORTED_SCALERS.keySet())
+            inputScaler,
+            StringJoining.join(SUPPORTED_SCALER_NAMES)
         ));
     }
 

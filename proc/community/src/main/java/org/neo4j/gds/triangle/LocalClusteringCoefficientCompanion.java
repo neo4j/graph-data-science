@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
@@ -34,7 +35,6 @@ import org.neo4j.logging.Log;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
@@ -48,15 +48,16 @@ final class LocalClusteringCoefficientCompanion {
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodePropertyValues nodeProperties(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
-        return computeResult.result().asNodeProperties();
+        return computeResult.result()
+            .map(LocalClusteringCoefficient.Result::asNodeProperties)
+            .orElse(EmptyDoubleNodePropertyValues.INSTANCE);
     }
 
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
-        var result = Optional.ofNullable(computeResult.result())
-            .orElse(EmptyResult.EMPTY_RESULT);
+        var result = computeResult.result().orElse(EmptyResult.EMPTY_RESULT);
 
         return procResultBuilder
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient());

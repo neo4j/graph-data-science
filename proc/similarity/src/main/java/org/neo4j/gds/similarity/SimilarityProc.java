@@ -43,11 +43,12 @@ public final class SimilarityProc {
         ComputationResult<? extends Algorithm<?>, RESULT, CONFIG> computationResult,
         Function<RESULT, SimilarityGraphResult> graphResultFunc
     ) {
-        RESULT result = computationResult.result();
-        SimilarityGraphResult graphResult = graphResultFunc.apply(result);
-        resultBuilderWithTimings(procResultBuilder, computationResult)
-            .withNodesCompared(graphResult.comparedNodes())
-            .withRelationshipsWritten(graphResult.similarityGraph().relationshipCount());
+        computationResult.result().ifPresent(result -> {
+            SimilarityGraphResult graphResult = graphResultFunc.apply(result);
+            resultBuilderWithTimings(procResultBuilder, computationResult)
+                .withNodesCompared(graphResult.comparedNodes())
+                .withRelationshipsWritten(graphResult.similarityGraph().relationshipCount());
+        });
 
         return procResultBuilder;
     }

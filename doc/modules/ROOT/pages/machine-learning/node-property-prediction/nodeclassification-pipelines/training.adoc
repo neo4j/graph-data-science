@@ -32,6 +32,9 @@ The actual steps as well as their ordering in the implementation may differ.
 
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
+NOTE: Parallel executions of the same pipeline on the same graph is not supported.
+
+
 [[nodeclassification-pipeline-metrics]]
 == Metrics
 
@@ -89,6 +92,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
 | modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
 | xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
+| storeModelToDisk                                              | Boolean           | false                | yes       | Automatically store model to disk after training.
 |===
 
 .Results

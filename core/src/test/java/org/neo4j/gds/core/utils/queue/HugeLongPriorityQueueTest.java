@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.queue;
 
 import io.qala.datagen.RandomShortApi;
-import org.assertj.core.api.Assertions;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
@@ -29,11 +28,9 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import static io.qala.datagen.RandomShortApi.integer;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 class HugeLongPriorityQueueTest {
 
@@ -41,7 +38,7 @@ class HugeLongPriorityQueueTest {
     void testIsEmpty() {
         var capacity = integer(10, 20);
         var queue = HugeLongPriorityQueue.min(capacity);
-        assertEquals(queue.size(), 0);
+        assertThat(queue.size()).isEqualTo(0L);
         assertThatThrownBy(() -> queue.top()
         ).hasMessageContaining("empty");
     }
@@ -54,9 +51,9 @@ class HugeLongPriorityQueueTest {
         for (long element = 0; element < count; element++) {
             queue.add(element, integer(1, 5));
         }
-        assertEquals(queue.size(), count);
+        assertThat(queue.size()).isEqualTo(count);
         queue.clear();
-        assertEquals(queue.size(), 0);
+        assertThat(queue.size()).isEqualTo(0L);
     }
 
     @Test
@@ -74,7 +71,7 @@ class HugeLongPriorityQueueTest {
                 minElement = key;
             }
             queue.add(key, weight);
-            assertEquals(queue.top(), minElement);
+            assertThat(queue.top()).isEqualTo(minElement);
         }
     }
 
@@ -94,7 +91,7 @@ class HugeLongPriorityQueueTest {
                 minElement = element;
             }
             queue.add(element, weight);
-            assertEquals(queue.top(), minElement);
+            assertThat(queue.top()).isEqualTo(minElement);
             elements.add(Tuples.pair(element, weight));
         }
 
@@ -116,12 +113,12 @@ class HugeLongPriorityQueueTest {
             var allowedElements = byCost.get(cost);
             while (!allowedElements.isEmpty()) {
                 long item = queue.pop();
-                assertThat(allowedElements, hasItem(item));
+                assertThat(item).isIn(allowedElements);
                 allowedElements.remove(item);
             }
         }
 
-        assertTrue(queue.isEmpty());
+        assertThat(queue.isEmpty()).isTrue();
     }
 
     @Test
@@ -142,7 +139,7 @@ class HugeLongPriorityQueueTest {
         for (long element = count - 1; element >= 0; element--) {
             minCost = Math.nextDown(minCost);
             queue.set(element, minCost);
-            assertEquals(element, queue.top());
+            assertThat(element).isEqualTo(queue.top());
         }
     }
 
@@ -168,7 +165,7 @@ class HugeLongPriorityQueueTest {
             }
             maxCost = Math.nextUp(maxCost);
             queue.set(element, maxCost);
-            assertEquals(top, queue.top());
+            assertThat(top).isEqualTo(queue.top());
         }
     }
 
@@ -177,7 +174,7 @@ class HugeLongPriorityQueueTest {
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(2);
         priorityQueue.add(1, 1);
         priorityQueue.set(1, 2);
-        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+        assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
     @Test
@@ -185,7 +182,7 @@ class HugeLongPriorityQueueTest {
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(2);
         priorityQueue.add(1, 1);
         priorityQueue.set(1, 1);
-        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+        assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
     @Test
@@ -193,7 +190,7 @@ class HugeLongPriorityQueueTest {
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(2);
         priorityQueue.set(1, 0);
         priorityQueue.set(1, 0);
-        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+        assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
     @Test
@@ -204,9 +201,29 @@ class HugeLongPriorityQueueTest {
         }
         for (int i = 0; i < 10; ++i) {
             var ith = priorityQueue.getIth(i);
-            assertEquals(priorityQueue.findElementPosition(ith), i + 1);
+            assertThat(priorityQueue.findElementPosition(ith)).isEqualTo(i + 1);
         }
-        assertEquals(priorityQueue.findElementPosition(10), 0);
+        assertThat(priorityQueue.findElementPosition(10)).isEqualTo(0);
+    }
+
+    @Test
+    void shouldKeepCostAfterDeleting() {
+        //This test verifies that after deleting an element .cost returns its last value
+        //If you change HLPQ so that this test fails, please revert the changes in
+        //https://github.com/neo-technology/graph-analytics/pull/7360 to use the 'costToParent' array again.
+        HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(11);
+        for (int i = 0; i < 10; ++i) {
+            priorityQueue.add(i, 10 - i);
+        }
+        assertThat(priorityQueue.cost(9)).isEqualTo(1);
+        for (int i = 0; i < 10; ++i) {
+            priorityQueue.pop();
+        }
+        for (int i = 0; i < 9; ++i) {
+            priorityQueue.add(i, 10 - i);
+        }
+        assertThat(priorityQueue.containsElement(9)).isFalse();
+        assertThat(priorityQueue.cost(9)).isEqualTo(1);
     }
 
     private double exclusiveDouble(double exclusiveMin, double exclusiveMax) {

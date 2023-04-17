@@ -60,6 +60,11 @@ public final class TrainingStatistics {
         return modelCandidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
     }
 
+    @TestOnly
+    public Double getTestScore(Metric metric) {
+        return testScores.get(metric);
+    }
+
     /**
      * Turns this class into a Cypher map, to be returned in a procedure YIELD field.
      * This is intentionally omitting the test scores.

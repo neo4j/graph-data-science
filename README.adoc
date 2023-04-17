@@ -200,7 +200,7 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 <!-- Required by the write execution modes, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
-  <artifactId>write-services</artifactId>
+  <artifactId>open-write-services</artifactId>
   <version>2.3.2</version>
 </dependency>
 ----

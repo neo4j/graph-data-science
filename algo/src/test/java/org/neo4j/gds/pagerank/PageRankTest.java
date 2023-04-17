@@ -567,16 +567,16 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedL1: 0.04658, expectedL2: 0.09099, expectedMean: -0.15783 })" +
-            ", (b:Node { expectedL1: 0.36717, expectedL2: 0.71721, expectedMean:  0.78947 })" +
-            ", (c:Node { expectedL1: 0.34073, expectedL2: 0.66557, expectedMean:  0.71136 })" +
-            ", (d:Node { expectedL1: 0.04195, expectedL2: 0.08194, expectedMean: -0.17152 })" +
-            ", (e:Node { expectedL1: 0.04658, expectedL2: 0.09099, expectedMean: -0.15783 })" +
-            ", (f:Node { expectedL1: 0.04195, expectedL2: 0.08194, expectedMean: -0.17152 })" +
-            ", (g:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
-            ", (h:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
-            ", (i:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
-            ", (j:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
+            "  (a:Node { expectedMinMax: 0.05268, expectedStdScore: -0.41956, expectedMean: -0.15783 })" +
+            ", (b:Node { expectedMinMax: 1.0,     expectedStdScore:  2.09854, expectedMean:  0.78947 })" +
+            ", (c:Node { expectedMinMax: 0.92189, expectedStdScore:  1.89092, expectedMean:  0.71136 })" +
+            ", (d:Node { expectedMinMax: 0.03900, expectedStdScore: -0.45594, expectedMean: -0.17152 })" +
+            ", (e:Node { expectedMinMax: 0.05268, expectedStdScore: -0.41956, expectedMean: -0.15783 })" +
+            ", (f:Node { expectedMinMax: 0.03900, expectedStdScore: -0.45594, expectedMean: -0.17152 })" +
+            ", (g:Node { expectedMinMax: 0.0,     expectedStdScore: -0.55961, expectedMean: -0.21052 })" +
+            ", (h:Node { expectedMinMax: 0.0,     expectedStdScore: -0.55961, expectedMean: -0.21052 })" +
+            ", (i:Node { expectedMinMax: 0.0,     expectedStdScore: -0.55961, expectedMean: -0.21052 })" +
+            ", (j:Node { expectedMinMax: 0.0,     expectedStdScore: -0.55961, expectedMean: -0.21052 })" +
             ", (b)-[:TYPE]->(c)" +
             ", (c)-[:TYPE]->(b)" +
             ", (d)-[:TYPE]->(a)" +
@@ -591,7 +591,7 @@ class PageRankTest {
         private Graph graph;
 
         @ParameterizedTest
-        @CsvSource({"L1NORM, expectedL1", "L2NORM, expectedL2", "MEAN, expectedMean"})
+        @CsvSource({"MINMAX, expectedMinMax", "STDSCORE, expectedStdScore", "MEAN, expectedMean"})
         void test(String scalerName, String expectedPropertyKey) {
             var config = ImmutablePageRankConfig
                 .builder()

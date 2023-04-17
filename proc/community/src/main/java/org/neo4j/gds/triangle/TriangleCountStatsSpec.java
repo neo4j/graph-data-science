@@ -24,7 +24,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
@@ -52,10 +51,10 @@ public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangl
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var builder = new StatsResult.Builder();
-            Optional.ofNullable(computationResult.result())
+            computationResult.result()
                 .ifPresent(result ->
                     builder
-                        .withGlobalTriangleCount(computationResult.result().globalTriangles())
+                        .withGlobalTriangleCount(result.globalTriangles())
                 );
 
             builder

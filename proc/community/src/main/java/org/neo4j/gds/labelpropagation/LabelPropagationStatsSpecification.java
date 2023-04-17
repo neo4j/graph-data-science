@@ -24,7 +24,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
@@ -55,7 +54,7 @@ public class LabelPropagationStatsSpecification implements AlgorithmSpec<LabelPr
                 computationResult.config().concurrency()
             );
 
-            Optional.ofNullable(computationResult.result())
+            computationResult.result()
                 .ifPresent(result -> {
                         builder
                             .didConverge(result.didConverge())

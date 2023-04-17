@@ -25,7 +25,6 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 
@@ -34,18 +33,18 @@ import java.util.SplittableRandom;
 
 public class Walker implements Runnable {
 
-    protected final SeenNodes seenNodes;
+    private final SeenNodes seenNodes;
     private final Optional<HugeAtomicDoubleArray> totalWeights;
-    protected final double qualityThreshold;
-    protected final WalkQualities walkQualities;
+    private final double qualityThreshold;
+    private final WalkQualities walkQualities;
     protected final SplittableRandom rng;
     protected final Graph inputGraph;
-    protected final RandomWalkWithRestartsConfig config;
+    private final double restartProbability;
     protected final ProgressTracker progressTracker;
 
-    protected final LongSet startNodesUsed;
+    private final LongSet startNodesUsed;
 
-    private NextNodeStrategy nextNodeStrategy;
+    private final NextNodeStrategy nextNodeStrategy;
 
     public Walker(
         SeenNodes seenNodes,
@@ -54,7 +53,7 @@ public class Walker implements Runnable {
         WalkQualities walkQualities,
         SplittableRandom rng,
         Graph inputGraph,
-        RandomWalkWithRestartsConfig config,
+        double restartProbability,
         ProgressTracker progressTracker,
         NextNodeStrategy nextNodeStrategy
     ) {
@@ -64,7 +63,7 @@ public class Walker implements Runnable {
         this.walkQualities = walkQualities;
         this.rng = rng;
         this.inputGraph = inputGraph;
-        this.config = config;
+        this.restartProbability = restartProbability;
         this.progressTracker = progressTracker;
         this.startNodesUsed = new LongHashSet();
         this.nextNodeStrategy = nextNodeStrategy;
@@ -86,7 +85,7 @@ public class Walker implements Runnable {
 
             // walk a step
             double degree = computeDegree(currentNode);
-            if (degree == 0.0 || rng.nextDouble() < config.restartProbability()) {
+            if (degree == 0.0 || rng.nextDouble() < restartProbability) {
                 progressTracker.logSteps(addedNodes);
 
                 double walkQuality = ((double) addedNodes) / nodesConsidered;
@@ -121,7 +120,7 @@ public class Walker implements Runnable {
         }
     }
 
-    protected double computeDegree(long currentNode) {
+    private double computeDegree(long currentNode) {
         if (totalWeights.isEmpty()) {
             return inputGraph.degree(currentNode);
         }

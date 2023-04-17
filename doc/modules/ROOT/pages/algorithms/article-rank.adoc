@@ -560,7 +560,6 @@ Comparing these results to the ones from the xref:algorithms/article-rank.adoc#a
 === Scaling centrality scores
 
 To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
-A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
 A description of all available scalers can be found in the documentation for the xref:algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
@@ -569,7 +568,7 @@ A description of all available scalers can be found in the documentation for the
 [source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stream('myGraph', {
-  scaler: "L1Norm"
+  scaler: "StdScore"
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
@@ -580,14 +579,14 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 0.275151294006312
-| "About"   | 0.12284588582564794
-| "Links"   | 0.12284588582564794
-| "Product" | 0.12284588582564794
-| "Site A"  | 0.08907776212918608
-| "Site B"  | 0.08907776212918608
-| "Site C"  | 0.08907776212918608
-| "Site D"  | 0.08907776212918608
+| "Home"    | 2.550761988515413
+| "About"   | -0.036593974039468
+| "Links"   | -0.036593974039468
+| "Product" | -0.036593974039468
+| "Site A"  | -0.610245016599252
+| "Site B"  | -0.610245016599252
+| "Site C"  | -0.610245016599252
+| "Site D"  | -0.610245016599252
 
 |===
 --

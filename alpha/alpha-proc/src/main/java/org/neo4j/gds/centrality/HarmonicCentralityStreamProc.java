@@ -53,15 +53,16 @@ public class HarmonicCentralityStreamProc extends HarmonicCentralityProc<Harmoni
     public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var result = computationResult.result();
-            var graph = computationResult.graph();
 
-            if (graph.isEmpty()) {
+            if (result.isEmpty()) {
                 return Stream.empty();
             }
 
+            var graph = computationResult.graph();
+            var centralityScores = result.get();
             return LongStream.range(0, graph.nodeCount())
                 .boxed()
-                .map(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), result.getCentralityScore(nodeId)));
+                .map(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), centralityScores.getCentralityScore(nodeId)));
         };
     }
 

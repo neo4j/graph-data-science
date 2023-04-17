@@ -106,7 +106,9 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 var relationships = getRelationships(
                     relationshipType,
                     computationResult,
-                    computationResult.result().graphResult(),
+                    computationResult.result()
+                        .map(NodeSimilarityResult::graphResult)
+                        .orElseGet(() -> new SimilarityGraphResult(computationResult.graph(), 0, false)),
                     config.mutateProperty(),
                     (SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
                     executionContext.returnColumns()

@@ -57,7 +57,7 @@ public class BellmanFordStatsSpec implements AlgorithmSpec<BellmanFord, BellmanF
                 computationResult.computeMillis(),
                 0,
                 computationResult.config().toMap(),
-                computationResult.result().containsNegativeCycle()
+                computationResult.result().map(BellmanFordResult::containsNegativeCycle).orElse(false)
             ));
     }
 }

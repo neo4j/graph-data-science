@@ -36,6 +36,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -409,6 +410,37 @@ class RandomWalkTest {
             .matches(walks -> walks.size() == 2)
             .anyMatch(walk -> walk[0] == aInternalId)
             .anyMatch(walk -> walk[0] == bInternalId);
+    }
+
+    /**
+     * Ensure that when termination flag is set externally, we terminate the walk
+     */
+    @Test
+    void testSetTerminationFlagAndMultipleRuns() {
+        for (int i = 0; i < 3; i++) {
+            Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
+                    .walkBufferSize(1)
+                    .build();
+
+            var randomWalk = RandomWalk.create(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER,
+                    Pools.DEFAULT
+            );
+
+            var stream = randomWalk.compute();
+            long count = stream.limit(10).count();
+
+            randomWalk.setTerminationFlag(new TerminationFlag() {
+                @Override
+                public boolean running() {
+                    return false;
+                }
+            });
+
+            assertEquals(10, count);
+        }
     }
 
     @Nested

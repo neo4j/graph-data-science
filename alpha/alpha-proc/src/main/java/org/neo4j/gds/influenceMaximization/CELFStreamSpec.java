@@ -52,8 +52,7 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     @Override
     public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var celfSeedSetMap = computationResult.result();
-            if (celfSeedSetMap == null) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 

@@ -14,3 +14,4 @@
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String        | null      | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | randomSeed                                                                       | Integer       | random    | yes      | A random seed which is used to control the randomness in computing the embeddings.
 | penaltyL2                                                                        | Float         | 0.0       | yes      | The influence of the l2 penalty term to the loss function.
+| storeModelToDisk                                                                 | Boolean       | false     | yes      | Automatically store model to disk after training.

@@ -50,7 +50,6 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
         ExecutionContext executionContext
     ) {
         var config = computationResult.config();
-        var result = computationResult.result();
 
         var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
@@ -64,13 +63,16 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
 
         SingleTypeRelationships relationships;
 
-        result.forEachPath(pathResult -> {
-            relationshipsBuilder.addFromInternal(
-                pathResult.sourceNode(),
-                pathResult.targetNode(),
-                pathResult.totalCost()
-            );
+        computationResult.result().ifPresent(result -> {
+            result.forEachPath(pathResult -> {
+                relationshipsBuilder.addFromInternal(
+                    pathResult.sourceNode(),
+                    pathResult.targetNode(),
+                    pathResult.totalCost()
+                );
+            });
         });
+
         relationships = relationshipsBuilder.build();
         resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
 

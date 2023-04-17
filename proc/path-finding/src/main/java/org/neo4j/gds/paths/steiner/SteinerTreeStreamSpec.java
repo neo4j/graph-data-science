@@ -56,11 +56,15 @@ public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteiner
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<StreamResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
+            if (computationResult.result().isEmpty()) {
+                return Stream.empty();
+            }
+
             var sourceNode = computationResult.config().sourceNode();
             Graph graph = computationResult.graph();
-            var steinerTreeResult = computationResult.result();
-            var parentArray=steinerTreeResult.parentArray();
-            var costArray=steinerTreeResult.relationshipToParentCost();
+            var steinerTreeResult = computationResult.result().get();
+            var parentArray = steinerTreeResult.parentArray();
+            var costArray = steinerTreeResult.relationshipToParentCost();
             return LongStream.range(0, graph.nodeCount())
                 .filter(nodeId -> parentArray.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
                 .mapToObj(nodeId -> new StreamResult(

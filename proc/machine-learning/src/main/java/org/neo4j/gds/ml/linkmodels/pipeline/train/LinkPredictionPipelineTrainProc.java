@@ -31,13 +31,16 @@ import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
+import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
@@ -59,7 +62,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
         PipelineCompanion.preparePipelineConfig(graphName, config);
-        return trainAndStoreModelWithResult(compute(graphName, config));
+        return trainAndSetModelWithResult(compute(graphName, config));
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.train.estimate", mode = READ)
@@ -105,10 +108,13 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
 
         public final Map<String, Object> modelSelectionStats;
 
-        public LPTrainResult(LinkPredictionTrainPipelineResult algoResult, long trainMillis) {
-            super(algoResult.model(), trainMillis);
+        public LPTrainResult(Optional<LinkPredictionTrainPipelineResult> algoResult, long trainMillis) {
+            super(algoResult.map(LinkPredictionTrainPipelineResult::model), trainMillis);
 
-            this.modelSelectionStats = algoResult.trainingStatistics().toMap();
+            this.modelSelectionStats = algoResult
+                .map(LinkPredictionTrainPipelineResult::trainingStatistics)
+                .map(TrainingStatistics::toMap)
+                .orElseGet(Collections::emptyMap);
         }
     }
 }

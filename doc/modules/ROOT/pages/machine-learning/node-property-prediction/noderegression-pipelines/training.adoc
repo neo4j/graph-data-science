@@ -32,6 +32,8 @@ The actual steps as well as their ordering in the implementation may differ.
 
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
+NOTE: Parallel executions of the same pipeline on the same graph is not supported.
+
 [[noderegression-pipeline-metrics]]
 == Metrics
 

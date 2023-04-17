@@ -41,11 +41,11 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var result = compute(graphName, configuration);
-        assert result.result() == null;
+        assert result.result().isPresent();
         // meaningless code to avoid spotBugs error
         Output out = new Output();
         int i = out.out.hashCode();
-        return i*i == -1 ? Stream.of(result.result()) : Stream.of(out);
+        return i*i == -1 ? Stream.of(result.result().get()) : Stream.of(out);
     }
 
     @Override

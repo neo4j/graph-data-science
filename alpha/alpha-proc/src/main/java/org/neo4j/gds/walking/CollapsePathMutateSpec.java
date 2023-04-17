@@ -64,8 +64,10 @@ public class CollapsePathMutateSpec implements AlgorithmSpec<CollapsePath, Singl
                     ComputationResult<CollapsePath, SingleTypeRelationships, CollapsePathConfig> computationResult,
                     ExecutionContext executionContext
                 ) {
-                    computationResult.graphStore().addRelationshipType(computationResult.result());
-                    resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
+                    computationResult.result().ifPresent(result -> {
+                        computationResult.graphStore().addRelationshipType(result);
+                        resultBuilder.withRelationshipsWritten(result.topology().elementCount());
+                    });
                 }
             };
         }
@@ -75,8 +77,7 @@ public class CollapsePathMutateSpec implements AlgorithmSpec<CollapsePath, Singl
         ComputationResult<CollapsePath, SingleTypeRelationships, CollapsePathConfig> computeResult,
         ExecutionContext executionContext
     ) {
-       var builder = new MutateResult.Builder();
-       return builder;
+        return new MutateResult.Builder();
     }
 
 }

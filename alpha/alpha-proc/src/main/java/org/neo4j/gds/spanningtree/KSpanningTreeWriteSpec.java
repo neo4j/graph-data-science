@@ -57,26 +57,18 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
 
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
-            SpanningTree spanningTree = computationResult.result();
             KSpanningTreeWriteConfig config = computationResult.config();
             KSpanningTree algorithm = computationResult.algorithm();
             KSpanningTreeWriteResult.Builder builder = new KSpanningTreeWriteResult.Builder();
 
-            if (graph.isEmpty()) {
+            if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
             }
 
-            var properties = new LongNodePropertyValues() {
-                @Override
-                public long nodeCount() {
-                    return computationResult.graph().nodeCount();
-                }
+            var spanningTree = computationResult.result().get();
 
-                @Override
-                public long longValue(long nodeId) {
-                    return spanningTree.head(nodeId);
-                }
-            };
+            var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
+
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
@@ -97,5 +89,28 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
             builder.withConfig(config);
             return Stream.of(builder.build());
         };
+    }
+
+    private static class SpanningTreeBackedNodePropertyValues implements LongNodePropertyValues {
+        private final SpanningTree spanningTree;
+        private final long nodeCount;
+
+        SpanningTreeBackedNodePropertyValues(
+            SpanningTree spanningTree,
+            long nodeCount
+        ) {
+            this.nodeCount = nodeCount;
+            this.spanningTree = spanningTree;
+        }
+
+        @Override
+        public long nodeCount() {
+            return nodeCount;
+        }
+
+        @Override
+        public long longValue(long nodeId) {
+            return spanningTree.head(nodeId);
+        }
     }
 }

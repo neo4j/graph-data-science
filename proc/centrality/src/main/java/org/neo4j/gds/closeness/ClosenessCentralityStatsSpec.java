@@ -32,7 +32,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
@@ -58,7 +57,7 @@ public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCent
 
     @Override
     public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
-        return new StatsComputationResultConsumer(this::resultBuilder);
+        return new StatsComputationResultConsumer<>(this::resultBuilder);
 
     }
 
@@ -68,18 +67,12 @@ public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCent
             ClosenessCentralityStatsConfig> computationResult,
         ExecutionContext executionContext
     ) {
-
-        var centralities = computationResult
-            .result()
-            .centralities();
-
         AbstractCentralityResultBuilder<StatsResult> builder = new StatsResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
-        Optional.ofNullable(computationResult.result())
-            .ifPresent(result -> builder.withCentralityFunction(centralities::get));
+        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
 
         return builder;
 

@@ -20,7 +20,10 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.properties.nodes.EmptyLongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 
 final class LeidenCompanion {
@@ -32,8 +35,12 @@ final class LeidenCompanion {
         String resultProperty
 
     ) {
+        if (computationResult.result().isEmpty()) {
+            return EmptyLongArrayNodePropertyValues.INSTANCE;
+        }
+
         var config = computationResult.config();
-        var leidenResult = computationResult.result();
+        var leidenResult = computationResult.result().get();
 
 
         if (config.includeIntermediateCommunities()) {
@@ -52,12 +59,15 @@ final class LeidenCompanion {
         String resultProperty
     ) {
         var config = computationResult.config();
-        var leidenResult = computationResult.result();
 
         return CommunityProcCompanion.nodeProperties(
             config,
             resultProperty,
-            leidenResult.dendrogramManager().getCurrent().asNodeProperties(),
+            computationResult.result()
+                .map(LeidenResult::dendrogramManager)
+                .map(LeidenDendrogramManager::getCurrent)
+                .map(HugeLongArray::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE),
             () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }

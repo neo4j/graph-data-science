@@ -146,7 +146,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
         RandomWalkWithRestartsConfig config,
         ProgressTracker progressTracker
     ) {
-        return new Walker(seenNodes, totalWeights, qualityThreshold, walkQualities, split, concurrentCopy, config, progressTracker,
+        return new Walker(seenNodes,
+            totalWeights,
+            qualityThreshold,
+            walkQualities,
+            split,
+            concurrentCopy,
+            config.restartProbability(),
+            progressTracker,
             new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
         );
     }

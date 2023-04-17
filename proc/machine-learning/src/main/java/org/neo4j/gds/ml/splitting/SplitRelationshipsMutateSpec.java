@@ -59,17 +59,18 @@ public class SplitRelationshipsMutateSpec implements AlgorithmSpec<SplitRelation
                 ComputationResult<SplitRelationships, EdgeSplitter.SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                var graphStore = computationResult.graphStore();
-                var splitResult = computationResult.result();
-                var selectedRels = splitResult.selectedRels().build();
-                var remainingRels = splitResult.remainingRels().build();
+                computationResult.result().ifPresent(splitResult -> {
+                    var graphStore = computationResult.graphStore();
+                    var selectedRels = splitResult.selectedRels().build();
+                    var remainingRels = splitResult.remainingRels().build();
 
-                graphStore.addRelationshipType(remainingRels);
-                graphStore.addRelationshipType(selectedRels);
+                    graphStore.addRelationshipType(remainingRels);
+                    graphStore.addRelationshipType(selectedRels);
 
-                long holdoutWritten = selectedRels.topology().elementCount();
-                long remainingWritten = remainingRels.topology().elementCount();
-                resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
+                    long holdoutWritten = selectedRels.topology().elementCount();
+                    long remainingWritten = remainingRels.topology().elementCount();
+                    resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
+                });
             }
         };
     }

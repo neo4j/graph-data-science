@@ -21,6 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
@@ -42,18 +43,22 @@ final class PageRankProc {
         PageRankResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult
     ) {
-        var result = computeResult.result();
-        procResultBuilder
-            .withDidConverge(!computeResult.isGraphEmpty() && result.didConverge())
-            .withRanIterations(!computeResult.isGraphEmpty() ? result.iterations() : 0)
-            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().scores()::get : null)
-            .withScalerVariant(computeResult.config().scaler());
+        computeResult.result().ifPresent(result -> {
+            procResultBuilder
+                .withDidConverge(result.didConverge())
+                .withRanIterations(result.iterations())
+                .withCentralityFunction(result.scores()::get)
+                .withScalerVariant(computeResult.config().scaler());
+        });
 
         return procResultBuilder;
     }
 
     static <CONFIG extends PageRankConfig> NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
-        return computeResult.result().scores().asNodeProperties();
+        return computeResult.result()
+            .map(PageRankResult::scores)
+            .orElseGet(() -> HugeDoubleArray.newArray(0))
+            .asNodeProperties();
     }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
