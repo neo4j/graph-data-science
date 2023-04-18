@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
-import org.neo4j.gds.core.loading.MutableIntValue;
 
 public final class DecompressingCursor implements AdjacencyCursor {
 
