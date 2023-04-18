@@ -94,7 +94,6 @@ class KCoreDecompositionStatsProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isEqualTo(-1L);
 
-            
             assertThat(row.getNumber("degeneracy"))
                 .as("degeneracy")
                 .asInstanceOf(LONG)
@@ -109,8 +108,20 @@ class KCoreDecompositionStatsProcTest extends BaseProcTest {
         assertThat(rowCount)
             .as("`mutate` mode should always return one row")
             .isEqualTo(1);
+    }
 
+    @Test
+    void memoryEstimation() {
+        String query="CALL gds.kcore.stats.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {})";
 
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(647_224L);
+        });
+
+        assertThat(rowCount)
+            .as("`estimate` mode should always return one row")
+            .isEqualTo(1);
     }
 
 }

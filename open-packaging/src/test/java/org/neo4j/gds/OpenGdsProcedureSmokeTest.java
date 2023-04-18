@@ -480,7 +480,16 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.localClusteringCoefficient.stream",
         "gds.localClusteringCoefficient.stream.estimate",
         "gds.localClusteringCoefficient.write",
-        "gds.localClusteringCoefficient.write.estimate"
+        "gds.localClusteringCoefficient.write.estimate",
+
+        "gds.kcore.stats",
+        "gds.kcore.stats.estimate",
+        "gds.kcore.stream",
+        "gds.kcore.stream.estimate",
+        "gds.kcore.mutate",
+        "gds.kcore.mutate.estimate",
+        "gds.kcore.write",
+        "gds.kcore.write.estimate"
     );
 
     private static final List<String> FUNCTIONS = asList(
@@ -510,12 +519,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.ml.oneHotEncoding",
 
-        "gds.graph.exists",
-
-        "gds.kcore.stats",
-        "gds.kcore.stream",
-        "gds.kcore.mutate",
-        "gds.kcore.write"
+        "gds.graph.exists"
 
     );
 
@@ -555,7 +559,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 400;
+        int expectedCount = 404;
         assertEquals(
             expectedCount,
             returnedRows,
