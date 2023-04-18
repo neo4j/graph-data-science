@@ -112,35 +112,38 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (J:female {id:'Juliette'}),
-  (R:male {id:'Romeo'}),
-  (r1:male {id:'Ryan'}),
-  (r2:male {id:'Robert'}),
-  (r3:male {id:'Riley'}),
-  (r4:female {id:'Ruby'}),
-  (j1:female {id:'Josie'}),
-  (j2:male {id:'Joseph'}),
-  (j3:female {id:'Jasmine'}),
-  (j4:female {id:'June'}),
-
-  (J)-[:LINK]->(R),
-  (R)-[:LINK]->(J),
-  (r1)-[:LINK]->(R),
-  (r2)-[:LINK]->(R),
-  (r3)-[:LINK]->(R),
-  (r4)-[:LINK]->(R),
-  (R)-[:LINK]->(r1),
-  (R)-[:LINK]->(r2),
-  (R)-[:LINK]->(r3),
-  (R)-[:LINK]->(r4),
-  (j1)-[:LINK]->(J),
-  (j2)-[:LINK]->(J),
-  (j3)-[:LINK]->(J),
-  (j4)-[:LINK]->(J),
-  (J)-[:LINK]->(j1),
-  (J)-[:LINK]->(j2),
-  (J)-[:LINK]->(j3),
-  (J)-[:LINK]->(j4);
+    (J:female {id:'Juliette'}),
+    (R:male {id:'Romeo'}),
+    (r1:male {id:'Ryan'}),
+    (r2:male {id:'Robert'}),
+    (r3:male {id:'Riley'}),
+    (r4:female {id:'Ruby'}),
+    (j1:female {id:'Josie'}),
+    (j2:male {id:'Joseph'}),
+    (j3:female {id:'Jasmine'}),
+    (j4:female {id:'June'}),
+    (J)-[:LINK]->(R),
+    (R)-[:LINK]->(J),
+    (r1)-[:LINK]->(R),   (R)-[:LINK]->(r1),
+    (r2)-[:LINK]->(R),   (R)-[:LINK]->(r2),
+    (r3)-[:LINK]->(R),   (R)-[:LINK]->(r3),
+    (r4)-[:LINK]->(R),   (R)-[:LINK]->(r4),
+    (r1)-[:LINK]->(r2),  (r2)-[:LINK]->(r1),
+    (r1)-[:LINK]->(r3),  (r3)-[:LINK]->(r1),
+    (r1)-[:LINK]->(r4),  (r4)-[:LINK]->(r1),
+    (r2)-[:LINK]->(r3),  (r3)-[:LINK]->(r2),
+    (r2)-[:LINK]->(r4),  (r4)-[:LINK]->(r2),
+    (r3)-[:LINK]->(r4),  (r4)-[:LINK]->(r3),
+    (j1)-[:LINK]->(J),   (J)-[:LINK]->(j1),
+    (j2)-[:LINK]->(J),   (J)-[:LINK]->(j2),
+    (j3)-[:LINK]->(J),   (J)-[:LINK]->(j3),
+    (j4)-[:LINK]->(J),   (J)-[:LINK]->(j4),
+    (j1)-[:LINK]->(j2),  (j2)-[:LINK]->(j1),
+    (j1)-[:LINK]->(j3),  (j3)-[:LINK]->(j1),
+    (j1)-[:LINK]->(j4),  (j4)-[:LINK]->(j1),
+    (j2)-[:LINK]->(j3),  (j3)-[:LINK]->(j2),
+    (j2)-[:LINK]->(j4),  (j4)-[:LINK]->(j2),
+    (j3)-[:LINK]->(j4),  (j4)-[:LINK]->(j3) ;
 ----
 
 This graph has two clusters of _Users_, that are closely connected.
@@ -153,7 +156,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project( 'myGraph', '*', 'LINK' )
+CALL gds.graph.project( 'myGraph', ['male', 'female'], 'LINK' );
 ----
 
 
@@ -168,14 +171,14 @@ Since we have six nodes total in our graph, and 5/10 = 0.5 we will use this as o
 .The following will run the Common Neighbour Aware random walk sampling algorithm:
 [source, cypher, role=noplay]
 ----
-MATCH (start:point {id: 'Juliette'})
-CALL gds.alpha.graph.sample.cnarw('mySample', 'myGraph',
+MATCH (start:female {id: 'Juliette'})
+CALL gds.alpha.graph.sample.cnarw('mySampleCNARW', 'myGraph',
 {
     samplingRatio: 0.5,
     startNodes: [id(start)]
 })
 YIELD nodeCount
-RETURN nodeCount
+RETURN nodeCount;
 ----
 
 .Results
