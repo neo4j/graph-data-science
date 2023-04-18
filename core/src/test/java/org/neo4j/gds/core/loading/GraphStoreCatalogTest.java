@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
@@ -412,6 +413,28 @@ class GraphStoreCatalogTest {
 
         assertTrue(GraphStoreCatalog.exists(USER_NAME, databaseId1, "graph1"));
         assertFalse(GraphStoreCatalog.exists(USER_NAME, databaseId1, "graph0"));
+    }
+
+    @Test
+    void callListeners() {
+        var listenerCalls = new MutableInt(0);
+
+        var listener = new GraphStoreCatalogListener() {
+            @Override
+            public void onProject(String user, String graphName) {
+                listenerCalls.increment();
+            }
+        };
+
+        GraphStoreCatalog.registerListener(listener);
+        assertThat(listenerCalls.intValue()).isZero();
+
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        assertThat(listenerCalls.intValue()).isEqualTo(1);
+
+        GraphStoreCatalog.unregisterListener(listener);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        assertThat(listenerCalls.intValue()).isEqualTo(1);
     }
 
     @Test
