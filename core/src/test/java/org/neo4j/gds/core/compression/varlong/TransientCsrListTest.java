@@ -35,6 +35,7 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -180,6 +181,90 @@ class TransientCsrListTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void advanceBy(TestMethodRunner runner) {
+        runner.run(() -> {
+            var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(0)).isEqualTo(0);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(1);
+            assertTrue(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(1)).isEqualTo(1);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(2);
+            assertTrue(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(2)).isEqualTo(2);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(3);
+            assertTrue(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(3)).isEqualTo(3);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(4);
+            assertFalse(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(adjacencyCursor.advanceBy(5)).isEqualTo(NOT_FOUND);
+            assertFalse(adjacencyCursor.hasNextVLong());
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void advanceByAcrossBlocks(TestMethodRunner runner) {
+        runner.run(() -> {
+            var adjacencyCursor = adjacencyCursor(2 * CHUNK_SIZE);
+            assertThat(adjacencyCursor.advanceBy(CHUNK_SIZE)).isEqualTo(CHUNK_SIZE);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(CHUNK_SIZE + 1);
+
+            adjacencyCursor = adjacencyCursor(2 * CHUNK_SIZE);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(0);
+            assertThat(adjacencyCursor.advanceBy(CHUNK_SIZE)).isEqualTo(CHUNK_SIZE + 1);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(CHUNK_SIZE + 2);
+
+            adjacencyCursor = adjacencyCursor(3 * CHUNK_SIZE);
+            assertThat(adjacencyCursor.advanceBy(2 * CHUNK_SIZE + CHUNK_SIZE / 2)).isEqualTo(2 * CHUNK_SIZE + CHUNK_SIZE / 2);
+
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void shallowCopy(TestMethodRunner runner) {
+        runner.run(() -> {
+            var sourceCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 3, 4});
+            assertThat(sourceCursor.nextVLong()).isEqualTo(0);
+
+            var targetCursor = adjacencyCursor(1);
+            targetCursor = sourceCursor.shallowCopy(targetCursor);
+
+            assertThat(targetCursor.nextVLong()).isEqualTo(1);
+            assertThat(targetCursor.nextVLong()).isEqualTo(2);
+            assertThat(targetCursor.nextVLong()).isEqualTo(3);
+            assertThat(targetCursor.nextVLong()).isEqualTo(4);
+            assertFalse(targetCursor.hasNextVLong());
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void shallowCopyAcrossBlocks(TestMethodRunner runner) {
+        runner.run(() -> {
+            var sourceCursor = adjacencyCursor(3 * CHUNK_SIZE);
+            assertThat(sourceCursor.advanceBy(2 * CHUNK_SIZE + 1)).isEqualTo(2 * CHUNK_SIZE + 1);
+
+            var targetCursor = adjacencyCursor(1);
+            targetCursor = sourceCursor.shallowCopy(targetCursor);
+
+            assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 2);
+            assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 3);
+            assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 4);
+            assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 5);
+        });
+    }
+
     static Stream<Arguments> testRunnersAndDegrees() {
         return TestSupport.crossArguments(
             () -> TestMethodRunner.adjacencyCompressions().map(Arguments::of),
@@ -263,6 +348,11 @@ class TransientCsrListTest {
             assertThat(sum2.longValue())
                 .isEqualTo(LongStream.range(3, secondDegree).map(i -> i + 100_000).sum() + /* undirected from 1 */ 1);
         });
+    }
+
+    static AdjacencyCursor adjacencyCursor(int length) {
+        assert length > 0 : "length must be greater than 0";
+        return adjacencyCursorFromTargets(IntStream.range(0, length).mapToLong(i -> i).toArray());
     }
 
     static AdjacencyCursor adjacencyCursorFromTargets(long[] targets) {
