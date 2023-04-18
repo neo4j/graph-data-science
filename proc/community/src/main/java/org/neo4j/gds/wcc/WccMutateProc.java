@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -56,6 +57,10 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             pipelineSpec,
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
