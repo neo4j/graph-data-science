@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kcore;
+package org.neo4j.gds.doc.syntax;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
+import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
 
-class KCoreDecompositionAlgorithmFactoryTest {
+class KCoreDecompositionSyntaxTest extends SyntaxTestBase {
 
-    @Test
-    void memoryEstimation() {
-        var config = KCoreDecompositionStreamConfig.of(CypherMapWrapper.empty());
-        var factory = new KCoreDecompositionAlgorithmFactory<>();
-        var estimate = factory.memoryEstimation(config)
-            .estimate(GraphDimensions.of(100), config.concurrency());
-
-        var memoryUsage = estimate.memoryUsage();
-        assertThat(memoryUsage.min).isEqualTo(4624L);
-        assertThat(memoryUsage.max).isEqualTo(4624L);
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STREAM),
+            SyntaxModeMeta.of(STATS),
+            SyntaxModeMeta.of(MUTATE),
+            SyntaxModeMeta.of(WRITE)
+        );
     }
 
+    @Override
+    protected String adocFile() {
+        return "pages/algorithms/k-core.adoc";
+    }
 }

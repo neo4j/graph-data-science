@@ -26,11 +26,9 @@ import java.util.Map;
 
 public class StatsResult extends StandardStatsResult {
 
-    public final long nodePropertiesWritten;
     public final long degeneracy;
 
     public StatsResult(
-        long nodePropertiesWritten,
         long degeneracy,
         long preProcessingMillis,
         long computeMillis,
@@ -38,7 +36,6 @@ public class StatsResult extends StandardStatsResult {
         Map<String, Object> configuration
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis,  configuration);
-        this.nodePropertiesWritten = nodePropertiesWritten;
         this.degeneracy = degeneracy;
     }
 
@@ -53,7 +50,6 @@ public class StatsResult extends StandardStatsResult {
 
         public StatsResult build() {
             return new StatsResult(
-                nodePropertiesWritten,
                 degeneracy,
                 preProcessingMillis,
                 computeMillis,

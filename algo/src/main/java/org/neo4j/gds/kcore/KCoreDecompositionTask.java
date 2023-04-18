@@ -65,7 +65,7 @@ class KCoreDecompositionTask implements Runnable {
 
     static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(KCoreDecompositionTask.class)
-            .perNode("examinationStack", HugeLongArrayStack.memoryEstimation())
+            .add("examinationStack", HugeLongArrayStack.memoryEstimation())
             .build();
     }
 
