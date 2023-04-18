@@ -27,6 +27,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -41,7 +43,17 @@ public final class GraphStoreCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
+    private static final List<GraphStoreCatalogListener> listeners = new ArrayList<>();
+
     private GraphStoreCatalog() { }
+
+    public static void registerListener(GraphStoreCatalogListener listener) {
+        listeners.add(listener);
+    }
+
+    public static void unregisterListener(GraphStoreCatalogListener listener) {
+        listeners.remove(listener);
+    }
 
     public static GraphStoreWithConfig get(CatalogRequest request, String graphName) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
@@ -160,6 +172,8 @@ public final class GraphStoreCatalog {
             );
             return userCatalog;
         });
+
+        listeners.forEach(listener -> listener.onProject(config.username(), config.graphName()));
     }
 
     public static boolean exists(String username, String databaseName, String graphName) {
