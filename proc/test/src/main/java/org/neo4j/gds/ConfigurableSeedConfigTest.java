@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.MapUtil;
@@ -115,10 +116,8 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
     default void shouldFailWithInvalidSeedProperty() {
         String loadedGraphName = "loadedGraph";
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             loadedGraphName,
-            allRelationshipsProjection(),
-            nodeProperties()
+            allRelationshipsProjection()
         );
 
         applyOnProcedure((proc) -> {
@@ -134,10 +133,14 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
                 "`%s`: `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found",
                 seedPropertyKeyOverride()
             );
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
+            IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                ((Runnable) () -> proc.compute(
+                    loadedGraphName,
+                    configMap
+                ))::run
+            );
+            Assertions.assertThat(exception).hasMessageContaining(error);
         });
     }
 

@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -137,13 +138,6 @@ public class LabelPropagationMutateProcTest extends BaseProcTest implements
         return LabelPropagationMutateConfig.of(mapWrapper);
     }
 
-    @Override
-    public void assertResultEquals(LabelPropagationResult result1, LabelPropagationResult result2) {
-        assertThat(result1)
-            .usingRecursiveComparison()
-            .isEqualTo(result2);
-    }
-
     @Test
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(LabelPropagationWriteProc.class);
@@ -152,7 +146,10 @@ public class LabelPropagationMutateProcTest extends BaseProcTest implements
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName, nodeProperties()), initialGraphStore);
+        GraphStoreCatalog.set(
+            withNameAndRelationshipProjections(testGraphName, RelationshipProjections.ALL),
+            initialGraphStore
+        );
 
         var mutateQuery = GdsCypher
             .call(testGraphName)

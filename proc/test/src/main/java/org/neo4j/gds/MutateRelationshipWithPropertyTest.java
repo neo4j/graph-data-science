@@ -27,7 +27,6 @@ import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -80,8 +79,7 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     try {
                         mutateMethod.invoke(procedure, graphName, config);

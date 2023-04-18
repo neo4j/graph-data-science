@@ -27,6 +27,9 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -39,16 +42,25 @@ public class NodeLabelIndexTest extends BaseTest {
 
     @Test
     void shouldLoadWithoutNodeLabelIndex() {
-        runQueryWithResultConsumer(
-            "SHOW INDEXES WHERE entityType = 'NODE'",
+        List<String> nodeIndices = runQuery(
+            "SHOW INDEXES " +
+            " YIELD name, entityType " +
+            " WHERE entityType = 'NODE'" +
+            " RETURN name",
             result -> {
-                assertThat(result.hasNext()).isTrue();
-                runQueryWithResultConsumer(
-                    "DROP INDEX " + result.next().get("name"),
-                    innerResult -> assertThat(innerResult.resultAsString()).contains("Indexes removed: 1")
-                );
+                var indices = new ArrayList<String>();
+                while (result.hasNext()) {
+                    indices.add((String) result.next().get("name"));
+                }
+                return indices;
             }
         );
+
+        nodeIndices.forEach(index -> runQuery(
+            "DROP INDEX " + index,
+            result -> assertThat(result.resultAsString()).contains("Indexes removed: 1")
+        ));
+
 
         var log = Neo4jProxy.testLog();;
         var graph = new StoreLoaderBuilder()

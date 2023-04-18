@@ -27,6 +27,7 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -47,7 +48,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class Node2VecMutateProcTest extends BaseProcTest
@@ -111,8 +111,7 @@ class Node2VecMutateProcTest extends BaseProcTest
         String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
@@ -188,12 +187,6 @@ class Node2VecMutateProcTest extends BaseProcTest
     @Override
     public GraphDatabaseService graphDb() {
         return db;
-    }
-
-    @Override
-    public void assertResultEquals(Node2VecModel.Result result1, Node2VecModel.Result result2) {
-        // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
-        assertEquals(result1.embeddings().get(0).data().length, result2.embeddings().get(0).data().length);
     }
 
     @Test

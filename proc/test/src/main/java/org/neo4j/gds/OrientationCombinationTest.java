@@ -74,8 +74,7 @@ public interface OrientationCombinationTest<ALGORITHM extends Algorithm<RESULT>,
             .withEntry("relationshipTypes", filter));
 
         applyOnProcedure(proc -> {
-            getProcedureMethods(proc)
-                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
+            ProcedureMethodHelper.nonEstimateMethods(proc)
                 .forEach(noneEstimateMethod -> {
                     try {
                         // it should work
@@ -122,8 +121,7 @@ public interface OrientationCombinationTest<ALGORITHM extends Algorithm<RESULT>,
             .withEntry("relationshipTypes", filter));
 
         applyOnProcedure(proc -> {
-            getProcedureMethods(proc)
-                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
+            ProcedureMethodHelper.nonEstimateMethods(proc)
                 .forEach(noneEstimateMethod -> Assertions.assertThatThrownBy(() -> noneEstimateMethod.invoke(
                             proc,
                             "directedMultiRels",

@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -104,8 +103,4 @@ class K1ColoringStatsProcTest extends BaseProcTest implements
         return db;
     }
 
-    @Override
-    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
-        assertThat(result1.toArray()).containsExactly(result2.toArray());
-    }
 }

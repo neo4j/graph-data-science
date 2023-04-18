@@ -511,8 +511,10 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.ml.oneHotEncoding",
 
-        "gds.graph.exists"
+        "gds.graph.exists",
 
+        "gds.kcore.stream"
+        
     );
 
     private static final List<String> AGGREGATION_FUNCTIONS = List.of(
@@ -551,7 +553,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 396;
+        int expectedCount = 397;
         assertEquals(
             expectedCount,
             returnedRows,

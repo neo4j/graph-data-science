@@ -46,6 +46,16 @@ final class BlockDecompressor {
         this.header = new ByteArrayBuffer();
     }
 
+    void copyFrom(BlockDecompressor other) {
+        System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
+        System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
+        this.targetPtr = other.targetPtr;
+        this.headerLength = other.headerLength;
+        this.idxInBlock = other.idxInBlock;
+        this.blockId = other.blockId;
+        this.lastValue = other.lastValue;
+    }
+
     void reset(long ptr, int degree) {
         int headerSize = BitUtil.ceilDiv(degree, AdjacencyPacking.BLOCK_SIZE);
         long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);
@@ -75,6 +85,18 @@ final class BlockDecompressor {
             decompressBlock();
         }
         return block[this.idxInBlock];
+    }
+
+    long advanceBy(int steps) {
+        // Due to delta encoded target ids, we can't yet skip blocks
+        // as we need to decompress all the previous blocks to get
+        // the correct target id.
+        while (this.idxInBlock + steps >= BLOCK_SIZE) {
+            steps = this.idxInBlock + steps - BLOCK_SIZE;
+            decompressBlock();
+        }
+        this.idxInBlock += steps;
+        return block[this.idxInBlock++];
     }
 
     private void decompressBlock() {

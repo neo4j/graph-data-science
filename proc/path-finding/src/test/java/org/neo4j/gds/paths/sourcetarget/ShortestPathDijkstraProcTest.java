@@ -41,7 +41,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 
@@ -116,15 +115,15 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     }
 
     @Override
+    public void consumeResult(DijkstraResult dijkstraResult) {
+        dijkstraResult.pathSet();
+    }
+
+    @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
             .withNumber(SOURCE_NODE_KEY, idFunction.of("a"))
             .withNumber(TARGET_NODE_KEY, idFunction.of("f"));
-    }
-
-    @Override
-    public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
-        assertEquals(result1.pathSet(), result2.pathSet());
     }
 
     @Test

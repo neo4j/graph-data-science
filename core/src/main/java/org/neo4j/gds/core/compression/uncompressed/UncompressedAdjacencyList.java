@@ -322,7 +322,7 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
                 offset = limit;
                 return NOT_FOUND;
             }
-            return currentPage[offset];
+            return currentPage[offset++];
         }
 
         @Override

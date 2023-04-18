@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasEntry;
@@ -165,13 +164,6 @@ class PageRankMutateProcTest extends BaseProcTest
     @Override
     public GraphDatabaseService graphDb() {
         return db;
-    }
-
-    @Override
-    public void assertResultEquals(PageRankResult result1, PageRankResult result2) {
-        assertThat(result1)
-            .usingRecursiveComparison()
-            .isEqualTo(result2);
     }
 
 }

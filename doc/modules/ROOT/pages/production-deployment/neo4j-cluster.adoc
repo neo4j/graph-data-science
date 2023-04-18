@@ -46,7 +46,7 @@ For more information on setting up, configuring and managing a Neo4j cluster, pl
 ======
 When working with cluster configuration you should beware https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_server.config.strict_validation.enabled[strict config validation] in Neo4j.
 
-When configuring GDS for a Read Replica you will introduce GDS-specific configuration into `neo4j.conf` - and that is fine because with the GDS plugin installed, Neo4j will happily validate those configuration items.
+When configuring GDS for a Secondary instance you will introduce GDS-specific configuration into `neo4j.conf` - and that is fine because with the GDS plugin installed, Neo4j will happily validate those configuration items.
 
 However, you might not be able to reuse that same configuration file verbatim on the core cluster members, because there you will _not_ install GDS plugin, and thus Neo4j will _not_ be able to validate the GDS-specific configuration items. And validation failure would mean Neo4j would refuse to start.
 

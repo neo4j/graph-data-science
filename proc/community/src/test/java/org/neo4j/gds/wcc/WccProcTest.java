@@ -35,9 +35,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Wcc, CONFIG, DisjointSetStruct> {
 
@@ -95,12 +92,4 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Override
-    public void assertResultEquals(DisjointSetStruct result1, DisjointSetStruct result2) {
-        assertEquals(result1.size(), result2.size(), "DSS sizes are supposed to be equal.");
-        long nodeCount = result1.size();
-        for (long i = 0; i < nodeCount; i++) {
-            assertEquals(result1.setIdOf(i), result2.setIdOf(i), formatWithLocale("Node %d has different set ids", i));
-        }
-    }
 }

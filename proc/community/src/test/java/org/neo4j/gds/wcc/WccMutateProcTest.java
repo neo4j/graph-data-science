@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -97,7 +98,10 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName, nodeProperties()), initialGraphStore);
+        GraphStoreCatalog.set(
+            withNameAndRelationshipProjections(testGraphName, RelationshipProjections.ALL),
+            initialGraphStore
+        );
 
         var mutateQuery = GdsCypher
             .call(testGraphName)
@@ -133,7 +137,10 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName, nodeProperties()), initialGraphStore);
+        GraphStoreCatalog.set(
+            withNameAndRelationshipProjections(testGraphName, RelationshipProjections.ALL),
+            initialGraphStore
+        );
 
         String query = GdsCypher
             .call(testGraphName)

@@ -29,24 +29,30 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
@@ -144,6 +150,11 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     }
 
     @Override
+    public void consumeResult(DijkstraResult dijkstraResult) {
+        dijkstraResult.pathSet();
+    }
+
+    @Override
     public GraphDatabaseService graphDb() {
         return db;
     }
@@ -155,11 +166,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
             .withNumber(TARGET_NODE_KEY, idFunction.of("nX"))
             .withString(LONGITUDE_PROPERTY_KEY, LONGITUDE_PROPERTY)
             .withString(LATITUDE_PROPERTY_KEY, LATITUDE_PROPERTY);
-    }
-
-    @Override
-    public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
-        assertEquals(result1.pathSet(), result2.pathSet());
     }
 
     /**
@@ -182,13 +188,24 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
                 .nodeQuery(NODE_QUERY)
                 .build();
 
-        return graphLoader(graphDb(), configWithNodeProperty);
+        return ImmutableGraphLoader
+            .builder()
+            .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+                .transactionContext(TestSupport.fullAccessTransaction(db))
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .log(Neo4jProxy.testLog())
+                .build())
+            .username("")
+            .projectConfig(configWithNodeProperty)
+            .build();
     }
 
     @Override
     public void loadGraph(String graphName) {
-        QueryRunner.runQuery(
-            graphDb(),
+        runQuery(
             GdsCypher.call(graphName)
                 .graphProject()
                 .withAnyLabel()

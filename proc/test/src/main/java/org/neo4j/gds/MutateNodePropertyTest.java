@@ -45,15 +45,16 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
 
     ValueType mutatePropertyType();
 
+    default boolean requiresUndirected() {
+        return false;
+    }
+
     @Test
     default void testWriteBackGraphMutationOnFilteredGraph() {
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
-        nodeProperties().forEach(p -> {
-            runQuery(graphDb(), "MATCH (n) SET n." + p + "=0.0");
-        });
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
@@ -61,11 +62,11 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
             .graphName(graphName)
             .addNodeProjection(ImmutableNodeProjection.of(
                 "A",
-                PropertyMappings.fromObject(nodeProperties())
+                PropertyMappings.of()
             ))
             .addNodeProjection(ImmutableNodeProjection.of(
                 "B",
-                PropertyMappings.fromObject(nodeProperties())
+                PropertyMappings.of()
             ));
 
 
@@ -80,8 +81,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+            ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
                         "nodeLabels",

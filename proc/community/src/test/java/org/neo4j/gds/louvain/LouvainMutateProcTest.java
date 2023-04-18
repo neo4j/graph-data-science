@@ -292,10 +292,4 @@ public class LouvainMutateProcTest extends BaseProcTest implements
         return db;
     }
 
-    @Override
-    public void assertResultEquals(LouvainResult result1, LouvainResult result2) {
-        assertThat(result1)
-            .usingRecursiveComparison()
-            .isEqualTo(result2);
-    }
 }

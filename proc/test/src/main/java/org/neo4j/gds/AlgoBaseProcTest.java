@@ -37,7 +37,6 @@ import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -49,23 +48,15 @@ import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
@@ -89,30 +80,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?>> getProcedureClazz();
 
-    default AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?> proc() {
-        try {
-            return getProcedureClazz()
-                .getConstructor()
-                .newInstance();
-        } catch (Exception e) {
-            fail("unable to instantiate procedure", e);
-        }
-        return null;
-    }
-
     GraphDatabaseService graphDb();
 
-    default DatabaseId databaseId() {
-        return DatabaseId.of(graphDb());
-    }
-
     CONFIG createConfig(CypherMapWrapper mapWrapper);
-
-    void assertResultEquals(RESULT result1, RESULT result2);
-
-    default CypherMapWrapper createMinimalConfig() {
-        return createMinimalConfig(CypherMapWrapper.empty());
-    }
 
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
@@ -152,35 +122,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         );
     }
 
-    default void assertMissingProperty(String error, Runnable runnable) {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            runnable::run
-        );
-        assertThat(exception).hasMessageContaining(error);
-    }
-
-    class InvocationCountingTaskStore extends GlobalTaskStore {
-        public int registerTaskInvocations;
-        public int removeTaskInvocations;
-        Set<JobId> seenJobIds = new HashSet<>();
-
-        @Override
-        public void store(
-            String username, JobId jobId, Task task
-        ) {
-            super.store(username, jobId, task);
-            registerTaskInvocations++;
-
-            seenJobIds.add(jobId);
-        }
-
-        @Override
-        public void remove(String username, JobId jobId) {
-            super.remove(username, jobId);
-            removeTaskInvocations++;
-        }
-    }
+    default void consumeResult(RESULT result) {}
 
     @Test
     default void shouldUnregisterTaskAfterComputation() {
@@ -188,31 +130,28 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
         var loadedGraphName = "loadedGraph";
         var graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             loadedGraphName,
-            relationshipProjections(),
-            nodeProperties()
+            relationshipProjections()
         );
 
-        GraphStoreCatalog.set(
-            graphProjectConfig,
-            graphLoader(graphProjectConfig).graphStore()
-        );
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
 
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            var resultRun1 = proc.compute(
-                loadedGraphName,
-                configMap
+            consumeResult(
+                proc.compute(
+                    loadedGraphName,
+                    configMap
+                ).result().get()
             );
-            var resultRun2 = proc.compute(
-                loadedGraphName,
-                configMap
+            consumeResult(
+                proc.compute(
+                    loadedGraphName,
+                    configMap
+                ).result().get()
             );
-
-            assertResultEquals(resultRun1.result().get(), resultRun2.result().get());
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -229,28 +168,20 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
         String loadedGraphName = "loadedGraph";
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            "",
             loadedGraphName,
-            relationshipProjections(),
-            nodeProperties()
+            relationshipProjections()
         );
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(
-                graphProjectConfig,
-                graphStore
-            );
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
             var someJobId = new JobId();
             Map<String, Object> mapWithJobId = Map.of("jobId", someJobId);
 
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(mapWithJobId)).toMap();
-            proc.compute(
-                loadedGraphName,
-                configMap
-            );
+            proc.compute(loadedGraphName, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
@@ -260,51 +191,43 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return RelationshipProjections.ALL;
     }
 
-    default boolean requiresUndirected() {
-        return false;
-    }
-
-    default List<String> nodeProperties() {
-        return List.of();
-    }
-
     @Test
     default void testRunOnEmptyGraph() {
-        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-        runQuery(graphDb(), "CREATE (n: X)");
-        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
-
         applyOnProcedure((proc) -> {
-            GraphStoreCatalog.removeAllLoadedGraphs();
-            var loadedGraphName = "graph";
-            var propertyMappings = nodeProperties().stream().map(prop -> PropertyMapping.of(prop, 1.0)).collect(Collectors.toList());
-            GraphProjectConfig graphProjectConfig = withNameAndProjections(
-                "",
-                loadedGraphName,
-                ImmutableNodeProjections.of(
-                    Map.of(
-                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of(propertyMappings))
-                    )
-                ),
-                relationshipProjections()
-            );
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(graphProjectConfig, graphStore);
-            getWriteAndStreamProcedures(proc)
-                .forEach(method -> {
+            var methods = Stream.concat(
+                ProcedureMethodHelper.writeMethods(proc),
+                ProcedureMethodHelper.streamMethods(proc)
+            ).collect(Collectors.toList());
+
+            if (!methods.isEmpty()) {
+                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+                runQuery(graphDb(), "CALL db.createLabel('X')");
+                runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+                GraphStoreCatalog.removeAllLoadedGraphs();
+
+                var graphName = "graph";
+                var graphProjectConfig = withNameAndProjections(
+                    graphName,
+                    ImmutableNodeProjections.of(
+                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                    ),
+                    relationshipProjections()
+                );
+                var graphStore = graphLoader(graphProjectConfig).graphStore();
+                GraphStoreCatalog.set(graphProjectConfig, graphStore);
+                methods.forEach(method -> {
                     Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
 
                     configMap.remove(NODE_PROPERTIES_KEY);
                     configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
                     configMap.remove("relationshipWeightProperty");
 
-                    var nodeWeightProperty = configMap.get("nodeWeightProperty");
-                    if (nodeWeightProperty != null) {
-                        var nodeProperty = String.valueOf(nodeWeightProperty);
+                    if (configMap.containsKey("nodeWeightProperty")) {
+                        var nodeProperty = String.valueOf(configMap.get("nodeWeightProperty"));
                         runQuery(
                             graphDb(),
                             "CALL db.createProperty($prop)",
-                            Map.of("prop", nodeWeightProperty)
+                            Map.of("prop", nodeProperty)
                         );
                         configMap.put(NODE_PROPERTIES_KEY, Map.ofEntries(ImmutablePropertyMapping
                             .builder()
@@ -316,69 +239,33 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                     }
 
                     try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, loadedGraphName, configMap);
-
-                        if (getProcedureMethodName(method).endsWith("stream")) {
+                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, configMap);
+                        if (ProcedureMethodHelper.methodName(method).endsWith("stream")) {
                             assertEquals(0, result.count(), "Stream result should be empty.");
                         } else {
                             assertEquals(1, result.count());
                         }
-
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
                 });
+            }
         });
     }
 
     default void loadGraph(String graphName) {
-        loadGraph(graphName, Orientation.NATURAL);
-    }
-
-    default void loadGraph(String graphName, Orientation orientation) {
         runQuery(
             graphDb(),
             GdsCypher.call(graphName)
                 .graphProject()
-                .loadEverything(orientation)
-                .withNodeProperties(nodeProperties(), DefaultValue.DEFAULT)
+                .loadEverything(Orientation.NATURAL)
                 .yields()
         );
     }
 
-    default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {
-        return Arrays.stream(proc.getClass().getDeclaredMethods())
-            .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
-    }
-
-    default String getProcedureMethodName(Method method) {
-        Procedure procedureAnnotation = method.getDeclaredAnnotation(Procedure.class);
-        Objects.requireNonNull(procedureAnnotation, method + " is not annotation with " + Procedure.class);
-        String name = procedureAnnotation.name();
-        if (name.isEmpty()) {
-            name = procedureAnnotation.value();
-        }
-        return name;
-    }
-
-    default Stream<Method> getWriteAndStreamProcedures(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {
-        return getProcedureMethods(proc)
-            .filter(method -> {
-                String procedureMethodName = getProcedureMethodName(method);
-                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
-            });
-    }
-
     @NotNull
     default GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return graphLoader(graphDb(), graphProjectConfig);
-    }
-
-    @NotNull
-    default GraphLoader graphLoader(
-        GraphDatabaseService db,
-        GraphProjectConfig graphProjectConfig
-    ) {
+        GraphDatabaseService db = graphDb();
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
@@ -393,5 +280,4 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             .projectConfig(graphProjectConfig)
             .build();
     }
-
 }

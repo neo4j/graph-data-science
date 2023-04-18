@@ -104,11 +104,27 @@ public final class DecompressingCursor implements AdjacencyCursor {
 
     @Override
     public long advanceBy(int n) {
-        throw new UnsupportedOperationException("not yet implemented");
+        assert n >= 0;
+
+        if (remaining() <= n) {
+            // we need to signal that the cursor is exhausted
+            this.currentPosition = this.maxTargets;
+            return NOT_FOUND;
+        }
+
+        // we consume n targets and need to set the current position to the next target
+        this.currentPosition += n + 1;
+        return this.decompressingReader.advanceBy(n);
     }
 
     @Override
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        throw new UnsupportedOperationException("not yet implemented");
+        var dest = destination instanceof DecompressingCursor
+            ? (DecompressingCursor) destination
+            : new DecompressingCursor(this.pages);
+        dest.decompressingReader.copyFrom(this.decompressingReader);
+        dest.currentPosition = this.currentPosition;
+        dest.maxTargets = this.maxTargets;
+        return dest;
     }
 }
