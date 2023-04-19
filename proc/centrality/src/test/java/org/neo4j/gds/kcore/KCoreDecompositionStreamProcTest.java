@@ -106,8 +106,8 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
         String query="CALL gds.kcore.stream.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {})";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);
-            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(647_224L);
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(301_912L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(301_912L);
         });
 
         assertThat(rowCount)

@@ -47,6 +47,7 @@
 *** xref:algorithms/eigenvector-centrality.adoc[]
 *** xref:algorithms/betweenness-centrality.adoc[]
 *** xref:algorithms/degree-centrality.adoc[]
+*** xref:algorithms/k-core.adoc[]
 *** xref:algorithms/closeness-centrality.adoc[]
 *** xref:algorithms/harmonic-centrality.adoc[]
 *** xref:algorithms/hits.adoc[]

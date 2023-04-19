@@ -1,0 +1,411 @@
+[[algorithms-k-core]]
+= K-Core Decomposition
+:description: This section describes the K-Core Decomposition algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: core value
+:algorithm: K-Core Decomposition
+
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+[[algorithms-k-core-intro]]
+== Introduction
+
+The K-core decomposition constitutes a process of separates the nodes in a graph into groups based on the degree sequence and topology of the graph.
+
+The term `i-core` refers to a maximal subgraph of the original graph such that each node in this subgraph has degree at least `i`.
+The maximality ensures that it is not possible to find another subgraph with more nodes where this degree property holds.
+
+The nodes in the subgraph denoted by `i-core` also belong to the subgraph denoted by `j-core` for any `j<i`.
+The converse however is not true.
+Each node  _u_  is associated with a core value which denotes the largest value _i_ such that _u_ belongs to the `i-core`.
+The largest core value is called the _degeneracy_ of the graph.
+
+Standard algorithms for K-Core Decomposition  iteratively remove the node of lowest degree until the graph becomes empty.
+When a node is removed from the graph, all of its relationships are removed, and the degree of its neighbors is reduced by one.
+With this approach, the different core groups are discovered one-by-one.
+
+The Neo4j GDS Library offers a parallel implementation based on two recent approaches for the problem:
+
+https://ieeexplore.ieee.org/abstract/document/7965211/[Parallel k-core decomposition on multicore platforms]
+
+https://ieeexplore.ieee.org/abstract/document/7004366/[ParK: An efficient algorithm for k-core decomposition on multicore processors]
+
+K-core Decomposition can have applications in several fields ranging from social network analysis to bioinformatics.
+Some of the possible use-cases are presented https://doc.rero.ch/record/328037/files/zha_kct.pdf[here].
+
+[[algorithms-k-core--syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.K-Core Decomposition syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run .K-Core Decomposition in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  coreValue: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name   | Type     | Description
+| nodeId | Integer  | Node ID.
+| coreValue  | Float    | Core value.
+|===
+======
+
+
+[.include-with-stats]
+======
+.Run K-Core Decomposition in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.stats(
+  graphName: String,
+  configuration: Map
+) YIELD
+  degeneracy: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| degeneracy             | Integer   | the maximum core value in the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| configuration          | Map       | Configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run K-Core Decomposition in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  degeneracy: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| degeneracy             | Integer   | the maximum core value in the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| configuration          | Map       | Configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-write]
+======
+.Run Degree Centrality in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.write(
+  graphName: String,
+  configuration: Map
+) YIELD
+  degeneracy: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| degeneracy             | Integer   | the maximum core value in the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | Number of properties written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
+
+
+[[algorithms-k-core-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: k-core-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:User {name: 'Alice'}),
+  (bridget:User {name: 'Bridget'}),
+  (charles:User {name: 'Charles'}),
+  (doug:User {name: 'Doug'}),
+  (eli:User {name: 'Eli'}),
+  (filip:User {name: 'Filip'}),
+  (greg:User {name: 'Greg'}),
+  (harry:User {name: 'Harry'}),
+  (ian:User {name: 'Ian'}),
+  (james:User {name: 'James'}),
+
+  (alice)-[:FRIEND]->(bridget),
+  (bridget)-[:FRIEND]->(charles),
+  (charles)-[:FRIEND]->(doug),
+  (charles)-[:FRIEND]->(harry),
+  (doug)-[:FRIEND]->(eli),
+  (doug)-[:FRIEND]->(filip),
+  (doug)-[:FRIEND]->(greg),
+  (eli)-[:FRIEND]->(filip),
+  (eli)-[:FRIEND]->(greg),
+  (filip)-[:FRIEND]->(greg),
+  (greg)-[:FRIEND]->(harry),
+  (ian)-[:FRIEND]->(james)
+
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `User` nodes and the `FRIEND` relationships.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using athe undirected projection and store it in the graph catalog under the name 'graph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'graph',
+  'User',
+  {
+    FRIEND: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
+The graph is projected in the  `UNDIRECTED` orientation  as the friendship relationship is associative.
+
+[[algorithms-degree-centrality-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.write.estimate('graph', { writeProperty: 'coreValue' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 10        | 24                | 1024       | 1024       | "1024 Bytes"
+|===
+--
+
+
+[[algorithms-k-core-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest core values.
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.stream('graph')
+YIELD nodeId, coreValue
+RETURN gds.util.asNode(nodeId).name AS name, coreValue
+ORDER BY coreValue ASC, name DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name       | coreValue
+| "James"    | 1
+| "Ian"      | 1
+| "Bridget"  | 1
+| "Alice"    | 1
+| "Harry"    | 2
+| "Charles"  | 2
+| "Greg"     | 3
+| "Filip"    | 3
+| "Eli"      | 3
+| "Doug"     | 3
+
+
+|===
+--
+
+The algorithm has separated the nodes in the graph in three distinct groups.
+The first group  where all nodes have core value qual to 1 includes James, Ian, Bridget, and Alice.
+The second group includes Harry and Charles.
+Here, all the nodes have core value equal to 2.
+The third group includes Greg, Filip, Eli, and Doug, and all the nodes have core value equal to 3.
+
+As it was explained in xref:algorithms-k-core-intro[introduction], nodes with core value _i_ have degree at least _i_ in the subgraph containing only nodes with core value at least _i_.
+For example, although Charles has degree 3, he cannot be part of the 3-core  subgraph since one of its neighbors is Bridget from the first group of core value 1.
+Once Bridget is excluded, Charles is left with a degree of 2, which acts as an upper bound on its core value.
+One of its two remaining neighbors is Doug who belongs to the 3-core.
+
+Note that as the results show, the nodes in different connected components might be part of the same core group (for example Ian and Alice).
+
+[[algorithms-k-core-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-k-core-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stats` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.stats('graph')
+YIELD degeneracy
+RETURN degeneracy
+----
+
+.Results
+[opts="header"]
+|===
+| degeneracy
+|3
+|===
+--
+
+As the results from xref:algorithms/k-core.adoc#algorithms-k-core-examples-stream[stream example] also confirm, the degeneracy, i.e., the largest core value, is equal to three.
+
+
+[[algorithms-k-core-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.mutate('graph', { mutateProperty: 'coreValue' })
+YIELD degeneracy, nodePropertiesWritten
+RETURN degeneracy , nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| degeneracy | nodePropertiesWritten
+| 3         | 10
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, the in-memory graph now has a node property `coreValue` which stores the core value of each node.
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs in the catalog].
+
+
+[[algorithms-degree-centrality-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.kcore.write('graph', { writeProperty: 'coreValue' })
+YIELD degeneracy, nodePropertiesWritten
+RETURN degeneracy , nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| degeneracy | nodePropertiesWritten
+| 3         | 10
+|===
+--
+The returned result is the same as in the `stats` example.
+Additionally, each of the seven nodes now has a new property `coreValue` in the Neo4j database, containing the core value for that node.
