@@ -84,7 +84,7 @@ class GraphSampleProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldSample() {
+    void shouldSampleRWR() {
         runQuery("CALL gds.graph.project('g', '*', '*')");
 
         var query =
@@ -97,7 +97,7 @@ class GraphSampleProcTest extends BaseProcTest {
 
     @ParameterizedTest
     @CsvSource(value = {"0.28,1", "0.35,2"})
-    void shouldUseSingleStartNode(double samplingRatio, long expectedStartNodeCount) {
+    void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
         runQuery("CALL gds.graph.project('g', '*', '*')");
 
         var query =
@@ -111,7 +111,7 @@ class GraphSampleProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldSampleHalf() {
+    void shouldSampleHalfRWR() {
         runQuery("CALL gds.graph.project('g', '*', '*')");
 
         var query =
@@ -123,7 +123,7 @@ class GraphSampleProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldListCorrectGraphProjectionConfig() {
+    void shouldListCorrectGraphProjectionConfigRWR() {
         runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
 
         runQuery("CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5})");
@@ -137,13 +137,95 @@ class GraphSampleProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldMutateCorrectGraph() {
+    void shouldMutateCorrectGraphRWR() {
         long expectedNodeCount = 7L;
 
         runQuery("CALL gds.graph.project('g', '*', '*')");
 
         var query =
             "CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
+        assertCypherResult(query, List.of(
+            Map.of("nodeCount", expectedNodeCount)
+        ));
+        assertGraphExists("sample");
+
+        assertCypherResult(
+            "CALL gds.pageRank.mutate('sample', {mutateProperty: 'rank'}) YIELD nodePropertiesWritten",
+            List.of(
+                Map.of("nodePropertiesWritten", expectedNodeCount)
+            )
+        );
+
+        var numberOfStreamedProperties = runQueryWithRowConsumer(
+            "CALL gds.graph.nodeProperty.stream('sample', 'rank')",
+            unused -> {}
+        );
+        assertThat(numberOfStreamedProperties).isEqualTo(expectedNodeCount);
+
+        assertThatThrownBy(() -> runQuery("CALL gds.graph.nodeProperty.stream('g', 'rank')"))
+            .hasRootCauseInstanceOf(IllegalArgumentException.class);
+    }
+    @Test
+    void shouldSampleCNARW() {
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        var query =
+            "CALL gds.alpha.graph.sample.cnarw('sample', 'g', {samplingRatio: 1.0}) YIELD nodeCount";
+        assertCypherResult(query, List.of(
+            Map.of("nodeCount", 14L)
+        ));
+        assertGraphExists("sample");
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"0.28,1", "0.35,2"})
+    void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        var query =
+            "MATCH (z:Z {prop: 42})" +
+            " CALL gds.alpha.graph.sample.cnarw('sample', 'g', {samplingRatio: $samplingRatio, startNodes: [id(z)], concurrency: 1, randomSeed: 42} )" +
+            " YIELD startNodeCount RETURN startNodeCount";
+        assertCypherResult(query, Map.of("samplingRatio", samplingRatio), List.of(
+            Map.of("startNodeCount", expectedStartNodeCount)
+        ));
+        assertGraphExists("sample");
+    }
+
+    @Test
+    void shouldSampleHalfCNARW() {
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        var query =
+            "CALL gds.alpha.graph.sample.cnarw('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
+        assertCypherResult(query, List.of(
+            Map.of("nodeCount", 7L)
+        ));
+        assertGraphExists("sample");
+    }
+
+    @Test
+    void shouldListCorrectGraphProjectionConfigCNARW() {
+        runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
+
+        runQuery("CALL gds.alpha.graph.sample.cnarw('sample', 'g', {samplingRatio: 0.5})");
+        assertGraphExists("sample");
+        runQueryWithRowConsumer("CALL gds.graph.list('sample') YIELD configuration", resultRow -> {
+            assertThat(resultRow.get("configuration"))
+                .isInstanceOf(Map.class)
+                .asInstanceOf(MAP)
+                .containsEntry("samplingRatio", 0.5);
+        });
+    }
+
+    @Test
+    void shouldMutateCorrectGraphCNARW() {
+        long expectedNodeCount = 7L;
+
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        var query =
+            "CALL gds.alpha.graph.sample.cnarw('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
         assertCypherResult(query, List.of(
             Map.of("nodeCount", expectedNodeCount)
         ));
