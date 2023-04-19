@@ -1,6 +1,6 @@
 [[algorithms-k-core]]
 = K-Core Decomposition
-:description: This section describes the Degree Centrality algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the K-Core Decomposition algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: core value
 :algorithm: K-Core Decomposition
