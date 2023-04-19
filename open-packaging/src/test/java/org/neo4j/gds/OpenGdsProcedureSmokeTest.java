@@ -560,7 +560,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 404;
+        int expectedCount = 405;
         assertEquals(
             expectedCount,
             returnedRows,
