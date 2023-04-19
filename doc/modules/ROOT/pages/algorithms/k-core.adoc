@@ -203,7 +203,7 @@ include::partial$/algorithms/common-configuration/common-write-configuration-ent
 
 :algorithm-name: {algorithm}
 :graph-description: social network
-:image-file: degree-centrality-graph.svg
+:image-file: k-core-graph.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
