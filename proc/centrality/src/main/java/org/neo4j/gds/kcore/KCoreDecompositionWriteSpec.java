@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -32,43 +32,43 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.kcore.KCoreCompanion.nodePropertyValues;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
-@GdsCallable(name = "gds.kcore.mutate", description = KCORE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<MutateResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionMutateConfig>> {
+@GdsCallable(name = "gds.kcore.write", description = KCORE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class KCoreDecompositionWriteSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<WriteResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionWriteConfig>> {
     @Override
     public String name() {
-        return "KCoreMutate";
+        return "KCoreWrite";
     }
 
     @Override
-    public KCoreDecompositionAlgorithmFactory<KCoreDecompositionMutateConfig> algorithmFactory() {
+    public KCoreDecompositionAlgorithmFactory<KCoreDecompositionWriteConfig> algorithmFactory() {
         return new KCoreDecompositionAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<KCoreDecompositionMutateConfig> newConfigFunction() {
-        return (__, userInput) -> KCoreDecompositionMutateConfig.of(userInput);
+    public NewConfigFunction<KCoreDecompositionWriteConfig> newConfigFunction() {
+        return (__, userInput) -> KCoreDecompositionWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
+    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+        return new WriteNodePropertiesComputationResultConsumer<>(
+            this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
+                computationResult.config().writeProperty(),
                 nodePropertyValues(computationResult.result()))),
-            this::resultBuilder
+            name()
         );
-
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig> computationResult,
+    private AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder();
+        var builder = new WriteResult.Builder();
         computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
 
         return builder;
