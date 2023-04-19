@@ -33,28 +33,28 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KCoreDecompositionStreamProc extends BaseProc {
+public class KCoreDecompositionMutateProc extends BaseProc {
 
-    @Procedure(value = "gds.kcore.stream", mode = READ)
+    @Procedure(value = "gds.kcore.mutate", mode = READ)
     @Description(KCORE_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new KCoreDecompositionStreamSpec(),
+            new KCoreDecompositionMutateSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.kcore.stream.estimate", mode = READ)
+    @Procedure(value = "gds.kcore.mutate.estimate", mode = READ)
     @Description(KCORE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            new KCoreDecompositionStreamSpec(),
+            new KCoreDecompositionMutateSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);

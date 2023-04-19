@@ -21,6 +21,8 @@ package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -59,6 +61,12 @@ class KCoreDecompositionTask implements Runnable {
         this.remainingNodes = remainingNodes;
         this.phase = KCoreDecompositionPhase.SCAN;
         this.chunkSize = chunkSize;
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(KCoreDecompositionTask.class)
+            .perNode("examinationStack", HugeLongArrayStack.memoryEstimation())
+            .build();
     }
 
     @Override

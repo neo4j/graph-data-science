@@ -21,6 +21,10 @@ package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositionBaseConfig> extends GraphAlgorithmFactory<KCoreDecomposition, CONFIG> {
@@ -35,4 +39,13 @@ public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositio
         return "KCoreDecomposition";
     }
 
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        var builder = MemoryEstimations.builder(KCoreDecomposition.class);
+        builder
+            .perNode("currentDegrees", HugeAtomicIntArray::memoryEstimation)
+            .perNode("cores", HugeIntArray::memoryEstimation)
+            .perThread("KCoreDecompositionTask", KCoreDecompositionTask.memoryEstimation());
+        return builder.build();
+    }
 }

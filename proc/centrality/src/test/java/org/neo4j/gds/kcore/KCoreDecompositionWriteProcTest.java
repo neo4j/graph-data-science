@@ -27,13 +27,15 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 
-class KCoreDecompositionStreamProcTest extends BaseProcTest {
+class KCoreDecompositionWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -60,7 +62,7 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            KCoreDecompositionStreamProc.class,
+            KCoreDecompositionWriteProc.class,
             GraphProjectProc.class
         );
 
@@ -74,36 +76,71 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldStream(){
+    void shouldWrite(){
 
-        String query="CALL gds.kcore.stream('graph')";
-
-        var expectedOutput= Map.of(
-            idFunction.of("z"), 0,
-            idFunction.of("a"), 1,
-            idFunction.of("b"), 1,
-            idFunction.of("c"), 2,
-            idFunction.of("d"), 2,
-            idFunction.of("e"), 2,
-            idFunction.of("f"), 2,
-            idFunction.of("g"), 2,
-            idFunction.of("h"), 2
-        );
+        String query="CALL gds.kcore.write('graph', { writeProperty: 'coreValue'})";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
-            int coreValue = row.getNumber("coreValue").intValue();
-            assertThat(expectedOutput).containsEntry(nodeId, coreValue);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .as("preProcessingMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .as("computeMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .as("postProcessingMillis")
+                .asInstanceOf(LONG)
+                .isEqualTo(-1L);
+
+            assertThat(row.getNumber("writeMillis"))
+                .as("writeMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .as("nodePropertiesWritten")
+                .asInstanceOf(LONG)
+                .isEqualTo(9L);
+
+            assertThat(row.getNumber("degeneracy"))
+                .as("degeneracy")
+                .asInstanceOf(LONG)
+                .isEqualTo(2L);
+
+            assertThat(row.get("configuration"))
+                .as("configuration")
+                .asInstanceOf(MAP)
+                .isNotEmpty();
         });
 
         assertThat(rowCount)
-            .as("Streamed rows should match the expected")
-            .isEqualTo(expectedOutput.size());
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
+
+        assertCypherResult(
+            "MATCH (n:node) RETURN id(n) AS nodeId, n.coreValue AS coreValue",
+            List.of(
+                Map.of("nodeId", idFunction.of("z"), "coreValue", 0L),
+                Map.of("nodeId", idFunction.of("a"), "coreValue", 1L),
+                Map.of("nodeId", idFunction.of("b"), "coreValue", 1L),
+                Map.of("nodeId", idFunction.of("c"), "coreValue", 2L),
+                Map.of("nodeId", idFunction.of("d"), "coreValue", 2L),
+                Map.of("nodeId", idFunction.of("e"), "coreValue", 2L),
+                Map.of("nodeId", idFunction.of("f"), "coreValue", 2L),
+                Map.of("nodeId", idFunction.of("g"), "coreValue", 2L),
+                Map.of("nodeId", idFunction.of("h"), "coreValue", 2L)
+            )
+        );
     }
 
     @Test
     void memoryEstimation() {
-        String query="CALL gds.kcore.stream.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {})";
+        String query="CALL gds.kcore.write.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {writeProperty: 'kcore'})";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);

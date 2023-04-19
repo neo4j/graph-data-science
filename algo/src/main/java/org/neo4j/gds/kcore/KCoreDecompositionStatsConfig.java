@@ -17,22 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.write;
+package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
+@Configuration
+public interface KCoreDecompositionStatsConfig extends KCoreDecompositionBaseConfig {
 
-public interface RelationshipStreamExporter {
-    /**
-     * @param propertyKeys - keys of the properties to write
-     * @param propertyTypes - types of the properties, corresponding to the keys
-     */
-    long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes);
-
-    static Task baseTask(String operationName) {
-        return Tasks.leaf(operationName + " :: WriteRelationshipStream");
+    static KCoreDecompositionStatsConfig of(CypherMapWrapper userInput) {
+        return new KCoreDecompositionStatsConfigImpl(userInput);
     }
 }

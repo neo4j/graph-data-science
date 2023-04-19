@@ -26,6 +26,7 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
@@ -79,7 +80,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .build();
 
         assertThatExceptionOfType(AuthorizationViolationException.class)
-            .isThrownBy(() -> exporter.write("OUT_TYPE"));
+            .isThrownBy(() -> exporter.write("OUT_TYPE", List.of(), List.of()));
     }
 
     @Test
@@ -105,7 +106,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var relationshipType = "FOOBAR";
         var longKey = "x";
         var doubleKey = "y";
-        var relationshipsWritten = exporter.write(relationshipType, longKey, doubleKey);
+        var relationshipsWritten = exporter.write(relationshipType, List.of(longKey, doubleKey), List.of(ValueType.LONG, ValueType.DOUBLE));
 
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
@@ -159,7 +160,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var relationshipType = "FOOBAR";
         var longArrayKey = "x";
         var doubleArrayKey = "y";
-        var relationshipsWritten = exporter.write(relationshipType, longArrayKey, doubleArrayKey);
+        var relationshipsWritten = exporter.write(relationshipType, List.of(longArrayKey, doubleArrayKey), List.of(ValueType.LONG_ARRAY, ValueType.DOUBLE_ARRAY));
 
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
@@ -201,7 +202,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .withBatchSize(batchSize)
             .build();
 
-        var relationshipsWritten = exporter.write("FOOBAR");
+        var relationshipsWritten = exporter.write("FOOBAR", List.of(), List.of());
 
         assertEquals(relationshipCount, relationshipsWritten);
         assertCypherResult(
@@ -216,7 +217,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .builder(TestSupport.fullAccessTransaction(db), graph, Stream.empty(), TerminationFlag.RUNNING_TRUE)
             .build();
 
-        var relationshipsWritten = exporter.write("FOOBAR");
+        var relationshipsWritten = exporter.write("FOOBAR", List.of(), List.of());
 
         assertEquals(0, relationshipsWritten);
     }
@@ -248,7 +249,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .withProgressTracker(progressTracker)
             .build();
 
-        var relationshipsWritten = exporter.write("FOOBAR");
+        var relationshipsWritten = exporter.write("FOOBAR", List.of(), List.of());
 
         assertEquals(relationshipCount, relationshipsWritten);
 
@@ -266,8 +267,8 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             );
     }
 
-    Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
-        return ImmutableRelationship.of(
+    ExportedRelationship relationship(String sourceVariable, String targetVariable, Value... values) {
+        return ImmutableExportedRelationship.of(
             graph.toMappedNodeId(idFunction.of(sourceVariable)),
             graph.toMappedNodeId(idFunction.of(targetVariable)),
             values

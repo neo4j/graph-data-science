@@ -19,20 +19,14 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.values.storable.Value;
 
-import java.util.List;
+@ValueClass
+public interface ExportedRelationship {
+    long sourceNode();
 
-public interface RelationshipStreamExporter {
-    /**
-     * @param propertyKeys - keys of the properties to write
-     * @param propertyTypes - types of the properties, corresponding to the keys
-     */
-    long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes);
+    long targetNode();
 
-    static Task baseTask(String operationName) {
-        return Tasks.leaf(operationName + " :: WriteRelationshipStream");
-    }
+    Value[] values();
 }

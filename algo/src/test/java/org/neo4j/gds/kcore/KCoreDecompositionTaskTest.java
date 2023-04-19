@@ -17,16 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.write;
+package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.values.storable.Value;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.GraphDimensions;
 
-@ValueClass
-public interface Relationship {
-    long sourceNode();
+import static org.assertj.core.api.Assertions.assertThat;
 
-    long targetNode();
+class KCoreDecompositionTaskTest {
 
-    Value[] values();
+    @Test
+    void memoryEstimation() {
+        var memoryUsage = KCoreDecompositionTask.memoryEstimation()
+            .estimate(GraphDimensions.of(100), 4)
+            .memoryUsage();
+
+        assertThat(memoryUsage.min).isEqualTo(87_256L);
+        assertThat(memoryUsage.max).isEqualTo(87_256L);
+    }
+
 }

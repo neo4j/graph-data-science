@@ -21,11 +21,12 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.ImmutableRelationship;
+import org.neo4j.gds.core.write.ImmutableExportedRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -35,6 +36,7 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -78,7 +80,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
             var graph = computationResult.graph();
 
             var relationshipStream = result
-                .mapPaths(pathResult -> ImmutableRelationship.of(
+                .mapPaths(pathResult -> ImmutableExportedRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
                     createValues(graph, pathResult, writeNodeIds, writeCosts)
@@ -104,7 +106,8 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                     resultBuilder.withRelationshipsWritten(exporter.write(
                         writeRelationshipType,
-                        createKeys(writeNodeIds, writeCosts)
+                        createKeys(writeNodeIds, writeCosts),
+                        createTypes(writeNodeIds, writeCosts)
                     ));
                 }
             });
@@ -113,17 +116,50 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
         });
     }
 
-    private String[] createKeys(boolean writeNodeIds, boolean writeCosts) {
+    private List<String> createKeys(boolean writeNodeIds, boolean writeCosts) {
         if (writeNodeIds && writeCosts) {
-            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY, COSTS_KEY};
+            return List.of(
+                TOTAL_COST_KEY,
+                NODE_IDS_KEY,
+                COSTS_KEY
+            );
         }
         if (writeNodeIds) {
-            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY};
+            return List.of(
+                TOTAL_COST_KEY,
+                NODE_IDS_KEY
+            );
         }
         if (writeCosts) {
-            return new String[]{TOTAL_COST_KEY, COSTS_KEY};
+            return List.of(
+                TOTAL_COST_KEY,
+                COSTS_KEY
+            );
         }
-        return new String[]{TOTAL_COST_KEY};
+        return List.of(TOTAL_COST_KEY);
+    }
+
+    private List<ValueType> createTypes(boolean writeNodeIds, boolean writeCosts) {
+        if (writeNodeIds && writeCosts) {
+            return List.of(
+                ValueType.DOUBLE,
+                ValueType.LONG_ARRAY,
+                ValueType.DOUBLE_ARRAY
+            );
+        }
+        if (writeNodeIds) {
+            return List.of(
+                ValueType.DOUBLE,
+                ValueType.LONG_ARRAY
+            );
+        }
+        if (writeCosts) {
+            return List.of(
+                ValueType.DOUBLE,
+                ValueType.DOUBLE_ARRAY
+            );
+        }
+        return List.of(ValueType.DOUBLE);
     }
 
     private Value[] createValues(IdMap idMap, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {

@@ -20,9 +20,12 @@
 package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,32 +35,40 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-public class KCoreDecompositionStreamProc extends BaseProc {
+public class KCoreDecompositionWriteProc extends BaseProc {
 
-    @Procedure(value = "gds.kcore.stream", mode = READ)
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+
+    @Procedure(value = "gds.kcore.write", mode = WRITE)
     @Description(KCORE_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<WriteResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new KCoreDecompositionStreamSpec(),
+            new KCoreDecompositionWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.kcore.stream.estimate", mode = READ)
+    @Procedure(value = "gds.kcore.write.estimate", mode = READ)
     @Description(KCORE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            new KCoreDecompositionStreamSpec(),
+            new KCoreDecompositionWriteSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
+    }
 }

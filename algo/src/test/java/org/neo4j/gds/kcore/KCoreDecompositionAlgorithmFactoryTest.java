@@ -17,22 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.write;
+package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
 
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public interface RelationshipStreamExporter {
-    /**
-     * @param propertyKeys - keys of the properties to write
-     * @param propertyTypes - types of the properties, corresponding to the keys
-     */
-    long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes);
+class KCoreDecompositionAlgorithmFactoryTest {
 
-    static Task baseTask(String operationName) {
-        return Tasks.leaf(operationName + " :: WriteRelationshipStream");
+    @Test
+    void memoryEstimation() {
+        var config = KCoreDecompositionStreamConfig.of(CypherMapWrapper.empty());
+        var factory = new KCoreDecompositionAlgorithmFactory<>();
+        var estimate = factory.memoryEstimation(config)
+            .estimate(GraphDimensions.of(100), config.concurrency());
+
+        var memoryUsage = estimate.memoryUsage();
+        assertThat(memoryUsage.min).isEqualTo(349_936L);
+        assertThat(memoryUsage.max).isEqualTo(349_936L);
     }
+
 }

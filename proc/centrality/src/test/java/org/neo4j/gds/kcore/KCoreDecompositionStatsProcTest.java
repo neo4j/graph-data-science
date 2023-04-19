@@ -27,13 +27,12 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 
-class KCoreDecompositionStreamProcTest extends BaseProcTest {
+class KCoreDecompositionStatsProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -60,7 +59,7 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            KCoreDecompositionStreamProc.class,
+            KCoreDecompositionStatsProc.class,
             GraphProjectProc.class
         );
 
@@ -74,36 +73,46 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldStream(){
+    void shouldComputeStats(){
 
-        String query="CALL gds.kcore.stream('graph')";
-
-        var expectedOutput= Map.of(
-            idFunction.of("z"), 0,
-            idFunction.of("a"), 1,
-            idFunction.of("b"), 1,
-            idFunction.of("c"), 2,
-            idFunction.of("d"), 2,
-            idFunction.of("e"), 2,
-            idFunction.of("f"), 2,
-            idFunction.of("g"), 2,
-            idFunction.of("h"), 2
-        );
+        String query = "CALL gds.kcore.stats('graph')";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
-            int coreValue = row.getNumber("coreValue").intValue();
-            assertThat(expectedOutput).containsEntry(nodeId, coreValue);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .as("preProcessingMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .as("computeMillis")
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .as("postProcessingMillis")
+                .asInstanceOf(LONG)
+                .isEqualTo(-1L);
+
+            assertThat(row.getNumber("degeneracy"))
+                .as("degeneracy")
+                .asInstanceOf(LONG)
+                .isEqualTo(2L);
+
+            assertThat(row.get("configuration"))
+                .as("configuration")
+                .asInstanceOf(MAP)
+                .isNotEmpty();
         });
 
         assertThat(rowCount)
-            .as("Streamed rows should match the expected")
-            .isEqualTo(expectedOutput.size());
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @Test
     void memoryEstimation() {
-        String query="CALL gds.kcore.stream.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {})";
+        String query="CALL gds.kcore.stats.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {})";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);
@@ -113,7 +122,6 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
         assertThat(rowCount)
             .as("`estimate` mode should always return one row")
             .isEqualTo(1);
-
     }
 
 }
