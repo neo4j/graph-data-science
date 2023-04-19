@@ -14,6 +14,8 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 == Introduction
 
+Graph sampling algorithms are used to reduce the complexity of large and complex graphs while preserving their essential properties. They can help to speed up computation, reduce bias, and ensure privacy, making graph analysis more manageable and accurate. They are widely used in network analysis, machine learning, and social network analysis, among other applications.
+
 The Common Neighbour Aware Random Walk (CNARW) is a graph sampling technique that involves optimizing the selection of the next-hop node.
 It takes into account the number of common neighbours between the current node and the next-hop candidates.
 
@@ -25,7 +27,7 @@ Nodes with higher degrees may provide this opportunity, but they may also have m
 
 Therefore, choosing a node with a higher degree and fewer common neighbours with previously visited nodes (or the current node) not only increases the chances of discovering unvisited nodes but also reduces the probability of revisiting previously visited nodes in future steps.
 
-The implementation of the algorithm is based on the following papers:
+The implementation of the algorithm is based on the following paper:
 
 * https://ieeexplore.ieee.org/abstract/document/9712235[Common Neighbors Matter: Fast Random Walk Sampling with Common Neighbor Awareness^]
 
@@ -191,4 +193,4 @@ RETURN nodeCount;
 |===
 --
 
-Five nodes were visited. The main difference of the Common Neighbour Aware Random Walk and Random Walks with Restarts graphs sampling algorithms is that there is more chances to go into another cluster for the first one, which is colored in blue in the example above. The relationships sampled are those connecting these nodes.
+Five nodes were visited. The main difference between the Common Neighbour Aware Random Walk and Random Walks with Restarts graphs sampling algorithms is that there are more chances to go into another cluster for the first one, which is colored in blue in the example above. The relationships sampled are those connecting these nodes.
