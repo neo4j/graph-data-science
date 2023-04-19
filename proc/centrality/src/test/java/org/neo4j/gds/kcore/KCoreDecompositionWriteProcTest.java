@@ -136,9 +136,21 @@ class KCoreDecompositionWriteProcTest extends BaseProcTest {
                 Map.of("nodeId", idFunction.of("h"), "coreValue", 2L)
             )
         );
-
-
     }
 
+    @Test
+    void memoryEstimation() {
+        String query="CALL gds.kcore.write.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {writeProperty: 'kcore'})";
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(647_224L);
+        });
+
+        assertThat(rowCount)
+            .as("`estimate` mode should always return one row")
+            .isEqualTo(1);
+
+    }
 
 }

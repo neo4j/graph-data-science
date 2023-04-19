@@ -130,7 +130,6 @@ class KCoreDecompositionMutateProcTest extends BaseProcTest {
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph(), Orientation.UNDIRECTED), actualGraph);
     }
 
-
     private String expectedMutatedGraph() {
         return "CREATE " +
                "  (z {coreValue: 0})," +
@@ -153,4 +152,18 @@ class KCoreDecompositionMutateProcTest extends BaseProcTest {
                "(h)-[:R]->(c)";
     }
 
+    @Test
+    void memoryEstimation() {
+        String query="CALL gds.kcore.mutate.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {mutateProperty: 'kcore'})";
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(647_224L);
+        });
+
+        assertThat(rowCount)
+            .as("`estimate` mode should always return one row")
+            .isEqualTo(1);
+
+    }
 }

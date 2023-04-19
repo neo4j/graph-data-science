@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 
 class KCoreDecompositionStreamProcTest extends BaseProcTest {
@@ -98,6 +99,21 @@ class KCoreDecompositionStreamProcTest extends BaseProcTest {
         assertThat(rowCount)
             .as("Streamed rows should match the expected")
             .isEqualTo(expectedOutput.size());
+    }
+
+    @Test
+    void memoryEstimation() {
+        String query="CALL gds.kcore.stream.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {})";
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(647_224L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(647_224L);
+        });
+
+        assertThat(rowCount)
+            .as("`estimate` mode should always return one row")
+            .isEqualTo(1);
+
     }
 
 }
