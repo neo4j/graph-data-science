@@ -302,8 +302,8 @@ ORDER BY coreValue ASC, name DESC
 [opts="header",cols="1,1"]
 |===
 | name       | coreValue
-| "Ian"      | 1
 | "James"    | 1
+| "Ian"      | 1
 | "Bridget"  | 1
 | "Alice"    | 1
 | "Harry"    | 2
