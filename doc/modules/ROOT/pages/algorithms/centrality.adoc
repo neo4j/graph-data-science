@@ -17,4 +17,4 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 * Alpha
 ** xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 ** xref:algorithms/hits.adoc[HITS]
-** xref:algorithms/influence-maximization.adoc[Influence Maximization]
+** xref:algorithms/celf.adoc[CELF]
