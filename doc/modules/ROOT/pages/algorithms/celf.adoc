@@ -1,3 +1,6 @@
+:page-aliases: algorithms/influence-maximization/celf.adoc
+:page-aliases: algorithms/influence-maximization/
+
 [[algorithms-celf]]
 [.beta]
 = CELF
