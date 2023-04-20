@@ -23,10 +23,13 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.ref.Cleaner;
+import java.util.Optional;
 
 public class PackedAdjacencyList implements AdjacencyList {
 
@@ -36,12 +39,23 @@ public class PackedAdjacencyList implements AdjacencyList {
     private final HugeIntArray degrees;
     private final HugeLongArray offsets;
 
+    private final long bytesOffHeap;
+    private Optional<MemoryInfo> memoryInfo;
+
     private final Cleaner.Cleanable cleanable;
 
-    PackedAdjacencyList(long[] pages, int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
+    PackedAdjacencyList(
+        long[] pages,
+        int[] allocationSizes,
+        long bytesOffHeap,
+        HugeIntArray degrees,
+        HugeLongArray offsets
+    ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.bytesOffHeap = bytesOffHeap;
+        this.memoryInfo = Optional.empty();
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
     }
 
@@ -81,6 +95,26 @@ public class PackedAdjacencyList implements AdjacencyList {
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
         return new DecompressingCursor(this.pages);
+    }
+
+    @Override
+    public MemoryInfo memoryInfo() {
+        if (memoryInfo.isPresent()) {
+             return memoryInfo.get();
+        }
+
+        var memoryInfoBuilder = ImmutableMemoryInfo
+            .builder()
+            .bytesOffHeap(this.bytesOffHeap);
+
+        var bytesOnHeap = MemoryUsage.sizeOf(this);
+        if (bytesOnHeap >= 0){
+            memoryInfoBuilder.bytesOnHeap(bytesOnHeap);
+        }
+        var memoryInfo = memoryInfoBuilder.build();
+        this.memoryInfo = Optional.of(memoryInfo);
+
+        return memoryInfo;
     }
 
     /**

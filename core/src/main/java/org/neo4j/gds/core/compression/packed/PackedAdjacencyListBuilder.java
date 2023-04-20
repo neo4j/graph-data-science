@@ -51,12 +51,15 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         reorder(intoPages, offsets, degrees);
         long[] pages = new long[intoPages.length];
         int[] allocationSizes = new int[intoPages.length];
+        long offHeapAllocation = 0L;
         for (int i = 0; i < intoPages.length; i++) {
             Address address = intoPages[i];
             pages[i] = address.address();
-            allocationSizes[i] = Math.toIntExact(address.bytes());
+            int allocationSize = Math.toIntExact(address.bytes());
+            allocationSizes[i] = allocationSize;
+            offHeapAllocation += allocationSize;
         }
-        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
+        return new PackedAdjacencyList(pages, allocationSizes, offHeapAllocation, degrees, offsets);
     }
 
     private enum Factory implements BumpAllocator.Factory<Address> {

@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
@@ -39,6 +40,8 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
+
+import java.util.Optional;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
@@ -112,11 +115,13 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     private long[][] pages;
     private HugeIntArray degrees;
     private HugeLongArray offsets;
+    private Optional<MemoryInfo> memoryInfo;
 
     public UncompressedAdjacencyList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.memoryInfo = Optional.empty();
     }
 
     @Override
@@ -182,6 +187,21 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     @Override
     public PropertyCursor rawPropertyCursor() {
         return new Cursor(pages);
+    }
+
+    @Override
+    public MemoryInfo memoryInfo() {
+        if (memoryInfo.isPresent()){
+            return memoryInfo.get();
+        }
+        var memoryInfoBuilder = ImmutableMemoryInfo.builder();
+        var onHeapBytes = MemoryUsage.sizeOf(this);
+        if (onHeapBytes >= 0) {
+            memoryInfoBuilder.bytesOnHeap(onHeapBytes);
+        }
+        var memoryInfo = memoryInfoBuilder.build();
+        this.memoryInfo = Optional.of(memoryInfo);
+        return memoryInfo;
     }
 
     public static final class Cursor extends MutableIntValue implements AdjacencyCursor, PropertyCursor {

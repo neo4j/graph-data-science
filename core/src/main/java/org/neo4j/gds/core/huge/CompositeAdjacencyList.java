@@ -23,9 +23,11 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableMemoryInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 public final class CompositeAdjacencyList implements AdjacencyList {
@@ -52,7 +54,11 @@ public final class CompositeAdjacencyList implements AdjacencyList {
     }
 
     static CompositeAdjacencyList of(List<AdjacencyList> adjacencyLists) {
-        return new CompositeAdjacencyList(adjacencyLists, CompositeAdjacencyCursor::new, new AdjacencyCursorWrapperFactory.Identity());
+        return new CompositeAdjacencyList(
+            adjacencyLists,
+            CompositeAdjacencyCursor::new,
+            new AdjacencyCursorWrapperFactory.Identity()
+        );
     }
 
     static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, IdMap filteredIdMap) {
@@ -68,7 +74,11 @@ public final class CompositeAdjacencyList implements AdjacencyList {
                 .collect(Collectors.toList());
             return new CompositeAdjacencyCursor(wrappedCursors);
         };
-        return new CompositeAdjacencyList(adjacencyLists, compositeAdjacencyCursorFactory, adjacencyCursorWrapperFactory);
+        return new CompositeAdjacencyList(
+            adjacencyLists,
+            compositeAdjacencyCursorFactory,
+            adjacencyCursorWrapperFactory
+        );
     }
 
     private CompositeAdjacencyList(
@@ -138,6 +148,27 @@ public final class CompositeAdjacencyList implements AdjacencyList {
             cursors.add(adjacency.rawAdjacencyCursor());
         }
         return compositeAdjacencyCursorFactory.create(cursors);
+    }
+
+    @Override
+    public MemoryInfo memoryInfo() {
+        var memoryInfo = this.adjacencyLists.stream().map(AdjacencyList::memoryInfo).collect(Collectors.toList());
+
+        var bytesOnHeap = memoryInfo
+            .stream()
+            .map(MemoryInfo::bytesOnHeap)
+            .filter(OptionalLong::isPresent)
+            .mapToLong(OptionalLong::getAsLong)
+            .reduce(Long::sum);
+
+        var bytesOffHeap = memoryInfo
+            .stream()
+            .map(MemoryInfo::bytesOffHeap)
+            .filter(OptionalLong::isPresent)
+            .mapToLong(OptionalLong::getAsLong)
+            .reduce(Long::sum);
+
+        return ImmutableMemoryInfo.builder().bytesOnHeap(bytesOnHeap).bytesOffHeap(bytesOffHeap).build();
     }
 
 }
