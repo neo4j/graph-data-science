@@ -19,101 +19,126 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.DynamicTest;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class LocalClusteringCoefficientWriteProcTest
-    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig> {
+class LocalClusteringCoefficientWriteProcTest extends BaseProcTest {
 
-    @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
-        ).flatMap(Collection::stream);
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
+                                           "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
+                                           "(c)-[:T]->(a), " +
+                                           "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
+                                           "(b)-[:T]->(d), " +
+                                           "(c)-[:T]->(d), " +
+                                           "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
+                                           "(b)-[:T]->(e) ";
 
-    private AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, ?> proc() {
-        try {
-            return getProcedureClazz()
-                .getConstructor()
-                .newInstance();
-        } catch (Exception e) {
-            fail("unable to instantiate procedure", e);
-        }
-        return null;
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            LocalClusteringCoefficientWriteProc.class
+        );
+        runQuery(
+            "CALL gds.graph.project('graph', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
     }
 
     @Test
     void testWrite() {
-        var query = "CALL gds.localClusteringCoefficient.write('g', { writeProperty: 'localCC' })";
+        var expectedResult = Map.of(
+            "a", 2.0 / 3,
+            "b", 2.0 / 3,
+            "c", 1.0,
+            "d", 1.0,
+            "e", 1.0
+        );
 
-        assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficient() / 5, 1e-10),
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "nodePropertiesWritten", 5L,
-            "writeMillis", greaterThan(-1L)
-        )));
+        var query = "CALL gds.localClusteringCoefficient.write('graph', { writeProperty: 'lcc' })";
 
-        assertWriteResult(expectedResult, "localCC");
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("averageClusteringCoefficient"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(13.0 / 15.0, Offset.offset(1e-10));
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+
+        });
+
+        assertThat(rowCount).isEqualTo(1);
+        assertWriteResult(expectedResult, "lcc");
     }
 
     @Test
     void testWriteSeeded() {
-        var query = "CALL gds.localClusteringCoefficient.write('g', { " +
-                    "   writeProperty: 'localCC', " +
-                    "   triangleCountProperty: 'seed' " +
-                    "})";
+        var expectedResult = Map.of(
+            "a", 1.0 / 3,
+            "b", 1.0 / 3,
+            "c", 1.0 / 3,
+            "d", 2.0 / 3,
+            "e", 2.0
+        );
 
-        assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficientSeeded() / 5, 1e-10),
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "nodePropertiesWritten", 5L,
-            "writeMillis", greaterThan(-1L)
-        )));
+        var query = "CALL gds.localClusteringCoefficient.write('graph', { writeProperty: 'lcc', triangleCountProperty: 'seed' })";
 
-        assertWriteResult(expectedResultWithSeeding, "localCC");
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("averageClusteringCoefficient"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(11.0 / 15.0, Offset.offset(1e-10));
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+
+        });
+
+        assertThat(rowCount).isEqualTo(1);
+        assertWriteResult(expectedResult, "lcc");
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, ?>> getProcedureClazz() {
-        return LocalClusteringCoefficientWriteProc.class;
-    }
-
-    @Override
-    public LocalClusteringCoefficientWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientWriteConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", "writeProperty");
-        }
-        return mapWrapper;
-    }
 
     private void assertWriteResult(
         Map<String, Double> expectedResult,

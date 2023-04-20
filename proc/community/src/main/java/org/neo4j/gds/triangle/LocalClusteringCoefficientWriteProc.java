@@ -19,17 +19,13 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -37,21 +33,25 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteProc.WriteResult, LocalClusteringCoefficientWriteConfig> {
+public class LocalClusteringCoefficientWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.localClusteringCoefficient.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<LocalClusteringCoefficientWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LocalClusteringCoefficientWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.write.estimate", mode = READ)
@@ -60,87 +60,15 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new LocalClusteringCoefficientWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected LocalClusteringCoefficientWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return LocalClusteringCoefficientWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig> algorithmFactory() {
-        return new LocalClusteringCoefficientFactory<>();
-    }
-
-    @Override
-    public ValidationConfiguration<LocalClusteringCoefficientWriteConfig> validationConfig(ExecutionContext executionContext) {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computationResult
-    ) {
-        return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientWriteResultBuilder(
-                executionContext.returnColumns(),
-                computeResult.config().concurrency()
-            ),
-            computeResult
-        );
-    }
-
-    @SuppressWarnings("unused")
-    public static class WriteResult extends LocalClusteringCoefficientStatsResult {
-
-        public long writeMillis;
-        public long nodePropertiesWritten;
-
-        WriteResult(
-            double averageClusteringCoefficient,
-            long nodeCount,
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(averageClusteringCoefficient, nodeCount, preProcessingMillis, computeMillis, configuration);
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.writeMillis = writeMillis;
-        }
-    }
-
-
-    static class LocalClusteringCoefficientWriteResultBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<WriteResult> {
-
-        LocalClusteringCoefficientWriteResultBuilder(
-            ProcedureReturnColumns returnColumns,
-            int concurrency
-        ) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected WriteResult buildResult() {
-            return new WriteResult(
-                averageClusteringCoefficient,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }
