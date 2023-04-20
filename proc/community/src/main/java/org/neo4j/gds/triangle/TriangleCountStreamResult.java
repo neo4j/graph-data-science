@@ -20,12 +20,12 @@
 package org.neo4j.gds.triangle;
 
 @SuppressWarnings("unused")
-public class StreamResult {
+public class TriangleCountStreamResult {
 
     public final long nodeId;
     public final long triangleCount;
 
-    public StreamResult(long nodeId, long triangleCount) {
+    public TriangleCountStreamResult(long nodeId, long triangleCount) {
         this.nodeId = nodeId;
         this.triangleCount = triangleCount;
     }

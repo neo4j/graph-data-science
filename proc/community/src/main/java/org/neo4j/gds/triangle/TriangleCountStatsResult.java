@@ -20,53 +20,45 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class MutateResult extends StatsResult {
+public class TriangleCountStatsResult extends StandardStatsResult {
 
-    public long mutateMillis;
-    public long nodePropertiesWritten;
+    public final long globalTriangleCount;
+    public final long nodeCount;
 
-    MutateResult(
+    TriangleCountStatsResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,
         long computeMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            globalTriangleCount,
-            nodeCount,
-            preProcessingMillis,
-            computeMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+        // post-processing is instant for TC
+        super(preProcessingMillis, computeMillis, 0L, configuration);
+        this.globalTriangleCount = globalTriangleCount;
+        this.nodeCount = nodeCount;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    static class Builder extends AbstractResultBuilder<TriangleCountStatsResult> {
 
         long globalTriangleCount = 0;
-        
+
         Builder withGlobalTriangleCount(long globalTriangleCount) {
             this.globalTriangleCount = globalTriangleCount;
             return this;
         }
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public TriangleCountStatsResult build() {
+            return new TriangleCountStatsResult(
                 globalTriangleCount,
                 nodeCount,
                 preProcessingMillis,
                 computeMillis,
-                mutateMillis,
-                nodePropertiesWritten,
                 config.toMap()
             );
         }

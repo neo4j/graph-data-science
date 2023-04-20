@@ -30,7 +30,7 @@ import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangleCount,TriangleCountResult,TriangleCountStatsConfig, Stream<StatsResult>,IntersectingTriangleCountFactory<TriangleCountStatsConfig>> {
+public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>, IntersectingTriangleCountFactory<TriangleCountStatsConfig>> {
 
     @Override
     public String name() {
@@ -48,9 +48,9 @@ public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangl
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var builder = new StatsResult.Builder();
+            var builder = new TriangleCountStatsResult.Builder();
             computationResult.result()
                 .ifPresent(result ->
                     builder

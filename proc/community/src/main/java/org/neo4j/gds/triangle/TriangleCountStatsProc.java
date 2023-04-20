@@ -36,7 +36,7 @@ public class TriangleCountStatsProc extends BaseProc {
 
     @Procedure(value = "gds.triangleCount.stats", mode = READ)
     @Description(TriangleCountCompanion.DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<TriangleCountStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

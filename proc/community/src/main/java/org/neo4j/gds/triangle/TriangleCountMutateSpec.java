@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.triangleCount.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, Stream<MutateResult>, IntersectingTriangleCountFactory<TriangleCountMutateConfig>> {
+public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, Stream<TriangleCountMutateResult>, IntersectingTriangleCountFactory<TriangleCountMutateConfig>> {
     @Override
     public String name() {
         return "TriangleCountMutate";
@@ -54,7 +54,7 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, Stream<TriangleCountMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -67,11 +67,11 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
     }
 
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<TriangleCountMutateResult> resultBuilder(
         ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder();
+        var builder = new TriangleCountMutateResult.Builder();
 
         computationResult.result()
             .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
