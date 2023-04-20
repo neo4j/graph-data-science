@@ -20,14 +20,9 @@
 package org.neo4j.gds.triangle;
 
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,25 +31,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LocalClusteringCoefficientStreamProc extends StreamProc<
-    LocalClusteringCoefficient,
-    LocalClusteringCoefficient.Result,
-    LocalClusteringCoefficientStreamProc.Result,
-    LocalClusteringCoefficientStreamConfig
-    > {
-
+public class LocalClusteringCoefficientStreamProc extends BaseProc {
     @Procedure(name = "gds.localClusteringCoefficient.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<Result> stream(
+    public Stream<LocalClusteringCoefficientStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LocalClusteringCoefficientStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stream.estimate", mode = READ)
@@ -63,47 +53,10 @@ public class LocalClusteringCoefficientStreamProc extends StreamProc<
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected LocalClusteringCoefficientStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return LocalClusteringCoefficientStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory() {
-        return new LocalClusteringCoefficientFactory<>();
-    }
-
-    @Override
-    protected Result streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        return new Result(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
-    }
-
-    @Override
-    public ValidationConfiguration<LocalClusteringCoefficientStreamConfig> validationConfig(ExecutionContext executionContext) {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig> computationResult
-    ) {
-        return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);
-    }
-
-    @SuppressWarnings("unused")
-    public static class Result {
-        public final long nodeId;
-        public final double localClusteringCoefficient;
-
-        public Result(long nodeId, double localClusteringCoefficient) {
-            this.nodeId = nodeId;
-            this.localClusteringCoefficient = localClusteringCoefficient;
-        }
+        return new MemoryEstimationExecutor<>(
+            new LocalClusteringCoefficientStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
-

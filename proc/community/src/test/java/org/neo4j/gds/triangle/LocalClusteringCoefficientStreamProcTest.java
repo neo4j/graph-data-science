@@ -19,66 +19,92 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStreamConfig> {
+class LocalClusteringCoefficientStreamProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
+                                           "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
+                                           "(c)-[:T]->(a), " +
+                                           "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
+                                           "(b)-[:T]->(d), " +
+                                           "(c)-[:T]->(d), " +
+                                           "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
+                                           "(b)-[:T]->(e) ";
+
+    @Inject
+    IdFunction idFunction;
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            LocalClusteringCoefficientStreamProc.class
+        );
+        runQuery(
+            "CALL gds.graph.project('graph', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
+    }
 
     @Test
     void testStreaming() {
-        var query = "CALL gds.localClusteringCoefficient.stream('g')";
+        var query = "CALL gds.localClusteringCoefficient.stream('graph')";
 
-        Map<Long, Double> actualResult = new HashMap<>();
-        runQueryWithRowConsumer(query, row -> {
+        var expectedResult = Map.of(
+            idFunction.of("a"), 2.0 / 3,
+            idFunction.of("b"), 2.0 / 3,
+            idFunction.of("c"), 1.0,
+            idFunction.of("d"), 1.0,
+            idFunction.of("e"), 1.0
+        );
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double localClusteringCoefficient = row.getNumber("localClusteringCoefficient").doubleValue();
-            actualResult.put(nodeId, localClusteringCoefficient);
+            assertThat(localClusteringCoefficient).isCloseTo(expectedResult.get(nodeId), Offset.offset(1e-5));
         });
+        assertThat(rowCount).isEqualTo(5L);
 
-        assertStreamResult(actualResult, expectedResult);
     }
 
     @Test
     void testStreamingSeeded() {
-        var query = "CALL gds.localClusteringCoefficient.stream('g', { triangleCountProperty: 'seed'})";
+        var query = "CALL gds.localClusteringCoefficient.stream('graph', { triangleCountProperty: 'seed'})";
 
-        Map<Long, Double> actualResult = new HashMap<>();
-        runQueryWithRowConsumer(query, row -> {
+        var expectedResult = Map.of(
+            idFunction.of("a"), 1.0 / 3,
+            idFunction.of("b"), 1.0 / 3,
+            idFunction.of("c"), 1.0 / 3,
+            idFunction.of("d"), 2.0 / 3,
+            idFunction.of("e"), 2.0
+        );
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double localClusteringCoefficient = row.getNumber("localClusteringCoefficient").doubleValue();
-            actualResult.put(nodeId, localClusteringCoefficient);
+            assertThat(localClusteringCoefficient).isCloseTo(expectedResult.get(nodeId), Offset.offset(1e-5));
         });
-
-        assertStreamResult(actualResult, expectedResultWithSeeding);
+        assertThat(rowCount).isEqualTo(5L);
     }
 
-    private void assertStreamResult(Map<Long, Double> actualResult, Map<String, Double> expectedResult) {
-        actualResult.forEach(
-            (nodeId, coefficient) -> {
-                runQueryWithRowConsumer(String.format(
-                    "MATCH (n) WHERE id(n) = %d RETURN n.name AS name",
-                    nodeId
-                ), row -> {
-                    String name = row.getString("name");
-                    assertThat(expectedResult.get(name)).isEqualTo(coefficient);
-                });
-            }
-        );
+    @Test
+    void shouldThrowForNotUndirected() {
+        runQuery("CALL gds.graph.project('graph2', 'A', {T: { orientation: 'NATURAL'}})");
+
+        var query = "CALL gds.localClusteringCoefficient.stream('graph2');";
+        assertThatThrownBy(() -> runQuery(query)).hasMessageContaining("not all undirected");
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig, ?>> getProcedureClazz() {
-        return LocalClusteringCoefficientStreamProc.class;
-    }
-
-    @Override
-    public LocalClusteringCoefficientStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientStreamConfig.of(mapWrapper);
-    }
 }
