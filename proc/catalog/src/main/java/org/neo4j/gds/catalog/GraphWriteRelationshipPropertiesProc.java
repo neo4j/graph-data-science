@@ -21,6 +21,8 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.WriteRelationshipPropertiesConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,6 +36,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,7 +55,8 @@ public class GraphWriteRelationshipPropertiesProc extends CatalogProc {
     public Stream<Result> writeRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType,
-        @Name(value = "relationshipProperties") List<String> relationshipProperties
+        @Name(value = "relationshipProperties") List<String> relationshipProperties,
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
 
         ProcPreconditions.check();
@@ -62,6 +66,8 @@ public class GraphWriteRelationshipPropertiesProc extends CatalogProc {
         var graphStore = graphStoreFromCatalog(graphName).graphStore();
         validate(graphStore, relationshipType, relationshipProperties);
 
+        var config = WriteRelationshipPropertiesConfig.of(CypherMapWrapper.create(configuration));
+
         var relationshipCount = graphStore.relationshipCount(RelationshipType.of(relationshipType));
 
         var exporter = exporterBuilder
@@ -69,6 +75,8 @@ public class GraphWriteRelationshipPropertiesProc extends CatalogProc {
             .withRelationPropertyTranslator(Values::doubleValue)
             .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
             .withProgressTracker(ProgressTracker.NULL_TRACKER)
+            .withArrowConnectionInfo(config.arrowConnectionInfo())
+            .withRelationshipCount(relationshipCount)
             .build();
 
         // writing

@@ -20,9 +20,14 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.values.storable.Values;
+
+import java.util.Optional;
+import java.util.function.LongUnaryOperator;
+import java.util.stream.Stream;
 
 public abstract class RelationshipPropertiesExporterBuilder {
 
@@ -30,6 +35,13 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected GraphStore graphStore;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
+
+    // FIXME: These four are only used by the Arrow builder; keeping this aligned with the existing builders but has to be changed.
+    protected Stream<ExportedRelationship> relationships;
+    protected LongUnaryOperator toOriginalId;
+    protected long relationshipCount = -1L;
+    protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo;
+
 
     public abstract RelationshipPropertiesExporter build();
 
@@ -59,6 +71,30 @@ public abstract class RelationshipPropertiesExporterBuilder {
      */
     public RelationshipPropertiesExporterBuilder withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
+        return this;
+    }
+
+
+    // FIXME: Below are methods that should only be valid for Arrow builder;
+    // Putting these here so we don't have to refactor each and every Builder
+    public RelationshipPropertiesExporterBuilder withIdMappingOperator(LongUnaryOperator toOriginalNodeId) {
+        this.toOriginalId = toOriginalNodeId;
+        return this;
+    }
+
+
+    public RelationshipPropertiesExporterBuilder withRelationships(Stream<ExportedRelationship> relationships) {
+        this.relationships = relationships;
+        return this;
+    }
+
+    public RelationshipPropertiesExporterBuilder withRelationshipCount(long relationshipCount) {
+        this.relationshipCount = relationshipCount;
+        return this;
+    }
+
+    public RelationshipPropertiesExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+        this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
 

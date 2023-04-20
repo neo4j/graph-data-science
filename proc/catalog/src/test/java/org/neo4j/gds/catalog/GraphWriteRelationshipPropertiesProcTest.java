@@ -81,7 +81,7 @@ class GraphWriteRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void shouldWriteRelationshipWithMultipleProperties() {
         String writeQuery =
-            "CALL gds.graph.relationshipProperties.write('aggregate', 'PAID',[ 'totalAmount', 'numberOfPayments'])" +
+            "CALL gds.graph.relationshipProperties.write('aggregate', 'PAID',[ 'totalAmount', 'numberOfPayments'], {})" +
             "YIELD writeMillis, graphName, relationshipType, relationshipProperties, relationshipsWritten, propertiesWritten";
 
         var rowCount = runQueryWithRowConsumer(writeQuery, row -> {
