@@ -19,38 +19,33 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.time.ZonedDateTime;
-import java.util.List;
-
-import static org.neo4j.gds.core.model.Model.ALL_USERS;
 
 @ValueClass
-public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends ToMapConvertible> {
-
-    String creator();
-
-    List<String> sharedWith();
+public
+interface ModelHash {
+    String user();
 
     String name();
 
-    String algoType();
+    ZonedDateTime timestamp();
 
-    GraphSchema graphSchema();
+    static ModelHash of(ModelMetaData<? extends ModelConfig, ?> modelMetaData) {
+        return ImmutableModelHash.of(
+            modelMetaData.creator(),
+            modelMetaData.name(),
+            modelMetaData.creationTime()
+        );
+    }
 
-    CONFIG trainConfig();
-
-    ZonedDateTime creationTime();
-
-    INFO customInfo();
-
-    @Value.Derived
-    default boolean isPublished() {
-        return sharedWith().contains(ALL_USERS);
+    static ModelHash of(Model<?, ?, ?> model) {
+        return ImmutableModelHash.of(
+            model.creator(),
+            model.name(),
+            model.creationTime()
+        );
     }
 }
