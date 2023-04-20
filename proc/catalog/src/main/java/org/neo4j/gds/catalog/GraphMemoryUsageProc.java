@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -30,6 +31,8 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.openjdk.jol.info.GraphWalker;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -78,7 +81,9 @@ public class GraphMemoryUsageProc extends CatalogProc {
 
         static GraphMemoryUsage of(GraphStoreWithConfig graphStoreWithConfig) {
             var totalSize = new MutableLong();
-            var detailMemory = internalSizeOfGraph(graphStoreWithConfig.graphStore(), totalSize);
+            var graphStore = graphStoreWithConfig.graphStore();
+            var detailMemory = internalSizeOfGraph(graphStore, totalSize);
+
             var memoryUsage = MemoryUsage.humanReadable(totalSize.longValue());
 
             return new GraphMemoryUsage(
@@ -86,8 +91,8 @@ public class GraphMemoryUsageProc extends CatalogProc {
                 memoryUsage,
                 totalSize.longValue(),
                 detailMemory,
-                graphStoreWithConfig.graphStore().nodeCount(),
-                graphStoreWithConfig.graphStore().relationshipCount()
+                graphStore.nodeCount(),
+                graphStore.relationshipCount()
             );
         }
 
@@ -151,23 +156,39 @@ public class GraphMemoryUsageProc extends CatalogProc {
 
             var mappingTotal = mappingSparseLongArray.longValue() + mappingForward.longValue() + mappingBackward.longValue();
             var adjacencyTotal = adjacencyDegrees.longValue() + adjacencyOffsets.longValue() + adjacencyLists.longValue();
-            return Map.of(
-                "total", totalSize.longValue(),
-                "nodes", Map.of(
-                    "sparseLongArray", mappingSparseLongArray.longValue(),
-                    "forwardMapping", mappingForward.longValue(),
-                    "backwardMapping", mappingBackward.longValue(),
-                    "mapping", mappingTotal,
-                    "total", nodesTotal.longValue()
-                ),
-                "relationships", Map.of(
-                    "degrees", adjacencyDegrees.longValue(),
-                    "offsets", adjacencyOffsets.longValue(),
-                    "targetIds", adjacencyLists.longValue(),
-                    "adjacencyLists", adjacencyTotal,
-                    "total", relationshipsTotal.longValue()
-                )
-            );
+
+            var details = new HashMap<String, Object>();
+            details.put("total", totalSize.longValue());
+            details.put("nodes", Map.of(
+                "sparseLongArray", mappingSparseLongArray.longValue(),
+                "forwardMapping", mappingForward.longValue(),
+                "backwardMapping", mappingBackward.longValue(),
+                "mapping", mappingTotal,
+                "total", nodesTotal.longValue()
+            ));
+            details.put("relationships", Map.of(
+                "degrees", adjacencyDegrees.longValue(),
+                "offsets", adjacencyOffsets.longValue(),
+                "targetIds", adjacencyLists.longValue(),
+                "adjacencyLists", adjacencyTotal,
+                "total", relationshipsTotal.longValue()
+            ));
+
+            if (graphStore instanceof CSRGraphStore) {
+                var adjacencyListDetails = new HashMap<String, Object>();
+                var csrGraphStore = ((CSRGraphStore) graphStore);
+                var unionGraph = csrGraphStore.getUnion();
+                unionGraph.relationshipTopologies().forEach((relationshipType, adjacency) -> {
+                    var memoryInfo = adjacency.adjacencyList().memoryInfo();
+                    adjacencyListDetails.put(relationshipType.name(), Map.of(
+                        "bytesTotal", memoryInfo.bytesTotal().orElse(0),
+                        "bytesOnHeap", memoryInfo.bytesOnHeap().orElse(0),
+                        "bytesOffHeap", memoryInfo.bytesOffHeap().orElse(0)
+                    ));
+                });
+                details.put("adjacencyLists", adjacencyListDetails);
+            }
+            return Collections.unmodifiableMap(details);
         }
     }
 }
