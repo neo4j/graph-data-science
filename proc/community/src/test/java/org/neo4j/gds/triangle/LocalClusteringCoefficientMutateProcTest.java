@@ -19,119 +19,156 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class LocalClusteringCoefficientMutateProcTest
-    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientMutateConfig>
-    implements MutateNodePropertyTest<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficient.Result> {
+class LocalClusteringCoefficientMutateProcTest extends BaseProcTest {
 
-    @Override
-    public String mutateProperty() {
-        return "mutatedLocalCC";
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
+                                           "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
+                                           "(c)-[:T]->(a), " +
+                                           "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
+                                           "(b)-[:T]->(d), " +
+                                           "(c)-[:T]->(d), " +
+                                           "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
+                                           "(b)-[:T]->(e) ";
+
+    String expectedMutatedGraph = formatWithLocale(
+        "  (a:A { lcc: %f })" +
+        ", (b:A { lcc: %f })" +
+        ", (c:A { lcc: %f })" +
+        ", (d:A { lcc: %f })" +
+        ", (e:A { lcc: %f })" +
+        // Graph is UNDIRECTED, e.g. each rel twice
+        ", (a)-[:T]->(b)" +
+        ", (b)-[:T]->(a)" +
+        ", (b)-[:T]->(c)" +
+        ", (c)-[:T]->(b)" +
+        ", (a)-[:T]->(c)" +
+        ", (c)-[:T]->(a)" +
+
+        ", (a)-[:T]->(d)" +
+        ", (d)-[:T]->(a)" +
+        ", (b)-[:T]->(d)" +
+        ", (d)-[:T]->(b)" +
+
+        ", (a)-[:T]->(e)" +
+        ", (e)-[:T]->(a)" +
+        ", (b)-[:T]->(e)" +
+        ", (e)-[:T]->(b)" +
+
+        ", (c)-[:T]->(d)" +
+        ", (d)-[:T]->(c)",
+        2.0 / 3, 2.0 / 3, 1.0, 1.0, 1.0
+    );
+
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            LocalClusteringCoefficientMutateProc.class
+        );
+
     }
 
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
-
-    @Override
-    public String expectedMutatedGraph() {
-        return formatWithLocale(
-            "  (a { mutatedLocalCC: %f })" +
-            ", (b { mutatedLocalCC: %f })" +
-            ", (c { mutatedLocalCC: %f })" +
-            ", (d { mutatedLocalCC: %f })" +
-            ", (e { mutatedLocalCC: %f })" +
-            // Graph is UNDIRECTED, e.g. each rel twice
-            ", (a)-->(b)" +
-            ", (b)-->(a)" +
-            ", (b)-->(c)" +
-            ", (c)-->(b)" +
-            ", (a)-->(c)" +
-            ", (c)-->(a)" +
-
-            ", (a)-->(d)" +
-            ", (d)-->(a)" +
-            ", (b)-->(d)" +
-            ", (d)-->(b)" +
-
-            ", (a)-->(e)" +
-            ", (e)-->(a)" +
-            ", (b)-->(e)" +
-            ", (e)-->(b)" +
-
-            ", (c)-->(d)" +
-            ", (d)-->(c)",
-                2.0 / 3, 2.0 / 3, 1.0, 1.0, 1.0
-            );
-    }
 
     @Test
     void testMutateYields() {
-        String query = GdsCypher
-            .call(TEST_GRAPH_NAME)
-            .algo("localClusteringCoefficient")
-            .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
-            .yields();
 
-        assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficient() / 5, 1e-10),
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "mutateMillis", greaterThan(-1L),
-            "nodePropertiesWritten", 5L
-        )));
+        runQuery("CALL gds.graph.project('graph', {A: {label: 'A'}}, {T: {orientation: 'UNDIRECTED'}})");
+
+        var query = "CALL gds.localClusteringCoefficient.mutate('graph', {mutateProperty: 'lcc'})";
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("averageClusteringCoefficient"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(13.0 / 15.0, Offset.offset(1e-10));
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+
+        });
+
+        assertThat(rowCount).isEqualTo(1);
+
+        Graph mutatedGraph = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db), "graph")
+            .graphStore().getGraph(RelationshipType.of("T"));
+
+        assertGraphEquals(fromGdl(expectedMutatedGraph), mutatedGraph);
+
     }
 
     @Test
     void testMutateSeeded() {
-        var query = "CALL gds.localClusteringCoefficient.mutate('g', {" +
-                    "   mutateProperty: $mutateProperty," +
-                    "   triangleCountProperty: 'seed'" +
-                    "})";
+        runQuery(
+            "CALL gds.graph.project('graph', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
+        var query = "CALL gds.localClusteringCoefficient.mutate('graph', {mutateProperty: 'lcc', triangleCountProperty: 'seed'})";
 
-        assertCypherResult(query, Map.of("mutateProperty", mutateProperty()), List.of(Map.of(
-            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficientSeeded() / 5, 1e-10),
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "mutateMillis", greaterThan(-1L),
-            "nodePropertiesWritten", 5L
-        )));
-    }
 
-    @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig, ?>> getProcedureClazz() {
-        return LocalClusteringCoefficientMutateProc.class;
-    }
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("averageClusteringCoefficient"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(11.0 / 15.0, Offset.offset(1e-10));
 
-    @Override
-    public LocalClusteringCoefficientMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientMutateConfig.of(mapWrapper);
-    }
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
 
-    @Override
-    public boolean requiresUndirected() {
-        return true;
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+        });
+
+        assertThat(rowCount).isEqualTo(1);
     }
 }
+
+
