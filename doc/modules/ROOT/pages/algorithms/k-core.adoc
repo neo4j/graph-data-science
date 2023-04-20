@@ -156,7 +156,7 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 
 [.include-with-write]
 ======
-.Run Degree Centrality in write mode on a named graph.
+.Run K-Core decomposition in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.kcore.write(
@@ -257,7 +257,7 @@ CALL gds.graph.project(
 
 The graph is projected in the  `UNDIRECTED` orientation  as the friendship relationship is associative.
 
-[[algorithms-degree-centrality-examples-memory-estimation]]
+[[algorithms-k-core-examples-memory-estimation]]
 === Memory Estimation
 
 :mode: write
@@ -385,7 +385,7 @@ Additionally, the in-memory graph now has a node property `coreValue` which stor
 To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs in the catalog].
 
 
-[[algorithms-degree-centrality-examples-write]]
+[[algorithms-k-core-examples-write]]
 === Write
 
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
