@@ -12,6 +12,7 @@ The Neo4j GDS library includes the following community detection algorithms, gro
 ** xref:algorithms/wcc.adoc[Weakly Connected Components]
 ** xref:algorithms/triangle-count.adoc[Triangle Count]
 ** xref:algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient]
+** xref:algorithms/k-core.adoc[K-Core Decomposition]
 * Beta
 ** xref:algorithms/k1coloring.adoc[K-1 Coloring]
 ** xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
