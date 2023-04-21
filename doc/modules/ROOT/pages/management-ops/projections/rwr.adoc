@@ -104,6 +104,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | restartProbability      | Float           | 0.1                               | yes      | The probability that a sampling random walk restarts from one of the start nodes.
 | startNodes              | List of Integer | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
 | nodeLabelStratification | Boolean         | false                             | yes      | If true, preserves the node label distribution of the original graph.
+| randomSeed              | Integer         | n/a                               | yes      | A random seed which is used for all randomness in the computation. Requires `concurrency = 1`.
 |===
 
 .Results
