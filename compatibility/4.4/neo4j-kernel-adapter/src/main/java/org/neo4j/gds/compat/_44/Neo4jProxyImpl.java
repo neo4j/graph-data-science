@@ -28,6 +28,7 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatCallableProcedure;
@@ -40,6 +41,7 @@ import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsDatabaseLayout;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
@@ -805,5 +807,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         MapValue queryParameters
     ) {
         return contextFactory.newContext(tx, queryText, queryParameters);
+    }
+
+    @Override
+    public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
+        var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
+        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService).name());
     }
 }
