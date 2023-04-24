@@ -93,6 +93,7 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         var sumWeights = 0;
         for (int i = 0; i < neighs.length; i++)
             sumWeights += weights[i];
+
         var remainingMass = rng.nextDouble(0, sumWeights);
 
         int i = 0;
@@ -101,42 +102,6 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         }
 
         return neighs.buffer[i - 1];
-    }
-
-    private static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
-        quicksortLongs(longArray, doubleArray, 0, length - 1);
-    }
-
-    private static void quicksortLongs(long[] longArray, double[] doubleArray, int lo, int hi) {
-        if (lo >= hi) {
-            return;
-        }
-        int p = partition(longArray, doubleArray, lo, hi);
-        quicksortLongs(longArray, doubleArray, lo, p - 1);
-        quicksortLongs(longArray, doubleArray, p + 1, hi);
-    }
-
-    private static int partition(long[] longArray, double[] doubleArray, int lo, int hi) {
-        long pivot = longArray[hi];
-        int i = lo;
-        for (int j = lo; j < hi; j++) {
-            if (longArray[j] < pivot) {
-                swap(longArray, doubleArray, i, j);
-                i++;
-            }
-        }
-        swap(longArray, doubleArray, i, hi);
-        return i;
-    }
-
-    private static void swap(long[] longArray, double[] doubleArray, int i, int j) {
-        long tempInt = longArray[i];
-        longArray[i] = longArray[j];
-        longArray[j] = tempInt;
-
-        double tempDouble = doubleArray[i];
-        doubleArray[i] = doubleArray[j];
-        doubleArray[j] = tempDouble;
     }
 
     private static void sortNeighsWithWeights(
@@ -162,5 +127,51 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         });
 
         sortDoubleArrayByLongValues(neighs.buffer, weights.buffer, neighsCount);
+    }
+
+    /**
+     * Sort two arrays simultaneously based on values of the first (long) array.
+     * E.g. {[4, 1, 8], [0.5, 1.9, 0.9]} -> {[1, 4, 8], [1,9, 0.5, 0.9]}
+     *
+     * @param longArray   Array of long values (e.g. neighbours ids)
+     * @param doubleArray Array of double values (e.g. neighbours weighs)
+     * @param length      Number of values to sort
+     */
+    private static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
+        assert longArray.length <= length;
+        assert doubleArray.length <= length;
+        quickSortLongsWithDoubles(longArray, doubleArray, 0, length - 1);
+    }
+
+    private static void quickSortLongsWithDoubles(long[] longArray, double[] doubleArray, int lo, int hi) {
+        if (lo >= hi) {
+            return;
+        }
+        int p = partition(longArray, doubleArray, lo, hi);
+        quickSortLongsWithDoubles(longArray, doubleArray, lo, p - 1);
+        quickSortLongsWithDoubles(longArray, doubleArray, p + 1, hi);
+    }
+
+    private static int partition(long[] longArray, double[] doubleArray, int lo, int hi) {
+        long pivot = longArray[hi];
+        int i = lo;
+        for (int j = lo; j < hi; j++) {
+            if (longArray[j] < pivot) {
+                swap(longArray, doubleArray, i, j);
+                i++;
+            }
+        }
+        swap(longArray, doubleArray, i, hi);
+        return i;
+    }
+
+    private static void swap(long[] l, double[] d, int i, int j) {
+        long tempLong = l[i];
+        l[i] = l[j];
+        l[j] = tempLong;
+
+        double tempDouble = d[i];
+        d[i] = d[j];
+        d[j] = tempDouble;
     }
 }
