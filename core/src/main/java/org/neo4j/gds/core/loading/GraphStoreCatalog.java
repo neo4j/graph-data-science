@@ -185,7 +185,7 @@ public final class GraphStoreCatalog {
 
         listeners.forEach(listener -> {
             try {
-                listener.onProject(config.username(), config.graphName());
+                listener.onProject(config.username(), graphStore.databaseId().databaseName(), config.graphName());
             } catch (Exception e) {
                 log.ifPresent(l -> l.warn(String.format(
                     Locale.US,
