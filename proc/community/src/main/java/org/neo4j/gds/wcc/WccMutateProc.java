@@ -49,7 +49,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new WccMutateSpec();
+        var mutateSpec = new WccMutateSpecification();
         var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
@@ -69,7 +69,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new WccMutateSpec();
+        var mutateSpec = new WccMutateSpecification();
         var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
@@ -92,7 +92,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new WccMutateSpec().computationResultConsumer();
+        return new WccMutateSpecification().computationResultConsumer();
     }
 
     @SuppressWarnings("unused")
