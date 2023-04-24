@@ -490,6 +490,10 @@ public final class Neo4jProxy {
         return IMPL.newQueryContext(contextFactory, tx, queryText, queryParameters);
     }
 
+    public static boolean isCompositeDatabase(GraphDatabaseService databaseService) {
+        return IMPL.isCompositeDatabase(databaseService);
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }
