@@ -20,10 +20,8 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -43,12 +41,9 @@ public class WccMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new WccMutateSpecification();
-        var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
-            mutateSpec,
-            pipelineSpec,
+            new WccMutateSpecification(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -59,12 +54,9 @@ public class WccMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new WccMutateSpecification();
-        var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
-            mutateSpec,
-            pipelineSpec,
+            new WccMutateSpecification(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
