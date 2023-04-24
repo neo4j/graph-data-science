@@ -29,32 +29,32 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>, IntersectingTriangleCountFactory<TriangleCountStatsConfig>> {
+@GdsCallable(name = "gds.localClusteringCoefficient.stats", description = STATS_DESCRIPTION, executionMode = STATS)
+public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientStatsConfig>> {
 
     @Override
     public String name() {
-        return "TriangleCountStats";
+        return "LocalClusteringCoefficientStats";
     }
 
     @Override
-    public IntersectingTriangleCountFactory<TriangleCountStatsConfig> algorithmFactory() {
-        return new IntersectingTriangleCountFactory<>();
+    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientStatsConfig> algorithmFactory() {
+        return new LocalClusteringCoefficientFactory<>();
     }
 
     @Override
-    public NewConfigFunction<TriangleCountStatsConfig> newConfigFunction() {
-        return (___,config) ->  TriangleCountStatsConfig.of(config);
+    public NewConfigFunction<LocalClusteringCoefficientStatsConfig> newConfigFunction() {
+        return (___, config) -> LocalClusteringCoefficientStatsConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var builder = new TriangleCountStatsResult.Builder();
+            var builder = new LocalClusteringCoefficientStatsResult.Builder();
             computationResult.result()
                 .ifPresent(result ->
                     builder
-                        .withGlobalTriangleCount(result.globalTriangles())
+                        .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
                 );
 
             builder
@@ -66,4 +66,6 @@ public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangl
             return Stream.of(builder.build());
         };
     }
+
+
 }

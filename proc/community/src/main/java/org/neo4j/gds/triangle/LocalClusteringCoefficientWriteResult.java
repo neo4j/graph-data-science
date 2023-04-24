@@ -24,48 +24,48 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class MutateResult extends StatsResult {
+public class LocalClusteringCoefficientWriteResult extends LocalClusteringCoefficientStatsResult {
 
-    public long mutateMillis;
+    public long writeMillis;
     public long nodePropertiesWritten;
 
-    MutateResult(
-        long globalTriangleCount,
+    public LocalClusteringCoefficientWriteResult(
+        double averageClusteringCoefficient,
         long nodeCount,
         long preProcessingMillis,
         long computeMillis,
-        long mutateMillis,
+        long writeMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
         super(
-            globalTriangleCount,
+            averageClusteringCoefficient,
             nodeCount,
             preProcessingMillis,
             computeMillis,
             configuration
         );
-        this.mutateMillis = mutateMillis;
+        this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientWriteResult> {
 
-        long globalTriangleCount = 0;
-        
-        Builder withGlobalTriangleCount(long globalTriangleCount) {
-            this.globalTriangleCount = globalTriangleCount;
+        double averageClusteringCoefficient = 0;
+
+        Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
+            this.averageClusteringCoefficient = averageClusteringCoefficient;
             return this;
         }
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
-                globalTriangleCount,
+        public LocalClusteringCoefficientWriteResult build() {
+            return new LocalClusteringCoefficientWriteResult(
+                averageClusteringCoefficient,
                 nodeCount,
                 preProcessingMillis,
                 computeMillis,
-                mutateMillis,
+                writeMillis,
                 nodePropertiesWritten,
                 config.toMap()
             );

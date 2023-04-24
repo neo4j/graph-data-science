@@ -19,54 +19,89 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStatsConfig> {
+class LocalClusteringCoefficientStatsProcTest extends BaseProcTest {
 
-    @Test
-    void testStats() {
-        var query = "CALL gds.localClusteringCoefficient.stats('g')";
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+                                           "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
+                                           "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
+                                           "(c)-[:T]->(a), " +
+                                           "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
+                                           "(b)-[:T]->(d), " +
+                                           "(c)-[:T]->(d), " +
+                                           "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
+                                           "(b)-[:T]->(e) ";
 
-        assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficient() / 5, 1e-10),
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class)
-        )));
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            LocalClusteringCoefficientStatsProc.class
+        );
+        runQuery(
+            "CALL gds.graph.project('graph', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
     }
 
-    @Test
-    void testStatsSeeded() {
-        var query = "CALL gds.localClusteringCoefficient.stats('g', { triangleCountProperty: 'seed'})";
-
-        assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficientSeeded() / 5, 1e-10),
-            "nodeCount", 5L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class)
-        )));
+    static Stream<Arguments> queries() {
+        return Stream.of(
+            arguments(
+                "CALL gds.localClusteringCoefficient.stats('graph')",
+                (13.0 / 15.0)
+            ),
+            arguments(
+                "CALL gds.localClusteringCoefficient.stats('graph', { triangleCountProperty: 'seed'})",
+                (11.0 / 15.0)
+            )
+        );
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig, ?>> getProcedureClazz() {
-        return LocalClusteringCoefficientStatsProc.class;
+    @ParameterizedTest
+    @MethodSource("queries")
+    void testStats(String query, double expectedCoefficient) {
+
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("averageClusteringCoefficient"))
+                .asInstanceOf(DOUBLE)
+                .isCloseTo(expectedCoefficient, Offset.offset(1e-10));
+
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.get("configuration"))
+                .isInstanceOf(Map.class);
+        });
+
+        assertThat(rowCount).isEqualTo(1);
     }
 
-    @Override
-    public LocalClusteringCoefficientStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientStatsConfig.of(mapWrapper);
-    }
 }

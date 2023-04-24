@@ -44,7 +44,7 @@ public class TriangleCountWriteProc extends BaseProc {
 
     @Procedure(value = "gds.triangleCount.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<TriangleCountWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

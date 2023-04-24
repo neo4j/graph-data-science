@@ -20,30 +20,36 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class StatsResult extends StandardStatsResult {
+public class TriangleCountWriteResult extends TriangleCountStatsResult {
 
-    public final long globalTriangleCount;
-    public final long nodeCount;
+    public long writeMillis;
+    public long nodePropertiesWritten;
 
-    StatsResult(
+    public TriangleCountWriteResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,
         long computeMillis,
+        long writeMillis,
+        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        // post-processing is instant for TC
-        super(preProcessingMillis, computeMillis, 0L, configuration);
-        this.globalTriangleCount = globalTriangleCount;
-        this.nodeCount = nodeCount;
+        super(
+            globalTriangleCount,
+            nodeCount,
+            preProcessingMillis,
+            computeMillis,
+            configuration
+        );
+        this.writeMillis = writeMillis;
+        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractResultBuilder<StatsResult> {
+    static class Builder extends AbstractResultBuilder<TriangleCountWriteResult> {
 
         long globalTriangleCount = 0;
 
@@ -53,12 +59,14 @@ public class StatsResult extends StandardStatsResult {
         }
 
         @Override
-        public StatsResult build() {
-            return new StatsResult(
+        public TriangleCountWriteResult build() {
+            return new TriangleCountWriteResult(
                 globalTriangleCount,
                 nodeCount,
                 preProcessingMillis,
                 computeMillis,
+                writeMillis,
+                nodePropertiesWritten,
                 config.toMap()
             );
         }

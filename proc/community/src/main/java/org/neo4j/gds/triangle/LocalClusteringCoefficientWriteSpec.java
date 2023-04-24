@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -34,48 +34,47 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 
-@GdsCallable(name = "gds.triangleCount.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<TriangleCountWriteResult>, IntersectingTriangleCountFactory<TriangleCountWriteConfig>> {
+@GdsCallable(name = "gds.localClusteringCoefficient.write", description = LocalClusteringCoefficientCompanion.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientWriteConfig>> {
     @Override
     public String name() {
-        return "TriangleCountWrite";
+        return "LocalClusteringCoefficientWrite";
     }
 
     @Override
-    public IntersectingTriangleCountFactory<TriangleCountWriteConfig> algorithmFactory() {
-        return new IntersectingTriangleCountFactory<>();
+    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientWriteConfig> algorithmFactory() {
+        return new LocalClusteringCoefficientFactory<>();
     }
 
     @Override
-    public NewConfigFunction<TriangleCountWriteConfig> newConfigFunction() {
-        return (___, config) -> TriangleCountWriteConfig.of(config);
+    public NewConfigFunction<LocalClusteringCoefficientWriteConfig> newConfigFunction() {
+        return (___, config) -> LocalClusteringCoefficientWriteConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<TriangleCountWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 computationResult.result()
-                    .map(TriangleCountResult::asNodeProperties)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
+                    .map(LocalClusteringCoefficient.Result::asNodeProperties)
+                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             name()
 
-        );
-    }
+        );    }
 
-    private AbstractResultBuilder<TriangleCountWriteResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computationResult,
+
+    private AbstractResultBuilder<LocalClusteringCoefficientWriteResult> resultBuilder(
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new TriangleCountWriteResult.Builder();
+        var builder = new LocalClusteringCoefficientWriteResult.Builder();
 
         computationResult.result()
-            .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
+            .ifPresent(result -> builder.withAverageClusteringCoefficient(result.averageClusteringCoefficient()));
 
         return builder;
     }

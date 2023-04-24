@@ -24,17 +24,17 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class WriteResult extends StatsResult {
+public class TriangleCountMutateResult extends TriangleCountStatsResult {
 
-    public long writeMillis;
+    public long mutateMillis;
     public long nodePropertiesWritten;
 
-    public WriteResult(
+    TriangleCountMutateResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,
         long computeMillis,
-        long writeMillis,
+        long mutateMillis,
         long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
@@ -45,11 +45,11 @@ public class WriteResult extends StatsResult {
             computeMillis,
             configuration
         );
-        this.writeMillis = writeMillis;
+        this.mutateMillis = mutateMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractResultBuilder<WriteResult> {
+    static class Builder extends AbstractResultBuilder<TriangleCountMutateResult> {
 
         long globalTriangleCount = 0;
 
@@ -59,13 +59,13 @@ public class WriteResult extends StatsResult {
         }
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public TriangleCountMutateResult build() {
+            return new TriangleCountMutateResult(
                 globalTriangleCount,
                 nodeCount,
                 preProcessingMillis,
                 computeMillis,
-                writeMillis,
+                mutateMillis,
                 nodePropertiesWritten,
                 config.toMap()
             );

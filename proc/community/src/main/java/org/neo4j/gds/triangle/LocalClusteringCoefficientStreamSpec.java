@@ -28,28 +28,28 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 
-@GdsCallable(name = "gds.triangleCount.stream", description = TriangleCountCompanion.DESCRIPTION, executionMode = STREAM)
-public class TriangleCountStreamSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<TriangleCountStreamResult>, IntersectingTriangleCountFactory<TriangleCountStreamConfig>> {
+@GdsCallable(name = "gds.localClusteringCoefficient.stream", description = DESCRIPTION, executionMode = STREAM)
+public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<LocalClusteringCoefficient,LocalClusteringCoefficient.Result,LocalClusteringCoefficientStreamConfig,Stream<LocalClusteringCoefficientStreamResult>,LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig>> {
     @Override
     public String name() {
-        return "TriangleCountStream";
+        return "LocalClusteringCoefficientStream";
     }
 
     @Override
-    public IntersectingTriangleCountFactory<TriangleCountStreamConfig> algorithmFactory() {
-        return new IntersectingTriangleCountFactory<>();
+    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig> algorithmFactory() {
+        return new LocalClusteringCoefficientFactory<>();
     }
 
     @Override
-    public NewConfigFunction<TriangleCountStreamConfig> newConfigFunction() {
-        return (___,config) -> TriangleCountStreamConfig.of(config);
+    public NewConfigFunction<LocalClusteringCoefficientStreamConfig> newConfigFunction() {
+        return  (___,config) -> LocalClusteringCoefficientStreamConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<TriangleCountStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig, Stream<LocalClusteringCoefficientStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-
 
             if (computationResult.result().isEmpty()) {
                 return Stream.of();
@@ -58,9 +58,9 @@ public class TriangleCountStreamSpec implements AlgorithmSpec<IntersectingTriang
             var graph = computationResult.graph();
             var result = computationResult.result().get();
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new TriangleCountStreamResult(
+                .mapToObj(i -> new LocalClusteringCoefficientStreamResult(
                     graph.toOriginalNodeId(i),
-                    result.localTriangles().get(i)
+                    result.localClusteringCoefficients().get(i)
                 ));
         };
     }
