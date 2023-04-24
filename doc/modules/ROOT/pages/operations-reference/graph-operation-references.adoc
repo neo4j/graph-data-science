@@ -34,9 +34,10 @@
 .2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller]
 | `gds.graph.relationshipProperty.stream`
 | `gds.graph.streamRelationshipProperty` (deprecated)
-.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
+.3+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
 | `gds.graph.relationshipProperties.stream`
 | `gds.graph.streamRelationshipProperties` (deprecated)
+| `gds.graph.relationshipProperties.write`
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j]
 | `gds.graph.nodeProperties.write`
 | `gds.graph.writeNodeProperties`

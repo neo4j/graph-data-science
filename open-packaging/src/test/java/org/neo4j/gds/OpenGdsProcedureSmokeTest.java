@@ -389,6 +389,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.nodeProperty.stream",
         "gds.graph.streamRelationshipProperties",
         "gds.graph.relationshipProperties.stream",
+        "gds.graph.relationshipProperties.write",
         "gds.graph.streamRelationshipProperty",
         "gds.graph.relationshipProperty.stream",
         "gds.graph.writeNodeProperties",
@@ -560,7 +561,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 405;
+        int expectedCount = 406;
         assertEquals(
             expectedCount,
             returnedRows,
