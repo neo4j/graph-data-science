@@ -20,12 +20,10 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -46,7 +44,7 @@ public class WccWriteProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.write", mode = WRITE)
     @Description(WCC_DESCRIPTION)
-    public Stream<WccWriteProc.WriteResult> write(
+    public Stream<WccWriteSpecification.WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -72,55 +70,5 @@ public class WccWriteProc extends BaseProc {
     @Override
     public ExecutionContext executionContext() {
         return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
-
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends WccStatsProc.StatsResult {
-
-        public final long writeMillis;
-        public final long nodePropertiesWritten;
-
-        WriteResult(
-            long componentCount,
-            Map<String, Object> componentDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                componentCount,
-                componentDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.writeMillis = writeMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    writeMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
     }
 }

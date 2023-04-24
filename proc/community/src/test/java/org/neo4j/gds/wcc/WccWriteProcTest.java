@@ -457,7 +457,7 @@ class WccWriteProcTest extends BaseProcTest {
 
             var spec = new WccWriteSpecification() {
                 @Override
-                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteProc.WriteResult>> computationResultConsumer() {
+                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
                     return (computationResult, executionContext) -> {
                         computationResult.result().get();
                         return Stream.empty();
@@ -499,7 +499,7 @@ class WccWriteProcTest extends BaseProcTest {
 
             var spec = new WccWriteSpecification() {
                 @Override
-                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteProc.WriteResult>> computationResultConsumer() {
+                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
                     return (computationResult, executionContext) -> {
                         computationResult.result().get();
                         return Stream.empty();

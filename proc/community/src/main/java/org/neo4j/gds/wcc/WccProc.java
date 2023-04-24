@@ -37,9 +37,7 @@ final class WccProc {
         AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
     ) {
-        computationResult.result().ifPresent(result -> {
-            procResultBuilder.withCommunityFunction(result::setIdOf);
-        });
+        computationResult.result().ifPresent(result -> procResultBuilder.withCommunityFunction(result::setIdOf));
         return procResultBuilder;
     }
 

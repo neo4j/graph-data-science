@@ -20,12 +20,9 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,7 +37,7 @@ public class WccStatsProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<WccStatsSpecification.StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -61,44 +58,5 @@ public class WccStatsProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final long componentCount;
-        public final Map<String, Object> componentDistribution;
-
-        StatsResult(
-            long componentCount,
-            Map<String, Object> componentDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-            this.componentCount = componentCount;
-            this.componentDistribution = componentDistribution;
-        }
-
-        static class Builder extends AbstractCommunityResultBuilder<StatsResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected StatsResult buildResult() {
-                return new StatsResult(
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    config.toMap()
-                );
-            }
-        }
     }
 }

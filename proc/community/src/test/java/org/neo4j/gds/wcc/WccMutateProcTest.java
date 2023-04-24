@@ -475,7 +475,7 @@ class WccMutateProcTest extends BaseProcTest {
 
             var spec = new WccMutateSpecification() {
                 @Override
-                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> computationResultConsumer() {
+                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
                     return (computationResultConsumer, executionContext) -> {
                         computationResultConsumer.result().get();
                         return Stream.empty();

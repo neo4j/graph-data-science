@@ -20,12 +20,10 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +39,7 @@ public class WccMutateProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<WccMutateSpecification.MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -70,55 +68,5 @@ public class WccMutateProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @SuppressWarnings("unused")
-    public static final class MutateResult extends WccStatsProc.StatsResult {
-
-        public final long mutateMillis;
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            long componentCount,
-            Map<String, Object> componentDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                componentCount,
-                componentDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.mutateMillis = mutateMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected MutateResult buildResult() {
-                return new MutateResult(
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
     }
 }

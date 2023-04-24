@@ -37,7 +37,7 @@ public class WccStreamProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.stream", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<WccStreamProc.StreamResult> stream(
+    public Stream<WccStreamSpecification.StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -58,18 +58,5 @@ public class WccStreamProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @SuppressWarnings("unused")
-    public static class StreamResult {
-
-        public final long nodeId;
-
-        public final long componentId;
-
-        public StreamResult(long nodeId, long componentId) {
-            this.nodeId = nodeId;
-            this.componentId = componentId;
-        }
     }
 }

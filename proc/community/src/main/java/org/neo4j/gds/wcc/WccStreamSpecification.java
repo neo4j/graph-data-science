@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.stream", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccStreamConfig, Stream<WccStreamProc.StreamResult>, WccAlgorithmFactory<WccStreamConfig>> {
+public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccStreamConfig, Stream<WccStreamSpecification.StreamResult>, WccAlgorithmFactory<WccStreamConfig>> {
 
     @Override
     public String name() {
@@ -53,7 +53,7 @@ public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
     }
 
     @Override
-    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccStreamConfig, Stream<WccStreamProc.StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             if (computationResult.isGraphEmpty()) {
                 return Stream.empty();
@@ -69,10 +69,23 @@ public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
                 .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId -> new WccStreamProc.StreamResult(
+                .mapToObj(nodeId -> new StreamResult(
                     graph.toOriginalNodeId(nodeId),
                     nodePropertyValues.longValue(nodeId)
                 ));
         };
+    }
+
+    @SuppressWarnings("unused")
+    public static class StreamResult {
+
+        public final long nodeId;
+
+        public final long componentId;
+
+        public StreamResult(long nodeId, long componentId) {
+            this.nodeId = nodeId;
+            this.componentId = componentId;
+        }
     }
 }
