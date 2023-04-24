@@ -21,6 +21,7 @@ package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.functions.similairty.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 
@@ -32,6 +33,9 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
 
     private final Graph inputGraph;
     private final SplittableRandom rng;
+
+    private final LongArrayBuffer uSortedNeighs = new LongArrayBuffer();
+    private final LongArrayBuffer vSortedNeighs = new LongArrayBuffer();
 
     CommonNeighbourAwareNextNodeStrategy(
         Graph inputGraph,
@@ -45,10 +49,10 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
     public long getNextNode(long currentNode) {
         double q, chanceOutOfNeighbours;
         long candidateNode;
-        var uSortedNeighs = sortedNeighbours(inputGraph, currentNode);
+        sortedNeighbours(inputGraph, currentNode, uSortedNeighs);
         do {
             candidateNode = getCandidateNode(uSortedNeighs);
-            var vSortedNeighs = sortedNeighbours(inputGraph, candidateNode);
+            sortedNeighbours(inputGraph, candidateNode, vSortedNeighs);
             var overlap = computeOverlapSimilarity(uSortedNeighs, vSortedNeighs);
 
             chanceOutOfNeighbours = 1.0D - overlap;
@@ -58,34 +62,35 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
         return candidateNode;
     }
 
-    private double computeOverlapSimilarity(long[] neighsU, long[] neighsV) {
-        double similarity = OverlapSimilarity.computeSimilarity(neighsU, neighsV);
+    private double computeOverlapSimilarity(LongArrayBuffer neighsU, LongArrayBuffer neighsV) {
+        if(neighsU.length == 0 || neighsV.length == 0) return 0.0D;
+        double similarity = OverlapSimilarity.computeSimilarity(neighsU.buffer, neighsV.buffer, neighsU.length, neighsV.length);
         if (Double.isNaN(similarity)) {
             return 0.0D;
         }
         return similarity;
     }
 
-    private long getCandidateNode(long[] sortedNeighs) {
+    private long getCandidateNode(LongArrayBuffer sortedNeighs) {
         long candidateNode;
 
         int targetOffsetCandidate = rng.nextInt(sortedNeighs.length);
-        candidateNode = sortedNeighs[targetOffsetCandidate];
+        candidateNode = sortedNeighs.buffer[targetOffsetCandidate];
         assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
                                                   "' is bound by the degree but no target could be found for nodeId " + candidateNode;
         return candidateNode;
     }
 
 
-
-    private long[] sortedNeighbours(Graph graph, long nodeId) {
-        var neighs = new long[graph.degree(nodeId)];
+    static void sortedNeighbours(Graph graph, long nodeId, LongArrayBuffer neighs) {
+        var neighsCount = graph.degree(nodeId);
+        neighs.ensureCapacity(neighsCount);
+        neighs.length = neighsCount;
         var idx = new AtomicInteger(0);
         graph.forEachRelationship(nodeId, (src, dst) -> {
-            neighs[idx.getAndIncrement()] = dst;
+            neighs.buffer[idx.getAndIncrement()] = dst;
             return true;
         });
-        Arrays.sort(neighs);
-        return neighs;
+        Arrays.sort(neighs.buffer, 0, neighsCount);
     }
 }

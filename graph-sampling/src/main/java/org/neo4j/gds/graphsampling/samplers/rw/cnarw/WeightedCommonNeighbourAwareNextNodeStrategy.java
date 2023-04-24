@@ -20,6 +20,7 @@
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.functions.similairty.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 
@@ -30,8 +31,12 @@ import java.util.stream.IntStream;
 
 public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
 
-    private final Graph inputGraph;
-    private final SplittableRandom rng;
+    private Graph inputGraph;
+    private SplittableRandom rng;
+    private final LongArrayBuffer uSortedNeighsId = new LongArrayBuffer();
+    private double[] uSortedNeighsWeights;
+    private final LongArrayBuffer vSortedNeighsId = new LongArrayBuffer();
+    private double[] vSortedNeighsWeights;
 
     WeightedCommonNeighbourAwareNextNodeStrategy(
         Graph inputGraph,
@@ -45,15 +50,15 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     public long getNextNode(long currentNode) {
         double q, chanceOutOfNeighbours;
         long candidateNode;
-        var uSortedNeighs = new SortedNeighsWithWeights(inputGraph, currentNode);
+        uSortedNeighsWeights = sortNeighsWithWeights(inputGraph, currentNode, uSortedNeighsId);
         do {
-            candidateNode = getCandidateNode(uSortedNeighs.getNeighs(), uSortedNeighs.getWeights());
-            var vSortedNeighs = new SortedNeighsWithWeights(inputGraph, candidateNode);
+            candidateNode = getCandidateNode(uSortedNeighsId, uSortedNeighsWeights);
+            vSortedNeighsWeights = sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsId);
             var overlap = computeOverlapSimilarity(
-                uSortedNeighs.getNeighs(),
-                uSortedNeighs.getWeights(),
-                vSortedNeighs.getNeighs(),
-                vSortedNeighs.getWeights()
+                uSortedNeighsId,
+                uSortedNeighsWeights,
+                vSortedNeighsId,
+                vSortedNeighsWeights
             );
 
             chanceOutOfNeighbours = 1.0D - overlap;
@@ -63,16 +68,30 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         return candidateNode;
     }
 
-    private double computeOverlapSimilarity(long[] neighsU, double[] weightsU, long[] neighsV, double[] weightsV) {
-        double similarity = OverlapSimilarity.computeWeightedSimilarity(neighsU, neighsV, weightsU, weightsV);
+    private double computeOverlapSimilarity(
+        LongArrayBuffer neighsU,
+        double[] weightsU,
+        LongArrayBuffer neighsV,
+        double[] weightsV
+    ) {
+        double similarity = OverlapSimilarity.computeWeightedSimilarity(
+            neighsU.buffer,
+            neighsV.buffer,
+            weightsU,
+            weightsV,
+            neighsU.length,
+            neighsV.length
+        );
         if (Double.isNaN(similarity)) {
             return 0.0D;
         }
         return similarity;
     }
 
-    private long getCandidateNode(long[] neighs, double[] weights) {
-        var sumWeights = Arrays.stream(weights).sum();
+    private long getCandidateNode(LongArrayBuffer neighs, double[] weights) {
+        var sumWeights = 0;
+        for (int i = 0; i < neighs.length; i++)
+            sumWeights += weights[i];
         var remainingMass = rng.nextDouble(0, sumWeights);
 
         int i = 0;
@@ -80,37 +99,27 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
             remainingMass -= weights[i++];
         }
 
-        return neighs[i - 1];
+        return neighs.buffer[i - 1];
     }
 
 
-    static class SortedNeighsWithWeights {
-        final long[] neighs;
-        final double[] weights;
+    private static double[] sortNeighsWithWeights(Graph graph, long nodeId, LongArrayBuffer neighs) {
+        var neighsCount = graph.degree(nodeId);
+        neighs.ensureCapacity(neighsCount);
+        neighs.length = neighsCount;
+        var idx = new AtomicInteger(0);
+        double[] weightsArray = new double[neighsCount];
+        graph.forEachRelationship(nodeId, 0.0, (src, dst, w) -> {
+            var localIdx = idx.getAndIncrement();
+            neighs.buffer[localIdx] = dst;
+            weightsArray[localIdx] = w;
+            return true;
+        });
 
-        SortedNeighsWithWeights(Graph graph, long nodeId) {
-            this.neighs = new long[graph.degree(nodeId)];
-            var idx = new AtomicInteger(0);
-            double[] weightsArray = new double[graph.degree(nodeId)];
-            graph.forEachRelationship(nodeId, 0.0, (src, dst, w) -> {
-                var localIdx = idx.getAndIncrement();
-                neighs[localIdx] = dst;
-                weightsArray[localIdx] = w;
-                return true;
-            });
-
-            weights = IntStream.range(0, weightsArray.length).boxed()
-                .sorted((i, j) -> Long.compare(neighs[i], neighs[j]))
-                .map(i -> weightsArray[i]).mapToDouble(x -> x).toArray();
-            Arrays.sort(neighs);
-        }
-
-        long[] getNeighs() {
-            return neighs;
-        }
-
-        double[] getWeights() {
-            return weights;
-        }
+        var weights = IntStream.range(0, weightsArray.length).boxed()
+            .sorted((i, j) -> Long.compare(neighs.buffer[i], neighs.buffer[j]))
+            .map(i -> weightsArray[i]).mapToDouble(x -> x).toArray();
+        Arrays.sort(neighs.buffer, 0, neighsCount);
+        return weights;
     }
 }

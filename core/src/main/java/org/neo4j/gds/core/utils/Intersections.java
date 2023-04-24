@@ -55,6 +55,30 @@ public final class Intersections {
         return intersection;
     }
 
+    public static long intersection3(long[] targets1, long[] targets2, int len1, int len2) {
+        assert len1 <= targets1.length;
+        assert len2 <= targets2.length;
+        if (len2 == 0) return 0;
+        int off2 = 0;
+        long intersection = 0;
+        int idx1 = 0;
+        while (idx1 < len1) {
+            var value1 = targets1[idx1];
+            if (value1 > targets2[off2]) {
+                while (++off2 != len2 && value1 > targets2[off2]) ;
+                if (off2 == len2) return intersection;
+            }
+            if (value1 == targets2[off2]) {
+                intersection++;
+                off2++;
+                if (off2 == len2) return intersection;
+            }
+            idx1++;
+        }
+        return intersection;
+    }
+
+
     // idea, compute differences, when 0 then equal?
     // assume both are sorted
     public static long intersection4(long[] targets1, long[] targets2) {

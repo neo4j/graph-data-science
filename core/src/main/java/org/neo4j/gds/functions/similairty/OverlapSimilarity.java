@@ -26,14 +26,28 @@ public final class OverlapSimilarity {
     private OverlapSimilarity() {}
 
     public static double computeSimilarity(long[] vector1, long[] vector2, double similarityCutoff) {
-        long intersection = Intersections.intersection3(vector1, vector2);
-        double minimumCardinality = Math.min(vector1.length, vector2.length);
+        return computeSimilarity(vector1, vector2, similarityCutoff, vector1.length, vector2.length);
+    }
+    public static double computeSimilarity(long[] vector1, long[] vector2, double similarityCutoff, int length1, int length2) {
+        long intersection = Intersections.intersection3(vector1, vector2, length1, length2);
+        double minimumCardinality = Math.min(length1, length2);
         double similarity = intersection / minimumCardinality;
         return similarity >= similarityCutoff ? similarity : Double.NaN;
     }
 
-    public static double computeSimilarity(long[] vector1, long[] vector2) {
-        return computeSimilarity(vector1, vector2, 0d);
+    public static double computeSimilarity(long[] vector1, long[] vector2, int length1, int length2) {
+        return computeSimilarity(vector1, vector2, 0d, length1, length2);
+    }
+
+    public static double computeWeightedSimilarity(
+        long[] vector1,
+        long[] vector2,
+        double[] weights1,
+        double[] weights2,
+        int length1,
+        int length2
+    ) {
+        return computeWeightedSimilarity(vector1, vector2, weights1, weights2, 0d, length1, length2);
     }
 
     public static double computeWeightedSimilarity(
@@ -46,10 +60,24 @@ public final class OverlapSimilarity {
         assert vector1.length == weights1.length;
         assert vector2.length == weights2.length;
 
-        int offset1 = 0;
-        int offset2 = 0;
         int length1 = weights1.length;
         int length2 = weights2.length;
+
+        return computeWeightedSimilarity(vector1, vector2, weights1, weights2, similarityCutoff, length1, length2);
+    }
+
+
+    public static double computeWeightedSimilarity(
+        long[] vector1,
+        long[] vector2,
+        double[] weights1,
+        double[] weights2,
+        double similarityCutoff,
+        int length1,
+        int length2
+    ) {
+        int offset1 = 0;
+        int offset2 = 0;
         double top = 0;
         double bottom1 = 0;
         double bottom2 = 0;
@@ -80,14 +108,5 @@ public final class OverlapSimilarity {
         }
         double similarity = top / Math.min(bottom1, bottom2);
         return similarity >= similarityCutoff ? similarity : Double.NaN;
-    }
-
-    public static double computeWeightedSimilarity(
-        long[] vector1,
-        long[] vector2,
-        double[] weights1,
-        double[] weights2
-    ) {
-        return computeWeightedSimilarity(vector1, vector2, weights1, weights2, 0d);
     }
 }
