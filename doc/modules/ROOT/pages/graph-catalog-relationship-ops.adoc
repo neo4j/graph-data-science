@@ -265,6 +265,49 @@ YIELD
 |===
 ======
 
+[.include-with-write-multiple-properties]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.relationshipProperties.write(
+    graphName: String,
+    relationshipType: String,
+    relationshipProperties: List of String,
+    configuration: Map
+)
+YIELD
+  writeMillis: Integer,
+  graphName: String,
+  relationshipType: String,
+  relationshipsWritten: Integer,
+  relationshipProperties: List of String,
+  propertiesWritten: Integer
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name                      | Type    | Optional | Description
+| graphName                 | String  | no       | The name under which the graph is stored in the catalog.
+| relationshipType          | String  | no       | The relationship type in the graph to write back.
+| relationshipProperties    | String  | yes      | The relationship properties to write back.
+| configuration             | Map     | yes      | Additional parameters to configure the procedure.
+|===
+
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                      | Type                     | Description
+| writeMillis               | Integer                  | Milliseconds for writing result data back to Neo4j.
+| graphName                 | String                   | The name of a graph stored in the catalog.
+| relationshipType          | String                   | The type of the relationship that was written.
+| relationshipsWritten      | Integer                  | Number relationships written.
+| relationshipProperties    | String                   | The name of the relationship properties that were written.
+| propertiesWritten         | Integer                  | Number relationships properties written.
+|===
+======
+
 [.include-with-delete-relationships]
 ======
 [source, cypher, role=noplay]

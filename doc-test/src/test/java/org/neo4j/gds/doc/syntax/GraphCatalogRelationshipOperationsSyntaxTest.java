@@ -31,6 +31,7 @@ class GraphCatalogRelationshipOperationsSyntaxTest extends SyntaxTestBase {
             SyntaxModeMeta.of(SyntaxMode.STREAM_MULTIPLE_PROPERTIES),
             SyntaxModeMeta.of(SyntaxMode.CONVERT_TO_UNDIRECTED),
             SyntaxModeMeta.of(SyntaxMode.WRITE),
+            SyntaxModeMeta.of(SyntaxMode.WRITE_RELATIONSHIP_PROPERTIES),
             SyntaxModeMeta.of(SyntaxMode.DELETE_RELATIONSHIPS)
         );
     }
