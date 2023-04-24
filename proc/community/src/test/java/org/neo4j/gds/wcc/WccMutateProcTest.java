@@ -60,6 +60,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -67,6 +68,8 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -450,7 +453,7 @@ class WccMutateProcTest extends BaseProcTest {
             () -> applyOnProcedure(procedure -> {
                 var computationResult = mock(ComputationResult.class);
                 log.add(0, ((TestLog) procedure.log));
-                procedure.computationResultConsumer().consume(computationResult, procedure.executionContext());
+                new WccMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
             })
         );
 
@@ -465,18 +468,22 @@ class WccMutateProcTest extends BaseProcTest {
             RelationshipProjections.ALL
         );
         GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+        applyOnProcedure(wccMutateProc -> {
+            wccMutateProc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = Map.<String, Object>of("mutateProperty", MUTATE_PROPERTY);
-            proc.compute(
-                configMap,
-                GRAPH_NAME
-            ).result().get();
-            proc.compute(
-                configMap,
-                GRAPH_NAME
-            ).result().get();
+
+            var spec = new WccMutateSpecification() {
+                @Override
+                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> computationResultConsumer() {
+                    return (computationResultConsumer, executionContext) -> {
+                        computationResultConsumer.result().get();
+                        return Stream.empty();
+                    };
+                }
+            };
+            new ProcedureExecutor<>(spec, wccMutateProc.executionContext()).compute(GRAPH_NAME, configMap);
+            new ProcedureExecutor<>(spec, wccMutateProc.executionContext()).compute(GRAPH_NAME, configMap);
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -507,7 +514,7 @@ class WccMutateProcTest extends BaseProcTest {
                 "mutateProperty", MUTATE_PROPERTY
             );
 
-            proc.compute(configMap, GRAPH_NAME);
+            proc.mutate(GRAPH_NAME, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });

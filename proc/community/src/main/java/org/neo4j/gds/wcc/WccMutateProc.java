@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
@@ -41,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig, WccMutateProc.MutateResult> {
+public class WccMutateProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
@@ -59,10 +55,6 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         ).compute(graphName, configuration);
     }
 
-    ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> compute(Map<String, Object> configuration, String graphName) {
-        return compute(graphName, configuration);
-    }
-
     @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
@@ -78,21 +70,6 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected WccMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return WccMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
-        return new WccAlgorithmFactory<>();
-    }
-
-    @Override
-    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new WccMutateSpecification().computationResultConsumer();
     }
 
     @SuppressWarnings("unused")
