@@ -92,7 +92,7 @@ public class CypherAggregation implements CompatUserAggregationFunction {
             .apply(ctx);
 
         var username = procedures.lookupComponentProvider(Username.class, true).apply(ctx);
-        var runsOnCompositeDatabase = DatabaseTopologyHelper.isCompositeDatabase(databaseService);
+        var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
 
         return new GraphAggregator(
             DatabaseId.of(databaseService),
