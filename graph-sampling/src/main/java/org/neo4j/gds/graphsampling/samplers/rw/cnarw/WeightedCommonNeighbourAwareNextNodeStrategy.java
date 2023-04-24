@@ -32,9 +32,9 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
 
     private final Graph inputGraph;
     private final SplittableRandom rng;
-    private final LongArrayBuffer uSortedNeighsId = new LongArrayBuffer();
+    private final LongArrayBuffer uSortedNeighsIds = new LongArrayBuffer();
     private final DoubleArrayBuffer uSortedNeighsWeights = new DoubleArrayBuffer();
-    private final LongArrayBuffer vSortedNeighsId = new LongArrayBuffer();
+    private final LongArrayBuffer vSortedNeighsIds = new LongArrayBuffer();
     private final DoubleArrayBuffer vSortedNeighsWeights = new DoubleArrayBuffer();
 
     WeightedCommonNeighbourAwareNextNodeStrategy(
@@ -49,15 +49,15 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     public long getNextNode(long currentNode) {
         double q, chanceOutOfNeighbours;
         long candidateNode;
-        sortNeighsWithWeights(inputGraph, currentNode, uSortedNeighsId, uSortedNeighsWeights);
+        sortNeighsWithWeights(inputGraph, currentNode, uSortedNeighsIds, uSortedNeighsWeights);
         do {
-            candidateNode = getCandidateNode(uSortedNeighsId, uSortedNeighsWeights.buffer);
-            sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsId, vSortedNeighsWeights);
+            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights.buffer);
+            sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsIds, vSortedNeighsWeights);
             var overlap = computeOverlapSimilarity(
-                uSortedNeighsId,
-                uSortedNeighsWeights.buffer,
-                vSortedNeighsId,
-                vSortedNeighsWeights.buffer
+                uSortedNeighsIds,
+                uSortedNeighsWeights,
+                vSortedNeighsIds,
+                vSortedNeighsWeights
             );
 
             chanceOutOfNeighbours = 1.0D - overlap;
@@ -69,15 +69,15 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
 
     private double computeOverlapSimilarity(
         LongArrayBuffer neighsU,
-        double[] weightsU,
+        DoubleArrayBuffer weightsU,
         LongArrayBuffer neighsV,
-        double[] weightsV
+        DoubleArrayBuffer weightsV
     ) {
         double similarity = OverlapSimilarity.computeWeightedSimilarity(
             neighsU.buffer,
             neighsV.buffer,
-            weightsU,
-            weightsV,
+            weightsU.buffer,
+            weightsV.buffer,
             neighsU.length,
             neighsV.length
         );
@@ -144,10 +144,13 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         DoubleArrayBuffer weights
     ) {
         var neighsCount = graph.degree(nodeId);
+
         neighs.ensureCapacity(neighsCount);
-        weights.ensureCapacity(neighsCount);
         neighs.length = neighsCount;
+
+        weights.ensureCapacity(neighsCount);
         weights.length = neighsCount;
+
         var idx = new AtomicInteger(0);
         graph.forEachRelationship(nodeId, 0.0, (src, dst, w) -> {
             var localIdx = idx.getAndIncrement();
