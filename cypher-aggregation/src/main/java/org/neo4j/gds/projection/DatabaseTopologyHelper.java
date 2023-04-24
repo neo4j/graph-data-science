@@ -29,6 +29,6 @@ public final class DatabaseTopologyHelper {
 
     public static boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService) {
         var databaseManager = GraphDatabaseApiProxy.resolveDependency(graphDatabaseService, FabricDatabaseManager.class);
-        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(graphDatabaseService).name());
+        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(graphDatabaseService));
     }
 }
