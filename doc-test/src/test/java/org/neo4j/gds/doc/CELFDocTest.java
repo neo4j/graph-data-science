@@ -50,6 +50,6 @@ class CELFDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/influence-maximization/celf.adoc";
+        return "pages/algorithms/celf.adoc";
     }
 }

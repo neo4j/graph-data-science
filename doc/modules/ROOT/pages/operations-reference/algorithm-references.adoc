@@ -239,7 +239,7 @@
 | `gds.beta.node2vec.stream.estimate`
 | `gds.beta.node2vec.write`
 | `gds.beta.node2vec.write.estimate`
-.8+<.^| xref:algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
+.8+<.^| xref:algorithms/celf.adoc[Influence Maximization - CELF]
 | `gds.beta.influenceMaximization.celf.mutate`
 | `gds.beta.influenceMaximization.celf.mutate.estimate`
 | `gds.beta.influenceMaximization.celf.stats`
