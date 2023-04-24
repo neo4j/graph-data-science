@@ -19,17 +19,11 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
@@ -42,8 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.wcc.stats", description = STATS_DESCRIPTION, executionMode = ExecutionMode.STATS)
-public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc.StatsResult, WccStatsConfig> {
+public class WccStatsProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -51,15 +44,10 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stats(computationResult);
-    }
-
-    ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> compute(Map<String, Object> configuration, String graphName) {
-        return compute(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new WccStatsSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
@@ -68,28 +56,11 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return WccProc.resultBuilder(
-            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @Override
-    protected WccStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return WccStatsConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory() {
-        return WccProc.algorithmFactory();
+        return new MemoryEstimationExecutor<>(
+            new WccStatsSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @SuppressWarnings("unused")

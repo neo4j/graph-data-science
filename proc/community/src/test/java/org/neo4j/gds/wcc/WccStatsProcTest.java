@@ -242,14 +242,14 @@ class WccStatsProcTest extends BaseProcTest {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = CypherMapWrapper.empty().toMap();
-            proc.compute(
-                configMap,
-                loadedGraphName
-            ).result().get();
-            proc.compute(
-                configMap,
-                loadedGraphName
-            ).result().get();
+            proc.stats(
+                loadedGraphName,
+                configMap
+            ).count();
+            proc.stats(
+                loadedGraphName,
+                configMap
+            ).count();
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -279,7 +279,7 @@ class WccStatsProcTest extends BaseProcTest {
             Map<String, Object> mapWithJobId = Map.of("jobId", someJobId);
 
             Map<String, Object> configMap = CypherMapWrapper.create(mapWithJobId).toMap();
-            proc.compute(configMap, loadedGraphName);
+            proc.stats(loadedGraphName, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
