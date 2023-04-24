@@ -101,6 +101,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {

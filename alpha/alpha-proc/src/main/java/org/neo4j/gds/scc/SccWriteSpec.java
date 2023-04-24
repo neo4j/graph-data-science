@@ -93,6 +93,7 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .build();
 
                 var properties = components.asNodeProperties();

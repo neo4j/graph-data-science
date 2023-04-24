@@ -110,6 +110,7 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
                                 .withGraph(similarityGraph)
                                 .withTerminationFlag(algorithm.getTerminationFlag())
                                 .withProgressTracker(progressTracker)
+                                .withArrowConnectionInfo(config.arrowConnectionInfo())
                                 .build();
 
                             if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
