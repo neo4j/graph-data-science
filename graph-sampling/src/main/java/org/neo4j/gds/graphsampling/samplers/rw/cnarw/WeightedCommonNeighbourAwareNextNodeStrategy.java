@@ -54,10 +54,8 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
             candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights.buffer);
             sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsIds, vSortedNeighsWeights);
             var overlap = computeOverlapSimilarity(
-                uSortedNeighsIds,
-                uSortedNeighsWeights,
-                vSortedNeighsIds,
-                vSortedNeighsWeights
+                uSortedNeighsIds, uSortedNeighsWeights,
+                vSortedNeighsIds, vSortedNeighsWeights
             );
 
             chanceOutOfNeighbours = 1.0D - overlap;
@@ -68,20 +66,15 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     }
 
     private double computeOverlapSimilarity(
-        LongArrayBuffer neighsU,
-        DoubleArrayBuffer weightsU,
-        LongArrayBuffer neighsV,
-        DoubleArrayBuffer weightsV
+        LongArrayBuffer neighsU, DoubleArrayBuffer weightsU,
+        LongArrayBuffer neighsV, DoubleArrayBuffer weightsV
     ) {
         double similarityCutoff = 0.0d;
         double similarity = OverlapSimilarity.computeWeightedSimilarity(
-            neighsU.buffer,
-            neighsV.buffer,
-            weightsU.buffer,
-            weightsV.buffer,
-            similarityCutoff,
-            neighsU.length,
-            neighsV.length
+            neighsU.buffer, neighsU.length,
+            neighsV.buffer, neighsV.length,
+            weightsU.buffer, weightsV.buffer,
+            similarityCutoff
         );
         if (Double.isNaN(similarity)) {
             return 0.0D;
@@ -105,10 +98,8 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     }
 
     private static void sortNeighsWithWeights(
-        Graph graph,
-        long nodeId,
-        LongArrayBuffer neighs,
-        DoubleArrayBuffer weights
+        Graph graph, long nodeId,
+        LongArrayBuffer neighs, DoubleArrayBuffer weights
     ) {
         var neighsCount = graph.degree(nodeId);
 
@@ -138,8 +129,8 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
      * @param length      Number of values to sort
      */
     private static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
-        assert longArray.length <= length;
-        assert doubleArray.length <= length;
+        assert longArray.length >= length;
+        assert doubleArray.length >= length;
         quickSortLongsWithDoubles(longArray, doubleArray, 0, length - 1);
     }
 

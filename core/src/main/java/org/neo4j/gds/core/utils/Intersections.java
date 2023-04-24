@@ -78,7 +78,6 @@ public final class Intersections {
         return intersection;
     }
 
-
     // idea, compute differences, when 0 then equal?
     // assume both are sorted
     public static long intersection4(long[] targets1, long[] targets2) {

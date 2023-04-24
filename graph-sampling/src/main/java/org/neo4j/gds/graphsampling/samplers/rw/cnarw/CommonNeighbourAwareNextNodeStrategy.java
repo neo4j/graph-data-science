@@ -66,11 +66,9 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
         if (neighsU.length == 0 || neighsV.length == 0) return 0.0D;
         double similarityCutoff = 0.0d;
         double similarity = OverlapSimilarity.computeSimilarity(
-            neighsU.buffer,
-            neighsV.buffer,
-            similarityCutoff,
-            neighsU.length,
-            neighsV.length
+            neighsU.buffer, neighsU.length,
+            neighsV.buffer, neighsV.length,
+            similarityCutoff
         );
         if (Double.isNaN(similarity)) {
             return 0.0D;
