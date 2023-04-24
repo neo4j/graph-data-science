@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class TriangleCountStreamProc extends BaseProc {
     @Description(TriangleCountCompanion.DESCRIPTION)
     @Procedure(name = "gds.triangleCount.stream", mode = Mode.READ)
-    public Stream<StreamResult> stream(
+    public Stream<TriangleCountStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

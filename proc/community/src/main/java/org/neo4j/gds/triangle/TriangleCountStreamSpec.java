@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.triangleCount.stream", description = TriangleCountCompanion.DESCRIPTION, executionMode = STREAM)
-public class TriangleCountStreamSpec  implements AlgorithmSpec<IntersectingTriangleCount,TriangleCountResult,TriangleCountStreamConfig,Stream<StreamResult>,IntersectingTriangleCountFactory<TriangleCountStreamConfig>> {
+public class TriangleCountStreamSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<TriangleCountStreamResult>, IntersectingTriangleCountFactory<TriangleCountStreamConfig>> {
     @Override
     public String name() {
         return "TriangleCountStream";
@@ -38,7 +38,7 @@ public class TriangleCountStreamSpec  implements AlgorithmSpec<IntersectingTrian
 
     @Override
     public IntersectingTriangleCountFactory<TriangleCountStreamConfig> algorithmFactory() {
-        return  new IntersectingTriangleCountFactory<>();
+        return new IntersectingTriangleCountFactory<>();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TriangleCountStreamSpec  implements AlgorithmSpec<IntersectingTrian
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<TriangleCountStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
 
@@ -58,7 +58,7 @@ public class TriangleCountStreamSpec  implements AlgorithmSpec<IntersectingTrian
             var graph = computationResult.graph();
             var result = computationResult.result().get();
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new StreamResult(
+                .mapToObj(i -> new TriangleCountStreamResult(
                     graph.toOriginalNodeId(i),
                     result.localTriangles().get(i)
                 ));

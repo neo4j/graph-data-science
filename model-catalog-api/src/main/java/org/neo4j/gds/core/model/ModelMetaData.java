@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model.CustomInfo;
@@ -26,6 +27,8 @@ import org.neo4j.gds.model.ModelConfig;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import static org.neo4j.gds.core.model.Model.ALL_USERS;
 
 @ValueClass
 public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo> {
@@ -47,4 +50,9 @@ public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomIn
     INFO customInfo();
 
     String gdsVersion();
+
+    @Value.Derived
+    default boolean isPublished() {
+        return sharedWith().contains(ALL_USERS);
+    }
 }

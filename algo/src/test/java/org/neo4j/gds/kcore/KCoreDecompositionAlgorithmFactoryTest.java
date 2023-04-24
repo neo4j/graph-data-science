@@ -35,8 +35,8 @@ class KCoreDecompositionAlgorithmFactoryTest {
             .estimate(GraphDimensions.of(100), config.concurrency());
 
         var memoryUsage = estimate.memoryUsage();
-        assertThat(memoryUsage.min).isEqualTo(349_936L);
-        assertThat(memoryUsage.max).isEqualTo(349_936L);
+        assertThat(memoryUsage.min).isEqualTo(4624L);
+        assertThat(memoryUsage.max).isEqualTo(4624L);
     }
 
 }

@@ -34,9 +34,10 @@
 .2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller]
 | `gds.graph.relationshipProperty.stream`
 | `gds.graph.streamRelationshipProperty` (deprecated)
-.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
+.3+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
 | `gds.graph.relationshipProperties.stream`
 | `gds.graph.streamRelationshipProperties` (deprecated)
+| `gds.graph.relationshipProperties.write`
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j]
 | `gds.graph.nodeProperties.write`
 | `gds.graph.writeNodeProperties`
@@ -76,6 +77,7 @@
 |Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop`
 |Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream`
 |xref:management-ops/projections/rwr.adoc[Sample a subgraph using random walk with restarts] | `gds.alpha.graph.sample.rwr`
+|xref:management-ops/projections/cnarw.adoc[Sample a subgraph using common neighbor aware random walks] | `gds.alpha.graph.sample.cnarw`
 |xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[Add node labels to the in-memory graph]   | `gds.alpha.graph.nodeLabel.mutate`
 |xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-label-example[Write node labels to the database]         | `gds.alpha.graph.nodeLabel.write`
 |===

@@ -20,17 +20,10 @@
 package org.neo4j.gds.triangle;
 
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -39,19 +32,20 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsProc.StatsResult, LocalClusteringCoefficientStatsConfig> {
+public class LocalClusteringCoefficientStatsProc extends BaseProc {
 
     @Procedure(value = "gds.localClusteringCoefficient.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<LocalClusteringCoefficientStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LocalClusteringCoefficientStatsSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)
@@ -60,76 +54,12 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new LocalClusteringCoefficientStatsSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ValidationConfiguration<LocalClusteringCoefficientStatsConfig> validationConfig(ExecutionContext executionContext) {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
-    }
 
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientStatsBuilder(
-                executionContext.returnColumns(),
-                computeResult.config().concurrency()
-            ),
-            computeResult
-        );
-    }
-
-    @Override
-    protected LocalClusteringCoefficientStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return LocalClusteringCoefficientStatsConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory() {
-        return new LocalClusteringCoefficientFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final double averageClusteringCoefficient;
-        public final long nodeCount;
-
-        StatsResult(
-            double averageClusteringCoefficient,
-            long nodeCount,
-            long preProcessingMillis,
-            long computeMillis,
-            Map<String, Object> configuration
-        ) {
-            // post-processing is instant for LCC
-            super(preProcessingMillis, computeMillis, 0L, configuration);
-            this.averageClusteringCoefficient = averageClusteringCoefficient;
-            this.nodeCount = nodeCount;
-        }
-    }
-
-    static class LocalClusteringCoefficientStatsBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<StatsResult> {
-
-        LocalClusteringCoefficientStatsBuilder(
-            ProcedureReturnColumns returnColumns,
-            int concurrency
-        ) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected StatsResult buildResult() {
-            return new StatsResult(
-                averageClusteringCoefficient,
-                nodeCount,
-                preProcessingMillis,
-                computeMillis,
-                config.toMap()
-            );
-        }
-    }
 }

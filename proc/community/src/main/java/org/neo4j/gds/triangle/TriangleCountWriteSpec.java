@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.triangleCount.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangleCount,TriangleCountResult,TriangleCountWriteConfig,Stream<WriteResult>,IntersectingTriangleCountFactory<TriangleCountWriteConfig>> {
+public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<TriangleCountWriteResult>, IntersectingTriangleCountFactory<TriangleCountWriteConfig>> {
     @Override
     public String name() {
         return "TriangleCountWrite";
@@ -54,7 +54,7 @@ public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangl
     }
 
     @Override
-    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<TriangleCountWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -68,15 +68,15 @@ public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangl
         );
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<TriangleCountWriteResult> resultBuilder(
         ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder();
+        var builder = new TriangleCountWriteResult.Builder();
 
         computationResult.result()
             .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
-        
+
         return builder;
     }
 }

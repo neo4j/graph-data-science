@@ -26,12 +26,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositionBaseConfig> extends GraphAlgorithmFactory<KCoreDecomposition, CONFIG> {
     @Override
     public KCoreDecomposition build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
 
-        return new KCoreDecomposition(graph,configuration.concurrency(),progressTracker);
+        return new KCoreDecomposition(graph, configuration.concurrency(), progressTracker);
     }
 
     @Override
@@ -47,5 +49,10 @@ public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositio
             .perNode("cores", HugeIntArray::memoryEstimation)
             .perThread("KCoreDecompositionTask", KCoreDecompositionTask.memoryEstimation());
         return builder.build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), graph.nodeCount());
     }
 }

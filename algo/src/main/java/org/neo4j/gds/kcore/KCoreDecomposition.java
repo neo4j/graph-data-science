@@ -58,6 +58,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
     @Override
     public KCoreDecompositionResult compute() {
+        progressTracker.beginSubTask("KCoreDecomposition");
 
         HugeAtomicIntArray currentDegrees = HugeAtomicIntArray.of(
             graph.nodeCount(),
@@ -67,19 +68,24 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         HugeIntArray core = HugeIntArray.newArray(graph.nodeCount());
         int degeneracy = 0;
 
-        AtomicLong remainingNodes = new AtomicLong(graph.nodeCount());
+        AtomicLong degreeZeroNodes = new AtomicLong();
 
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency,
             v -> {
                 int degree = graph.degree(v);
                 currentDegrees.set(v, degree);
-                if (degree == 0)
-                    remainingNodes.decrementAndGet();
+                if (degree == 0) {
+                    degreeZeroNodes.incrementAndGet();
+                }
             }
 
         );
 
+        AtomicLong remainingNodes = new AtomicLong(graph.nodeCount() - degreeZeroNodes.get());
+        progressTracker.logProgress(degreeZeroNodes.get());
+
         AtomicLong nodeIndex = new AtomicLong(0);
+
         int scanningDegree = 1;
 
         var tasks = createTasks(currentDegrees, core, nodeIndex, remainingNodes);
@@ -113,6 +119,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
             }
 
         }
+        progressTracker.endSubTask("KCoreDecomposition");
 
         return ImmutableKCoreDecompositionResult.of(core, degeneracy);
     }

@@ -26,7 +26,11 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.logging.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -41,7 +45,25 @@ public final class GraphStoreCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
+    private static final List<GraphStoreCatalogListener> listeners = new ArrayList<>();
+
+    // as we want to use the Neo4j log if possible and the catalog is a static instance,
+    // we make the log injectable
+    private static Optional<Log> log = Optional.empty();
+
     private GraphStoreCatalog() { }
+
+    public static void registerListener(GraphStoreCatalogListener listener) {
+        listeners.add(listener);
+    }
+
+    public static void unregisterListener(GraphStoreCatalogListener listener) {
+        listeners.remove(listener);
+    }
+
+    public static void setLog(Log log) {
+        GraphStoreCatalog.log = Optional.of(log);
+    }
 
     public static GraphStoreWithConfig get(CatalogRequest request, String graphName) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
@@ -159,6 +181,19 @@ public final class GraphStoreCatalog {
                 overwrite
             );
             return userCatalog;
+        });
+
+        listeners.forEach(listener -> {
+            try {
+                listener.onProject(config.username(), config.graphName());
+            } catch (Exception e) {
+                log.ifPresent(l -> l.warn(String.format(
+                    Locale.US,
+                    "Could not call listener %s on setting the graph %s",
+                    listener,
+                    config.graphName()
+                ), e));
+            }
         });
     }
 

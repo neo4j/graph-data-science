@@ -37,7 +37,7 @@ public class TriangleCountMutateProc extends BaseProc {
 
     @Procedure(value = "gds.triangleCount.mutate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> write(
+    public Stream<TriangleCountMutateResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

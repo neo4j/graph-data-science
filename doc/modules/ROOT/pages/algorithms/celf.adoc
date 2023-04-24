@@ -1,0 +1,457 @@
+:page-aliases: algorithms/influence-maximization/celf.adoc
+:page-aliases: algorithms/influence-maximization/
+
+[[algorithms-celf]]
+[.beta]
+= CELF
+:description: This section describes the Cost Effective Lazy Forward (CELF) influence maximization algorithm in the Neo4j Graph Data Science library.
+:entity: influenceMaximization
+:result: spread
+:algorithm: CELF
+
+
+include::partial$/operations-reference/beta-note.adoc[]
+
+:directed:
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[alpha-algorithms-celf-intro]]
+== Introduction
+The  influence maximization problem asks for a set of `k` nodes that maximize the expected spread of influence in the network.
+The set of these initial `k` is called the `seed set`.
+
+The Neo4j GDS Library supports approximate computation of the best seed set under the Independent Cascade propagation model.
+In this propagation model, initially we assume that the nodes in the seed set become influenced and the process works as follows.
+An influenced node influences each of its neighbors with probability `p`.
+The spread is then the number of nodes that become influenced.
+
+The Neo4j GDS Library supports the CELF algorithm, introduced in 2007 by Leskovec et al. in https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks] to compute a seed set with a large expected spread.
+
+The CELF algorithm is based on the https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Greedy] algorithm for the problem.
+It works iteratively in `k` steps to create the returned seed set `S`,
+where at each step the node yielding the maximum expected spread gain is added to `S`.
+
+The expected spread gain of a node `u` not in `S` is estimated by running `mc` different Monte Carlo simulations of the propagation process and counting for each simulation the number of nodes that would become influenced if `u` were to be added in `S`.
+
+The CELF algorithm extends on Greedy by introducing a _lazy forwarding_ mechanism, which
+prunes a lot of nodes from being examined, thereby massively reducing the number of conducted simulations.
+This makes CELF much faster than Greedy on large networks.
+
+[[alpha-algorithms-celf-syntax]]
+== Syntax
+
+
+.CELF syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run CELF in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  spread: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/influence-maximization/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name         | Type       | Description
+| nodeId       | Integer    | Node ID.
+| spread       | Float      | The spread gained by selecting the node.
+|===
+======
+
+[.include-with-stats]
+======
+
+.Run CELF in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  totalSpread: Float,
+  nodeCount: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/influence-maximization/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name              | Type       | Description
+| computeMillis     | Integer    | Milliseconds for running the algorithm.
+| totalSpread       | Float      | The sum of individual seed set node spreads.
+| nodeCount         | Integer    | Number of nodes in the graph.
+| configuration     | Map        | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+
+.Run CELF in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  computeMillis: Integer,
+  totalSpread: Float,
+  nodeCount: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/influence-maximization/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                   | Type      | Description
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| totalSpread            | Float     | The sum of individual seed set node spreads.
+| nodeCount              | Integer   | Number of nodes in the graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+
+.Run CELF in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  computeMillis: Integer,
+  totalSpread: Float,
+  nodeCount: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/influence-maximization/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                   | Type      | Description
+| writeMillis            | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the Neo4j database.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| totalSpread            | Float     | The sum of individual seed set node spreads.
+| nodeCount              | Integer   | Number of nodes in the graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
+
+
+[[alpha-algorithms-celf-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: influence-maximization.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=setup-query]
+----
+CREATE
+  (a:Person {name: 'Jimmy'}),
+  (b:Person {name: 'Jack'}),
+  (c:Person {name: 'Alice'}),
+  (d:Person {name: 'Ceri'}),
+  (e:Person {name: 'Mohammed'}),
+  (f:Person {name: 'Michael'}),
+  (g:Person {name: 'Ethan'}),
+  (h:Person {name: 'Lara'}),
+  (i:Person {name: 'Amir'}),
+  (j:Person {name: 'Willie'}),
+
+  (b)-[:FRIEND_OF]->(c),
+  (c)-[:FRIEND_OF]->(a),
+  (c)-[:FRIEND_OF]->(g),
+  (c)-[:FRIEND_OF]->(h),
+  (c)-[:FRIEND_OF]->(i),
+  (c)-[:FRIEND_OF]->(j),
+  (d)-[:FRIEND_OF]->(g),
+  (f)-[:FRIEND_OF]->(e),
+  (f)-[:FRIEND_OF]->(g),
+  (g)-[:FRIEND_OF]->(a),
+  (g)-[:FRIEND_OF]->(b),
+  (g)-[:FRIEND_OF]->(h),
+  (g)-[:FRIEND_OF]->(e),
+  (h)-[:FRIEND_OF]->(i);
+----
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=graph-project-query no-play]
+----
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  'FRIEND_OF'
+);
+----
+
+In the following examples we will demonstrate using the CELF algorithm on this graph.
+
+
+[[algorithms-celf-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.write.estimate('myGraph', {
+  writeProperty: 'spread',
+  seedSetSize: 3
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 10        | 14                | 2584    | 2584    | "2584 Bytes"
+|===
+--
+
+
+[[alpha-algorithms-celf-examples-stats]]
+=== Stats
+
+:stats-syntax: alpha-algorithms-celf-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in stats mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.stats('myGraph', {seedSetSize: 3})
+YIELD totalSpread
+----
+
+.Results
+[opts="header"]
+|===
+| totalSpread
+| 3.76
+|===
+--
+
+Using `stats` mode is useful to inspect how different configuration options affect the `totalSpread` and choose ones that produce optimal spread.
+
+[[alpha-algorithms-celf-examples-stream]]
+=== Stream
+
+In the `stream` execution mode, the algorithm returns the {result} for nodes that are part of the seed set.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the `stream` mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3})
+YIELD nodeId, spread
+RETURN gds.util.asNode(nodeId).name AS name, spread
+ORDER BY spread DESC, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name      | spread
+| "Alice"   | 1.6
+| "Ceri"    | 1.08
+| "Michael" | 1.08
+|===
+--
+
+Note that in `stream` mode the result is only the seed set computed by the algorithm.
+The other nodes are not considered influential and are not included in the result.
+
+
+[[alpha-algorithms-celf-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example, group=celfMutate]
+--
+.The following will run the algorithm, and updates the graph with the mutateProperty:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.mutate('myGraph', {
+  mutateProperty: 'celfSpread',
+  seedSetSize: 3
+})
+YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 10
+|===
+--
+
+[role=query-example, group=celfMutate]
+--
+.Stream the mutated node properties:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'celfSpread')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name as name, propertyValue AS spread
+ORDER BY spread DESC, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | spread
+| "Alice"     | 1.6
+| "Ceri"      | 1.08
+| "Michael"   | 1.08
+| "Amir"      | 0
+| "Ethan"     | 0
+| "Jack"      | 0
+| "Jimmy"     | 0
+| "Lara"      | 0
+| "Mohammed"  | 0
+| "Willie"    | 0
+|===
+
+--
+
+Note that in `mutate` all nodes in the in-memory graph get the `spread` property.
+The nodes that are not considered influential by the algorithm receive value of zero.
+
+
+[[alpha-algorithms-celf-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example, group=celfWrite]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.write('myGraph', {
+  writeProperty: 'celfSpread',
+  seedSetSize: 3
+})
+YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 10
+|===
+--
+
+[role=query-example, group=celfWrite]
+--
+.Query the written node properties:
+[source, cypher, role=noplay]
+----
+MATCH (n) RETURN n.name AS name, n.celfSpread AS spread
+ORDER BY spread DESC, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | spread
+| "Alice"     | 1.6
+| "Ceri"      | 1.08
+| "Michael"   | 1.08
+| "Amir"      | 0
+| "Ethan"     | 0
+| "Jack"      | 0
+| "Jimmy"     | 0
+| "Lara"      | 0
+| "Mohammed"  | 0
+| "Willie"    | 0
+|===
+
+--
+
+Note that in `write` all nodes in Neo4j graph projected get the `spread` property.
+The nodes that are not considered influential by the algorithm receive value of zero.

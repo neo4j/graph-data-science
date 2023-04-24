@@ -326,4 +326,6 @@ public interface Neo4jProxyApi {
         String queryText,
         MapValue queryParameters
     );
+
+    boolean isCompositeDatabase(GraphDatabaseService databaseService);
 }

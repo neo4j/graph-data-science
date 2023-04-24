@@ -28,13 +28,10 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
 
 class TriangleCountStatsProcTest extends BaseProcTest {
 
@@ -60,16 +57,7 @@ class TriangleCountStatsProcTest extends BaseProcTest {
             .algo("triangleCount")
             .statsMode()
             .yields();
-
-        assertCypherResult(query, List.of(Map.of(
-            "globalTriangleCount", 1L,
-            "nodeCount", 3L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "configuration", isA(Map.class)
-        )));
-
+        
         var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("globalTriangleCount"))
                 .asInstanceOf(LONG)
