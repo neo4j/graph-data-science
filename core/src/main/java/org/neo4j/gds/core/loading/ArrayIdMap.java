@@ -105,7 +105,7 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public boolean contains(final long originalNodeId) {
+    public boolean containsOriginalId(final long originalNodeId) {
         return originalToInternalIds.contains(originalNodeId);
     }
 

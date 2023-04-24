@@ -70,7 +70,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
             @Override
             public boolean contains(IdMap idMap, long id) {
-                return idMap.contains(id);
+                return idMap.containsOriginalId(id);
             }
         }
     }

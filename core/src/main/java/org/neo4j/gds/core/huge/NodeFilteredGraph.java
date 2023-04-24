@@ -195,8 +195,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public boolean contains(long originalNodeId) {
-        return filteredIdMap.contains(originalNodeId);
+    public boolean containsOriginalId(long originalNodeId) {
+        return filteredIdMap.containsOriginalId(originalNodeId);
     }
 
     @Override

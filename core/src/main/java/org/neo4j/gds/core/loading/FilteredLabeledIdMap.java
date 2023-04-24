@@ -64,8 +64,8 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public boolean contains(long originalNodeId) {
-        return rootToFilteredIdMap.contains(originalToRootIdMap.toMappedNodeId(originalNodeId));
+    public boolean containsOriginalId(long originalNodeId) {
+        return rootToFilteredIdMap.containsOriginalId(originalToRootIdMap.toMappedNodeId(originalNodeId));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
 
     @Override
     public boolean containsRootNodeId(long rootNodeId) {
-        return rootToFilteredIdMap.contains(rootNodeId);
+        return rootToFilteredIdMap.containsOriginalId(rootNodeId);
     }
 
     @Override

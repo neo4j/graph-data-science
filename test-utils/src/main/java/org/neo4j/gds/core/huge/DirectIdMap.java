@@ -60,7 +60,7 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public boolean contains(final long originalNodeId) {
+    public boolean containsOriginalId(final long originalNodeId) {
         return originalNodeId < nodeCount;
     }
 

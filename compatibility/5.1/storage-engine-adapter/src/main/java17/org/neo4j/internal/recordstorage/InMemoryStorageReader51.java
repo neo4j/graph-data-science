@@ -315,6 +315,6 @@ public class InMemoryStorageReader51 implements StorageReader {
 
     protected boolean nodeExists(long id) {
         var originalId = graphStore.nodes().toOriginalNodeId(id);
-        return graphStore.nodes().contains(originalId);
+        return graphStore.nodes().containsOriginalId(originalId);
     }
 }

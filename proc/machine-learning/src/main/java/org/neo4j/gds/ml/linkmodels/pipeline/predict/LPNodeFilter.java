@@ -51,7 +51,7 @@ public interface LPNodeFilter extends LongPredicate {
 
                 @Override
                 public boolean test(long id) {
-                    return idMap.contains(predictGraph.toOriginalNodeId(id));
+                    return idMap.containsOriginalId(predictGraph.toOriginalNodeId(id));
                 }
             };
         }

@@ -91,7 +91,7 @@ public class InMemoryStorageReader55 implements StorageReader {
     @Override
     public boolean nodeExists(long id, StoreCursors storeCursors) {
         var originalId = graphStore.nodes().toOriginalNodeId(id);
-        return graphStore.nodes().contains(originalId);
+        return graphStore.nodes().containsOriginalId(originalId);
     }
 
     @Override

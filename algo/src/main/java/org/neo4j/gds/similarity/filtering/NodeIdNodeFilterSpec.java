@@ -58,7 +58,7 @@ public class NodeIdNodeFilterSpec implements NodeFilterSpec {
 
         var missingNodes = nodeIds
             .stream()
-            .filter(Predicate.not(existingNodeIds::contains))
+            .filter(Predicate.not(existingNodeIds::containsOriginalId))
             .map(String::valueOf)
             .collect(Collectors.joining(","));
 

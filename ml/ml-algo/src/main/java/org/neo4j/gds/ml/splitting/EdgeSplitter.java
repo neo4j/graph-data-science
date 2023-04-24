@@ -73,8 +73,8 @@ public abstract class EdgeSplitter {
         double holdoutFraction,
         Optional<String> remainingRelPropertyKey
     ) {
-        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
+        LongPredicate isValidSourceNode = node -> sourceNodes.containsOriginalId(graph.toOriginalNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodes.containsOriginalId(graph.toOriginalNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilder(

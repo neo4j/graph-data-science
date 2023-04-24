@@ -48,8 +48,8 @@ public class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public boolean contains(long originalNodeId) {
-        return super.contains(highToLowIdSpace.toMappedNodeId(originalNodeId));
+    public boolean containsOriginalId(long originalNodeId) {
+        return super.containsOriginalId(highToLowIdSpace.toMappedNodeId(originalNodeId));
     }
 
     @Override

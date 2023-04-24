@@ -107,10 +107,10 @@ class FilteredLabeledIdMapTest {
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
-        assertThat(idMap.contains(42)).isTrue();
-        assertThat(idMap.contains(43)).isFalse();
-        assertThat(idMap.contains(1337)).isTrue();
-        assertThat(idMap.contains(1338)).isFalse();
+        assertThat(idMap.containsOriginalId(42)).isTrue();
+        assertThat(idMap.containsOriginalId(43)).isFalse();
+        assertThat(idMap.containsOriginalId(1337)).isTrue();
+        assertThat(idMap.containsOriginalId(1338)).isFalse();
     }
 
     @Test
