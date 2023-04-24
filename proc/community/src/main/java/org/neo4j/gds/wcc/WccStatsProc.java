@@ -30,13 +30,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class WccStatsProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(WCC_DESCRIPTION)
     public Stream<WccStatsSpecification.StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

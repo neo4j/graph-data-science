@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@GdsCallable(name = "gds.wcc.write", description = WccProc.WCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.wcc.write", description = WccSpecification.WCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteSpecification.WriteResult>, WccAlgorithmFactory<WccWriteConfig>> {
 
     @Override
@@ -70,7 +70,7 @@ public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return WccProc.resultBuilder(
+        return WccSpecification.resultBuilder(
             new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );

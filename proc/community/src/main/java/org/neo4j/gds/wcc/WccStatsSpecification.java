@@ -36,8 +36,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
+import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.wcc.stats", description = "Executes the algorithm and returns result statistics without writing the result to Neo4j.", executionMode = ExecutionMode.STATS)
+@GdsCallable(name = "gds.wcc.stats", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class WccStatsSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccStatsConfig, Stream<WccStatsSpecification.StatsResult>, WccAlgorithmFactory<WccStatsConfig>> {
 
     @Override

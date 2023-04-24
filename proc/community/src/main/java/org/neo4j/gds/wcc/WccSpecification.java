@@ -26,12 +26,10 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
-final class WccProc {
+final class WccSpecification {
 
     static final String WCC_DESCRIPTION =
         "The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.";
-
-    private WccProc() {}
 
     static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
         AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
@@ -56,4 +54,6 @@ final class WccProc {
             () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }
+
+    private WccSpecification() {}
 }

@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
+import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.mutate", description = WCC_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateSpecification.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
@@ -64,7 +64,7 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
         MutateNodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult) -> List.of(
             ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                WccProc.nodeProperties(
+                WccSpecification.nodeProperties(
                     computationResult,
                     computationResult.config().mutateProperty()
                 )
@@ -77,7 +77,7 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
         ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return WccProc.resultBuilder(
+        return WccSpecification.resultBuilder(
             new MutateResult.Builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
