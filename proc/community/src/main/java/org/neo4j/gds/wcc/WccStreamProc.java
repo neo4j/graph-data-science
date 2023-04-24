@@ -19,17 +19,9 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,12 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.wcc.stream", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class WccStreamProc extends StreamProc<
-    Wcc,
-    DisjointSetStruct,
-    WccStreamProc.StreamResult,
-    WccStreamConfig> {
+public class WccStreamProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.stream", mode = READ)
     @Description(WCC_DESCRIPTION)
@@ -54,16 +41,10 @@ public class WccStreamProc extends StreamProc<
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stream(computationResult);
-    }
-
-    @TestOnly
-    ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> compute(Map<String, Object> configuration, String graphName) {
-        return compute(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new WccStreamSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.stream.estimate", mode = READ)
@@ -72,34 +53,11 @@ public class WccStreamProc extends StreamProc<
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected WccStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return WccStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
-        return WccProc.algorithmFactory();
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
-        return CommunityProcCompanion.nodeProperties(
-                computationResult.config(),
-                computationResult.result()
-                    .map(DisjointSetStruct::asNodeProperties)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-        );
+        return new MemoryEstimationExecutor<>(
+            new WccStreamSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @SuppressWarnings("unused")
