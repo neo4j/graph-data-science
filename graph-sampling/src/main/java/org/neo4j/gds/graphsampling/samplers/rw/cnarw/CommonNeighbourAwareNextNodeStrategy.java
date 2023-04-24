@@ -63,8 +63,15 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
     }
 
     private double computeOverlapSimilarity(LongArrayBuffer neighsU, LongArrayBuffer neighsV) {
-        if(neighsU.length == 0 || neighsV.length == 0) return 0.0D;
-        double similarity = OverlapSimilarity.computeSimilarity(neighsU.buffer, neighsV.buffer, neighsU.length, neighsV.length);
+        if (neighsU.length == 0 || neighsV.length == 0) return 0.0D;
+        double similarityCutoff = 0.0d;
+        double similarity = OverlapSimilarity.computeSimilarity(
+            neighsU.buffer,
+            neighsV.buffer,
+            similarityCutoff,
+            neighsU.length,
+            neighsV.length
+        );
         if (Double.isNaN(similarity)) {
             return 0.0D;
         }
@@ -82,7 +89,7 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
     }
 
 
-    static void sortedNeighbours(Graph graph, long nodeId, LongArrayBuffer neighs) {
+    private static void sortedNeighbours(Graph graph, long nodeId, LongArrayBuffer neighs) {
         var neighsCount = graph.degree(nodeId);
         neighs.ensureCapacity(neighsCount);
         neighs.length = neighsCount;

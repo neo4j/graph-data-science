@@ -25,29 +25,12 @@ public final class OverlapSimilarity {
 
     private OverlapSimilarity() {}
 
-    public static double computeSimilarity(long[] vector1, long[] vector2, double similarityCutoff) {
-        return computeSimilarity(vector1, vector2, similarityCutoff, vector1.length, vector2.length);
-    }
-    public static double computeSimilarity(long[] vector1, long[] vector2, double similarityCutoff, int length1, int length2) {
-        long intersection = Intersections.intersection3(vector1, vector2, length1, length2);
-        double minimumCardinality = Math.min(length1, length2);
-        double similarity = intersection / minimumCardinality;
-        return similarity >= similarityCutoff ? similarity : Double.NaN;
-    }
-
-    public static double computeSimilarity(long[] vector1, long[] vector2, int length1, int length2) {
-        return computeSimilarity(vector1, vector2, 0d, length1, length2);
-    }
-
-    public static double computeWeightedSimilarity(
+    public static double computeSimilarity(
         long[] vector1,
         long[] vector2,
-        double[] weights1,
-        double[] weights2,
-        int length1,
-        int length2
+        double similarityCutoff
     ) {
-        return computeWeightedSimilarity(vector1, vector2, weights1, weights2, 0d, length1, length2);
+        return computeSimilarity(vector1, vector2, similarityCutoff, vector1.length, vector2.length);
     }
 
     public static double computeWeightedSimilarity(
@@ -66,6 +49,18 @@ public final class OverlapSimilarity {
         return computeWeightedSimilarity(vector1, vector2, weights1, weights2, similarityCutoff, length1, length2);
     }
 
+    public static double computeSimilarity(
+        long[] vector1,
+        long[] vector2,
+        double similarityCutoff,
+        int length1,
+        int length2
+    ) {
+        long intersection = Intersections.intersection3(vector1, vector2, length1, length2);
+        double minimumCardinality = Math.min(length1, length2);
+        double similarity = intersection / minimumCardinality;
+        return similarity >= similarityCutoff ? similarity : Double.NaN;
+    }
 
     public static double computeWeightedSimilarity(
         long[] vector1,

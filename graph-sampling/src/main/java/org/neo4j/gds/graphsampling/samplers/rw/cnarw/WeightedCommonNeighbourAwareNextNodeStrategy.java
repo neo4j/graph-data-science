@@ -73,11 +73,13 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         LongArrayBuffer neighsV,
         DoubleArrayBuffer weightsV
     ) {
+        double similarityCutoff = 0.0d;
         double similarity = OverlapSimilarity.computeWeightedSimilarity(
             neighsU.buffer,
             neighsV.buffer,
             weightsU.buffer,
             weightsV.buffer,
+            similarityCutoff,
             neighsU.length,
             neighsV.length
         );
@@ -101,7 +103,7 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         return neighs.buffer[i - 1];
     }
 
-    public static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
+    private static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
         quicksortLongs(longArray, doubleArray, 0, length - 1);
     }
 
