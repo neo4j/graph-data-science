@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -30,22 +31,29 @@ final class FastRPCompanion {
 
     private FastRPCompanion() {}
 
-    static <CONFIG extends FastRPBaseConfig> NodePropertyValues getNodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
-        var nodeCount = computationResult.graph().nodeCount();
-        var embeddings = computationResult.result()
-            .map(FastRP.FastRPResult::embeddings)
-            .orElseGet(() -> HugeObjectArray.newArray(float[].class, 0));
+    static <CONFIG extends FastRPBaseConfig> NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
+        return computationResult.result()
+            .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
+            .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
+    }
 
-        return new FloatArrayNodePropertyValues() {
-            @Override
-            public float[] floatArrayValue(long nodeId) {
-                return embeddings.get(nodeId);
-            }
+    private static class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
+        private final HugeObjectArray<float[]> embeddings;
+        private final long nodeCount;
 
-            @Override
-            public long nodeCount() {
-                return nodeCount;
-            }
-        };
+        EmbeddingNodePropertyValues(HugeObjectArray<float[]> embeddings) {
+            this.embeddings = embeddings;
+            nodeCount = embeddings.size();
+        }
+
+        @Override
+        public float[] floatArrayValue(long nodeId) {
+            return embeddings.get(nodeId);
+        }
+
+        @Override
+        public long nodeCount() {
+            return nodeCount;
+        }
     }
 }

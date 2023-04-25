@@ -19,18 +19,20 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,61 +40,48 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.FLOAT_ARRAY;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 
-class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
+class FastRPWriteProcTest extends BaseProcTest {
 
-    @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
-        ).flatMap(Collection::stream);
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a', f1: 0.4, f2: 1.3})" +
+        ", (b:Node {name: 'b', f1: 2.1, f2: 0.5})" +
+        ", (e:Node2 {name: 'e'})" +
+        ", (c:Isolated {name: 'c'})" +
+        ", (d:Isolated {name: 'd'})" +
+        ", (a)-[:REL]->(b)" +
 
-    private AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPWriteConfig, ?> proc() {
-        try {
-            return getProcedureClazz()
-                .getConstructor()
-                .newInstance();
-        } catch (Exception e) {
-            fail("unable to instantiate procedure", e);
-        }
-        return null;
-    }
-    @Override
-    GdsCypher.ExecutionModes mode() {
-        return GdsCypher.ExecutionModes.WRITE;
-    }
+        ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
+        ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
-    @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPWriteConfig, ?>> getProcedureClazz() {
-        return FastRPWriteProc.class;
-    }
+    private static final String FAST_RP_GRAPH = "myGraph";
 
-    @Override
-    public FastRPWriteConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPWriteConfig.of(userInput);
-    }
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            FastRPWriteProc.class,
+            GraphProjectProc.class
+        );
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        CypherMapWrapper minimalConfig = super.createMinimalConfig(userInput);
-
-        if (!minimalConfig.containsKey("writeProperty")) {
-            return minimalConfig.withString("writeProperty", "embedding");
-        }
-        return minimalConfig;
+        runQuery(GdsCypher.call(FAST_RP_GRAPH)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
+            .yields());
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
-    void shouldComputeNonZeroEmbeddings(List<Float> weights) {
+    @MethodSource("weights")
+    void shouldComputeNonZeroEmbeddings(Collection<Float> weights, double propertyRatio) {
         List<String> featureProperties = List.of("f1", "f2");
-        var propertyRatio = 0.5;
         int embeddingDimension = 128;
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FASTRP_GRAPH)
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FAST_RP_GRAPH)
             .algo("fastRP")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
@@ -152,5 +141,19 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
         float[] embeddingOfE = embeddings.get("e");
         scale(embeddingOfE, 2);
         assertThat(embeddings.get("b")).containsExactly(embeddingOfE);
+    }
+
+    private static Stream<Arguments> weights() {
+        return crossArguments(
+            () -> Stream.of(
+                Arguments.of(Collections.emptyList()),
+                Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f))
+            ),
+            () -> Stream.of(
+                Arguments.of(0f),
+                Arguments.of(0.5f),
+                Arguments.of(1f)
+            )
+        );
     }
 }
