@@ -19,37 +19,117 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
-class GraphSageTrainProcTest extends GraphSageBaseProcTest {
+@Neo4jModelCatalogExtension
+class GraphSageTrainProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:King{ name: 'A', age: 20, birth_year: 200, death_year: 300 })" +
+        ", (b:King{ name: 'B', age: 12, birth_year: 232, death_year: 300 })" +
+        ", (c:King{ name: 'C', age: 67, birth_year: 212, death_year: 300 })" +
+        ", (d:King{ name: 'D', age: 78, birth_year: 245, death_year: 300 })" +
+        ", (e:King{ name: 'E', age: 32, birth_year: 256, death_year: 300 })" +
+        ", (f:King{ name: 'F', age: 32, birth_year: 214, death_year: 300 })" +
+        ", (g:King{ name: 'G', age: 35, birth_year: 214, death_year: 300 })" +
+        ", (h:King{ name: 'H', age: 56, birth_year: 253, death_year: 300 })" +
+        ", (i:King{ name: 'I', age: 62, birth_year: 267, death_year: 300 })" +
+        ", (j:King{ name: 'J', age: 44, birth_year: 289, death_year: 300 })" +
+        ", (k:King{ name: 'K', age: 89, birth_year: 211, death_year: 300 })" +
+        ", (l:King{ name: 'L', age: 99, birth_year: 201, death_year: 300 })" +
+        ", (m:King{ name: 'M', age: 99, birth_year: 201, death_year: 300 })" +
+        ", (n:King{ name: 'N', age: 99, birth_year: 201, death_year: 300 })" +
+        ", (o:King{ name: 'O', age: 99, birth_year: 201, death_year: 300 })" +
+        ", (a)-[:REL {weight: 1.0}]->(b)" +
+        ", (a)-[:REL {weight: 5.0}]->(c)" +
+        ", (b)-[:REL {weight: 42.0}]->(c)" +
+        ", (b)-[:REL {weight: 10.0}]->(d)" +
+        ", (c)-[:REL {weight: 62.0}]->(e)" +
+        ", (d)-[:REL {weight: 1.0}]->(e)" +
+        ", (d)-[:REL {weight: 1.0}]->(f)" +
+        ", (e)-[:REL {weight: 1.0}]->(f)" +
+        ", (e)-[:REL {weight: 4.0}]->(g)" +
+        ", (h)-[:REL {weight: 1.0}]->(i)" +
+        ", (i)-[:REL {weight: -1.0}]->(j)" +
+        ", (j)-[:REL {weight: 1.0}]->(k)" +
+        ", (j)-[:REL {weight: -10.0}]->(l)" +
+        ", (k)-[:REL {weight: 1.0}]->(l)";
+
+    private static final String GRAPH_NAME = "embeddingsGraph";
+
+    private static final String MODEL_NAME = "graphSageModel";
+
+    @Inject
+    protected ModelCatalog modelCatalog;
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            GraphSageTrainProc.class
+        );
+
+        String query = "CALL gds.graph.project($graphName, " +
+                       " {" +
+                       "    King: {" +
+                       "        label: 'King', " +
+                       "        properties: {" +
+                       "            age: {property: 'age', defaultValue: 1.0}, " +
+                       "            birth_year: {property: 'birth_year', defaultValue: 1.0}, " +
+                       "            death_year: {property: 'death_year', defaultValue: 1.0}" +
+                       "        }" +
+                       "    }" +
+                       " }, " +
+                       " { " +
+                       "    R: {" +
+                       "        type: '*', orientation: 'UNDIRECTED', properties: 'weight'" +
+                       "    }" +
+                       "})";
+
+        runQuery(query, Map.of("graphName", GRAPH_NAME));
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
 
     @Test
     void runsTraining() {
@@ -67,29 +147,35 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .yields();
 
         runQueryWithResultConsumer(train, result -> {
-            Map<String, Object> resultRow = result.next();
-            assertNotNull(resultRow);
-            assertNotNull(resultRow.get("configuration"));
-            var modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
-            assertNotNull(modelInfo);
-            assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));
-            assertEquals(GraphSage.MODEL_TYPE, modelInfo.get(MODEL_TYPE_KEY));
-            assertTrue((long) resultRow.get("trainMillis") > 0);
+            var resultRow = result.next();
+
+            assertThat(resultRow).isNotNull();
+            assertThat(resultRow.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
+            assertThat(resultRow.get("modelInfo"))
+                .isNotNull()
+                .asInstanceOf(MAP)
+                .containsEntry(MODEL_NAME_KEY, modelName)
+                .containsEntry(MODEL_TYPE_KEY, GraphSage.MODEL_TYPE);
+
+            assertThat(resultRow.get("trainMillis")).asInstanceOf(LONG).isGreaterThan(0);
         });
 
         var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
         assertThat(model.gdsVersion()).isEqualTo("Unknown");
 
-        assertEquals(modelName, model.name());
-        assertEquals(GraphSage.MODEL_TYPE, model.algoType());
+        assertThat(model.name()).isEqualTo(modelName);
+        assertThat(model.algoType()).isEqualTo(GraphSage.MODEL_TYPE);
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
-        assertNotNull(trainConfig);
-        assertEquals(1, trainConfig.concurrency());
-        assertEquals(List.of("age", "birth_year", "death_year"), trainConfig.featureProperties());
-        assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
-        assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
-        assertEquals(64, trainConfig.embeddingDimension());
+        assertThat(trainConfig).isNotNull();
+        assertThat(trainConfig.concurrency()).isEqualTo(1);
+        assertThat(trainConfig.featureProperties()).containsExactly("age", "birth_year", "death_year");
+        assertThat(trainConfig.aggregator()).isEqualTo(Aggregator.AggregatorType.MEAN);
+        assertThat(trainConfig.activationFunction()).isEqualTo(ActivationFunction.SIGMOID);
+        assertThat(trainConfig.embeddingDimension()).isEqualTo(64);
     }
 
     @Test
@@ -98,7 +184,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
         runQuery("CREATE (:A {a1: 1.0, a2: 2.0})-[:REL]->(:B {b1: 42.0, b2: 1337.0})");
 
-        String query = GdsCypher.call(graphName)
+        String query = GdsCypher.call(GRAPH_NAME)
             .graphProject()
             .withNodeLabel(
                 "A",
@@ -121,7 +207,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         runQuery(query);
 
         String modelName = "gsModel";
-        String train = GdsCypher.call(graphName)
+        String train = GdsCypher.call(GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("projectedFeatureDimension", 5)
@@ -131,25 +217,33 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .yields();
 
         runQueryWithResultConsumer(train, result -> {
-            Map<String, Object> resultRow = result.next();
-            assertNotNull(resultRow);
-            assertNotNull(resultRow.get("configuration"));
-            Map<String, Object> modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
-            assertNotNull(modelInfo);
-            assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));
-            assertEquals(GraphSage.MODEL_TYPE, modelInfo.get(MODEL_TYPE_KEY));
-            assertTrue((long) resultRow.get("trainMillis") > 0);
+            var resultRow = result.next();
+
+            assertThat(resultRow).isNotNull();
+            assertThat(resultRow.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
+            assertThat(resultRow.get("modelInfo"))
+                .isNotNull()
+                .asInstanceOf(MAP)
+                .containsEntry(MODEL_NAME_KEY, modelName)
+                .containsEntry(MODEL_TYPE_KEY, GraphSage.MODEL_TYPE);
+
+            assertThat(resultRow.get("trainMillis")).asInstanceOf(LONG).isGreaterThan(0);
         });
 
         var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
 
-        assertEquals(modelName, model.name());
-        assertEquals(GraphSage.MODEL_TYPE, model.algoType());
+        assertThat(model.name()).isEqualTo(modelName);
+        assertThat(model.algoType()).isEqualTo(GraphSage.MODEL_TYPE);
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
-        assertNotNull(trainConfig);
-        assertEquals(List.of("a1", "a2", "b1", "b2"), trainConfig.featureProperties());
-        assertEquals(64, trainConfig.embeddingDimension());
+        assertThat(trainConfig).isNotNull();
+
+        assertThat(trainConfig.featureProperties()).containsExactly("a1", "a2", "b1", "b2");
+
+        assertThat(trainConfig.embeddingDimension()).isEqualTo(64);
     }
 
     @Test
@@ -162,7 +256,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
             .addParameter("embeddingDimension", 42)
-            .addParameter("modelName", modelName)
+            .addParameter("modelName", MODEL_NAME)
             .yields();
 
         assertThatThrownBy(() -> runQuery(query))
@@ -180,7 +274,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             getUsername(),
             CypherMapWrapper.create(
                 Map.of(
-                    "modelName", GraphSageBaseProcTest.modelName,
+                    "modelName", MODEL_NAME,
                     "featureProperties", List.of("foo"),
                     "projectedFeatureDimension", 5
                 )
@@ -205,7 +299,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             getUsername(),
             CypherMapWrapper.create(
                 Map.of(
-                    "modelName", GraphSageBaseProcTest.modelName,
+                    "modelName", MODEL_NAME,
                     "featureProperties", List.of("foo")
                 )
             )
@@ -225,7 +319,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void shouldValidateModelBeforeTraining() {
         var trainConfigParams = Map.of(
-            "modelName", GraphSageBaseProcTest.modelName,
+            "modelName", MODEL_NAME,
             "featureProperties", List.of("age"),
             "sudo", true
         );
@@ -245,9 +339,9 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         TestProcedureRunner.applyOnProcedure(
             db,
             GraphSageTrainProc.class,
-            proc -> assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
+            proc -> assertThatThrownBy(() -> proc.train(GRAPH_NAME, trainConfigParams))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName)
+                .hasMessage("Model with name `%s` already exists.", MODEL_NAME)
         );
     }
 
@@ -274,10 +368,10 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
     @Test
     void estimates() {
-        String query = GdsCypher.call(graphName)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .trainEstimation()
-            .addParameter("modelName", modelName)
+            .addParameter("modelName", MODEL_NAME)
             .addParameter("featureProperties", List.of("age"))
             .yields("requiredMemory");
 
@@ -289,11 +383,11 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @ParameterizedTest
     @ValueSource(ints = {-10, -1, 0})
     void featureDimensionValidation(int projectedFeatureDimension) {
-        String query = GdsCypher.call(graphName)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .trainEstimation()
             .addParameter("featureProperties", List.of("a"))
-            .addParameter("modelName", modelName)
+            .addParameter("modelName", MODEL_NAME)
             .addParameter("projectedFeatureDimension", projectedFeatureDimension)
             .yields();
 

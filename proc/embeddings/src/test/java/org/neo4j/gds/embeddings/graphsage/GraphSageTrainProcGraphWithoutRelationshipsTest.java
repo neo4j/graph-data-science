@@ -27,6 +27,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -37,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Neo4jModelCatalogExtension
 class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
 
+    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:King{ name: 'A', age: 20 })" +
@@ -50,8 +52,6 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
             GraphProjectProc.class,
             GraphSageTrainProc.class
         );
-
-        runQuery(DB_CYPHER);
 
         String query = GdsCypher.call(GRAPH_NAME)
             .graphProject()
