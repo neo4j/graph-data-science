@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-public abstract class RelationshipStreamExporterBuilder<T extends RelationshipStreamExporter> {
+public abstract class RelationshipStreamExporterBuilder {
     protected Stream<ExportedRelationship> relationships;
 
     // FIXME: This looks very dodgy; only being overriden in the Cypher implementation and in some tests...
