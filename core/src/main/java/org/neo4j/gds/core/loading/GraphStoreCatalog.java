@@ -28,12 +28,12 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -45,7 +45,7 @@ public final class GraphStoreCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
-    private static final List<GraphStoreCatalogListener> listeners = new ArrayList<>();
+    private static final Set<GraphStoreCatalogListener> listeners = new HashSet<>();
 
     // as we want to use the Neo4j log if possible and the catalog is a static instance,
     // we make the log injectable
@@ -185,7 +185,7 @@ public final class GraphStoreCatalog {
 
         listeners.forEach(listener -> {
             try {
-                listener.onProject(config.username(), config.graphName());
+                listener.onProject(config.username(), graphStore.databaseId().databaseName(), config.graphName());
             } catch (Exception e) {
                 log.ifPresent(l -> l.warn(String.format(
                     Locale.US,

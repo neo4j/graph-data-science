@@ -421,7 +421,7 @@ class GraphStoreCatalogTest {
 
         var listener = new GraphStoreCatalogListener() {
             @Override
-            public void onProject(String user, String graphName) {
+            public void onProject(String user, String database, String graphName) {
                 listenerCalls.increment();
             }
         };
