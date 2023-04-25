@@ -2,7 +2,7 @@
 allprojects { proj ->
 
     plugins.withType(JavaLibraryPlugin) {
-        if (project.hasProperty('enableSpotless') && project.property('enableSpotless')) {
+        if (Boolean.parseBoolean(project.properties.get("enableSpotless"))) {
             proj.apply plugin: "com.diffplug.spotless"
             proj.spotless {
                 java {
