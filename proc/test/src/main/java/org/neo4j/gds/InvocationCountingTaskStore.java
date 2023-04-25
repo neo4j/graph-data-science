@@ -31,7 +31,7 @@ import java.util.Set;
 public class InvocationCountingTaskStore extends GlobalTaskStore {
     public int registerTaskInvocations;
     public int removeTaskInvocations;
-    Set<JobId> seenJobIds = new HashSet<>();
+    public Set<JobId> seenJobIds = new HashSet<>();
 
     @Override
     public void store(String username, JobId jobId, Task task) {
