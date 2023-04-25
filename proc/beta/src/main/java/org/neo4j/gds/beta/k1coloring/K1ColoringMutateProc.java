@@ -26,6 +26,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -50,6 +51,10 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return mutate(compute(graphName, configuration));
+    }
+
+    ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate.estimate", mode = READ)
