@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,8 +37,10 @@ import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.fastRP.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, FastRPWriteProc.WriteResult, FastRPWriteConfig> {
+public class FastRPWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.fastRP.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -49,11 +48,10 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP.FastRPResult, FastRPWriteConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return write(computationResult);
+        return new ProcedureExecutor<>(
+            new FastRPWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.write.estimate", mode = READ)
@@ -62,72 +60,15 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new FastRPWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected FastRPWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return FastRPWriteConfig.of(config);
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
-
-    @Override
-    public GraphAlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
-        return new FastRPFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPWriteConfig> computationResult) {
-        return FastRPCompanion.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<FastRP, FastRP.FastRPResult, FastRPWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new WriteResult.Builder();
-    }
-
-    @SuppressWarnings("unused")
-    public static final class WriteResult {
-
-        public final long nodeCount;
-        public final long nodePropertiesWritten;
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final Map<String, Object> configuration;
-
-        WriteResult(
-            long nodeCount,
-            long nodePropertiesWritten,
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            Map<String, Object> configuration
-        ) {
-            this.nodeCount = nodeCount;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends AbstractResultBuilder<WriteResult> {
-
-            @Override
-            public WriteResult build() {
-                return new WriteResult(
-                    nodeCount,
-                    nodePropertiesWritten,
-                    preProcessingMillis,
-                    computeMillis,
-                    writeMillis,
-                    config.toMap()
-                );
-            }
-        }
-    }
-
 }
