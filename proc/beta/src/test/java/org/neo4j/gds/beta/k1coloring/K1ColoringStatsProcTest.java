@@ -20,27 +20,57 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.ImmutableNodeProjection;
+import org.neo4j.gds.ImmutableNodeProjections;
+import org.neo4j.gds.ImmutablePropertyMappings;
+import org.neo4j.gds.InvocationCountingTaskStore;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.ProcedureMethodHelper;
+import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class K1ColoringStatsProcTest extends BaseProcTest implements
-    AlgoBaseProcTest<K1Coloring, K1ColoringStatsConfig, HugeLongArray> {
+class K1ColoringStatsProcTest extends BaseProcTest {
 
+    private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String K1COLORING_GRAPH = "myGraph";
 
     @Neo4jGraph
@@ -59,22 +89,24 @@ class K1ColoringStatsProcTest extends BaseProcTest implements
             K1ColoringStatsProc.class,
             GraphProjectProc.class
         );
-        loadGraph(K1COLORING_GRAPH);
+        runQuery(
+            GdsCypher.call(K1COLORING_GRAPH)
+                .graphProject()
+                .loadEverything(Orientation.NATURAL)
+                .yields()
+        );
     }
 
-    @Override
-    public Class<K1ColoringStatsProc> getProcedureClazz() {
-        return K1ColoringStatsProc.class;
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Override
-    public K1ColoringStatsConfig createConfig(CypherMapWrapper configMap) {
-        return K1ColoringStatsConfig.of(configMap);
-    }
     @Test
     void testStats() {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH)
+            .algo("gds", "beta", "k1coloring")
             .statsMode()
             .yields();
 
@@ -89,18 +121,84 @@ class K1ColoringStatsProcTest extends BaseProcTest implements
     }
 
     @Test
-    @Disabled("Stats on empty graph has not been covered in AlgoBaseProcTest 🙈")
-    public void testRunOnEmptyGraph() {
+    void shouldUnregisterTaskAfterComputation() {
+        var taskStore = new InvocationCountingTaskStore();
+        TestProcedureRunner.applyOnProcedure(db, K1ColoringStatsProc.class, proc -> {
+            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+
+            var configMap = Map.<String, Object>of();
+            proc.compute(configMap, K1COLORING_GRAPH).result().get();
+            proc.compute(configMap, K1COLORING_GRAPH).result().get();
+
+            assertThat(taskStore.query())
+                .withFailMessage(() -> formatWithLocale(
+                    "Expected no tasks to be open but found [%s]",
+                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
+                )).isEmpty();
+            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
+        });
     }
 
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
+    @Test
+    void shouldRegisterTaskWithCorrectJobId() {
+        var taskStore = new InvocationCountingTaskStore();
+        TestProcedureRunner.applyOnProcedure(db, K1ColoringStatsProc.class, proc -> {
+            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+            var someJobId = new JobId();
+            Map<String, Object> configMap = Map.of("jobId", someJobId);
+            proc.compute(configMap, K1COLORING_GRAPH);
+            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
+        });
     }
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
+    @Test
+    void testRunOnEmptyGraph() {
+        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+        TestProcedureRunner.applyOnProcedure(db, K1ColoringStatsProc.class, (proc) -> {
+            var methods = ProcedureMethodHelper.statsMethods(proc).collect(Collectors.toList());
+            if (!methods.isEmpty()) {
+                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+                runQuery("CALL db.createLabel('X')");
+                runQuery("MATCH (n) DETACH DELETE n");
+                GraphStoreCatalog.removeAllLoadedGraphs();
+
+                var graphName = "graph";
+                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
+                    TEST_USERNAME,
+                    graphName,
+                    ImmutableNodeProjections.of(
+                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                    ),
+                    RelationshipProjections.ALL
+                );
+                var graphStore = graphLoader(graphProjectConfig).graphStore();
+                GraphStoreCatalog.set(graphProjectConfig, graphStore);
+                methods.forEach(method -> {
+                    try {
+                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, Map.<String, Object>of());
+                        assertEquals(1, result.count());
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                });
+            }
+        });
     }
 
+    @NotNull
+    private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        return ImmutableGraphLoader
+            .builder()
+            .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+                .transactionContext(TestSupport.fullAccessTransaction(db))
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .log(Neo4jProxy.testLog())
+                .build())
+            .username("")
+            .projectConfig(graphProjectConfig)
+            .build();
+    }
 }

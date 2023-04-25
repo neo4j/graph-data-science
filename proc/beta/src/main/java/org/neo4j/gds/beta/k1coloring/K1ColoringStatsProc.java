@@ -63,6 +63,10 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
+    ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
+    }
+
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(
         ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computeResult,
