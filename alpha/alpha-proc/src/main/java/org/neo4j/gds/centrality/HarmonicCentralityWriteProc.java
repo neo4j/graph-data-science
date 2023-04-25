@@ -80,7 +80,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
             builder.withCentralityFunction(result::getCentralityScore);
 
             try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-                var writeConcurrency = computationResult.config().writeConcurrency();
+                var writeConcurrency = config.writeConcurrency();
                 var progressTracker = new TaskProgressTracker(
                     NodePropertyExporter.baseTask("HarmonicCentrality", graph.nodeCount()),
                     executionContext.log(),
@@ -92,6 +92,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, writeConcurrency)
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .build();
 
                 var properties = new DoubleNodePropertyValues() {
