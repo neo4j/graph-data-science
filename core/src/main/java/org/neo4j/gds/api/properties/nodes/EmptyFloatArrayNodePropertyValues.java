@@ -22,6 +22,7 @@ package org.neo4j.gds.api.properties.nodes;
 public final class EmptyFloatArrayNodePropertyValues implements FloatArrayNodePropertyValues {
 
     public static final EmptyFloatArrayNodePropertyValues INSTANCE = new EmptyFloatArrayNodePropertyValues();
+    private static final float[] EMPTY_ARRAY = new float[0];
 
     private EmptyFloatArrayNodePropertyValues() {}
 
@@ -32,6 +33,6 @@ public final class EmptyFloatArrayNodePropertyValues implements FloatArrayNodePr
 
     @Override
     public float[] floatArrayValue(long nodeId) {
-        return new float[0];
+        return EMPTY_ARRAY;
     }
 }
