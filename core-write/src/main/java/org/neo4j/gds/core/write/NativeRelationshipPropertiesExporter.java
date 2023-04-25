@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.write;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
@@ -35,7 +34,6 @@ import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
-import org.neo4j.values.storable.Value;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -185,17 +183,14 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
                 relationshipToken,
                 toOriginalId.applyAsLong(target)
             );
-            var propertyValues = new IntObjectHashMap<Value>();
+
             for (int propertyIdx = 0; propertyIdx < properties.length; propertyIdx++) {
-                propertyValues.put(
+                ops.relationshipSetProperty(
+                    relationshipId,
                     propertyTokens.get(propertyIdx),
                     propertyTranslator.toValue(properties[propertyIdx])
                 );
             }
-            ops.relationshipApplyChanges(
-                relationshipId,
-                propertyValues
-            );
 
             progressTracker.logProgress();
         }
