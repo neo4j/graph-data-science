@@ -19,51 +19,73 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.crossArguments;
 
 @SuppressWarnings("unchecked")
-class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
+class FastRPStreamProcTest extends BaseProcTest {
 
-    @Override
-    GdsCypher.ExecutionModes mode() {
-        return GdsCypher.ExecutionModes.STREAM;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a', f1: 0.4, f2: 1.3})" +
+        ", (b:Node {name: 'b', f1: 2.1, f2: 0.5})" +
+        ", (e:Node2 {name: 'e'})" +
+        ", (c:Isolated {name: 'c'})" +
+        ", (d:Isolated {name: 'd'})" +
+        ", (a)-[:REL]->(b)" +
 
-    @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPStreamConfig, ?>> getProcedureClazz() {
-        return FastRPStreamProc.class;
-    }
+        ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
+        ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
-    @Override
-    public FastRPStreamConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPStreamConfig.of(userInput);
+    private static final String FAST_RP_GRAPH = "myGraph";
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            FastRPStreamProc.class,
+            GraphProjectProc.class
+        );
+
+        runQuery(
+            GdsCypher.call(FAST_RP_GRAPH)
+                .graphProject()
+                .withNodeLabel("Node")
+                .withRelationshipType("REL", Orientation.UNDIRECTED)
+                .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
+                .yields()
+        );
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
-    void shouldComputeNonZeroEmbeddings(List<Float> weights) {
-        List<String> featureProperties = List.of("f1", "f2");
-        var propertyRatio = 0.5;
-        int embeddingDimension = 128;
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FASTRP_GRAPH)
+    @MethodSource("weights")
+    void shouldComputeNonZeroEmbeddings(Collection<Float> weights, double propertyRatio) {
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FAST_RP_GRAPH)
             .algo("fastRP")
             .streamMode()
             .addParameter("propertyRatio", propertyRatio)
-            .addParameter("featureProperties", featureProperties)
-            .addParameter("embeddingDimension", embeddingDimension);
+            .addParameter("featureProperties", List.of("f1", "f2"))
+            .addParameter("embeddingDimension", 128);
 
         if (!weights.isEmpty()) {
             queryBuilder.addParameter("iterationWeights", weights);
@@ -73,7 +95,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("embedding"))
                 .asList()
-                .hasSize(embeddingDimension)
+                .hasSize(128)
                 .anySatisfy(value -> assertThat(value).asInstanceOf(DOUBLE).isNotEqualTo(0.0));
         });
     }
@@ -84,7 +106,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
         var weights = List.of(0.0D, 1.0D, 2.0D, 4.0D);
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FASTRP_GRAPH)
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FAST_RP_GRAPH)
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
@@ -132,5 +154,19 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         for (int i = 0; i < 128; i++) {
             assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
         }
+    }
+
+    private static Stream<Arguments> weights() {
+        return crossArguments(
+            () -> Stream.of(
+                Arguments.of(Collections.emptyList()),
+                Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f))
+            ),
+            () -> Stream.of(
+                Arguments.of(0f),
+                Arguments.of(0.5f),
+                Arguments.of(1f)
+            )
+        );
     }
 }
