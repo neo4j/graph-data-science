@@ -26,11 +26,14 @@ import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
@@ -40,13 +43,15 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     private final int concurrency;
     private static final int CHUNK_SIZE = 64;
     private int chunkSize;
+    static int UNASSIGNED = -1;
+    static double REBUILD_CONSTANT = 0.02;
 
-   public KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
-       super(progressTracker);
-       this.graph = graph;
-       this.concurrency = concurrency;
-       this.chunkSize = CHUNK_SIZE;
-   }
+    public KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
+        super(progressTracker);
+        this.graph = graph;
+        this.concurrency = concurrency;
+        this.chunkSize = CHUNK_SIZE;
+    }
 
     @TestOnly
     KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker, int chunkSize) {
@@ -74,13 +79,17 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
             v -> {
                 int degree = graph.degree(v);
                 currentDegrees.set(v, degree);
+                int coreInitilization = UNASSIGNED;
                 if (degree == 0) {
                     degreeZeroNodes.incrementAndGet();
+                    coreInitilization = 0;
                 }
+                core.set(v, coreInitilization);
+
             }
 
         );
-
+        long rebuildLimit = (long) Math.ceil(REBUILD_CONSTANT * graph.nodeCount());
         AtomicLong remainingNodes = new AtomicLong(graph.nodeCount() - degreeZeroNodes.get());
         progressTracker.logProgress(degreeZeroNodes.get());
 
@@ -89,10 +98,17 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         int scanningDegree = 1;
 
         var tasks = createTasks(currentDegrees, core, nodeIndex, remainingNodes);
+        boolean hasRebuild = false;
 
         while (remainingNodes.get() > 0) {
 
+            if (!hasRebuild && remainingNodes.get() < rebuildLimit) {
+                rebuild(tasks, core, remainingNodes.get());
+                hasRebuild = true;
+            }
+
             nodeIndex.set(0L);
+
             for (var task : tasks) {
                 task.setScanningDegree(scanningDegree);
             }
@@ -131,6 +147,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         AtomicLong remainingNodes
     ) {
         List<KCoreDecompositionTask> tasks = new ArrayList<>();
+        var nodeProvider = new FullNodeProvider(graph.nodeCount());
         for (int taskId = 0; taskId < concurrency; ++taskId) {
             tasks.add(new KCoreDecompositionTask(
                 graph.concurrentCopy(),
@@ -139,9 +156,26 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 nodeIndex,
                 remainingNodes,
                 chunkSize,
+                nodeProvider,
                 progressTracker
             ));
         }
         return tasks;
+    }
+
+    private void rebuild(List<KCoreDecompositionTask> tasks, HugeIntArray core, long numberOfRemainingNodes) {
+        HugeLongArray nodeOrder = HugeLongArray.newArray(numberOfRemainingNodes);
+        AtomicLong atomicIndex = new AtomicLong(0);
+        var rebuildTasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> new RebuildTask(partition, atomicIndex, core, nodeOrder),
+            Optional.empty()
+        );
+        RunWithConcurrency.builder().tasks(rebuildTasks).concurrency(concurrency).run();
+        var newNodeProvider = new ReducedNodeProvider(nodeOrder, numberOfRemainingNodes);
+        for (var task : tasks) {
+            task.updateNodeProvider(newNodeProvider);
+        }
     }
 }

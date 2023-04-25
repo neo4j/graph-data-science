@@ -38,6 +38,10 @@ public final class HugeLongArrayQueue {
             .perNode("array", HugeLongArray::memoryEstimation).build();
     }
 
+    public static long memoryEstimation(long fixedSize) {
+        return HugeIntArray.memoryEstimation(fixedSize);
+    }
+
     private HugeLongArrayQueue(HugeLongArray array) {
         this.head = 0;
         this.tail = 0;
