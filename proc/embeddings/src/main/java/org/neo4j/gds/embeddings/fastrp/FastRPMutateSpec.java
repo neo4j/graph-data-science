@@ -56,7 +56,7 @@ public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResu
             (computationResult) -> List.of(
                 NodeProperty.of(
                     computationResult.config().mutateProperty(),
-                    FastRPCompanion.getNodeProperties(computationResult)
+                    FastRPCompanion.nodeProperties(computationResult)
                 )
             ),
             this::resultBuilder

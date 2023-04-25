@@ -77,7 +77,7 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPWriteConfig> computationResult) {
-        return FastRPCompanion.getNodeProperties(computationResult);
+        return FastRPCompanion.nodeProperties(computationResult);
     }
 
     @Override

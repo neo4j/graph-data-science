@@ -19,28 +19,21 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.DESCRIPTION, executionMode = STREAM)
-public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, FastRPStreamProc.StreamResult, FastRPStreamConfig> {
+public class FastRPStreamProc extends BaseProc {
 
     @Procedure(value = "gds.fastRP.stream", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
@@ -48,11 +41,10 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP.FastRPResult, FastRPStreamConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stream(computationResult);
+        return new ProcedureExecutor<>(
+            new FastRPStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.stream.estimate", mode = READ)
@@ -61,42 +53,10 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPStreamConfig> computationResult) {
-        return FastRPCompanion.getNodeProperties(computationResult);
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        return new StreamResult(originalNodeId, nodePropertyValues.floatArrayValue(internalNodeId));
-    }
-
-    @Override
-    protected FastRPStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return FastRPStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
-        return new FastRPFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static final class StreamResult {
-        public final long nodeId;
-        public final List<Double> embedding;
-
-        StreamResult(long nodeId, float[] embedding) {
-            this.nodeId = nodeId;
-            this.embedding = new ArrayList<>(embedding.length);
-            for (var f : embedding) {
-                this.embedding.add((double) f);
-            }
-        }
+        return new MemoryEstimationExecutor<>(
+            new FastRPStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

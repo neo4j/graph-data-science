@@ -92,12 +92,14 @@ class FastRPStreamProcTest extends BaseProcTest {
         }
         String query = queryBuilder.yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("embedding"))
                 .asList()
                 .hasSize(128)
                 .anySatisfy(value -> assertThat(value).asInstanceOf(DOUBLE).isNotEqualTo(0.0));
         });
+
+        assertThat(rowCount).isEqualTo(2);
     }
 
     @Test
@@ -117,11 +119,13 @@ class FastRPStreamProcTest extends BaseProcTest {
         queryBuilder.addParameter("iterationWeights", weights);
         String query = queryBuilder.yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("embedding"))
                 .asList()
                 .anySatisfy(value -> assertThat(value).asInstanceOf(DOUBLE).isNotEqualTo(0.0));
         });
+
+        assertThat(rowCount).isEqualTo(2);
     }
 
     @Test
@@ -149,7 +153,8 @@ class FastRPStreamProcTest extends BaseProcTest {
             .yields();
 
         List<List<Double>> embeddings = new ArrayList<>(3);
-        runQueryWithRowConsumer(query, row -> embeddings.add((List<Double>) row.get("embedding")));
+        var rowCount = runQueryWithRowConsumer(query, row -> embeddings.add((List<Double>) row.get("embedding")));
+        assertThat(rowCount).isEqualTo(3);
 
         for (int i = 0; i < 128; i++) {
             assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
