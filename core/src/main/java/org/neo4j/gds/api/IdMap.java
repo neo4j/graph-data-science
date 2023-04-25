@@ -76,7 +76,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     /**
      * Returns true iff the Neo4j id is mapped, otherwise false.
      */
-    boolean contains(long originalNodeId);
+    boolean containsOriginalId(long originalNodeId);
 
     /**
      * Number of mapped nodeIds.

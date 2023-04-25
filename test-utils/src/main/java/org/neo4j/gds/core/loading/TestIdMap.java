@@ -63,7 +63,7 @@ public final class TestIdMap extends LabeledIdMap {
     }
 
     @Override
-    public boolean contains(long originalNodeId) {
+    public boolean containsOriginalId(long originalNodeId) {
         return forwardMap.containsKey(originalNodeId);
     }
 

@@ -210,7 +210,7 @@ class FilteredKnnBaseConfigTest {
             .longs(
                 0,
                 4_294_967_295L // a large-ish number that still fits in our id maps (Math.pow(2, 32) - 1)
-            ).filter(l -> !graphStore.nodes().contains(l))
+            ).filter(l -> !graphStore.nodes().containsOriginalId(l))
             .limit(1)
             .findFirst()
             .getAsLong();
