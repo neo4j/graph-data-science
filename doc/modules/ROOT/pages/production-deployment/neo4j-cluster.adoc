@@ -24,7 +24,7 @@ We make use of a _Secondary_ instance to deploy the GDS library and process anal
 Calls to GDS `write` procedures are internally directed via _server-side routing_ to the cluster instance that is a `Writer` for the database we work on.
 
 Neo4j 5.x supports different databases on the same cluster instance to act as `Primary` or `Secondary` members of the cluster.
-In order for GDS to work correctly, all databases on the instance it is installed have to be `Secondary`, including the `system` database (see https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_server.cluster.system_database_mode[server.cluster.system_database_mode] and https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_initial.server.mode_constraint[initial.server.mode_constraint]).
+In order for GDS to function, all databases on the instance it is installed have to be `Secondary`, including the `system` database (see https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_server.cluster.system_database_mode[server.cluster.system_database_mode] and https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_initial.server.mode_constraint[initial.server.mode_constraint]).
 GDS has compute-intensive OLAP workloads that may disrupt the cluster operations and we recommend GDS to be installed on an instance that is not serving transactional load and does not participate in `Leader` elections.
 
 [NOTE]
