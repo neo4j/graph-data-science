@@ -859,12 +859,12 @@ CALL gds.graph.project(
 ----
 <1> Project node labels `Buyer` and `Seller`.
 <2> Project relationship type `PAID` to the in-memory graph.
-<3> Use relationship typ `PAYS` from the Neo4j database graph.
+<3> Use relationship type `PAYS` from the Neo4j database graph.
 <4> Project property `totalAmount` of relationship type `PAYS` using `SUM` aggregation.
 <5> Project property `numberOfPayments` of relationship type `PAYS` using `COUNT` aggregation.
 
 As we can see the Neo4j graph contains some parallel relationships.
-We use GDS projection to condense these into single relationship between the nodes.
+We use GDS projection to condense these into single relationships between the nodes.
 In this example we want to track how many times someone paid someone and what is the total amount of all payments.
 
 To write relationship properties, these have to be explicitly specified.
