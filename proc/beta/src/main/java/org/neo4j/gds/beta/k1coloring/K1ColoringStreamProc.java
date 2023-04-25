@@ -49,6 +49,10 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
         return stream(compute(graphName, configuration));
     }
 
+    ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
+    }
+
     @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
