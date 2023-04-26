@@ -31,6 +31,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.negativeSampling.UserInputNegativeSampler;
 
@@ -40,11 +41,12 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class UserInputNegativeSamplerTest {
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 5000)
     static String gdl =
         "(a1:A), " +
         "(a2:A), " +
@@ -60,6 +62,9 @@ class UserInputNegativeSamplerTest {
 
     @Inject
     Graph graph;
+
+    @Inject
+    IdFunction idFunction;
 
 
     @Test
@@ -120,9 +125,11 @@ class UserInputNegativeSamplerTest {
             List.of(NodeLabel.of("A"))
         ))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("There is a relationship of negativeRelationshipType between nodes 0 and 1. " +
+            .hasMessageContaining(formatWithLocale("There is a relationship of negativeRelationshipType between nodes %d and %d. " +
                                   "The nodes have types [NodeLabel{name='A'}] and [NodeLabel{name='A'}]. " +
-                                  "However, they need to be between [NodeLabel{name='B'}] and [NodeLabel{name='A'}]."
+                                  "However, they need to be between [NodeLabel{name='B'}] and [NodeLabel{name='A'}].",
+                idFunction.of("a1"), idFunction.of("a2")
+                )
             );
     }
 
