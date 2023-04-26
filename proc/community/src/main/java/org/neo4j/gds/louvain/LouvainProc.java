@@ -30,9 +30,6 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 final class LouvainProc {
 
-    static final String LOUVAIN_DESCRIPTION =
-        "The Louvain method for community detection is an algorithm for detecting communities in networks.";
-
     private LouvainProc() {}
 
     static <CONFIG extends LouvainBaseConfig> NodePropertyValues nodeProperties(

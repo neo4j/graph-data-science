@@ -19,122 +19,43 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.louvain.stream", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = STREAM)
-public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, LouvainStreamProc.StreamResult, LouvainStreamConfig> {
-
+public class LouvainStreamProc extends BaseProc {
     @Procedure(value = "gds.louvain.stream", mode = READ)
-    @Description(LouvainProc.LOUVAIN_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LouvainStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected LouvainStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return LouvainStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory() {
-        return new LouvainFactory<>();
-    }
-
-    @Override
-    protected Stream<StreamResult> stream(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
-        return runWithExceptionLogging("Graph streaming failed", () -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            boolean includeIntermediateCommunities = computationResult
-                .config()
-                .includeIntermediateCommunities();
-
-            Graph graph = computationResult.graph();
-
-            var louvain = computationResult.result().get();
-            var nodeProperties = nodeProperties(computationResult);
-
-            return LongStream.range(0, graph.nodeCount())
-                .boxed().
-                filter(nodeProperties::hasValue)
-                .map(nodeId -> {
-                    long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
-                    long communityId = nodeProperties.longValue(nodeId);
-                    return new StreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
-                });
-        });
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
-        return CommunityProcCompanion.nodeProperties(
-            computationResult.config(),
-            computationResult.result()
-                .map(LouvainResult::dendrogramManager)
-                .map(LouvainDendrogramManager::getCurrent)
-                .map(HugeLongArray::asNodeProperties)
-                .orElse(EmptyLongNodePropertyValues.INSTANCE)
-        );
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        throw new UnsupportedOperationException("Louvain handles result building individually.");
-    }
-
-    @SuppressWarnings("unused")
-    public static final class StreamResult {
-        public final long nodeId;
-        public final long communityId;
-        public final List<Long> intermediateCommunityIds;
-
-        StreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
-            this.nodeId = nodeId;
-            this.intermediateCommunityIds = intermediateCommunityIds == null ? null : Arrays
-                .stream(intermediateCommunityIds)
-                .boxed()
-                .collect(Collectors.toList());
-            this.communityId = communityId;
-        }
+        return new MemoryEstimationExecutor<>(
+            new LouvainStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 }

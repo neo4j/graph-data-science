@@ -43,11 +43,11 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.louvain.write", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.louvain.write", description = LouvainConstants.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class LouvainWriteProc extends WriteProc<Louvain, LouvainResult, LouvainWriteProc.WriteResult, LouvainWriteConfig> {
 
     @Procedure(value = "gds.louvain.write", mode = WRITE)
-    @Description(LouvainProc.LOUVAIN_DESCRIPTION)
+    @Description(LouvainConstants.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
