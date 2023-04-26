@@ -36,9 +36,11 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -54,7 +56,7 @@ import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionRelatio
 @GdlExtension
 class LinkPredictionRelationshipSamplerTest {
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 1337)
     private static final String GRAPH =
         "CREATE " +
         "(a:N {scalar: 0, array: [-1.0, -2.0, 1.0, 1.0, 3.0]}), " +
@@ -64,6 +66,8 @@ class LinkPredictionRelationshipSamplerTest {
         "(e:N {scalar: 1, array: [-2.0, 1.0, 2.0, 1.0, -1.0]}), " +
         "(f:N {scalar: 0, array: [-1.0, -3.0, 1.0, 2.0, 2.0]}), " +
         "(g:N {scalar: 1, array: [3.0, 1.0, -3.0, 3.0, 1.0]}), " +
+        // leaving some id gap between nodes
+        "(:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), ".repeat(20) +
         "(h:N {scalar: 3, array: [-1.0, 3.0, 2.0, 1.0, -3.0]}), " +
         "(i:N {scalar: 3, array: [4.0, 1.0, 1.0, 2.0, 1.0]}), " +
         "(j:N {scalar: 4, array: [1.0, -4.0, 2.0, -2.0, 2.0]}), " +
@@ -72,7 +76,7 @@ class LinkPredictionRelationshipSamplerTest {
         "(m:N {scalar: 0, array: [4.0, 4.0, 1.0, 1.0, 1.0]}), " +
         "(n:N {scalar: 3, array: [1.0, -2.0, 3.0, 2.0, 3.0]}), " +
         "(o:N {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "" +
+
         "(a)-[:REL {weight: 2.0}]->(b), " +
         "(a)-[:REL {weight: 1.0}]->(c), " +
         "(b)-[:REL {weight: 3.0}]->(c), " +
@@ -95,6 +99,9 @@ class LinkPredictionRelationshipSamplerTest {
 
     @Inject
     GraphStore graphStore;
+
+    @Inject
+    IdFunction idFunction;
 
     @GdlGraph(graphNamePrefix = "multi", orientation = Orientation.UNDIRECTED)
     private static final String MULTI_GRAPH =
@@ -363,7 +370,7 @@ class LinkPredictionRelationshipSamplerTest {
             .negativeRelationshipType("NEGATIVE") // 3 total
             .build();
 
-        var trainConfig = createTrainConfig("REL", "*", "N", -1337L);
+        var trainConfig = createTrainConfig("REL", "N", "N", -1337L);
 
         var relationshipSplitter = new LinkPredictionRelationshipSampler(
             graphStore,
@@ -386,6 +393,23 @@ class LinkPredictionRelationshipSamplerTest {
         //8 * 0.5 = 4 positive, 1 negative
         assertThat(trainGraphSize).isEqualTo(5);
         assertThat(featureInputGraphSize).isEqualTo(8);
+        var outGraph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore), List.of(splitConfig.testRelationshipType(), splitConfig.trainRelationshipType()), Optional.of("label"));
 
+        var negativeRelSpace = graphStore.getGraph(RelationshipType.of("NEGATIVE"));
+        var positiveRelSpace = graphStore.getGraph(RelationshipType.of("REL"));
+
+        outGraph.forEachNode(nodeId -> {
+            outGraph.forEachRelationship(nodeId, Double.NaN, (s,t, w) -> {
+                if (w == 1.0) {
+                    assertThat(positiveRelSpace.exists(outGraph.toRootNodeId(s), outGraph.toRootNodeId(t))).isTrue();
+                }
+                if (w == 0.0) {
+                    assertThat(negativeRelSpace.exists(outGraph.toRootNodeId(s), outGraph.toRootNodeId(t))).isTrue();
+                }
+                return true;
+            });
+            return true;
+            }
+        );
     }
 }

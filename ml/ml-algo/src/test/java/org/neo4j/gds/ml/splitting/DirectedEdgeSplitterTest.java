@@ -131,6 +131,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(-1L),
             skewedGraphStore.nodes(),
             skewedGraphStore.nodes(),
+            skewedGraphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -148,6 +149,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     void splitMultiGraph() {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(-1L),
+            multiGraphStore.nodes(),
             multiGraphStore.nodes(),
             multiGraphStore.nodes(),
             RelationshipType.of("SELECTED"),
@@ -168,6 +170,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     void split() {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(-1L),
+            graphStore.nodes(),
             graphStore.nodes(),
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
@@ -209,6 +212,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitter = new DirectedEdgeSplitter(Optional.of(42L),
             huuuuugeDenseGraph,
             huuuuugeDenseGraph,
+            huuuuugeDenseGraph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -241,6 +245,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(42L),
             graphStore.nodes(),
             graphStore.nodes(),
+            graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -261,6 +266,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         Collection<NodeLabel> targetNodeLabels = List.of(NodeLabel.of("C"), NodeLabel.of("D"));
         var splitter = new DirectedEdgeSplitter(
             Optional.of(1337L),
+            multiLabelGraphStore.nodes(),
             multiLabelGraphStore.getGraph(sourceNodeLabels),
             multiLabelGraphStore.getGraph(targetNodeLabels),
             RelationshipType.of("SELECTED"),
@@ -295,6 +301,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(42L),
             graphStore.nodes(),
             graphStore.nodes(),
+            graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -308,6 +315,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     void shouldPreserveRelationshipWeights() {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(42L),
+            graphStore.nodes(),
             graphStore.nodes(),
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),

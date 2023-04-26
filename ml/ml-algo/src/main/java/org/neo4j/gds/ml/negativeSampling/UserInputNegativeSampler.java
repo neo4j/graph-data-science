@@ -64,13 +64,16 @@ public class UserInputNegativeSampler implements NegativeSampler {
 
         negativeExampleGraph.forEachNode(nodeId -> {
             negativeExampleGraph.forEachRelationship(nodeId, (s, t) -> {
+                // as we are adding the relationships to the GraphStore we need to operate over the rootNodeIds
+                long rootS = negativeExampleGraph.toRootNodeId(s);
+                long rootT = negativeExampleGraph.toRootNodeId(t);
                 if (s < t) {
                     if (sample(testRelationshipsToAdd.doubleValue()/(testRelationshipsToAdd.doubleValue() + trainRelationshipsToAdd.doubleValue()))) {
                         testRelationshipsToAdd.decrement();
-                        testSetBuilder.add(s, t, NEGATIVE);
+                        testSetBuilder.addFromInternal(rootS, rootT, NEGATIVE);
                     } else {
                         trainRelationshipsToAdd.decrement();
-                        trainSetBuilder.add(s, t, NEGATIVE);
+                        trainSetBuilder.addFromInternal(rootS, rootT, NEGATIVE);
                     }
                 }
                 return true;
