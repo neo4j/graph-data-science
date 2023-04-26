@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.BaseProcTest;
+public final class StreamResult {
+    public final long nodeId;
+    public final double centrality;
 
-class HarmonicCentralityProcTest extends BaseProcTest {
-
-
+    StreamResult(long nodeId, double centrality) {
+        this.nodeId = nodeId;
+        this.centrality = centrality;
+    }
 }
