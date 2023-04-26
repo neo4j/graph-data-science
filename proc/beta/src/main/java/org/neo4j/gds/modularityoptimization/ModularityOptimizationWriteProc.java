@@ -19,15 +19,9 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,20 +30,21 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.beta.modularityOptimization.write", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteProc.WriteResult, ModularityOptimizationWriteConfig> {
+public class ModularityOptimizationWriteProc extends BaseProc {
 
     @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
     @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<ModularityOptimizationWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ModularityOptimizationWriteSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
@@ -58,101 +53,10 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected ModularityOptimizationWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return ModularityOptimizationWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
-        return new ModularityOptimizationFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig> computationResult) {
-        return ModularityOptimizationProc.nodeProperties(computationResult, computationResult.config().writeProperty());
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return ModularityOptimizationProc.resultBuilder(
-            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @SuppressWarnings("unused")
-    public static class WriteResult {
-
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long postProcessingMillis;
-        public final long nodes;
-        public boolean didConverge;
-        public long ranIterations;
-        public double modularity;
-        public final long communityCount;
-        public final Map<String, Object> communityDistribution;
-        public final Map<String, Object> configuration;
-
-        WriteResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodes,
-            boolean didConverge,
-            long ranIterations,
-            double modularity,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            Map<String, Object> configuration
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodes = nodes;
-            this.didConverge = didConverge;
-            this.ranIterations = ranIterations;
-            this.modularity = modularity;
-            this.communityCount = communityCount;
-            this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<WriteResult> {
-
-            Builder(
-                ProcedureReturnColumns returnColumns,
-                int concurrency
-            ) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    writeMillis,
-                    nodeCount,
-                    didConverge,
-                    ranIterations,
-                    modularity,
-                    maybeCommunityCount.orElse(0),
-                    communityHistogramOrNull(),
-                    config.toMap()
-                );
-            }
-        }
+        return new MemoryEstimationExecutor<>(
+            new ModularityOptimizationWriteSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
