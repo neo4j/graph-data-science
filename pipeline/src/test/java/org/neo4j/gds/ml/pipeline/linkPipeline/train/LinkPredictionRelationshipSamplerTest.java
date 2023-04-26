@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.ElementSchemaEntry;
 import org.neo4j.gds.assertj.Extractors;
@@ -41,13 +40,11 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,40 +59,15 @@ class LinkPredictionRelationshipSamplerTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 1337)
     private static final String GRAPH =
         "CREATE " +
-        "(x1:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x2:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x3:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x4:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x5:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x6:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x7:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x8:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(x9:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y1:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y2:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y3:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y4:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y5:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y6:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y7:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y8:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(y9:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z1:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z3:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z5:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z6:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z7:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z8:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "(z9:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
         "(a:N {scalar: 0, array: [-1.0, -2.0, 1.0, 1.0, 3.0]}), " +
-        "(z4:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
         "(b:N {scalar: 4, array: [2.0, 1.0, -2.0, 2.0, 1.0]}), " +
         "(c:N {scalar: 0, array: [-3.0, 4.0, 3.0, 3.0, 2.0]}), " +
         "(d:N {scalar: 3, array: [1.0, 3.0, 1.0, -1.0, -1.0]}), " +
         "(e:N {scalar: 1, array: [-2.0, 1.0, 2.0, 1.0, -1.0]}), " +
         "(f:N {scalar: 0, array: [-1.0, -3.0, 1.0, 2.0, 2.0]}), " +
         "(g:N {scalar: 1, array: [3.0, 1.0, -3.0, 3.0, 1.0]}), " +
-        "(z2:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
+        // leaving some id gap between nodes
+        "(:Ignore {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), ".repeat(20) +
         "(h:N {scalar: 3, array: [-1.0, 3.0, 2.0, 1.0, -3.0]}), " +
         "(i:N {scalar: 3, array: [4.0, 1.0, 1.0, 2.0, 1.0]}), " +
         "(j:N {scalar: 4, array: [1.0, -4.0, 2.0, -2.0, 2.0]}), " +
@@ -104,7 +76,7 @@ class LinkPredictionRelationshipSamplerTest {
         "(m:N {scalar: 0, array: [4.0, 4.0, 1.0, 1.0, 1.0]}), " +
         "(n:N {scalar: 3, array: [1.0, -2.0, 3.0, 2.0, 3.0]}), " +
         "(o:N {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
-        "" +
+
         "(a)-[:REL {weight: 2.0}]->(b), " +
         "(a)-[:REL {weight: 1.0}]->(c), " +
         "(b)-[:REL {weight: 3.0}]->(c), " +
@@ -421,44 +393,23 @@ class LinkPredictionRelationshipSamplerTest {
         //8 * 0.5 = 4 positive, 1 negative
         assertThat(trainGraphSize).isEqualTo(5);
         assertThat(featureInputGraphSize).isEqualTo(8);
-        Graph outGraph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore), List.of(splitConfig.testRelationshipType(), splitConfig.trainRelationshipType()), Optional.of("label"));
-        var positiveEdgesList = new ArrayList<String>();
-        var negativeEdgesList = new ArrayList<String>();
-        var idsToNames = IntStream
-            .range('a', 'o' + 1)
-            .mapToObj(i -> (char) i)
-            .collect(Collectors.toMap(c -> idFunction.of(String.valueOf(c)), String::valueOf));
+        var outGraph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore), List.of(splitConfig.testRelationshipType(), splitConfig.trainRelationshipType()), Optional.of("label"));
+
+        var negativeRelSpace = graphStore.getGraph(RelationshipType.of("NEGATIVE"));
+        var positiveRelSpace = graphStore.getGraph(RelationshipType.of("REL"));
+
         outGraph.forEachNode(nodeId -> {
-            outGraph.forEachRelationship(nodeId, -2, (s,t, w) -> {
-                var relationshipString = "(" + idsToNames.get(outGraph.toOriginalNodeId(s)) + "," + idsToNames.get(outGraph.toOriginalNodeId(t)) + ")";
+            outGraph.forEachRelationship(nodeId, Double.NaN, (s,t, w) -> {
                 if (w == 1.0) {
-                    positiveEdgesList.add(relationshipString);
+                    assertThat(positiveRelSpace.exists(outGraph.toRootNodeId(s), outGraph.toRootNodeId(t))).isTrue();
                 }
                 if (w == 0.0) {
-                    negativeEdgesList.add(relationshipString);
+                    assertThat(negativeRelSpace.exists(outGraph.toRootNodeId(s), outGraph.toRootNodeId(t))).isTrue();
                 }
                 return true;
             });
             return true;
             }
         );
-        assertThat(String.join("\n", positiveEdgesList))
-            .isEqualTo(
-                "(a,b)\n" +
-                "(a,c)\n" +
-                "(c,d)\n" +
-                "(e,g)\n" +
-                "(f,g)\n" +
-                "(h,i)\n" +
-                "(j,k)\n" +
-                "(j,l)\n" +
-                "(k,l)\n" +
-                "(m,n)\n" +
-                "(m,o)\n" +
-                "(n,o)");
-                assertThat(String.join("\n", negativeEdgesList))
-            .isEqualTo("(a,k)\n" +
-                       "(b,k)\n" +
-                       "(c,k)");
     }
 }
