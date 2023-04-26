@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -37,59 +37,60 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.*;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.nodePropertyValues;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<MutateResult>, GraphSageAlgorithmFactory<GraphSageMutateConfig>> {
+@GdsCallable(name = "gds.beta.graphSage.write", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<WriteResult>, GraphSageAlgorithmFactory<GraphSageWriteConfig>> {
 
     private ModelCatalog modelCatalog;
 
     @Override
     public String name() {
-        return "GraphSageMutate";
+        return "GraphSageWrite";
     }
 
     @Override
-    public GraphSageAlgorithmFactory<GraphSageMutateConfig> algorithmFactory() {
+    public GraphSageAlgorithmFactory<GraphSageWriteConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 
     @Override
-    public NewConfigFunction<GraphSageMutateConfig> newConfigFunction() {
-        return GraphSageMutateConfig::of;
+    public NewConfigFunction<GraphSageWriteConfig> newConfigFunction() {
+        return GraphSageWriteConfig::of;
     }
 
     @Override
-    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
+    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+        return new WriteNodePropertiesComputationResultConsumer<>(
+            this::resultBuilder,
             this::nodePropertyList,
-            this::resultBuilder
+            name()
         );
     }
 
     @Override
-    public GraphSageMutateSpec withModelCatalog(ModelCatalog modelCatalog) {
+    public GraphSageWriteSpec withModelCatalog(ModelCatalog modelCatalog) {
         this.modelCatalog = modelCatalog;
         return this;
     }
 
     @Override
-    public ValidationConfiguration<GraphSageMutateConfig> validationConfig(ExecutionContext executionContext) {
+    public ValidationConfiguration<GraphSageWriteConfig> validationConfig(ExecutionContext executionContext) {
         return new GraphSageConfigurationValidation<>(modelCatalog);
     }
 
-    private MutateResult.Builder resultBuilder(
-        ComputationResult<GraphSage, GraphSageResult, GraphSageMutateConfig> computationResult,
+    private WriteResult.Builder resultBuilder(
+        ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new WriteResult.Builder();
     }
 
-    private List<NodeProperty> nodePropertyList(ComputationResult<GraphSage, GraphSageResult, GraphSageMutateConfig> computationResult) {
+    private List<NodeProperty> nodePropertyList(ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult) {
         return List.of(NodeProperty.of(
-            computationResult.config().mutateProperty(),
+            computationResult.config().writeProperty(),
             nodePropertyValues(computationResult.result())
         ));
     }

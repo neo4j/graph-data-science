@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+
+import java.util.Optional;
 
 public final class GraphSageCompanion {
 
@@ -35,25 +34,11 @@ public final class GraphSageCompanion {
 
     private GraphSageCompanion() {}
 
-    @NotNull
-    static <T extends GraphSageBaseConfig> DoubleArrayNodePropertyValues getNodeProperties(ComputationResult<GraphSage, GraphSageResult, T> computationResult) {
-        var embeddings = computationResult.result()
+    static DoubleArrayNodePropertyValues nodePropertyValues(Optional<GraphSageResult> graphSageResult) {
+        return graphSageResult
             .map(GraphSageResult::embeddings)
-            .orElseGet(() -> HugeObjectArray.newArray(double[].class, 0));
-        var size = embeddings.size();
-
-        return new DoubleArrayNodePropertyValues() {
-            @Override
-            public long nodeCount() {
-                return size;
-            }
-
-            @Override
-            public double[] doubleArrayValue(long nodeId) {
-
-                return embeddings.get(nodeId);
-            }
-        };
+            .map(embeddings -> (DoubleArrayNodePropertyValues) new EmbeddingNodePropertyValues(embeddings))
+            .orElse(EmptyDoubleArrayNodePropertyValues.INSTANCE);
     }
 
     static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(ModelCatalog catalog) {
