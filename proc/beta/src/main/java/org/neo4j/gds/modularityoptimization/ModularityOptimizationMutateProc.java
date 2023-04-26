@@ -51,6 +51,10 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         return mutate(compute(graphName, configuration));
     }
 
+    ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> compute(Map<String, Object> configuration, String graphName) {
+        return compute(graphName, configuration);
+    }
+
     @Procedure(value = "gds.beta.modularityOptimization.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
