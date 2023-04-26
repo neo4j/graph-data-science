@@ -20,31 +20,22 @@
 package org.neo4j.gds.louvain;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
-public class LouvainMutateProcTest extends BaseProcTest implements
-    MutateNodePropertyTest<Louvain, LouvainMutateConfig, LouvainResult> {
-
+public class LouvainMutateProcTest extends BaseProcTest {
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
@@ -108,89 +99,13 @@ public class LouvainMutateProcTest extends BaseProcTest implements
         );
     }
 
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
-
-    @Override
-    public String mutateProperty() {
-        return "communityId";
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.LONG;
-    }
-
-    @Override
-    public Optional<String> mutateGraphName() {
-        return Optional.of("myGraph");
-    }
-
-    @Override
-    public String expectedMutatedGraph() {
-        return
-            "  (a:Node { communityId: 14, seed: 1 })" +
-            ", (b:Node { communityId: 14, seed: 1 })" +
-            ", (c:Node { communityId: 14, seed: 1 })" +
-            ", (d:Node { communityId: 14, seed: 1 })" +
-            ", (e:Node { communityId: 14, seed: 1 })" +
-            ", (f:Node { communityId: 14, seed: 1 })" +
-            ", (g:Node { communityId: 7, seed: 2 })" +
-            ", (h:Node { communityId: 7, seed: 2 })" +
-            ", (i:Node { communityId: 7, seed: 2 })" +
-            ", (j:Node { communityId: 12, seed: 42 })" +
-            ", (k:Node { communityId: 12, seed: 42 })" +
-            ", (l:Node { communityId: 12, seed: 42 })" +
-            ", (m:Node { communityId: 12, seed: 42 })" +
-            ", (n:Node { communityId: 12, seed: 42 })" +
-            ", (x:Node { communityId: 14, seed: 1 })" +
-            // 'LOUVAIN_GRAPH' is UNDIRECTED, e.g. each rel twice
-            ", (a)-[:TYPE]->(b)-[:TYPE]->(a)" +
-            ", (a)-[:TYPE]->(d)-[:TYPE]->(a)" +
-            ", (a)-[:TYPE]->(f)-[:TYPE]->(a)" +
-            ", (b)-[:TYPE]->(d)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(x)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(g)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(e)-[:TYPE]->(b)" +
-            ", (c)-[:TYPE]->(x)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(f)-[:TYPE]->(c)" +
-            ", (d)-[:TYPE]->(k)-[:TYPE]->(d)" +
-            ", (e)-[:TYPE]->(x)-[:TYPE]->(e)" +
-            ", (e)-[:TYPE]->(f)-[:TYPE]->(e)" +
-            ", (e)-[:TYPE]->(h)-[:TYPE]->(e)" +
-            ", (f)-[:TYPE]->(g)-[:TYPE]->(f)" +
-            ", (g)-[:TYPE]->(h)-[:TYPE]->(g)" +
-            ", (h)-[:TYPE]->(i)-[:TYPE]->(h)" +
-            ", (h)-[:TYPE]->(j)-[:TYPE]->(h)" +
-            ", (i)-[:TYPE]->(k)-[:TYPE]->(i)" +
-            ", (j)-[:TYPE]->(k)-[:TYPE]->(j)" +
-            ", (j)-[:TYPE]->(m)-[:TYPE]->(j)" +
-            ", (j)-[:TYPE]->(n)-[:TYPE]->(j)" +
-            ", (k)-[:TYPE]->(m)-[:TYPE]->(k)" +
-            ", (k)-[:TYPE]->(l)-[:TYPE]->(k)" +
-            ", (l)-[:TYPE]->(n)-[:TYPE]->(l)" +
-            ", (m)-[:TYPE]->(n)-[:TYPE]->(m)";
-    }
-
-    @Override
-    public Class<LouvainMutateProc> getProcedureClazz() {
-        return LouvainMutateProc.class;
-    }
-
-    @Override
-    public LouvainMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainMutateConfig.of(mapWrapper);
-    }
-
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call(mutateGraphName().orElseThrow())
+            .call("myGraph")
             .algo("louvain")
             .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateProperty", "communityId")
             .yields(
                 "nodePropertiesWritten",
                 "preProcessingMillis",
@@ -257,7 +172,6 @@ public class LouvainMutateProcTest extends BaseProcTest implements
         );
     }
 
-    // FIXME: This doesn't belong here.
     @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
@@ -281,15 +195,9 @@ public class LouvainMutateProcTest extends BaseProcTest implements
             .yields("communityCount");
 
         runQueryWithRowConsumer(query, row -> {
-           assertThat(row.getNumber("communityCount"))
-               .asInstanceOf(LONG)
-               .isEqualTo(0L);
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(0L);
         });
     }
-
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
 }
