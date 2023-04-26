@@ -50,6 +50,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -57,6 +58,8 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
@@ -203,8 +206,17 @@ class K1ColoringWriteProcTest extends BaseProcTest {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             Map<String, Object> configMap = Map.of("writeProperty", "color");
-            proc.compute(configMap, K1COLORING_GRAPH).result().get();
-            proc.compute(configMap, K1COLORING_GRAPH).result().get();
+            var spec = new K1ColoringWriteSpecification() {
+                @Override
+                public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>> computationResultConsumer() {
+                    return (computationResult, executionContext) -> {
+                        computationResult.result().get();
+                        return Stream.empty();
+                    };
+                }
+            };
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap).count();
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap).count();
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -227,7 +239,16 @@ class K1ColoringWriteProcTest extends BaseProcTest {
                 "jobId", someJobId,
                 "writeProperty", "color"
             );
-            proc.compute(configMap, K1COLORING_GRAPH);
+            var spec = new K1ColoringWriteSpecification() {
+                @Override
+                public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>> computationResultConsumer() {
+                    return (computationResult, executionContext) -> {
+                        computationResult.result().get();
+                        return Stream.empty();
+                    };
+                }
+            };
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
