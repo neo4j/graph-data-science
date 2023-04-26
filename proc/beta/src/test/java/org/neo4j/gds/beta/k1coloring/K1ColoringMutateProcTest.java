@@ -57,6 +57,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -64,6 +65,8 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -310,7 +313,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
             () -> applyOnProcedure(procedure -> {
                 var computationResult = mock(ComputationResult.class);
                 log.add(0, ((TestLog) procedure.log));
-                procedure.computationResultConsumer().consume(computationResult, procedure.executionContext());
+                new K1ColoringMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
             })
         );
 
@@ -325,8 +328,17 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
-            proc.compute(configMap, K1COLORING_GRAPH).result().get();
-            proc.compute(configMap, K1COLORING_GRAPH).result().get();
+            var spec = new K1ColoringMutateSpecification() {
+                @Override
+                public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>> computationResultConsumer() {
+                    return (computationResult, executionContext) -> {
+                        computationResult.result().get();
+                        return Stream.empty();
+                    };
+                }
+            };
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap);
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap);
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -349,7 +361,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
                 "jobId", someJobId,
                 "mutateProperty", MUTATE_PROPERTY
             );
-            proc.compute(configMap, K1COLORING_GRAPH);
+            proc.mutate(K1COLORING_GRAPH, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });

@@ -120,7 +120,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
             this.configuration = configuration;
         }
 
-        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<StatsResult> {
+        static class Builder extends K1ColoringResultBuilder<StatsResult> {
 
             Builder(
                 ProcedureReturnColumns returnColumns,

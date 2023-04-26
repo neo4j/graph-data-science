@@ -25,7 +25,6 @@ import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 final class K1ColoringProc {
@@ -56,33 +55,5 @@ final class K1ColoringProc {
                 .map(HugeLongArray::asNodeProperties)
                 .orElse(EmptyLongNodePropertyValues.INSTANCE)
         );
-    }
-
-    abstract static class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
-        long colorCount = -1L;
-        long ranIterations;
-        boolean didConverge;
-
-        K1ColoringResultBuilder(
-            ProcedureReturnColumns returnColumns,
-            int concurrency
-        ) {
-            super(returnColumns, concurrency);
-        }
-
-        K1ColoringResultBuilder<PROC_RESULT> withColorCount(long colorCount) {
-            this.colorCount = colorCount;
-            return this;
-        }
-
-        K1ColoringResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
-            this.ranIterations = ranIterations;
-            return this;
-        }
-
-        K1ColoringResultBuilder<PROC_RESULT> withDidConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
     }
 }

@@ -139,7 +139,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             this.configuration = configuration;
         }
 
-        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<WriteResult> {
+        static class Builder extends K1ColoringResultBuilder<WriteResult> {
 
             Builder(
                 ProcedureReturnColumns returnColumns,
