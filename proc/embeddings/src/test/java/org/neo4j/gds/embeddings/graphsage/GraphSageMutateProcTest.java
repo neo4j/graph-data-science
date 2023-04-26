@@ -144,7 +144,7 @@ class GraphSageMutateProcTest extends BaseProcTest {
 
         var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseName(), graphName).graphStore();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("nodeCount")).isEqualTo(graphStore.nodeCount());
             assertThat(row.get("nodePropertiesWritten")).isEqualTo(graphStore.nodeCount());
             assertThat(row.get("preProcessingMillis")).isNotEqualTo(-1L);
@@ -152,6 +152,10 @@ class GraphSageMutateProcTest extends BaseProcTest {
             assertThat(row.get("mutateMillis")).isNotEqualTo(-1L);
             assertThat(row.get("configuration")).isInstanceOf(Map.class);
         });
+
+        assertThat(rowCount)
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
 
         var embeddingNodePropertyValues = graphStore.nodeProperty(mutatePropertyKey).values();
         graphStore.nodes().forEachNode(nodeId -> {

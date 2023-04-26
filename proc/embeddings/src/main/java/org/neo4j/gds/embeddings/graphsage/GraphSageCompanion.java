@@ -21,31 +21,26 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-
-import java.util.List;
 
 public final class GraphSageCompanion {
 
-    public static final String GRAPHSAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
+    static final String GRAPHSAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
 
     private GraphSageCompanion() {}
 
     @NotNull
-    public static <T extends GraphSageBaseConfig> DoubleArrayNodePropertyValues getNodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
-        var size = computationResult.graph().nodeCount();
+    static <T extends GraphSageBaseConfig> DoubleArrayNodePropertyValues getNodeProperties(ComputationResult<GraphSage, GraphSageResult, T> computationResult) {
         var embeddings = computationResult.result()
-            .map(GraphSage.GraphSageResult::embeddings)
+            .map(GraphSageResult::embeddings)
             .orElseGet(() -> HugeObjectArray.newArray(double[].class, 0));
+        var size = embeddings.size();
 
         return new DoubleArrayNodePropertyValues() {
             @Override
@@ -62,26 +57,7 @@ public final class GraphSageCompanion {
     }
 
     static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(ModelCatalog catalog) {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
-                return List.of(
-                    (graphStore, graphProjectConfig, graphSageConfig) -> {
-                        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model = GraphSageModelResolver.resolveModel(
-                            catalog,
-                            graphSageConfig.username(),
-                            graphSageConfig.modelName()
-                        );
-                        GraphSageTrainConfig trainConfig = model.trainConfig();
-                        trainConfig.graphStoreValidation(
-                            graphStore,
-                            graphSageConfig.nodeLabelIdentifiers(graphStore),
-                            graphSageConfig.internalRelationshipTypes(graphStore)
-                        );
-                    }
-                );
-            }
-        };
+        return new GraphSageConfigurationValidation<>(catalog);
     }
 
 }

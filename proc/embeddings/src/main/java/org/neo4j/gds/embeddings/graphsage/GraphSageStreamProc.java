@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -50,7 +51,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DE
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.beta.graphSage.stream", description = GRAPHSAGE_DESCRIPTION, executionMode = STREAM)
-public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
+public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)
@@ -71,7 +72,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected Stream<GraphSageStreamResult> stream(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig> computationResult) {
+    protected Stream<GraphSageStreamResult> stream(ComputationResult<GraphSage, GraphSageResult, GraphSageStreamConfig> computationResult) {
         return runWithExceptionLogging("GraphSage streaming failed", () -> {
             var graph = computationResult.graph();
             var result = computationResult.result();
@@ -94,7 +95,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>, AlgorithmFactory<?, GraphSage, GraphSageStreamConfig>> withModelCatalog(
+    public AlgorithmSpec<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>, AlgorithmFactory<?, GraphSage, GraphSageStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);

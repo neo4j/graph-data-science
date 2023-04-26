@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -48,7 +49,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getNodePrope
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.graphSage.write", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
+public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPHSAGE_DESCRIPTION)
@@ -74,7 +75,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig, Stream<GraphSageWriteResult>, AlgorithmFactory<?, GraphSage, GraphSageWriteConfig>> withModelCatalog(
+    public AlgorithmSpec<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<GraphSageWriteResult>, AlgorithmFactory<?, GraphSage, GraphSageWriteConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);
@@ -92,13 +93,13 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult) {
         return getNodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<GraphSageWriteResult> resultBuilder(
-        ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computeResult,
+        ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new GraphSageWriteResult.Builder();
