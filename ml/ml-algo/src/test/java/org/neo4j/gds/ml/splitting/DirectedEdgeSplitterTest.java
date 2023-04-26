@@ -286,7 +286,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRelationships = result.selectedRels().build();
         assertThat(selectedRelationships.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRelationships, multiLabelGraphStore);
+            assertRelSamplingProperties(selectedRelationships, multiLabelGraph);
             assertThat(topology.elementCount()).isEqualTo(1);
             assertFalse(topology.isMultiGraph());
         });
