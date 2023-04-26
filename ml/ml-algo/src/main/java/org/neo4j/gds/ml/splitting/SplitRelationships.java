@@ -40,14 +40,19 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     private final SplitRelationshipsBaseConfig config;
 
+    private final IdMap rootNodes;
+
     private final IdMap sourceNodes;
 
     private final IdMap targetNodes;
 
-    private SplitRelationships(Graph graph, Graph masterGraph, IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsBaseConfig config) {
+    private SplitRelationships(Graph graph, Graph masterGraph,
+                               IdMap rootNodes,
+                               IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsBaseConfig config) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
+        this.rootNodes = rootNodes;
         this.config = config;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
@@ -66,7 +71,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap sourceNodes = graphStore.getGraph(sourceLabels);
         IdMap targetNodes = graphStore.getGraph(targetLabels);
 
-        return new SplitRelationships(graph, masterGraph, sourceNodes, targetNodes, config);
+        return new SplitRelationships(graph, masterGraph, graphStore.nodes(), sourceNodes, targetNodes, config);
     }
 
     public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
@@ -98,6 +103,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         var splitter = isUndirected
             ? new UndirectedEdgeSplitter(
             config.randomSeed(),
+            rootNodes,
             sourceNodes,
             targetNodes,
             config.holdoutRelationshipType(),
@@ -106,6 +112,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         )
             : new DirectedEdgeSplitter(
                 config.randomSeed(),
+                rootNodes,
                 sourceNodes,
                 targetNodes,
                 config.holdoutRelationshipType(),
