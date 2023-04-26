@@ -68,6 +68,8 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -389,10 +391,10 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         assertThrows(
             NullPointerException.class,
             () -> TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure -> {
-                            var computationResult = mock(ComputationResult.class);
-                            log.add(0, ((TestLog) procedure.log));
-                            procedure.computationResultConsumer().consume(computationResult, procedure.executionContext());
-                        })
+                var computationResult = mock(ComputationResult.class);
+                log.add(0, ((TestLog) procedure.log));
+                new ModularityOptimizationMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
+            })
         );
 
         assertTrue(log.get(0).containsMessage(TestLog.WARN, "Graph mutation failed"));
@@ -406,8 +408,14 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
-            proc.compute(configMap, TEST_GRAPH_NAME).result().get();
-            proc.compute(configMap, TEST_GRAPH_NAME).result().get();
+            var spec = new ModularityOptimizationMutateSpecification() {
+                @Override
+                public ComputationResultConsumer<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig, Stream<ModularityOptimizationMutateResult>> computationResultConsumer() {
+                    return (transformer, __) -> { transformer.result().get(); return Stream.empty(); };
+                }
+            };
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(TEST_GRAPH_NAME, configMap).count();
+            new ProcedureExecutor<>(spec, proc.executionContext()).compute(TEST_GRAPH_NAME, configMap).count();
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -430,7 +438,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 "jobId", someJobId,
                 "mutateProperty", MUTATE_PROPERTY
             );
-            proc.compute(config, TEST_GRAPH_NAME);
+            proc.mutate(TEST_GRAPH_NAME, config);
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
     }
