@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,35 +33,41 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.articleRank.write", description = PageRankProc.ARTICLE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ArticleRankWriteProc extends PageRankWriteProc {
+public class ArticleRankWriteProc extends BaseProc {
+    
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    @Override
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
     @Description(PageRankProc.ARTICLE_RANK_DESCRIPTION)
-    public Stream<PageRankWriteProc.WriteResult> write(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.write(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new ArticleRankWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
-    @Override
     @Procedure(value = "gds.articleRank.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return super.computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new ArticleRankWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankWriteConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }
