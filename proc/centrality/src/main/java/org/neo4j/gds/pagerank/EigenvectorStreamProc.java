@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class EigenvectorStreamProc extends BaseProc {
 
     @Procedure(value = "gds.eigenvector.stream", mode = READ)
-    @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
+    @Description(PageRankProcCompanion.EIGENVECTOR_DESCRIPTION)
     public Stream<CentralityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

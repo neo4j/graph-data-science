@@ -54,7 +54,7 @@ public final class WriteResult extends StatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends PageRankProc.PageRankResultBuilder<WriteResult> {
+    static class Builder extends PageRankProcCompanion.PageRankResultBuilder<WriteResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);

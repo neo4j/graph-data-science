@@ -55,7 +55,7 @@ public final class MutateResult extends StatsResult {
     }
 
 
-    static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
+    static class Builder extends PageRankProcCompanion.PageRankResultBuilder<MutateResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);

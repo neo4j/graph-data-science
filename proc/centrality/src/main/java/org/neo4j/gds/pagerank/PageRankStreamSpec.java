@@ -29,7 +29,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.stream", description = PAGE_RANK_DESCRIPTION, executionMode = STREAM)
 public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankStreamConfig,Stream<CentralityStreamResult>,PageRankAlgorithmFactory<PageRankStreamConfig>> {

@@ -23,7 +23,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.pagerank.PageRankProc.EIGENVECTOR_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.write", description = EIGENVECTOR_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class EigenVectorWriteSpec extends  PageRankWriteSpec {

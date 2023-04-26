@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class EigenvectorStatsProc extends BaseProc {
 
     @Procedure(value = "gds.eigenvector.stats", mode = READ)
-    @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
+    @Description(PageRankProcCompanion.EIGENVECTOR_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

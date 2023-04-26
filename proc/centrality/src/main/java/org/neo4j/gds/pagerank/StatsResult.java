@@ -47,7 +47,7 @@ public class StatsResult extends StandardStatsResult {
         this.centralityDistribution = centralityDistribution;
     }
 
-    static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
+    static class Builder extends PageRankProcCompanion.PageRankResultBuilder<StatsResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);

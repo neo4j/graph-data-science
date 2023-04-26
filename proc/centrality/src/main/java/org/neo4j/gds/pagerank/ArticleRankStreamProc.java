@@ -30,7 +30,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pagerank.PageRankProc.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ArticleRankStreamProc extends PageRankStreamProc {

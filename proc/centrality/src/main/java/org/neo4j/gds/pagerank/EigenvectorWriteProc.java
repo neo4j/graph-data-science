@@ -42,7 +42,7 @@ public class EigenvectorWriteProc extends BaseProc {
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.eigenvector.write", mode = WRITE)
-    @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
+    @Description(PageRankProcCompanion.EIGENVECTOR_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

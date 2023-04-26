@@ -22,7 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.executor.GdsCallable;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.pagerank.PageRankProc.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.articleRank.stream", description = ARTICLE_RANK_DESCRIPTION, executionMode = STREAM)
 public class ArticleRankStreamSpec extends  PageRankStreamSpec {

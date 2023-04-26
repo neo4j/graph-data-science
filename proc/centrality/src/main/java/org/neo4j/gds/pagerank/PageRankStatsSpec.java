@@ -27,7 +27,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.stats", description = PAGE_RANK_DESCRIPTION, executionMode = STATS)
 public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankStatsConfig,Stream<StatsResult>,PageRankAlgorithmFactory<PageRankStatsConfig>> {
@@ -51,18 +51,27 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
     public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
-            var builder = PageRankProc.resultBuilder(
-                    new StatsResult.Builder(
-                        executionContext.returnColumns(),
-                        computationResult.config().concurrency()
-                    ), computationResult)
-                .withConfig(computationResult.config())
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis());
+            var builder = new StatsResult.Builder(
+                executionContext.returnColumns(),
+                computationResult.config().concurrency()
+            );
 
-            return Stream.of(builder.build());
+            computationResult.result().ifPresent(result -> {
+                builder
+                    .withDidConverge(result.didConverge())
+                    .withRanIterations(result.iterations())
+                    .withCentralityFunction(result.scores()::get)
+                    .withScalerVariant(computationResult.config().scaler());
+            });
+
+            return Stream.of(
+                builder.withPreProcessingMillis(computationResult.preProcessingMillis())
+                    .withComputeMillis(computationResult.computeMillis())
+                    .withNodeCount(computationResult.graph().nodeCount())
+                    .withConfig(computationResult.config())
+                    .build()
+            );
         };
     }
-
 
 }

@@ -37,12 +37,12 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ArticleRankWriteProc extends BaseProc {
-    
+
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
-    @Description(PageRankProc.ARTICLE_RANK_DESCRIPTION)
+    @Description(PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

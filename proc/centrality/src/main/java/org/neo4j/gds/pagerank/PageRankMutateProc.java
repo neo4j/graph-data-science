@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class PageRankMutateProc extends BaseProc {
 
     @Procedure(value = "gds.pageRank.mutate", mode = READ)
-    @Description(PageRankProc.PAGE_RANK_DESCRIPTION)
+    @Description(PageRankProcCompanion.PAGE_RANK_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -23,7 +23,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.pagerank.PageRankProc.EIGENVECTOR_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.stream", description = EIGENVECTOR_DESCRIPTION, executionMode = STREAM)
 public class EigenVectorStreamSpec extends  PageRankStreamSpec {

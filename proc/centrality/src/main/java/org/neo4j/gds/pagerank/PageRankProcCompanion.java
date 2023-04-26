@@ -20,12 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
-final class PageRankProc {
+final class PageRankProcCompanion {
 
     static final String PAGE_RANK_DESCRIPTION =
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
@@ -37,29 +34,8 @@ final class PageRankProc {
     static final String EIGENVECTOR_DESCRIPTION =
         "Eigenvector Centrality is an algorithm that measures the transitive influence or connectivity of nodes.";
 
-    private PageRankProc() {}
+    private PageRankProcCompanion() {}
 
-    static <PROC_RESULT, CONFIG extends PageRankConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
-        PageRankResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult
-    ) {
-        computeResult.result().ifPresent(result -> {
-            procResultBuilder
-                .withDidConverge(result.didConverge())
-                .withRanIterations(result.iterations())
-                .withCentralityFunction(result.scores()::get)
-                .withScalerVariant(computeResult.config().scaler());
-        });
-
-        return procResultBuilder;
-    }
-
-    static <CONFIG extends PageRankConfig> NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
-        return computeResult.result()
-            .map(PageRankResult::scores)
-            .orElseGet(() -> HugeDoubleArray.newArray(0))
-            .asNodeProperties();
-    }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
         protected long ranIterations;
