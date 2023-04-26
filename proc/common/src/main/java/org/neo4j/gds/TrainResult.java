@@ -17,46 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds;
 
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.model.ModelConfig;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
-public class MLTrainResult {
+// FIXME replace this with MLTrainResult (duplicate?) --> VN: this would require to add dependency to `:proc-machine-learning` which is not good...
+public class TrainResult {
 
-    public final long trainMillis;
     public final Map<String, Object> modelInfo;
     public final Map<String, Object> configuration;
+    public final long trainMillis;
 
-    public MLTrainResult(
-        Optional<Model<?, ?, ?>> maybeTrainedModel,
+    public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends Model.CustomInfo> TrainResult(
+        Optional<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>> maybeTrainedModel,
         long trainMillis
     ) {
-        if(maybeTrainedModel.isPresent()) {
-            var trainedModel = maybeTrainedModel.get();
-            this.modelInfo = Stream.concat(
-                Map.of(
-                    MODEL_NAME_KEY, trainedModel.name(),
-                    MODEL_TYPE_KEY, trainedModel.algoType()
-                ).entrySet().stream(),
-                trainedModel.customInfo().toMap().entrySet().stream()
-            ).collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue)
-            );
-            this.configuration = trainedModel.trainConfig().toMap();
-        } else {
-            modelInfo = Collections.emptyMap();
-            configuration = Collections.emptyMap();
-        }
+        this.modelInfo = new HashMap<>();
+        this.configuration = new HashMap<>();
+
+        maybeTrainedModel.ifPresent(trainedModel -> {
+            TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
+
+            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
+            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+            modelInfo.putAll(trainedModel.customInfo().toMap());
+            configuration.putAll(trainConfig.toMap());
+        });
+
         this.trainMillis = trainMillis;
     }
 }

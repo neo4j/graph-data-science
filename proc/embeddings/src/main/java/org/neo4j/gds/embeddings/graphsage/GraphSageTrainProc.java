@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
+import org.neo4j.gds.TrainResult;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
@@ -43,7 +44,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DE
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.beta.graphSage.train", description = GRAPHSAGE_DESCRIPTION, executionMode = TRAIN)
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainProc.TrainResult> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainResult> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
@@ -83,9 +84,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
     protected TrainResult constructProcResult(ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult) {
         return new TrainResult(
             computationResult.result(),
-            computationResult.computeMillis(),
-            computationResult.graph().nodeCount(),
-            computationResult.graph().relationshipCount()
+            computationResult.computeMillis()
         );
     }
 
@@ -94,4 +93,3 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
         return model;
     }
 }
-
