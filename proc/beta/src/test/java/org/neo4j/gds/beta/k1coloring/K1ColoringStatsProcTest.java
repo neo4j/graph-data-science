@@ -127,8 +127,8 @@ class K1ColoringStatsProcTest extends BaseProcTest {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             var configMap = Map.<String, Object>of();
-            proc.compute(configMap, K1COLORING_GRAPH).result().get();
-            proc.compute(configMap, K1COLORING_GRAPH).result().get();
+            proc.stats(K1COLORING_GRAPH, configMap).count();
+            proc.stats(K1COLORING_GRAPH, configMap).count();
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -146,7 +146,7 @@ class K1ColoringStatsProcTest extends BaseProcTest {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
             var someJobId = new JobId();
             Map<String, Object> configMap = Map.of("jobId", someJobId);
-            proc.compute(configMap, K1COLORING_GRAPH);
+            proc.stats(K1COLORING_GRAPH, configMap);
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
     }
