@@ -19,19 +19,16 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-final class K1ColoringProc {
+final class K1ColoringSpecificationHelper {
     static final String K1_COLORING_DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
     private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
-    private K1ColoringProc() {}
+    private K1ColoringSpecificationHelper() {}
 
     static <PROC_RESULT, CONFIG extends K1ColoringConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         K1ColoringResultBuilder<PROC_RESULT> procResultBuilder,
@@ -47,13 +44,4 @@ final class K1ColoringProc {
             .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
     }
 
-    static <CONFIG extends K1ColoringConfig> NodePropertyValues nodeProperties(ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
-        var config = computeResult.config();
-        return CommunityProcCompanion.considerSizeFilter(
-            config,
-            computeResult.result()
-                .map(HugeLongArray::asNodeProperties)
-                .orElse(EmptyLongNodePropertyValues.INSTANCE)
-        );
-    }
 }

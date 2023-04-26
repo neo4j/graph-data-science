@@ -37,9 +37,10 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.k1coloring.write", description = K1ColoringProc.K1_COLORING_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.k1coloring.write", description = K1_COLORING_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>, K1ColoringFactory<K1ColoringWriteConfig>> {
 
     @Override
@@ -72,7 +73,7 @@ public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, H
     ) {
         var returnColumns = executionContext.returnColumns();
         var builder = new K1ColoringWriteResult.Builder(returnColumns, computeResult.config().concurrency());
-        return K1ColoringProc.resultBuilder(builder, computeResult, returnColumns);
+        return K1ColoringSpecificationHelper.resultBuilder(builder, computeResult, returnColumns);
     }
 
     private List<NodeProperty> nodePropertyList(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {

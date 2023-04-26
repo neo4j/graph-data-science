@@ -31,9 +31,10 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.beta.k1coloring.stats", description = K1ColoringProc.K1_COLORING_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.beta.k1coloring.stats", description = K1_COLORING_DESCRIPTION, executionMode = STATS)
 public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>, K1ColoringFactory<K1ColoringStatsConfig>> {
 
     @Override
@@ -64,6 +65,6 @@ public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, H
             executionContext.returnColumns(),
             computeResult.config().concurrency()
         );
-        return K1ColoringProc.resultBuilder(builder, computeResult, executionContext.returnColumns());
+        return K1ColoringSpecificationHelper.resultBuilder(builder, computeResult, executionContext.returnColumns());
     }
 }

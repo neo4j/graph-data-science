@@ -30,12 +30,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringStreamProc extends BaseProc {
 
     @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
-    @Description(K1ColoringProc.K1_COLORING_DESCRIPTION)
+    @Description(K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

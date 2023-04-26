@@ -36,9 +36,10 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.k1coloring.mutate", description = K1ColoringProc.K1_COLORING_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.k1coloring.mutate", description = K1_COLORING_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>, K1ColoringFactory<K1ColoringMutateConfig>> {
 
     @Override
@@ -81,7 +82,7 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
        ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult,
        ExecutionContext executionContext
     ) {
-        return K1ColoringProc.resultBuilder(
+        return K1ColoringSpecificationHelper.resultBuilder(
             new K1ColoringMutateResult.Builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
