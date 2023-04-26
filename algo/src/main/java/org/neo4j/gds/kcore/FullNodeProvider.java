@@ -19,10 +19,20 @@
  */
 package org.neo4j.gds.kcore;
 
-public interface NodeProvider {
+class FullNodeProvider implements NodeProvider {
+    private final long size;
 
-    long node(long indexId);
-    long size();
+    FullNodeProvider(long size) {
+        this.size = size;
+    }
+
+    @Override
+    public long node(long indexId) {
+        return indexId;
+    }
+
+    @Override
+    public long size() {
+        return size;
+    }
 }
-
-

@@ -143,8 +143,8 @@ class KCoreDecompositionWriteProcTest extends BaseProcTest {
         String query="CALL gds.kcore.write.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {writeProperty: 'kcore'})";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(301_912L);
-            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(301_912L);
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(302_184L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(302_184L);
         });
 
         assertThat(rowCount)

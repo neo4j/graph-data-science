@@ -19,10 +19,24 @@
  */
 package org.neo4j.gds.kcore;
 
-public interface NodeProvider {
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-    long node(long indexId);
-    long size();
+class ReducedNodeProvider implements NodeProvider {
+    private final long size;
+    private final HugeLongArray nodeOrder;
+
+    ReducedNodeProvider(HugeLongArray nodeOrder, long size) {
+        this.size = size;
+        this.nodeOrder = nodeOrder;
+    }
+
+    @Override
+    public long node(long indexId) {
+        return nodeOrder.get(indexId);
+    }
+
+    @Override
+    public long size() {
+        return size;
+    }
 }
-
-
