@@ -20,6 +20,8 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -28,13 +30,14 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.modularityoptimization.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.modularityOptimization.mutate", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig, Stream<ModularityOptimizationMutateResult>, ModularityOptimizationFactory<ModularityOptimizationMutateConfig>> {
@@ -63,7 +66,15 @@ public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<
     }
 
     private List<NodeProperty> nodePropertyList(ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computationResult) {
-        var nodePropertyValues = ModularityOptimizationProc.nodeProperties(computationResult);
+        var resultCommunities = computationResult.result()
+            .map(ModularityOptimizationResult::asNodeProperties)
+            .orElse(EmptyLongNodePropertyValues.INSTANCE);
+        NodePropertyValues nodePropertyValues;
+        if (computationResult.config().consecutiveIds()) {
+            nodePropertyValues = new ConsecutiveLongNodePropertyValues(resultCommunities);
+        } else {
+            nodePropertyValues = resultCommunities;
+        }
         return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodePropertyValues));
     }
 
@@ -71,7 +82,7 @@ public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return ModularityOptimizationProc.resultBuilder(
+        return ModularityOptimizationSpecificationHelper.resultBuilder(
             new ModularityOptimizationMutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );

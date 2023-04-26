@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.modularityoptimization.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.modularityOptimization.stream", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = STREAM)
 public class ModularityOptimizationStreamSpecification implements AlgorithmSpec<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig, Stream<ModularityOptimizationStreamResult>, ModularityOptimizationFactory<ModularityOptimizationStreamConfig>> {

@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -34,7 +36,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.modularityoptimization.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.modularityOptimization.write", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ModularityOptimizationWriteSpecification implements AlgorithmSpec<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig, Stream<ModularityOptimizationWriteResult>, ModularityOptimizationFactory<ModularityOptimizationWriteConfig>> {
@@ -67,7 +69,7 @@ public class ModularityOptimizationWriteSpecification implements AlgorithmSpec<M
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return ModularityOptimizationProc.resultBuilder(
+        return ModularityOptimizationSpecificationHelper.resultBuilder(
             new ModularityOptimizationWriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
@@ -75,9 +77,13 @@ public class ModularityOptimizationWriteSpecification implements AlgorithmSpec<M
 
     private List<NodeProperty> nodePropertiesList(ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig> computationResult) {
         var config = computationResult.config();
-        var nodePropertyValues = ModularityOptimizationProc.nodeProperties(
-            computationResult,
-            config.writeProperty()
+        var nodePropertyValues = CommunityProcCompanion.nodeProperties(
+            config,
+            config.writeProperty(),
+            computationResult.result()
+                .map(ModularityOptimizationResult::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE),
+            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
         return List.of(ImmutableNodeProperty.of(config.writeProperty(), nodePropertyValues));
     }

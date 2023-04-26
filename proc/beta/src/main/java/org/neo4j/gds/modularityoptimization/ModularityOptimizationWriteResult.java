@@ -64,7 +64,7 @@ public class ModularityOptimizationWriteResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<ModularityOptimizationWriteResult> {
+    static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationWriteResult> {
 
         Builder(
             ProcedureReturnColumns returnColumns,

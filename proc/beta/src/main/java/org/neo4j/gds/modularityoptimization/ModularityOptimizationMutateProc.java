@@ -30,12 +30,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityOptimizationMutateProc extends BaseProc {
 
     @Procedure(value = "gds.beta.modularityOptimization.mutate", mode = READ)
-    @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
+    @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<ModularityOptimizationMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

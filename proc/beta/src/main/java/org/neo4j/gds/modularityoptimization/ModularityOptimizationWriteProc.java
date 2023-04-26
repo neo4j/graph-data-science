@@ -30,13 +30,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ModularityOptimizationWriteProc extends BaseProc {
 
     @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
-    @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
+    @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<ModularityOptimizationWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

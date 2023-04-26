@@ -64,7 +64,7 @@ public class ModularityOptimizationMutateResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<ModularityOptimizationMutateResult> {
+    static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationMutateResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
