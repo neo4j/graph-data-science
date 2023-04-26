@@ -76,7 +76,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringStreamProcTest extends BaseProcTest {
 
-    private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String K1COLORING_GRAPH = "myGraph";
 
     @Neo4jGraph
@@ -185,8 +184,8 @@ class K1ColoringStreamProcTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, K1ColoringStreamProc.class, proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
-            proc.compute(Map.of(), K1COLORING_GRAPH).result().get();
-            proc.compute(Map.of(), K1COLORING_GRAPH).result().get();
+            proc.stream(K1COLORING_GRAPH, Map.of()).count();
+            proc.stream(K1COLORING_GRAPH, Map.of()).count();
 
             assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
@@ -206,7 +205,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
 
             var someJobId = new JobId();
             Map<String, Object> configMap = Map.of("jobId", someJobId);
-            proc.compute(configMap, K1COLORING_GRAPH);
+            proc.stream(K1COLORING_GRAPH, configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
@@ -225,7 +224,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
 
                 var graphName = "graph";
                 var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    TEST_USERNAME,
+                    Username.EMPTY_USERNAME.username(),
                     graphName,
                     ImmutableNodeProjections.of(
                         Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
