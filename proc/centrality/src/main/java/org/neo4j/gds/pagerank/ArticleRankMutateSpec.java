@@ -24,7 +24,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
 
-@GdsCallable(name = "gds.articleRank.stats", description = ARTICLE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.articleRank.mutate", description = ARTICLE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ArticleRankMutateSpec extends PageRankMutateSpec {
 
     @Override
