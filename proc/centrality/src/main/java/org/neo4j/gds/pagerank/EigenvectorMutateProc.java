@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,43 +30,33 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.eigenvector.mutate", description = PageRankProc.EIGENVECTOR_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class EigenvectorMutateProc extends PageRankMutateProc {
+public class EigenvectorMutateProc extends BaseProc {
 
-    @Override
     @Procedure(value = "gds.eigenvector.mutate", mode = READ)
     @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.mutate(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new EigenVectorMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
-    @Override
     @Procedure(value = "gds.eigenvector.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return super.estimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new EigenVectorMutateSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
-    }
-
-    @Override
-    protected PageRankMutateConfig newConfig(String username, CypherMapWrapper config) {
-        if (config.containsKey("dampingFactor")) {
-            throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-        }
-
-        return super.newConfig(username, config);
-    }
 }

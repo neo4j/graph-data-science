@@ -19,68 +19,52 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
-class PageRankMutateProcTest extends BaseProcTest
-    implements MutateNodePropertyTest<PageRankAlgorithm, PageRankMutateConfig, PageRankResult> {
+class PageRankMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
-           "  (a:Label1 {name: 'a'})" +
-           ", (b:Label1 {name: 'b'})" +
-           ", (c:Label1 {name: 'c'})" +
-           ", (d:Label1 {name: 'd'})" +
-           ", (e:Label1 {name: 'e'})" +
-           ", (f:Label1 {name: 'f'})" +
-           ", (g:Label1 {name: 'g'})" +
-           ", (h:Label1 {name: 'h'})" +
-           ", (i:Label1 {name: 'i'})" +
-           ", (j:Label1 {name: 'j'})" +
-           ", (b)-[:TYPE1]->(c)" +
-           ", (c)-[:TYPE1]->(b)" +
-           ", (d)-[:TYPE1]->(a)" +
-           ", (d)-[:TYPE1]->(b)" +
-           ", (e)-[:TYPE1]->(b)" +
-           ", (e)-[:TYPE1]->(d)" +
-           ", (e)-[:TYPE1]->(f)" +
-           ", (f)-[:TYPE1]->(b)" +
-           ", (f)-[:TYPE1]->(e)";
+                                           "  (a:Label1 {name: 'a'})" +
+                                           ", (b:Label1 {name: 'b'})" +
+                                           ", (c:Label1 {name: 'c'})" +
+                                           ", (d:Label1 {name: 'd'})" +
+                                           ", (e:Label1 {name: 'e'})" +
+                                           ", (f:Label1 {name: 'f'})" +
+                                           ", (g:Label1 {name: 'g'})" +
+                                           ", (h:Label1 {name: 'h'})" +
+                                           ", (i:Label1 {name: 'i'})" +
+                                           ", (j:Label1 {name: 'j'})" +
+                                           ", (b)-[:TYPE1]->(c)" +
+                                           ", (c)-[:TYPE1]->(b)" +
+                                           ", (d)-[:TYPE1]->(a)" +
+                                           ", (d)-[:TYPE1]->(b)" +
+                                           ", (e)-[:TYPE1]->(b)" +
+                                           ", (e)-[:TYPE1]->(d)" +
+                                           ", (e)-[:TYPE1]->(f)" +
+                                           ", (f)-[:TYPE1]->(b)" +
+                                           ", (f)-[:TYPE1]->(e)";
 
-    @Override
-    public String mutateProperty() {
-        return "score";
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
-
-    @Override
-    public Optional<String> mutateGraphName() {
-        return Optional.of("completeGraph");
-    }
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -91,7 +75,7 @@ class PageRankMutateProcTest extends BaseProcTest
         );
 
         runQuery(
-            GdsCypher.call("completeGraph")
+            GdsCypher.call("graph")
                 .graphProject()
                 .withAnyLabel()
                 .withAnyRelationshipType()
@@ -99,12 +83,7 @@ class PageRankMutateProcTest extends BaseProcTest
         );
     }
 
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
 
-    @Override
     public String expectedMutatedGraph() {
         return
             "  (a {score: 0.243013d})" +
@@ -128,23 +107,14 @@ class PageRankMutateProcTest extends BaseProcTest
             ", (f)-[{w: 1.0d}]->(e)";
     }
 
-    @Override
-    public Class<PageRankMutateProc> getProcedureClazz() {
-        return PageRankMutateProc.class;
-    }
-
-    @Override
-    public PageRankMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankMutateConfig.of(mapWrapper);
-    }
 
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call("completeGraph")
+            .call("graph")
             .algo("pageRank")
             .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateProperty", "score")
             .yields();
 
 
@@ -157,13 +127,15 @@ class PageRankMutateProcTest extends BaseProcTest
             "didConverge", false,
             "ranIterations", 20L,
             "centralityDistribution", isA(Map.class),
-            "configuration", allOf(isA(Map.class), hasEntry("mutateProperty", mutateProperty()))
+            "configuration", allOf(isA(Map.class), hasEntry("mutateProperty", "score"))
         )));
+
+        Graph mutatedGraph = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db), "graph")
+            .graphStore().getGraph(RelationshipType.ALL_RELATIONSHIPS);
+
+        assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
 
 }

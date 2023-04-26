@@ -19,16 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,11 +30,9 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.pageRank.mutate", description = PageRankProc.PAGE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, PageRankResult, PageRankMutateProc.MutateResult, PageRankMutateConfig> {
+public class PageRankMutateProc extends BaseProc {
 
     @Procedure(value = "gds.pageRank.mutate", mode = READ)
     @Description(PageRankProc.PAGE_RANK_DESCRIPTION)
@@ -49,11 +40,10 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return mutate(computationResult);
+        return new ProcedureExecutor<>(
+            new PageRankMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.mutate.estimate", mode = READ)
@@ -62,86 +52,13 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new PageRankMutateSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected PageRankMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return PageRankMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computationResult) {
-        return PageRankProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return PageRankProc.resultBuilder(
-            new MutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @SuppressWarnings("unused")
-    public static final class MutateResult extends StatsResult {
-
-        public final long mutateMillis;
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            long ranIterations,
-            boolean didConverge,
-            @Nullable Map<String, Object> centralityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                ranIterations,
-                didConverge,
-                centralityDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.mutateMillis = mutateMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
 
 
-        static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            public MutateResult buildResult() {
-                return new MutateResult(
-                    ranIterations,
-                    didConverge,
-                    centralityHistogram,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }
