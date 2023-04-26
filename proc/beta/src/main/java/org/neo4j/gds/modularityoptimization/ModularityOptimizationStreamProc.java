@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,19 +30,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.beta.modularityOptimization.stream", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = STREAM)
-public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamProc.StreamResult, ModularityOptimizationStreamConfig> {
+public class ModularityOptimizationStreamProc extends BaseProc {
 
     @Procedure(name = "gds.beta.modularityOptimization.stream", mode = READ)
     @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<ModularityOptimizationStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ModularityOptimizationStreamSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.stream.estimate", mode = READ)
@@ -56,44 +52,10 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationStreamConfig> algorithmFactory() {
-        return new ModularityOptimizationFactory<>();
-    }
-
-    @Override
-    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues) {
-        return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig> computationResult
-    ) {
-        return CommunityProcCompanion.nodeProperties(
-                computationResult.config(),
-                computationResult.result()
-                    .map(ModularityOptimizationResult::asNodeProperties)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-        );
-    }
-
-    @Override
-    protected ModularityOptimizationStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return ModularityOptimizationStreamConfig.of(config);
-    }
-
-    @SuppressWarnings("unused")
-    public static class StreamResult {
-        public final long nodeId;
-        public final long communityId;
-
-        public StreamResult(long nodeId, long communityId) {
-            this.nodeId = nodeId;
-            this.communityId = communityId;
-        }
+        return new MemoryEstimationExecutor<>(
+            new ModularityOptimizationStreamSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
