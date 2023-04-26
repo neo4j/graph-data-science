@@ -19,21 +19,24 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-import static org.assertj.core.api.Assertions.assertThat;
+class ReducedNodeProvider implements NodeProvider {
+    private final long size;
+    private final HugeLongArray nodeOrder;
 
-class KCoreDecompositionTaskTest {
-
-    @Test
-    void memoryEstimation() {
-        var memoryUsage = KCoreDecompositionTask.memoryEstimation()
-            .estimate(GraphDimensions.of(100), 4)
-            .memoryUsage();
-
-        assertThat(memoryUsage.min).isEqualTo(936L);
-        assertThat(memoryUsage.max).isEqualTo(936L);
+    ReducedNodeProvider(HugeLongArray nodeOrder, long size) {
+        this.size = size;
+        this.nodeOrder = nodeOrder;
     }
 
+    @Override
+    public long node(long indexId) {
+        return nodeOrder.get(indexId);
+    }
+
+    @Override
+    public long size() {
+        return size;
+    }
 }

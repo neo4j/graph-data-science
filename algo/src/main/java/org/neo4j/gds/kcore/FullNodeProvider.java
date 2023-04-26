@@ -19,21 +19,20 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.GraphDimensions;
+class FullNodeProvider implements NodeProvider {
+    private final long size;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-class KCoreDecompositionTaskTest {
-
-    @Test
-    void memoryEstimation() {
-        var memoryUsage = KCoreDecompositionTask.memoryEstimation()
-            .estimate(GraphDimensions.of(100), 4)
-            .memoryUsage();
-
-        assertThat(memoryUsage.min).isEqualTo(936L);
-        assertThat(memoryUsage.max).isEqualTo(936L);
+    FullNodeProvider(long size) {
+        this.size = size;
     }
 
+    @Override
+    public long node(long indexId) {
+        return indexId;
+    }
+
+    @Override
+    public long size() {
+        return size;
+    }
 }

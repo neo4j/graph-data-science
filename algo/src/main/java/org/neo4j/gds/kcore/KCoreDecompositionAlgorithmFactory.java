@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -43,11 +44,26 @@ public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositio
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
+
         var builder = MemoryEstimations.builder(KCoreDecomposition.class);
         builder
             .perNode("currentDegrees", HugeAtomicIntArray::memoryEstimation)
             .perNode("cores", HugeIntArray::memoryEstimation)
             .perThread("KCoreDecompositionTask", KCoreDecompositionTask.memoryEstimation());
+
+        builder.perGraphDimension("RebuildTask", ((graphDimensions, concurrency) -> {
+            var resizedNodeCount = Math.max(
+                1,
+                (long) Math.ceil(graphDimensions.nodeCount() * KCoreDecomposition.REBUILD_CONSTANT)
+            );
+            var rebuildTask = RebuildTask.memoryEstimation(resizedNodeCount);
+            var totalRebuildTasks = rebuildTask * concurrency;
+            var rebuildArray = HugeIntArray.memoryEstimation(resizedNodeCount);
+            return MemoryRange.of(totalRebuildTasks + rebuildArray);
+
+        }));
+
+
         return builder.build();
     }
 
