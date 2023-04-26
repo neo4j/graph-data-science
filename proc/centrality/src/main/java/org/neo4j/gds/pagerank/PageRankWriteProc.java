@@ -94,7 +94,7 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
     }
 
     @SuppressWarnings("unused")
-    public static final class WriteResult extends PageRankStatsProc.StatsResult {
+    public static final class WriteResult extends StatsResult {
 
         public final long writeMillis;
         public final long nodePropertiesWritten;

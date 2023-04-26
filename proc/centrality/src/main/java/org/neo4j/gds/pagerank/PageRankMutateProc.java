@@ -92,7 +92,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     }
 
     @SuppressWarnings("unused")
-    public static final class MutateResult extends PageRankStatsProc.StatsResult {
+    public static final class MutateResult extends StatsResult {
 
         public final long mutateMillis;
         public final long nodePropertiesWritten;

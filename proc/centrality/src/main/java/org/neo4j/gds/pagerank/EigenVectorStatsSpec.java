@@ -22,29 +22,30 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.pagerank.PageRankProc.EIGENVECTOR_DESCRIPTION;
 
-@GdsCallable(name = "gds.eigenvector.stream", description = EIGENVECTOR_DESCRIPTION, executionMode = STREAM)
-public class EigenVectorStreamSpec extends  PageRankStreamSpec {
+@GdsCallable(name = "gds.eigenvector.stats", description = EIGENVECTOR_DESCRIPTION, executionMode = STATS)
+public class EigenVectorStatsSpec extends  PageRankStatsSpec {
 
     @Override
     public String name() {
-        return "EigenvectorStream";
+        return "EigenvectorStats";
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankStreamConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankStatsConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
-
     @Override
-    public NewConfigFunction<PageRankStreamConfig> newConfigFunction() {
+    public NewConfigFunction<PageRankStatsConfig> newConfigFunction() {
         return (___, config) -> {
             if (config.containsKey("dampingFactor")) {
                 throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
             }
-            return PageRankStreamConfig.of(config);
+            return PageRankStatsConfig.of(config);
         };
     }
+
+
 }
