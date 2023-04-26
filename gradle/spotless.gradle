@@ -9,18 +9,11 @@ allprojects { proj ->
                     removeUnusedImports()
 
                     eclipse().configFile(rootProject.file("public/etc/codestyle.xml"))
-
-                    def projectDirectoryPath = proj.getProjectDir().getPath()
-                    def sourceFileHeader = null
-                    if (projectDirectoryPath.contains('private')) {
-                        sourceFileHeader = rootProject.file("private/etc/licenses/neo4j-source-header.txt")
-                    } else if (projectDirectoryPath.contains('public')) {
-                        sourceFileHeader = rootProject.file("$publicDir/etc/licenses/headers/source-header.txt")
-                    } else {
-                        throw new RuntimeException("Project must be either private or public, but it was $projectDirectoryPath")
-                    }
-                    licenseHeaderFile sourceFileHeader
                 }
+            }
+
+            tasks.named("spotlessApply").configure {
+                it.dependsOn("licenseFormat")
             }
         }
     }

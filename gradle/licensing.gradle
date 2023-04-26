@@ -99,8 +99,24 @@ def allowList = [
 
 allprojects { proj ->
     plugins.withType(JavaLibraryPlugin) {
-        proj.apply plugin: 'com.github.hierynomus.license-report'
+        proj.apply plugin: 'com.github.hierynomus.license'
         // License header checking and insertion
+        license {
+            header = rootProject.file("$publicDir/etc/licenses/headers/source-header.txt")
+            // what comment style to use
+            mapping {
+                java = 'SLASHSTAR_STYLE'
+            }
+            // /issues/145
+            // exclude 'test/resources/**'
+            // exclude 'main/resources/**'
+            include '**/*.java'
+
+            // These files were copied from lucene and need to keep their license headers
+            exclude '**/CloseableThreadLocal*.java'
+            exclude '**/IntPriorityQueue*.java'
+        }
+        tasks.check.dependsOn tasks.license
 
         // Dependency license reporting
         downloadLicenses {
