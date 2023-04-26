@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,12 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.pageRank.stream", description = PAGE_RANK_DESCRIPTION, executionMode = STREAM)
-public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankResult, CentralityStreamResult, PageRankStreamConfig> {
+public class PageRankStreamProc extends BaseProc {
 
     @Procedure(value = "gds.pageRank.stream", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
@@ -47,11 +42,10 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stream(computationResult);
+        return new ProcedureExecutor<>(
+            new PageRankStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.stream.estimate", mode = READ)
@@ -60,28 +54,12 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new PageRankStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected CentralityStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        return new CentralityStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
-    }
 
-    @Override
-    protected PageRankStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return PageRankStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult) {
-        return PageRankProc.nodeProperties(computationResult);
-    }
 }
