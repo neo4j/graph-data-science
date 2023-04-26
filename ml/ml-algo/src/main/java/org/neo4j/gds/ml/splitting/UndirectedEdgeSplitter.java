@@ -45,13 +45,16 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
     public UndirectedEdgeSplitter(
         Optional<Long> maybeSeed,
+        IdMap rootNodes,
         IdMap sourceNodes,
         IdMap targetNodes,
         RelationshipType selectedRelationshipType,
         RelationshipType remainingRelationshipType,
         int concurrency
     ) {
-        super(maybeSeed, sourceNodes, targetNodes, selectedRelationshipType, remainingRelationshipType, concurrency);
+        super(maybeSeed,
+            rootNodes,
+            sourceNodes, targetNodes, selectedRelationshipType, remainingRelationshipType, concurrency);
     }
 
     @Override

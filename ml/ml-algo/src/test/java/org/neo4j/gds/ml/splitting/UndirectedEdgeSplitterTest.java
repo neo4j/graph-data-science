@@ -97,6 +97,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(1337L),
             graphStore.nodes(),
             graphStore.nodes(),
+            graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -127,6 +128,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(-1L),
             multiGraphStore.nodes(),
             multiGraphStore.nodes(),
+            multiGraphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -155,6 +157,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var splitter = new UndirectedEdgeSplitter(
             Optional.of(42L),
+            huuuuugeDenseGraph,
             huuuuugeDenseGraph,
             huuuuugeDenseGraph,
             RelationshipType.of("SELECTED"),
@@ -198,29 +201,31 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var splitResult1 = new UndirectedEdgeSplitter(
             Optional.of(12L),
-            graphStore.nodes(),
-            graphStore.nodes(),
+            graph.idMap(),
+            graph.idMap(),
+            graph.idMap(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var splitResult2 = new UndirectedEdgeSplitter(
             Optional.of(12L),
-            graphStore.nodes(),
-            graphStore.nodes(),
+            graph.idMap(),
+            graph.idMap(),
+            graph.idMap(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var remainingAreEqual = relationshipsAreEqual(
-            graph,
+            graph.idMap(),
             splitResult1.remainingRels().build(),
             splitResult2.remainingRels().build()
         );
         assertTrue(remainingAreEqual);
 
         var holdoutAreEqual = relationshipsAreEqual(
-            graph,
+            graph.idMap(),
             splitResult1.selectedRels().build(),
             splitResult2.selectedRels().build()
         );
@@ -244,12 +249,14 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(42L),
             graphStore.nodes(),
             graphStore.nodes(),
+            graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var splitResult2 = new UndirectedEdgeSplitter(
             Optional.of(117L),
+            graphStore.nodes(),
             graphStore.nodes(),
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
@@ -277,6 +284,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(42L),
             graphStore.nodes(),
             graphStore.nodes(),
+            graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -297,6 +305,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var targetNodeLabels = List.of(NodeLabel.of("A"));
         var splitter = new UndirectedEdgeSplitter(
             Optional.of(1337L),
+            graphStore.getGraph(NodeLabel.of("A")),
             graphStore.getGraph(NodeLabel.of("A")),
             graphStore.getGraph(NodeLabel.of("A")),
             RelationshipType.of("SELECTED"),
@@ -332,6 +341,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         Collection<NodeLabel> targetNodeLabels = List.of(NodeLabel.of("C"), NodeLabel.of("D"));
         var splitter = new UndirectedEdgeSplitter(
             Optional.of(1337L),
+            multiLabelGraphStore.nodes(),
             multiLabelGraphStore.getGraph(sourceNodeLabels),
             multiLabelGraphStore.getGraph(targetNodeLabels),
             RelationshipType.of("SELECTED"),
@@ -367,6 +377,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(42L),
             graphStore.nodes(),
             graphStore.nodes(),
+            graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
@@ -380,6 +391,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     void shouldPreserveRelationshipWeights() {
         var splitter = new UndirectedEdgeSplitter(
             Optional.of(42L),
+            graphStore.nodes(),
             graphStore.nodes(),
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
@@ -409,6 +421,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     void zeroNegativeSamples() {
         var splitter = new UndirectedEdgeSplitter(
             Optional.of(1337L),
+            graphStore.nodes(),
             graphStore.nodes(),
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
