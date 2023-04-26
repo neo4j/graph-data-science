@@ -31,38 +31,37 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSageMutateProc extends BaseProc {
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
-    @Description(GRAPHSAGE_DESCRIPTION)
+    @Description(GRAPH_SAGE_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            mutateSpec(),
+            specification(),
             executionContext()
         ).compute(graphName, configuration);
-
     }
 
     @Procedure(value = "gds.beta.graphSage.mutate.estimate", mode = READ)
-    @Description(GRAPHSAGE_DESCRIPTION)
+    @Description(GRAPH_SAGE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            mutateSpec(),
+            specification(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    private GraphSageMutateSpec mutateSpec() {
+    private GraphSageMutateSpec specification() {
         return new GraphSageMutateSpec()
             .withModelCatalog(internalModelCatalog);
     }

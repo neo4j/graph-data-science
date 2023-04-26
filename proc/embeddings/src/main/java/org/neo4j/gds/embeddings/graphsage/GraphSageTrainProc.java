@@ -40,13 +40,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
-@GdsCallable(name = "gds.beta.graphSage.train", description = GRAPHSAGE_DESCRIPTION, executionMode = TRAIN)
+@GdsCallable(name = "gds.beta.graphSage.train", description = GRAPH_SAGE_DESCRIPTION, executionMode = TRAIN)
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainResult> {
 
-    @Description(GRAPHSAGE_DESCRIPTION)
+    @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
     public Stream<TrainResult> train(
         @Name(value = "graphName") String graphName,

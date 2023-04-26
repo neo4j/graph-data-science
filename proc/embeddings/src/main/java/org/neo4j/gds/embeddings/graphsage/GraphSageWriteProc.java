@@ -34,7 +34,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 
 public class GraphSageWriteProc extends BaseProc {
 
@@ -42,13 +42,13 @@ public class GraphSageWriteProc extends BaseProc {
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
-    @Description(GRAPHSAGE_DESCRIPTION)
+    @Description(GRAPH_SAGE_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            writeSpecification(),
+            specification(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -60,7 +60,7 @@ public class GraphSageWriteProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            writeSpecification(),
+            specification(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
@@ -71,7 +71,7 @@ public class GraphSageWriteProc extends BaseProc {
         return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
-    private GraphSageWriteSpec writeSpecification() {
+    private GraphSageWriteSpec specification() {
         return new GraphSageWriteSpec()
             .withModelCatalog(internalModelCatalog);
     }

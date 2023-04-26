@@ -37,11 +37,11 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.nodePropertyValues;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.graphSage.write", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.graphSage.write", description = GRAPH_SAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<WriteResult>, GraphSageAlgorithmFactory<GraphSageWriteConfig>> {
 
     private ModelCatalog modelCatalog;

@@ -21,16 +21,13 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
 import java.util.Optional;
 
 public final class GraphSageCompanion {
 
-    static final String GRAPHSAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
+    static final String GRAPH_SAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
 
     private GraphSageCompanion() {}
 
@@ -40,9 +37,4 @@ public final class GraphSageCompanion {
             .map(embeddings -> (DoubleArrayNodePropertyValues) new EmbeddingNodePropertyValues(embeddings))
             .orElse(EmptyDoubleArrayNodePropertyValues.INSTANCE);
     }
-
-    static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(ModelCatalog catalog) {
-        return new GraphSageConfigurationValidation<>(catalog);
-    }
-
 }
