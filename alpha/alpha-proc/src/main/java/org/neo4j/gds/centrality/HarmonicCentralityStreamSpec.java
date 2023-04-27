@@ -59,7 +59,7 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            ()  ->computationResult.result()
+            () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
                     return LongStream
