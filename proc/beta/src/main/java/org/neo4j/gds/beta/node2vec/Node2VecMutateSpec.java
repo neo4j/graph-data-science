@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
@@ -35,7 +34,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -80,10 +78,9 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel
 
     @NotNull
     private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult) {
-        var nodePropertyValues = computationResult.result()
+        return computationResult.result()
             .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
-        return nodePropertyValues;
     }
 
     private MutateResult.Builder resultBuilder(
@@ -98,23 +95,4 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel
         return builder;
     }
 
-    private static class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
-        private final HugeObjectArray<FloatVector> embeddings;
-        private final long nodeCount;
-
-        EmbeddingNodePropertyValues(HugeObjectArray<FloatVector> embeddings) {
-            this.embeddings = embeddings;
-            nodeCount = embeddings.size();
-        }
-
-        @Override
-        public float[] floatArrayValue(long nodeId) {
-            return embeddings.get(nodeId).data();
-        }
-
-        @Override
-        public long nodeCount() {
-            return nodeCount;
-        }
-    }
 }

@@ -20,31 +20,19 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
-import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.beta.node2vec.stream", description = Node2VecCompanion.DESCRIPTION, executionMode = STREAM)
-public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2VecModel.Result, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
+public class Node2VecStreamProc extends BaseProc {
 
     @Procedure(value = "gds.beta.node2vec.stream", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -52,12 +40,10 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2VecModel.Resul
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecStreamConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        return stream(computationResult);
+        return new ProcedureExecutor<>(
+            new Node2VecStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.node2vec.stream.estimate", mode = READ)
@@ -66,42 +52,10 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2VecModel.Resul
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected Node2VecStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return Node2VecStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
-        return new Node2VecAlgorithmFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecStreamConfig> computationResult) {
-        return Node2VecCompanion.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        return new StreamResult(originalNodeId, nodePropertyValues.floatArrayValue(internalNodeId));
-    }
-
-    @SuppressWarnings("unused")
-    public static class StreamResult {
-        public long nodeId;
-        public List<Double> embedding;
-
-        StreamResult(long nodeId, float[] embedding) {
-            this.nodeId = nodeId;
-            this.embedding = new ArrayList<>(embedding.length);
-            for (var f : embedding) {
-                this.embedding.add((double) f);
-            }
-        }
+        return new MemoryEstimationExecutor<>(
+            new Node2VecStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
