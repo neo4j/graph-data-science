@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
-import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
-import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class Node2VecWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<Node2Vec, Node2VecWriteConfig, Node2VecModel.Result> {
+class Node2VecWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -62,54 +56,44 @@ class Node2VecWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<Nod
             Node2VecWriteProc.class,
             GraphProjectProc.class
         );
+
+        runQuery("CALL gds.graph.project($graphName, '*', '*')", Map.of("graphName", DEFAULT_GRAPH_NAME));
     }
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
-        loadGraph(DEFAULT_GRAPH_NAME);
-        long dimensions = 42;
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("writeProperty", "embedding")
-            .addParameter("embeddingDimension", dimensions)
+            .addParameter("embeddingDimension", 42L)
             .yields();
         runQuery(query);
 
-        assertCypherResult(
-            "MATCH (n) RETURN size(n.embedding) AS size",
-            List.of(
-                Map.of("size", dimensions),
-                Map.of("size", dimensions),
-                Map.of("size", dimensions),
-                Map.of("size", dimensions),
-                Map.of("size", dimensions)
-            )
-        );
-    }
 
-    public Class<Node2VecWriteProc> getProcedureClazz() {
-        return Node2VecWriteProc.class;
-    }
-
-    @Override
-    public Node2VecWriteConfig createConfig(CypherMapWrapper userInput) {
-        return Node2VecWriteConfig.of(userInput);
+        var rowCount = runQueryWithRowConsumer("MATCH (n) RETURN size(n.embedding) AS size", row -> {
+           assertThat(row.getNumber("size")).asInstanceOf(LONG).isEqualTo(42L);
+        });
+        assertThat(rowCount).isEqualTo(5);
     }
 
     @Test
     void returnLossPerIteration() {
-        loadGraph(DEFAULT_GRAPH_NAME);
-        int iterations = 5;
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("embeddingDimension", 42)
             .addParameter("writeProperty", "testProp")
-            .addParameter("iterations", iterations)
+            .addParameter("iterations", 5)
             .yields("lossPerIteration");
 
-        assertCypherResult(query, List.of(Map.of("lossPerIteration", Matchers.hasSize(iterations))));
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.get("lossPerIteration")).asList().hasSize(5);
+        });
+
+        assertThat(rowCount)
+            .as("`write` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @Test
@@ -117,7 +101,6 @@ class Node2VecWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<Nod
         long nodeCount = runQuery("MATCH (n) RETURN count(n) AS count", result ->
             result.<Long>columnAs("count").stream().findFirst().orElse(-1L)
         );
-        loadGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .writeMode()
@@ -140,14 +123,4 @@ class Node2VecWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<Nod
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(expectedMessage);
     }
-
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        return userInput.withEntryIfMissing("writeProperty", "embedding");
-    }
-
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
 }
