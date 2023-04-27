@@ -17,20 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.node2vec;
+package org.neo4j.gds.embeddings.node2vec;
 
-import java.util.ArrayList;
-import java.util.List;
+final class Node2VecCompanion {
 
-public class StreamResult {
-    public long nodeId;
-    public List<Double> embedding;
+    static final String DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
 
-    StreamResult(long nodeId, float[] embedding) {
-        this.nodeId = nodeId;
-        this.embedding = new ArrayList<>(embedding.length);
-        for (var f : embedding) {
-            this.embedding.add((double) f);
-        }
-    }
+    private Node2VecCompanion() {}
 }

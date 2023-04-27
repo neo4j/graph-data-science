@@ -17,42 +17,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.node2vec;
+package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.List;
 import java.util.Map;
 
-public final class MutateResult extends StandardMutateResult {
+public final class WriteResult {
 
     public final long nodeCount;
     public final long nodePropertiesWritten;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long writeMillis;
+    public final Map<String, Object> configuration;
     public final List<Double> lossPerIteration;
 
-    private MutateResult(
+    private WriteResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
-        long mutateMillis,
+        long writeMillis,
         Map<String, Object> configuration,
         List<Double> lossPerIteration
     ) {
-        super(preProcessingMillis, computeMillis, 0, mutateMillis, configuration);
         this.nodeCount = nodeCount;
         this.nodePropertiesWritten = nodePropertiesWritten;
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.writeMillis = writeMillis;
+        this.configuration = configuration;
         this.lossPerIteration = lossPerIteration;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    static class Builder extends AbstractResultBuilder<WriteResult> {
 
         private List<Double> lossPerIteration;
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public WriteResult build() {
+            return new WriteResult(
                 nodeCount,
                 nodePropertiesWritten,
                 preProcessingMillis,

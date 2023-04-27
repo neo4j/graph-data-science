@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.node2vec;
+package org.neo4j.gds.embeddings.node2vec;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,6 @@ import org.neo4j.gds.ImmutableNodeProjection;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
@@ -50,9 +49,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -97,7 +93,7 @@ class Node2VecStreamProcTest extends BaseProcTest {
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
-        loadGraph(DEFAULT_GRAPH_NAME);
+        runQuery("CALL gds.graph.project($graphName, '*', '*')", Map.of("graphName", DEFAULT_GRAPH_NAME));
         int dimensions = 42;
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
@@ -119,7 +115,7 @@ class Node2VecStreamProcTest extends BaseProcTest {
         long nodeCount = runQuery("MATCH (n) RETURN count(n) AS count", result ->
             result.<Long>columnAs("count").stream().findFirst().orElse(-1L)
         );
-        loadGraph(DEFAULT_GRAPH_NAME);
+        runQuery("CALL gds.graph.project($graphName, '*', '*')", Map.of("graphName", DEFAULT_GRAPH_NAME));
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .streamMode()
@@ -232,14 +228,5 @@ class Node2VecStreamProcTest extends BaseProcTest {
             .username("")
             .projectConfig(graphProjectConfig)
             .build();
-    }
-
-    private void loadGraph(String graphName) {
-        runQuery(
-            GdsCypher.call(graphName)
-                .graphProject()
-                .loadEverything(Orientation.NATURAL)
-                .yields()
-        );
     }
 }

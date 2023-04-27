@@ -17,17 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.node2vec;
+package org.neo4j.gds.embeddings.node2vec;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
-import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -38,59 +34,59 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.node2vec.mutate", description = Node2VecCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, Stream<MutateResult>, Node2VecAlgorithmFactory<Node2VecMutateConfig>> {
+@GdsCallable(name = "gds.beta.node2vec.write", description = Node2VecCompanion.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, Stream<WriteResult>, Node2VecAlgorithmFactory<Node2VecWriteConfig>> {
     @Override
     public String name() {
-        return "Node2VecMutate";
+        return "Node2VecWrite";
     }
 
     @Override
-    public Node2VecAlgorithmFactory<Node2VecMutateConfig> algorithmFactory() {
+    public Node2VecAlgorithmFactory<Node2VecWriteConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<Node2VecMutateConfig> newConfigFunction() {
-        return (__, userInput) -> Node2VecMutateConfig.of(userInput);
+    public NewConfigFunction<Node2VecWriteConfig> newConfigFunction() {
+        return (__, userInput) -> Node2VecWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
+    public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+        return new WriteNodePropertiesComputationResultConsumer<>(
+            this::resultBuilder,
             this::nodePropertyList,
-            this::resultBuilder
+            name()
         );
     }
 
-    private List<NodeProperty> nodePropertyList(
-        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult
-    ) {
+    private List<NodeProperty> nodePropertyList(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computationResult) {
         return List.of(
             NodeProperty.of(
-                computationResult.config().mutateProperty(),
+                computationResult.config().writeProperty(),
                 nodePropertyValues(computationResult)
             )
         );
     }
 
     @NotNull
-    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult) {
+    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computationResult) {
         return computationResult.result()
             .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
     }
 
-    private MutateResult.Builder resultBuilder(
-        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computeResult,
+    private WriteResult.Builder resultBuilder(
+        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder();
-        computeResult.result().ifPresent(result -> {
-            builder.withLossPerIteration(result.lossPerIteration());
-        });
+        var builder = new WriteResult.Builder();
+
+        computeResult.result()
+            .map(Node2VecModel.Result::lossPerIteration)
+            .ifPresent(builder::withLossPerIteration);
 
         return builder;
     }
