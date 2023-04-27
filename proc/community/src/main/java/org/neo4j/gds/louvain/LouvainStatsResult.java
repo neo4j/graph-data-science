@@ -20,18 +20,21 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
-public final class WriteResult extends LouvainStatsResult {
-    public final long writeMillis;
-    public final long nodePropertiesWritten;
+public class LouvainStatsResult extends StandardStatsResult {
+    public final double modularity;
+    public final List<Double> modularities;
+    public final long ranLevels;
+    public final long communityCount;
+    public final Map<String, Object> communityDistribution;
 
-    private WriteResult(
+    LouvainStatsResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
@@ -40,33 +43,24 @@ public final class WriteResult extends LouvainStatsResult {
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long writeMillis,
-        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            modularity,
-            modularities,
-            ranLevels,
-            communityCount,
-            communityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.writeMillis = writeMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.modularity = modularity;
+        this.modularities = modularities;
+        this.ranLevels = ranLevels;
+        this.communityCount = communityCount;
+        this.communityDistribution = communityDistribution;
     }
 
-    static class Builder extends LouvainProc.LouvainResultBuilder<WriteResult> {
+    static class Builder extends LouvainProc.LouvainResultBuilder<LouvainStatsResult> {
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        protected WriteResult buildResult() {
-            return new WriteResult(
+        protected LouvainStatsResult buildResult() {
+            return new LouvainStatsResult(
                 modularity,
                 Arrays.stream(modularities).boxed().collect(Collectors.toList()),
                 levels,
@@ -75,8 +69,6 @@ public final class WriteResult extends LouvainStatsResult {
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
                 config.toMap()
             );
         }

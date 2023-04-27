@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class MutateResult extends LouvainStatsProc.StatsResult {
+public final class MutateResult extends LouvainStatsResult {
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 

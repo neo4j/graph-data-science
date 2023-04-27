@@ -19,121 +19,43 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.louvain.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class LouvainStatsProc extends StatsProc<Louvain, LouvainResult, LouvainStatsProc.StatsResult, LouvainStatsConfig> {
-
+public class LouvainStatsProc extends BaseProc {
     @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<LouvainStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LouvainStatsSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<Louvain, LouvainResult, LouvainStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LouvainProc.resultBuilder(
-            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @Override
-    protected LouvainStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return LouvainStatsConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Louvain, LouvainStatsConfig> algorithmFactory() {
-        return new LouvainFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final double modularity;
-        public final List<Double> modularities;
-        public final long ranLevels;
-        public final long communityCount;
-        public final Map<String, Object> communityDistribution;
-
-        StatsResult(
-            double modularity,
-            List<Double> modularities,
-            long ranLevels,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-            this.modularity = modularity;
-            this.modularities = modularities;
-            this.ranLevels = ranLevels;
-            this.communityCount = communityCount;
-            this.communityDistribution = communityDistribution;
-        }
-
-        static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected StatsResult buildResult() {
-                return new StatsResult(
-                    modularity,
-                    Arrays.stream(modularities).boxed().collect(Collectors.toList()),
-                    levels,
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    config.toMap()
-                );
-            }
-        }
-
+        return new MemoryEstimationExecutor<>(
+            new LouvainStatsSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 }
