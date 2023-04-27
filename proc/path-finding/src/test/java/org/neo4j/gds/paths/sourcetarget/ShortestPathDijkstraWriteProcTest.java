@@ -19,60 +19,82 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.TestLogProvider;
+import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraWriteConfig> {
+class ShortestPathDijkstraWriteProcTest extends BaseProcTest {
+
+    long idA, idC, idD, idE, idF;
+    static long[] ids0;
+    static double[] costs0;
 
     TestLog testLog;
 
-    @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig, ?>> getProcedureClazz() {
-        return ShortestPathDijkstraWriteProc.class;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (:Offset)" +
+                                            ", (a:Label)" +
+                                            ", (b:Label)" +
+                                            ", (c:Label)" +
+                                            ", (d:Label)" +
+                                            ", (e:Label)" +
+                                            ", (f:Label)" +
+                                            ", (a)-[:TYPE {cost: 4}]->(b)" +
+                                            ", (a)-[:TYPE {cost: 2}]->(c)" +
+                                            ", (b)-[:TYPE {cost: 5}]->(c)" +
+                                            ", (b)-[:TYPE {cost: 10}]->(d)" +
+                                            ", (c)-[:TYPE {cost: 3}]->(e)" +
+                                            ", (d)-[:TYPE {cost: 11}]->(f)" +
+                                            ", (e)-[:TYPE {cost: 4}]->(d)";
 
-    @Override
-    public ShortestPathDijkstraWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraWriteConfig.of(mapWrapper);
-    }
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            ShortestPathDijkstraWriteProc.class,
+            GraphProjectProc.class
+        );
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        mapWrapper = super.createMinimalConfig(mapWrapper);
+        idA = idFunction.of("a");
+        idC = idFunction.of("c");
+        idD = idFunction.of("d");
+        idE = idFunction.of("e");
+        idF = idFunction.of("f");
 
-        if (!mapWrapper.containsKey(WRITE_RELATIONSHIP_TYPE_KEY)) {
-            mapWrapper = mapWrapper.withString(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
-        }
+        ids0 = new long[]{idA, idC, idE, idD, idF};
+        costs0 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
 
-        return mapWrapper;
+
+        runQuery(GdsCypher.call("graph")
+            .graphProject()
+            .withNodeLabel("Label")
+            .withRelationshipType("TYPE")
+            .withRelationshipProperty("cost")
+            .yields());
     }
 
     @Override
@@ -85,13 +107,12 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
     @Test
     void testWrite() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .writeMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
+            .addParameter("sourceNode", idFunction.of("a"))
+            .addParameter("targetNode", idFunction.of("f"))
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .addParameter("writeNodeIds", true)
@@ -115,13 +136,12 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
     void testWriteFlags(boolean writeNodeIds, boolean writeCosts) {
         var relationshipWeightProperty = "cost";
 
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .writeMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
+            .addParameter("sourceNode", idFunction.of("a"))
+            .addParameter("targetNode", idFunction.of("f"))
             .addParameter("relationshipWeightProperty", relationshipWeightProperty)
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .addParameter("writeNodeIds", writeNodeIds)
@@ -152,13 +172,12 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
     @Test
     void testLazyComputationLoggingFinishes() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .writeMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
+            .addParameter("sourceNode", idFunction.of("a"))
+            .addParameter("targetNode", idFunction.of("f"))
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeRelationshipType", "BAR")
             .yields();
@@ -171,29 +190,34 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
     @Test
     void testProgressTracking() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        applyOnProcedure(proc -> {
-            var pathProc = ((ShortestPathDijkstraWriteProc) proc);
+        var query = GdsCypher.call("graph")
+            .algo("gds.shortestPath.dijkstra")
+            .writeMode()
+            .addParameter("sourceNode", idFunction.of("a"))
+            .addParameter("targetNode", idFunction.of("f"))
+            .addParameter("relationshipWeightProperty", "cost")
+            .addParameter("writeRelationshipType", "BAR")
+            .yields();
 
-            var taskStore = new GlobalTaskStore();
+        runQuery(query);
 
-            pathProc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
+        var messages = testLog.getMessages(TestLog.INFO);
 
-            pathProc.write(
-                "graph",
-                Map.of(
-                    "sourceNode", config.sourceNode(),
-                    "targetNode", config.targetNode(),
-                    "relationshipWeightProperty", "cost",
-                    "writeRelationshipType", "BAR"
-                )
-            );
+        assertThat(messages)
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .contains("Write shortest Paths :: WriteRelationshipStream :: Finished");
 
-            assertThat(taskStore.query().map(TaskStore.UserTask::task).map(Task::description)).containsExactlyInAnyOrder(
-                "Dijkstra",
-                "Write shortest Paths :: WriteRelationshipStream"
-            );
-        });
     }
+
+    void applyOnProcedure(Consumer<ShortestPathDijkstraWriteProc> func) {
+        TestProcedureRunner.applyOnProcedure(
+            db,
+            ShortestPathDijkstraWriteProc.class,
+            func
+        );
+    }
+
+
 }
