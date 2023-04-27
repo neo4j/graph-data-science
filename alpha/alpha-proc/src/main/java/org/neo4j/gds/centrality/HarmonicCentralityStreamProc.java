@@ -19,25 +19,19 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
-import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
-import org.neo4j.gds.impl.harmonic.HarmonicResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.centrality.HarmonicCentralityProc.DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
-public class HarmonicCentralityStreamProc extends HarmonicCentralityProc<HarmonicCentralityStreamProc.StreamResult> {
+public class HarmonicCentralityStreamProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ)
     @Description(DESCRIPTION)
@@ -45,35 +39,10 @@ public class HarmonicCentralityStreamProc extends HarmonicCentralityProc<Harmoni
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        return new ProcedureExecutor<>(
+            new HarmonicCentralityStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
-    @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var result = computationResult.result();
-
-            if (result.isEmpty()) {
-                return Stream.empty();
-            }
-
-            var graph = computationResult.graph();
-            var centralityScores = result.get();
-            return LongStream.range(0, graph.nodeCount())
-                .boxed()
-                .map(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), centralityScores.getCentralityScore(nodeId)));
-        };
-    }
-
-    @SuppressWarnings("unused")
-    public static final class StreamResult {
-        public final long nodeId;
-        public final double centrality;
-
-        StreamResult(long nodeId, double centrality) {
-            this.nodeId = nodeId;
-            this.centrality = centrality;
-        }
-    }
 }

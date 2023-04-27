@@ -17,11 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.impl.harmonic;
 
-import org.neo4j.gds.BaseProcTest;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-class HarmonicCentralityProcTest extends BaseProcTest {
+@Configuration
+public interface HarmonicCentralityWriteConfig extends HarmonicCentralityBaseConfig, WritePropertyConfig {
 
+    @Override
+    @Value.Default
+    default String writeProperty() {
+        return "centrality";
+    }
 
+    static HarmonicCentralityWriteConfig of(CypherMapWrapper config) {
+        return new HarmonicCentralityWriteConfigImpl(config);
+    }
 }

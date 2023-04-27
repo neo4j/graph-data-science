@@ -17,29 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.closeness;
+package org.neo4j.gds.impl.harmonic;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface HarmonicCentralityConfig extends
-    AlgoBaseConfig,
-    WritePropertyConfig {
 
-    @Override
-    @Value.Default
-    default String writeProperty() {
-        return "centrality";
-    }
-
-    static HarmonicCentralityConfig of(CypherMapWrapper config) {
-        return new HarmonicCentralityConfigImpl(config);
-    }
+public interface HarmonicCentralityBaseConfig  extends AlgoBaseConfig
+{
 }
