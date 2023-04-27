@@ -20,9 +20,12 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,6 +38,9 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ModularityOptimizationWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
@@ -59,5 +65,10 @@ public class ModularityOptimizationWriteProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }
