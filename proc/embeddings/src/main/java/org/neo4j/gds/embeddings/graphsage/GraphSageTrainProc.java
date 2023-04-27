@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
+import org.neo4j.gds.TrainResult;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
@@ -39,13 +40,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
-@GdsCallable(name = "gds.beta.graphSage.train", description = GRAPHSAGE_DESCRIPTION, executionMode = TRAIN)
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainProc.TrainResult> {
+@GdsCallable(name = "gds.beta.graphSage.train", description = GRAPH_SAGE_DESCRIPTION, executionMode = TRAIN)
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainResult> {
 
-    @Description(GRAPHSAGE_DESCRIPTION)
+    @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
     public Stream<TrainResult> train(
         @Name(value = "graphName") String graphName,
@@ -83,9 +84,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
     protected TrainResult constructProcResult(ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult) {
         return new TrainResult(
             computationResult.result(),
-            computationResult.computeMillis(),
-            computationResult.graph().nodeCount(),
-            computationResult.graph().relationshipCount()
+            computationResult.computeMillis()
         );
     }
 
@@ -94,4 +93,3 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
         return model;
     }
 }
-

@@ -20,21 +20,25 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-import java.util.Optional;
+class EmbeddingNodePropertyValues implements DoubleArrayNodePropertyValues {
+    private final long size;
+    private final HugeObjectArray<double[]> embeddings;
 
-public final class GraphSageCompanion {
+    EmbeddingNodePropertyValues(HugeObjectArray<double[]> embeddings) {
+        this.embeddings = embeddings;
+        this.size = embeddings.size();
+    }
 
-    static final String GRAPH_SAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
+    @Override
+    public long nodeCount() {
+        return size;
+    }
 
-    private GraphSageCompanion() {}
+    @Override
+    public double[] doubleArrayValue(long nodeId) {
 
-    static DoubleArrayNodePropertyValues nodePropertyValues(Optional<GraphSageResult> graphSageResult) {
-        return graphSageResult
-            .map(GraphSageResult::embeddings)
-            .map(embeddings -> (DoubleArrayNodePropertyValues) new EmbeddingNodePropertyValues(embeddings))
-            .orElse(EmptyDoubleArrayNodePropertyValues.INSTANCE);
+        return embeddings.get(nodeId);
     }
 }

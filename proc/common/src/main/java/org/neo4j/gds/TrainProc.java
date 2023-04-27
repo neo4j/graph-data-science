@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -33,14 +32,8 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
 public abstract class TrainProc<
     ALGO extends Algorithm<ALGO_RESULT>,
@@ -109,7 +102,7 @@ public abstract class TrainProc<
         private final String username;
         private final String modelType;
 
-        public TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
+        TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
             this.modelCatalog = modelCatalog;
             this.username = username;
             this.modelType = modelType;
@@ -128,33 +121,4 @@ public abstract class TrainProc<
         }
     }
 
-    // FIXME replace this with MLTrainResult (duplicate?)
-    @SuppressWarnings("unused")
-    public static class TrainResult {
-
-        public final Map<String, Object> modelInfo;
-        public final Map<String, Object> configuration;
-        public final long trainMillis;
-
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends CustomInfo> TrainResult(
-            Optional<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>> maybeTrainedModel,
-            long trainMillis,
-            long nodeCount,
-            long relationshipCount
-        ) {
-            this.modelInfo = new HashMap<>();
-            this.configuration = new HashMap<>();
-
-            maybeTrainedModel.ifPresent(trainedModel -> {
-                TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
-
-                modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-                modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-                modelInfo.putAll(trainedModel.customInfo().toMap());
-                configuration.putAll(trainConfig.toMap());
-            });
-
-            this.trainMillis = trainMillis;
-        }
-    }
 }
