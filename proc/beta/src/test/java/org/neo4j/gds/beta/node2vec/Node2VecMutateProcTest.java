@@ -20,49 +20,69 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.hamcrest.Matchers;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.ProcedureMethodHelper;
+import org.neo4j.gds.ImmutableNodeProjection;
+import org.neo4j.gds.ImmutablePropertyMappings;
+import org.neo4j.gds.InvocationCountingTaskStore;
+import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.graphdb.QueryExecutionException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class Node2VecMutateProcTest extends BaseProcTest
-    implements
-        AlgoBaseProcTest<Node2Vec, Node2VecMutateConfig, Node2VecModel.Result>,
-        MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, Node2VecModel.Result> {
+class Node2VecMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node1)" +
-        ", (b:Node1)" +
-        ", (c:Node2)" +
-        ", (d:Isolated)" +
-        ", (e:Isolated)" +
+        "  (a:Node1 {dummy:1})" +
+        ", (b:Node1 {dummy:1})" +
+        ", (c:Node2 {dummy:1})" +
+        ", (d:Isolated {dummy:1})" +
+        ", (e:Isolated {dummy:1})" +
         ", (a)-[:REL]->(b)" +
         ", (b)-[:REL]->(a)" +
         ", (a)-[:REL]->(c)" +
@@ -77,120 +97,159 @@ class Node2VecMutateProcTest extends BaseProcTest
             GraphWriteNodePropertiesProc.class,
             GraphProjectProc.class
         );
+
+        runQuery("CALL gds.graph.project('graph', '*', '*')");
     }
 
-    @Override
-    public Class<Node2VecMutateProc> getProcedureClazz() {
-        return Node2VecMutateProc.class;
+    @AfterEach
+    void removeAllLoadedGraphs() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Override
-    public Node2VecMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return Node2VecMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public String mutateProperty() {
-        return "node2vecEmbedding";
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.FLOAT_ARRAY;
-    }
-
-    @Override
     @Test
-    public void testGraphMutation() {
-        assertMutatedGraph(runMutation());
+    void testMutateFailsOnExistingToken() {
+
+        var projectQuery = "CALL gds.graph.project('existingPropertyGraph', {N: {label: 'Node1', properties: 'dummy'}}, '*')";
+        runQuery(projectQuery);
+
+        var query = GdsCypher.call("existingPropertyGraph")
+            .algo("gds.beta.node2vec")
+            .mutateMode()
+            .addParameter("embeddingDimension", 42)
+            .addParameter("mutateProperty", "dummy")
+            .addParameter("iterations", 1)
+            .yields();
+
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery(query))
+            .withRootCauseExactlyInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("Node property `dummy` already exists in the in-memory graph.");
     }
 
-    @Override
     @Test
-    public void testMutateFailsOnExistingToken() {
-        String graphName = ensureGraphExists();
+    void mutation() {
+        var graphBeforeMutation = findLoadedGraph("graph");
+        assertThat(graphBeforeMutation.schema().nodeSchema().allProperties()).doesNotContain("testProp");
 
-        applyOnProcedure(procedure ->
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-                    try {
-                        // write first time
-                        mutateMethod.invoke(procedure, graphName, config);
-                        // write second time using same `writeProperty`
-                        assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
-                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-                            .hasRootCauseMessage(failOnExistingTokenMessage());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
+        runQuery("CALL gds.beta.node2vec.mutate('graph', {" +
+                 "   embeddingDimension: 42, " +
+                 "   mutateProperty: 'testProp', " +
+                 "   iterations: 5" +
+                 "})");
 
-        GraphStore mutatedGraphStore = GraphStoreCatalog.get(AlgoBaseProcTest.TEST_USERNAME, databaseId(), graphName).graphStore();
-        assertMutatedGraph(mutatedGraphStore);
+        var graphAfterMutation = findLoadedGraph("graph");
+        assertThat(graphAfterMutation.schema().nodeSchema().allProperties()).contains("testProp");
+
+        var mutatedProperty = graphAfterMutation.nodeProperties("testProp");
+        graphAfterMutation.forEachNode(nodeId -> {
+            assertThat(mutatedProperty.floatArrayValue(nodeId)).hasSize(42);
+            return true;
+        });
     }
 
     @Test
     void returnLossPerIteration() {
-        loadGraph(DEFAULT_GRAPH_NAME);
-        int iterations = 5;
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.node2vec")
-            .mutateMode()
-            .addParameter("embeddingDimension", 42)
-            .addParameter("mutateProperty", "testProp")
-            .addParameter("iterations", iterations)
-            .yields("lossPerIteration");
-
-        assertCypherResult(query, List.of(Map.of("lossPerIteration", Matchers.hasSize(iterations))));
+        var query = "CALL gds.beta.node2vec.mutate('graph', {" +
+                    "   embeddingDimension: 42, " +
+                    "   mutateProperty: 'testProp', " +
+                    "   iterations: 5" +
+                    "}) " +
+                    "YIELD lossPerIteration";
+        assertCypherResult(query, List.of(Map.of("lossPerIteration", Matchers.hasSize(5))));
     }
 
-    private void assertMutatedGraph(GraphStore mutatedGraphStore) {
-        var mutatedProperties = mutatedGraphStore.nodeProperty(mutateProperty()).values();
-        mutatedGraphStore.nodes().forEachNode(nodeId -> {
-            var embedding = mutatedProperties.floatArrayValue(nodeId);
-            assertThat(embedding)
-                .hasSize(128)
-                .satisfies(array -> {
-                    var allZeros = true;
-                    for (float v : array) {
-                        allZeros &= v == 0.0f;
-                    }
-                    assertThat(allZeros)
-                        .withFailMessage("Embedding %s should not be all zeroes", Arrays.toString(array))
-                        .isFalse();
-                });
 
-            return true;
+    @Test
+    void shouldUnregisterTaskAfterComputation() {
+        var taskStore = new InvocationCountingTaskStore();
+        var graphProjectConfig = withNameAndRelationshipProjections(
+            "g2"
+        );
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
+        applyOnProcedure(wccMutateProc -> {
+            wccMutateProc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+
+            var configMap = Map.<String, Object>of("mutateProperty", "embedding");
+
+            var spec = new Node2VecMutateSpec() {
+                @Override
+                public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+                    return (computationResultConsumer, executionContext) -> Stream.empty();
+                }
+            };
+            new ProcedureExecutor<>(spec, wccMutateProc.executionContext()).compute("g2", configMap);
+            new ProcedureExecutor<>(spec, wccMutateProc.executionContext()).compute("g2", configMap);
+
+            assertThat(taskStore.query())
+                .withFailMessage(() -> formatWithLocale(
+                    "Expected no tasks to be open but found %s",
+                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
+                )).isEmpty();
+            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
         });
-
-        GraphSchema schema = mutatedGraphStore.schema();
-        if (mutateProperty() != null) {
-            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema());
-            assertThat(nodesContainMutateProperty)
-                .withFailMessage(
-                    "The node schema %s should contain a property called `%s` of type `%s`",
-                    mutatedGraphStore.schema().nodeSchema(),
-                    mutateProperty(),
-                    mutatePropertyType()
-                )
-                .isTrue();
-        }
-    }
-
-    @Override
-    public String expectedMutatedGraph() {
-        throw new UnsupportedOperationException("Node2Vec is a random based algorithm and cannot support this method");
-    }
-
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
     }
 
     @Test
-    @Disabled("Mutate on empty graph has not been covered in AlgoBaseProcTest 🙈")
-    public void testRunOnEmptyGraph() {
+    void shouldRegisterTaskWithCorrectJobId() {
+        var taskStore = new InvocationCountingTaskStore();
+
+        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
+            "g1"
+        );
+        applyOnProcedure(proc -> {
+            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+
+            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
+
+            var someJobId = new JobId();
+            Map<String, Object> configMap = Map.of(
+                "jobId", someJobId,
+                "mutateProperty", "embedding"
+            );
+
+            proc.mutate("g1", configMap);
+
+            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
+        });
+    }
+
+    void applyOnProcedure(Consumer<Node2VecMutateProc> func) {
+        TestProcedureRunner.applyOnProcedure(
+            db,
+            Node2VecMutateProc.class,
+            func
+        );
+    }
+
+    private GraphProjectFromStoreConfig withNameAndRelationshipProjections(
+        String graphName
+    ) {
+        return ImmutableGraphProjectFromStoreConfig.of(
+            getUsername(),
+            graphName,
+            NodeProjections.create(singletonMap(
+                ALL_NODES,
+                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+            )),
+            RelationshipProjections.ALL
+        );
+    }
+
+    @NotNull
+    private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        return ImmutableGraphLoader
+            .builder()
+            .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+                .transactionContext(TestSupport.fullAccessTransaction(db))
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .log(Neo4jProxy.testLog())
+                .build())
+            .username("")
+            .projectConfig(graphProjectConfig)
+            .build();
     }
 }
