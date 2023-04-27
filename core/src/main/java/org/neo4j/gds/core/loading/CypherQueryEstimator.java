@@ -32,21 +32,21 @@ public class CypherQueryEstimator {
 
     private final TransactionContext context;
 
-    CypherQueryEstimator(TransactionContext context) {this.context = context;}
+    public CypherQueryEstimator(TransactionContext context) {this.context = context;}
 
 
-    EstimationResult getNodeEstimation(String nodeQuery) {
+    public EstimationResult getNodeEstimation(String nodeQuery) {
         return runEstimationQuery(nodeQuery, NodeSubscriber.RESERVED_COLUMNS);
     }
 
-    EstimationResult getRelationshipEstimation(String relationshipQuery) {
+    public EstimationResult getRelationshipEstimation(String relationshipQuery) {
         return runEstimationQuery(
             relationshipQuery,
             RelationshipSubscriber.RESERVED_COLUMNS
         );
     }
 
-    private EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
+    public EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
         return context.withRestrictedAccess(READ).apply((tx, ktx) -> {
             var explainQuery = formatWithLocale("EXPLAIN %s", query);
             try (var result = tx.execute(explainQuery)) {
