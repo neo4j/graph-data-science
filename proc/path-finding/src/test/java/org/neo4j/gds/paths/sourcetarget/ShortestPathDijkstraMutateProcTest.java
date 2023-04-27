@@ -236,17 +236,21 @@ class ShortestPathDijkstraMutateProcTest extends BaseProcTest {
             GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
             var someJobId = new JobId();
-            Map<String, Object> configMap = Map.of(
+            var configMap = Map.<String, Object>of(
                 "jobId", someJobId,
-                "mutateProperty", "embedding"
+                "sourceNode",
+                0,
+                "targetNode",
+                1,
+                "mutateRelationshipType",
+                "foo"
             );
-
             proc.mutate("g1", configMap);
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
     }
-    
+
     @NotNull
     private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
         return ImmutableGraphLoader
