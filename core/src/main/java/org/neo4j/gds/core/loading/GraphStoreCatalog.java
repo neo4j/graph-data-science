@@ -24,7 +24,9 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
@@ -184,18 +186,21 @@ public final class GraphStoreCatalog {
             return userCatalog;
         });
 
-        listeners.forEach(listener -> {
-            try {
-                listener.onProject(config.username(), graphStore.databaseId().databaseName(), config.graphName());
-            } catch (Exception e) {
-                log.ifPresent(l -> l.warn(String.format(
+        listeners.forEach(listener -> ExceptionUtil.safeRunWithLogException(
+                log.orElseGet(Neo4jProxy::testLog),
+                () -> String.format(
                     Locale.US,
                     "Could not call listener %s on setting the graph %s",
                     listener,
                     config.graphName()
-                ), e));
-            }
-        });
+                ),
+                () -> listener.onProject(
+                    config.username(),
+                    graphStore.databaseId().databaseName(),
+                    config.graphName()
+                )
+            )
+        );
     }
 
     public static boolean exists(String username, String databaseName, String graphName) {
