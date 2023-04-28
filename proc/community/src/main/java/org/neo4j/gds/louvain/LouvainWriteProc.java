@@ -19,136 +19,55 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.louvain.write", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LouvainWriteProc extends WriteProc<Louvain, LouvainResult, LouvainWriteProc.WriteResult, LouvainWriteConfig> {
+public class LouvainWriteProc extends BaseProc {
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.louvain.write", mode = WRITE)
-    @Description(LouvainProc.LOUVAIN_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new LouvainWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new LouvainWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodeProperties(
-            computationResult,
-            computationResult.config().writeProperty()
-        );
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LouvainProc.resultBuilder(new WriteResult.Builder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        ), computeResult);
-    }
-
-    @Override
-    protected LouvainWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return LouvainWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory() {
-        return new LouvainFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends LouvainStatsProc.StatsResult {
-
-        public final long writeMillis;
-        public final long nodePropertiesWritten;
-
-        WriteResult(
-            double modularity,
-            List<Double> modularities,
-            long ranLevels,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                modularity,
-                modularities,
-                ranLevels,
-                communityCount,
-                communityDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.writeMillis = writeMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends LouvainProc.LouvainResultBuilder<WriteResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    modularity,
-                    Arrays.stream(modularities).boxed().collect(Collectors.toList()),
-                    levels,
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    writeMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }

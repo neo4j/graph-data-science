@@ -44,19 +44,14 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 
 import java.util.List;
 
-public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgorithmFactory<Louvain, CONFIG> {
-
-    @Override
-    public String taskName() {
-        return "Louvain";
-    }
-
+public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgorithmFactory<Louvain, CONFIG> {
     @Override
     public Louvain build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
+
         return new Louvain(
             graph,
             configuration,
@@ -65,8 +60,22 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
             configuration.maxIterations(),
             configuration.tolerance(),
             configuration.concurrency(),
-            progressTracker, Pools.DEFAULT
+            progressTracker,
+            Pools.DEFAULT
+        );
+    }
 
+    @Override
+    public String taskName() {
+        return "Louvain";
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.iterativeDynamic(
+            taskName(),
+            () -> List.of(ModularityOptimizationFactory.modularityOptimizationProgressTask(graph, config)),
+            config.maxLevels()
         );
     }
 
@@ -106,17 +115,9 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
                 HugeLongArray.memoryEstimation(nodeCount),
                 HugeLongArray.memoryEstimation(nodeCount) * (config.includeIntermediateCommunities() ? config.maxLevels() : Math.min(
                     2,
-                    config.maxLevels()))
+                    config.maxLevels()
+                ))
             ))
             .build();
-    }
-
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.iterativeDynamic(
-            taskName(),
-            () -> List.of(ModularityOptimizationFactory.modularityOptimizationProgressTask(graph, config)),
-            config.maxLevels()
-        );
     }
 }
