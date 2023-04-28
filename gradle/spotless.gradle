@@ -1,0 +1,21 @@
+
+allprojects { proj ->
+
+    plugins.withType(JavaLibraryPlugin) {
+        if (Boolean.parseBoolean(project.properties.get("enableSpotless"))) {
+            proj.apply plugin: "com.diffplug.spotless"
+            proj.spotless {
+                java {
+                    removeUnusedImports()
+
+                    eclipse().configFile(rootProject.file("public/etc/codestyle.xml"))
+                }
+            }
+
+            tasks.named("spotlessApply").configure {
+                it.dependsOn("licenseFormat")
+            }
+        }
+    }
+
+}
