@@ -20,9 +20,13 @@
 package org.neo4j.gds.topologicalsort;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface TopologicalSortConfig extends AlgoBaseConfig {
+public interface TopologicalSortStreamConfig extends TopologicalSortBaseConfig {
+
+    static TopologicalSortStreamConfig of(CypherMapWrapper userInput) {
+        return new TopologicalSortStreamConfigImpl(userInput);
+    }
 
 }
