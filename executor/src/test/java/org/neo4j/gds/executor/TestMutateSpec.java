@@ -53,6 +53,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
             .withMutateMillis(42)
             .withWriteMillis(42)
             .withNodePropertiesWritten(42)
+            .withConfig(computationResult.config())
             .build();
     }
 }
