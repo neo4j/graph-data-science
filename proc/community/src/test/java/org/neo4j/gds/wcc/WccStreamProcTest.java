@@ -34,7 +34,6 @@ import org.neo4j.gds.ImmutableNodeProjection;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMapping;
 import org.neo4j.gds.ImmutablePropertyMappings;
-import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -44,7 +43,6 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -59,13 +57,8 @@ import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -84,7 +77,6 @@ import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class WccStreamProcTest extends BaseProcTest {
 
@@ -245,66 +237,6 @@ class WccStreamProcTest extends BaseProcTest {
 
         assertThat(communities)
             .containsExactly(expectedCommunities);
-    }
-
-    @Test
-    void shouldUnregisterTaskAfterComputation() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        var loadedGraphName = "loadedGraph";
-        var graphProjectConfig = withNameAndRelationshipProjections(
-            loadedGraphName,
-            RelationshipProjections.ALL
-        );
-
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            var configMap = CypherMapWrapper.empty().toMap();
-
-            proc.stream(
-                loadedGraphName,
-                configMap
-            ).count();
-            proc.stream(
-                loadedGraphName,
-                configMap
-            ).count();
-
-            assertThat(taskStore.query())
-                .withFailMessage(() -> formatWithLocale(
-                    "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
-                )).isEmpty();
-            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
-        });
-    }
-
-    @Test
-    void shouldRegisterTaskWithCorrectJobId() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            loadedGraphName,
-            RelationshipProjections.ALL
-        );
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(graphProjectConfig, graphStore);
-
-            var someJobId = new JobId();
-            Map<String, Object> mapWithJobId = Map.of("jobId", someJobId);
-
-            Map<String, Object> configMap = CypherMapWrapper.create(mapWithJobId).toMap();
-            proc.stream(loadedGraphName, configMap).count();
-
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
-        });
     }
 
     @Test

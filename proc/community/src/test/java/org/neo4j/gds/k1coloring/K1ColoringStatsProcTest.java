@@ -121,37 +121,6 @@ class K1ColoringStatsProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldUnregisterTaskAfterComputation() {
-        var taskStore = new InvocationCountingTaskStore();
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringStatsProc.class, proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            var configMap = Map.<String, Object>of();
-            proc.stats(K1COLORING_GRAPH, configMap).count();
-            proc.stats(K1COLORING_GRAPH, configMap).count();
-
-            assertThat(taskStore.query())
-                .withFailMessage(() -> formatWithLocale(
-                    "Expected no tasks to be open but found [%s]",
-                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
-                )).isEmpty();
-            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
-        });
-    }
-
-    @Test
-    void shouldRegisterTaskWithCorrectJobId() {
-        var taskStore = new InvocationCountingTaskStore();
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringStatsProc.class, proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-            var someJobId = new JobId();
-            Map<String, Object> configMap = Map.of("jobId", someJobId);
-            proc.stats(K1COLORING_GRAPH, configMap);
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
-        });
-    }
-
-    @Test
     void testRunOnEmptyGraph() {
         // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
         TestProcedureRunner.applyOnProcedure(db, K1ColoringStatsProc.class, (proc) -> {

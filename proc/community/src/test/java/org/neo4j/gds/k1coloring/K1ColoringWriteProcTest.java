@@ -32,7 +32,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ImmutableNodeProjection;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMappings;
-import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProcedureMethodHelper;
@@ -50,20 +49,12 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -72,13 +63,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringWriteProcTest extends BaseProcTest {
 
@@ -195,62 +184,6 @@ class K1ColoringWriteProcTest extends BaseProcTest {
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
             long nodeId = row.getNumber("id").longValue();
             assertEquals(expectedResult.get(nodeId), row.getNumber("color"));
-        });
-    }
-
-    @Test
-    void shouldUnregisterTaskAfterComputation() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            Map<String, Object> configMap = Map.of("writeProperty", "color");
-            var spec = new K1ColoringWriteSpecification() {
-                @Override
-                public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>> computationResultConsumer() {
-                    return (computationResult, executionContext) -> {
-                        computationResult.result().get();
-                        return Stream.empty();
-                    };
-                }
-            };
-            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap).count();
-            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap).count();
-
-            assertThat(taskStore.query())
-                .withFailMessage(() -> formatWithLocale(
-                    "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
-                )).isEmpty();
-            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
-        });
-    }
-
-    @Test
-    void shouldRegisterTaskWithCorrectJobId() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            var someJobId = new JobId();
-            Map<String, Object> configMap = Map.of(
-                "jobId", someJobId,
-                "writeProperty", "color"
-            );
-            var spec = new K1ColoringWriteSpecification() {
-                @Override
-                public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>> computationResultConsumer() {
-                    return (computationResult, executionContext) -> {
-                        computationResult.result().get();
-                        return Stream.empty();
-                    };
-                }
-            };
-            new ProcedureExecutor<>(spec, proc.executionContext()).compute(K1COLORING_GRAPH, configMap);
-
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
     }
 

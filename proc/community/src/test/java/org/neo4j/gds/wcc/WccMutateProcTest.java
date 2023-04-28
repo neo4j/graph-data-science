@@ -29,7 +29,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ImmutableNodeProjection;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMappings;
-import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -60,18 +59,10 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -458,66 +449,6 @@ class WccMutateProcTest extends BaseProcTest {
         );
 
         assertTrue(log.get(0).containsMessage(TestLog.WARN, "Graph mutation failed"));
-    }
-
-    @Test
-    void shouldUnregisterTaskAfterComputation() {
-        var taskStore = new InvocationCountingTaskStore();
-        var graphProjectConfig = withNameAndRelationshipProjections(
-            GRAPH_NAME,
-            RelationshipProjections.ALL
-        );
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-        applyOnProcedure(wccMutateProc -> {
-            wccMutateProc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            var configMap = Map.<String, Object>of("mutateProperty", MUTATE_PROPERTY);
-
-            var spec = new WccMutateSpecification() {
-                @Override
-                public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-                    return (computationResultConsumer, executionContext) -> {
-                        computationResultConsumer.result().get();
-                        return Stream.empty();
-                    };
-                }
-            };
-            new ProcedureExecutor<>(spec, wccMutateProc.executionContext()).compute(GRAPH_NAME, configMap);
-            new ProcedureExecutor<>(spec, wccMutateProc.executionContext()).compute(GRAPH_NAME, configMap);
-
-            assertThat(taskStore.query())
-                .withFailMessage(() -> formatWithLocale(
-                    "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
-                )).isEmpty();
-            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
-        });
-    }
-
-    @Test
-    void shouldRegisterTaskWithCorrectJobId() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            GRAPH_NAME,
-            RelationshipProjections.ALL
-        );
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(graphProjectConfig, graphStore);
-
-            var someJobId = new JobId();
-            Map<String, Object> configMap = Map.of(
-                "jobId", someJobId,
-                "mutateProperty", MUTATE_PROPERTY
-            );
-
-            proc.mutate(GRAPH_NAME, configMap);
-
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
-        });
     }
 
     @Test

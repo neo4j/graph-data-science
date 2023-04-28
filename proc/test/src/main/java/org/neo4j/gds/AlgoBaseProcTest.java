@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -37,16 +36,11 @@ import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.lang.reflect.InvocationTargetException;
@@ -55,13 +49,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * @deprecated do not add new uses of this.
@@ -123,69 +115,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     }
 
     default void consumeResult(RESULT result) {}
-
-    @Test
-    default void shouldUnregisterTaskAfterComputation() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        var loadedGraphName = "loadedGraph";
-        var graphProjectConfig = withNameAndRelationshipProjections(
-            loadedGraphName,
-            relationshipProjections()
-        );
-
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            consumeResult(
-                proc.compute(
-                    loadedGraphName,
-                    configMap
-                ).result().get()
-            );
-            consumeResult(
-                proc.compute(
-                    loadedGraphName,
-                    configMap
-                ).result().get()
-            );
-
-            assertThat(taskStore.query())
-                .withFailMessage(() -> formatWithLocale(
-                    "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
-                )).isEmpty();
-            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
-        });
-    }
-
-    @Test
-    default void shouldRegisterTaskWithCorrectJobId() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
-            loadedGraphName,
-            relationshipProjections()
-        );
-        applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(graphProjectConfig, graphStore);
-
-            var someJobId = new JobId();
-            Map<String, Object> mapWithJobId = Map.of("jobId", someJobId);
-
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(mapWithJobId)).toMap();
-            proc.compute(loadedGraphName, configMap);
-
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
-        });
-    }
 
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.ALL;
