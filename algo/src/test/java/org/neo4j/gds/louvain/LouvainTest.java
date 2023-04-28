@@ -384,7 +384,7 @@ class LouvainTest {
             .build();
 
         assertMemoryEstimation(
-            () -> new LouvainFactory<>().memoryEstimation(config),
+            () -> new LouvainAlgorithmFactory<>().memoryEstimation(config),
             nodeCount,
             relCount,
             concurrency,
@@ -415,13 +415,13 @@ class LouvainTest {
             .concurrency(1)
             .build();
 
-        MemoryTree memoryTree = new LouvainFactory<>()
+        MemoryTree memoryTree = new LouvainAlgorithmFactory<>()
             .memoryEstimation(config)
             .estimate(dimensionsWithoutProperties, 1);
-        MemoryTree memoryTreeOneProperty = new LouvainFactory<>()
+        MemoryTree memoryTreeOneProperty = new LouvainAlgorithmFactory<>()
             .memoryEstimation(config)
             .estimate(dimensionsWithOneProperty, 1);
-        MemoryTree memoryTreeTwoProperties = new LouvainFactory<>()
+        MemoryTree memoryTreeTwoProperties = new LouvainAlgorithmFactory<>()
             .memoryEstimation(config)
             .estimate(dimensionsWithTwoProperties, 1);
 
@@ -469,7 +469,7 @@ class LouvainTest {
 
         var config = defaultConfigBuilder().build();
 
-        var progressTask = new LouvainFactory<>().progressTask(graph, config);
+        var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
