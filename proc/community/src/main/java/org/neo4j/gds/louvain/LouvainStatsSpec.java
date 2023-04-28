@@ -30,7 +30,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 
 @GdsCallable(name = "gds.louvain.stats", description = DESCRIPTION, executionMode = STREAM)
-public class LouvainStatsSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStatsConfig, Stream<LouvainStatsResult>, LouvainAlgorithmFactory<LouvainStatsConfig>> {
+public class LouvainStatsSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStatsConfig, Stream<StatsResult>, LouvainAlgorithmFactory<LouvainStatsConfig>> {
     @Override
     public String name() {
         return "LouvainStats";
@@ -47,10 +47,10 @@ public class LouvainStatsSpec implements AlgorithmSpec<Louvain, LouvainResult, L
     }
 
     @Override
-    public ComputationResultConsumer<Louvain, LouvainResult, LouvainStatsConfig, Stream<LouvainStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Louvain, LouvainResult, LouvainStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
-            var louvainStatsResultBuilder = new LouvainStatsResult.Builder(
+            var louvainStatsResultBuilder = new LouvainStatsResultsBuilder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );

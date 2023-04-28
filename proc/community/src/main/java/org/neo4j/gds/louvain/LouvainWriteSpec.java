@@ -25,11 +25,9 @@ import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -56,7 +54,7 @@ public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, L
     @Override
     public ComputationResultConsumer<Louvain, LouvainResult, LouvainWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
+            LouvainResultBuilder::createForWrite,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 nodeProperties(computationResult)
@@ -67,19 +65,9 @@ public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, L
 
     @Deprecated
     protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodeProperties(
+        return LouvainNodePropertyValuesDelegate.extractNodeProperties(
             computationResult,
             computationResult.config().writeProperty()
         );
-    }
-
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return LouvainProc.resultBuilder(new WriteResult.Builder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        ), computeResult);
     }
 }

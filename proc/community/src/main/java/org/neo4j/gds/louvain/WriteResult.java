@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
-public final class WriteResult extends LouvainStatsResult {
+public final class WriteResult extends StatsResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    private WriteResult(
+    WriteResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
@@ -57,28 +52,5 @@ public final class WriteResult extends LouvainStatsResult {
         );
         this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-
-    static class Builder extends LouvainProc.LouvainResultBuilder<WriteResult> {
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected WriteResult buildResult() {
-            return new WriteResult(
-                modularity,
-                Arrays.stream(modularities).boxed().collect(Collectors.toList()),
-                levels,
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
-                config.toMap()
-            );
-        }
     }
 }

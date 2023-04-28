@@ -19,22 +19,19 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.results.StandardStatsResult;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class LouvainStatsResult extends StandardStatsResult {
+public class StatsResult extends StandardStatsResult {
     public final double modularity;
     public final List<Double> modularities;
     public final long ranLevels;
     public final long communityCount;
     public final Map<String, Object> communityDistribution;
 
-    LouvainStatsResult(
+    StatsResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
@@ -51,26 +48,5 @@ public class LouvainStatsResult extends StandardStatsResult {
         this.ranLevels = ranLevels;
         this.communityCount = communityCount;
         this.communityDistribution = communityDistribution;
-    }
-
-    static class Builder extends LouvainProc.LouvainResultBuilder<LouvainStatsResult> {
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected LouvainStatsResult buildResult() {
-            return new LouvainStatsResult(
-                modularity,
-                Arrays.stream(modularities).boxed().collect(Collectors.toList()),
-                levels,
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                config.toMap()
-            );
-        }
     }
 }

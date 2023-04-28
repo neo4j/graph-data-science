@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LouvainStatsProc extends BaseProc {
     @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<LouvainStatsResult> stats(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
