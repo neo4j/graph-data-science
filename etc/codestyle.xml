@@ -174,7 +174,7 @@
         <setting id="org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_enum_declaration" value="insert"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_between_brackets_in_array_type_reference" value="do not insert"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_before_opening_angle_bracket_in_type_parameters" value="do not insert"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_string_concatenation" value="83"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_string_concatenation" value="80"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_before_semicolon_in_for" value="do not insert"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_before_opening_bracket_in_array_allocation_expression" value="do not insert"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_multiple_fields" value="16"/>
