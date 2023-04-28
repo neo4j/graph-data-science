@@ -17,25 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 
-import java.util.List;
+class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
+    private final HugeObjectArray<FloatVector> embeddings;
+    private final long nodeCount;
 
-class Node2VecDocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            Node2VecStreamProc.class,
-            GraphProjectProc.class
-        );
+    EmbeddingNodePropertyValues(HugeObjectArray<FloatVector> embeddings) {
+        this.embeddings = embeddings;
+        nodeCount = embeddings.size();
     }
 
     @Override
-    protected String adocFile() {
-        return "pages/machine-learning/node-embeddings/node2vec.adoc";
+    public float[] floatArrayValue(long nodeId) {
+        return embeddings.get(nodeId).data();
+    }
+
+    @Override
+    public long nodeCount() {
+        return nodeCount;
     }
 }

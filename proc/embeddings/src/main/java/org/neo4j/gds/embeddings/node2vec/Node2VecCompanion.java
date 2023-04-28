@@ -17,25 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
+final class Node2VecCompanion {
 
-import java.util.List;
+    static final String DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
 
-class Node2VecDocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            Node2VecStreamProc.class,
-            GraphProjectProc.class
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/machine-learning/node-embeddings/node2vec.adoc";
-    }
+    private Node2VecCompanion() {}
 }
