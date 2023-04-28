@@ -54,7 +54,7 @@ class LinkPredictionPredictPipelineAlgorithmFactoryTest {
     @Test
     void estimate() {
         withModelInCatalog();
-        var factory = new LinkPredictionPredictPipelineAlgorithmFactory<>(ExecutionContext.EMPTY, modelCatalog);
+        var factory = new LinkPredictionPredictPipelineAlgorithmFactory<>(ExecutionContext.EMPTY.withModelCatalog(modelCatalog));
         var config = LinkPredictionPredictPipelineStreamConfig.of(
             "testUser",
             CypherMapWrapper.create(
