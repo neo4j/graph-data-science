@@ -125,17 +125,26 @@ class KCoreDecompositionTask implements Runnable {
             long nodeId = examinationStack.pop();
             core.set(nodeId, scanningDegree);
             nodesExamined++;
+            
+            relax(nodeId);
 
-            localGraph.forEachRelationship(nodeId, (s, t) -> {
-                var degree = currentDegrees.getAndAdd(t, -1);
-                if (degree == scanningDegree + 1) {
-                    examinationStack.push(t);
-                }
-                return true;
-            });
         }
         remainingNodes.addAndGet(-nodesExamined);
         progressTracker.logProgress(nodesExamined);
+    }
+
+    private void relax(long nodeId) {
+
+        localGraph.forEachRelationship(nodeId, (s, t) -> {
+
+            boolean shouldPushToStack = (core.get(t) == KCoreDecomposition.UNASSIGNED)
+                                        && (currentDegrees.getAndAdd(t, -1) == scanningDegree + 1);
+            if (shouldPushToStack) {
+                examinationStack.push(t);
+            }
+
+            return true;
+        });
     }
 
     enum KCoreDecompositionPhase {
