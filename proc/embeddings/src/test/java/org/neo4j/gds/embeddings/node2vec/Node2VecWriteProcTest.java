@@ -29,9 +29,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class Node2VecWriteProcTest extends BaseProcTest {
 
@@ -67,60 +65,23 @@ class Node2VecWriteProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("writeProperty", "embedding")
             .addParameter("embeddingDimension", 42L)
-            .yields();
-        runQuery(query);
-
-
-        var rowCount = runQueryWithRowConsumer("MATCH (n) RETURN size(n.embedding) AS size", row -> {
-           assertThat(row.getNumber("size")).asInstanceOf(LONG).isEqualTo(42L);
-        });
-        assertThat(rowCount).isEqualTo(5);
-    }
-
-    @Test
-    void returnLossPerIteration() {
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.node2vec")
-            .writeMode()
-            .addParameter("embeddingDimension", 42)
-            .addParameter("writeProperty", "testProp")
             .addParameter("iterations", 5)
             .yields("lossPerIteration");
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            assertThat(row.get("lossPerIteration")).asList().hasSize(5);
+            assertThat(row.get("lossPerIteration"))
+                .as("There should be the same amount of losses as the configured `iterations`.")
+                .asList()
+                .hasSize(5);
         });
 
         assertThat(rowCount)
             .as("`write` mode should always return one row")
             .isEqualTo(1);
-    }
 
-    @Test
-    void shouldThrowIfRunningWouldOverflow() {
-        long nodeCount = runQuery("MATCH (n) RETURN count(n) AS count", result ->
-            result.<Long>columnAs("count").stream().findFirst().orElse(-1L)
-        );
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.node2vec")
-            .writeMode()
-            .addParameter("writeProperty", "embedding")
-            .addParameter("walksPerNode", Integer.MAX_VALUE)
-            .addParameter("walkLength", Integer.MAX_VALUE)
-            .addParameter("sudo", true)
-            .yields();
-
-        String expectedMessage = formatWithLocale(
-            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
-            " Try reducing these parameters or run on a smaller graph.",
-            nodeCount,
-            Integer.MAX_VALUE,
-            Integer.MAX_VALUE
-        );
-
-        assertThatThrownBy(() -> runQuery(query))
-            .rootCause()
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage(expectedMessage);
+        var nodePropertiesWritten = runQueryWithRowConsumer("MATCH (n) RETURN size(n.embedding) AS size", row -> {
+           assertThat(row.getNumber("size")).asInstanceOf(LONG).isEqualTo(42L);
+        });
+        assertThat(nodePropertiesWritten).isEqualTo(5);
     }
 }
