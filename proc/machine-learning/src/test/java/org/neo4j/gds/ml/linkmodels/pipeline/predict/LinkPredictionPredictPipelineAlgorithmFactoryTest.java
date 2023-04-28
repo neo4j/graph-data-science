@@ -19,20 +19,15 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.DefaultValue;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.catalog.GraphListProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.core.model.ModelCatalogExtension;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
@@ -47,44 +42,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
-@Neo4jModelCatalogExtension
-abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
+@ModelCatalogExtension
+class LinkPredictionPredictPipelineAlgorithmFactoryTest {
 
-    abstract Class<? extends AlgoBaseProc<?, ?, ?, ?>> getProcedureClazz();
+    @InjectModelCatalog
+    ModelCatalog modelCatalog;
 
-    @Neo4jGraph
-    static String GDL = "CREATE " +
-                        "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
-                        ", (n1:N {a: 2.0, b: 1.0, c: 1.0})" +
-                        ", (n2:N {a: 3.0, b: 1.5, c: 1.0})" +
-                        ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
-                        ", (n4:N {a: 1.0, b: 0.9, c: 1.0})" +
-                        ", (m0:M {a: 1.0, b: 0.8, c: 1.0})" +
-                        ", (m1:M {a: 2.0, b: 1.0, c: 1.0})" +
-                        ", (m2:M {a: 3.0, b: 1.5, c: 1.0})" +
-                        ", (m3:M {a: 0.0, b: 2.8, c: 1.0})" +
-                        ", (m4:M {a: 1.0, b: 0.9, c: 1.0})" +
-                        ", (n1)-[:T]->(n2)" +
-                        ", (n3)-[:T]->(n4)" +
-                        ", (n1)-[:T]->(n3)" +
-                        ", (n2)-[:T]->(n4)" +
-                        ", (m1)-[:T]->(m2)" +
-                        ", (m3)-[:T]->(m4)" +
-                        ", (m1)-[:T]->(m3)" +
-                        ", (m2)-[:T]->(m4)";
-
-    @Inject
-    private ModelCatalog modelCatalog;
-
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(GraphListProc.class, GraphProjectProc.class, getProcedureClazz());
-
+    @Test
+    void estimate() {
         withModelInCatalog();
+        var factory = new LinkPredictionPredictPipelineAlgorithmFactory<>(ExecutionContext.EMPTY, modelCatalog);
+        var config = LinkPredictionPredictPipelineStreamConfig.of(
+            "testUser",
+            CypherMapWrapper.create(
+                Map.of(
+                    "graphName", "g",
+                    "modelName", "model",
+                    "threshold", 0L,
+                    "mutateRelationshipType", "PREDICTED",
+                    "topN", 3
+                )
+            )
+        );
+        var estimate = factory
+            .memoryEstimation(config)
+            .estimate(GraphDimensions.of(10), 4);
 
-        runQuery(projectQuery("g", Orientation.UNDIRECTED));
+        assertThat(estimate.memoryUsage().toString()).isEqualTo("548 Bytes");
     }
 
     private void withModelInCatalog() {
@@ -106,7 +93,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
             GraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfigImpl.builder()
-                .modelUser(getUsername())
+                .modelUser("testUser")
                 .modelName("model")
                 .pipeline("DUMMY")
                 .sourceNodeLabel("N")
@@ -123,14 +110,4 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
             )
         ));
     }
-
-    String projectQuery(String graphName, Orientation orientation) {
-        return GdsCypher.call(graphName)
-            .graphProject()
-            .withNodeLabels("N", "M")
-            .withRelationshipType("T", orientation)
-            .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .yields();
-    }
-
 }

@@ -21,14 +21,16 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,6 +69,9 @@ public final class LPGraphStoreFilterFactory {
             );
         }
 
+        // Don't bother building the filter if the validation of the relationships doesn't pass.
+        validateGraphFilter(graphStore, predictRelTypes);
+
         var nodePropertyStepsBaseLabels = Stream
             .of(targetNodeLabels, sourceNodeLabels)
             .flatMap(Collection::stream)
@@ -81,23 +86,25 @@ public final class LPGraphStoreFilterFactory {
 
         progressTracker.logInfo(formatWithLocale("The graph filters used for filtering in prediction is %s", filter));
 
-        validateGraphFilter(graphStore, filter);
-
         return filter;
     }
 
-    private static void validateGraphFilter(GraphStore graphStore, LPGraphStoreFilter filter) {
-        var directedPredictRels = filter
-            .predictRelationshipTypes()
+    static void validateGraphFilter(GraphStore graphStore, Collection<RelationshipType> predictedRelationships) {
+        var directedPredictRels = graphStore.schema()
+            .filterRelationshipTypes(new HashSet<>(predictedRelationships))
+            .relationshipSchema()
+            .directions()
+            .entrySet()
             .stream()
-            .filter(type -> !graphStore.schema().filterRelationshipTypes(Set.of(type)).isUndirected())
+            .filter(entry -> entry.getValue() != Direction.UNDIRECTED)
+            .map(Map.Entry::getKey)
             .map(RelationshipType::name)
             .collect(Collectors.toList());
 
         if (!directedPredictRels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Procedure requires all relationships of %s to be UNDIRECTED, but found %s to be directed.",
-                StringJoining.join(filter.predictRelationshipTypes().stream().map(RelationshipType::name)),
+                StringJoining.join(predictedRelationships.stream().map(RelationshipType::name)),
                 StringJoining.join(directedPredictRels)
             ));
         }
