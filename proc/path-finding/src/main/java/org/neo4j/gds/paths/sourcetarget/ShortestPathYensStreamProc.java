@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathStreamProc;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.yens.Yens;
-import org.neo4j.gds.paths.yens.YensFactory;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,34 +34,29 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.shortestPath.yens.stream", description = YENS_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, ShortestPathYensStreamConfig> {
-
+public class ShortestPathYensStreamProc extends BaseProc {
     @Procedure(name = "gds.shortestPath.yens.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ShortestPathYensStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.yens.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphName") Object graphName,
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected ShortestPathYensStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return ShortestPathYensStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Yens, ShortestPathYensStreamConfig> algorithmFactory() {
-        return new YensFactory<>();
+        return new MemoryEstimationExecutor<>(
+            new ShortestPathYensStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 }
