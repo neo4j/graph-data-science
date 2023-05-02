@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Map;
 import java.util.Optional;
@@ -77,10 +78,7 @@ class WeightedBetweennessCentralityTest {
         ", (d) -[:REL {weight: 0.2}]->(e)" +
         ", (e) -[:REL {weight: 1.0}]->(f)";
     @Inject
-    private Graph weightedGraph;
-
-    @Inject
-    private IdFunction weightedIdFunction;
+    private TestGraph weightedGraph;
 
     @Test
     void shouldEqualWithUnweightedWhenWeightsAreEqual() {
@@ -115,6 +113,8 @@ class WeightedBetweennessCentralityTest {
 
     @Test
     void shouldComputeWithWeights() {
+        IdFunction weightedIdFunction = weightedGraph::toMappedNodeId;
+
          var bc = new BetweennessCentrality(
              weightedGraph,
              new RandomDegreeSelectionStrategy(7, Optional.of(42L)),

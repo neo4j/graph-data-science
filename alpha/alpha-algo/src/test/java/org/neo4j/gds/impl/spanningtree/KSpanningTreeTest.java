@@ -54,7 +54,8 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 @GdlExtension
 class KSpanningTreeTest {
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    // setting the idOffset to 0 as there is dedicated testing for id offset
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
             "CREATE " +
             "  (a:Node)" +

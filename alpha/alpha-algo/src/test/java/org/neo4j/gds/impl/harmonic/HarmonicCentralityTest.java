@@ -62,6 +62,7 @@ public class HarmonicCentralityTest {
 
     @Test
     void shouldComputeHarmonicCentrality() {
+        IdFunction mappedId = variable -> graph.toMappedNodeId(idFunction.of(variable));
 
         var harmonicCentrality = new HarmonicCentrality(
             graph,
@@ -72,11 +73,11 @@ public class HarmonicCentralityTest {
 
         var result = harmonicCentrality.compute();
 
-        assertThat(result.getCentralityScore(idFunction.of("a"))).isEqualTo(0.375, within(0.1));
-        assertThat(result.getCentralityScore(idFunction.of("b"))).isEqualTo(0.5, within(0.1));
-        assertThat(result.getCentralityScore(idFunction.of("c"))).isEqualTo(0.375, within(0.1));
-        assertThat(result.getCentralityScore(idFunction.of("d"))).isEqualTo(0.25, within(0.1));
-        assertThat(result.getCentralityScore(idFunction.of("e"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.getCentralityScore(mappedId.of("a"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.getCentralityScore(mappedId.of("b"))).isEqualTo(0.5, within(0.1));
+        assertThat(result.getCentralityScore(mappedId.of("c"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.getCentralityScore(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.getCentralityScore(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
     }
 
     @Test

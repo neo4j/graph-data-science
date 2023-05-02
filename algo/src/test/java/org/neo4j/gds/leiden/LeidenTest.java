@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -83,9 +82,6 @@ class LeidenTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void leiden() {
         int maxLevels = 3;
@@ -111,7 +107,7 @@ class LeidenTest {
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .hasSize(2)
@@ -146,7 +142,7 @@ class LeidenTest {
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .hasSize(2)
@@ -184,7 +180,7 @@ class LeidenTest {
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .hasSize(2)

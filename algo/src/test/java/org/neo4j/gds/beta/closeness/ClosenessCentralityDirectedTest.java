@@ -20,13 +20,13 @@
 package org.neo4j.gds.beta.closeness;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,13 +79,12 @@ class ClosenessCentralityDirectedTest {
         ", (f)-[:TYPE]->(e)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void testCentrality() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var algo = ClosenessCentrality.of(
             graph,
             ImmutableClosenessCentralityStreamConfig.builder().build(),
@@ -104,6 +103,8 @@ class ClosenessCentralityDirectedTest {
 
     @Test
     void testCentralityWithWassermanFaust() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var algo = ClosenessCentrality.of(
             graph,
             ImmutableClosenessCentralityStreamConfig.builder().useWassermanFaust(true).build(),

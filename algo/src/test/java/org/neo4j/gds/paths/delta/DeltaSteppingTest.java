@@ -43,6 +43,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
@@ -309,14 +310,13 @@ final class DeltaSteppingTest {
             ", (e)-[:TYPE]->(d)";
 
         @Inject
-        Graph graph;
-
-        @Inject
-        IdFunction idFunction;
+        TestGraph graph;
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSource(double delta, int concurrency, long idOffset) {
+            IdFunction idFunction = graph::toMappedNodeId;
+
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "a"),
                 expected(idFunction, 1, new double[]{0.0, 1.0}, "a", "b"),
@@ -326,7 +326,7 @@ final class DeltaSteppingTest {
                 expected(idFunction, 5, new double[]{0.0, 1.0, 2.0, 3.0}, "a", "b", "d", "f")
             );
 
-            var sourceNode = graph.toOriginalNodeId(idFunction.of("a"));
+            var sourceNode = graph.toOriginalNodeId("a");
 
             var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
                 .concurrency(concurrency)

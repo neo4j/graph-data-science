@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.features.FeatureExtractionBaseTest;
 
@@ -164,10 +165,7 @@ class GraphSageHelperTest {
                                                   ", (a)-[:REL]->(b)";
 
         @Inject
-        Graph validGraph;
-
-        @Inject
-        IdFunction validIdFunction;
+        TestGraph validGraph;
 
         @Test
         void shouldConcatenateFeatures() {
@@ -182,8 +180,8 @@ class GraphSageHelperTest {
                 graphSageTrainConfig
             );
             //TODO: check where rounding error is coming from
-            assertThat(features.get(validIdFunction.of("a"))).contains(new double[] {1.4, -1.1, 2.5}, Offset.offset(1e-6));
-            assertThat(features.get(validIdFunction.of("b"))).contains(new double[] {1.8, 1.0, 2.0}, Offset.offset(1e-6));
+            assertThat(features.get(validGraph.toMappedNodeId("a"))).contains(new double[] {1.4, -1.1, 2.5}, Offset.offset(1e-6));
+            assertThat(features.get(validGraph.toMappedNodeId("b"))).contains(new double[] {1.8, 1.0, 2.0}, Offset.offset(1e-6));
         }
     }
 

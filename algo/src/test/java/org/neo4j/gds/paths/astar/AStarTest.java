@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -34,8 +33,8 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.astar.config.ImmutableShortestPathAStarStreamConfig;
 
 import java.util.List;
@@ -120,23 +119,20 @@ class AStarTest {
         ", (nP)-[:TYPE {cost: 847.0}]->(nX)";
 
     @Inject
-    Graph graph;
-
-    @Inject
-    IdFunction idFunction;
+    TestGraph graph;
 
     @Test
     void sourceTarget() {
         var expected = expected(
-            idFunction,
+            graph::toMappedNodeId,
             0,
             new double[]{0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 1652.0, 2392.0, 2979.0},
             "nA", "nB", "nC", "nD", "nE", "nF", "nG", "nH", "nX"
         );
 
         var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of("nA"))
-            .targetNode(idFunction.of("nX"))
+            .sourceNode(graph.toOriginalNodeId("nA"))
+            .targetNode(graph.toOriginalNodeId("nX"))
             .build();
 
         var path = AStar
@@ -152,8 +148,8 @@ class AStarTest {
     void shouldLogProgress() {
 
         var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of("nA"))
-            .targetNode(idFunction.of("nX"))
+            .sourceNode(graph.toOriginalNodeId("nA"))
+            .targetNode(graph.toOriginalNodeId("nX"))
             .build();
 
         var progressTask = new AStarFactory<>().progressTask(graph, config);

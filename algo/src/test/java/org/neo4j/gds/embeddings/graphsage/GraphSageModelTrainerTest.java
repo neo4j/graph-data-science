@@ -288,7 +288,7 @@ class GraphSageModelTrainerTest {
         assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 100, 100, 100, 100);
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
-            .contains(new double[]{19.55, 21.24, 19.90, 19.42, 17.87, 17.03, 17.04, 20.42, 15.86, 20.56}, Offset.offset(0.05)
+            .contains(new double[]{15.79, 16.05, 17.71, 16.05, 16.34, 14.68, 15.72, 16.21, 15.23, 15.44}, Offset.offset(0.05)
             );
     }
 
@@ -321,7 +321,7 @@ class GraphSageModelTrainerTest {
         assertThat(metrics.ranIterationsPerEpoch()).containsOnly(10);
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
-            .contains(new double[]{19.73, 21.25, 20.81, 23.13, 19.70, 25.34, 20.65, 17.10, 20.48, 21.51}, Offset.offset(0.05)
+            .contains(new double[]{23.57, 20.95, 20.95, 19.13, 20.81, 18.20, 20.73, 22.03, 21.38, 18.18}, Offset.offset(0.05)
             );
     }
 

@@ -143,6 +143,8 @@ class LouvainTest {
             Optional.empty()
         );
 
+        IdFunction mappedId = name -> graph.toMappedNodeId(idFunction.of(name));
+
         var config = defaultConfigBuilder().build();
         Louvain algorithm = new Louvain(
             graph,
@@ -165,17 +167,17 @@ class LouvainTest {
 
         assertCommunities(
             dendrogram[0],
-            ids(idFunction, "a", "b", "d"),
-            ids(idFunction, "c", "e", "f", "x"),
-            ids(idFunction, "g", "h", "i"),
-            ids(idFunction, "j", "k", "l", "m", "n")
+            ids(mappedId, "a", "b", "d"),
+            ids(mappedId, "c", "e", "f", "x"),
+            ids(mappedId, "g", "h", "i"),
+            ids(mappedId, "j", "k", "l", "m", "n")
         );
 
         assertCommunities(
             dendrogram[1],
-            ids(idFunction, "a", "b", "c", "d", "e", "f", "x"),
-            ids(idFunction, "g", "h", "i"),
-            ids(idFunction, "j", "k", "l", "m", "n")
+            ids(mappedId, "a", "b", "c", "d", "e", "f", "x"),
+            ids(mappedId, "g", "h", "i"),
+            ids(mappedId, "j", "k", "l", "m", "n")
         );
 
         assertEquals(2, result.ranLevels());
@@ -189,6 +191,9 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT"),
             Optional.of("weight")
         );
+
+        IdFunction mappedId = name -> graphStore.getGraph(NodeLabel.of("Node")).toMappedNodeId(idFunction.of(name));
+
         var config = defaultConfigBuilder().build();
         Louvain algorithm = new Louvain(
             graph,
@@ -211,17 +216,17 @@ class LouvainTest {
 
         assertCommunities(
             dendrogram[0],
-            ids(idFunction, "a", "b", "d"),
-            ids(idFunction, "c", "e", "x"),
-            ids(idFunction, "f", "g"),
-            ids(idFunction, "h", "i"),
-            ids(idFunction, "j", "k", "l", "m", "n")
+            ids(mappedId, "a", "b", "d"),
+            ids(mappedId, "c", "e", "x"),
+            ids(mappedId, "f", "g"),
+            ids(mappedId, "h", "i"),
+            ids(mappedId, "j", "k", "l", "m", "n")
         );
 
         assertCommunities(
             dendrogram[1],
-            ids(idFunction, "a", "b", "c", "d", "e", "f", "g", "x"),
-            ids(idFunction, "h", "i", "j", "k", "l", "m", "n")
+            ids(mappedId, "a", "b", "c", "d", "e", "f", "g", "x"),
+            ids(mappedId, "h", "i", "j", "k", "l", "m", "n")
         );
 
         assertEquals(2, result.ranLevels());
@@ -235,6 +240,8 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT"),
             Optional.of("weight")
         );
+
+        IdFunction mappedId = name -> graphStore.getGraph(NodeLabel.of("Node")).toMappedNodeId(idFunction.of(name));
 
         var config = defaultConfigBuilder().seedProperty("seed").build();
         Louvain algorithm = new Louvain(
@@ -257,9 +264,9 @@ class LouvainTest {
         final double[] modularities = result.modularities();
 
         var expectedCommunitiesWithLabels = Map.of(
-            1L, ids(idFunction, "a", "b", "c", "d", "e", "f", "x"),
-            2L, ids(idFunction, "g", "h", "i"),
-            42L, ids(idFunction, "j", "k", "l", "m", "n")
+            1L, ids(mappedId, "a", "b", "c", "d", "e", "f", "x"),
+            2L, ids(mappedId, "g", "h", "i"),
+            42L, ids(mappedId, "j", "k", "l", "m", "n")
         );
 
         assertCommunitiesWithLabels(

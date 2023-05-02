@@ -27,7 +27,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.TestGraphs;
@@ -45,9 +44,6 @@ class KarateTest {
     private static final String DB_CYPHER = TestGraphs.KARATE_CLUB_GRAPH;
     @Inject
     private TestGraph graph;
-
-    @Inject
-    private IdFunction idFunction;
 
     @ParameterizedTest
     @ValueSource(longs = {99999, 25, 323, 405, 58, 61, 7, 8123, 94, 19})
@@ -70,7 +66,7 @@ class KarateTest {
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(
@@ -108,7 +104,7 @@ class KarateTest {
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(

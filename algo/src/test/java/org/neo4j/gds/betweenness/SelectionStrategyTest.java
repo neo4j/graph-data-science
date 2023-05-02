@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -31,6 +32,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Optional;
+import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +41,8 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 @GdlExtension
 class SelectionStrategyTest {
 
-    @GdlGraph
+    // override idOffset to work with previous randomSeed
+    @GdlGraph(idOffset = 0)
     private static final String DB_GDL =
         "(a)-->(b)" +
         "(a)-->(c)" +
@@ -91,9 +94,12 @@ class SelectionStrategyTest {
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(3, samplingSize(selectionStrategy));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(graph.toMappedNodeId("a"), selectionStrategy.next());
-        assertEquals(graph.toMappedNodeId("b"), selectionStrategy.next());
-        assertEquals(graph.toMappedNodeId("f"), selectionStrategy.next());
+
+        Assertions.assertThat(LongStream.range(0, 3).map(__ -> selectionStrategy.next())).containsExactly(
+            graph.toMappedNodeId("a"),
+            graph.toMappedNodeId("b"),
+            graph.toMappedNodeId("f")
+        );
     }
 
     @Test

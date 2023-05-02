@@ -118,16 +118,13 @@ class BellmanFordMultipleNegativeCyclesTest {
         @Inject
         private TestGraph graph;
 
-        @Inject
-        private IdFunction idFunction;
-
 
         @Test
         void shouldReturnNegativeCycles() {
             long[] a = new long[]{
-                idFunction.of("a1"),
-                idFunction.of("a2"),
-                idFunction.of("a3"),
+                graph.toMappedNodeId("a1"),
+                graph.toMappedNodeId("a2"),
+                graph.toMappedNodeId("a3"),
             };
             var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 4).compute();
 

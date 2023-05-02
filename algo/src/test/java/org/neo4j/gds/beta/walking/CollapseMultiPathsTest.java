@@ -89,6 +89,8 @@ class CollapseMultiPathsTest {
     @Inject
     private IdFunction idFunction;
 
+    private IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
     @Test
     void shouldFollowRoutesFromMovies() {
         var bus = graphStore.getGraph(RelationshipType.of("BUS"));
@@ -115,15 +117,15 @@ class CollapseMultiPathsTest {
         ).compute();
 
         // Planes, Trains and Automobiles
-        long manhattan = idFunction.of("manhattan");
-        long lasallevanburen = idFunction.of("lasallevanburen");
+        long manhattan = mappedId.of("manhattan");
+        long lasallevanburen = mappedId.of("lasallevanburen");
 
         // King of Staten Island
-        long statenisland = idFunction.of("statenisland");
+        long statenisland = mappedId.of("statenisland");
 
         // Silver Streak + Airplane!
-        long losangeles = idFunction.of("losangeles");
-        long chicago = idFunction.of("chicago");
+        long losangeles = mappedId.of("losangeles");
+        long chicago = mappedId.of("chicago");
 
         AdjacencyList adjacencyList = path.topology().adjacencyList();
         AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(manhattan);
@@ -177,8 +179,8 @@ class CollapseMultiPathsTest {
         ).compute();
 
         // US north east corridor
-        long washington = idFunction.of("washington");
-        long newyork = idFunction.of("newyork");
+        long washington = mappedId.of("washington");
+        long newyork = mappedId.of("newyork");
 
         AdjacencyList adjacencyList = path.topology().adjacencyList();
 

@@ -34,6 +34,8 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -68,7 +70,7 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void should() {
-        var sourceNodeFilter = List.of(0L, 1L, 2L);
+        var sourceNodeFilter = Stream.of("a", "b", "c").map(graph::toMappedNodeId).collect(Collectors.toList());
 
         var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
@@ -97,7 +99,7 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void shouldSurviveIoannisObjections() {
-        var sourceNodeFilter = List.of(3L);
+        var sourceNodeFilter = List.of(graph.toMappedNodeId("d"));
 
         var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
@@ -127,7 +129,7 @@ class FilteredNodeSimilarityTest {
 
     @Test
     void shouldSurviveIoannisFurtherObjections() {
-        var sourceNodeFilter = List.of(3L);
+        var sourceNodeFilter = List.of(graph.toMappedNodeId("d"));
 
         var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
@@ -160,7 +162,7 @@ class FilteredNodeSimilarityTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2})
     void shouldLogProgressAccurately(int concurrency) {
-        var sourceNodeFilter = List.of(2L, 3L);
+        var sourceNodeFilter = List.of(graph.toMappedNodeId("c"), graph.toMappedNodeId("d"));
 
         var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))

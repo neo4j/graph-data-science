@@ -24,7 +24,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -60,9 +59,6 @@ class LeidenWeightedTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @RepeatedTest(10)
     void weightedLeiden() {
         var maxLevels = 10;
@@ -87,7 +83,7 @@ class LeidenWeightedTest {
         var communities = leidenResult.communities();
 
         var communitiesMap = Stream.of("nAlice", "nBridget", "nCharles", "nDoug", "nMark", "nMichael")
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(

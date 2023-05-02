@@ -62,7 +62,8 @@ class ModularityOptimizationWithoutOrientationTest {
 
     private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
 
-    @GdlGraph
+    // manual idOffset to make sure seed2 is still bigger
+    @GdlGraph(idOffset = 10)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed1:  1,  seed2: 21})" +
@@ -97,6 +98,8 @@ class ModularityOptimizationWithoutOrientationTest {
     @Inject
     private IdFunction idFunction;
 
+    IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
     @Test
     void testUnweighted() {
         var graph = unweightedGraph();
@@ -106,8 +109,8 @@ class ModularityOptimizationWithoutOrientationTest {
         assertEquals(0.12244, pmo.modularity(), 0.001);
         assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
-            ids(idFunction, "a", "b", "c", "e"),
-            ids(idFunction, "d", "f")
+            ids(mappedId, "a", "b", "c", "e"),
+            ids(mappedId, "d", "f")
         );
         assertTrue(pmo.ranIterations() <= 3);
     }
@@ -119,8 +122,8 @@ class ModularityOptimizationWithoutOrientationTest {
         assertEquals(0.4985, pmo.modularity(), 0.001);
         assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
-            ids(idFunction, "a", "e", "f"),
-            ids(idFunction, "b", "c", "d")
+            ids(mappedId, "a", "e", "f"),
+            ids(mappedId, "b", "c", "d")
         );
         assertTrue(pmo.ranIterations() <= 3);
     }
@@ -131,15 +134,16 @@ class ModularityOptimizationWithoutOrientationTest {
 
         var pmo = compute(
             graph,
-            10, graph.nodeProperties("seed2"),
+            10,
+            graph.nodeProperties("seed2"),
             1,
             100
         );
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
-        assertCommunities(actualCommunities, ids(idFunction, EXPECTED_SEED_COMMUNITIES));
-        assertTrue(actualCommunities[0] == 43 && actualCommunities[2] == 42 && actualCommunities[3] == 33);
+        assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
+        assertThat(actualCommunities).startsWith(43L, 42L, 33L);
         assertTrue(pmo.ranIterations() <= 3);
     }
 
@@ -156,7 +160,7 @@ class ModularityOptimizationWithoutOrientationTest {
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
-        assertCommunities(actualCommunities, ids(idFunction, EXPECTED_SEED_COMMUNITIES));
+        assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
         assertTrue(actualCommunities[0] == 4 && actualCommunities[2] == 2 || actualCommunities[3] == 3);
         assertTrue(pmo.ranIterations() <= 3);
     }

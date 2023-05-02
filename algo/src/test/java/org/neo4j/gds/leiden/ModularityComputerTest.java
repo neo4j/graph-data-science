@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -66,9 +65,6 @@ class ModularityComputerTest {
     //HugeLongArray.of(1, 1, 1, 3, 3, 3, 1, 3);
     @Inject
     private TestGraph graph;
-
-    @Inject
-    private IdFunction idFunction;
 
 
     @Test

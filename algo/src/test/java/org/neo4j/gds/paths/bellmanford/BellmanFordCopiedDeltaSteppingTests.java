@@ -25,12 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -198,10 +198,9 @@ final class BellmanFordCopiedDeltaSteppingTests {
             ", (e)-[:TYPE]->(d)";
 
         @Inject
-        Graph graph;
+        TestGraph graph;
 
-        @Inject
-        IdFunction idFunction;
+        IdFunction idFunction = (name) -> graph.toMappedNodeId(name);
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.bellmanford.BellmanFordCopiedDeltaSteppingTests#testParameters")
@@ -214,7 +213,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 expected(idFunction, 3, new double[]{0.0, 1.0, 2.0}, "a", "c", "e"),
                 expected(idFunction, 5, new double[]{0.0, 1.0, 2.0, 3.0}, "a", "b", "d", "f")
             );
-            var sourceNode = graph.toOriginalNodeId(idFunction.of("a"));
+            var sourceNode = graph.toOriginalNodeId("a");
 
             var paths = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, sourceNode, true, true, concurrency)
                 .compute()

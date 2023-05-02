@@ -103,7 +103,7 @@ class CELFOnConnectedGraphTest {
 
         //round 5
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
-
+        IdFunction mappedId = variable -> graph.toMappedNodeId(idFunction.of(variable));
 
         CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER

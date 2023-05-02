@@ -45,7 +45,8 @@ import static org.neo4j.gds.pregel.SpeakerListenerLPA.LABELS_PROPERTY;
 @GdlExtension
 class SpeakerListenerLPATest {
 
-    @GdlGraph
+    // using an offset of 0 as the tests were written against a specific random seed
+    @GdlGraph(idOffset = 0)
     private static final String GDL =
         "(x), (a), (b), (c), (d), (e), (f), (g), (h), (i)" +
         ", (a)-->(b)" +

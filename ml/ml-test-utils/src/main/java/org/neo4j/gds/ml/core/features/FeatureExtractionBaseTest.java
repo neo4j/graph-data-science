@@ -24,6 +24,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -74,16 +77,16 @@ public abstract class FeatureExtractionBaseTest {
     protected Graph validGraph;
 
     @Inject
-    protected Graph missingArrayGraph;
+    protected TestGraph missingArrayGraph;
 
     @Inject
-    protected Graph missingArray2Graph;
+    protected TestGraph missingArray2Graph;
 
     @Inject
-    protected Graph missingScalarGraph;
+    protected TestGraph missingScalarGraph;
 
     @Inject
-    protected Graph invalidGraph;
+    protected TestGraph invalidGraph;
 
     public abstract void makeExtractions(Graph graph);
 
@@ -91,9 +94,11 @@ public abstract class FeatureExtractionBaseTest {
     void shouldFailOnMissingScalarProperty() {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> makeExtractions(missingScalarGraph))
-            .withMessageContaining(
-                "Node with ID `0` has invalid feature property value `NaN` for property `b`"
-            );
+            .withMessageContaining(String.format(
+                Locale.US,
+                "Node with ID `%d` has invalid feature property value `NaN` for property `b`",
+                missingScalarGraph.toOriginalNodeId("n1")
+            ));
     }
 
     @Test
@@ -101,7 +106,11 @@ public abstract class FeatureExtractionBaseTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> makeExtractions(missingArrayGraph))
             .withMessageContaining(
-                "Missing node property for property key `a` on node with id `0`."
+                String.format(
+                    Locale.US,
+                    "Missing node property for property key `a` on node with id `%d`.",
+                    missingArrayGraph.toOriginalNodeId("n1")
+                )
             );
     }
 
@@ -110,7 +119,12 @@ public abstract class FeatureExtractionBaseTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> makeExtractions(missingArray2Graph))
             .withMessageContaining(
-                "Missing node property for property key `a` on node with id `1`."
+                String.format(
+                    Locale.US,
+                    "Missing node property for property key `a` on node with id `%d`.",
+                    missingArray2Graph.toOriginalNodeId("n2")
+                )
+
             );
     }
 

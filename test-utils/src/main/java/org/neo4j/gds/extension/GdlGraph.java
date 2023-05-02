@@ -54,7 +54,7 @@ public @interface GdlGraph {
      * Offset for assigning ids to nodes in the GDL graph.
      * Node ids will always be consecutive incrementing by 1.
      */
-    long idOffset() default 0;
+    long idOffset() default 1337;
 
     /**
      * If set, the graph store is added to the GraphStore catalog.

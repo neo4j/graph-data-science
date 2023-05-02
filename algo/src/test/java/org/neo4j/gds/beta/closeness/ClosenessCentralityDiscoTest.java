@@ -22,13 +22,13 @@ package org.neo4j.gds.beta.closeness;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,13 +58,12 @@ class ClosenessCentralityDiscoTest {
         ", (d)-[:TYPE]->(e)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void testHuge() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var algo = ClosenessCentrality.of(
             graph,
             ImmutableClosenessCentralityStreamConfig.builder().concurrency(2).useWassermanFaust(true).build(),

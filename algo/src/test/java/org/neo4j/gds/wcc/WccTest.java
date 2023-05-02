@@ -386,7 +386,7 @@ class WccTest {
         }
 
         private List<Long> ids(TestGraph graph, String... nodes) {
-            return Arrays.stream(nodes).map(graph::toOriginalNodeId).collect(Collectors.toList());
+            return Arrays.stream(nodes).map(graph::toMappedNodeId).collect(Collectors.toList());
         }
     }
 }

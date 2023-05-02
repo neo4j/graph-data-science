@@ -112,6 +112,8 @@ class CollapsePathTest {
     @Inject
     private IdFunction idFunction;
 
+    IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
     @Test
     void testCreatingRelationships() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
@@ -182,6 +184,8 @@ class CollapsePathTest {
         @Inject
         private GraphStore graphStore;
 
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
         @Test
         void shouldComputeForAllNodesWithoutNodeLabelsSpecified() {
             var relType = "HAS_FRIEND";
@@ -202,8 +206,8 @@ class CollapsePathTest {
 
             // then two relationships should be created
             assertThat(resultGraph.relationshipCount()).isEqualTo(2);
-            assertThat(resultGraph.exists(idFunction.of("p1"), idFunction.of("p3"))).isTrue();
-            assertThat(resultGraph.exists(idFunction.of("p2"), idFunction.of("dog"))).isTrue();
+            assertThat(resultGraph.exists(mappedId.of("p1"), mappedId.of("p3"))).isTrue();
+            assertThat(resultGraph.exists(mappedId.of("p2"), mappedId.of("dog"))).isTrue();
         }
 
         @Test
@@ -227,7 +231,7 @@ class CollapsePathTest {
 
             // a single relationship is created (there is no Dog)
             assertThat(resultGraph.relationshipCount()).isEqualTo(1);
-            assertThat(resultGraph.exists(idFunction.of("p1"), idFunction.of("p3"))).isTrue();
+            assertThat(resultGraph.exists(mappedId.of("p1"), mappedId.of("p3"))).isTrue();
         }
     }
 

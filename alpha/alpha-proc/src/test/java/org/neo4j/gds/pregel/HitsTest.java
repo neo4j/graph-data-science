@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -58,9 +57,6 @@ class HitsTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void testHits() {
         var config = ImmutableHitsConfig.builder().concurrency(1).hitsIterations(30).build();
@@ -85,7 +81,7 @@ class HitsTest {
         var actualAuthScores = new HashMap<String, Double>();
 
         List.of("a", "b", "c", "d", "e", "f", "g", "h").forEach(node -> {
-            var nodeId = idFunction.of(node);
+            var nodeId = graph.toMappedNodeId(node);
 
             var expectedHub = pseudoCodeHits.hubs[(int) nodeId];
             var expectedAuth = pseudoCodeHits.auths[(int) nodeId];

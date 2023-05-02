@@ -28,7 +28,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
@@ -45,7 +44,6 @@ import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -87,10 +85,7 @@ class RandomWalkTest {
         ", (c)-[:REL2]->(b)";
 
     @Inject
-    private CSRGraph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void testWithDefaultConfig() {
@@ -107,9 +102,10 @@ class RandomWalkTest {
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
         assertEquals(expectedNumberOfWalks, result.size());
+        long nodeZero = graph.toMappedNodeId("a");
         long[] walkForNodeZero = result
             .stream()
-            .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
+            .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
         int expectedStepsInWalkForNode0 = config.walkLength();
@@ -159,9 +155,10 @@ class RandomWalkTest {
         int expectedNumberOfWalks = config.walksPerNode() * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
+        long nodeZero = graph.toMappedNodeId("a");
         long[] walkForNodeZero = result
             .stream()
-            .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
+            .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
         int expectedStepsInWalkForNode0 = config.walkLength();
