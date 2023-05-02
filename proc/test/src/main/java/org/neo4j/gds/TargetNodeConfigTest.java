@@ -20,13 +20,58 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.TargetNodeConfig;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
-public interface TargetNodeConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends TargetNodeConfig & AlgoBaseConfig, RESULT> extends NodeConfigTest<ALGORITHM, CONFIG, RESULT> {
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@GdlExtension
+class TargetNodeConfigTest {
+
+    @GdlGraph
+    private static final String DB_CYPHER =
+        "CREATE " +
+            " (a0:Node)," +
+            " (a1:Node)";
+
+    @Inject
+    GraphStore graphStore;
+    @Inject
+    IdFunction idFunction;
 
     @Test
-    default void testTargetNodeValidation() {
-        testNodeValidation(TargetNodeConfig.TARGET_NODE_KEY, "Target node", "does not exist");
+    void shouldThrowForInvalidNode() {
+        var config = SampleTargetConfigImpl.builder().targetNode(100).build();
+
+        assertThatThrownBy(() -> config.validateTargetNode(
+            graphStore,
+            List.of(NodeLabel.of("Node")),
+            List.of()
+        ))
+            .hasMessageContaining("Target node does not exist in the in-memory graph: `100`");
+    }
+
+    @Test
+    void shouldNotThrowForExistingNode() {
+        var config = SampleTargetConfigImpl.builder().targetNode(idFunction.of("a0")).build();
+
+        assertThatNoException().isThrownBy(() -> config.validateTargetNode(
+            graphStore,
+            List.of(NodeLabel.of("Node")),
+            List.of()
+        ));
+    }
+
+    @Configuration
+    interface SampleTargetConfig extends TargetNodeConfig {
+
     }
 }

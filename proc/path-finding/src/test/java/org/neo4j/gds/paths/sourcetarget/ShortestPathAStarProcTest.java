@@ -29,8 +29,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.SourceNodeConfigTest;
-import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -59,9 +57,7 @@ import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATIT
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 
 abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
-    SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
-    TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
+    AlgoBaseProcTest<AStar, CONFIG, DijkstraResult> {
 
     private static final String NODE_QUERY = "MATCH (n) RETURN id(n) AS id, n.latitude AS latitude, n.longitude AS longitude";
 
