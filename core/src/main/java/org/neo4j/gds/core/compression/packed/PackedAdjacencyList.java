@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.ref.Cleaner;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class PackedAdjacencyList implements AdjacencyList {
@@ -38,24 +39,20 @@ public class PackedAdjacencyList implements AdjacencyList {
     private final long[] pages;
     private final HugeIntArray degrees;
     private final HugeLongArray offsets;
-
-    private final long bytesOffHeap;
-    private Optional<MemoryInfo> memoryInfo;
+    private final int[] allocationSizes;
 
     private final Cleaner.Cleanable cleanable;
 
     PackedAdjacencyList(
         long[] pages,
         int[] allocationSizes,
-        long bytesOffHeap,
         HugeIntArray degrees,
         HugeLongArray offsets
     ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
-        this.bytesOffHeap = bytesOffHeap;
-        this.memoryInfo = Optional.empty();
+        this.allocationSizes = allocationSizes;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
     }
 
@@ -99,22 +96,18 @@ public class PackedAdjacencyList implements AdjacencyList {
 
     @Override
     public MemoryInfo memoryInfo() {
-        if (memoryInfo.isPresent()) {
-             return memoryInfo.get();
-        }
+        long bytesOffHeap = Arrays.stream(this.allocationSizes).asLongStream().sum();
 
         var memoryInfoBuilder = ImmutableMemoryInfo
             .builder()
-            .bytesOffHeap(this.bytesOffHeap);
+            .bytesOffHeap(bytesOffHeap);
 
         var bytesOnHeap = MemoryUsage.sizeOf(this);
-        if (bytesOnHeap >= 0){
+        if (bytesOnHeap >= 0) {
             memoryInfoBuilder.bytesOnHeap(bytesOnHeap);
         }
-        var memoryInfo = memoryInfoBuilder.build();
-        this.memoryInfo = Optional.of(memoryInfo);
 
-        return memoryInfo;
+        return memoryInfoBuilder.build();
     }
 
     /**

@@ -63,7 +63,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
             var allocationSizes = new int[]{bytesOffHeap};
             var degrees = HugeIntArray.of(degree.intValue());
             var offsets = HugeLongArray.of(offset);
-            var list = new PackedAdjacencyList(pages, allocationSizes, bytesOffHeap, degrees, offsets);
+            var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
 
             code.accept(list);
         });

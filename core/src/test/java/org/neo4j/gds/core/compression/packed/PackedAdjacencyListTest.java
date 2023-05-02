@@ -78,6 +78,6 @@ class PackedAdjacencyListTest {
         var degrees = HugeIntArray.of(degree.intValue());
         var offsets = HugeLongArray.of(offset);
 
-        return new PackedAdjacencyList(pages, allocationSizes, bytesOffHeap, degrees, offsets);
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
     }
 }
