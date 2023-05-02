@@ -36,15 +36,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.shortestPath.yens.write", description = YENS_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.shortestPath.yens.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, ShortestPathYensWriteConfig> {
 
     @Procedure(name = "gds.shortestPath.yens.write", mode = WRITE)
-    @Description(YENS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

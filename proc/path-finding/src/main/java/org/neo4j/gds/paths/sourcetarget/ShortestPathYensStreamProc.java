@@ -35,15 +35,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.shortestPath.yens.stream", description = YENS_DESCRIPTION, executionMode = STREAM)
 public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, ShortestPathYensStreamConfig> {
 
     @Procedure(name = "gds.shortestPath.yens.stream", mode = READ)
-    @Description(YENS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
