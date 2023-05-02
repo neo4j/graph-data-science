@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class TopologicalSortStreamProcTest extends BaseProcTest {
 
-    @Neo4jGraph()
+    @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (n0)" +
