@@ -61,8 +61,9 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
             }
 
             Graph graph = computationResult.graph();
-            return LongStream.of(computationResult.result().get().value().toArray())
-                .mapToObj(nodeId -> new TopologicalSortStreamResult(graph.toOriginalNodeId(nodeId)));
+            var topologicallySortedNodes = computationResult.result().get().value();
+            return LongStream.range(0, graph.nodeCount())
+                .mapToObj(nodeId -> new TopologicalSortStreamResult(graph.toOriginalNodeId(topologicallySortedNodes.get(nodeId))));
         };
     }
 }
