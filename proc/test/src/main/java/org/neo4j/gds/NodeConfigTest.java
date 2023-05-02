@@ -19,48 +19,32 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.config.NodeConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.internal.recordstorage.RecordStorageEngine;
+import org.neo4j.kernel.impl.core.NodeEntity;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.QueryRunner.runQuery;
 
-public interface NodeConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends NodeConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+class NodeConfigTest {
 
-    default void testNodeValidation(String configKey, String... expectedMessageSubstrings) {
-        runQuery(graphDb(), "CREATE (:A)");
-
-        var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-            "",
-            "loadedGraph",
-            NodeProjections.all(),
-            RelationshipProjections.ALL
-        );
-
-        long nodeId = TestSupport.fullAccessTransaction(graphDb()).apply((tx, ktx) -> {
-            var nodeStore = GraphDatabaseApiProxy
-                .resolveDependency(graphDb(), RecordStorageEngine.class)
-                .testAccessNeoStores()
-                .getNodeStore();
-            return Neo4jProxy.getHighestPossibleIdInUse(nodeStore, ktx);
-        });
-
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-
-        var config = createMinimalConfig(CypherMapWrapper.empty())
-            .withNumber(configKey, nodeId + 42L)
-            .toMap();
-
-        applyOnProcedure(proc -> {
-            assertThatThrownBy(() -> proc.compute("loadedGraph", config))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContainingAll(expectedMessageSubstrings);
-        });
+    @Test
+    void shouldParseNumber() {
+        assertThat(NodeConfig.parseNodeId(1337L, "sampleProperty")).isEqualTo(1337L);
     }
+
+    @Test
+    void shouldParseNode() {
+        var sampleNode = new NodeEntity(null, 1337L);
+        assertThat(NodeConfig.parseNodeId(sampleNode, "sampleProperty")).isEqualTo(1337L);
+
+    }
+
+    @Test
+    void shouldNotParseAnythingElse() {
+        assertThatThrownBy(() -> NodeConfig.parseNodeId(Boolean.TRUE, "sampleProperty"))
+            .hasMessageContaining("Expected a node or a node id for `sampleProperty`. Got Boolean");
+    }
+
+
 }
