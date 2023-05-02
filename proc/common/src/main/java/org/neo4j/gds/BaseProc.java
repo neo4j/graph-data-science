@@ -188,7 +188,7 @@ public abstract class BaseProc {
             : DatabaseTransactionContext.of(databaseService, procedureTransaction);
     }
 
-    public ModelCatalog modelCatalog() {
+    private ModelCatalog modelCatalog() {
         if (internalModelCatalog == null) {
             // you need to set the ModelCatalog if Neo4j is not present (org.neo4j.gds.BaseProc.setModelCatalog).
             throw new IllegalStateException("ModelCatalog could not be retrieved. Please report the error.");

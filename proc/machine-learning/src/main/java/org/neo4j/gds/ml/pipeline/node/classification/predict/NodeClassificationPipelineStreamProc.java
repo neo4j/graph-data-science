@@ -147,7 +147,7 @@ public class NodeClassificationPipelineStreamProc
 
     @Override
     public NewConfigFunction<NodeClassificationPredictPipelineStreamConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewStreamConfigFn(modelCatalog());
+        return new NodeClassificationPredictNewStreamConfigFn(executionContext().modelCatalog());
     }
 
 

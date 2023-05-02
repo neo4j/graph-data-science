@@ -105,7 +105,7 @@ public class NodeRegressionPipelineMutateProc
 
     @Override
     public NewConfigFunction<NodeRegressionPredictPipelineMutateConfig> newConfigFunction() {
-        return new NodeRegressionPredictNewMutateConfigFn(modelCatalog());
+        return new NodeRegressionPredictNewMutateConfigFn(executionContext().modelCatalog());
     }
 
     @Override

@@ -88,7 +88,7 @@ public class NodeRegressionPipelineStreamProc
 
     @Override
     public NewConfigFunction<NodeRegressionPredictPipelineBaseConfig> newConfigFunction() {
-        return new NodeRegressionPredictNewStreamConfigFn(modelCatalog());
+        return new NodeRegressionPredictNewStreamConfigFn(executionContext().modelCatalog());
     }
 
     @Override

@@ -138,7 +138,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     public NewConfigFunction<NodeClassificationPredictPipelineWriteConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewWriteConfigFn(modelCatalog());
+        return new NodeClassificationPredictNewWriteConfigFn(executionContext().modelCatalog());
     }
 
     @Override

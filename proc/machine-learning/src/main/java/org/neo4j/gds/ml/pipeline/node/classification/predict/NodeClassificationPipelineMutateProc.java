@@ -137,7 +137,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     public NewConfigFunction<NodeClassificationPredictPipelineMutateConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewMutateConfigFn(modelCatalog());
+        return new NodeClassificationPredictNewMutateConfigFn(executionContext().modelCatalog());
     }
 
     @Override
