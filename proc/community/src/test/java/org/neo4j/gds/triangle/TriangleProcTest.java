@@ -22,98 +22,52 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.HashSet;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import java.util.List;
+import java.util.Map;
 
 class TriangleProcTest extends BaseProcTest {
 
-    private static String[] idToName;
-
-    private static String dbCypher() {
-        return
-            "CREATE " +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (i:Node {name: 'i'})" +
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(a)" +
-            ", (c)-[:TYPE]->(h)" +
-            ", (d)-[:TYPE]->(e)" +
-            ", (e)-[:TYPE]->(f)" +
-            ", (f)-[:TYPE]->(d)" +
-            ", (b)-[:TYPE]->(d)" +
-            ", (g)-[:TYPE]->(h)" +
-            ", (h)-[:TYPE]->(i)" +
-            ", (i)-[:TYPE]->(g)";
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE " +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+        ", (h:Node {name: 'h'})" +
+        ", (i:Node {name: 'i'})" +
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(a)" +
+        ", (c)-[:TYPE]->(h)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (e)-[:TYPE]->(f)" +
+        ", (f)-[:TYPE]->(d)" +
+        ", (b)-[:TYPE]->(d)" +
+        ", (g)-[:TYPE]->(h)" +
+        ", (h)-[:TYPE]->(i)" +
+        ", (i)-[:TYPE]->(g)";
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(TriangleProc.class, GraphProjectProc.class);
-        runQuery(dbCypher());
-        idToName = new String[9];
-
-        runInTransaction(db, tx -> {
-            for (int i = 0; i < 9; i++) {
-                final String name = (String) tx.getNodeById(i).getProperty("name");
-                idToName[i] = name;
-            }
-        });
-    }
-
-    private static int idsum(String... names) {
-        int sum = 0;
-        for (int i = 0; i < idToName.length; i++) {
-            for (String name : names) {
-                if (idToName[i].equals(name)) {
-                    sum += i;
-                }
-            }
-        }
-        return sum;
+        runQuery("CALL gds.graph.project('graph', 'Node', {TYPE: {type: 'TYPE', orientation: 'UNDIRECTED'}})");
     }
 
     @Test
     void testStreaming() {
-        HashSet<Integer> sums = new HashSet<>();
-        TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
-
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .yields();
-        runQuery(createQuery);
-
-        String query = "CALL gds.alpha.triangles('" + DEFAULT_GRAPH_NAME + "', {})" +
-        "YIELD nodeA, nodeB, nodeC";
-
-
-        runQueryWithRowConsumer(query, row -> {
-            long nodeA = row.getNumber("nodeA").longValue();
-            long nodeB = row.getNumber("nodeB").longValue();
-            long nodeC = row.getNumber("nodeC").longValue();
-            consumer.consume(idToName[(int) nodeA], idToName[(int) nodeB], idToName[(int) nodeC]);
-        });
-
-        assertThat(sums, containsInAnyOrder(0 + 1 + 2, 3 + 4 + 5, 6 + 7 + 8));
-    }
-
-    interface TripleConsumer {
-        void consume(String nodeA, String nodeB, String nodeC);
+        assertCypherResult(
+            "CALL gds.alpha.triangles('graph', {}) " +
+            "YIELD nodeA, nodeB, nodeC " +
+            "RETURN nodeA + nodeB + nodeC AS triangleSum ORDER BY triangleSum", List.of(
+            Map.of("triangleSum", 0L + 1L + 2L),
+            Map.of("triangleSum", 3L + 4L + 5L),
+            Map.of("triangleSum", 6L + 7L + 8L)
+        ));
     }
 }

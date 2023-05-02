@@ -41,11 +41,10 @@ class TriangleStreamTest extends BaseTest {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
-    private static final long TRIANGLES = 1000;
+    private static final int TRIANGLES = 1000;
 
-    private static long centerId;
-
-    private static Graph graph;
+    private long centerId;
+    private Graph graph;
 
     @BeforeEach
     void setupGraphDb() {
@@ -56,12 +55,18 @@ class TriangleStreamTest extends BaseTest {
             .newDefaultBuilder();
         Node center = builder.createNode();
         builder.newRingBuilder()
-            .createRing((int) TRIANGLES)
+            .createRing(TRIANGLES)
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
         centerId = center.getId();
 
-        graph = loadGraph();
+        graph = new StoreLoaderBuilder()
+            .databaseService(db)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .globalOrientation(Orientation.UNDIRECTED)
+            .build()
+            .graph();
     }
 
     @Test
@@ -72,7 +77,7 @@ class TriangleStreamTest extends BaseTest {
                 .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 
-        verify(mock, times((int) TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
+        verify(mock, times(TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
     }
 
     @Test
@@ -83,20 +88,10 @@ class TriangleStreamTest extends BaseTest {
                 .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 
-        verify(mock, times((int) TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
+        verify(mock, times(TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
     }
 
     interface TripleConsumer {
         void consume(long nodeA, long nodeB, long nodeC);
-    }
-
-    private Graph loadGraph() {
-        return new StoreLoaderBuilder()
-            .databaseService(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
     }
 }
