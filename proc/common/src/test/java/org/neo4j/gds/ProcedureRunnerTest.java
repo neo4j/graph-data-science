@@ -107,7 +107,7 @@ class ProcedureRunnerTest extends BaseTest {
                     assertThat(proc.log).isEqualTo(log);
                     assertThat(proc.taskRegistryFactory).isEqualTo(taskRegistryFactory);
                     assertThat(proc.username).isEqualTo(username);
-                    assertThat(proc.modelCatalog()).isEqualTo(modelCatalog);
+                    assertThat(proc.executionContext().modelCatalog()).isEqualTo(modelCatalog);
                 }
             );
         }

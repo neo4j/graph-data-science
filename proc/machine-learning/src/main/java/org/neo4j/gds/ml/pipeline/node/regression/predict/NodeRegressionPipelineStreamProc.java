@@ -70,7 +70,7 @@ public class NodeRegressionPipelineStreamProc
 
     @Override
     public AlgorithmFactory<?, NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineBaseConfig> algorithmFactory() {
-        return new NodeRegressionPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
+        return new NodeRegressionPredictPipelineAlgorithmFactory<>(executionContext());
     }
 
     @Override

@@ -41,9 +41,9 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     private final ModelCatalog modelCatalog;
     private final ExecutionContext executionContext;
 
-    NodeClassificationPredictPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+    NodeClassificationPredictPipelineAlgorithmFactory(ExecutionContext executionContext) {
         super();
-        this.modelCatalog = modelCatalog;
+        this.modelCatalog = executionContext.modelCatalog();
         this.executionContext = executionContext;
     }
 

@@ -53,8 +53,8 @@ public abstract class TrainProc<
         return (computationResult, executionContext) -> {
             if (computationResult.result().isPresent()) {
                 var model = extractModel(computationResult.result().get());
-                var modelCatalog = modelCatalog();
-                modelCatalog().set(model);
+                var modelCatalog = executionContext.modelCatalog();
+                modelCatalog.set(model);
 
                 if (computationResult.config().storeModelToDisk()) {
                     try {
@@ -83,7 +83,7 @@ public abstract class TrainProc<
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
                 return List.of(
-                   new TrainingConfigValidation<>(modelCatalog(), username(), modelType())
+                   new TrainingConfigValidation<>(executionContext.modelCatalog(), username(), modelType())
                 );
             }
         };

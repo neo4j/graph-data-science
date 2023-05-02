@@ -161,7 +161,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
 
     @Override
     public GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
-        return new LinkPredictionPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(executionContext());
     }
 
     @Override

@@ -38,10 +38,10 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
     private final ExecutionContext executionContext;
     private final ModelCatalog modelCatalog;
 
-    LinkPredictionPredictPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+    LinkPredictionPredictPipelineAlgorithmFactory(ExecutionContext executionContext) {
         super();
         this.executionContext = executionContext;
-        this.modelCatalog = modelCatalog;
+        this.modelCatalog = executionContext.modelCatalog();
     }
 
     @Override
