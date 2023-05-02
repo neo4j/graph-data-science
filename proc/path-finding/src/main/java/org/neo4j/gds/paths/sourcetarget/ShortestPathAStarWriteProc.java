@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathWriteProc;
-import org.neo4j.gds.paths.astar.AStar;
-import org.neo4j.gds.paths.astar.AStarFactory;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,13 +34,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarProc.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.shortestPath.astar.write", description = ASTAR_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, ShortestPathAStarWriteConfig> {
+public class ShortestPathAStarWriteProc extends BaseProc {
+
+    @Context
+    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.shortestPath.astar.write", mode = WRITE)
     @Description(ASTAR_DESCRIPTION)
@@ -49,7 +49,10 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ShortestPathAStarWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.write.estimate", mode = READ)
@@ -58,16 +61,16 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new ShortestPathAStarWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected ShortestPathAStarWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return ShortestPathAStarWriteConfig.of(config);
+    public ExecutionContext executionContext() {
+        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
     }
 
-    @Override
-    public GraphAlgorithmFactory<AStar, ShortestPathAStarWriteConfig> algorithmFactory() {
-        return new AStarFactory<>();
-    }
 }

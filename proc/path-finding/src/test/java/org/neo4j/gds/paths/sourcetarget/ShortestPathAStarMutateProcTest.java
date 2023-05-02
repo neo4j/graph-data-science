@@ -44,10 +44,10 @@ import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 
-class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<ShortestPathAStarMutateConfig>
+class ShortestPathAStarMutateProcTest extends ShortestPathAStarCompanionTest<ShortestPathAStarMutateConfig>
     implements MutateRelationshipWithPropertyTest<AStar, ShortestPathAStarMutateConfig, DijkstraResult> {
 
-    private static final String EXISTING_GRAPH =        "CREATE" +
+    private static final String EXISTING_GRAPH = "CREATE" +
         "  (nA:Label {latitude: 1.304444D,    longitude: 103.717373D})" +
         ", (nB:Label {latitude: 1.1892D,      longitude: 103.4689D})" +
         ", (nC:Label {latitude: 8.83055556D,  longitude: 111.8725D})" +

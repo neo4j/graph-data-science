@@ -40,7 +40,7 @@ import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATIT
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<ShortestPathAStarStreamConfig> {
+class ShortestPathAStarStreamProcTest extends ShortestPathAStarCompanionTest<ShortestPathAStarStreamConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarStreamConfig, ?>> getProcedureClazz() {
