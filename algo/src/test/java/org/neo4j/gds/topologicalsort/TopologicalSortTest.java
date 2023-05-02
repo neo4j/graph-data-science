@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
-    private static TopologicalSortConfig CONFIG = new TopologicalSortConfigImpl.Builder().concurrency(4).build();
+    private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder().concurrency(4).build();
 
     @GdlGraph(graphNamePrefix = "basic")
     private static final String basicQuery =

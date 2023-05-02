@@ -17,24 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.paths.topologicalsort;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+@SuppressWarnings("unused")
+public class TopologicalSortStreamResult {
 
-public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> extends GraphAlgorithmFactory<TopologicalSort, CONFIG> {
-    @Override
-    public TopologicalSort build(Graph graph, TopologicalSortBaseConfig configuration, ProgressTracker progressTracker) {
-        return new TopologicalSort(
-            graph,
-            configuration,
-            progressTracker
-        );
-    }
+    public final long nodeId;
 
-    @Override
-    public String taskName() {
-        return "TopologicalSort";
+    public TopologicalSortStreamResult(long nodeId) {
+        this.nodeId = nodeId;
     }
 }
