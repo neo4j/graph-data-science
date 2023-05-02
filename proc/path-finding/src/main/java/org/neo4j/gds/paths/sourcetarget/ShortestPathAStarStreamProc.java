@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathStreamProc;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.astar.AStar;
-import org.neo4j.gds.paths.astar.AStarFactory;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,12 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.shortestPath.astar.stream", description = ASTAR_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, ShortestPathAStarStreamConfig> {
+public class ShortestPathAStarStreamProc extends BaseProc {
 
     @Procedure(name = "gds.shortestPath.astar.stream", mode = READ)
     @Description(ASTAR_DESCRIPTION)
@@ -48,7 +42,10 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ShortestPathAStarStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.stream.estimate", mode = READ)
@@ -57,16 +54,11 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new ShortestPathAStarStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected ShortestPathAStarStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return ShortestPathAStarStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<AStar, ShortestPathAStarStreamConfig> algorithmFactory() {
-        return new AStarFactory<>();
-    }
 }
