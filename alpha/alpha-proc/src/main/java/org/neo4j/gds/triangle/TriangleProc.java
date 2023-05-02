@@ -19,14 +19,8 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,12 +29,9 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.triangle.TriangleProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.triangles", description = DESCRIPTION, executionMode = STREAM)
-public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, TriangleStream.Result> {
+public class TriangleProc extends BaseProc {
 
     static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
 
@@ -50,46 +41,9 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
-    }
-
-    @Override
-    protected TriangleCountBaseConfig newConfig(String username, CypherMapWrapper config) {
-        return TriangleCountBaseConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
-        return new GraphAlgorithmFactory<>() {
-            @Override
-            public String taskName() {
-                return "TriangleStream";
-            }
-
-            @Override
-            public TriangleStream build(
-                Graph graph,
-                TriangleCountBaseConfig configuration,
-                ProgressTracker progressTracker
-            ) {
-                return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency());
-            }
-        };
-    }
-
-    @Override
-    public ComputationResultConsumer<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, Stream<TriangleStream.Result>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            var resultStream = computationResult.result().get();
-            try(var statement = transaction.acquireStatement()) {
-                statement.registerCloseableResource(resultStream);
-            }
-            return resultStream;
-        };
+        return new ProcedureExecutor<>(
+            new TriangleStreamSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 }
