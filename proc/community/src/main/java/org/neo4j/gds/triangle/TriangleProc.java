@@ -21,7 +21,6 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

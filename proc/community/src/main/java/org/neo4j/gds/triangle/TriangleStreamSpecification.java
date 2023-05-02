@@ -23,8 +23,6 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.triangle.TriangleStream;
-import org.neo4j.gds.impl.triangle.TriangleStreamFactory;
 
 import java.util.stream.Stream;
 

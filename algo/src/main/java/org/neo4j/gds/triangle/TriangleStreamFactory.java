@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.triangle;
+package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 
 public class TriangleStreamFactory extends GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> {
 
