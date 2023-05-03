@@ -2,7 +2,6 @@
 [[graph-project-apache-arrow]]
 = Projecting graphs using Apache Arrow
 :description: This chapter explains how to import data using Apache Arrow™ into the Graph Data Science library.
-:star: *
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
