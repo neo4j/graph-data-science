@@ -39,7 +39,6 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
-import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -101,20 +100,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                         ));
                 }
 
-                if (proc instanceof StreamOfRelationshipsWriter) {
-                    ((StreamOfRelationshipsWriter<?, ?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporterBuilder(
-                        DatabaseTransactionContext.of(
-                            proc.databaseService,
-                            proc.procedureTransaction
-                        ));
-                }
-
                 func.accept(proc);
             }
         );
     }
-
-    default void consumeResult(RESULT result) {}
 
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.ALL;

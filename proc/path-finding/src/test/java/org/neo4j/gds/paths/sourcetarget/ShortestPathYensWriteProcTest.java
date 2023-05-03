@@ -20,14 +20,17 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 
 import java.util.List;
@@ -35,26 +38,54 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.neo4j.gds.config.SourceNodeConfig.SOURCE_NODE_KEY;
+import static org.neo4j.gds.config.TargetNodeConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPathYensWriteConfig> {
+class ShortestPathYensWriteProcTest extends BaseProcTest {
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+        "  (c:Label)" +
+        ", (d:Label)" +
+        ", (e:Label)" +
+        ", (f:Label)" +
+        ", (g:Label)" +
+        ", (h:Label)" +
+        ", (c)-[:TYPE {cost: 2.0}]->(e)" +
+        ", (c)-[:TYPE {cost: 3.0}]->(h)" +
+        ", (e)-[:TYPE {cost: 2.0}]->(f)" +
+        ", (e)-[:TYPE {cost: 3.0}]->(g)" +
+        ", (e)-[:TYPE {cost: 1.0}]->(h)" +
+        ", (f)-[:TYPE {cost: 1.0}]->(d)" +
+        ", (f)-[:TYPE {cost: 2.0}]->(g)" +
+        ", (g)-[:TYPE {cost: 2.0}]->(d)" +
+        ", (h)-[:TYPE {cost: 4.0}]->(f)";
+    private static final String K_KEY = "k";
+    long idC;
+    long idH;
+    long idD;
+    long idE;
+    long idF;
+    long idG;
+    long[] ids0;
+    long[] ids1;
+    long[] ids2;
+    double[] costs0;
+    double[] costs1;
+    double[] costs2;
 
-    @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig, ?>> getProcedureClazz() {
-        return ShortestPathYensWriteProc.class;
-    }
-
-    @Override
-    public ShortestPathYensWriteConfig createConfig(CypherMapWrapper mapWrapper) {
+    private ShortestPathYensWriteConfig createConfig(CypherMapWrapper mapWrapper) {
         return ShortestPathYensWriteConfig.of(mapWrapper);
     }
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        mapWrapper = super.createMinimalConfig(mapWrapper);
+    private CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        mapWrapper = mapWrapper
+            .withNumber(SOURCE_NODE_KEY, idC)
+            .withNumber(TARGET_NODE_KEY, idD)
+            .withNumber(K_KEY, 3);
 
         if (!mapWrapper.containsKey(WRITE_RELATIONSHIP_TYPE_KEY)) {
             mapWrapper = mapWrapper.withString(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
@@ -134,5 +165,40 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
             }
         });
         assertThat(rowCount).isEqualTo(3);
+    }
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            ShortestPathYensWriteProc.class,
+            GraphProjectProc.class
+        );
+
+        idC = idFunction.of("c");
+        idD = idFunction.of("d");
+        idE = idFunction.of("e");
+        idF = idFunction.of("f");
+        idG = idFunction.of("g");
+        idH = idFunction.of("h");
+
+        ids0 = new long[]{idC, idE, idF, idD};
+        ids1 = new long[]{idC, idE, idG, idD};
+        ids2 = new long[]{idC, idH, idF, idD};
+
+        costs0 = new double[]{0.0, 2.0, 4.0, 5.0};
+        costs1 = new double[]{0.0, 2.0, 5.0, 7.0};
+        costs2 = new double[]{0.0, 3.0, 7.0, 8.0};
+
+        runQuery(GdsCypher.call("graph")
+            .graphProject()
+            .withNodeLabel("Label")
+            .withAnyRelationshipType()
+            .withRelationshipProperty("cost")
+            .yields());
+    }
+
+    @AfterEach
+    void teardown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 }
