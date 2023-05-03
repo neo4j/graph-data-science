@@ -26,7 +26,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.dijkstra.write", description = DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class ShortestPathDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraWriteConfig>> {
+public class ShortestPathDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraWriteConfig>> {
 
     @Override
     public String name() {
@@ -54,7 +54,7 @@ public class ShortestPathDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, Di
     }
 
     @Override
-    public ComputationResultConsumer<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Dijkstra, PathFindingResult, ShortestPathDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
 

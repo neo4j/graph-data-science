@@ -25,36 +25,35 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
+import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.paths.yens.YensFactory;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
 
-@GdsCallable(name = "gds.shortestPath.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathDijkstraStreamSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraStreamConfig, Stream<StreamResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraStreamConfig>> {
+@GdsCallable(name = "gds.shortestPath.yens.stream", description = YensConstants.DESCRIPTION, executionMode = STREAM)
+public class ShortestPathYensStreamSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensStreamConfig, Stream<StreamResult>, YensFactory<ShortestPathYensStreamConfig>> {
 
     @Override
     public String name() {
-        return "DijkstraStream";
+        return "YensStream";
     }
 
     @Override
-    public DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraStreamConfig> algorithmFactory() {
-        return new DijkstraFactory.SourceTargetDijkstraFactory<>();
+    public YensFactory<ShortestPathYensStreamConfig> algorithmFactory() {
+        return new YensFactory<>();
     }
 
     @Override
-    public NewConfigFunction<ShortestPathDijkstraStreamConfig> newConfigFunction() {
-        return (___,config) -> ShortestPathDijkstraStreamConfig.of(config);
+    public NewConfigFunction<ShortestPathYensStreamConfig> newConfigFunction() {
+        return (___, config) -> ShortestPathYensStreamConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<Dijkstra, PathFindingResult, ShortestPathDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Yens, PathFindingResult, ShortestPathYensStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

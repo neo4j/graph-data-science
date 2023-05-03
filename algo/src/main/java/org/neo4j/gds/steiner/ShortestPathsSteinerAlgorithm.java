@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -201,7 +201,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         }
     }
 
-    private DijkstraResult runShortestPaths() {
+    private PathFindingResult runShortestPaths() {
         var steinerBasedDelta = new SteinerBasedDeltaStepping(
             graph,
             sourceId,

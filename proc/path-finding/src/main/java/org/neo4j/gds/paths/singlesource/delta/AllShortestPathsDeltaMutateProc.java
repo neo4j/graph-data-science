@@ -26,7 +26,7 @@ import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -46,7 +46,7 @@ public class AllShortestPathsDeltaMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var mutateSpec = new AllShortestPathsDeltaMutateSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaMutateConfig>();
 
         return new ProcedureExecutor<>(
             mutateSpec,
@@ -62,7 +62,7 @@ public class AllShortestPathsDeltaMutateProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var mutateSpec = new AllShortestPathsDeltaMutateSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,

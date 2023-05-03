@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-final class ShortestPathYensProc {
-    static final String YENS_DESCRIPTION = "The Yen's shortest path algorithm computes the k shortest (weighted) paths between a pair of nodes.";
+final class YensConstants {
+    static final String DESCRIPTION = "The Yen's shortest path algorithm computes the k shortest (weighted) paths between a pair of nodes.";
 
-    private ShortestPathYensProc() {}
+    private YensConstants() {}
 }

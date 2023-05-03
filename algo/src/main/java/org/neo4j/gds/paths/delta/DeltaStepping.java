@@ -39,7 +39,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
-public final class DeltaStepping extends Algorithm<DijkstraResult> {
+public final class DeltaStepping extends Algorithm<PathFindingResult> {
     public static final String DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph. " +
                                              "The computation is run multi-threaded";
 
@@ -155,9 +155,8 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
     }
 
     @Override
-    public DijkstraResult compute() {
+    public PathFindingResult compute() {
         progressTracker.beginSubTask();
-        int iteration = 0;
         int currentBin = 0;
 
         var frontierIndex = new AtomicLong(0);
@@ -198,12 +197,11 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
             ParallelUtil.run(relaxTasks, executorService);
             progressTracker.endSubTask();
 
-            iteration += 1;
             frontierSize.set(frontierIndex.longValue());
             frontierIndex.set(0);
         }
 
-        return new DijkstraResult(pathResults(distances, startNode, concurrency), progressTracker::endSubTask);
+        return new PathFindingResult(pathResults(distances, startNode, concurrency), progressTracker::endSubTask);
     }
 
     enum Phase {

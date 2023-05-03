@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathWriteProc;
-import org.neo4j.gds.paths.yens.Yens;
-import org.neo4j.gds.paths.yens.YensFactory;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,39 +34,41 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.shortestPath.yens.write", description = YENS_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, ShortestPathYensWriteConfig> {
+public class ShortestPathYensWriteProc extends BaseProc {
+    @Context
+    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.shortestPath.yens.write", mode = WRITE)
-    @Description(YENS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ShortestPathYensWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.yens.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphName") Object graphName,
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new ShortestPathYensWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override
-    protected ShortestPathYensWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return ShortestPathYensWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Yens, ShortestPathYensWriteConfig> algorithmFactory() {
-        return new YensFactory<>();
+    public ExecutionContext executionContext() {
+        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
     }
 }

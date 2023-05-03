@@ -24,15 +24,15 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
-public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig> implements ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StreamResult>> {
+public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig> implements ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StreamResult>> {
 
     @Override
     public Stream<StreamResult> consume(
-        ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult, ExecutionContext executionContext
+        ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult, ExecutionContext executionContext
     ) {
 
         if (computationResult.result().isEmpty()) {

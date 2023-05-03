@@ -28,14 +28,14 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.allShortestPaths.delta.stream", description = DeltaStepping.DESCRIPTION, executionMode = STREAM)
-public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>, DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig>> {
+public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>, DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig>> {
 
     @Override
     public String name() {
@@ -54,7 +54,7 @@ public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepp
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

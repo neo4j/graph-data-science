@@ -28,7 +28,7 @@ import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.astar.mutate", description = ASTAR_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class ShortestPathAStarMutateSpec implements AlgorithmSpec<AStar, DijkstraResult, ShortestPathAStarMutateConfig, Stream<MutateResult>, AStarFactory<ShortestPathAStarMutateConfig>> {
+public class ShortestPathAStarMutateSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarMutateConfig, Stream<MutateResult>, AStarFactory<ShortestPathAStarMutateConfig>> {
 
     @Override
     public String name() {
@@ -54,7 +54,7 @@ public class ShortestPathAStarMutateSpec implements AlgorithmSpec<AStar, Dijkstr
     }
 
     @Override
-    public ComputationResultConsumer<AStar, DijkstraResult, ShortestPathAStarMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<AStar, PathFindingResult, ShortestPathAStarMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();
     }
 

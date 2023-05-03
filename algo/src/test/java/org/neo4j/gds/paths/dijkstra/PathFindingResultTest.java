@@ -29,10 +29,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DijkstraResultTest {
+class PathFindingResultTest {
 
-    Supplier<DijkstraResult> dijkstraResultSupplier;
-    MutableBoolean actionCalled;
+    private Supplier<PathFindingResult> pathFindingResultSupplier;
+    private MutableBoolean actionCalled;
 
     @BeforeEach
     void setup() {
@@ -45,24 +45,24 @@ class DijkstraResultTest {
             .costs(1.0D)
             .build();
         actionCalled = new MutableBoolean(false);
-        dijkstraResultSupplier = () -> new DijkstraResult(Stream.of(pathResult), actionCalled::setTrue);
+        pathFindingResultSupplier = () -> new PathFindingResult(Stream.of(pathResult), actionCalled::setTrue);
     }
 
     @Test
     void testFindFirst() {
-        dijkstraResultSupplier.get().findFirst();
+        pathFindingResultSupplier.get().findFirst();
         assertThat(actionCalled.booleanValue()).isTrue();
     }
 
     @Test
     void testForEachPath() {
-        dijkstraResultSupplier.get().forEachPath(pathResult -> {});
+        pathFindingResultSupplier.get().forEachPath(pathResult -> {});
         assertThat(actionCalled.booleanValue()).isTrue();
     }
 
     @Test
     void testMapPathWithClose() {
-        dijkstraResultSupplier.get().mapPaths(pathResult -> pathResult).close();
+        pathFindingResultSupplier.get().mapPaths(pathResult -> pathResult).close();
         assertThat(actionCalled.booleanValue()).isTrue();
     }
 }

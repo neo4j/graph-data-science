@@ -23,39 +23,38 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
-import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.astar.AStar;
-import org.neo4j.gds.paths.astar.AStarFactory;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.paths.yens.YensFactory;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
 
-@GdsCallable(name = "gds.shortestPath.astar.stream", description = ASTAR_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathAStarStreamSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<StreamResult>, AStarFactory<ShortestPathAStarStreamConfig>> {
-
+@GdsCallable(name = "gds.shortestPath.yens.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+public class ShortestPathYensWriteSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensWriteConfig, Stream<StandardWriteRelationshipsResult>, YensFactory<ShortestPathYensWriteConfig>> {
     @Override
     public String name() {
-        return "AStarWrite";
+        return "YensWrite";
     }
 
     @Override
-    public AStarFactory<ShortestPathAStarStreamConfig> algorithmFactory() {
-        return new AStarFactory<>();
+    public YensFactory<ShortestPathYensWriteConfig> algorithmFactory() {
+        return new YensFactory<>();
     }
 
     @Override
-    public NewConfigFunction<ShortestPathAStarStreamConfig> newConfigFunction() {
-        return (___,config) -> ShortestPathAStarStreamConfig.of(config);
+    public NewConfigFunction<ShortestPathYensWriteConfig> newConfigFunction() {
+        return (___, config) -> ShortestPathYensWriteConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return new ShortestPathStreamResultConsumer<>();
+    public ComputationResultConsumer<Yens, PathFindingResult, ShortestPathYensWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+        return new ShortestPathWriteResultConsumer<>();
     }
 
     @Override

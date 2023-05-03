@@ -19,91 +19,94 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.yens.Yens;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.config.SourceNodeConfig.SOURCE_NODE_KEY;
+import static org.neo4j.gds.config.TargetNodeConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 
-class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPathYensMutateConfig>
-    implements MutateRelationshipWithPropertyTest<Yens, ShortestPathYensMutateConfig, DijkstraResult> {
-
-    private static final String EXISTING_GRAPH =
-        "CREATE" +
-        ", (c:Label)" +
+class ShortestPathYensMutateProcTest extends BaseProcTest {
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+        "  (c:Label)" +
         ", (d:Label)" +
         ", (e:Label)" +
         ", (f:Label)" +
         ", (g:Label)" +
         ", (h:Label)" +
-        ", (c)-[{w: 3.0}]->(d)" +
-        ", (c)-[{w: 2.0}]->(e)" +
-        ", (d)-[{w: 4.0}]->(f)" +
-        ", (e)-[{w: 1.0}]->(d)" +
-        ", (e)-[{w: 2.0}]->(f)" +
-        ", (e)-[{w: 3.0}]->(g)" +
-        ", (f)-[{w: 2.0}]->(g)" +
-        ", (f)-[{w: 1.0}]->(h)" +
-        ", (g)-[{w: 2.0}]->(h)";
+        ", (c)-[:TYPE {cost: 2.0}]->(e)" +
+        ", (c)-[:TYPE {cost: 3.0}]->(h)" +
+        ", (e)-[:TYPE {cost: 2.0}]->(f)" +
+        ", (e)-[:TYPE {cost: 3.0}]->(g)" +
+        ", (e)-[:TYPE {cost: 1.0}]->(h)" +
+        ", (f)-[:TYPE {cost: 1.0}]->(d)" +
+        ", (f)-[:TYPE {cost: 2.0}]->(g)" +
+        ", (g)-[:TYPE {cost: 2.0}]->(d)" +
+        ", (h)-[:TYPE {cost: 4.0}]->(f)";
 
-    @Override
-    public String expectedMutatedGraph() {
+    private static final String EXISTING_GRAPH =
+        "CREATE" +
+            ", (c:Label)" +
+            ", (d:Label)" +
+            ", (e:Label)" +
+            ", (f:Label)" +
+            ", (g:Label)" +
+            ", (h:Label)" +
+            ", (c)-[{w: 3.0}]->(d)" +
+            ", (c)-[{w: 2.0}]->(e)" +
+            ", (d)-[{w: 4.0}]->(f)" +
+            ", (e)-[{w: 1.0}]->(d)" +
+            ", (e)-[{w: 2.0}]->(f)" +
+            ", (e)-[{w: 3.0}]->(g)" +
+            ", (f)-[{w: 2.0}]->(g)" +
+            ", (f)-[{w: 1.0}]->(h)" +
+            ", (g)-[{w: 2.0}]->(h)";
+    private static final String K_KEY = "k";
+    long idC;
+    long idH;
+    long idD;
+    long idE;
+    long idF;
+    long idG;
+    long[] ids0;
+    long[] ids1;
+    long[] ids2;
+    double[] costs0;
+    double[] costs1;
+    double[] costs2;
+
+    String expectedMutatedGraph() {
         return EXISTING_GRAPH +
-               // new relationship as a result from mutate
-               ", (c)-[:PATH {w: 3.0}]->(h)" +
-               ", (c)-[:PATH {w: 3.0}]->(h)" +
-               ", (c)-[:PATH {w: 3.0}]->(h)";
+            // new relationship as a result from mutate
+            ", (c)-[:PATH {w: 3.0}]->(h)" +
+            ", (c)-[:PATH {w: 3.0}]->(h)" +
+            ", (c)-[:PATH {w: 3.0}]->(h)";
     }
 
-    @Override
-    public String mutateRelationshipType() {
-        return WRITE_RELATIONSHIP_TYPE;
-    }
-
-    @Override
-    public String mutateProperty() {
-        return null;
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
-
-    public Optional<String> mutateGraphName() {
-        return Optional.of(GRAPH_NAME);
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensMutateConfig, ?>> getProcedureClazz() {
-        return ShortestPathYensMutateProc.class;
-    }
-
-    @Override
-    public ShortestPathYensMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathYensMutateConfig.of(mapWrapper);
-    }
-
-    @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        mapWrapper = super.createMinimalConfig(mapWrapper);
+        mapWrapper = mapWrapper
+            .withNumber(SOURCE_NODE_KEY, idC)
+            .withNumber(TARGET_NODE_KEY, idD)
+            .withNumber(K_KEY, 3);
 
         if (!mapWrapper.containsKey(MUTATE_RELATIONSHIP_TYPE_KEY)) {
             mapWrapper = mapWrapper.withString(MUTATE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
@@ -112,27 +115,39 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
         return mapWrapper;
     }
 
-    @Override
     @Test
-    @Disabled("This test does not work for Dijkstra as no property is written")
-    public void testMutateFailsOnExistingToken() {}
+    void testMutate() {
+        var config = ShortestPathYensMutateConfig.of(createMinimalConfig(CypherMapWrapper.empty()));
 
+        var query = GdsCypher.call("graph")
+            .algo("gds.shortestPath.yens")
+            .mutateMode()
+            .addParameter("sourceNode", config.sourceNode())
+            .addParameter("targetNode", config.targetNode())
+            .addParameter("k", config.k())
+            .addParameter("mutateRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .yields();
 
-    @Override
-    @Test
-    @Disabled("This test does not work for Dijkstra as the source node is filtered")
-    public void testGraphMutationOnFilteredGraph() {}
+        assertCypherResult(query, List.of(Map.of(
+            "relationshipsWritten", 3L,
+            "preProcessingMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
 
-    @Override
-    @Test
-    @Disabled("This test does not work for Dijkstra as the source node is filtered")
-    public void testWriteBackGraphMutationOnFilteredGraph() {}
+        var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
+        var expected = TestSupport.fromGdl(expectedMutatedGraph());
+
+        assertGraphEquals(expected, actual);
+    }
 
     @Test
     void testWeightedMutate() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+        var config = ShortestPathYensMutateConfig.of(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call(GRAPH_NAME)
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.yens")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -154,12 +169,55 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
         var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(
             EXISTING_GRAPH +
-            // new relationship as a result from mutate
-            ", (c)-[:PATH {w: 5.0}]->(h)" +
-            ", (c)-[:PATH {w: 7.0}]->(h)" +
-            ", (c)-[:PATH {w: 8.0}]->(h)"
+                // new relationship as a result from mutate
+                ", (c)-[:PATH {w: 5.0}]->(h)" +
+                ", (c)-[:PATH {w: 7.0}]->(h)" +
+                ", (c)-[:PATH {w: 8.0}]->(h)"
         );
 
         assertGraphEquals(expected, actual);
+    }
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            ShortestPathYensMutateProc.class,
+            GraphProjectProc.class
+        );
+
+        idC = idFunction.of("c");
+        idD = idFunction.of("d");
+        idE = idFunction.of("e");
+        idF = idFunction.of("f");
+        idG = idFunction.of("g");
+        idH = idFunction.of("h");
+
+        ids0 = new long[]{idC, idE, idF, idD};
+        ids1 = new long[]{idC, idE, idG, idD};
+        ids2 = new long[]{idC, idH, idF, idD};
+
+        costs0 = new double[]{0.0, 2.0, 4.0, 5.0};
+        costs1 = new double[]{0.0, 2.0, 5.0, 7.0};
+        costs2 = new double[]{0.0, 3.0, 7.0, 8.0};
+
+        runQuery(GdsCypher.call("graph")
+            .graphProject()
+            .withNodeLabel("Label")
+            .withAnyRelationshipType()
+            .withRelationshipProperty("cost")
+            .yields());
+    }
+
+    @AfterEach
+    void teardown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    DatabaseId databaseId() {
+        return DatabaseId.of(graphDb());
     }
 }
