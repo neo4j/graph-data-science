@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
@@ -88,7 +89,8 @@ public final class GraphImporter {
         String username,
         DatabaseId databaseId,
         AnyValue configMap,
-        boolean canWriteToDatabase
+        boolean canWriteToDatabase,
+        PropertyState propertyState
     ) {
 
         var graphName = graphNameValue.stringValue();
@@ -100,7 +102,7 @@ public final class GraphImporter {
             (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
         );
 
-        var idMapBuilder = idMapBuilder(config.readConcurrency());
+        var idMapBuilder = idMapBuilder(config.readConcurrency(), propertyState);
 
         return new GraphImporter(
             config,
@@ -117,8 +119,8 @@ public final class GraphImporter {
         }
     }
 
-    private static LazyIdMapBuilder idMapBuilder(int readConcurrency) {
-        return new LazyIdMapBuilder(readConcurrency, true, true);
+    private static LazyIdMapBuilder idMapBuilder(int readConcurrency, PropertyState propertyState) {
+        return new LazyIdMapBuilder(readConcurrency, true, true, propertyState);
     }
 
     public void update(

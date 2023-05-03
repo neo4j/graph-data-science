@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
@@ -179,7 +180,8 @@ public class GraphAggregator implements CompatUserAggregator {
                     this.username,
                     this.databaseId,
                     config,
-                    this.canWriteToDatabase
+                    this.canWriteToDatabase,
+                    PropertyState.PERSISTENT
                 );
             }
             return data;

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -40,7 +41,7 @@ class LazyIdMapBuilderTest {
         long idCount = 100_000;
         var rng = new Random(42);
 
-        var lazyIdMapBuilder = new LazyIdMapBuilder(concurrency, false, false);
+        var lazyIdMapBuilder = new LazyIdMapBuilder(concurrency, false, false, PropertyState.PERSISTENT);
 
         var idList = LongStream.rangeClosed(1, idCount)
             .flatMap(id -> rng.nextBoolean() ? LongStream.of(id, id) : LongStream.of(id))
