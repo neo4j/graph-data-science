@@ -23,7 +23,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -31,6 +30,7 @@ import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.procedure.Context;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -41,6 +41,9 @@ public abstract class TrainProc<
     TRAIN_CONFIG extends TrainBaseConfig,
     PROC_RESULT
     > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     protected abstract String modelType();
 
@@ -90,11 +93,8 @@ public abstract class TrainProc<
     }
 
     @Override
-    public AlgorithmSpec<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, TRAIN_CONFIG>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(modelCatalog);
     }
 
     public static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {

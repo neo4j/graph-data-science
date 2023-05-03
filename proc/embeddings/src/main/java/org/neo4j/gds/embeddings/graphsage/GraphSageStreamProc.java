@@ -20,9 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -34,6 +37,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 
 public class GraphSageStreamProc extends BaseProc {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)
@@ -60,8 +66,15 @@ public class GraphSageStreamProc extends BaseProc {
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(modelCatalog);
+    }
+
     private GraphSageStreamSpec specification() {
         return new GraphSageStreamSpec()
-            .withModelCatalog(internalModelCatalog);
+            // TODO: Fix this thing, should obtain the model catalog from the execution context
+            .withModelCatalog(modelCatalog);
     }
+
 }

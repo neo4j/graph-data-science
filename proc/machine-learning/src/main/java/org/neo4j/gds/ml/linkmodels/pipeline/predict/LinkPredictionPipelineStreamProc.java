@@ -20,16 +20,16 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -46,6 +46,9 @@ import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
 @GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, LinkPredictionPipelineStreamProc.Result> {
+
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -99,11 +102,8 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    public AlgorithmSpec<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<Result>, AlgorithmFactory<?, LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 
     @SuppressWarnings("unused")

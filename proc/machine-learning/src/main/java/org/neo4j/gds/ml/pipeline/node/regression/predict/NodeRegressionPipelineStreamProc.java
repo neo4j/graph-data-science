@@ -25,10 +25,11 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -50,6 +51,9 @@ public class NodeRegressionPipelineStreamProc
     NodeRegressionStreamResult,
     NodeRegressionPredictPipelineBaseConfig>
 {
+
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -74,11 +78,8 @@ public class NodeRegressionPipelineStreamProc
     }
 
     @Override
-    public AlgorithmSpec<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig, Stream<NodeRegressionStreamResult>, AlgorithmFactory<?, NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineBaseConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 
     @Override

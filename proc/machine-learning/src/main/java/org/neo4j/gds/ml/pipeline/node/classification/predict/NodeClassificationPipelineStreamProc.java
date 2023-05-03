@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -57,6 +57,9 @@ public class NodeClassificationPipelineStreamProc
     NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
     NodeClassificationStreamResult,
     NodeClassificationPredictPipelineStreamConfig> {
+
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -138,11 +141,8 @@ public class NodeClassificationPipelineStreamProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 
     @Override

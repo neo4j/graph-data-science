@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -61,7 +60,6 @@ public final class ProcedureRunner {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
-        proc.internalModelCatalog = GraphDatabaseApiProxy.resolveDependency(proc.databaseService, ModelCatalog.class);
 
         return proc;
     }

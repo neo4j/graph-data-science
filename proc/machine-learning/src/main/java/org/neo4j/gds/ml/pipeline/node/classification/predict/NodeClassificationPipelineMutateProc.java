@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -34,6 +32,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -58,6 +57,9 @@ public class NodeClassificationPipelineMutateProc
     PredictMutateResult,
     NodeClassificationPredictPipelineMutateConfig>
 {
+    @Context
+    public ModelCatalog internalModelCatalog;
+
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
     public Stream<PredictMutateResult> mutate(
@@ -79,11 +81,8 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig, Stream<PredictMutateResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 
     @Override

@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -37,6 +38,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 
 public class GraphSageWriteProc extends BaseProc {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
@@ -73,6 +77,7 @@ public class GraphSageWriteProc extends BaseProc {
 
     private GraphSageWriteSpec specification() {
         return new GraphSageWriteSpec()
-            .withModelCatalog(internalModelCatalog);
+            // TODO: Fix this thing, should obtain the model catalog from the execution context
+            .withModelCatalog(modelCatalog);
     }
 }

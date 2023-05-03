@@ -208,7 +208,6 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
-            proc.internalModelCatalog = ModelCatalog.EMPTY;
             proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -234,7 +233,6 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
-            proc.internalModelCatalog = ModelCatalog.EMPTY;
             proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -259,7 +257,6 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
-            proc.internalModelCatalog = ModelCatalog.EMPTY;
             proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,

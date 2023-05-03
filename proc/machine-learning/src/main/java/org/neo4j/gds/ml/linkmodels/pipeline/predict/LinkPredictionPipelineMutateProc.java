@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.HdrHistogram.ConcurrentDoubleHistogram;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
@@ -35,7 +34,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -44,6 +42,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -61,6 +60,9 @@ import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
 @GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
+
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -165,11 +167,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    public AlgorithmSpec<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 
     @SuppressWarnings("unused")

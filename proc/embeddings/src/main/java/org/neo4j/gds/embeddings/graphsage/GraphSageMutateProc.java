@@ -20,9 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -35,6 +38,9 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_D
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSageMutateProc extends BaseProc {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPH_SAGE_DESCRIPTION)
@@ -61,8 +67,14 @@ public class GraphSageMutateProc extends BaseProc {
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(modelCatalog);
+    }
+
     private GraphSageMutateSpec specification() {
         return new GraphSageMutateSpec()
-            .withModelCatalog(internalModelCatalog);
+            // TODO: the spec should retrieve the model catalog from the execution context instead.
+            .withModelCatalog(modelCatalog);
     }
 }
