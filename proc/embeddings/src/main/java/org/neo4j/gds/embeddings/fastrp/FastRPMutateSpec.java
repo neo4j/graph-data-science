@@ -41,7 +41,7 @@ public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResu
     }
 
     @Override
-    public FastRPFactory<FastRPMutateConfig> algorithmFactory() {
+    public FastRPFactory<FastRPMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FastRPFactory<>();
     }
 

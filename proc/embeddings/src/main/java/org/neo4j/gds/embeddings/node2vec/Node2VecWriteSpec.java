@@ -44,7 +44,7 @@ public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.
     }
 
     @Override
-    public Node2VecAlgorithmFactory<Node2VecWriteConfig> algorithmFactory() {
+    public Node2VecAlgorithmFactory<Node2VecWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new Node2VecAlgorithmFactory<>();
     }
 

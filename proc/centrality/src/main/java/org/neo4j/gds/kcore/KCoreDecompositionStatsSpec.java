@@ -21,6 +21,7 @@ package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -37,7 +38,7 @@ public class KCoreDecompositionStatsSpec implements AlgorithmSpec<KCoreDecomposi
     }
 
     @Override
-    public KCoreDecompositionAlgorithmFactory<KCoreDecompositionStatsConfig> algorithmFactory() {
+    public KCoreDecompositionAlgorithmFactory<KCoreDecompositionStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KCoreDecompositionAlgorithmFactory<>();
     }
 

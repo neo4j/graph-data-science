@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
@@ -44,16 +43,14 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 @GdsCallable(name = "gds.beta.graphSage.write", description = GRAPH_SAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<WriteResult>, GraphSageAlgorithmFactory<GraphSageWriteConfig>> {
 
-    private ModelCatalog modelCatalog;
-
     @Override
     public String name() {
         return "GraphSageWrite";
     }
 
     @Override
-    public GraphSageAlgorithmFactory<GraphSageWriteConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+    public GraphSageAlgorithmFactory<GraphSageWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new GraphSageAlgorithmFactory<>(executionContext.modelCatalog());
     }
 
     @Override
@@ -71,14 +68,8 @@ public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageRes
     }
 
     @Override
-    public GraphSageWriteSpec withModelCatalog(ModelCatalog modelCatalog) {
-        this.modelCatalog = modelCatalog;
-        return this;
-    }
-
-    @Override
     public ValidationConfiguration<GraphSageWriteConfig> validationConfig(ExecutionContext executionContext) {
-        return new GraphSageConfigurationValidation<>(modelCatalog);
+        return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
     }
 
     private WriteResult.Builder resultBuilder(

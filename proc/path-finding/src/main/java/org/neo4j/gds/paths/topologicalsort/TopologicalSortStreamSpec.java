@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.topologicalsort;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.topologicalsort.TopologicalSort;
@@ -43,7 +44,7 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
     }
 
     @Override
-    public TopologicalSortFactory<TopologicalSortStreamConfig> algorithmFactory() {
+    public TopologicalSortFactory<TopologicalSortStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new TopologicalSortFactory<>();
     }
 

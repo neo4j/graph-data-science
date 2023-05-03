@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.scc.Scc;
@@ -44,7 +45,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
     }
 
     @Override
-    public SccAlgorithmFactory<SccStreamConfig> algorithmFactory() {
+    public SccAlgorithmFactory<SccStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SccAlgorithmFactory<>();
     }
 

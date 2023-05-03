@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -61,7 +62,7 @@ public class NodeSimilarityMutateSpecification implements AlgorithmSpec<NodeSimi
     }
 
     @Override
-    public NodeSimilarityFactory<NodeSimilarityMutateConfig> algorithmFactory() {
+    public NodeSimilarityFactory<NodeSimilarityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new NodeSimilarityFactory<>();
     }
 

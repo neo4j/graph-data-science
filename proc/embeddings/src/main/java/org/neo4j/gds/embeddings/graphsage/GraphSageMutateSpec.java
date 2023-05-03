@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
@@ -44,16 +43,14 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 @GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPH_SAGE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<MutateResult>, GraphSageAlgorithmFactory<GraphSageMutateConfig>> {
 
-    private ModelCatalog modelCatalog;
-
     @Override
     public String name() {
         return "GraphSageMutate";
     }
 
     @Override
-    public GraphSageAlgorithmFactory<GraphSageMutateConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+    public GraphSageAlgorithmFactory<GraphSageMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new GraphSageAlgorithmFactory<>(executionContext.modelCatalog());
     }
 
     @Override
@@ -70,14 +67,8 @@ public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageRe
     }
 
     @Override
-    public GraphSageMutateSpec withModelCatalog(ModelCatalog modelCatalog) {
-        this.modelCatalog = modelCatalog;
-        return this;
-    }
-
-    @Override
     public ValidationConfiguration<GraphSageMutateConfig> validationConfig(ExecutionContext executionContext) {
-        return new GraphSageConfigurationValidation<>(modelCatalog);
+        return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
     }
 
     private MutateResult.Builder resultBuilder(

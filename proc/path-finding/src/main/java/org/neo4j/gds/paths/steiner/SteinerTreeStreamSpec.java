@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
@@ -43,7 +44,7 @@ public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteiner
     }
 
     @Override
-    public SteinerTreeAlgorithmFactory<SteinerTreeStreamConfig> algorithmFactory() {
+    public SteinerTreeAlgorithmFactory<SteinerTreeStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SteinerTreeAlgorithmFactory<>();
     }
 

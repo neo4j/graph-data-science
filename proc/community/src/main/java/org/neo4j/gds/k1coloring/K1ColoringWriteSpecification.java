@@ -49,7 +49,7 @@ public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, H
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringWriteConfig> algorithmFactory() {
+    public K1ColoringFactory<K1ColoringWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new K1ColoringFactory<>();
     }
 

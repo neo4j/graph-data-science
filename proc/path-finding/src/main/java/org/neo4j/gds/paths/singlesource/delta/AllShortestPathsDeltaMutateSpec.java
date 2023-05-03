@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.MutateResult;
@@ -43,7 +44,7 @@ public class AllShortestPathsDeltaMutateSpec implements AlgorithmSpec<DeltaStepp
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaMutateConfig> algorithmFactory() {
+    public DeltaSteppingFactory<AllShortestPathsDeltaMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DeltaSteppingFactory<>();
     }
 

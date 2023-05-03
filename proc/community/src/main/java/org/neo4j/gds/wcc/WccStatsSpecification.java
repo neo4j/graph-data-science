@@ -47,7 +47,7 @@ public class WccStatsSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
     }
 
     @Override
-    public WccAlgorithmFactory<WccStatsConfig> algorithmFactory() {
+    public WccAlgorithmFactory<WccStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new WccAlgorithmFactory<>();
     }
 

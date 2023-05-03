@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.MutateResult;
@@ -44,7 +45,7 @@ public class ShortestPathAStarMutateSpec implements AlgorithmSpec<AStar, PathFin
     }
 
     @Override
-    public AStarFactory<ShortestPathAStarMutateConfig> algorithmFactory() {
+    public AStarFactory<ShortestPathAStarMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new AStarFactory<>();
     }
 

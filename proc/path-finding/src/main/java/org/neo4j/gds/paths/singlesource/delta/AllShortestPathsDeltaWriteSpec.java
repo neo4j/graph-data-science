@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
@@ -42,7 +43,7 @@ public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaSteppi
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig> algorithmFactory() {
+    public DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DeltaSteppingFactory<>();
     }
 

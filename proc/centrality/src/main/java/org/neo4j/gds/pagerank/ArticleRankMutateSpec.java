@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -33,7 +34,7 @@ public class ArticleRankMutateSpec extends PageRankMutateSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 

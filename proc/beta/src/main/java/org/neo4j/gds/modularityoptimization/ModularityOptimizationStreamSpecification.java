@@ -26,6 +26,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -45,7 +46,7 @@ public class ModularityOptimizationStreamSpecification implements AlgorithmSpec<
     }
 
     @Override
-    public ModularityOptimizationFactory<ModularityOptimizationStreamConfig> algorithmFactory() {
+    public ModularityOptimizationFactory<ModularityOptimizationStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ModularityOptimizationFactory<>();
     }
 

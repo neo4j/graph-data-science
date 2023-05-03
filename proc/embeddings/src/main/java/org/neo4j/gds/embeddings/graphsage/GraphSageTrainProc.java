@@ -30,6 +30,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -70,7 +71,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
     }
 
     @Override
-    public GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory(ExecutionContext executionContext) {
         var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
         return new GraphSageTrainAlgorithmFactory(gdsVersion);
     }

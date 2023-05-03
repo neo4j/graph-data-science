@@ -117,7 +117,7 @@ public abstract class AlgoBaseProc<
 
         var name = name();
         var executionContext = executionContext();
-        var factory = algorithmFactory();
+        var factory = algorithmFactory(executionContext);
         var configFunction = newConfigFunction();
         var validationConfig = validationConfig(executionContext);
         var releaseProgressTask = releaseProgressTask();
@@ -128,7 +128,7 @@ public abstract class AlgoBaseProc<
             }
 
             @Override
-            public AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory() {
+            public AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory(ExecutionContext executionContext) {
                 return factory;
             }
 

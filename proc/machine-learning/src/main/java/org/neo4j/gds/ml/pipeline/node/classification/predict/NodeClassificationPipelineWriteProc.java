@@ -141,8 +141,10 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext());
+    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext);
     }
 
     @SuppressWarnings("unused")

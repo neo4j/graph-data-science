@@ -44,7 +44,7 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
     }
 
     @Override
-    public IntersectingTriangleCountFactory<TriangleCountMutateConfig> algorithmFactory() {
+    public IntersectingTriangleCountFactory<TriangleCountMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new IntersectingTriangleCountFactory<>();
     }
 

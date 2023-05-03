@@ -49,7 +49,7 @@ public class GraphSageMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            specification(),
+            new GraphSageMutateSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -61,7 +61,7 @@ public class GraphSageMutateProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            specification(),
+            new GraphSageMutateSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
@@ -72,9 +72,4 @@ public class GraphSageMutateProc extends BaseProc {
         return super.executionContext().withModelCatalog(modelCatalog);
     }
 
-    private GraphSageMutateSpec specification() {
-        return new GraphSageMutateSpec()
-            // TODO: the spec should retrieve the model catalog from the execution context instead.
-            .withModelCatalog(modelCatalog);
-    }
 }

@@ -43,7 +43,7 @@ public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalC
     }
 
     @Override
-    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientWriteConfig> algorithmFactory() {
+    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LocalClusteringCoefficientFactory<>();
     }
 

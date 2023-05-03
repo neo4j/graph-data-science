@@ -46,7 +46,7 @@ public class BetweennessCentralityStreamSpecification implements AlgorithmSpec<B
     }
 
     @Override
-    public BetweennessCentralityFactory<BetweennessCentralityStreamConfig> algorithmFactory() {
+    public BetweennessCentralityFactory<BetweennessCentralityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BetweennessCentralityFactory<>();
     }
 

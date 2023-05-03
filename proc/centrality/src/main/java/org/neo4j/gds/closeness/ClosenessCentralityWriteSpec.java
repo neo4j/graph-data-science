@@ -50,7 +50,7 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityWriteConfig> algorithmFactory() {
+    public ClosenessCentralityFactory<ClosenessCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ClosenessCentralityFactory<>();
     }
 

@@ -78,7 +78,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithmResult, Test
     }
 
     @Override
-    public GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new TestAlgorithmFactory<>();
     }
 }

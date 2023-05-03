@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.traverse;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.MutateResult;
@@ -38,7 +39,7 @@ public class DfsMutateSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsMutat
     }
 
     @Override
-    public DfsAlgorithmFactory<DfsMutateConfig> algorithmFactory() {
+    public DfsAlgorithmFactory<DfsMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DfsAlgorithmFactory<>();
     }
 

@@ -47,7 +47,7 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
     }
 
     @Override
-    public LeidenAlgorithmFactory<LeidenWriteConfig> algorithmFactory() {
+    public LeidenAlgorithmFactory<LeidenWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LeidenAlgorithmFactory<>();
     }
 

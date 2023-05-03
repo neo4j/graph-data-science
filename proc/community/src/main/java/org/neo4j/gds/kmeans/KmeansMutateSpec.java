@@ -47,7 +47,7 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     }
 
     @Override
-    public KmeansAlgorithmFactory<KmeansMutateConfig> algorithmFactory() {
+    public KmeansAlgorithmFactory<KmeansMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KmeansAlgorithmFactory<>();
     }
 

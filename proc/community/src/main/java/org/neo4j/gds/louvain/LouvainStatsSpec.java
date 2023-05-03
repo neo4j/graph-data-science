@@ -21,6 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -37,7 +38,7 @@ public class LouvainStatsSpec implements AlgorithmSpec<Louvain, LouvainResult, L
     }
 
     @Override
-    public LouvainAlgorithmFactory<LouvainStatsConfig> algorithmFactory() {
+    public LouvainAlgorithmFactory<LouvainStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LouvainAlgorithmFactory<>();
     }
 

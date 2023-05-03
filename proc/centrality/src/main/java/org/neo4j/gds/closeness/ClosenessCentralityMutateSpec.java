@@ -49,7 +49,7 @@ public class ClosenessCentralityMutateSpec implements AlgorithmSpec<ClosenessCen
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityMutateConfig> algorithmFactory() {
+    public ClosenessCentralityFactory<ClosenessCentralityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ClosenessCentralityFactory<>();
     }
 

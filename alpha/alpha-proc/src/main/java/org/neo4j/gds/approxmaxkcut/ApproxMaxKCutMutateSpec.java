@@ -49,7 +49,7 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
     }
 
     @Override
-    public ApproxMaxKCutFactory<ApproxMaxKCutMutateConfig> algorithmFactory() {
+    public ApproxMaxKCutFactory<ApproxMaxKCutMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ApproxMaxKCutFactory<>();
     }
 

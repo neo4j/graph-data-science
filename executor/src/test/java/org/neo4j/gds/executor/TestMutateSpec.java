@@ -34,7 +34,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
     }
 
     @Override
-    public TestAlgorithmFactory<TestMutateConfig> algorithmFactory() {
+    public TestAlgorithmFactory<TestMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new TestAlgorithmFactory<>();
     }
 

@@ -86,6 +86,7 @@ public final class BidirectionalComputationStreamProc extends PregelStreamProc<B
 
     @Override
     public GraphAlgorithmFactory<BidirectionalComputationAlgorithm, PregelProcedureConfig> algorithmFactory(
+        ExecutionContext executionContext
     ) {
         return new GraphAlgorithmFactory<BidirectionalComputationAlgorithm, PregelProcedureConfig>() {
             @Override

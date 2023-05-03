@@ -34,7 +34,7 @@ public interface AlgorithmSpec<
 > {
     String name();
 
-    ALGO_FACTORY algorithmFactory();
+    ALGO_FACTORY algorithmFactory(ExecutionContext executionContext);
 
     NewConfigFunction<CONFIG> newConfigFunction();
 
@@ -44,6 +44,7 @@ public interface AlgorithmSpec<
         return ValidationConfiguration.empty();
     }
 
+    // TODO: Remove this and use the ModelCatalog from the ExecutionContext
     default AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ALGO_FACTORY> withModelCatalog(ModelCatalog modelCatalog) {
         return this;
     }

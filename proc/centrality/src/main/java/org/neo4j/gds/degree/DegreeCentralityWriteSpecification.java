@@ -43,7 +43,7 @@ public class DegreeCentralityWriteSpecification implements AlgorithmSpec<DegreeC
     }
 
     @Override
-    public DegreeCentralityFactory<DegreeCentralityWriteConfig> algorithmFactory() {
+    public DegreeCentralityFactory<DegreeCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DegreeCentralityFactory<>();
     }
 

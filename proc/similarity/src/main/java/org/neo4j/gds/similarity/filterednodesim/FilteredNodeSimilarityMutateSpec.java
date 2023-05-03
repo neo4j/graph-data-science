@@ -72,7 +72,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
 
 
     @Override
-    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityMutateConfig> algorithmFactory() {
+    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredNodeSimilarityFactory<>();
     }
 

@@ -46,7 +46,7 @@ public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityStatsConfig> algorithmFactory() {
+    public ClosenessCentralityFactory<ClosenessCentralityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ClosenessCentralityFactory<>();
     }
 

@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -43,7 +44,7 @@ public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelP
     }
 
     @Override
-    public LabelPropagationFactory<LabelPropagationStreamConfig> algorithmFactory() {
+    public LabelPropagationFactory<LabelPropagationStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LabelPropagationFactory<>();
     }
 

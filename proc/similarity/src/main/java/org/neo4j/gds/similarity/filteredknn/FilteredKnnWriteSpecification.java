@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
@@ -36,7 +37,7 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
     }
 
     @Override
-    public FilteredKnnFactory<FilteredKnnWriteConfig> algorithmFactory() {
+    public FilteredKnnFactory<FilteredKnnWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredKnnFactory<>();
     }
 

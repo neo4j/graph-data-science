@@ -45,7 +45,7 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
     }
 
     @Override
-    public ToUndirectedAlgorithmFactory algorithmFactory() {
+    public ToUndirectedAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
         return new ToUndirectedAlgorithmFactory();
     }
 

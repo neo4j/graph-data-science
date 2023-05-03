@@ -52,7 +52,7 @@ public class GraphSageWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            specification(),
+            new GraphSageWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -64,7 +64,7 @@ public class GraphSageWriteProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            specification(),
+            new GraphSageWriteSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
@@ -72,12 +72,9 @@ public class GraphSageWriteProc extends BaseProc {
 
     @Override
     public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
-
-    private GraphSageWriteSpec specification() {
-        return new GraphSageWriteSpec()
-            // TODO: Fix this thing, should obtain the model catalog from the execution context
+        return super.executionContext()
+            .withNodePropertyExporterBuilder(nodePropertyExporterBuilder)
             .withModelCatalog(modelCatalog);
     }
+
 }

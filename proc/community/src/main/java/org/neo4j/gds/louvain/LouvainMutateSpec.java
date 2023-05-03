@@ -23,6 +23,7 @@ import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -41,7 +42,7 @@ public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, 
     }
 
     @Override
-    public LouvainAlgorithmFactory<LouvainMutateConfig> algorithmFactory() {
+    public LouvainAlgorithmFactory<LouvainMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LouvainAlgorithmFactory<>();
     }
 

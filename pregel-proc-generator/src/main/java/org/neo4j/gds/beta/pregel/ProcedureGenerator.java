@@ -281,6 +281,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
+            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .returns(ParameterizedTypeName.get(
                 ClassName.get(GraphAlgorithmFactory.class),
                 algorithmClassName,

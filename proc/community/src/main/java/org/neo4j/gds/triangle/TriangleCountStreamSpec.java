@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -37,7 +38,7 @@ public class TriangleCountStreamSpec implements AlgorithmSpec<IntersectingTriang
     }
 
     @Override
-    public IntersectingTriangleCountFactory<TriangleCountStreamConfig> algorithmFactory() {
+    public IntersectingTriangleCountFactory<TriangleCountStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new IntersectingTriangleCountFactory<>();
     }
 

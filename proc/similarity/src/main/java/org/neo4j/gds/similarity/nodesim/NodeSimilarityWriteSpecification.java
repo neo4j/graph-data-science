@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -40,7 +41,7 @@ public class NodeSimilarityWriteSpecification implements AlgorithmSpec<NodeSimil
     }
 
     @Override
-    public NodeSimilarityFactory<NodeSimilarityWriteConfig> algorithmFactory() {
+    public NodeSimilarityFactory<NodeSimilarityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new NodeSimilarityFactory<>();
     }
 

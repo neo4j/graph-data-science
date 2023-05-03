@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -37,7 +38,7 @@ public class FilteredKnnStreamSpecification implements AlgorithmSpec<FilteredKnn
     }
 
     @Override
-    public FilteredKnnFactory<FilteredKnnStreamConfig> algorithmFactory() {
+    public FilteredKnnFactory<FilteredKnnStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredKnnFactory<>();
     }
 

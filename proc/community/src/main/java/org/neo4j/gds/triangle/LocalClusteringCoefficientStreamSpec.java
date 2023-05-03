@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -38,7 +39,7 @@ public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<Loca
     }
 
     @Override
-    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig> algorithmFactory() {
+    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LocalClusteringCoefficientFactory<>();
     }
 

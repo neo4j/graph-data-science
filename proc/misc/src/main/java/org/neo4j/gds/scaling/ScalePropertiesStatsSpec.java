@@ -46,7 +46,7 @@ public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, 
     }
 
     @Override
-    public ScalePropertiesFactory<ScalePropertiesStatsConfig> algorithmFactory() {
+    public ScalePropertiesFactory<ScalePropertiesStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ScalePropertiesFactory<>();
     }
 

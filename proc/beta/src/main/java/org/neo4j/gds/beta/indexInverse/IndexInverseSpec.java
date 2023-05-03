@@ -47,7 +47,7 @@ public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, Map
     }
 
     @Override
-    public InverseRelationshipsAlgorithmFactory algorithmFactory() {
+    public InverseRelationshipsAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
         return new InverseRelationshipsAlgorithmFactory();
     }
 

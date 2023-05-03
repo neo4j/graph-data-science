@@ -44,7 +44,7 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel
     }
 
     @Override
-    public Node2VecAlgorithmFactory<Node2VecMutateConfig> algorithmFactory() {
+    public Node2VecAlgorithmFactory<Node2VecMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new Node2VecAlgorithmFactory<>();
     }
 

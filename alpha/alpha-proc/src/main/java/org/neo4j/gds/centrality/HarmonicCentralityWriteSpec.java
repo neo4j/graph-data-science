@@ -49,7 +49,7 @@ public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentra
     }
 
     @Override
-    public HarmonicCentralityAlgorithmFactory<HarmonicCentralityWriteConfig> algorithmFactory() {
+    public HarmonicCentralityAlgorithmFactory<HarmonicCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new HarmonicCentralityAlgorithmFactory<>();
     }
 

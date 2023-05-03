@@ -21,6 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -38,7 +39,7 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankStatsConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>();
     }
 

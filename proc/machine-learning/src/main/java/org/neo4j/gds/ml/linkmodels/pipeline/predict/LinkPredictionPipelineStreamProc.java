@@ -77,8 +77,10 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
-        return new LinkPredictionPredictPipelineAlgorithmFactory<>(executionContext());
+    public GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(executionContext);
     }
 
     @Override

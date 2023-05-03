@@ -24,6 +24,7 @@ import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
@@ -45,7 +46,7 @@ public class ApproxMaxKCutStreamSpec implements AlgorithmSpec<ApproxMaxKCut, Max
     }
 
     @Override
-    public ApproxMaxKCutFactory<ApproxMaxKCutStreamConfig> algorithmFactory() {
+    public ApproxMaxKCutFactory<ApproxMaxKCutStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ApproxMaxKCutFactory<>();
     }
 

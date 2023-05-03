@@ -44,7 +44,7 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>();
     }
 

@@ -92,7 +92,7 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
     }
 
     @Override
-    public GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new GraphAlgorithmFactory<>() {
 
             @Override

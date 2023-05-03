@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
@@ -44,7 +45,9 @@ public class ShortestPathDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, Pa
     }
 
     @Override
-    public DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraWriteConfig> algorithmFactory() {
+    public DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraWriteConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
         return new DijkstraFactory.SourceTargetDijkstraFactory<>();
     }
 

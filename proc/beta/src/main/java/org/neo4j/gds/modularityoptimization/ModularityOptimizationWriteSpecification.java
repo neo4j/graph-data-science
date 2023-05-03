@@ -47,7 +47,7 @@ public class ModularityOptimizationWriteSpecification implements AlgorithmSpec<M
     }
 
     @Override
-    public ModularityOptimizationFactory<ModularityOptimizationWriteConfig> algorithmFactory() {
+    public ModularityOptimizationFactory<ModularityOptimizationWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ModularityOptimizationFactory<>();
     }
 
