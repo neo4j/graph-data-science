@@ -27,7 +27,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
@@ -53,7 +53,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var writeSpec = new AllShortestPathsDeltaWriteSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig>();
 
         return new ProcedureExecutor<>(
             writeSpec,
@@ -69,7 +69,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var writeSpec = new AllShortestPathsDeltaWriteSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig>();
 
         return new MemoryEstimationExecutor<>(
             writeSpec,

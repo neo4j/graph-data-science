@@ -44,7 +44,7 @@ import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_STOP;
 
-public final class Dijkstra extends Algorithm<DijkstraResult> {
+public final class Dijkstra extends Algorithm<PathFindingResult> {
     public static final String DESCRIPTION_SOURCE_TARGET = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     private static final long NO_RELATIONSHIP = -1;
@@ -176,7 +176,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
         }
     }
 
-    public DijkstraResult compute() {
+    public PathFindingResult compute() {
         progressTracker.beginSubTask();
 
         queue.add(sourceNode, 0.0);
@@ -188,7 +188,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
             .generate(() -> next(traversalPredicate, pathResultBuilder))
             .takeWhile(pathResult -> pathResult != PathResult.EMPTY);
 
-        return new DijkstraResult(paths, progressTracker::endSubTask);
+        return new PathFindingResult(paths, progressTracker::endSubTask);
     }
 
     private PathResult next(TraversalPredicate traversalPredicate, ImmutablePathResult.Builder pathResultBuilder) {

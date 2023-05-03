@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.astar.write", description = ASTAR_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class ShortestPathAStarWriteSpec implements AlgorithmSpec<AStar, DijkstraResult, ShortestPathAStarWriteConfig, Stream<StandardWriteRelationshipsResult>, AStarFactory<ShortestPathAStarWriteConfig>> {
+public class ShortestPathAStarWriteSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarWriteConfig, Stream<StandardWriteRelationshipsResult>, AStarFactory<ShortestPathAStarWriteConfig>> {
 
     @Override
     public String name() {
@@ -54,7 +54,7 @@ public class ShortestPathAStarWriteSpec implements AlgorithmSpec<AStar, Dijkstra
     }
 
     @Override
-    public ComputationResultConsumer<AStar, DijkstraResult, ShortestPathAStarWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<AStar, PathFindingResult, ShortestPathAStarWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
 

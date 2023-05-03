@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.shortestPath.yens.stream", description = YensConstants.DESCRIPTION, executionMode = STREAM)
-public class ShortestPathYensStreamSpec implements AlgorithmSpec<Yens, DijkstraResult, ShortestPathYensStreamConfig, Stream<StreamResult>, YensFactory<ShortestPathYensStreamConfig>> {
+public class ShortestPathYensStreamSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensStreamConfig, Stream<StreamResult>, YensFactory<ShortestPathYensStreamConfig>> {
 
     @Override
     public String name() {
@@ -53,7 +53,7 @@ public class ShortestPathYensStreamSpec implements AlgorithmSpec<Yens, DijkstraR
     }
 
     @Override
-    public ComputationResultConsumer<Yens, DijkstraResult, ShortestPathYensStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Yens, PathFindingResult, ShortestPathYensStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.TentativeDistances;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ import java.util.stream.IntStream;
  * Also, when a path to terminal has been found, we do not start a shortest path search from scratch.
  * We instead continue from where we left off.
  */
-public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
+public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult> {
 
     static final int NO_BIN = Integer.MAX_VALUE;
     private static final long NO_TERMINAL = -1;
@@ -260,7 +260,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     }
 
     @Override
-    public DijkstraResult compute() {
+    public PathFindingResult compute() {
         int currentBin = 0;
 
         var pathResultBuilder = ImmutablePathResult.builder()
@@ -326,7 +326,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         }
 
 
-        return new DijkstraResult(paths.stream());
+        return new PathFindingResult(paths.stream());
     }
 
     enum Phase {

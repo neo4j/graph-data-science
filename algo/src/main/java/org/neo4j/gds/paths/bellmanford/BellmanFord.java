@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -153,8 +153,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
         return BellmanFordResult.of(
             containsNegativeCycle,
-            new DijkstraResult(paths),
-            new DijkstraResult(negativeCycles)
+            new PathFindingResult(paths),
+            new PathFindingResult(negativeCycles)
         );
     }
 

@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathDijkstraStreamSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig, Stream<StreamResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraStreamConfig>> {
+public class ShortestPathDijkstraStreamSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraStreamConfig, Stream<StreamResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraStreamConfig>> {
 
     @Override
     public String name() {
@@ -54,7 +54,7 @@ public class ShortestPathDijkstraStreamSpec implements AlgorithmSpec<Dijkstra, D
     }
 
     @Override
-    public ComputationResultConsumer<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Dijkstra, PathFindingResult, ShortestPathDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

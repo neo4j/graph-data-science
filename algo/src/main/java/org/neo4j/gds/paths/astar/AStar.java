@@ -28,13 +28,13 @@ import org.neo4j.gds.core.utils.paged.HugeLongDoubleMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class AStar extends Algorithm<DijkstraResult> {
+public final class AStar extends Algorithm<PathFindingResult> {
 
     private final Dijkstra dijkstra;
 
@@ -84,7 +84,7 @@ public final class AStar extends Algorithm<DijkstraResult> {
     }
 
     @Override
-    public DijkstraResult compute() {
+    public PathFindingResult compute() {
         return dijkstra.compute();
     }
 

@@ -29,18 +29,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DijkstraResult {
-
+public class PathFindingResult {
     private final Stream<PathResult> paths;
+
     private final Runnable closeStreamAction;
 
     private final AtomicBoolean consumptionTriggered;
 
-    public DijkstraResult(Stream<PathResult> paths) {
+    public PathFindingResult(Stream<PathResult> paths) {
         this(paths, () -> {});
     }
 
-    public DijkstraResult(Stream<PathResult> paths, Runnable closeStreamAction) {
+    public PathFindingResult(Stream<PathResult> paths, Runnable closeStreamAction) {
         this.paths = paths;
         this.closeStreamAction = closeStreamAction;
         this.consumptionTriggered = new AtomicBoolean(false);

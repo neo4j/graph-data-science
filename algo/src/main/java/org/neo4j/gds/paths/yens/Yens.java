@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public final class Yens extends Algorithm<DijkstraResult> {
+public final class Yens extends Algorithm<PathFindingResult> {
 
     private final Graph graph;
     private final ShortestPathYensBaseConfig config;
@@ -82,7 +82,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
 
     @Override
-    public DijkstraResult compute() {
+    public PathFindingResult compute() {
         progressTracker.beginSubTask("Yens");
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
@@ -91,7 +91,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
-            return new DijkstraResult(Stream.empty(), progressTracker::endSubTask);
+            return new PathFindingResult(Stream.empty(), progressTracker::endSubTask);
         }
 
         kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
@@ -124,7 +124,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
         }
         progressTracker.endSubTask();
 
-        return new DijkstraResult(
+        return new PathFindingResult(
             kShortestPaths.stream().map(MutablePathResult::toPathResult),
             progressTracker::endSubTask
         );
@@ -188,5 +188,3 @@ public final class Yens extends Algorithm<DijkstraResult> {
     }
 
 }
-
-
