@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,24 +30,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.testProc.write", description = STATS_DESCRIPTION, executionMode = STATS)
-public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithmResult, TestResult, TestWriteConfig> {
+public class TestProc extends BaseProc {
 
     @Procedure(value = "gds.testProc.write", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(Constants.STATS_DESCRIPTION)
     public Stream<TestResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestWriteConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stats(computationResult);
+        return new ProcedureExecutor<>(
+            new TestSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.testProc.write.estimate", mode = READ)
@@ -59,26 +52,11 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithmResult, Test
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new TestSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected TestResult.TestResultBuilder resultBuilder(
-        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
-            .map(TestAlgorithmResult::relationshipCount)
-            .orElse(-1L));
-    }
-
-    @Override
-    protected TestWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return TestWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new TestAlgorithmFactory<>();
-    }
 }
