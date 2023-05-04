@@ -98,7 +98,7 @@ public final class CSRGraphStoreUtil {
         return new GraphStoreBuilder()
             .databaseId(databaseId)
             // TODO: is it correct that we only use this for generated graphs?
-            .capabilities(ImmutableStaticCapabilities.of(WriteMode.DATABASE))
+            .capabilities(ImmutableStaticCapabilities.of(WriteMode.NONE))
             .schema(schema)
             .nodes(ImmutableNodes.of(schema.nodeSchema(), graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
