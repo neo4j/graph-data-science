@@ -34,7 +34,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -76,7 +75,7 @@ class K1ColoringTest {
 
         k1Coloring.compute();
 
-        HugeLongArray colors = k1Coloring.colors();
+        var colors = k1Coloring.colors();
 
         var colorOfNode0 = colors.get(0);
         var colorOfNode1 = colors.get(1);
@@ -116,7 +115,7 @@ class K1ColoringTest {
         );
 
         k1Coloring.compute();
-        HugeLongArray colors = k1Coloring.colors();
+        var colors = k1Coloring.colors();
 
         var usedColors = new HashSet<>(100);
         var conflicts = new MutableLong(0);

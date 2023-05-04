@@ -24,7 +24,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -72,6 +71,7 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
     private final long maxIterations;
 
     private BitSet nodesToColor;
+    // Not thread-safe on purpose
     private HugeLongArray colors;
     private long ranIterations;
     private boolean didConverge;
@@ -169,7 +169,7 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         );
 
         var steps = PartitionUtils.degreePartitionWithBatchSize(
-            new SetBitsIterable(nodesToColor).primitiveLongIterator(),
+            nodesToColor,
             graph::degree,
             adjustedBatchSize,
             partition -> new ColoringStep(

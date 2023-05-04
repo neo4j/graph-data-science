@@ -50,10 +50,6 @@ public class SetBitsIterable implements Iterable<Long> {
         return new Iterator(offset);
     }
 
-    public PrimitiveIterator.OfLong primitiveLongIterator() {
-        return new PrimitiveLongIteratorWrapper(iterator());
-    }
-
     public LongStream stream() {
         return StreamSupport.longStream(spliterator(), false);
     }
@@ -91,20 +87,4 @@ public class SetBitsIterable implements Iterable<Long> {
         }
     }
 
-    private static final class PrimitiveLongIteratorWrapper implements PrimitiveIterator.OfLong {
-
-        private final PrimitiveIterator.OfLong nodeIterator;
-
-        private PrimitiveLongIteratorWrapper(PrimitiveIterator.OfLong nodeIterator) {this.nodeIterator = nodeIterator;}
-
-        @Override
-        public boolean hasNext() {
-            return nodeIterator.hasNext();
-        }
-
-        @Override
-        public long nextLong() {
-            return nodeIterator.nextLong();
-        }
-    }
 }

@@ -20,9 +20,11 @@
 package org.neo4j.gds.core.utils.partition;
 
 import com.carrotsearch.hppc.AbstractIterator;
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
 
@@ -30,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.function.Function;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
@@ -213,29 +214,37 @@ public final class PartitionUtils {
         return partitions.stream().map(taskCreator).collect(Collectors.toList());
     }
 
-    // Passing an iterator makes partitioning harder, please use the nodeCount based.
-    @Deprecated()
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
-        PrimitiveIterator.OfLong nodes,
+        BitSet bitset,
         DegreeFunction degrees,
-        long batchSize,
-        Function<DegreePartition, TASK> taskCreator
+        long degreesPerBatch,
+        Function<IteratorPartition, TASK> taskCreator
     ) {
+        assert degreesPerBatch > 0L;
+
+        var iterator = bitset.iterator();
+        var totalSize = bitset.cardinality();
+
         var result = new ArrayList<TASK>();
-        long start = 0L;
-        while (nodes.hasNext()) {
-            assert batchSize > 0L;
-            long partitionSize = 0L;
-            long nodeId = 0L;
-            while (nodes.hasNext() && partitionSize < batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
-                nodeId = nodes.nextLong();
-                partitionSize += degrees.degree(nodeId);
+        long seen = 0L;
+
+        while (seen < totalSize) {
+            long setBit = iterator.nextSetBit();
+            long currentDegrees = degrees.degree(setBit);
+            long currentLength = 1L;
+            long startIdx = setBit;
+            seen++;
+
+            while (seen < totalSize && currentDegrees < degreesPerBatch && currentLength < Partition.MAX_NODE_COUNT) {
+                setBit = iterator.nextSetBit();
+                currentDegrees += degrees.degree(setBit);
+                currentLength++;
+                seen++;
             }
 
-            long end = nodeId + 1;
-            result.add(taskCreator.apply(DegreePartition.of(start, end - start, partitionSize)));
-            start = end;
+            result.add(taskCreator.apply(new IteratorPartition(new SetBitsIterable(bitset, startIdx).iterator(), currentLength)));
         }
+
         return result;
     }
 

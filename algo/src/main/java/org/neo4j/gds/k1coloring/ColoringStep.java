@@ -20,10 +20,9 @@
 package org.neo4j.gds.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.IteratorPartition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public final class ColoringStep implements Runnable {
@@ -34,7 +33,7 @@ public final class ColoringStep implements Runnable {
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
     private final BitSet forbiddenColors;
-    private final Partition partition;
+    private final IteratorPartition partition;
     private final ProgressTracker progressTracker;
     private final long[] resetMask;
 
@@ -42,7 +41,7 @@ public final class ColoringStep implements Runnable {
         RelationshipIterator graph,
         HugeLongArray colors,
         BitSet nodesToColor,
-        Partition partition,
+        IteratorPartition partition,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
@@ -56,28 +55,25 @@ public final class ColoringStep implements Runnable {
 
     @Override
     public void run() {
-        var coloredNodes = new MutableLong(0);
         partition.consume(nodeId -> {
-            if (nodesToColor.get(nodeId)) {
-                coloredNodes.increment();
-                resetForbiddenColors();
+            resetForbiddenColors();
 
-                graph.forEachRelationship(nodeId, (s, target) -> {
-                    if (s != target) {
-                        forbiddenColors.set(colors.get(target));
-                    }
-                    return true;
-                });
-
-                long nextColor = 0;
-                while (forbiddenColors.get(nextColor)) {
-                    nextColor++;
+            graph.forEachRelationship(nodeId, (s, target) -> {
+                if (s != target) {
+                    forbiddenColors.set(colors.get(target));
                 }
+                return true;
+            });
 
-                colors.set(nodeId, nextColor);
+            long nextColor = 0;
+            while (forbiddenColors.get(nextColor)) {
+                nextColor++;
             }
+
+            colors.set(nodeId, nextColor);
         });
-        progressTracker.logProgress(coloredNodes.longValue());
+
+        progressTracker.logProgress(partition.length());
     }
 
     private void resetForbiddenColors() {

@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
+import org.neo4j.gds.core.utils.partition.IteratorPartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -370,24 +371,41 @@ class PartitionUtilsTest {
     }
 
     @Test
-    void testDegreePartitioningWithNodeFilter() {
-        Graph graph = fromGdl(
-            "(a)-->(b)" +
-            "(a)-->(c)" +
-            "(b)-->(a)" +
-            "(b)-->(c)"
-        );
-        BitSet nodeFilter = new BitSet(graph.nodeCount());
+    void testDegreePartitioningOnBitSet() {
+        int[] degrees = {2, 1, 2, 4};
+
+        BitSet nodeFilter = new BitSet(degrees.length);
         nodeFilter.set(0);
-        nodeFilter.set(2);
+        nodeFilter.set(1);
+        nodeFilter.set(3);
 
         var partitions = PartitionUtils.degreePartitionWithBatchSize(
-            new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph::degree, 2, Function.identity()
+            nodeFilter, i -> degrees[(int) i], 2, Function.identity()
         );
 
-        assertThat(partitions).containsExactly(
-            DegreePartition.of(0, 1, 2),
-            DegreePartition.of(1, 2, 0)
+        assertThat(partitions.stream().map(IteratorPartition::materialize)).containsExactlyInAnyOrder(
+            new long[] {0},
+            new long[] {1, 3}
+        );
+    }
+
+    @Test
+    void testDegreePartitioningOnBitSetExceedsLimit() {
+        int[] degrees = {4, 1, 4, 0};
+
+        BitSet nodeFilter = new BitSet(degrees.length);
+        nodeFilter.set(0);
+        nodeFilter.set(1);
+        nodeFilter.set(2);
+
+        int degreesPerBatch = 2;
+        var partitions = PartitionUtils.degreePartitionWithBatchSize(
+            nodeFilter, i -> degrees[(int) i], degreesPerBatch, Function.identity()
+        );
+
+        assertThat(partitions.stream().map(IteratorPartition::materialize)).containsExactlyInAnyOrder(
+            new long[] {0},
+            new long[] {1, 2}
         );
     }
 
