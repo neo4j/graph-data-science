@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.HdrHistogram.ConcurrentHistogram;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.compress.ModifiableSlice;
@@ -68,7 +69,9 @@ class PackedAdjacencyListTest {
             data,
             data.length,
             Aggregation.NONE,
-            degree
+            degree,
+            null,
+            null
         );
 
         long ptr = slice.slice().address();
@@ -78,6 +81,6 @@ class PackedAdjacencyListTest {
         var degrees = HugeIntArray.of(degree.intValue());
         var offsets = HugeLongArray.of(offset);
 
-        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, new ConcurrentHistogram(0));
     }
 }

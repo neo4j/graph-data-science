@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.HdrHistogram.ConcurrentHistogram;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
@@ -48,6 +49,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         Consumer<PackedAdjacencyList> code
     ) {
         test((allocator, slice) -> {
+
             var degree = new MutableInt(0);
             var offset = AdjacencyPacker.compress(
                 allocator,
@@ -55,7 +57,9 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                 values,
                 length,
                 aggregation,
-                degree
+                degree,
+                null,
+                null
             );
 
             var pages = new long[]{degree.intValue()};
@@ -63,7 +67,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
             var allocationSizes = new int[]{bytesOffHeap};
             var degrees = HugeIntArray.of(degree.intValue());
             var offsets = HugeLongArray.of(offset);
-            var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
+            var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, new ConcurrentHistogram(0));
 
             code.accept(list);
         });
@@ -83,7 +87,9 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                 values.clone(),
                 length,
                 aggregation,
-                degree
+                degree,
+                null,
+                null
             );
 
             var pages = new long[]{slice.slice().address()};

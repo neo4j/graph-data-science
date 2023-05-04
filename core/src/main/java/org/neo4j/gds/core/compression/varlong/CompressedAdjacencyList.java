@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
+import org.HdrHistogram.ConcurrentHistogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -102,11 +103,15 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     private byte[][] pages;
     private HugeIntArray degrees;
     private HugeLongArray offsets;
+    private final ConcurrentHistogram allocationHistogram;
 
-    public CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    public CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets,
+        ConcurrentHistogram allocationHistogram
+    ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.allocationHistogram = allocationHistogram;
     }
 
     @Override
@@ -148,9 +153,10 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
     @Override
     public MemoryInfo memoryInfo() {
-        var memoryInfoBuilder = ImmutableMemoryInfo.builder();
         var memoryInfoBuilder = ImmutableMemoryInfo.builder()
             .pages(this.pages.length)
+            .allocationHistogram(this.allocationHistogram);
+
         var onHeapBytes = MemoryUsage.sizeOf(this);
         if (onHeapBytes >= 0) {
             memoryInfoBuilder.bytesOnHeap(onHeapBytes);

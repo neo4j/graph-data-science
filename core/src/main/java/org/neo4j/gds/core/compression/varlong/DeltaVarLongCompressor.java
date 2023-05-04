@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
+import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
@@ -87,7 +88,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             Aggregation[] aggregations,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
-            HugeLongArray propertyOffsets
+            HugeLongArray propertyOffsets,
+            Histogram headerAllocations, Histogram valueAllocations
         ) {
             AdjacencyListBuilder.Allocator<long[]> firstAllocator;
             AdjacencyListBuilder.PositionalAllocator<long[]>[] otherAllocators;

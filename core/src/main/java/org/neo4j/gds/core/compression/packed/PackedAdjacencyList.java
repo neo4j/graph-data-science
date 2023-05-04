@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.HdrHistogram.ConcurrentHistogram;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.AdjacencyCursor;
@@ -30,7 +31,6 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.ref.Cleaner;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class PackedAdjacencyList implements AdjacencyList {
 
@@ -40,6 +40,7 @@ public class PackedAdjacencyList implements AdjacencyList {
     private final HugeIntArray degrees;
     private final HugeLongArray offsets;
     private final int[] allocationSizes;
+    private final ConcurrentHistogram allocationHistogram;
 
     private final Cleaner.Cleanable cleanable;
 
@@ -47,12 +48,14 @@ public class PackedAdjacencyList implements AdjacencyList {
         long[] pages,
         int[] allocationSizes,
         HugeIntArray degrees,
-        HugeLongArray offsets
+        HugeLongArray offsets,
+        ConcurrentHistogram allocationHistogram
     ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
         this.allocationSizes = allocationSizes;
+        this.allocationHistogram = allocationHistogram;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
     }
 
@@ -101,6 +104,7 @@ public class PackedAdjacencyList implements AdjacencyList {
         var memoryInfoBuilder = ImmutableMemoryInfo
             .builder()
             .pages(this.pages.length)
+            .allocationHistogram(this.allocationHistogram)
             .bytesOffHeap(bytesOffHeap);
 
         var bytesOnHeap = MemoryUsage.sizeOf(this);
