@@ -30,6 +30,8 @@ import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;
 
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLongsSize;
+
 public final class AdjacencyPacker {
 
     private AdjacencyPacker() {}
@@ -105,6 +107,67 @@ public final class AdjacencyPacker {
         return preparePacking(allocator, slice, values, length, headerAllocations, valueAllocations);
     }
 
+    public static long compressWithVarLongTail(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        int length,
+        Aggregation aggregation,
+        MutableInt degree,
+        Histogram headerAllocations,
+        Histogram valueAllocations
+    ) {
+        Arrays.sort(values, 0, length);
+        return deltaCompressWithVarLongTail(allocator, slice, values, length, aggregation, degree, headerAllocations, valueAllocations);
+    }
+
+    static long compressWithPropertiesWithVarLongTail(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        long[][] properties,
+        int length,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        MutableInt degree,
+        Histogram headerBitsHistogram,
+        Histogram valueAllocationHistogram
+    ) {
+        if (length > 0) {
+            // sort, delta encode, reorder and aggregate properties
+            length = AdjacencyCompression.applyDeltaEncoding(
+                values,
+                length,
+                properties,
+                aggregations,
+                noAggregation
+            );
+        }
+
+        degree.setValue(length);
+
+        return preparePackingWithVarLongTail(allocator, slice, values, length, headerBitsHistogram, valueAllocationHistogram);
+    }
+
+    private static long deltaCompressWithVarLongTail(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        int length,
+        Aggregation aggregation,
+        MutableInt degree,
+        Histogram headerAllocations,
+        Histogram valueAllocations
+    ) {
+        if (length > 0) {
+            length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
+        }
+
+        degree.setValue(length);
+
+        return preparePackingWithVarLongTail(allocator, slice, values, length, headerAllocations, valueAllocations);
+    }
+
     private static long preparePacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
@@ -177,6 +240,95 @@ public final class AdjacencyPacker {
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
+
+        return adjacencyOffset;
+    }
+
+    private static long preparePackingWithVarLongTail(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        int length,
+        Histogram headerBitsHistogram,
+        Histogram valueAllocationHistogram
+    ) {
+        int blocks = length / AdjacencyPacking.BLOCK_SIZE;
+        var header = new byte[blocks];
+
+        long blockBytes = 0L;
+        int offset = 0;
+        int blockIdx = 0;
+
+        for (; blockIdx < blocks; blockIdx++, offset += AdjacencyPacking.BLOCK_SIZE) {
+            int bits = bitsNeeded(values, offset, AdjacencyPacking.BLOCK_SIZE);
+            blockBytes += bytesNeeded(bits);
+            header[blockIdx] = (byte) bits;
+        }
+
+        int tailLength = length - offset;
+        long tailBytes = encodedVLongsSize(values, length - tailLength, tailLength);
+
+        return runPackingWithVarLongTail(
+            allocator,
+            slice,
+            values,
+            header,
+            blockBytes,
+            tailBytes,
+            length,
+            tailLength,
+            headerBitsHistogram,
+            valueAllocationHistogram
+        );
+    }
+
+    private static long runPackingWithVarLongTail(
+        AdjacencyListBuilder.Allocator<Address> allocator,
+        AdjacencyListBuilder.Slice<Address> slice,
+        long[] values,
+        byte[] header,
+        long blockBytes,
+        long tailBytes,
+        int length,
+        int tailLength,
+        ValueRecorder headerBitsHistogram,
+        ValueRecorder valueAllocationHistogram
+    ) {
+        assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
+
+        long headerSize = header.length * Byte.BYTES;
+        // we must add padding between the header and the data bytes
+        // to avoid writing unaligned longs
+        long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);
+        long fullSize = alignedHeaderSize + blockBytes + tailBytes;
+        // we must align to long because we write in terms of longs, not single bytes
+        long alignedFullSize = BitUtil.align(fullSize, Long.BYTES);
+        int allocationSize = Math.toIntExact(alignedFullSize);
+
+        long adjacencyOffset = allocator.allocate(allocationSize, slice);
+
+        if (valueAllocationHistogram != null) {
+            valueAllocationHistogram.recordValue(blockBytes + tailBytes);
+        }
+
+        Address address = slice.slice();
+        long ptr = address.address() + slice.offset();
+
+        // write header
+        UnsafeUtil.copyMemory(header, BYTE_ARRAY_BASE_OFFSET, null, ptr, headerSize);
+        ptr += alignedHeaderSize;
+
+        // main packing loop
+        int in = 0;
+        for (byte bits : header) {
+            if (headerBitsHistogram != null) {
+                headerBitsHistogram.recordValue(bits);
+            }
+            ptr = AdjacencyPacking.pack(bits, values, in, ptr);
+            in += AdjacencyPacking.BLOCK_SIZE;
+        }
+
+        AdjacencyCompression.compress(values, length - tailLength, tailLength, ptr);
 
         return adjacencyOffset;
     }
