@@ -26,6 +26,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;
 import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
@@ -168,6 +169,11 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
         @Configuration.ConvertWith(method = "validateAuthProperty")
         default String authProperty() {
             return "auth";
+        }
+
+        @Override
+        default Partitioning partitioning() {
+            return Partitioning.AUTO;
         }
 
         static @Nullable String validateHubProperty(String input) {
