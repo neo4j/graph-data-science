@@ -30,6 +30,7 @@ import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableNodes;
@@ -63,7 +64,7 @@ public final class GraphImporter {
     private final List<String> inverseIndexedRelationshipTypes;
     private final LazyIdMapBuilder idMapBuilder;
 
-    private final boolean canWriteToDatabase;
+    private final WriteMode writeMode;
 
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
@@ -73,13 +74,13 @@ public final class GraphImporter {
         List<String> undirectedRelationshipTypes,
         List<String> inverseIndexedRelationshipTypes,
         LazyIdMapBuilder idMapBuilder,
-        boolean canWriteToDatabase
+        WriteMode writeMode
     ) {
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
         this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
         this.idMapBuilder = idMapBuilder;
-        this.canWriteToDatabase = canWriteToDatabase;
+        this.writeMode = writeMode;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
     }
@@ -89,7 +90,7 @@ public final class GraphImporter {
         String username,
         DatabaseId databaseId,
         AnyValue configMap,
-        boolean canWriteToDatabase,
+        WriteMode writeMode,
         PropertyState propertyState
     ) {
 
@@ -109,7 +110,7 @@ public final class GraphImporter {
             config.undirectedRelationshipTypes(),
             config.inverseIndexedRelationshipTypes(),
             idMapBuilder,
-            canWriteToDatabase
+            writeMode
         );
     }
 
@@ -186,11 +187,13 @@ public final class GraphImporter {
 
         this.idMapBuilder.prepareForFlush();
 
-        var canWriteToDatabase = this.canWriteToDatabase && !hasSeenArbitraryId;
+        var writeMode = hasSeenArbitraryId
+            ? WriteMode.NONE
+            : this.writeMode;
 
         var graphStoreBuilder = new GraphStoreBuilder()
             .concurrency(this.config.readConcurrency())
-            .capabilities(ImmutableStaticCapabilities.of(canWriteToDatabase))
+            .capabilities(ImmutableStaticCapabilities.of(writeMode))
             .databaseId(databaseId);
 
         var valueMapper = buildNodesWithProperties(graphStoreBuilder);

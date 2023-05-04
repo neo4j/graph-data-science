@@ -21,5 +21,19 @@ package org.neo4j.gds.core.loading;
 
 public interface Capabilities {
 
-    boolean canWriteToDatabase();
+    WriteMode writeMode();
+
+    default boolean canWriteToDatabase() {
+        return writeMode() == WriteMode.DATABASE;
+    }
+
+    default boolean canWriteToRemoteDatabase() {
+        return writeMode() == WriteMode.REMOTE;
+    }
+
+    enum WriteMode {
+        DATABASE,
+        REMOTE,
+        NONE
+    }
 }

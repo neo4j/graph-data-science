@@ -33,6 +33,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.values.storable.NumberType;
 
@@ -97,7 +98,7 @@ public final class CSRGraphStoreUtil {
         return new GraphStoreBuilder()
             .databaseId(databaseId)
             // TODO: is it correct that we only use this for generated graphs?
-            .capabilities(ImmutableStaticCapabilities.of(false))
+            .capabilities(ImmutableStaticCapabilities.of(WriteMode.DATABASE))
             .schema(schema)
             .nodes(ImmutableNodes.of(schema.nodeSchema(), graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)

@@ -21,6 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
@@ -35,7 +36,7 @@ class GraphAggregatorTest {
         var graphName = "graph";
         var databaseId = DatabaseId.random();
 
-        var aggregator = new GraphAggregator(databaseId, userName, true);
+        var aggregator = new GraphAggregator(databaseId, userName, WriteMode.DATABASE);
 
         long source = 1L << 50;
         long target = (1L << 50) + 1;

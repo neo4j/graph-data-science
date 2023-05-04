@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.token.TokenHolders;
@@ -57,7 +58,7 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     @Override
     public Capabilities capabilities() {
-        return ImmutableStaticCapabilities.builder().from(super.capabilities()).canWriteToDatabase(false).build();
+        return ImmutableStaticCapabilities.builder().from(super.capabilities()).writeMode(WriteMode.NONE).build();
     }
 
     @Override
