@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.impl.block.factory.Functions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -39,6 +40,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -206,6 +208,30 @@ class PartitionUtilsTest {
         }
     }
 
+    @Disabled("this underlines the current problem of our partitioning")
+    @Test
+    void testDegreePartitionWithMiddleHighDegreeNodes() {
+        var nodeCount = 5;
+        var degrees = new int[] { 1, 1, 10, 3, 1 };
+        var degreesPerPartition = 3;
+
+        var nodes = LongStream.range(0, nodeCount).iterator();
+
+        List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
+            nodes,
+            idx -> degrees[(int) idx],
+            degreesPerPartition,
+            Function.identity()
+        );
+
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 2, 2),
+            DegreePartition.of(2, 1, 10),
+            DegreePartition.of(3, 1, 3),
+            DegreePartition.of(4, 1, 1)
+        );
+    }
+
     @Test
     void testDegreePartitioningWithBatchSize() {
         Graph graph = fromGdl(
@@ -216,11 +242,12 @@ class PartitionUtilsTest {
         );
 
         var partitions = PartitionUtils.degreePartitionWithBatchSize(graph, 2, Function.identity());
-        assertEquals(2, partitions.size());
-        assertEquals(0, partitions.get(0).startNode());
-        assertEquals(2, partitions.get(0).nodeCount());
-        assertEquals(2, partitions.get(1).startNode());
-        assertEquals(1, partitions.get(1).nodeCount());
+
+        // FIXME this also shows a problematic case
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 2, 4),
+            DegreePartition.of(2, 1, 0)
+        );
     }
 
     @Test
@@ -246,17 +273,11 @@ class PartitionUtilsTest {
             Optional.of(9L)
         );
 
-        assertEquals(3, partitions.size());
-
-        assertEquals(0, partitions.get(0).startNode());
-        assertEquals(2, partitions.get(0).nodeCount());
-
-        assertEquals(2, partitions.get(1).startNode());
-        assertEquals(1, partitions.get(1).nodeCount());
-
-        assertEquals(3, partitions.get(2).startNode());
-        assertEquals(2, partitions.get(2).nodeCount());
-
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 2, 7),
+            DegreePartition.of(2, 1, 6),
+            DegreePartition.of(3, 2, 2)
+        );
     }
 
     @Test
@@ -282,17 +303,11 @@ class PartitionUtilsTest {
             Optional.empty()
         );
 
-        assertEquals(3, partitions.size());
-
-        assertEquals(0, partitions.get(0).startNode());
-        assertEquals(2, partitions.get(0).nodeCount());
-
-        assertEquals(2, partitions.get(1).startNode());
-        assertEquals(1, partitions.get(1).nodeCount());
-
-        assertEquals(3, partitions.get(2).startNode());
-        assertEquals(2, partitions.get(2).nodeCount());
-
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 2, 7),
+            DegreePartition.of(2, 1, 6),
+            DegreePartition.of(3, 2, 2)
+        );
     }
 
     @Test
@@ -310,9 +325,8 @@ class PartitionUtilsTest {
         var partitions = PartitionUtils.degreePartitionWithBatchSize(
             new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph::degree, 2, Function.identity()
         );
-        assertEquals(1, partitions.size());
-        assertEquals(0, partitions.get(0).startNode());
-        assertEquals(3, partitions.get(0).nodeCount());
+
+        assertThat(partitions).containsExactly(DegreePartition.of(0, 3, 2));
     }
 
     @Test

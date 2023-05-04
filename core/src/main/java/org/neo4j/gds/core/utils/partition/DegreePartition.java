@@ -51,4 +51,13 @@ public class DegreePartition extends Partition {
     public int hashCode() {
         return Objects.hash(super.hashCode(), totalDegree);
     }
+
+    @Override
+    public String toString() {
+        return "DegreePartition{" +
+            "start:" + this.startNode() +
+            ", length:" + this.nodeCount() +
+            ", totalDegree=" + totalDegree +
+            '}';
+    }
 }
