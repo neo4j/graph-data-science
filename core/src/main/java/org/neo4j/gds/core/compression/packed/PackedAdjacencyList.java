@@ -100,6 +100,7 @@ public class PackedAdjacencyList implements AdjacencyList {
 
         var memoryInfoBuilder = ImmutableMemoryInfo
             .builder()
+            .pages(this.pages.length)
             .bytesOffHeap(bytesOffHeap);
 
         var bytesOnHeap = MemoryUsage.sizeOf(this);

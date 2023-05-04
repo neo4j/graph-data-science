@@ -187,7 +187,7 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
 
     @Override
     public MemoryInfo memoryInfo() {
-        var memoryInfoBuilder = ImmutableMemoryInfo.builder();
+        var memoryInfoBuilder = ImmutableMemoryInfo.builder().pages(this.pages.length);
         var onHeapBytes = MemoryUsage.sizeOf(this);
         if (onHeapBytes >= 0) {
             memoryInfoBuilder.bytesOnHeap(onHeapBytes);

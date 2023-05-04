@@ -149,6 +149,8 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     @Override
     public MemoryInfo memoryInfo() {
         var memoryInfoBuilder = ImmutableMemoryInfo.builder();
+        var memoryInfoBuilder = ImmutableMemoryInfo.builder()
+            .pages(this.pages.length)
         var onHeapBytes = MemoryUsage.sizeOf(this);
         if (onHeapBytes >= 0) {
             memoryInfoBuilder.bytesOnHeap(onHeapBytes);

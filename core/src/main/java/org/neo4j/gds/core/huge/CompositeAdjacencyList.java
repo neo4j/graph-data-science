@@ -154,6 +154,11 @@ public final class CompositeAdjacencyList implements AdjacencyList {
     public MemoryInfo memoryInfo() {
         var memoryInfo = this.adjacencyLists.stream().map(AdjacencyList::memoryInfo).collect(Collectors.toList());
 
+        var pages = memoryInfo
+            .stream()
+            .mapToLong(MemoryInfo::pages)
+            .sum();
+
         var bytesOnHeap = memoryInfo
             .stream()
             .map(MemoryInfo::bytesOnHeap)
@@ -168,7 +173,7 @@ public final class CompositeAdjacencyList implements AdjacencyList {
             .mapToLong(OptionalLong::getAsLong)
             .reduce(Long::sum);
 
-        return ImmutableMemoryInfo.builder().bytesOnHeap(bytesOnHeap).bytesOffHeap(bytesOffHeap).build();
+        return ImmutableMemoryInfo.builder().pages(pages).bytesOnHeap(bytesOnHeap).bytesOffHeap(bytesOffHeap).build();
     }
 
 }

@@ -181,6 +181,7 @@ public class GraphMemoryUsageProc extends CatalogProc {
                 unionGraph.relationshipTopologies().forEach((relationshipType, adjacency) -> {
                     var memoryInfo = adjacency.adjacencyList().memoryInfo();
                     adjacencyListDetails.put(relationshipType.name(), Map.of(
+                        "pages", memoryInfo.pages(),
                         "bytesTotal", memoryInfo.bytesTotal().orElse(0),
                         "bytesOnHeap", memoryInfo.bytesOnHeap().orElse(0),
                         "bytesOffHeap", memoryInfo.bytesOffHeap().orElse(0)

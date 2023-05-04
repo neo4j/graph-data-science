@@ -132,7 +132,7 @@ public interface AdjacencyList {
     @ValueClass
     interface MemoryInfo {
 
-        MemoryInfo EMPTY = ImmutableMemoryInfo.builder().build();
+        MemoryInfo EMPTY = ImmutableMemoryInfo.builder().pages(0).build();
 
         /**
          * Returns the total number of bytes occupied by this adjacency list,
@@ -145,6 +145,11 @@ public interface AdjacencyList {
                 .mapToLong(OptionalLong::getAsLong)
                 .reduce(Long::sum);
         }
+
+        /**
+         * The number of pages this adjacency list occupies.
+         */
+        long pages();
 
         /**
          * Number of bytes this adjacency list occupies on heap.
