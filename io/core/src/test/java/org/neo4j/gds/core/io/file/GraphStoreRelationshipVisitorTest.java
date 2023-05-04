@@ -166,7 +166,7 @@ class GraphStoreRelationshipVisitorTest {
 
         return new GraphStoreBuilder()
             .schema(MutableGraphSchema.from(expectedGraph.schema()))
-            .capabilities(ImmutableStaticCapabilities.of(WriteMode.DATABASE))
+            .capabilities(ImmutableStaticCapabilities.of(WriteMode.LOCAL))
             .nodes(nodes)
             .relationshipImportResult(actualRelationships)
             .databaseId(DatabaseId.random())

@@ -36,7 +36,7 @@ class GraphAggregatorTest {
         var graphName = "graph";
         var databaseId = DatabaseId.random();
 
-        var aggregator = new GraphAggregator(databaseId, userName, WriteMode.DATABASE);
+        var aggregator = new GraphAggregator(databaseId, userName, WriteMode.LOCAL);
 
         long source = 1L << 50;
         long target = (1L << 50) + 1;

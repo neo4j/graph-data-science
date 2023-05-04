@@ -33,7 +33,7 @@ class CsvGraphCapabilitiesWriterTest extends CsvVisitorTest {
     @Test
     void shouldExportGraphCapabilities() throws IOException {
         var capabilities = ImmutableStaticCapabilities.builder()
-            .writeMode(WriteMode.DATABASE)
+            .writeMode(WriteMode.LOCAL)
             .build();
 
         var graphCapabilitiesWriter = new CsvGraphCapabilitiesWriter(tempDir);
@@ -44,7 +44,7 @@ class CsvGraphCapabilitiesWriterTest extends CsvVisitorTest {
             GRAPH_CAPABILITIES_FILE_NAME,
             List.of(
                 defaultHeaderColumns(),
-                List.of(WriteMode.DATABASE.name())
+                List.of(WriteMode.LOCAL.name())
             )
         );
     }

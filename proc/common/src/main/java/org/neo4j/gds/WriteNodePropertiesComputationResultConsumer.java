@@ -149,7 +149,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
         if (writeMode == WriteMode.REMOTE && !hasArrowConnectionInfo) {
             throw new IllegalArgumentException("Missing arrow connection information");
         }
-        if (writeMode == WriteMode.DATABASE && hasArrowConnectionInfo) {
+        if (writeMode == WriteMode.LOCAL && hasArrowConnectionInfo) {
             throw new IllegalArgumentException(
                 "Arrow connection info was given although the write operation is targeting a local database");
         }
@@ -180,7 +180,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
 
     private static PropertyState expectedPropertyStateForWriteMode(WriteMode writeMode) {
         switch (writeMode) {
-            case DATABASE:
+            case LOCAL:
                 return PropertyState.PERSISTENT;
             case REMOTE:
                 return PropertyState.REMOTE;

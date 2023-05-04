@@ -28,7 +28,7 @@ public interface StaticCapabilities extends Capabilities {
     @Value.Default
     @Override
     default WriteMode writeMode() {
-        return WriteMode.DATABASE;
+        return WriteMode.LOCAL;
     }
 
     @Value.Lazy

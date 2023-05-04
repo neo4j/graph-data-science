@@ -103,10 +103,10 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
     void shouldThrowWhenWriteModeDoesNotMatchPropertyState() {
         var config = ImmutableTestWriteConfig.builder().writeProperty("writeProp").build();
 
-        assertThatThrownBy(() -> executeWrite(config, PropertyState.TRANSIENT, WriteMode.DATABASE))
+        assertThatThrownBy(() -> executeWrite(config, PropertyState.TRANSIENT, WriteMode.LOCAL))
             .hasMessageContaining("propertyKey=foo, propertyState=TRANSIENT");
 
-        assertThatThrownBy(() -> executeWrite(config, PropertyState.REMOTE, WriteMode.DATABASE))
+        assertThatThrownBy(() -> executeWrite(config, PropertyState.REMOTE, WriteMode.LOCAL))
             .hasMessageContaining("propertyKey=foo, propertyState=REMOTE");
     }
 
@@ -125,7 +125,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
             .arrowConnectionInfo(ImmutableArrowConnectionInfo.of("localhost", 1337, "token"))
             .build();
 
-        assertThatThrownBy(() -> executeWrite(config, PropertyState.PERSISTENT, WriteMode.DATABASE))
+        assertThatThrownBy(() -> executeWrite(config, PropertyState.PERSISTENT, WriteMode.LOCAL))
             .hasMessageContaining("write operation is targeting a local database");
     }
 

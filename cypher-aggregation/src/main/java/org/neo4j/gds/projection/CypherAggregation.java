@@ -96,7 +96,7 @@ public class CypherAggregation implements CompatUserAggregationFunction {
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
         var writeMode = runsOnCompositeDatabase
             ? WriteMode.NONE
-            : WriteMode.DATABASE;
+            : WriteMode.LOCAL;
 
         return new GraphAggregator(
             DatabaseId.of(databaseService),

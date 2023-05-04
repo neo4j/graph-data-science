@@ -121,7 +121,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         long estimatedNumberOfRelProperties
     ) {
         // TODO: need to pass capabilities from outside?
-        super(graphProjectConfig, ImmutableStaticCapabilities.of(Capabilities.WriteMode.DATABASE), loadingContext, graphDimensions);
+        super(graphProjectConfig, ImmutableStaticCapabilities.of(Capabilities.WriteMode.LOCAL), loadingContext, graphDimensions);
 
         this.cypherConfig = graphProjectConfig;
         this.numberOfNodeProperties = estimatedNumberOfNodeProperties;
