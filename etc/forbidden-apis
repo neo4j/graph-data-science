@@ -18,5 +18,3 @@ java.util.ServiceLoader#load(java.lang.Class) @ Must pass explicit class loader 
 
 org.neo4j.kernel.api.procedure.CallableProcedure @ Implement org.neo4j.gds.compat.CompatCallableProcedure instead and call Neo4jProxy.callableProcedure(compat).
 org.neo4j.kernel.api.procedure.CallableUserAggregationFunction @ Implement org.neo4j.gds.compat.CompatUserAggregationFunction instead and call Neo4jProxy.callableUserAggregationFunction(compat).
-
-com.neo4j.dbms.api.EnterpriseDatabaseManagementServiceBuilder @ Use EnterpriseDbCreator instead.
