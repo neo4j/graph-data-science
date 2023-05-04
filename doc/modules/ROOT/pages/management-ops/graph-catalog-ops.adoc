@@ -72,12 +72,12 @@ xref:management-ops/projections/graph-generation.adoc[Randomised graphs can be g
 
 == Modifying the graph catalog
 
-.Graph catalog modification operations:
+.Graph catalog update operations:
 [opts=header,cols="1m,1"]
 |===
 | Name                                     | Description
 | xref:graph-catalog-node-ops.adoc[gds.alpha.graph.nodeLabel.mutate] | Computes and adds a new node label to the graph.
-| xref:graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.toUndirected] | Convert one relationship type of the graph from directed to undirected.
+| xref:graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.toUndirected] | Converts relationship of a given type in a graph from directed to undirected.
 |===
 
 
