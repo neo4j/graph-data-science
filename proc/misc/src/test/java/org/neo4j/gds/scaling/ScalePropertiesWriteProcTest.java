@@ -68,7 +68,7 @@ class ScalePropertiesWriteProcTest extends BaseProcTest {
     void write() {
         String query = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .writeMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "stdscore")
@@ -106,7 +106,7 @@ class ScalePropertiesWriteProcTest extends BaseProcTest {
     void doesNotAllowL1OrL2() {
         var queryL1 = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .writeMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "L1Norm")
@@ -114,7 +114,7 @@ class ScalePropertiesWriteProcTest extends BaseProcTest {
             .yields();
         var queryL2 = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .writeMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "L2Norm")
@@ -130,7 +130,7 @@ class ScalePropertiesWriteProcTest extends BaseProcTest {
     void estimate() {
         var query = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .writeEstimation()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "stdscore")

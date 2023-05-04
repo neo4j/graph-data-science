@@ -114,7 +114,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Scale Properties in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stream(
+CALL gds.scaleProperties.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -146,7 +146,7 @@ include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 .Run Scale Properties in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.mutate(
+CALL gds.scaleProperties.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -188,7 +188,7 @@ include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 .Run Scale Properties in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stats(
+CALL gds.scaleProperties.stats(
   graphName: String,
   configuration: Map
 )
@@ -227,7 +227,7 @@ include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 .Run Scale properties in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.write(
+CALL gds.scaleProperties.write(
   graphName: String,
   configuration: Map
 )
@@ -337,7 +337,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stream.estimate('myGraph', {
+CALL gds.scaleProperties.stream.estimate('myGraph', {
   nodeProperties: ['buildYear', 'storyCapacity'],
   scaler: 'MinMax'
 })
@@ -364,7 +364,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stream('myGraph', {
+CALL gds.scaleProperties.stream('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'MinMax'
 }) YIELD nodeId, scaledProperty
@@ -409,7 +409,7 @@ The output is a list property which we will call `hotelFeatures`, imagining that
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.mutate('myGraph', {
+CALL gds.scaleProperties.mutate('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'Mean',
   mutateProperty: 'hotelFeatures'
@@ -439,7 +439,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 .The following will run the algorithm in `stats` mode using the "Center" scaler:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stats('myGraph', {
+CALL gds.scaleProperties.stats('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'center'
 }) YIELD scalerStatistics
@@ -467,7 +467,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.write('myGraph', {
+CALL gds.scaleProperties.write('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'stdscore',
   writeProperty: 'hotelStdScore'
@@ -502,7 +502,7 @@ Additionally, we will include the `avgReview` property in our feature vector.
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stream('myGraph', {
+CALL gds.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview', 'storyCapacity'],
   scaler: 'StdScore'
 }) YIELD nodeId, scaledProperty
@@ -565,7 +565,7 @@ We will use `5.12`, as this will make the smallest scaled value zero.
 .The following will run the algorithm with a custom offset for the log scaler:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.scaleProperties.stream('myGraph', {
+CALL gds.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview'],
   scaler: {type: 'Log', offset: 5.12}
 }) YIELD nodeId, scaledProperty

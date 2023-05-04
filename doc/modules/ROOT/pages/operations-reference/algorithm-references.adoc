@@ -249,14 +249,14 @@
 | `gds.beta.influenceMaximization.celf.write`
 | `gds.beta.influenceMaximization.celf.write.estimate`
 .8+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
-| `gds.beta.scaleProperties.mutate`
-| `gds.beta.scaleProperties.mutate.estimate`
-| `gds.beta.scaleProperties.stream`
-| `gds.beta.scaleProperties.stream.estimate`
-| `gds.beta.scaleProperties.stats`
-| `gds.beta.scaleProperties.stats.estimate`
-| `gds.beta.scaleProperties.write`
-| `gds.beta.scaleProperties.write.estimate`
+| `gds.scaleProperties.mutate`
+| `gds.scaleProperties.mutate.estimate`
+| `gds.scaleProperties.stream`
+| `gds.scaleProperties.stream.estimate`
+| `gds.scaleProperties.stats`
+| `gds.scaleProperties.stats.estimate`
+| `gds.scaleProperties.write`
+| `gds.scaleProperties.write.estimate`
 
 |===
 

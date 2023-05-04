@@ -60,7 +60,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     void stream() {
         var query = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "Mean")
@@ -80,7 +80,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     void estimate() {
         var query = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .streamEstimation()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "Mean")
@@ -102,7 +102,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
 
     @Test
     void streamLogWithOffset() {
-        var query = "CALL gds.beta.scaleProperties.stream('g', {" +
+        var query = "CALL gds.scaleProperties.stream('g', {" +
                     "scaler: {type: 'log', offset: 10 }," +
                     "nodeProperties: 'myProp'}) " +
                     "yield nodeId, scaledProperty " +
@@ -122,14 +122,14 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     void betaDoesNotAllowL1OrL2() {
         var queryL1 = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "L1Norm")
             .yields();
         var queryL2 = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "L2Norm")
