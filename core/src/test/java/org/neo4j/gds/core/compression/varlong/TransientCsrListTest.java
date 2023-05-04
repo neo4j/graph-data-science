@@ -210,7 +210,7 @@ class TransientCsrListTest {
         });
     }
 
-    @ParameterizedTest
+    @ParameterizedTest()
     @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
     void advanceByAcrossBlocks(TestMethodRunner runner) {
         runner.run(() -> {
@@ -224,6 +224,25 @@ class TransientCsrListTest {
             assertThat(adjacencyCursor.nextVLong()).isEqualTo(CHUNK_SIZE + 2);
 
             adjacencyCursor = adjacencyCursor(3 * CHUNK_SIZE);
+            assertThat(adjacencyCursor.advanceBy(2 * CHUNK_SIZE + CHUNK_SIZE / 2)).isEqualTo(2 * CHUNK_SIZE + CHUNK_SIZE / 2);
+
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void advanceByAcrossBlocksWithTail(TestMethodRunner runner) {
+        runner.run(() -> {
+            var adjacencyCursor = adjacencyCursor(CHUNK_SIZE + CHUNK_SIZE / 2);
+            assertThat(adjacencyCursor.advanceBy(CHUNK_SIZE)).isEqualTo(CHUNK_SIZE);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(CHUNK_SIZE + 1);
+
+            adjacencyCursor = adjacencyCursor(CHUNK_SIZE + CHUNK_SIZE / 3);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(0);
+            assertThat(adjacencyCursor.advanceBy(CHUNK_SIZE)).isEqualTo(CHUNK_SIZE + 1);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(CHUNK_SIZE + 2);
+
+            adjacencyCursor = adjacencyCursor(3 * CHUNK_SIZE - 2);
             assertThat(adjacencyCursor.advanceBy(2 * CHUNK_SIZE + CHUNK_SIZE / 2)).isEqualTo(2 * CHUNK_SIZE + CHUNK_SIZE / 2);
 
         });

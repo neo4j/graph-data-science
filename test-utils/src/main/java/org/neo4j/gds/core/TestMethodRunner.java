@@ -23,21 +23,54 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.utils.CheckedRunnable;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.stream.Stream;
 
-public interface TestMethodRunner {
-    <E extends Exception> void run(CheckedRunnable<E> code) throws E;
+public final class TestMethodRunner {
+
+    public static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     @TestOnly
-    static Stream<TestMethodRunner> adjacencyCompressions() {
+    public static Stream<TestMethodRunner> adjacencyCompressions() {
         return Stream.of(
-            TestMethodRunner::runCompressedUnordered,
-            TestMethodRunner::runCompressedOrdered,
-            TestMethodRunner::runUncompressedUnordered,
-            TestMethodRunner::runUncompressedOrdered,
-            TestMethodRunner::runPackedUnordered,
-            TestMethodRunner::runPackedOrdered
+            new TestMethodRunner("runCompressedUnordered"),
+            new TestMethodRunner("runCompressedOrdered"),
+            new TestMethodRunner("runUncompressedUnordered"),
+            new TestMethodRunner("runUncompressedOrdered"),
+            new TestMethodRunner("runPackedUnordered"),
+            new TestMethodRunner("runPackedOrdered")
         );
+    }
+
+    private final String methodName;
+    private final MethodHandle methodHandle;
+
+    public TestMethodRunner(String methodName) {
+        this.methodName = methodName;
+        try {
+            this.methodHandle = LOOKUP.findStatic(
+                TestMethodRunner.class,
+                this.methodName,
+                MethodType.methodType(void.class, CheckedRunnable.class)
+            );
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new LinkageError("boop", e);
+        }
+    }
+
+    public <E extends Exception> void run(CheckedRunnable<E> code) throws E {
+        try {
+            this.methodHandle.invoke(code);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.methodName;
     }
 
     @TestOnly
