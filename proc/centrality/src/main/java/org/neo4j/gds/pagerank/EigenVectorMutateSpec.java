@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -34,7 +35,7 @@ public class EigenVectorMutateSpec extends PageRankMutateSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
     @Override

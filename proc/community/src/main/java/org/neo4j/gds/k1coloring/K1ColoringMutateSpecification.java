@@ -48,7 +48,7 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringMutateConfig> algorithmFactory() {
+    public K1ColoringFactory<K1ColoringMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new K1ColoringFactory<>();
     }
 

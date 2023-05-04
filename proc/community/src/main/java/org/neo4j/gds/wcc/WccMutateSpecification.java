@@ -50,7 +50,7 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
     }
 
     @Override
-    public WccAlgorithmFactory<WccMutateConfig> algorithmFactory() {
+    public WccAlgorithmFactory<WccMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new WccAlgorithmFactory<>();
     }
 

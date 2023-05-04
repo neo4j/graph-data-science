@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -48,7 +49,7 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
     }
 
     @Override
-    public SccAlgorithmFactory<SccWriteConfig> algorithmFactory() {
+    public SccAlgorithmFactory<SccWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SccAlgorithmFactory<>();
     }
 

@@ -32,6 +32,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.pregel.proc.PregelStreamProc;
@@ -83,7 +84,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
     }
 
     @Override
-    public GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory(ExecutionContext executionContext) {
         return new GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,

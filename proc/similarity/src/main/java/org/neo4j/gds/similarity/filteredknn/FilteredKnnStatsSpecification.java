@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -44,7 +45,7 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
     }
 
     @Override
-    public FilteredKnnFactory<FilteredKnnStatsConfig> algorithmFactory() {
+    public FilteredKnnFactory<FilteredKnnStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredKnnFactory<>();
     }
 

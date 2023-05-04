@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -39,7 +40,7 @@ public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
     }
 
     @Override
-    public LeidenAlgorithmFactory<LeidenStatsConfig> algorithmFactory() {
+    public LeidenAlgorithmFactory<LeidenStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LeidenAlgorithmFactory<>();
     }
 

@@ -46,7 +46,7 @@ public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPr
     }
 
     @Override
-    public LabelPropagationFactory<LabelPropagationWriteConfig> algorithmFactory() {
+    public LabelPropagationFactory<LabelPropagationWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LabelPropagationFactory<>();
     }
 

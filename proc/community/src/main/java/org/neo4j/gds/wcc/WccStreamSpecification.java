@@ -25,6 +25,7 @@ import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -43,7 +44,7 @@ public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
     }
 
     @Override
-    public WccAlgorithmFactory<WccStreamConfig> algorithmFactory() {
+    public WccAlgorithmFactory<WccStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new WccAlgorithmFactory<>();
     }
 

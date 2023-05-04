@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -33,7 +34,7 @@ public class ArticleRankWriteSpec extends  PageRankWriteSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankWriteConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 

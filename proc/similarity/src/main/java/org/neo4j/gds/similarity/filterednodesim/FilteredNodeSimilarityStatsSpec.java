@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.filterednodesim;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -54,7 +55,7 @@ public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
     }
 
     @Override
-    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityStatsConfig> algorithmFactory() {
+    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredNodeSimilarityFactory<>();
     }
 

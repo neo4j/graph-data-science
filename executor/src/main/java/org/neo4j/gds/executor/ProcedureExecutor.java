@@ -76,7 +76,7 @@ public class ProcedureExecutor<
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
-        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory());
+        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory(executionContext));
 
         GraphStore graphStore;
         Graph graph;
@@ -147,7 +147,7 @@ public class ProcedureExecutor<
         CONFIG config
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.terminationMonitor());
-        ALGO algorithm = algoSpec.algorithmFactory()
+        ALGO algorithm = algoSpec.algorithmFactory(executionContext)
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
                 public ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory) {

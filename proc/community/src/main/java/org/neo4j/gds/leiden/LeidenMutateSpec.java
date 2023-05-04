@@ -47,7 +47,7 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
     }
 
     @Override
-    public LeidenAlgorithmFactory<LeidenMutateConfig> algorithmFactory() {
+    public LeidenAlgorithmFactory<LeidenMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LeidenAlgorithmFactory<>();
     }
 

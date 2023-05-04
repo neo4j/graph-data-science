@@ -46,7 +46,7 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     }
 
     @Override
-    public CELFAlgorithmFactory<InfluenceMaximizationMutateConfig> algorithmFactory() {
+    public CELFAlgorithmFactory<InfluenceMaximizationMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new CELFAlgorithmFactory<>();
     }
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -40,7 +41,7 @@ public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, Page
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankStreamConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>();
     }
 

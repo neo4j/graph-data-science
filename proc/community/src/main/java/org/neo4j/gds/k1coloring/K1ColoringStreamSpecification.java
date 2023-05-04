@@ -47,7 +47,7 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringStreamConfig> algorithmFactory() {
+    public K1ColoringFactory<K1ColoringStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new K1ColoringFactory<>();
     }
 

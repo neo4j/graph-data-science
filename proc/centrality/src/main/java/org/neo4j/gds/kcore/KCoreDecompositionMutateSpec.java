@@ -44,7 +44,7 @@ public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecompos
     }
 
     @Override
-    public KCoreDecompositionAlgorithmFactory<KCoreDecompositionMutateConfig> algorithmFactory() {
+    public KCoreDecompositionAlgorithmFactory<KCoreDecompositionMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KCoreDecompositionAlgorithmFactory<>();
     }
 

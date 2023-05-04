@@ -44,7 +44,7 @@ public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankWriteConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>();
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
@@ -41,16 +40,14 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 @GdsCallable(name = "gds.beta.graphSage.stream", description = GRAPH_SAGE_DESCRIPTION, executionMode = STREAM)
 public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<StreamResult>, GraphSageAlgorithmFactory<GraphSageStreamConfig>> {
 
-    private ModelCatalog modelCatalog;
-
     @Override
     public String name() {
         return "GraphSageStream";
     }
 
     @Override
-    public GraphSageAlgorithmFactory<GraphSageStreamConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+    public GraphSageAlgorithmFactory<GraphSageStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new GraphSageAlgorithmFactory<>(executionContext.modelCatalog());
     }
 
     @Override
@@ -79,14 +76,9 @@ public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageRe
         );
     }
 
-    @Override
-    public GraphSageStreamSpec withModelCatalog(ModelCatalog modelCatalog) {
-        this.modelCatalog = modelCatalog;
-        return this;
-    }
 
     @Override
     public ValidationConfiguration<GraphSageStreamConfig> validationConfig(ExecutionContext executionContext) {
-        return new GraphSageConfigurationValidation<>(modelCatalog);
+        return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
     }
 }

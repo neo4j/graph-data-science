@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
@@ -43,7 +44,7 @@ public class ShortestPathYensWriteSpec implements AlgorithmSpec<Yens, PathFindin
     }
 
     @Override
-    public YensFactory<ShortestPathYensWriteConfig> algorithmFactory() {
+    public YensFactory<ShortestPathYensWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new YensFactory<>();
     }
 

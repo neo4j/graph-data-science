@@ -48,7 +48,7 @@ public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<
     }
 
     @Override
-    public ModularityOptimizationFactory<ModularityOptimizationMutateConfig> algorithmFactory() {
+    public ModularityOptimizationFactory<ModularityOptimizationMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ModularityOptimizationFactory<>();
     }
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.MutateResult;
@@ -43,7 +44,9 @@ public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstr
     }
 
     @Override
-    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
+    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
         return new DijkstraFactory.AllShortestPathsDijkstraFactory<>();
     }
 

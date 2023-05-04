@@ -123,7 +123,7 @@ public class MemoryEstimationExecutor<
         MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
             graphDims,
             maybeGraphEstimation,
-            algoSpec.algorithmFactory(),
+            algoSpec.algorithmFactory(executionContext),
             algoConfig
         );
 

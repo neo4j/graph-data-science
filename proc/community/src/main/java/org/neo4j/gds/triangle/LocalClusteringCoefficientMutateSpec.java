@@ -43,7 +43,7 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
     }
 
     @Override
-    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientMutateConfig> algorithmFactory() {
+    public LocalClusteringCoefficientFactory<LocalClusteringCoefficientMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LocalClusteringCoefficientFactory<>();
     }
 

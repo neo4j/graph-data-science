@@ -24,7 +24,9 @@ import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -34,6 +36,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -54,6 +57,9 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipelineTrainProc.NCTrainResult
     > {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")
@@ -76,6 +82,11 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     }
 
     @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(modelCatalog);
+    }
+
+    @Override
     protected NodeClassificationPipelineTrainConfig newConfig(String username, CypherMapWrapper config) {
         return NodeClassificationPipelineTrainConfig.of(username, config);
     }
@@ -85,9 +96,9 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     public GraphStoreAlgorithmFactory<
         NodeClassificationTrainAlgorithm,
         NodeClassificationPipelineTrainConfig
-    > algorithmFactory() {
+    > algorithmFactory(ExecutionContext executionContext) {
         var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
-        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
+        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext, gdsVersion);
     }
 
     @Override

@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.spanningtree.KSpanningTree;
@@ -44,7 +45,7 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
     }
 
     @Override
-    public KSpanningTreeAlgorithmFactory<KSpanningTreeWriteConfig> algorithmFactory() {
+    public KSpanningTreeAlgorithmFactory<KSpanningTreeWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KSpanningTreeAlgorithmFactory<>();
     }
 

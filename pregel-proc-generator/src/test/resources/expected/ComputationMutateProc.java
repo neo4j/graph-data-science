@@ -88,7 +88,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
     }
 
     @Override
-    public GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory(ExecutionContext executionContext) {
         return new GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,

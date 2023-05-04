@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -33,7 +34,7 @@ public class ArticleRankStreamSpec extends  PageRankStreamSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankStreamConfig> algorithmFactory() {
+    public PageRankAlgorithmFactory<PageRankStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 

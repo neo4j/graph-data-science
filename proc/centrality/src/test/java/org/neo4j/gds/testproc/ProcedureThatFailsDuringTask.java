@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.test.config.DummyConfig;
 import org.neo4j.gds.test.config.DummyConfigImpl;
 import org.neo4j.procedure.Mode;
@@ -54,7 +55,7 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
     }
 
     @Override
-    public GraphAlgorithmFactory<FailingAlgorithm, DummyConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<FailingAlgorithm, DummyConfig> algorithmFactory(ExecutionContext executionContext) {
         return new GraphAlgorithmFactory<FailingAlgorithm, DummyConfig>() {
             @Override
             public String taskName() {

@@ -48,7 +48,7 @@ public class GraphSageStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            specification(),
+            new GraphSageStreamSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -60,7 +60,7 @@ public class GraphSageStreamProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            specification(),
+            new GraphSageStreamSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
@@ -69,12 +69,6 @@ public class GraphSageStreamProc extends BaseProc {
     @Override
     public ExecutionContext executionContext() {
         return super.executionContext().withModelCatalog(modelCatalog);
-    }
-
-    private GraphSageStreamSpec specification() {
-        return new GraphSageStreamSpec()
-            // TODO: Fix this thing, should obtain the model catalog from the execution context
-            .withModelCatalog(modelCatalog);
     }
 
 }

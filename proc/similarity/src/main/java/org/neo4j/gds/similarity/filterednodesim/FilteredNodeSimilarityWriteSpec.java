@@ -26,6 +26,7 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -55,7 +56,7 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
     }
 
     @Override
-    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig> algorithmFactory() {
+    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredNodeSimilarityFactory<>();
     }
 

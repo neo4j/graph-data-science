@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.randomwalk;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.results.StandardModeResult;
@@ -42,7 +43,7 @@ public class RandomWalkStatsSpec implements AlgorithmSpec<RandomWalk, Stream<lon
     }
 
     @Override
-    public RandomWalkAlgorithmFactory<RandomWalkStatsConfig> algorithmFactory() {
+    public RandomWalkAlgorithmFactory<RandomWalkStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new RandomWalkAlgorithmFactory<>();
     }
 

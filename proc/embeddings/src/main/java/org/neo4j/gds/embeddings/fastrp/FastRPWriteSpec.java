@@ -42,7 +42,7 @@ public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResul
     }
 
     @Override
-    public FastRPFactory<FastRPWriteConfig> algorithmFactory() {
+    public FastRPFactory<FastRPWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FastRPFactory<>();
     }
 

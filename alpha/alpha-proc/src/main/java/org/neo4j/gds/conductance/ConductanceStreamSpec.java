@@ -21,6 +21,7 @@ package org.neo4j.gds.conductance;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.conductance.Conductance;
@@ -43,7 +44,7 @@ public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, Conduct
     }
 
     @Override
-    public ConductanceFactory<ConductanceStreamConfig> algorithmFactory() {
+    public ConductanceFactory<ConductanceStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ConductanceFactory<>();
     }
 

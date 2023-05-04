@@ -28,6 +28,7 @@ import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -46,7 +47,7 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityStreamConfig> algorithmFactory() {
+    public ClosenessCentralityFactory<ClosenessCentralityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ClosenessCentralityFactory<>();
     }
 

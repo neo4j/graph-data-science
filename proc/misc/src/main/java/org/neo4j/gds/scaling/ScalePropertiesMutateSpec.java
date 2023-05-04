@@ -54,7 +54,7 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
     }
 
     @Override
-    public ScalePropertiesFactory<ScalePropertiesMutateConfig> algorithmFactory() {
+    public ScalePropertiesFactory<ScalePropertiesMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ScalePropertiesFactory<>();
     }
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -38,7 +39,7 @@ public class Node2VecStreamSpec  implements AlgorithmSpec<Node2Vec, Node2VecMode
     }
 
     @Override
-    public Node2VecAlgorithmFactory<Node2VecStreamConfig> algorithmFactory() {
+    public Node2VecAlgorithmFactory<Node2VecStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new Node2VecAlgorithmFactory<>();
     }
 

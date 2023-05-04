@@ -41,7 +41,7 @@ public class SplitRelationshipsMutateSpec implements AlgorithmSpec<SplitRelation
     }
 
     @Override
-    public SplitRelationshipsAlgorithmFactory algorithmFactory() {
+    public SplitRelationshipsAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
         return new SplitRelationshipsAlgorithmFactory();
     }
 

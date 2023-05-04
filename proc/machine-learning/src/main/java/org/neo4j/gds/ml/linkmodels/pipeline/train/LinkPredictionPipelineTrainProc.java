@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
@@ -81,9 +82,11 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
         var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
-        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
+        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext, gdsVersion);
     }
 
     @Override

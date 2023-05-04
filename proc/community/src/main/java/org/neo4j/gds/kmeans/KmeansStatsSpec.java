@@ -21,6 +21,7 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -39,7 +40,7 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
     }
 
     @Override
-    public KmeansAlgorithmFactory<KmeansStatsConfig> algorithmFactory() {
+    public KmeansAlgorithmFactory<KmeansStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KmeansAlgorithmFactory<>();
     }
 

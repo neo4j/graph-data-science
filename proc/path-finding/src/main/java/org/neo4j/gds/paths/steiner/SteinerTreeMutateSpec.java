@@ -26,6 +26,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
@@ -47,7 +48,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
     }
 
     @Override
-    public SteinerTreeAlgorithmFactory<SteinerTreeMutateConfig> algorithmFactory() {
+    public SteinerTreeAlgorithmFactory<SteinerTreeMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SteinerTreeAlgorithmFactory<>();
     }
 

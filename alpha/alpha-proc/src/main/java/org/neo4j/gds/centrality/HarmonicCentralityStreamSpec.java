@@ -22,6 +22,7 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
@@ -45,7 +46,7 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
     }
 
     @Override
-    public HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig> algorithmFactory() {
+    public HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new HarmonicCentralityAlgorithmFactory<>();
     }
 

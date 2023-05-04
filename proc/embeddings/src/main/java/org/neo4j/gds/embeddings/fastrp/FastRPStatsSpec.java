@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -37,7 +38,7 @@ public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResul
     }
 
     @Override
-    public FastRPFactory<FastRPStatsConfig> algorithmFactory() {
+    public FastRPFactory<FastRPStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FastRPFactory<>();
     }
 
