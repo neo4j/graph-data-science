@@ -1,3 +1,5 @@
 | hitsIterations            | Integer | n/a     | no       | The number of hits iterations to run. The number of pregel iterations will be equal to `hitsIterations * 4 + 1`
 | authProperty              | String  | "auth"  | yes      | The name that is used for the auth property when using `STREAM`, `MUTATE` or `WRITE` modes.
 | hubProperty               | String  | "hub"   | yes      | The name that is used for the hub property when using `STREAM`, `MUTATE` or `WRITE` modes.
+| partitioning              | String  | "AUTO"  | yes      | The partitioning scheme used to divide the work between threads. Available options are `AUTO`, `RANGE`, `DEGREE`.
+
