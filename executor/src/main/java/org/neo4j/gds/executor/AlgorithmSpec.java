@@ -25,6 +25,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
+import java.util.Map;
+
 public interface AlgorithmSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
@@ -35,6 +37,17 @@ public interface AlgorithmSpec<
     String name();
 
     ALGO_FACTORY algorithmFactory(ExecutionContext executionContext);
+
+    /**
+     * This is used to enhance the user input, mainly when running ML pipelines and the user has provided pre-trained model.
+     *
+     * @param userInput        - user provided configuration
+     * @param executionContext - the execution context provided during a procedure execution
+     * @return an enhanced configuration map
+     */
+    default Map<String, Object> preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
+        return userInput;
+    }
 
     NewConfigFunction<CONFIG> newConfigFunction();
 

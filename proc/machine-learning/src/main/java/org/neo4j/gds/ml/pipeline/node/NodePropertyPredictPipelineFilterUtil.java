@@ -45,12 +45,12 @@ public final class NodePropertyPredictPipelineFilterUtil {
             CustomInfo.class
         );
 
-        var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty() ? trainedModel
-            .trainConfig()
-            .targetNodeLabels() : basePredictConfig.targetNodeLabels();
-        var combinedRelationshipTypes = basePredictConfig.relationshipTypes().isEmpty() ? trainedModel
-            .trainConfig()
-            .relationshipTypes() : basePredictConfig.relationshipTypes();
+        var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty()
+            ? trainedModel.trainConfig().targetNodeLabels()
+            : basePredictConfig.targetNodeLabels();
+        var combinedRelationshipTypes = basePredictConfig.relationshipTypes().isEmpty()
+            ? trainedModel.trainConfig().relationshipTypes() :
+            basePredictConfig.relationshipTypes();
         return ImmutablePredictGraphFilter.builder()
             .nodeLabels(combinedTargetNodeLabels)
             .relationshipTypes(combinedRelationshipTypes)

@@ -19,16 +19,10 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -38,81 +32,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.NodeRegressionStreamResult;
 
-@GdsCallable(name = "gds.alpha.pipeline.nodeRegression.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
-public class NodeRegressionPipelineStreamProc
-    extends StreamProc<
-    NodeRegressionPredictPipelineExecutor,
-    HugeDoubleArray,
-    NodeRegressionStreamResult,
-    NodeRegressionPredictPipelineBaseConfig>
-{
+public class NodeRegressionPipelineStreamProc extends BaseProc {
 
     @Context
     public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
-    public Stream<NodeRegressionStreamResult> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return stream(compute(graphName, configuration));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig> computationResult) {
-        return computationResult.result()
-            .orElseGet(() -> HugeDoubleArray.newArray(0))
-            .asNodeProperties();
-    }
-
-    @Override
-    public AlgorithmFactory<?, NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineBaseConfig> algorithmFactory(
-        ExecutionContext executionContext
-    ) {
-        return new NodeRegressionPredictPipelineAlgorithmFactory<>(executionContext);
+        return new ProcedureExecutor<>(
+            new NodeRegressionPipelineStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Override
     public ExecutionContext executionContext() {
         return super.executionContext().withModelCatalog(internalModelCatalog);
-    }
-
-    @Override
-    protected NodeRegressionPredictPipelineBaseConfig newConfig(String username, CypherMapWrapper config) {
-        return newConfigFunction().apply(username, config);
-    }
-
-    @Override
-    public NewConfigFunction<NodeRegressionPredictPipelineBaseConfig> newConfigFunction() {
-        return new NodeRegressionPredictNewStreamConfigFn(executionContext().modelCatalog());
-    }
-
-    @Override
-    protected NodeRegressionStreamResult streamResult(
-        long originalNodeId,
-        long internalNodeId,
-        NodePropertyValues nodePropertyValues
-    ) {
-        return new NodeRegressionStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
-    }
-
-
-    @SuppressWarnings("unused")
-    public static final class NodeRegressionStreamResult {
-
-        public long nodeId;
-        public double predictedValue;
-
-        public NodeRegressionStreamResult(long nodeId, double predictedValue) {
-            this.nodeId = nodeId;
-            this.predictedValue = predictedValue;
-        }
     }
 }

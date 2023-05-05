@@ -24,12 +24,11 @@ import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public final class PredictMutateResult extends StandardMutateResult {
 
     public final long nodePropertiesWritten;
 
-    PredictMutateResult(
+    private PredictMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,

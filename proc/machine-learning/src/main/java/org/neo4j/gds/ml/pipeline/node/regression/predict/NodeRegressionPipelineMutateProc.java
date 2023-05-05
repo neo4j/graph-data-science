@@ -19,19 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -41,20 +33,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.pipeline.nodeRegression.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class NodeRegressionPipelineMutateProc
-    extends MutatePropertyProc<
-    NodeRegressionPredictPipelineExecutor,
-    HugeDoubleArray,
-    PredictMutateResult,
-    NodeRegressionPredictPipelineMutateConfig> {
+public class NodeRegressionPipelineMutateProc extends BaseProc {
 
     @Context
-    public ModelCatalog internalModelCatalog;
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -63,55 +48,15 @@ public class NodeRegressionPipelineMutateProc
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return mutate(compute(graphName, configuration));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computationResult) {
-        var nodeCount = computationResult.graph().nodeCount();
-        var predictedPropertyValues = computationResult.result().orElseGet(() -> HugeDoubleArray.newArray(0));
-
-        return new DoubleNodePropertyValues() {
-            @Override
-            public long nodeCount() {
-                return nodeCount;
-            }
-
-            @Override
-            public double doubleValue(long nodeId) {
-                return predictedPropertyValues.get(nodeId);
-            }
-        };
+        return new ProcedureExecutor<>(
+            new NodeRegressionPipelineMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Override
     public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(internalModelCatalog);
-    }
-
-    @Override
-    protected AbstractResultBuilder<PredictMutateResult> resultBuilder(
-        ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new PredictMutateResult.Builder();
-    }
-
-    @Override
-    protected NodeRegressionPredictPipelineMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return newConfigFunction().apply(username, config);
-    }
-
-    @Override
-    public NewConfigFunction<NodeRegressionPredictPipelineMutateConfig> newConfigFunction() {
-        return new NodeRegressionPredictNewMutateConfigFn(executionContext().modelCatalog());
-    }
-
-    @Override
-    public GraphStoreAlgorithmFactory<NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineMutateConfig> algorithmFactory(
-        ExecutionContext executionContext
-    ) {
-        return new NodeRegressionPredictPipelineAlgorithmFactory<>(executionContext);
+        return super.executionContext().withModelCatalog(modelCatalog);
     }
 
 }
