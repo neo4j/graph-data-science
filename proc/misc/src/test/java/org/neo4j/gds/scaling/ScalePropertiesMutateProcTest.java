@@ -80,7 +80,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     void mutate() {
         String query = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "max")
@@ -109,7 +109,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     void betaDoesNotAllowL1OrL2() {
         var queryL1 = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "L1Norm")
@@ -117,7 +117,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
             .yields();
         var queryL2 = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "L2Norm")
@@ -188,7 +188,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     void estimate() {
         var query = GdsCypher
             .call("g")
-            .algo("gds.beta.scaleProperties")
+            .algo("gds.scaleProperties")
             .mutateEstimation()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "max")

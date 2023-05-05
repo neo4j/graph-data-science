@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
-@GdsCallable(name = "gds.beta.scaleProperties.stream", aliases = {"gds.alpha.scaleProperties.stream"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.scaleProperties.stream", aliases = {"gds.alpha.scaleProperties.stream"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
 public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamProc.Result>, ScalePropertiesFactory<ScalePropertiesStreamConfig>> {
 
     private boolean allowL1L2Scalers = false;

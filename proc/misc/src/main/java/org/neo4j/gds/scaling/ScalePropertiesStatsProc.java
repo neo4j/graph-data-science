@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesStatsProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.scaleProperties.stats", mode = READ)
+    @Procedure(value = "gds.scaleProperties.stats", mode = READ)
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
@@ -50,7 +50,7 @@ public class ScalePropertiesStatsProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.scaleProperties.stats.estimate", mode = READ)
+    @Procedure(value = "gds.scaleProperties.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

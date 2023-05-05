@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesMutateProc extends BaseProc {
 
-    @Procedure("gds.beta.scaleProperties.mutate")
+    @Procedure("gds.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -50,7 +50,7 @@ public class ScalePropertiesMutateProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.scaleProperties.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.scaleProperties.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
@@ -65,7 +65,7 @@ public class ScalePropertiesMutateProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
-    @Procedure(value = "gds.alpha.scaleProperties.mutate", deprecatedBy = "gds.beta.scaleProperties.mutate")
+    @Procedure(value = "gds.alpha.scaleProperties.mutate", deprecatedBy = "gds.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<MutateResult> alphaMutate(
         @Name(value = "graphName") String graphName,

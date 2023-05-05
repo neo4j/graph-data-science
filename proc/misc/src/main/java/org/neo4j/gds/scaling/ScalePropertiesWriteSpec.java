@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
-@GdsCallable(name = "gds.beta.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
 
     @Override

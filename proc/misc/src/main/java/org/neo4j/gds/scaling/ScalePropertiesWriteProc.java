@@ -45,7 +45,7 @@ public class ScalePropertiesWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.beta.scaleProperties.write", mode = WRITE)
+    @Procedure(value = "gds.scaleProperties.write", mode = WRITE)
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<ScalePropertiesWriteProc.WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -57,7 +57,7 @@ public class ScalePropertiesWriteProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.scaleProperties.write.estimate", mode = READ)
+    @Procedure(value = "gds.scaleProperties.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
