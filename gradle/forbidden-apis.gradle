@@ -8,6 +8,7 @@ if (shouldForbiddenApis) {
             proj.apply plugin: 'de.thetaphi.forbiddenapis'
             proj.forbiddenApis {
                 signaturesFiles += files("$publicDir/etc/forbidden-apis")
+
                 ignoreSignaturesOfMissingClasses = true
                 suppressAnnotations = ["org.neo4j.gds.annotation.SuppressForbidden"]
                 bundledSignatures = ['jdk-system-out']
