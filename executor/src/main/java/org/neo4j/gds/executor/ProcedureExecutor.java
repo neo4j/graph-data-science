@@ -70,6 +70,9 @@ public class ProcedureExecutor<
 
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
+        // This is needed in the case of `pipelines` where they either pick stuff from the user input,
+        // or if there is a `modelName` they read stuff from the model stored in the catalog.
+        configuration = algoSpec.preProcessConfig(configuration, executionContext);
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
         executionContext.algorithmMetaDataSetter().set(config);
