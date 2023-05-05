@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.SetMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 
@@ -30,11 +30,10 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 
-public final class PregelProcessingStep implements BasicAnnotationProcessor.ProcessingStep {
+public final class PregelProcessorStep implements BasicAnnotationProcessor.Step {
 
     private static final Class<PregelProcedure> ANNOTATION_CLASS = PregelProcedure.class;
 
@@ -43,7 +42,7 @@ public final class PregelProcessingStep implements BasicAnnotationProcessor.Proc
     private final PregelValidation pregelValidation;
     private final PregelGenerator pregelGenerator;
 
-    PregelProcessingStep(
+    PregelProcessorStep(
         Messager messager,
         Filer filer,
         PregelValidation pregelValidation,
@@ -56,13 +55,13 @@ public final class PregelProcessingStep implements BasicAnnotationProcessor.Proc
     }
 
     @Override
-    public Set<? extends Class<? extends Annotation>> annotations() {
-        return ImmutableSet.of(ANNOTATION_CLASS);
+    public Set<String> annotations() {
+        return Set.of(ANNOTATION_CLASS.getCanonicalName());
     }
 
     @Override
-    public Set<? extends Element> process(SetMultimap<Class<? extends Annotation>, Element> elementsByAnnotation) {
-        Set<Element> elements = elementsByAnnotation.get(ANNOTATION_CLASS);
+    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+        Set<Element> elements = elementsByAnnotation.get(ANNOTATION_CLASS.getCanonicalName());
         ImmutableSet.Builder<Element> elementsToRetry = ImmutableSet.builder();
 
         for (Element element : elements) {

@@ -35,7 +35,7 @@ public final class PregelProcessor extends BasicAnnotationProcessor {
     }
 
     @Override
-    protected Iterable<? extends ProcessingStep> initSteps() {
+    protected Iterable<? extends Step> steps() {
         var pregelValidation = new PregelValidation(
             processingEnv.getMessager(),
             processingEnv.getElementUtils(),
@@ -47,7 +47,7 @@ public final class PregelProcessor extends BasicAnnotationProcessor {
             getSupportedSourceVersion()
         );
 
-        var processingStep = new PregelProcessingStep(
+        var processingStep = new PregelProcessorStep(
             processingEnv.getMessager(),
             processingEnv.getFiler(),
             pregelValidation,
