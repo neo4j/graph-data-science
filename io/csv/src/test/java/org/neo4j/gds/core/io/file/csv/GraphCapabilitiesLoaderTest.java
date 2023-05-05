@@ -24,7 +24,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 
 import java.io.IOException;
@@ -42,25 +43,21 @@ public class GraphCapabilitiesLoaderTest {
     Path exportDir;
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    void shouldLoadGraphCapabilities(boolean canWriteToDatabase) throws IOException {
+    @EnumSource(WriteMode.class)
+    void shouldLoadGraphCapabilities(WriteMode writeMode) throws IOException {
         var graphCapabilitiesFile = exportDir.resolve(GRAPH_CAPABILITIES_FILE_NAME).toFile();
 
         var lines = List.of(
-            "canWriteToDatabase",
-            Boolean.toString(canWriteToDatabase)
+            "writeMode",
+            writeMode.name()
         );
         FileUtils.writeLines(graphCapabilitiesFile, lines);
 
         var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir, CSV_MAPPER);
         var capabilities = capabilitiesLoader.load();
 
-        var booleanAssert = assertThat(capabilities.canWriteToDatabase());
-        if (canWriteToDatabase) {
-            booleanAssert.isTrue();
-        } else {
-            booleanAssert.isFalse();
-        }
+        assertThat(capabilities.canWriteToDatabase()).isEqualTo(writeMode == WriteMode.LOCAL);
+        assertThat(capabilities.canWriteToRemoteDatabase()).isEqualTo(writeMode == WriteMode.REMOTE);
     }
 
     @Test

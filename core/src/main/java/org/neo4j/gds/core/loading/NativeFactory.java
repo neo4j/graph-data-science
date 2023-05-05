@@ -33,6 +33,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -76,7 +77,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions
     ) {
-        super(graphProjectConfig, ImmutableStaticCapabilities.of(true), loadingContext, graphDimensions);
+        super(graphProjectConfig, ImmutableStaticCapabilities.of(WriteMode.LOCAL), loadingContext, graphDimensions);
         this.storeConfig = graphProjectConfig;
         this.progressTracker = initProgressTracker();
     }

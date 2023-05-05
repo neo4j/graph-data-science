@@ -39,6 +39,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.Nodes;
@@ -115,7 +116,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler);
 
         // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
-        var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(true));
+        var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(WriteMode.LOCAL));
 
         return new GdlFactory(
             gdlHandler,

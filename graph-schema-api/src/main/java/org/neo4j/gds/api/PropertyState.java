@@ -20,5 +20,5 @@
 package org.neo4j.gds.api;
 
 public enum PropertyState {
-    PERSISTENT, TRANSIENT
+    PERSISTENT, TRANSIENT, REMOTE
 }
