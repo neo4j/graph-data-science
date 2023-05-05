@@ -147,10 +147,8 @@ class GraphSageTrainProcTest extends BaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        runQueryWithResultConsumer(train, result -> {
-            var resultRow = result.next();
 
-            assertThat(resultRow).isNotNull();
+        var rowCount = runQueryWithRowConsumer(train, resultRow -> {
             assertThat(resultRow.get("configuration"))
                 .isNotNull()
                 .isInstanceOf(Map.class);
@@ -163,6 +161,10 @@ class GraphSageTrainProcTest extends BaseProcTest {
 
             assertThat(resultRow.get("trainMillis")).asInstanceOf(LONG).isGreaterThan(0);
         });
+
+        assertThat(rowCount)
+            .as("`train` mode should return one row")
+            .isEqualTo(1);
 
         var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
         assertThat(model.gdsVersion()).isEqualTo("Unknown");
@@ -217,10 +219,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        runQueryWithResultConsumer(train, result -> {
-            var resultRow = result.next();
-
-            assertThat(resultRow).isNotNull();
+        var rowCount = runQueryWithRowConsumer(train, resultRow -> {
             assertThat(resultRow.get("configuration"))
                 .isNotNull()
                 .isInstanceOf(Map.class);
@@ -233,6 +232,10 @@ class GraphSageTrainProcTest extends BaseProcTest {
 
             assertThat(resultRow.get("trainMillis")).asInstanceOf(LONG).isGreaterThan(0);
         });
+
+        assertThat(rowCount)
+            .as("`train` mode should return one row")
+            .isEqualTo(1);
 
         var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
 

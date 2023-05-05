@@ -19,20 +19,13 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.TrainResult;
-import org.neo4j.gds.compat.ProxyUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -42,10 +35,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
-@GdsCallable(name = "gds.beta.graphSage.train", description = GRAPH_SAGE_DESCRIPTION, executionMode = TRAIN)
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainResult> {
+public class GraphSageTrainProc extends BaseProc {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
@@ -53,7 +47,10 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return trainAndSetModelWithResult(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new GraphSageTrainSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Description(ESTIMATE_DESCRIPTION)
@@ -62,35 +59,15 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new GraphSageTrainSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
-    protected GraphSageTrainConfig newConfig(String username, CypherMapWrapper config) {
-        return GraphSageTrainConfig.of(username, config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory(ExecutionContext executionContext) {
-        var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
-        return new GraphSageTrainAlgorithmFactory(gdsVersion);
-    }
-
-    @Override
-    protected String modelType() {
-        return GraphSage.MODEL_TYPE;
-    }
-
-    @Override
-    protected TrainResult constructProcResult(ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult) {
-        return new TrainResult(
-            computationResult.result(),
-            computationResult.computeMillis()
-        );
-    }
-
-    @Override
-    protected Model<?, ?, ?> extractModel(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
-        return model;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(modelCatalog);
     }
 }

@@ -17,41 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
-// FIXME replace this with MLTrainResult (duplicate?) --> VN: this would require to add dependency to `:proc-machine-learning` which is not good...
 public class TrainResult {
 
     public final Map<String, Object> modelInfo;
     public final Map<String, Object> configuration;
     public final long trainMillis;
 
-    public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends Model.CustomInfo> TrainResult(
-        Optional<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>> maybeTrainedModel,
+    TrainResult(
+        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> trainedModel,
         long trainMillis
     ) {
+        var trainConfig = trainedModel.trainConfig();
+
         this.modelInfo = new HashMap<>();
-        this.configuration = new HashMap<>();
-
-        maybeTrainedModel.ifPresent(trainedModel -> {
-            TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
-
-            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-            modelInfo.putAll(trainedModel.customInfo().toMap());
-            configuration.putAll(trainConfig.toMap());
-        });
+        modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
+        modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+        modelInfo.putAll(trainedModel.customInfo().toMap());
+        configuration = trainConfig.toMap();
 
         this.trainMillis = trainMillis;
     }
