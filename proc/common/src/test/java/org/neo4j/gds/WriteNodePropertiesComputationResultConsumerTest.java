@@ -103,9 +103,6 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
     void shouldThrowWhenWriteModeDoesNotMatchPropertyState() {
         var config = ImmutableTestWriteConfig.builder().writeProperty("writeProp").build();
 
-        assertThatThrownBy(() -> executeWrite(config, PropertyState.TRANSIENT, WriteMode.LOCAL))
-            .hasMessageContaining("propertyKey=foo, propertyState=TRANSIENT");
-
         assertThatThrownBy(() -> executeWrite(config, PropertyState.REMOTE, WriteMode.LOCAL))
             .hasMessageContaining("propertyKey=foo, propertyState=REMOTE");
     }

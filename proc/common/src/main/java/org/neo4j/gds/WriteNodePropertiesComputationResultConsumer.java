@@ -37,6 +37,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -166,7 +167,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                     return false;
                 }
                 var propertyState = propertySchema.state();
-                return propertyState != expectedPropertyState;
+                return !expectedPropertyState.test(propertyState);
             })
             .map(nodeProperty -> formatWithLocale(
                 "NodeProperty{propertyKey=%s, propertyState=%s}",
@@ -184,12 +185,14 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
         }
     }
 
-    private static PropertyState expectedPropertyStateForWriteMode(WriteMode writeMode) {
+    private static Predicate<PropertyState> expectedPropertyStateForWriteMode(WriteMode writeMode) {
         switch (writeMode) {
             case LOCAL:
-                return PropertyState.PERSISTENT;
+                // We need to allow persistent and transient as for example algorithms that support seeding will reuse a
+                // mutated (transient) property to write back properties that are in fact backed by a database
+                return state -> state == PropertyState.PERSISTENT || state == PropertyState.TRANSIENT;
             case REMOTE:
-                return PropertyState.REMOTE;
+                return state -> state == PropertyState.REMOTE;
             default:
                 throw new IllegalStateException(formatWithLocale(
                     "Graph with write mode `%s` cannot write back to a database",
