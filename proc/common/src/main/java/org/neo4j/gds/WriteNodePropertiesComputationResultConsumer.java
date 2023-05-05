@@ -101,7 +101,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
             var nodePropertySchema = graph.schema().nodeSchema().unionProperties();
             var nodeProperties = nodePropertyListFunction.apply(computationResult);
 
-            assertPropertiesCanBeWritten(
+            validatePropertiesCanBeWritten(
                 writeMode,
                 nodePropertySchema,
                 nodeProperties,
@@ -141,7 +141,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
         );
     }
 
-    private static void assertPropertiesCanBeWritten(
+    private static void validatePropertiesCanBeWritten(
         WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
         Collection<NodeProperty> nodeProperties,
@@ -192,7 +192,8 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 // mutated (transient) property to write back properties that are in fact backed by a database
                 return state -> state == PropertyState.PERSISTENT || state == PropertyState.TRANSIENT;
             case REMOTE:
-                return state -> state == PropertyState.REMOTE;
+                // We allow transient properties for the same reason as above
+                return state -> state == PropertyState.REMOTE || state == PropertyState.TRANSIENT;
             default:
                 throw new IllegalStateException(formatWithLocale(
                     "Graph with write mode `%s` cannot write back to a database",
