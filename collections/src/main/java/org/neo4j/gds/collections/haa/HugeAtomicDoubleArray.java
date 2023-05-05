@@ -34,11 +34,11 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @return new array
      */
     static HugeAtomicDoubleArray of(long size, PageCreator.DoublePageCreator pageCreator) {
-        return HugeAtomicDoubleArraySon.of(size, pageCreator);
+        return HugeAtomicDoubleArrayFactory.of(size, pageCreator);
     }
 
     static long memoryEstimation(long size) {
-        return HugeAtomicDoubleArraySon.memoryEstimation(size);
+        return HugeAtomicDoubleArrayFactory.memoryEstimation(size);
     }
 
     /**

@@ -423,11 +423,11 @@ final class HugeAtomicDoubleArrayTest {
     }
 
     private HugeAtomicDoubleArray singleArray(final int size) {
-        return HugeAtomicDoubleArraySon.Single.of(size, PassThroughPageCreator.INSTANCE);
+        return HugeAtomicDoubleArrayFactory.Single.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     private HugeAtomicDoubleArray pagedArray(final int size) {
-        return HugeAtomicDoubleArraySon.Paged.of(size, PassThroughPageCreator.INSTANCE);
+        return HugeAtomicDoubleArrayFactory.Paged.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     /**

@@ -32,11 +32,11 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * @return new array
      */
     static HugeAtomicIntArray of(long size, PageCreator.IntPageCreator pageCreator) {
-        return HugeAtomicIntArraySon.of(size, pageCreator);
+        return HugeAtomicIntArrayFactory.of(size, pageCreator);
     }
 
     static long memoryEstimation(long size) {
-        return HugeAtomicIntArraySon.memoryEstimation(size);
+        return HugeAtomicIntArrayFactory.memoryEstimation(size);
     }
 
     /**

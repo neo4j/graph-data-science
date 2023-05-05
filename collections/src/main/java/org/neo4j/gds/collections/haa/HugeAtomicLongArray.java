@@ -34,11 +34,11 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @return new array
      */
     static HugeAtomicLongArray of(long size, PageCreator.LongPageCreator pageCreator) {
-        return HugeAtomicLongArraySon.of(size, pageCreator);
+        return HugeAtomicLongArrayFactory.of(size, pageCreator);
     }
 
     static long memoryEstimation(long size) {
-        return HugeAtomicLongArraySon.memoryEstimation(size);
+        return HugeAtomicLongArrayFactory.memoryEstimation(size);
     }
 
     /**

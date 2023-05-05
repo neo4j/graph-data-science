@@ -418,11 +418,11 @@ final class HugeAtomicByteArrayTest {
     }
 
     private HugeAtomicByteArray singleArray(final int size) {
-        return HugeAtomicByteArraySon.Single.of(size, PassThroughPageCreator.INSTANCE);
+        return HugeAtomicByteArrayFactory.Single.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     private HugeAtomicByteArray pagedArray(final int size) {
-        return HugeAtomicByteArraySon.Paged.of(size, PassThroughPageCreator.INSTANCE);
+        return HugeAtomicByteArrayFactory.Paged.of(size, PassThroughPageCreator.INSTANCE);
     }
 
     /**

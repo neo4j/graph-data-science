@@ -32,11 +32,11 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @return new array
      */
     static HugeAtomicByteArray of(long size, PageCreator.BytePageCreator pageCreator) {
-        return HugeAtomicByteArraySon.of(size, pageCreator);
+        return HugeAtomicByteArrayFactory.of(size, pageCreator);
     }
 
     static long memoryEstimation(long size) {
-        return HugeAtomicByteArraySon.memoryEstimation(size);
+        return HugeAtomicByteArrayFactory.memoryEstimation(size);
     }
 
     /**
