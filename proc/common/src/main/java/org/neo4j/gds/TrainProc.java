@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ComputationResult;
@@ -29,7 +27,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
-import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.procedure.Context;
 
 import java.util.List;
@@ -86,7 +83,7 @@ public abstract class TrainProc<
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
                 return List.of(
-                   new TrainingConfigValidation<>(executionContext.modelCatalog(), username(), modelType())
+                   new VerifyThatModelCanBeStored<>(executionContext.modelCatalog(), username(), modelType())
                 );
             }
         };
@@ -95,30 +92,6 @@ public abstract class TrainProc<
     @Override
     public ExecutionContext executionContext() {
         return super.executionContext().withModelCatalog(modelCatalog);
-    }
-
-    public static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {
-        private final ModelCatalog modelCatalog;
-        private final String username;
-        private final String modelType;
-
-        TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
-            this.modelCatalog = modelCatalog;
-            this.username = username;
-            this.modelType = modelType;
-        }
-
-        @Override
-        public void validateConfigsBeforeLoad(
-            GraphProjectConfig graphProjectConfig,
-            TRAIN_CONFIG config
-        ) {
-            modelCatalog.verifyModelCanBeStored(
-                username,
-                config.modelName(),
-                modelType
-            );
-        }
     }
 
 }
