@@ -37,7 +37,6 @@ import static org.neo4j.gds.collections.ValidatorUtils.hasSingleLongParameter;
 import static org.neo4j.gds.collections.ValidatorUtils.hasTypeAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.hasTypeKindAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.isAbstract;
-import static org.neo4j.gds.collections.ValidatorUtils.isDefault;
 import static org.neo4j.gds.collections.ValidatorUtils.isNotGeneric;
 import static org.neo4j.gds.collections.ValidatorUtils.mustReturn;
 
@@ -107,6 +106,9 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateReleaseMethod(e);
             case "copyTo":
                 return validateCopyToMethod(e);
+            case "<init>":
+                // for abstract class
+                return true;
             default:
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
         }
@@ -118,8 +120,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         return mustReturn(e, elementType.getKind(), messager)
                && hasNoParameters(e, messager)
                && doesNotThrow(e, messager)
-               && isNotGeneric(e, messager)
-               && isDefault(e, messager);
+               && isNotGeneric(e, messager);
     }
 
     private boolean validateGetMethod(ExecutableElement e, TypeMirror elementType) {

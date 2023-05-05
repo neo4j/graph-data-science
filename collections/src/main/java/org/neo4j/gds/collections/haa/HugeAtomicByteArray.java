@@ -23,7 +23,7 @@ import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
 @HugeAtomicArray(valueType = byte.class, valueOperatorInterface = ValueTransformers.ByteToByteFunction.class, pageCreatorInterface = PageCreator.BytePageCreator.class)
-public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
+public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
 
     /**
      * Creates a new array of the given size.
@@ -31,11 +31,11 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @param size the length of the new array, the highest supported index is {@code size - 1}
      * @return new array
      */
-    static HugeAtomicByteArray of(long size, PageCreator.BytePageCreator pageCreator) {
+    public static HugeAtomicByteArray of(long size, PageCreator.BytePageCreator pageCreator) {
         return HugeAtomicByteArrayFactory.of(size, pageCreator);
     }
 
-    static long memoryEstimation(long size) {
+    public static long memoryEstimation(long size) {
         return HugeAtomicByteArrayFactory.memoryEstimation(size);
     }
 
@@ -43,7 +43,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      *
      * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(org.neo4j.gds.collections.haa.HugeAtomicByteArray, long)}.
      */
-    default byte defaultValue() {
+    public byte defaultValue() {
         return 0;
     }
 
@@ -51,7 +51,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @return the long value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    byte get(long index);
+    public abstract byte get(long index);
 
     /**
      * Atomically adds the given delta to the value at the given index.
@@ -60,21 +60,21 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @param delta the value to add
      * @return the previous value at index
      */
-    byte getAndAdd(long index, byte delta);
+    public abstract byte getAndAdd(long index, byte delta);
 
     /**
      * Atomically returns the value at the given index and replaces it with the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    byte getAndReplace(long index, byte value);
+    public abstract byte getAndReplace(long index, byte value);
 
     /**
      * Sets the long value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    void set(long index, byte value);
+    public abstract void set(long index, byte value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -86,7 +86,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @return {@code true} iff successful. {@code false} indicates that the actual
      *     value was not equal to the expected value.
      */
-    boolean compareAndSet(long index, byte expect, byte update);
+    public abstract boolean compareAndSet(long index, byte expect, byte update);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -133,7 +133,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      *     which will be the same as the expected value if successful≤
      *     or the new current value if unsuccessful.
      */
-    byte compareAndExchange(long index, byte expect, byte update);
+    public abstract byte compareAndExchange(long index, byte expect, byte update);
 
     /**
      * Atomically updates the element at index {@code index} with the results
@@ -144,7 +144,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    void update(long index, ValueTransformers.ByteToByteFunction updateFunction);
+    public abstract void update(long index, ValueTransformers.ByteToByteFunction updateFunction);
 
     /**
      * Returns the length of this array.
@@ -153,20 +153,20 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * <p>
      * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
-    long size();
+    public abstract long size();
 
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
      *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
-    long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * Sets all entries in the array to the given value.
      *
      * This method is not thread-safe.
      */
-    void setAll(byte value);
+    public abstract void setAll(byte value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -181,7 +181,7 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      *
      * @return the amount of memory freed, in bytes.
      */
-    long release();
+    public abstract long release();
 
     /**
      * Copies the content of this array into the target array.
@@ -190,5 +190,5 @@ public interface HugeAtomicByteArray extends HugeCursorSupport<byte[]> {
      * <p>
      * This method is not thread-safe.
      */
-    void copyTo(HugeAtomicByteArray dest, long length);
+    public abstract void copyTo(HugeAtomicByteArray dest, long length);
 }

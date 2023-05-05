@@ -25,7 +25,7 @@ import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 import static org.neo4j.gds.collections.haa.ValueTransformers.DoubleToDoubleFunction;
 
 @HugeAtomicArray(valueType = double.class, valueOperatorInterface = DoubleToDoubleFunction.class, pageCreatorInterface = PageCreator.DoublePageCreator.class)
-public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
+public abstract class HugeAtomicDoubleArray implements HugeCursorSupport<double[]> {
 
     /**
      * Creates a new array of the given size.
@@ -33,11 +33,11 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @param size the length of the new array, the highest supported index is {@code size - 1}
      * @return new array
      */
-    static HugeAtomicDoubleArray of(long size, PageCreator.DoublePageCreator pageCreator) {
+    public static HugeAtomicDoubleArray of(long size, PageCreator.DoublePageCreator pageCreator) {
         return HugeAtomicDoubleArrayFactory.of(size, pageCreator);
     }
 
-    static long memoryEstimation(long size) {
+    public static long memoryEstimation(long size) {
         return HugeAtomicDoubleArrayFactory.memoryEstimation(size);
     }
 
@@ -45,7 +45,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      *
      * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(org.neo4j.gds.collections.haa.HugeAtomicDoubleArray, long)}.
      */
-    default double defaultValue() {
+    public double defaultValue() {
         return 0.0;
     }
 
@@ -53,7 +53,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @return the long value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    double get(long index);
+    public abstract double get(long index);
 
     /**
      * Atomically adds the given delta to the value at the given index.
@@ -62,14 +62,14 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @param delta the value to add
      * @return the previous value at index
      */
-    double getAndAdd(long index, double delta);
+    public abstract double getAndAdd(long index, double delta);
 
     /**
      * Atomically returns the value at the given index and replaces it with the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    double getAndReplace(long index, double value);
+    public abstract double getAndReplace(long index, double value);
 
 
     /**
@@ -77,7 +77,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    void set(long index, double value);
+    public abstract void set(long index, double value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -89,7 +89,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @return {@code true} iff successful. {@code false} indicates that the actual
      *     value was not equal to the expected value.
      */
-    boolean compareAndSet(long index, double expect, double update);
+    public abstract boolean compareAndSet(long index, double expect, double update);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -136,7 +136,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      *     which will be the same as the expected value if successful≤
      *     or the new current value if unsuccessful.
      */
-    double compareAndExchange(long index, double expect, double update);
+    public abstract double compareAndExchange(long index, double expect, double update);
 
     /**
      * Atomically updates the element at index {@code index} with the results
@@ -147,7 +147,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    void update(long index, DoubleToDoubleFunction updateFunction);
+    public abstract void update(long index, DoubleToDoubleFunction updateFunction);
 
     /**
      * Returns the length of this array.
@@ -156,20 +156,20 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * <p>
      * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
-    long size();
+    public abstract long size();
 
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
      *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
-    long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * Sets all entries in the array to the given value.
      *
      * This method is not thread-safe.
      */
-    void setAll(double value);
+    public abstract void setAll(double value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -184,7 +184,7 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      *
      * @return the amount of memory freed, in bytes.
      */
-    long release();
+    public abstract long release();
 
     /**
      * Copies the content of this array into the target array.
@@ -193,5 +193,5 @@ public interface HugeAtomicDoubleArray extends HugeCursorSupport<double[]> {
      * <p>
      * This method is not thread-safe.
      */
-    void copyTo(HugeAtomicDoubleArray dest, long length);
+    public abstract void copyTo(HugeAtomicDoubleArray dest, long length);
 }

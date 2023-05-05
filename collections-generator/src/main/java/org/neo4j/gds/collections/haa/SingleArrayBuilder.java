@@ -53,7 +53,7 @@ final class SingleArrayBuilder {
     ) {
         var builder = TypeSpec.classBuilder(SINLGE_CLASS_NAME)
             .addModifiers(Modifier.STATIC, Modifier.FINAL)
-            .addSuperinterface(interfaceType);
+            .superclass(interfaceType);
 
         // instance fields
         var arrayHandle = arrayHandleField(valueType);
