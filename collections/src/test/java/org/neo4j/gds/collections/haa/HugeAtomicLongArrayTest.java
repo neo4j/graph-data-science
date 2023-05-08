@@ -402,8 +402,8 @@ final class HugeAtomicLongArrayTest {
 
     @Test
     void testGetAndAddIsWithinBoundsForPagedArray() {
-        var size = HugeAtomicLongArraySon.Paged.PAGE_SIZE * 2 + 1; // We want an array with three pages
-        var index = HugeAtomicLongArraySon.Paged.PAGE_SIZE + 1;    // and look up some index larger than what fits in a single page
+        var size = HugeAtomicLongArrayFactory.Paged.PAGE_SIZE * 2 + 1; // We want an array with three pages
+        var index = HugeAtomicLongArrayFactory.Paged.PAGE_SIZE + 1;    // and look up some index larger than what fits in a single page
         var array = pagedArray(size);
 
         array.getAndAdd(index, 1);
@@ -497,7 +497,7 @@ final class HugeAtomicLongArrayTest {
 
     private HugeAtomicLongArray singleArray(final int size, final LongUnaryOperator valueProducer) {
 
-        return HugeAtomicLongArraySon.Single.of(size, new PageCreator(valueProducer));
+        return HugeAtomicLongArrayFactory.Single.of(size, new PageCreator(valueProducer));
     }
 
     private HugeAtomicLongArray pagedArray(final int size) {

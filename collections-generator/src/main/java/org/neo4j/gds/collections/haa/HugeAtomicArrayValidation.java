@@ -139,7 +139,7 @@ final class HugeAtomicArrayValidation implements CollectionStep.Validation<HugeA
         Name rootPackage();
 
         default String className() {
-            return element().getSimpleName() + "Son";
+            return element().getSimpleName() + "Factory";
         }
     }
 }

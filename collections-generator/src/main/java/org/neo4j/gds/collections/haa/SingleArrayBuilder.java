@@ -47,15 +47,13 @@ final class SingleArrayBuilder {
 
     static TypeSpec builder(
         TypeName interfaceType,
-        ClassName baseClassName,
         TypeName valueType,
         TypeName unaryOperatorType,
         TypeName pageCreatorType
     ) {
         var builder = TypeSpec.classBuilder(SINLGE_CLASS_NAME)
             .addModifiers(Modifier.STATIC, Modifier.FINAL)
-            .superclass(baseClassName)
-            .addSuperinterface(interfaceType);
+            .superclass(interfaceType);
 
         // instance fields
         var arrayHandle = arrayHandleField(valueType);

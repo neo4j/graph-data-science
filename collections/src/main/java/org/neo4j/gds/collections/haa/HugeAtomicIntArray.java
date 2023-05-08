@@ -23,7 +23,7 @@ import org.neo4j.gds.collections.HugeAtomicArray;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
 @HugeAtomicArray(valueType = int.class, valueOperatorInterface = ValueTransformers.IntToIntFunction.class, pageCreatorInterface = PageCreator.IntPageCreator.class)
-public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
+public abstract class HugeAtomicIntArray implements HugeCursorSupport<int[]> {
 
     /**
      * Creates a new array of the given size.
@@ -31,19 +31,19 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * @param size the length of the new array, the highest supported index is {@code size - 1}
      * @return new array
      */
-    static HugeAtomicIntArray of(long size, PageCreator.IntPageCreator pageCreator) {
-        return HugeAtomicIntArraySon.of(size, pageCreator);
+    public static HugeAtomicIntArray of(long size, PageCreator.IntPageCreator pageCreator) {
+        return HugeAtomicIntArrayFactory.of(size, pageCreator);
     }
 
-    static long memoryEstimation(long size) {
-        return HugeAtomicIntArraySon.memoryEstimation(size);
+    public static long memoryEstimation(long size) {
+        return HugeAtomicIntArrayFactory.memoryEstimation(size);
     }
 
     /**
      *
      * @return the defaultValue to fill the remaining space in the input of {@link #copyTo(org.neo4j.gds.collections.haa.HugeAtomicIntArray, long)}.
      */
-    default int defaultValue() {
+    public int defaultValue() {
         return 0;
     }
 
@@ -51,7 +51,7 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * @return the long value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    int get(long index);
+    public abstract int get(long index);
 
     /**
      * Atomically adds the given delta to the value at the given index.
@@ -60,21 +60,21 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * @param delta the value to add
      * @return the previous value at index
      */
-    int getAndAdd(long index, int delta);
+    public abstract int getAndAdd(long index, int delta);
 
     /**
      * Atomically returns the value at the given index and replaces it with the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    int getAndReplace(long index, int value);
+    public abstract int getAndReplace(long index, int value);
 
     /**
      * Sets the int value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    void set(long index, int value);
+    public abstract void set(long index, int value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -86,7 +86,7 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * @return {@code true} iff successful. {@code false} indicates that the actual
      *     value was not equal to the expected value.
      */
-    boolean compareAndSet(long index, int expect, int update);
+    public abstract boolean compareAndSet(long index, int expect, int update);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -133,7 +133,7 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      *     which will be the same as the expected value if successful≤
      *     or the new current value if unsuccessful.
      */
-    int compareAndExchange(long index, int expect, int update);
+    public abstract int compareAndExchange(long index, int expect, int update);
 
     /**
      * Atomically updates the element at index {@code index} with the results
@@ -144,7 +144,7 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    void update(long index, ValueTransformers.IntToIntFunction updateFunction);
+    public abstract void update(long index, ValueTransformers.IntToIntFunction updateFunction);
 
     /**
      * Returns the length of this array.
@@ -153,20 +153,20 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * <p>
      * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
-    long size();
+    public abstract long size();
 
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
      *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
-    long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * Sets all entries in the array to the given value.
      *
      * This method is not thread-safe.
      */
-    void setAll(int value);
+    public abstract void setAll(int value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -181,7 +181,7 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      *
      * @return the amount of memory freed, in bytes.
      */
-    long release();
+    public abstract long release();
 
     /**
      * Copies the content of this array into the target array.
@@ -190,5 +190,5 @@ public interface HugeAtomicIntArray extends HugeCursorSupport<int[]> {
      * <p>
      * This method is not thread-safe.
      */
-    void copyTo(HugeAtomicIntArray dest, long length);
+    public abstract void copyTo(HugeAtomicIntArray dest, long length);
 }

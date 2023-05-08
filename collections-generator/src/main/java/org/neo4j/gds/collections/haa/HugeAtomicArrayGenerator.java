@@ -49,8 +49,7 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
         var pageCreatorType = TypeName.get(spec.pageCreatorInterface());
 
         var builder = TypeSpec.classBuilder(className)
-            .addModifiers(Modifier.ABSTRACT)
-            .addSuperinterface(elementType)
+            .addModifiers(Modifier.FINAL)
             .addOriginatingElement(spec.element());
 
         // class annotation
@@ -64,7 +63,6 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
 
         builder.addType(SingleArrayBuilder.builder(
             elementType,
-            className,
             valueType,
             unaryOperatorType,
             pageCreatorType
@@ -72,7 +70,6 @@ final class HugeAtomicArrayGenerator implements CollectionStep.Generator<HugeAto
 
         builder.addType(PagedArrayBuilder.builder(
             elementType,
-            className,
             valueType,
             unaryOperatorType,
             pageCreatorType,
