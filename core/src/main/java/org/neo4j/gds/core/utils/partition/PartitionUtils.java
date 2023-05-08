@@ -39,6 +39,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PartitionUtils {
 
+    public static final double MIN_PARTITION_CAPACITY = 0.67;
+
     private PartitionUtils() {}
 
     public static <TASK> List<TASK> rangePartition(
@@ -167,13 +169,23 @@ public final class PartitionUtils {
 
         assert batchSize > 0L;
 
+        long minPartitionSize = Math.round(batchSize * MIN_PARTITION_CAPACITY);
+
         while(start < nodeCount) {
             long partitionSize = 0L;
 
             long nodeId = start - 1;
-            while (nodeId < nodeCount - 1 && partitionSize < batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
-                nodeId += 1;
-                partitionSize += degrees.degree(nodeId);
+            // find the next partition
+            while (nodeId < nodeCount - 1 && nodeId - start < Partition.MAX_NODE_COUNT) {
+                int degree = degrees.degree(nodeId + 1);
+
+                boolean partitionIsLargeEnough = partitionSize >= minPartitionSize;
+                if (partitionSize + degree > batchSize && partitionIsLargeEnough) {
+                    break;
+                }
+
+                nodeId++;
+                partitionSize += degree;
             }
 
             long end = nodeId + 1;

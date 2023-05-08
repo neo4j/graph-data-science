@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.impl.block.factory.Functions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,11 +39,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -157,6 +156,7 @@ class PartitionUtilsTest {
     }
 
     //@formatter:off
+
     static Stream<Arguments> ranges() {
         return Stream.of(
             Arguments.of(1, 42, List.of(Partition.of(0, 42))),
@@ -176,7 +176,6 @@ class PartitionUtilsTest {
         );
     }
     //@formatter:on
-
     @ParameterizedTest
     @MethodSource("ranges")
     void testRangePartitioning(int concurrency, long nodeCount, List<Partition> expectedPartitions) {
@@ -186,28 +185,56 @@ class PartitionUtilsTest {
         );
     }
 
-    @Test
-    void testDegreePartitioning() {
+    static Stream<Arguments> degreeDistributionWithPartitions() {
+        return Stream.of(
+            Arguments.of(
+                "UNIFORM",
+                LongStream.of(0, 2500, 5000, 7500)
+                    .mapToObj(start -> DegreePartition.of(start, 2500, 10000))
+                    .collect(Collectors.toList())
+            ),
+            Arguments.of("RANDOM", List.of(
+                DegreePartition.of(0, 2491, 10046),
+                DegreePartition.of(2491, 2526, 10049),
+                DegreePartition.of(5017, 2505, 10044),
+                DegreePartition.of(7522, 2476, 10045),
+                // remainder partition
+                DegreePartition.of(9998, 2, 9)
+            )),
+            Arguments.of("POWER_LAW", List.of(
+                    DegreePartition.of(0, 3, 9172),
+                    DegreePartition.of(3, 6, 9382),
+                    DegreePartition.of(9, 53, 10022),
+                    DegreePartition.of(62, 3040, 10045),
+                    // remainder partition
+                    DegreePartition.of(3102, 6898, 1557)
+                )
+            )
+        );
+    }
+
+
+
+    @MethodSource("degreeDistributionWithPartitions")
+    @ParameterizedTest
+    void testDegreePartitioning(String distribution, List<DegreePartition> expectedPartitions) {
         var concurrency = 4;
 
         var graph = RandomGraphGenerator.builder()
-            .nodeCount(DEFAULT_BATCH_SIZE)
+            .nodeCount(10_000)
             .averageDegree(concurrency)
-            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(42)
+            .relationshipDistribution(RelationshipDistribution.parse(distribution))
             .build()
             .generate();
 
-        var expectedPartitionSize = graph.nodeCount() / concurrency;
         var partitions = PartitionUtils.degreePartition(graph, concurrency, Functions.identity(), Optional.empty());
 
-        assertThat(partitions.size()).isEqualTo(concurrency);
-        for (DegreePartition partition : partitions) {
-            assertThat(partition.nodeCount()).isCloseTo(expectedPartitionSize, within(10L));
-            assertThat(partition.totalDegree()).isEqualTo(partition.stream().map(graph::degree).sum());
-        }
+        assertThat(partitions.stream().mapToLong(DegreePartition::totalDegree).sum()).isEqualTo(graph.relationshipCount());
+        assertThat(partitions).containsExactlyElementsOf(expectedPartitions);
+
     }
 
-    @Disabled("this underlines the current problem of our partitioning")
     @Test
     void testDegreePartitionWithMiddleHighDegreeNodes() {
         var nodeCount = 5;
@@ -230,6 +257,26 @@ class PartitionUtilsTest {
     }
 
     @Test
+    void testDegreePartitionWithAlternatingHighDegreeNodes() {
+        var nodeCount = 5;
+        var degrees = new int[] { 1, 10, 1, 10, 1 };
+        var degreesPerPartition = 3;
+
+        List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
+            nodeCount,
+            idx -> degrees[(int) idx],
+            degreesPerPartition,
+            Function.identity()
+        );
+
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 2, 11),
+            DegreePartition.of(2, 2, 11),
+            DegreePartition.of(4, 1, 1)
+        );
+    }
+
+    @Test
     void testDegreePartitioningWithBatchSize() {
         Graph graph = fromGdl(
             "(a)-->(b)" +
@@ -242,10 +289,7 @@ class PartitionUtilsTest {
 
         assertThat(partitions).containsExactly(
             DegreePartition.of(0, 1, 2),
-            DegreePartition.of(1, 1, 2),
-            // this is an unfortunate corner case as the last node is a 0 degree node
-            // and we reach the batch size just before
-            DegreePartition.of(2, 1, 0)
+            DegreePartition.of(1, 2, 2)
         );
     }
 
