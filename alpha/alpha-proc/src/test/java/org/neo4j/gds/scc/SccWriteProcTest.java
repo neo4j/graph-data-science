@@ -85,6 +85,11 @@ class SccWriteProcTest extends BaseProcTest {
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
 
+            assertThat(row.getNumber("nodes").longValue()).isEqualTo(9L);
+
+            assertThat(row.getNumber("p1").longValue()).isGreaterThan(0L);
+            assertThat(row.getNumber("p90").longValue()).isGreaterThan(0L);
+
             assertThat(row.getNumber("setCount").longValue()).isEqualTo(3L);
             assertThat(row.getNumber("minSetSize").longValue()).isEqualTo(3L);
             assertThat(row.getNumber("maxSetSize").longValue()).isEqualTo(3L);
