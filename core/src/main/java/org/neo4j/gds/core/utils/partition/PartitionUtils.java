@@ -127,7 +127,7 @@ public final class PartitionUtils {
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
             BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
         );
-        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+        return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> customDegreePartitionWithBatchSize(
@@ -145,7 +145,7 @@ public final class PartitionUtils {
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
             BitUtil.ceilDiv(actualWeightSum, concurrency)
         );
-        return degreePartitionWithBatchSize(graph.nodeIterator(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
+        return degreePartitionWithBatchSize(graph.nodeCount(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
@@ -153,9 +153,38 @@ public final class PartitionUtils {
         long batchSize,
         Function<DegreePartition, TASK> taskCreator
     ) {
-        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+        return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
     }
 
+    public static <TASK> List<TASK> degreePartitionWithBatchSize(
+        long nodeCount,
+        DegreeFunction degrees,
+        long batchSize,
+        Function<DegreePartition, TASK> taskCreator
+    ) {
+        var result = new ArrayList<TASK>();
+        long start = 0L;
+
+        assert batchSize > 0L;
+
+        while(start < nodeCount) {
+            long partitionSize = 0L;
+
+            long nodeId = start - 1;
+            while (nodeId < nodeCount - 1 && partitionSize < batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
+                nodeId += 1;
+                partitionSize += degrees.degree(nodeId);
+            }
+
+            long end = nodeId + 1;
+            result.add(taskCreator.apply(DegreePartition.of(start, end - start, partitionSize)));
+            start = end;
+        }
+        return result;
+    }
+
+    // Passing an iterator makes partitioning harder, please use the nodeCount based.
+    @Deprecated()
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
         PrimitiveIterator.OfLong nodes,
         DegreeFunction degrees,

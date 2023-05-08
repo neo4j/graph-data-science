@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -215,10 +214,8 @@ class PartitionUtilsTest {
         var degrees = new int[] { 1, 1, 10, 3, 1 };
         var degreesPerPartition = 3;
 
-        var nodes = LongStream.range(0, nodeCount).iterator();
-
         List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
-            nodes,
+            nodeCount,
             idx -> degrees[(int) idx],
             degreesPerPartition,
             Function.identity()
