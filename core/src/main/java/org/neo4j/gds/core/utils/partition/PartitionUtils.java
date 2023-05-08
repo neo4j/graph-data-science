@@ -168,7 +168,7 @@ public final class PartitionUtils {
             assert batchSize > 0L;
             long partitionSize = 0L;
             long nodeId = 0L;
-            while (nodes.hasNext() && partitionSize <= batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
+            while (nodes.hasNext() && partitionSize < batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
                 nodeId = nodes.nextLong();
                 partitionSize += degrees.degree(nodeId);
             }

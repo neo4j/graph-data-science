@@ -243,9 +243,11 @@ class PartitionUtilsTest {
 
         var partitions = PartitionUtils.degreePartitionWithBatchSize(graph, 2, Function.identity());
 
-        // FIXME this also shows a problematic case
         assertThat(partitions).containsExactly(
-            DegreePartition.of(0, 2, 4),
+            DegreePartition.of(0, 1, 2),
+            DegreePartition.of(1, 1, 2),
+            // this is an unfortunate corner case as the last node is a 0 degree node
+            // and we reach the batch size just before
             DegreePartition.of(2, 1, 0)
         );
     }
@@ -326,7 +328,10 @@ class PartitionUtilsTest {
             new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph::degree, 2, Function.identity()
         );
 
-        assertThat(partitions).containsExactly(DegreePartition.of(0, 3, 2));
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 1, 2),
+            DegreePartition.of(1, 2, 0)
+        );
     }
 
     @Test
