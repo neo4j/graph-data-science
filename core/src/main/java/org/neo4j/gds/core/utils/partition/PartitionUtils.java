@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.PrimitiveIterator;
 import java.util.function.Function;
 import java.util.function.LongToIntFunction;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -164,7 +165,7 @@ public final class PartitionUtils {
         long batchSize,
         Function<DegreePartition, TASK> taskCreator
     ) {
-        var result = new ArrayList<TASK>();
+        var partitions = new ArrayList<DegreePartition>();
         long start = 0L;
 
         assert batchSize > 0L;
@@ -189,10 +190,27 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            result.add(taskCreator.apply(DegreePartition.of(start, end - start, partitionSize)));
+            partitions.add(DegreePartition.of(start, end - start, partitionSize));
             start = end;
         }
-        return result;
+
+        // the above loop only merge partition i with i+1 to avoid i being too small
+        // thus we need to check the last partition manually
+        var minLastPartitionSize = Math.round(0.2 * batchSize);
+        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).totalDegree() < minLastPartitionSize) {
+            var lastPartition = partitions.remove(partitions.size() - 1);
+            var partitionToMerge = partitions.remove(partitions.size() - 1);
+
+            DegreePartition mergedPartition = DegreePartition.of(
+                partitionToMerge.startNode(),
+                lastPartition.nodeCount() + partitionToMerge.nodeCount(),
+                partitionToMerge.totalDegree() + lastPartition.totalDegree()
+            );
+
+            partitions.add(mergedPartition);
+        }
+
+        return partitions.stream().map(taskCreator).collect(Collectors.toList());
     }
 
     // Passing an iterator makes partitioning harder, please use the nodeCount based.

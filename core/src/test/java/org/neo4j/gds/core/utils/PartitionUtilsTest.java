@@ -197,17 +197,13 @@ class PartitionUtilsTest {
                 DegreePartition.of(0, 2491, 10046),
                 DegreePartition.of(2491, 2526, 10049),
                 DegreePartition.of(5017, 2505, 10044),
-                DegreePartition.of(7522, 2476, 10045),
-                // remainder partition
-                DegreePartition.of(9998, 2, 9)
+                DegreePartition.of(7522, 2478, 10054)
             )),
             Arguments.of("POWER_LAW", List.of(
                     DegreePartition.of(0, 3, 9172),
                     DegreePartition.of(3, 6, 9382),
                     DegreePartition.of(9, 53, 10022),
-                    DegreePartition.of(62, 3040, 10045),
-                    // remainder partition
-                    DegreePartition.of(3102, 6898, 1557)
+                    DegreePartition.of(62, 9938, 11602)
                 )
             )
         );
@@ -273,6 +269,26 @@ class PartitionUtilsTest {
             DegreePartition.of(0, 2, 11),
             DegreePartition.of(2, 2, 11),
             DegreePartition.of(4, 1, 1)
+        );
+    }
+
+    @Test
+    void testDegreePartitionWithPotentiallySmallLast() {
+        var nodeCount = 4;
+        var degrees = new int[] { 30, 30, 30, 1 };
+        var degreesPerPartition = 30;
+
+        List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
+            nodeCount,
+            idx -> degrees[(int) idx],
+            degreesPerPartition,
+            Function.identity()
+        );
+
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 1, 30),
+            DegreePartition.of(1, 1, 30),
+            DegreePartition.of(2, 2, 31)
         );
     }
 
