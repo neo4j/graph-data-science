@@ -46,14 +46,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class NodeClassificationPipelineMutateProc
     extends MutatePropertyProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
+    NodeClassificationPipelineResult,
     PredictMutateResult,
     NodeClassificationPredictPipelineMutateConfig>
 {
@@ -86,7 +86,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
         if (computationResult.result().isEmpty()) {
             return Collections.emptyList();
         }
@@ -123,7 +123,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     protected AbstractResultBuilder<PredictMutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computeResult,
+        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new PredictMutateResult.Builder();

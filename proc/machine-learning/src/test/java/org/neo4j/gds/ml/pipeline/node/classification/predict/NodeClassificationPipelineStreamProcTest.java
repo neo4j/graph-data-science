@@ -86,6 +86,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
             .algo("gds.beta.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("modelName", MODEL_NAME)
+            .addParameter("includePredictedProbabilities", false)
             .yields();
 
         assertCypherResult(query, List.of(

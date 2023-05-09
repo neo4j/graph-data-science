@@ -20,14 +20,11 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -47,14 +44,13 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictPipelineExecutor extends PredictPipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
     NodePropertyPredictPipeline,
-    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult
+    NodeClassificationPipelineResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
@@ -152,20 +148,5 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         ).compute();
 
         return NodeClassificationPipelineResult.of(nodeClassificationResult, classIdMap);
-    }
-
-    @ValueClass
-    public interface NodeClassificationPipelineResult {
-        HugeLongArray predictedClasses();
-        Optional<HugeObjectArray<double[]>> predictedProbabilities();
-
-        static NodeClassificationPipelineResult of(NodeClassificationPredict.NodeClassificationResult nodeClassificationResult, LocalIdMap classIdMap) {
-            var internalPredictions = nodeClassificationResult.predictedClasses();
-            var predictions = HugeLongArray.newArray(internalPredictions.size());
-            for (long i = 0; i < nodeClassificationResult.predictedClasses().size(); i++) {
-                predictions.set(i, classIdMap.toOriginal(internalPredictions.get(i)));
-            }
-            return ImmutableNodeClassificationPipelineResult.of(predictions, nodeClassificationResult.predictedProbabilities());
-        }
     }
 }
