@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
 /**
@@ -496,6 +497,176 @@ public final class AdjacencyUnpacking {
         values[62 + valuesStart] = w4 >>> 54 & 0x1FL;
         values[63 + valuesStart] = w4 >>> 59;
         return 40 + packedPtr;
+    }
+
+    public static long unpack4Loop(long[] values, int valuesStart, int valuesLength, long packedPtr) {
+        int words = BitUtil.ceilDiv(valuesLength * 4, Long.SIZE);
+        int shift = 0;
+        int offset = 0;
+
+        long word = UnsafeUtil.getLong(packedPtr);
+        packedPtr += 8;
+
+        for (int i = 0; i < words; i++) {
+            values[offset + 0 + valuesStart] = word >>> shift & 0xFL;
+            values[offset + 1 + valuesStart] = word >>> shift + 4 & 0xFL;
+            values[offset + 2 + valuesStart] = word >>> shift + 8  & 0xFL;
+            values[offset + 3 + valuesStart] = word >>> shift + 12 & 0xFL;
+            values[offset + 4 + valuesStart] = word >>> shift + 16 & 0xFL;
+            values[offset + 5 + valuesStart] = word >>> shift + 20 & 0xFL;
+            values[offset + 6 + valuesStart] = word >>> shift + 24 & 0xFL;
+            values[offset + 7 + valuesStart] = word >>> shift + 28 & 0xFL;
+            values[offset + 8 + valuesStart] = word >>> shift + 32 & 0xFL;
+            values[offset + 9 + valuesStart] = word >>> shift + 36 & 0xFL;
+            values[offset + 10 + valuesStart] = word >>> shift + 40 & 0xFL;
+            values[offset + 11 + valuesStart] = word >>> shift + 44 & 0xFL;
+            values[offset + 12 + valuesStart] = word >>> shift + 48 & 0xFL;
+            values[offset + 13 + valuesStart] = word >>> shift + 52 & 0xFL;
+            values[offset + 14 + valuesStart] = word >>> shift + 56 & 0xFL;
+            values[offset + 15 + valuesStart] = word >>> shift + 60 & 0xFL;
+
+            shift += 60;
+
+            word = UnsafeUtil.getLong(packedPtr);
+            packedPtr += 8;
+
+            if (i == words - 1) {
+                break;
+            }
+
+            if (shift > Long.SIZE - 4) {
+                shift = Long.SIZE - shift;
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                values[offset + 15 + valuesStart] |= word << shift & 0xFL;
+                shift = 5 - shift;
+                offset += 16;
+            } else if (shift == Long.SIZE - 4){
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                shift = 0;
+                offset += 16;
+            } else {
+                shift += 4;
+                values[offset + 16 + valuesStart] = word >>> shift & 0xFL;
+                shift = Long.SIZE - shift;
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                values[offset + 16 + valuesStart] |= word << shift & 0xFL;
+                shift = 4 - shift;
+                offset += 17;
+            }
+        }
+
+        return packedPtr;
+    }
+
+    public static long unpack5Loop(long[] values, int valuesStart, int valuesLength, long packedPtr) {
+        int words = BitUtil.ceilDiv(valuesLength * 5, Long.SIZE);
+        int shift = 0;
+        int offset = 0;
+
+        long word = UnsafeUtil.getLong(packedPtr);
+        packedPtr += 8;
+
+        for (int i = 0; i < words; i++) {
+            values[offset + 0 + valuesStart] = word >>> shift & 0x1FL;
+            values[offset + 1 + valuesStart] = word >>> shift + 5 & 0x1FL;
+            values[offset + 2 + valuesStart] = word >>> shift + 10  & 0x1FL;
+            values[offset + 3 + valuesStart] = word >>> shift + 15 & 0x1FL;
+            values[offset + 4 + valuesStart] = word >>> shift + 20 & 0x1FL;
+            values[offset + 5 + valuesStart] = word >>> shift + 25 & 0x1FL;
+            values[offset + 6 + valuesStart] = word >>> shift + 30 & 0x1FL;
+            values[offset + 7 + valuesStart] = word >>> shift + 35 & 0x1FL;
+            values[offset + 8 + valuesStart] = word >>> shift + 40 & 0x1FL;
+            values[offset + 9 + valuesStart] = word >>> shift + 45 & 0x1FL;
+            values[offset + 10 + valuesStart] = word >>> shift + 50 & 0x1FL;
+            values[offset + 11 + valuesStart] = word >>> shift + 55 & 0x1FL;
+
+            shift += 55;
+
+            if (i == words - 1) {
+                break;
+            }
+
+            if (shift > Long.SIZE - 5) {
+                shift = Long.SIZE - shift;
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                values[offset + 12 + valuesStart] |= word << shift & 0x1FL;
+                shift = 5 - shift;
+                offset += 12;
+            } else if (shift == Long.SIZE - 5) {
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                shift = 0;
+                offset += 12;
+            } else {
+                shift += 5;
+                values[offset + 12 + valuesStart] = word >>> shift & 0x1FL;
+                shift = Long.SIZE - shift;
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                values[offset + 12 + valuesStart] |= word << shift & 0x1FL;
+                shift = 5 - shift;
+                offset += 13;
+            }
+
+        }
+        return packedPtr;
+    }
+
+
+    public static long unpack7Loop(long[] values, int valuesStart, int valuesLength, long packedPtr) {
+        int words = BitUtil.ceilDiv(valuesLength * 7, Long.SIZE);
+        int shift = 0;
+        int offset = 0;
+
+        long word = UnsafeUtil.getLong(packedPtr);
+        packedPtr += 8;
+
+        for (int i = 0; i < words; i++) {
+            values[offset + 0 + valuesStart] = word >>> shift & 0x7FL;
+            values[offset + 1 + valuesStart] = word >>> shift + 7 & 0x7FL;
+            values[offset + 2 + valuesStart] = word >>> shift + 14  & 0x7FL;
+            values[offset + 3 + valuesStart] = word >>> shift + 21 & 0x7FL;
+            values[offset + 4 + valuesStart] = word >>> shift + 28 & 0x7FL;
+            values[offset + 5 + valuesStart] = word >>> shift + 35 & 0x7FL;
+            values[offset + 6 + valuesStart] = word >>> shift + 42 & 0x7FL;
+            values[offset + 7 + valuesStart] = word >>> shift + 49 & 0x7FL;
+            values[offset + 8 + valuesStart] = word >>> shift + 56 & 0x7FL;
+
+            shift += 56;
+
+            if (i == words - 1) {
+                break;
+            }
+
+            if (shift > Long.SIZE - 7) {
+                shift = Long.SIZE - shift;
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                values[offset + 8 + valuesStart] |= word << shift & 0x7FL;
+                shift = 7 - shift;
+                offset += 9;
+            } else if (shift == Long.SIZE - 7) {
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                shift = 0;
+                offset += 9;
+            } else {
+                shift += 7;
+                values[offset + 9 + valuesStart] = word >>> shift & 0x7FL;
+                shift = Long.SIZE - shift;
+                word = UnsafeUtil.getLong(packedPtr);
+                packedPtr += 8;
+                values[offset + 9 + valuesStart] |= word << shift & 0x7FL;
+                shift = 7 - shift;
+                offset += 10;
+            }
+        }
+
+        return packedPtr;
     }
 
     /**

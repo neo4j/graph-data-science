@@ -523,6 +523,72 @@ public final class AdjacencyPacking {
         return 40 + packedPtr;
     }
 
+    public static long pack4Loop(long[] values, int valuesStart, int valuesLength, long packedPtr) {
+        long w = 0;
+        int shift = 0;
+        for (int i = valuesStart; i < valuesStart + valuesLength; i++, shift += 4) {
+            w |= values[i] << shift;
+
+            if (shift > Long.SIZE - 4) {
+                UnsafeUtil.putLong(packedPtr, w);
+                packedPtr += 8;
+                w = values[i] >>> (Long.SIZE - shift);
+                shift -= Long.SIZE;
+            }
+        }
+
+        if (shift >= 4) {
+            UnsafeUtil.putLong(packedPtr, w);
+            packedPtr += 8;
+        }
+
+        return packedPtr;
+    }
+
+    public static long pack5Loop(long[] values, int valuesStart, int valuesLength, long packedPtr) {
+        long w = 0;
+        int shift = 0;
+        for (int i = valuesStart; i < valuesStart + valuesLength; i++, shift += 5) {
+            w |= values[i] << shift;
+
+            if (shift > Long.SIZE - 5) {
+                UnsafeUtil.putLong(packedPtr, w);
+                packedPtr += 8;
+                w = values[i] >>> (Long.SIZE - shift);
+                shift -= Long.SIZE;
+            }
+        }
+
+        if (shift >= 5) {
+            UnsafeUtil.putLong(packedPtr, w);
+            packedPtr += 8;
+        }
+
+        return packedPtr;
+    }
+
+    public static long pack7Loop(long[] values, int valuesStart, int valuesLength, long packedPtr) {
+        long w = 0;
+        int shift = 0;
+        for (int i = valuesStart; i < valuesStart + valuesLength; i++, shift += 7) {
+            w |= values[i] << shift;
+
+            if (shift > Long.SIZE - 7) {
+                UnsafeUtil.putLong(packedPtr, w);
+                packedPtr += 8;
+                w = values[i] >>> (Long.SIZE - shift);
+                shift -= Long.SIZE;
+            }
+        }
+
+        if (shift >= 7) {
+            UnsafeUtil.putLong(packedPtr, w);
+            packedPtr += 8;
+        }
+
+        return packedPtr;
+    }
+
     /**
      * Packs 64 6-bit values into 48 bytes, touching 6 words.
      */
