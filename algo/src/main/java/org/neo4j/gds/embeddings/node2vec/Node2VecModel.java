@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -105,7 +104,7 @@ public class Node2VecModel {
             );
 
             var tasks = PartitionUtils.degreePartitionWithBatchSize(
-                PrimitiveLongCollections.range(0, walks.size() - 1),
+                walks.size(),
                 walks::walkLength,
                 BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), config.concurrency()),
                 partition -> {
