@@ -33,8 +33,8 @@ class KCoreDecompositionAlgorithmFactoryTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1944L),
-            arguments(4, 4896L)
+            arguments(1, 1992L),
+            arguments(4, 5088L)
         );
     }
 
