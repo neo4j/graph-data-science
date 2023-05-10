@@ -19,37 +19,24 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ProcPreconditions;
-import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
-import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
-import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
-import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_CONFIG_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.RWR_PROVIDER;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSampleProc extends CatalogProc {
 
     private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
     private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
-
-    public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> RWR_CONFIG_PROVIDER =
-        (cypherMapWrapper) -> RandomWalkWithRestartsConfig.of(cypherMapWrapper);
-    public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> CNARW_CONFIG_PROVIDER =
-        (cypherMapWrapper) -> CommonNeighbourAwareRandomWalkConfig.of(cypherMapWrapper);
-
-    public static final Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> RWR_PROVIDER =
-        (rwrConfig) -> new RandomWalkWithRestarts(rwrConfig);
-    public static final Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> CNARW_PROVIDER =
-        (cnarwConfig) -> new CommonNeighbourAwareRandomWalk((CommonNeighbourAwareRandomWalkConfig) cnarwConfig);
 
 
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
@@ -91,25 +78,6 @@ public class GraphSampleProc extends CatalogProc {
             executionContext()
         );
 
-    }
-
-
-    public static class RandomWalkSamplingResult extends GraphProjectProc.GraphProjectResult {
-        public final String fromGraphName;
-        public final long startNodeCount;
-
-        RandomWalkSamplingResult(
-            String graphName,
-            String fromGraphName,
-            long nodeCount,
-            long relationshipCount,
-            long startNodeCount,
-            long projectMillis
-        ) {
-            super(graphName, nodeCount, relationshipCount, projectMillis);
-            this.fromGraphName = fromGraphName;
-            this.startNodeCount = startNodeCount;
-        }
     }
 
 

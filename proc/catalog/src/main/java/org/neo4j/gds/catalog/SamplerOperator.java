@@ -39,17 +39,17 @@ import java.util.stream.Stream;
 
 public final class SamplerOperator {
 
-   public static Stream<GraphSampleProc.RandomWalkSamplingResult> performSampling(
-        String fromGraphName,
-        String graphName,
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
-        Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider,
-        ExecutionContext executionContext
-    ) {
-        try (var progressTimer = ProgressTimer.start()) {
+   public static Stream<RandomWalkSamplingResult> performSampling(
+       String fromGraphName,
+       String graphName,
+       Map<String, Object> configuration,
+       Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
+       Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider,
+       ExecutionContext executionContext
+   ) {
+       try (var progressTimer = ProgressTimer.start()) {
 
-            var fromGraphStore = graphStoreFromCatalog(fromGraphName, executionContext);
+           var fromGraphStore = graphStoreFromCatalog(fromGraphName, executionContext);
 
             var cypherMap = CypherMapWrapper.create(configuration);
             var samplerConfig = samplerConfigProvider.apply(cypherMap);
@@ -81,14 +81,14 @@ public final class SamplerOperator {
             GraphStoreCatalog.set(rwrProcConfig, sampledGraphStore);
 
             var projectMillis = progressTimer.stop().getDuration();
-            return Stream.of(new GraphSampleProc.RandomWalkSamplingResult(
-                graphName,
-                fromGraphName,
-                sampledGraphStore.nodeCount(),
-                sampledGraphStore.relationshipCount(),
-                samplerAlgorithm.numberOfStartNodes(),
-                projectMillis
-            ));
+           return Stream.of(new RandomWalkSamplingResult(
+               graphName,
+               fromGraphName,
+               sampledGraphStore.nodeCount(),
+               sampledGraphStore.relationshipCount(),
+               samplerAlgorithm.numberOfStartNodes(),
+               projectMillis
+           ));
         }
    }
 

@@ -49,10 +49,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.catalog.GraphSampleProc.CNARW_CONFIG_PROVIDER;
-import static org.neo4j.gds.catalog.GraphSampleProc.CNARW_PROVIDER;
-import static org.neo4j.gds.catalog.GraphSampleProc.RWR_CONFIG_PROVIDER;
-import static org.neo4j.gds.catalog.GraphSampleProc.RWR_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_CONFIG_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
+import static org.neo4j.gds.catalog.SamplerCompanion.RWR_PROVIDER;
 
 @GdlExtension
 class SamplerOperatorTest  {
