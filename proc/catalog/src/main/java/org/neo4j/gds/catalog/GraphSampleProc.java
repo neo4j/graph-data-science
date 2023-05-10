@@ -49,7 +49,6 @@ public class GraphSampleProc extends CatalogProc {
 
         ProcPreconditions.check();
         validateGraphName(username(), graphName);
-        System.out.println(username() + " " + executionContext().username());
         return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
