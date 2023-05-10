@@ -19,15 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.config.RandomWalkWithRestartsProcConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ProcPreconditions;
-import org.neo4j.gds.graphsampling.GraphSampleConstructor;
-import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
@@ -37,7 +29,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -57,11 +48,14 @@ public class GraphSampleProc extends CatalogProc {
 
         ProcPreconditions.check();
         validateGraphName(username(), graphName);
-        return performSampling(
+        return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
             (cypherMapWrapper) -> RandomWalkWithRestartsConfig.of(cypherMapWrapper),
-            (rwrConfig) -> new RandomWalkWithRestarts(rwrConfig)
+            (rwrConfig) -> new RandomWalkWithRestarts(rwrConfig),
+            executionContext(),
+            username(),
+            input -> graphStoreFromCatalog(input)
         );
 
     }
@@ -76,67 +70,18 @@ public class GraphSampleProc extends CatalogProc {
     ) {
         ProcPreconditions.check();
         validateGraphName(username(), graphName);
-        return performSampling(
+        return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
             (cypherMapWrapper) -> CommonNeighbourAwareRandomWalkConfig.of(cypherMapWrapper),
-            (cnarwConfig) -> new CommonNeighbourAwareRandomWalk((CommonNeighbourAwareRandomWalkConfig) cnarwConfig)
+            (cnarwConfig) -> new CommonNeighbourAwareRandomWalk((CommonNeighbourAwareRandomWalkConfig) cnarwConfig),
+            executionContext(),
+            username(),
+            input -> graphStoreFromCatalog(input)
         );
 
     }
 
-    Stream<RandomWalkSamplingResult> performSampling(
-        String fromGraphName,
-        String graphName,
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
-        Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider
-
-    ) {
-        try (var progressTimer = ProgressTimer.start()) {
-
-            var fromGraphStore = graphStoreFromCatalog(fromGraphName);
-
-            var cypherMap = CypherMapWrapper.create(configuration);
-            var samplerConfig = samplerConfigProvider.apply(cypherMap);
-
-            var samplerAlgorithm = samplerAlgorithmProvider.apply(samplerConfig);
-            var progressTracker = new TaskProgressTracker(
-                GraphSampleConstructor.progressTask(fromGraphStore.graphStore(), samplerAlgorithm),
-                executionContext().log(),
-                samplerConfig.concurrency(),
-                samplerConfig.jobId(),
-                executionContext().taskRegistryFactory(),
-                EmptyUserLogRegistryFactory.INSTANCE
-            );
-            var graphSampleConstructor = new GraphSampleConstructor(
-                samplerConfig,
-                fromGraphStore.graphStore(),
-                samplerAlgorithm,
-                progressTracker
-            );
-            var sampledGraphStore = graphSampleConstructor.compute();
-
-            var rwrProcConfig = RandomWalkWithRestartsProcConfig.of(
-                username(),
-                graphName,
-                fromGraphName,
-                fromGraphStore.config(),
-                cypherMap
-            );
-            GraphStoreCatalog.set(rwrProcConfig, sampledGraphStore);
-
-            var projectMillis = progressTimer.stop().getDuration();
-            return Stream.of(new RandomWalkSamplingResult(
-                graphName,
-                fromGraphName,
-                sampledGraphStore.nodeCount(),
-                sampledGraphStore.relationshipCount(),
-                samplerAlgorithm.numberOfStartNodes(),
-                projectMillis
-            ));
-        }
-    }
 
     public static class RandomWalkSamplingResult extends GraphProjectProc.GraphProjectResult {
         public final String fromGraphName;
