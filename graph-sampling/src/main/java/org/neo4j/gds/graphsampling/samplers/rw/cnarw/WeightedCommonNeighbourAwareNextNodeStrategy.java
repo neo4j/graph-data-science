@@ -83,13 +83,11 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     }
 
     private long getCandidateNode(LongArrayBuffer neighs, DoubleArrayBuffer weights) {
-        var sumWeights = 0;
-        for (int i = 0; i < neighs.length; i++)
+        double sumWeights = 0;
+        for (int i = 0; i < neighs.length; i++) {
             sumWeights += weights.buffer[i];
-
-        if (sumWeights == 0) {
-            return rng.nextInt(neighs.length);
         }
+
         var remainingMass = rng.nextDouble(0, sumWeights);
 
         int i = 0;
