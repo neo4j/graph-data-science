@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
@@ -29,6 +31,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -37,6 +40,17 @@ public class GraphSampleProc extends CatalogProc {
 
     private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
     private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
+
+    public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> RWR_CONFIG_PROVIDER =
+        (cypherMapWrapper) -> RandomWalkWithRestartsConfig.of(cypherMapWrapper);
+    public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> CNARW_CONFIG_PROVIDER =
+        (cypherMapWrapper) -> CommonNeighbourAwareRandomWalkConfig.of(cypherMapWrapper);
+
+    public static final Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> RWR_PROVIDER =
+        (rwrConfig) -> new RandomWalkWithRestarts(rwrConfig);
+    public static final Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> CNARW_PROVIDER =
+        (cnarwConfig) -> new CommonNeighbourAwareRandomWalk((CommonNeighbourAwareRandomWalkConfig) cnarwConfig);
+
 
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
     @Description(RWR_DESCRIPTION)
@@ -51,8 +65,8 @@ public class GraphSampleProc extends CatalogProc {
         return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
-            (cypherMapWrapper) -> RandomWalkWithRestartsConfig.of(cypherMapWrapper),
-            (rwrConfig) -> new RandomWalkWithRestarts(rwrConfig),
+            RWR_CONFIG_PROVIDER,
+            RWR_PROVIDER,
             executionContext(),
             username(),
             input -> graphStoreFromCatalog(input)
@@ -73,8 +87,8 @@ public class GraphSampleProc extends CatalogProc {
         return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
-            (cypherMapWrapper) -> CommonNeighbourAwareRandomWalkConfig.of(cypherMapWrapper),
-            (cnarwConfig) -> new CommonNeighbourAwareRandomWalk((CommonNeighbourAwareRandomWalkConfig) cnarwConfig),
+            CNARW_CONFIG_PROVIDER,
+            CNARW_PROVIDER,
             executionContext(),
             username(),
             input -> graphStoreFromCatalog(input)
