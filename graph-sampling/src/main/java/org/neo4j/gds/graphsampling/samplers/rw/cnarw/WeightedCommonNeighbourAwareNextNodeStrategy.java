@@ -51,7 +51,7 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         long candidateNode;
         sortNeighsWithWeights(inputGraph, currentNode, uSortedNeighsIds, uSortedNeighsWeights);
         do {
-            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights.buffer);
+            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights);
             sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsIds, vSortedNeighsWeights);
             var overlap = computeOverlapSimilarity(
                 uSortedNeighsIds, uSortedNeighsWeights,
@@ -82,16 +82,19 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         return similarity;
     }
 
-    private long getCandidateNode(LongArrayBuffer neighs, double[] weights) {
+    private long getCandidateNode(LongArrayBuffer neighs, DoubleArrayBuffer weights) {
         var sumWeights = 0;
         for (int i = 0; i < neighs.length; i++)
-            sumWeights += weights[i];
+            sumWeights += weights.buffer[i];
 
+        if (sumWeights == 0) {
+            return rng.nextInt(neighs.length);
+        }
         var remainingMass = rng.nextDouble(0, sumWeights);
 
         int i = 0;
         while (remainingMass > 0) {
-            remainingMass -= weights[i++];
+            remainingMass -= weights.buffer[i++];
         }
 
         return neighs.buffer[i - 1];
