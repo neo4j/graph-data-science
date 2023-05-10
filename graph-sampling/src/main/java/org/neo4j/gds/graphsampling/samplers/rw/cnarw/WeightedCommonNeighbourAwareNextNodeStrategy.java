@@ -137,37 +137,9 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         if (longArrayIsSorted(longArray, length)) {
             return;
         }
-        if (length < 10) {
-            System.out.println("before");
-            for (int i = 0; i < length; i++) {
-                System.out.print(longArray[i] + ", ");
-            }
-            System.out.println();
-            for (int i = 0; i < length; i++) {
-                System.out.print(doubleArray[i] + ", ");
-            }
-            System.out.println();
-        }
         var order = IndirectSort.mergesort(0, length, new AscendingLongComparator(longArray));
         for (int i = 0; i < length; i++) {
             swap(longArray, doubleArray, i, order[i]);
-        }
-
-        System.out.println("length = " + length);
-        if (length < 10) {
-            System.out.println("after");
-            for (int i = 0; i < length; i++) {
-                System.out.print(order[i] + ", ");
-            }
-            System.out.println();
-            for (int i = 0; i < length; i++) {
-                System.out.print(longArray[i] + ", ");
-            }
-            System.out.println();
-            for (int i = 0; i < length; i++) {
-                System.out.print(doubleArray[i] + ", ");
-            }
-            System.out.println();
         }
     }
 
