@@ -73,7 +73,7 @@ class WriteConfigTest {
             List.of()
         ));
 
-        if (testGraphStore.capabilities().canWriteToDatabase()) {
+        if (testGraphStore.capabilities().canWriteToDatabase() || testGraphStore.capabilities().canWriteToRemoteDatabase()) {
             assertion.doesNotThrowAnyException();
         } else {
             assertion
