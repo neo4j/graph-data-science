@@ -22,15 +22,66 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@GdlExtension
 class GraphWriteNodePropertiesConfigTest {
+
+    @GdlGraph(graphNamePrefix = "propertiesSubset")
+    private static final String GDL_PROPERTIES_SUBSET =
+        "CREATE" +
+            "  (a:A {nodeProp1: 0, nodeProp2: 42})" +
+            ", (b:A {nodeProp1: 1, nodeProp2: 43})" +
+            ", (c:A {nodeProp1: 2, nodeProp2: 44})" +
+            ", (d:B {nodeProp1: 3})" +
+            ", (e:B {nodeProp1: 4})" +
+            ", (f:B {nodeProp1: 5})";
+
+    @Inject
+    private GraphStore propertiesSubsetGraphStore;
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("nodeLabels")
+    void validNodeLabels(Object nodeLabelsToValidate, String displayName) {
+        var config = GraphWriteNodePropertiesConfig.of(
+            "propertiesSubsetGraph",
+            List.of("nodeProp1", "nodeProp2"),
+            nodeLabelsToValidate,
+            CypherMapWrapper.empty()
+        );
+
+        var validNodeLabels = config.validNodeLabels(propertiesSubsetGraphStore);
+
+        assertThat(validNodeLabels)
+            .hasSize(1)
+            .satisfiesExactly(nodeLabel -> {
+                    assertThat(propertiesSubsetGraphStore.nodePropertyKeys(nodeLabel))
+                        .as("NodeLabel `%s` does not contain all requested properties", nodeLabel.name())
+                        .containsExactlyInAnyOrder("nodeProp1", "nodeProp2");
+                }
+            )
+            .as("Valid node labels are the only the ones containing all of the requested node properties")
+            .containsExactly(NodeLabel.of("A"));
+    }
+
+    public static Stream<Arguments> nodeLabels() {
+        return Stream.of(
+            Arguments.of("*", "Implicit `all labels`"),
+            Arguments.of(List.of("A", "B"), "Explicit `all labels`")
+        );
+    }
 
     @MethodSource("inputs")
     @ParameterizedTest
@@ -50,4 +101,5 @@ class GraphWriteNodePropertiesConfigTest {
             Arguments.of(Map.of("concurrency", 2, "writeConcurrency", 3), 2, 3)
         );
     }
+
 }
