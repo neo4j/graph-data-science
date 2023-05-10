@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
+import com.carrotsearch.hppc.sorting.IndirectComparator;
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.compress.DoubleArrayBuffer;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
@@ -132,29 +134,70 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     private static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
         assert longArray.length >= length;
         assert doubleArray.length >= length;
-        quickSortLongsWithDoubles(longArray, doubleArray, 0, length - 1);
-    }
-
-    private static void quickSortLongsWithDoubles(long[] longArray, double[] doubleArray, int lo, int hi) {
-        if (lo >= hi) {
+        if (longArrayIsSorted(longArray, length)) {
             return;
         }
-        int p = partition(longArray, doubleArray, lo, hi);
-        quickSortLongsWithDoubles(longArray, doubleArray, lo, p - 1);
-        quickSortLongsWithDoubles(longArray, doubleArray, p + 1, hi);
+        if (length < 10) {
+            System.out.println("before");
+            for (int i = 0; i < length; i++) {
+                System.out.print(longArray[i] + ", ");
+            }
+            System.out.println();
+            for (int i = 0; i < length; i++) {
+                System.out.print(doubleArray[i] + ", ");
+            }
+            System.out.println();
+        }
+        var order = IndirectSort.mergesort(0, length, new AscendingLongComparator(longArray));
+        for (int i = 0; i < length; i++) {
+            swap(longArray, doubleArray, i, order[i]);
+        }
+
+        System.out.println("length = " + length);
+        if (length < 10) {
+            System.out.println("after");
+            for (int i = 0; i < length; i++) {
+                System.out.print(order[i] + ", ");
+            }
+            System.out.println();
+            for (int i = 0; i < length; i++) {
+                System.out.print(longArray[i] + ", ");
+            }
+            System.out.println();
+            for (int i = 0; i < length; i++) {
+                System.out.print(doubleArray[i] + ", ");
+            }
+            System.out.println();
+        }
     }
 
-    private static int partition(long[] longArray, double[] doubleArray, int lo, int hi) {
-        long pivot = longArray[hi];
-        int i = lo;
-        for (int j = lo; j < hi; j++) {
-            if (longArray[j] < pivot) {
-                swap(longArray, doubleArray, i, j);
-                i++;
+    private static boolean longArrayIsSorted(long[] longArray, int length) {
+        if (length <= 1) return true;
+        for (int i = 0; i < length - 1; i++) {
+            if (longArray[i] > longArray[i + 1]) {
+                return false;
             }
         }
-        swap(longArray, doubleArray, i, hi);
-        return i;
+        return true;
+    }
+
+    public static class AscendingLongComparator implements IndirectComparator {
+        private final long[] array;
+
+        public AscendingLongComparator(long[] array) {
+            this.array = array;
+        }
+
+        public int compare(int indexA, int indexB) {
+            final long a = array[indexA];
+            final long b = array[indexB];
+
+            if (a < b)
+                return -1;
+            if (a > b)
+                return 1;
+            return 0;
+        }
     }
 
     private static void swap(long[] l, double[] d, int i, int j) {
