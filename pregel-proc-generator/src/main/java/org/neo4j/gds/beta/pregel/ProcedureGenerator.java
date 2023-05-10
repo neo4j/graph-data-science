@@ -28,12 +28,8 @@ import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -233,51 +229,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec algorithmFactoryMethod(ClassName algorithmClassName) {
-        TypeSpec anonymousFactoryType = TypeSpec.anonymousClassBuilder("")
-            .superclass(ParameterizedTypeName.get(
-                ClassName.get(GraphAlgorithmFactory.class),
-                algorithmClassName,
-                pregelSpec.configTypeName()
-            ))
-            .addMethod(MethodSpec.methodBuilder("build")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(Graph.class, "graph")
-                .addParameter(pregelSpec.configTypeName(), "configuration")
-                .addParameter(ProgressTracker.class, "progressTracker")
-                .returns(algorithmClassName)
-                .addStatement("return new $T(graph, configuration, progressTracker)", algorithmClassName)
-                .build()
-            )
-            .addMethod(MethodSpec.methodBuilder("taskName")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(String.class)
-                .addStatement("return $T.class.getSimpleName()", algorithmClassName)
-                .build()
-            )
-            .addMethod(MethodSpec.methodBuilder("progressTask")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(Graph.class, "graph")
-                .addParameter(pregelSpec.configTypeName(), "configuration")
-                .returns(Task.class)
-                .addStatement("return Pregel.progressTask(graph, configuration)", algorithmClassName)
-                .build())
-            .addMethod(MethodSpec.methodBuilder("memoryEstimation")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(MemoryEstimation.class)
-                .addParameter(pregelSpec.configTypeName(), "configuration")
-                .addStatement("var computation = new $T()", computationClassName(pregelSpec, ""))
-                .addStatement(
-                    "return $T.memoryEstimation(computation.schema(configuration), computation.reducer().isEmpty(), configuration.isAsynchronous())",
-                    Pregel.class
-                )
-                .build()
-            )
-            .build();
-
+        var factoryClassName = computationClassName(pregelSpec, ALGORITHM_FACTORY_SUFFIX);
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -287,7 +239,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 algorithmClassName,
                 pregelSpec.configTypeName()
             ))
-            .addStatement("return $L", anonymousFactoryType)
+            .addStatement("return new $T()", factoryClassName)
             .build();
     }
 

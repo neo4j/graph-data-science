@@ -24,14 +24,9 @@ import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -88,29 +83,7 @@ public final class BidirectionalComputationStreamProc extends PregelStreamProc<B
     public GraphAlgorithmFactory<BidirectionalComputationAlgorithm, PregelProcedureConfig> algorithmFactory(
         ExecutionContext executionContext
     ) {
-        return new GraphAlgorithmFactory<BidirectionalComputationAlgorithm, PregelProcedureConfig>() {
-            @Override
-            public BidirectionalComputationAlgorithm build(Graph graph,
-                                                           PregelProcedureConfig configuration, ProgressTracker progressTracker) {
-                return new BidirectionalComputationAlgorithm(graph, configuration, progressTracker);
-            }
-
-            @Override
-            public String taskName() {
-                return BidirectionalComputationAlgorithm.class.getSimpleName();
-            }
-
-            @Override
-            public Task progressTask(Graph graph, PregelProcedureConfig configuration) {
-                return Pregel.progressTask(graph, configuration);
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
-                var computation = new BidirectionalComputation();
-                return Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isEmpty(), configuration.isAsynchronous());
-            }
-        };
+        return new BidirectionalComputationAlgorithmFactory();
     }
 
     @Override

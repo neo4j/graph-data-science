@@ -37,6 +37,7 @@ class PregelGenerator {
 
     static final String PROCEDURE_SUFFIX = "Proc";
     static final String ALGORITHM_SUFFIX = "Algorithm";
+    static final String ALGORITHM_FACTORY_SUFFIX = ALGORITHM_SUFFIX + "Factory";
 
     private final Elements elementUtils;
     private final SourceVersion sourceVersion;
@@ -55,7 +56,10 @@ class PregelGenerator {
 
     List<JavaFile> generate(PregelValidation.Spec pregelSpec) {
         return Stream.concat(
-            Stream.of(new AlgorithmGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec()),
+            Stream.of(
+                new AlgorithmGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec(),
+                new AlgorithmFactoryGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec()
+            ),
             Arrays
                 .stream(pregelSpec.procedureModes())
                 .map(mode -> ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec))
