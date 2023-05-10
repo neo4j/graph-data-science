@@ -72,7 +72,7 @@ class GraphWriteNodePropertiesConfigTest {
                         .containsExactlyInAnyOrder("nodeProp1", "nodeProp2");
                 }
             )
-            .as("Valid node labels are the only the ones containing all of the requested node properties")
+            .as("Valid node labels are only the ones containing all of the requested node properties")
             .containsExactly(NodeLabel.of("A"));
     }
 

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -38,6 +38,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
@@ -51,7 +52,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -59,7 +59,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestProcedureRunner.applyOnProcedure;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
@@ -133,24 +132,44 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @ParameterizedTest
+
+    @Test
+    void shouldLogDeprecationWarning() {
+        runQuery(
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES)
+        );
+
+        assertThat(userLogStore.query(getUsername()))
+            .hasSize(1)
+            .first()
+            .extracting(UserLogEntry::getMessage)
+            .asString()
+            .contains("deprecated")
+            .contains("gds.graph.nodeProperties.write");
+    }
+
+    @Deprecated(forRemoval = true)
+    @Disabled("Tested in NodePropertiesWriterTest")@ParameterizedTest
     @ValueSource(strings = {
         // no labels -> defaults to PROJECT_ALL
         "CALL gds.graph.nodeProperties.write(" +
-        "   '%s', " +
+        "   $graphName, " +
         "   ['newNodeProp1', 'newNodeProp2']" +
         ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
         // explicit PROJECT_ALL
         "CALL gds.graph.nodeProperties.write(" +
-        "   '%s', " +
+        "   $graphName, " +
         "   ['newNodeProp1', 'newNodeProp2'], " +
         "   ['*']" +
         ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten"
     })
-    void writeLoadedNodeProperties(String graphWriteQueryTemplate) {
-        String graphWriteQuery = formatWithLocale(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
+    void writeLoadedNodeProperties(String graphWriteQuery) {
+        // FIXME: This is actually tested/should-be-tested in the individual NodePropertyExporter implementations
+        runQueryWithRowConsumer(
+            graphWriteQuery,
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
+            row -> {
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
             assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
             assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
@@ -174,6 +193,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ));
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("Tested in NodePropertiesWriterTest")
     @Test
     void writeLoadedNodePropertiesForLabel() {
         assertCypherResult(
@@ -205,6 +226,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ));
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("Tested in NodePropertiesWriterTest")
     @Test
     void writeLoadedNodePropertiesForLabelSubset() {
         assertCypherResult(
@@ -236,6 +259,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ));
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("Shouldn't test the procedure input format, it's Neo4j Procedure framework job")
     @Test
     void writeShouldComplainWithInvalidInput() {
 
@@ -246,6 +271,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("Shouldn't test the procedure input format, it's Neo4j Procedure framework job")
     @Test
     void writeShouldComplainWithInvalidInputForNodeLabels() {
 
@@ -256,6 +283,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("What is the purpose of this test? The write doesn't distinguish how a property ended in the GraphStore, it is oblivious of the mutation existence.")
     @Test
     void writeMutatedNodeProperties() {
         long expectedPropertyCount = 6;
@@ -292,6 +321,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ));
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("This is actually tested/should-be-tested in the individual NodePropertyExporter implementations")
     @Test
     void shouldLogProgressForIndividualLabels() {
         var log = Neo4jProxy.testLog();
@@ -322,6 +353,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             );
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("This should be in the configuration test")
     @Test
     void shouldFailOnNonExistingNodeProperties() {
         assertError(
@@ -331,6 +364,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("This should be in the configuration test")
     @Test
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
         assertError(
@@ -346,19 +381,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void shouldLogDeprecationWarning() {
-        runQuery(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES)
-        );
-        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
-        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
-        Assertions.assertThat(userLogEntries.get(0).getMessage())
-            .contains("deprecated")
-            .contains("gds.graph.nodeProperties.write");
-    }
-
+    @Deprecated(forRemoval = true)
+    @Disabled("Tested in NodePropertiesWriterTest")
     @Test
     void shouldRenameSingleProperly() {
         long expectedPropertyCount = 6;
@@ -397,6 +421,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ));
     }
 
+    @Deprecated(forRemoval = true)
+    @Disabled("Tested in NodePropertiesWriterTest")
     @Test
     void shouldRenameMultipleProperties() {
         assertCypherResult(

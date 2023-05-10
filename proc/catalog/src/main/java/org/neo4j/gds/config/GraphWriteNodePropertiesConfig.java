@@ -104,14 +104,14 @@ public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfi
      */
     @Configuration.Ignore
     default Collection<NodeLabel> validNodeLabels(GraphStore graphStore) {
-        List<String> allProperties = nodeProperties()
+        List<String> nodePropertiesRequestedByUser = nodeProperties()
             .stream()
-            .map(v -> v.nodeProperty())
+            .map(UserInputWriteProperties.PropertySpec::nodeProperty)
             .collect(Collectors.toList());
 
         return nodeLabelIdentifiers(graphStore)
             .stream()
-            .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(allProperties))
+            .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(nodePropertiesRequestedByUser))
             .collect(Collectors.toList());
 
     }
