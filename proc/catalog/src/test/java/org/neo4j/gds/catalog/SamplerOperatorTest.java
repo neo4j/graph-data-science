@@ -120,9 +120,7 @@ class SamplerOperatorTest  {
             mapConfiguration,
             RWR_CONFIG_PROVIDER,
             RWR_PROVIDER,
-            executionContext,
-            executionContext.username(),
-            input -> graphStoreFromCatalog(input, executionContext)
+            executionContext
         ).findFirst().get();
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
@@ -133,8 +131,10 @@ class SamplerOperatorTest  {
             "sample"
         )).isTrue();
 
-        var sampledGraphStore = GraphStoreCatalog.get(executionContext.username(),
-            executionContext.databaseId().databaseName(), "sample"
+        var sampledGraphStore = GraphStoreCatalog.get(
+            executionContext.username(),
+            executionContext.databaseId().databaseName(),
+            "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
     }
@@ -149,9 +149,7 @@ class SamplerOperatorTest  {
             mapConfiguration,
             CNARW_CONFIG_PROVIDER,
             CNARW_PROVIDER,
-            executionContext,
-            executionContext.username(),
-            input -> graphStoreFromCatalog(input, executionContext)
+            executionContext
         ).findFirst().get();
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
@@ -161,8 +159,10 @@ class SamplerOperatorTest  {
             "sample"
         )).isTrue();
 
-        var sampledGraphStore = GraphStoreCatalog.get(executionContext.username(),
-            executionContext.databaseId().databaseName(), "sample"
+        var sampledGraphStore = GraphStoreCatalog.get(
+            executionContext.username(),
+            executionContext.databaseId().databaseName(),
+            "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
     }

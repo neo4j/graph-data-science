@@ -45,14 +45,11 @@ public final class SamplerOperator {
         Map<String, Object> configuration,
         Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
         Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider,
-        ExecutionContext executionContext,
-        String username,
-       Function<String,GraphStoreWithConfig> graphStoreFromCatalog
-
+        ExecutionContext executionContext
     ) {
         try (var progressTimer = ProgressTimer.start()) {
 
-            var fromGraphStore = graphStoreFromCatalog.apply(fromGraphName);
+            var fromGraphStore = graphStoreFromCatalog(fromGraphName, executionContext);
 
             var cypherMap = CypherMapWrapper.create(configuration);
             var samplerConfig = samplerConfigProvider.apply(cypherMap);
@@ -75,7 +72,7 @@ public final class SamplerOperator {
             var sampledGraphStore = graphSampleConstructor.compute();
 
             var rwrProcConfig = RandomWalkWithRestartsProcConfig.of(
-                username,
+                executionContext.username(),
                 graphName,
                 fromGraphName,
                 fromGraphStore.config(),
@@ -93,13 +90,14 @@ public final class SamplerOperator {
                 projectMillis
             ));
         }
-    }
-    GraphStoreWithConfig graphStoreFromCatalog(String graphName,ExecutionContext executionContext,String username,boolean isGdsAdmin) {
+   }
+
+    static GraphStoreWithConfig graphStoreFromCatalog(String graphName, ExecutionContext executionContext) {
         var catalogRequest = ImmutableCatalogRequest.of(
             executionContext.databaseId().databaseName(),
-            username,
+            executionContext.username(),
             Optional.empty(),
-            isGdsAdmin
+            executionContext.isGdsAdmin()
         );
         return GraphStoreCatalog.get(catalogRequest, graphName);
     }

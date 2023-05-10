@@ -62,14 +62,13 @@ public class GraphSampleProc extends CatalogProc {
 
         ProcPreconditions.check();
         validateGraphName(username(), graphName);
+        System.out.println(username() + " " + executionContext().username());
         return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
             RWR_CONFIG_PROVIDER,
             RWR_PROVIDER,
-            executionContext(),
-            username(),
-            input -> graphStoreFromCatalog(input)
+            executionContext()
         );
 
     }
@@ -89,9 +88,7 @@ public class GraphSampleProc extends CatalogProc {
             graphName, configuration,
             CNARW_CONFIG_PROVIDER,
             CNARW_PROVIDER,
-            executionContext(),
-            username(),
-            input -> graphStoreFromCatalog(input)
+            executionContext()
         );
 
     }
