@@ -22,8 +22,6 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
@@ -83,22 +81,7 @@ class GraphSampleProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {"0.28,1", "0.35,2"})
-    void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
-        runQuery("CALL gds.graph.project('g', '*', '*')");
 
-        var query =
-            "MATCH (z:Z {prop: 42})" +
-            " CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: $samplingRatio, startNodes: [id(z)], concurrency: 1, randomSeed: 42} )" +
-            " YIELD startNodeCount RETURN startNodeCount";
-        assertCypherResult(query, Map.of("samplingRatio", samplingRatio), List.of(
-            Map.of("startNodeCount", expectedStartNodeCount)
-        ));
-        assertGraphExists("sample");
-    }
-
-    
     @Test
     void shouldListCorrectGraphProjectionConfigRWR() {
         runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
@@ -143,22 +126,7 @@ class GraphSampleProcTest extends BaseProcTest {
             .hasRootCauseInstanceOf(IllegalArgumentException.class);
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {"0.28,1", "0.35,2"})
-    void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
-        runQuery("CALL gds.graph.project('g', '*', '*')");
-
-        var query =
-            "MATCH (z:Z {prop: 42})" +
-            " CALL gds.alpha.graph.sample.cnarw('sample', 'g', {samplingRatio: $samplingRatio, startNodes: [id(z)], concurrency: 1, randomSeed: 42} )" +
-            " YIELD startNodeCount RETURN startNodeCount";
-        assertCypherResult(query, Map.of("samplingRatio", samplingRatio), List.of(
-            Map.of("startNodeCount", expectedStartNodeCount)
-        ));
-        assertGraphExists("sample");
-    }
-
-
+    
     @Test
     void shouldListCorrectGraphProjectionConfigCNARW() {
         runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");

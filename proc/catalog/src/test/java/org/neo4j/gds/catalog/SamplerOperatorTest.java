@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -34,18 +35,16 @@ import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +57,7 @@ import static org.neo4j.gds.catalog.GraphSampleProc.RWR_PROVIDER;
 @GdlExtension
 class SamplerOperatorTest  {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =
         "CREATE" +
             "  (x:Z {prop: 42})" +
@@ -91,6 +90,8 @@ class SamplerOperatorTest  {
     @Inject
     private GraphStore graphStore;
 
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() {
@@ -166,7 +167,68 @@ class SamplerOperatorTest  {
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
     }
-    
+
+    @ParameterizedTest
+    @CsvSource(value = {"0.28,1", "0.35,2"})
+    void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
+        var x = idFunction.of("x");
+
+        var executionContext = executionContextBuilder()
+            .build();
+
+        var result = SamplerOperator.performSampling("graph", "sample",
+            Map.of(
+                "samplingRatio", samplingRatio,
+                "concurrency", 1,
+                "startNodes", List.of(x),
+                "randomSeed", 42l
+            ),
+            RWR_CONFIG_PROVIDER,
+            RWR_PROVIDER,
+            executionContext
+        ).findFirst().get();
+
+        assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
+
+        assertThat(GraphStoreCatalog.exists(
+            executionContext.username(),
+            executionContext.databaseId().databaseName(),
+            "sample"
+        )).isTrue();
+
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"0.28,1", "0.35,2"})
+    void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
+        var x = idFunction.of("x");
+
+        var executionContext = executionContextBuilder()
+            .build();
+
+        var result = SamplerOperator.performSampling("graph", "sample",
+            Map.of(
+                "samplingRatio", samplingRatio,
+                "concurrency", 1,
+                "startNodes", List.of(x),
+                "randomSeed", 42l
+            ),
+            CNARW_CONFIG_PROVIDER,
+            CNARW_PROVIDER,
+            executionContext
+        ).findFirst().get();
+
+        assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
+
+        assertThat(GraphStoreCatalog.exists(
+            executionContext.username(),
+            executionContext.databaseId().databaseName(),
+            "sample"
+        )).isTrue();
+
+    }
+
+
     private ImmutableExecutionContext.Builder executionContextBuilder() {
         return ImmutableExecutionContext
             .builder()
@@ -182,16 +244,6 @@ class SamplerOperatorTest  {
             .nodeLookup(NodeLookup.EMPTY)
             .log(Neo4jProxy.testLog())
             .isGdsAdmin(false);
-    }
-
-    GraphStoreWithConfig graphStoreFromCatalog(String graphName, ExecutionContext executionContext) {
-        var catalogRequest = ImmutableCatalogRequest.of(
-            executionContext.databaseId().databaseName(),
-            executionContext.username(),
-            Optional.empty(),
-            executionContext.isGdsAdmin()
-        );
-        return GraphStoreCatalog.get(catalogRequest, graphName);
     }
 
 }
