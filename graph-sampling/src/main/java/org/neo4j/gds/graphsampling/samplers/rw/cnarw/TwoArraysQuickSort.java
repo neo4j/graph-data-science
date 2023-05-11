@@ -20,6 +20,8 @@
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
 public class TwoArraysQuickSort {
+    private TwoArraysQuickSort() {}
+
     /**
      * Sort two arrays simultaneously based on values of the first (long) array.
      * E.g. {[4, 1, 8], [0.5, 1.9, 0.9]} -> {[1, 4, 8], [1,9, 0.5, 0.9]}
@@ -31,7 +33,18 @@ public class TwoArraysQuickSort {
     static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
         assert longArray.length >= length;
         assert doubleArray.length >= length;
+        if (checkIfSorted(longArray, length) == true) {
+            return;
+        }
         quickSortLongsWithDoubles(longArray, doubleArray, 0, length - 1);
+    }
+
+    private static boolean checkIfSorted(long[] longArray, int length) {
+        for (int i = 0; i < length - 1; i++) {
+            if (longArray[i] > longArray[i + 1])
+                return false;
+        }
+        return true;
     }
 
     private static void quickSortLongsWithDoubles(long[] longArray, double[] doubleArray, int lo, int hi) {
