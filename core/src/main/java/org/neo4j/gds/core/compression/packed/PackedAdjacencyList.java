@@ -128,7 +128,7 @@ public class PackedAdjacencyList implements AdjacencyList {
         this.allocationHistogram = allocationHistogram;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
 
-        switch (System.getProperty("gds.compression", "varlong")) {
+        switch (System.getProperty("gds.compression", "packed")) {
             case "varlong":
                 this.newCursor = PackedAdjacencyList::newCursorWithVarLongTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLongTail;

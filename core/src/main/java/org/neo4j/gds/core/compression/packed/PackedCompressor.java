@@ -138,6 +138,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final ModifiableSlice<long[]> propertySlice;
     private final MutableInt degree;
 
+    private final boolean packed;
+
     private PackedCompressor(
         AdjacencyListBuilder.Allocator<Address> adjacencyAllocator,
         @Nullable AdjacencyListBuilder.Allocator<long[]> firstPropertyAllocator,
@@ -165,6 +167,17 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.adjacencySlice = ModifiableSlice.create();
         this.propertySlice = ModifiableSlice.create();
         this.degree = new MutableInt(0);
+
+        switch (System.getProperty("gds.compression", "packed")) {
+            case "varlong":
+                this.packed = false;
+                break;
+            case "packed":
+                this.packed = true;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown compression type");
+        }
     }
 
     @Override
@@ -214,19 +227,34 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
         long[] targets = this.buffer.buffer;
         int targetsLength = this.buffer.length;
-
-        long offset = AdjacencyPacker.compressWithPropertiesWithPackedTail(
-            this.adjacencyAllocator,
-            this.adjacencySlice,
-            targets,
-            uncompressedPropertiesPerProperty,
-            targetsLength,
-            this.aggregations,
-            this.noAggregation,
-            this.degree,
-            this.headerBitsHistogram,
-            this.valueAllocationHistogram
-        );
+        long offset;
+        if (this.packed) {
+            offset = AdjacencyPacker.compressWithPropertiesWithPackedTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                uncompressedPropertiesPerProperty,
+                targetsLength,
+                this.aggregations,
+                this.noAggregation,
+                this.degree,
+                this.headerBitsHistogram,
+                this.valueAllocationHistogram
+            );
+        } else {
+            offset = AdjacencyPacker.compressWithPropertiesWithVarLongTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                uncompressedPropertiesPerProperty,
+                targetsLength,
+                this.aggregations,
+                this.noAggregation,
+                this.degree,
+                this.headerBitsHistogram,
+                this.valueAllocationHistogram
+            );
+        }
 
         int degree = this.degree.intValue();
 
@@ -256,16 +284,31 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[] targets = this.buffer.buffer;
         int targetsLength = this.buffer.length;
 
-        long offset = AdjacencyPacker.compressWithPackedTail(
-            this.adjacencyAllocator,
-            this.adjacencySlice,
-            targets,
-            targetsLength,
-            this.aggregations[0],
-            this.degree,
-            this.headerBitsHistogram,
-            this.valueAllocationHistogram
-        );
+        long offset;
+
+        if (this.packed) {
+            offset = AdjacencyPacker.compressWithPackedTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                targetsLength,
+                this.aggregations[0],
+                this.degree,
+                this.headerBitsHistogram,
+                this.valueAllocationHistogram
+            );
+        } else {
+            offset = AdjacencyPacker.compressWithVarLongTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                targetsLength,
+                this.aggregations[0],
+                this.degree,
+                this.headerBitsHistogram,
+                this.valueAllocationHistogram
+            );
+        }
 
         int degree = this.degree.intValue();
 
