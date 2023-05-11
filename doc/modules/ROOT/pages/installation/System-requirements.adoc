@@ -88,6 +88,6 @@ The maximum concurrency that can be used is limited depending on the license und
 
 * Neo4j Graph Data Science Library - Enterprise Edition (GDS EE)
 ** The maximum concurrency in the library is unlimited.
-To register for a license, please contact Neo4j at https://neo4j.com/contact-us/?ref=graph-data-science.
+To register for a license, please visit https://neo4j.com/contact-us/?ref=graph-data-science[neo4j.com].
 
 NOTE: Concurrency limits are determined based on whether you have a GDS EE license, or if you are using GDS CE. The maximum concurrency limit in the graph data science library is not set based on your edition of the Neo4j database.
