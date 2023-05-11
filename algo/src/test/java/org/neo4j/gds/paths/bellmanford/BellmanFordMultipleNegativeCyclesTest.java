@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -60,20 +59,17 @@ class BellmanFordMultipleNegativeCyclesTest {
         @Inject
         private TestGraph graph;
 
-        @Inject
-        private IdFunction idFunction;
-
 
         @Test
         void shouldReturnNegativeCycles() {
             long[] a = new long[]{
-                idFunction.of("a0"),
-                idFunction.of("a1"),
-                idFunction.of("a2"),
-                idFunction.of("a3"),
-                idFunction.of("a4"),
-                idFunction.of("a5"),
-                idFunction.of("a6"),
+                graph.toMappedNodeId("a0"),
+                graph.toMappedNodeId("a1"),
+                graph.toMappedNodeId("a2"),
+                graph.toMappedNodeId("a3"),
+                graph.toMappedNodeId("a4"),
+                graph.toMappedNodeId("a5"),
+                graph.toMappedNodeId("a6"),
             };
             var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 4).compute();
 

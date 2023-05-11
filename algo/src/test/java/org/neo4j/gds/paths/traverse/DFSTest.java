@@ -103,7 +103,7 @@ class DFSTest {
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
-            Stream.of("a", "c", "d", "f", "g").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("a", "c", "d", "f", "g").mapToLong(naturalGraph::toMappedNodeId).toArray()
         );
     }
 
@@ -124,7 +124,7 @@ class DFSTest {
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
-            Stream.of("a", "c", "d", "f", "g", "e", "b").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("a", "c", "d", "f", "g", "e", "b").mapToLong(naturalGraph::toMappedNodeId).toArray()
         );
     }
 
@@ -146,7 +146,7 @@ class DFSTest {
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
-            Stream.of("g", "f", "d", "c", "a").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("g", "f", "d", "c", "a").mapToLong(naturalGraph::toMappedNodeId).toArray()
         );
     }
 
@@ -163,7 +163,7 @@ class DFSTest {
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
-            Stream.of("a", "c", "d", "f", "e", "b").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("a", "c", "d", "f", "e", "b").mapToLong(naturalGraph::toMappedNodeId).toArray()
         );
     }
 

@@ -213,7 +213,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
                 expected(idFunction, 3, new double[]{0.0, 1.0, 2.0}, "a", "c", "e"),
                 expected(idFunction, 5, new double[]{0.0, 1.0, 2.0, 3.0}, "a", "b", "d", "f")
             );
-            var sourceNode = graph.toOriginalNodeId("a");
+            var sourceNode = graph.toMappedNodeId("a");
 
             var paths = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, sourceNode, true, true, concurrency)
                 .compute()
