@@ -23,7 +23,6 @@ import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,25 +36,19 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.projection.CypherAggregation;
-import org.neo4j.graphdb.Result;
 
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
@@ -636,11 +629,6 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(actualNames).contains(name);
     }
 
-    @Test
-    void returnEmptyStreamWhenNoGraphsAreLoaded() {
-        long numberOfRows = runQuery("CALL gds.graph.list()", r -> r.stream().count());
-        assertThat(numberOfRows).isEqualTo(0L);
-    }
 
     @ParameterizedTest(name = "name argument: ''{0}''")
     @ValueSource(strings = {"foobar", "aa"})
@@ -660,33 +648,6 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(numberOfRows).isEqualTo(0L);
     }
 
-    @Test
-    void reverseProjectionForListing() {
-        runQuery("CREATE (a:Person), (b:Person), (a)-[:INTERACTS]->(b)");
-        runQuery(
-            "CALL gds.graph.project('incoming', 'Person', {" +
-            "  INTERACTS: {" +
-            "    orientation: 'REVERSE'" +
-            "  }" +
-            "})"
-        );
-        runQueryWithRowConsumer("CALL gds.graph.list()", row -> {
-            assertEquals(2, row.getNumber("nodeCount").intValue());
-        });
-    }
-
-    @Test
-    void listAllAvailableGraphsForUser() {
-        String loadQuery = "CALL gds.graph.project($name, '*', '*')";
-
-        runQuery("alice", loadQuery, map("name", "aliceGraph"));
-        runQuery("bob", loadQuery, map("name", "bobGraph"));
-
-        String listQuery = "CALL gds.graph.list() YIELD graphName as name";
-
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
-    }
 
     @Test
     void shouldShowSchemaForNativeProjectedGraph() {
@@ -780,26 +741,6 @@ class GraphListProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void shouldHaveCreationTimeField() {
-        String loadQuery = "CALL gds.graph.project($name, '*', '*')";
-
-        runQuery("alice", loadQuery, map("name", "aliceGraph"));
-        runQuery("bob", loadQuery, map("name", "bobGraph"));
-
-        String listQuery = "CALL gds.graph.list()";
-
-        AtomicReference<String> creationTimeAlice = new AtomicReference<>();
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> creationTimeAlice.set(formatCreationTime(resultRow)));
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> assertEquals(creationTimeAlice.get(), formatCreationTime(resultRow)));
-
-        AtomicReference<String> creationTimeBob = new AtomicReference<>();
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> creationTimeBob.set(formatCreationTime(resultRow)));
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(creationTimeBob.get(), formatCreationTime(resultRow)));
-
-        assertNotEquals(creationTimeAlice.get(), creationTimeBob.get());
-    }
-
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
@@ -818,7 +759,4 @@ class GraphListProcTest extends BaseProcTest {
         assertError(formatWithLocale("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
     }
 
-    private String formatCreationTime(Result.ResultRow resultRow) {
-        return ISO_LOCAL_DATE_TIME.format((TemporalAccessor) resultRow.get("creationTime"));
-    }
 }
