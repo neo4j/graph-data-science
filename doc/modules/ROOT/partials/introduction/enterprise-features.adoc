@@ -10,11 +10,11 @@ See xref:operations-reference/configuration-settings.adoc#gds.enterprise.license
 ** Includes all algorithms.
 ** Limits the catalog operations to manage graphs and models.
 Unavailable operations are listed under the Enterprise Edition below.
-** Limits the concurrency to 4 CPU cores.
+** Limits the xref:installation/System-requirements.adoc#system-requirements-cpu[concurrency to 4 CPU cores].
 ** Limits the capacity of the model catalog to 3 models.
 
 * The Neo4j Graph Data Science library Enterprise Edition:
-** Supports running on any amount of CPU cores.
+** Supports running on xref:installation/System-requirements.adoc#system-requirements-cpu[any amount of CPU cores].
 ** Supports running GDS write workloads as part of a xref::production-deployment/neo4j-cluster.adoc[Neo4j cluster deployment].
 ** Supports capacity and load xref::common-usage/monitoring-system.adoc[monitoring].
 ** Supports extended graph catalog features, including:
@@ -26,5 +26,3 @@ Unavailable operations are listed under the Enterprise Edition below.
 *** Model xref:model-catalog/store.adoc#model-catalog-store-ops[persistence to disk].
 ** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation], enabled by default.
 ** Supports the configuration of xref:production-deployment/defaults-and-limits.adoc[defaults and limits].
-
-For more information see xref:installation/System-requirements.adoc#system-requirements-cpu[System Requirements - CPU].
