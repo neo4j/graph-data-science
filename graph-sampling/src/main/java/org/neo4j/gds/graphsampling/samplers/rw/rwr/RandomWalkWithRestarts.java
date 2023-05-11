@@ -140,7 +140,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
     }
 
     @Override
-    public long numberOfStartNodes() {
+    public long startNodesCount() {
         return startNodesUsed.size();
     }
 

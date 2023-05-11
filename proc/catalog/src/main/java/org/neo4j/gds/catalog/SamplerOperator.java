@@ -86,7 +86,7 @@ public final class SamplerOperator {
                fromGraphName,
                sampledGraphStore.nodeCount(),
                sampledGraphStore.relationshipCount(),
-               samplerAlgorithm.numberOfStartNodes(),
+               samplerAlgorithm.startNodesCount(),
                projectMillis
            ));
         }

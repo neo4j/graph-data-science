@@ -120,7 +120,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
     }
 
     @Override
-    public long numberOfStartNodes() {
+    public long startNodesCount() {
         return startNodesUsed.size();
     }
 
