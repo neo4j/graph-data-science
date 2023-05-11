@@ -38,6 +38,7 @@ class PregelGenerator {
     static final String PROCEDURE_SUFFIX = "Proc";
     static final String ALGORITHM_SUFFIX = "Algorithm";
     static final String ALGORITHM_FACTORY_SUFFIX = ALGORITHM_SUFFIX + "Factory";
+    static final String ALGORITHM_SPECIFICATION_SUFFIX = ALGORITHM_SUFFIX + "Specification";
 
     private final Elements elementUtils;
     private final SourceVersion sourceVersion;
