@@ -33,8 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ToUndirectedAlgorithmFactoryTest {
 
     static Stream<Arguments> compressions() {
-        TestMethodRunner compressedRunner = TestMethodRunner::runCompressedOrdered;
-        TestMethodRunner uncompressedRunner = TestMethodRunner::runUncompressedOrdered;
+        var compressedRunner = TestMethodRunner.runCompressedOrdered();
+        var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
             Arguments.of(compressedRunner, MemoryRange.of(1_724_488)),

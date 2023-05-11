@@ -74,6 +74,36 @@ public final class TestMethodRunner {
     }
 
     @TestOnly
+    public static TestMethodRunner runCompressedUnordered() {
+        return new TestMethodRunner("runCompressedUnordered");
+    }
+
+    @TestOnly
+    public static TestMethodRunner runCompressedOrdered() {
+        return new TestMethodRunner("runCompressedOrdered");
+    }
+
+    @TestOnly
+    public static TestMethodRunner runUncompressedUnordered() {
+        return new TestMethodRunner("runUncompressedUnordered");
+    }
+
+    @TestOnly
+    public static TestMethodRunner runUncompressedOrdered() {
+        return new TestMethodRunner("runUncompressedOrdered");
+    }
+
+    @TestOnly
+    public static TestMethodRunner runPackedUnordered() {
+        return new TestMethodRunner("runPackedUnordered");
+    }
+
+    @TestOnly
+    public static TestMethodRunner runPackedOrdered() {
+        return new TestMethodRunner("runPackedOrdered");
+    }
+
+    @TestOnly
     static <E extends Exception> void runCompressedUnordered(CheckedRunnable<E> code) throws E {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
             GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code));
