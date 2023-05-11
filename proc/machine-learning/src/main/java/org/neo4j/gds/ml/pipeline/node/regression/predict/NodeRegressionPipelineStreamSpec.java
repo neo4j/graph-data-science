@@ -66,8 +66,8 @@ public class NodeRegressionPipelineStreamSpec
     }
 
     @Override
-    public Map<String, Object> preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        return NodeRegressionPipelineCompanion.enhanceUserInput(userInput, executionContext);
+    public void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
+        NodeRegressionPipelineCompanion.enhanceUserInput(userInput, executionContext);
     }
 
     @Override

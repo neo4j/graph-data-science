@@ -20,7 +20,7 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction;
+import org.neo4j.gds.MutateNodePropertyListFunction;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;

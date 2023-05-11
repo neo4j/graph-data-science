@@ -102,8 +102,8 @@ public class NodeClassificationPipelineStreamSpec implements AlgorithmSpec<NodeC
     }
 
     @Override
-    public Map<String, Object> preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        if (!userInput.containsKey("modelName")) return userInput;
+    public void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
+        if (!userInput.containsKey("modelName")) return;
 
         var modelName = userInput.get("modelName");
 
@@ -117,7 +117,5 @@ public class NodeClassificationPipelineStreamSpec implements AlgorithmSpec<NodeC
 
         if (!userInput.containsKey("targetNodeLabels")) userInput.put("targetNodeLabels", model.trainConfig().targetNodeLabels());
         if (!userInput.containsKey("relationshipTypes")) userInput.put("relationshipTypes", model.trainConfig().relationshipTypes());
-
-        return userInput;
     }
 }
