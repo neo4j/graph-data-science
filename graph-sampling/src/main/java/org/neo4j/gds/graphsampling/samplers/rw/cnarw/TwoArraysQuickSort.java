@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
-public class TwoArraysQuickSort {
+import com.carrotsearch.hppc.sorting.IndirectComparator;
+import com.carrotsearch.hppc.sorting.IndirectSort;
+
+public final class TwoArraysQuickSort {
     private TwoArraysQuickSort() {}
 
     /**
@@ -33,10 +36,29 @@ public class TwoArraysQuickSort {
     static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
         assert longArray.length >= length;
         assert doubleArray.length >= length;
-        if (checkIfSorted(longArray, length) == true) {
+        if (checkIfSorted(longArray, length)) {
             return;
         }
-        quickSortLongsWithDoubles(longArray, doubleArray, 0, length - 1);
+        var order = IndirectSort.mergesort(0, length, new AscendingLongComparator(longArray));
+        reorder(order, longArray, doubleArray, length);
+    }
+
+    private static void reorder(int[] order, long[] longArray, double[] doubleArray, int length) {
+        for (int i = 0; i < length; i++) {
+            while (order[i] != i) {
+                int idx = order[order[i]];
+                var longVal = longArray[order[i]];
+                var doubleVal = doubleArray[order[i]];
+
+                longArray[order[i]] = longArray[i];
+                doubleArray[order[i]] = doubleArray[i];
+                order[order[i]] = order[i];
+
+                order[i] = idx;
+                longArray[i] = longVal;
+                doubleArray[i] = doubleVal;
+            }
+        }
     }
 
     private static boolean checkIfSorted(long[] longArray, int length) {
@@ -47,35 +69,22 @@ public class TwoArraysQuickSort {
         return true;
     }
 
-    private static void quickSortLongsWithDoubles(long[] longArray, double[] doubleArray, int lo, int hi) {
-        if (lo >= hi) {
-            return;
+    public static class AscendingLongComparator implements IndirectComparator {
+        private final long[] array;
+
+        AscendingLongComparator(long[] array) {
+            this.array = array;
         }
-        int p = partition(longArray, doubleArray, lo, hi);
-        quickSortLongsWithDoubles(longArray, doubleArray, lo, p - 1);
-        quickSortLongsWithDoubles(longArray, doubleArray, p + 1, hi);
-    }
 
-    private static int partition(long[] longArray, double[] doubleArray, int lo, int hi) {
-        long pivot = longArray[hi];
-        int i = lo;
-        for (int j = lo; j < hi; j++) {
-            if (longArray[j] < pivot) {
-                swap(longArray, doubleArray, i, j);
-                i++;
-            }
+        public int compare(int indexA, int indexB) {
+            final long a = array[indexA];
+            final long b = array[indexB];
+
+            if (a < b)
+                return -1;
+            if (a > b)
+                return 1;
+            return 0;
         }
-        swap(longArray, doubleArray, i, hi);
-        return i;
-    }
-
-    private static void swap(long[] l, double[] d, int i, int j) {
-        long tempLong = l[i];
-        l[i] = l[j];
-        l[j] = tempLong;
-
-        double tempDouble = d[i];
-        d[i] = d[j];
-        d[j] = tempDouble;
     }
 }
