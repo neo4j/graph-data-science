@@ -96,17 +96,7 @@ public class NodeClassificationPipelineMutateSpec implements AlgorithmSpec<NodeC
         nodeProperties.add(NodeProperty.of(mutateProperty, classProperties));
 
         result.predictedProbabilities().ifPresent(probabilityProperties -> {
-            var properties = new DoubleArrayNodePropertyValues() {
-                @Override
-                public long nodeCount() {
-                    return computationResult.graph().nodeCount();
-                }
-
-                @Override
-                public double[] doubleArrayValue(long nodeId) {
-                    return probabilityProperties.get(nodeId);
-                }
-            };
+            var properties = probabilityProperties.asNodeProperties();
 
             nodeProperties.add(NodeProperty.of(
                 config.predictedProbabilityProperty().orElseThrow(),
