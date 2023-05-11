@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.graphsampling.NodesSampler;
+import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
@@ -41,7 +41,7 @@ import org.neo4j.gds.graphsampling.samplers.rw.Walker;
 import java.util.Optional;
 import java.util.SplittableRandom;
 
-public class RandomWalkWithRestarts implements NodesSampler {
+public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
     public static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     public static final int MAX_WALKS_PER_START = 100;
@@ -125,7 +125,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
         if (config.hasRelationshipWeightProperty()) {
-            var totalWeights = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(config.concurrency()));
+            var totalWeights = HugeAtomicDoubleArray.of(
+                nodeCount,
+                ParallelDoublePageCreator.passThrough(config.concurrency())
+            );
             totalWeights.setAll(TOTAL_WEIGHT_MISSING);
             return Optional.of(totalWeights);
         }
@@ -134,6 +137,11 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     public LongSet startNodesUsed() {
         return startNodesUsed;
+    }
+
+    @Override
+    public long startNodesCount() {
+        return startNodesUsed.size();
     }
 
     protected Runnable getWalker(
@@ -157,4 +165,5 @@ public class RandomWalkWithRestarts implements NodesSampler {
             new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
         );
     }
+    
 }
