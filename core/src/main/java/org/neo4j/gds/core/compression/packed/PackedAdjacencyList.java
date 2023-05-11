@@ -72,7 +72,7 @@ public class PackedAdjacencyList implements AdjacencyList {
         }
 
         long offset = this.offsets.get(node);
-        var cursor = new DecompressingCursorWithVarLongTail(this.pages);
+        var cursor = new DecompressingCursorWithPackedTail(this.pages);
         cursor.init(offset, degree);
 
         return cursor;
@@ -84,7 +84,7 @@ public class PackedAdjacencyList implements AdjacencyList {
         if (degree == 0) {
             return AdjacencyCursor.empty();
         }
-        if (reuse instanceof DecompressingCursorWithVarLongTail) {
+        if (reuse instanceof DecompressingCursorWithPackedTail) {
             long offset = this.offsets.get(node);
             reuse.init(offset, degree);
             return reuse;
@@ -94,7 +94,7 @@ public class PackedAdjacencyList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
-        return new DecompressingCursorWithVarLongTail(this.pages);
+        return new DecompressingCursorWithPackedTail(this.pages);
     }
 
     @Override

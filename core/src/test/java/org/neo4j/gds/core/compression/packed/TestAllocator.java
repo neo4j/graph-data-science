@@ -51,7 +51,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         test((allocator, slice) -> {
 
             var degree = new MutableInt(0);
-            var offset = AdjacencyPacker.compressWithVarLongTail(
+            var offset = AdjacencyPacker.compressWithPackedTail(
                 allocator,
                 slice,
                 values,
@@ -77,11 +77,11 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         long[] values,
         int length,
         Aggregation aggregation,
-        BiConsumer<DecompressingCursorWithVarLongTail, AdjacencyListBuilder.Slice<Address>> code
+        BiConsumer<DecompressingCursorWithPackedTail, AdjacencyListBuilder.Slice<Address>> code
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
-            var offset = AdjacencyPacker.compressWithVarLongTail(
+            var offset = AdjacencyPacker.compressWithPackedTail(
                 allocator,
                 slice,
                 values.clone(),
@@ -93,7 +93,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
             );
 
             var pages = new long[]{slice.slice().address()};
-            var cursor = new DecompressingCursorWithVarLongTail(pages);
+            var cursor = new DecompressingCursorWithPackedTail(pages);
             cursor.init(offset, degree.intValue());
 
             code.accept(cursor, slice);
