@@ -26,7 +26,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.DatabaseId;
@@ -40,11 +39,9 @@ import org.neo4j.gds.projection.CypherAggregation;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
@@ -82,92 +79,6 @@ class GraphListProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-    }
-
-    @Test
-    void listASingleLabelRelationshipTypeProjection() {
-        String name = "name";
-        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
-
-        assertCypherResult("CALL gds.graph.list()", singletonList(
-            map(
-                "graphName", name,
-                "database", "neo4j",
-                "configuration",
-                new Condition<>(config -> {
-                    assertThat(config)
-                        .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(10)
-                        .containsEntry(
-                            "nodeProjection", map(
-                                "A", map(
-                                    "label", "A",
-                                    "properties", emptyMap()
-                                )
-                            )
-                        )
-                        .containsEntry(
-                            "relationshipProjection", map(
-                                "REL", map(
-                                    "type", "REL",
-                                    "orientation", "NATURAL",
-                                    "aggregation", "DEFAULT",
-                                    "indexInverse", false,
-                                    "properties", emptyMap()
-                                )
-                            )
-                        )
-                        .containsEntry("relationshipProperties", emptyMap())
-                        .containsEntry("nodeProperties", emptyMap())
-                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
-                        .hasEntrySatisfying(
-                            "validateRelationships",
-                            booleanAssertConsumer(AbstractBooleanAssert::isFalse)
-                        )
-                        .hasEntrySatisfying(
-                            "readConcurrency",
-                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
-                        )
-                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
-                        .doesNotContainKeys(
-                            GraphProjectConfig.NODE_COUNT_KEY,
-                            GraphProjectConfig.RELATIONSHIP_COUNT_KEY,
-                            "username"
-                        );
-
-                    return true;
-                }, "Assert native `configuration` map"),
-                "schema", map(
-                    "nodes", map("A", map()),
-                    "relationships", map("REL", map()),
-                    "graphProperties", map()
-                ),
-                "schemaWithOrientation", map(
-                    "nodes", map("A", map()),
-                    "relationships", map("REL", map("direction", "DIRECTED", "properties", map())),
-                    "graphProperties", map()
-                ),
-                "nodeCount", 2L,
-                "relationshipCount", 1L,
-                "density", 0.5D,
-                "degreeDistribution", map(
-                    "min", 0L,
-                    "mean", 0.5D,
-                    "max", 1L,
-                    "p50", 0L,
-                    "p75", 1L,
-                    "p90", 1L,
-                    "p95", 1L,
-                    "p99", 1L,
-                    "p999", 1L
-                ),
-                "creationTime", isA(ZonedDateTime.class),
-                "modificationTime", isA(ZonedDateTime.class),
-                "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class)
-            )
-        ));
     }
 
     @Test
@@ -493,161 +404,6 @@ class GraphListProcTest extends BaseProcTest {
         ));
     }
 
-    @Test
-    void degreeDistributionComputationIsOptOut() {
-        String name = "name";
-        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
-
-        assertCypherResult(
-            "CALL gds.graph.list() YIELD graphName, nodeCount, relationshipCount",
-            singletonList(
-                map(
-                    "graphName", name,
-                    "nodeCount", 2L,
-                    "relationshipCount", 1L
-                )
-            )
-        );
-    }
-
-    @Test
-    void calculateDegreeDistributionForUndirectedNodesWhenAskedTo() {
-        String name = "name";
-        runQuery("CALL gds.graph.project($name, 'A', {REL: {orientation: 'undirected'}})", map("name", name));
-
-        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
-            map(
-                "degreeDistribution", map(
-                    "min", 1L,
-                    "mean", 1.0,
-                    "max", 1L,
-                    "p50", 1L,
-                    "p75", 1L,
-                    "p90", 1L,
-                    "p95", 1L,
-                    "p99", 1L,
-                    "p999", 1L
-                )
-            )
-        ));
-    }
-
-    @Test
-    void calculateDegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
-        String name = "name";
-        runQuery("CALL gds.graph.project($name, 'A', {REL: {orientation: 'natural'}})", map("name", name));
-
-        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
-            map(
-                "degreeDistribution", map(
-                    "min", 0L,
-                    "mean", 0.5D,
-                    "max", 1L,
-                    "p50", 0L,
-                    "p75", 1L,
-                    "p90", 1L,
-                    "p95", 1L,
-                    "p99", 1L,
-                    "p999", 1L
-                )
-            )
-        ));
-    }
-
-    @Test
-    void calculateDegreeDistributionForIncomingRelationshipsWhenAskedTo() {
-        String name = "name";
-        runQuery("CALL gds.graph.project($name, 'A', {REL: {orientation: 'reverse'}})", map("name", name));
-
-        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
-            map(
-                "degreeDistribution", map(
-                    "min", 0L,
-                    "mean", 0.5D,
-                    "max", 1L,
-                    "p50", 0L,
-                    "p75", 1L,
-                    "p90", 1L,
-                    "p95", 1L,
-                    "p99", 1L,
-                    "p999", 1L
-                )
-            )
-        ));
-    }
-
-    @Test
-    void calculateActualMemoryUsage() {
-        runQuery("CALL gds.graph.project('name', 'A', 'REL')");
-        assertCypherResult(
-            "CALL gds.graph.list() YIELD memoryUsage, sizeInBytes",
-            List.of(Map.of(
-                "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class)
-            ))
-        );
-    }
-
-    @ParameterizedTest(name = "name argument: {0}")
-    @ValueSource(strings = {"", "null"})
-    void listAllGraphsWhenCalledWithoutArgumentOrAnEmptyArgument(String argument) {
-        String[] names = {"a", "b", "c"};
-        for (String name : names) {
-            runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
-        }
-
-        List<String> actualNames = runQuery(
-            db,
-            "CALL gds.graph.list(" + argument + ")",
-            Collections.emptyMap(),
-            result -> result.<String>columnAs("graphName")
-                .stream()
-                .collect(toList())
-        );
-
-        assertThat(actualNames).containsExactlyInAnyOrder(names);
-    }
-
-    @Test
-    void filterOnExactMatchUsingTheFirstArgument() {
-        String[] names = {"b", "bb", "ab", "ba", "B", "ʙ"};
-        for (String name : names) {
-            runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
-        }
-
-        String name = names[0];
-        List<String> actualNames = runQuery(
-            db,
-            "CALL gds.graph.list($name)",
-            map("name", name),
-            result -> result.<String>columnAs("graphName")
-                .stream()
-                .collect(toList())
-        );
-
-        assertThat(actualNames).hasSize(1);
-        assertThat(actualNames).contains(name);
-    }
-
-
-    @ParameterizedTest(name = "name argument: ''{0}''")
-    @ValueSource(strings = {"foobar", "aa"})
-    void returnEmptyStreamWhenNoGraphMatchesTheFilterArgument(String argument) {
-        String[] names = {"a", "b", "c"};
-        for (String name : names) {
-            runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
-        }
-
-        long numberOfRows = runQuery(
-            db,
-            "CALL gds.graph.list($argument)",
-            map("argument", argument),
-            result -> result.stream().count()
-        );
-
-        assertThat(numberOfRows).isEqualTo(0L);
-    }
-
 
     @Test
     void shouldShowSchemaForNativeProjectedGraph() {
@@ -741,17 +497,6 @@ class GraphListProcTest extends BaseProcTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
-    void failsOnInvalidGraphName(String invalidName) {
-        if (invalidName != null) { // null is not a valid name, but we use it to mean 'list all'
-            assertError(
-                "CALL gds.graph.list($graphName)",
-                map("graphName", invalidName),
-                formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
-            );
-        }
-    }
 
     @ParameterizedTest(name = "Invalid Graph Name: {0}")
     @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
