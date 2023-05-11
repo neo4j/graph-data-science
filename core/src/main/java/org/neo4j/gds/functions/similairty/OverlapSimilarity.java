@@ -51,7 +51,7 @@ public final class OverlapSimilarity {
         long[] vector2, int length2,
         double similarityCutoff
     ) {
-        long intersection = Intersections.intersection3(vector1, vector2, length1, length2);
+        long intersection = Intersections.intersectionArraysWithLength(vector1, vector2, length1, length2);
         double minimumCardinality = Math.min(length1, length2);
         double similarity = intersection / minimumCardinality;
         return similarity >= similarityCutoff ? similarity : Double.NaN;

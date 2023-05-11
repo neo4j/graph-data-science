@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
@@ -27,7 +28,6 @@ import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 
 import java.util.Arrays;
 import java.util.SplittableRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
 
@@ -36,6 +36,8 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
 
     private final LongArrayBuffer uSortedNeighs = new LongArrayBuffer();
     private final LongArrayBuffer vSortedNeighs = new LongArrayBuffer();
+
+    private MutableInt idx = new MutableInt();
 
     CommonNeighbourAwareNextNodeStrategy(
         Graph inputGraph,
@@ -63,7 +65,9 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
     }
 
     private double computeOverlapSimilarity(LongArrayBuffer neighsU, LongArrayBuffer neighsV) {
-        if (neighsU.length == 0 || neighsV.length == 0) return 0.0D;
+        if (neighsU.length == 0 || neighsV.length == 0) {
+            return 0.0D;
+        }
         double similarityCutoff = 0.0d;
         double similarity = OverlapSimilarity.computeSimilarity(
             neighsU.buffer, neighsU.length,
@@ -87,11 +91,11 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
     }
 
 
-    private static void sortedNeighbours(Graph graph, long nodeId, LongArrayBuffer neighs) {
+    private void sortedNeighbours(Graph graph, long nodeId, LongArrayBuffer neighs) {
         var neighsCount = graph.degree(nodeId);
         neighs.ensureCapacity(neighsCount);
         neighs.length = neighsCount;
-        var idx = new AtomicInteger(0);
+        idx.setValue(0);
         graph.forEachRelationship(nodeId, (src, dst) -> {
             neighs.buffer[idx.getAndIncrement()] = dst;
             return true;

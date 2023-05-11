@@ -55,7 +55,8 @@ public final class Intersections {
         return intersection;
     }
 
-    public static long intersection3(long[] targets1, long[] targets2, int len1, int len2) {
+    // assume both arrays are sorted
+    public static long intersectionArraysWithLength(long[] targets1, long[] targets2, int len1, int len2) {
         assert len1 <= targets1.length;
         assert len2 <= targets2.length;
         if (len2 == 0) return 0;
