@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.impl.block.factory.Functions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,12 +29,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.IteratorPartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -410,6 +413,67 @@ class PartitionUtilsTest {
     }
 
     @Test
+    void testDegreePartitioningWithForcedNumberOfPartitionsShortcoming() {
+        // There is a drawback with forcing the number of partitions. This returns a not optimal partitioning,
+        // but it's required because each thread has exactly one partition.
+        // See next test for the optimal partitioning.
+
+        var nodeCount = 6;
+        int[] degrees = {20, 20, 20, 20, 10, 10};
+        var concurrency = 4;
+        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency, 1);
+
+        List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
+            nodeCount,
+            idx -> degrees[(int) idx],
+            degreesPerPartition,
+            Function.identity()
+        );
+
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 1, 20),
+            DegreePartition.of(1, 1, 20),
+            DegreePartition.of(2, 1, 20),
+            DegreePartition.of(3, 1, 20),
+            DegreePartition.of(4, 2, 20)
+        );
+    }
+
+    @Disabled("not implemented yet")
+    @Test
+    void testDegreePartitioningWithMorePartitionsThanThreads() {
+
+        // 4 threads
+        // 4 partitions (not good):
+        // {20} {20} {20} {20, 10, 10}
+        // 5 partitions (not good):
+        // {20} {20} {20} {20} {10, 10}
+        // 6 partitions (good):
+        // {20} {20} {20} {20} {10} {10}
+
+        var nodeCount = 6;
+        int[] degrees = {20, 20, 20, 20, 10, 10};
+        var concurrency = 4;
+        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency, 1);
+
+        List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
+            nodeCount,
+            idx -> degrees[(int) idx],
+            degreesPerPartition,
+            Function.identity()
+        );
+
+        assertThat(partitions).containsExactly(
+            DegreePartition.of(0, 1, 20),
+            DegreePartition.of(1, 1, 20),
+            DegreePartition.of(2, 1, 20),
+            DegreePartition.of(3, 1, 20),
+            DegreePartition.of(4, 2, 10),
+            DegreePartition.of(5, 1, 10)
+        );
+    }
+
+    @Test
     void testBlockAlignedPartitioning() {
         var blockShift = 3; // 2^3 = 8 ids per block
 
@@ -440,6 +504,7 @@ class PartitionUtilsTest {
                 Partition.of(14, 1)
             );
     }
+
 
     static class TestTask implements Runnable {
 
