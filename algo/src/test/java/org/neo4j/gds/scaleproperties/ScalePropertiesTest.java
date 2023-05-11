@@ -84,11 +84,11 @@ class ScalePropertiesTest {
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 
-        assertArrayEquals(new double[]{11.1 / 13D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{12.8 / 13D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{1D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{9 / 13D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
-        assertArrayEquals(new double[]{0D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
+        assertArrayEquals(new double[]{11.1 / 13D}, resultProperties[(int) graph.toMappedNodeId("a")]);
+        assertArrayEquals(new double[]{12.8 / 13D}, resultProperties[(int) graph.toMappedNodeId("b")]);
+        assertArrayEquals(new double[]{1D}, resultProperties[(int) graph.toMappedNodeId("c")]);
+        assertArrayEquals(new double[]{9 / 13D}, resultProperties[(int) graph.toMappedNodeId("d")]);
+        assertArrayEquals(new double[]{0D}, resultProperties[(int) graph.toMappedNodeId("e")]);
     }
 
     @Test
@@ -103,11 +103,11 @@ class ScalePropertiesTest {
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 
-        assertArrayEquals(new double[]{11.1 / 13D, 0D, 0D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{12.8 / 13D, 0.25, 1 / 50D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{1D, 0.5, 2 / 50D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{9 / 13D, 0.75, 10 / 50D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
-        assertArrayEquals(new double[]{0D, 1D, 1D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
+        assertArrayEquals(new double[]{11.1 / 13D, 0D, 0D}, resultProperties[(int) graph.toMappedNodeId("a")]);
+        assertArrayEquals(new double[]{12.8 / 13D, 0.25, 1 / 50D}, resultProperties[(int) graph.toMappedNodeId("b")]);
+        assertArrayEquals(new double[]{1D, 0.5, 2 / 50D}, resultProperties[(int) graph.toMappedNodeId("c")]);
+        assertArrayEquals(new double[]{9 / 13D, 0.75, 10 / 50D}, resultProperties[(int) graph.toMappedNodeId("d")]);
+        assertArrayEquals(new double[]{0D, 1D, 1D}, resultProperties[(int) graph.toMappedNodeId("e")]);
     }
 
     @Test

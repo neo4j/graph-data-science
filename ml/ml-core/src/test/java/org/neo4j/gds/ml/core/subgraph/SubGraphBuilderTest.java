@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @GdlExtension
 class SubGraphBuilderTest {
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String GRAPH =
         "(a), (b), (c), (d), (e), (f), (g), (h), (i), " +
         "(a)-[]->(b)," +

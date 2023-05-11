@@ -68,9 +68,6 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
 
     @GdlGraph(graphNamePrefix = "line", orientation = Orientation.NATURAL)
     private static final String lineQuery =
@@ -146,6 +143,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @ParameterizedTest
     @MethodSource("inputTuples")
     void shouldWorkCorrectly(double delta, int binSizeThreshold) {
+        IdFunction idFunction = graph::toMappedNodeId;
 
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
@@ -192,6 +190,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
 
     @Test
     void deltaSteppingShouldWorkCorrectly() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var isTerminal = new BitSet(graph.nodeCount());
         isTerminal.set(a[2]);

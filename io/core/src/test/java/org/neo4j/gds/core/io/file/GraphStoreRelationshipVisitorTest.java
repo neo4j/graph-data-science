@@ -54,7 +54,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 @GdlExtension
 class GraphStoreRelationshipVisitorTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 0)
     static String DB_CYPHER = "CREATE (a:A)-[:R {p: 1.23}]->(b:A)-[:R1 {r: 1337}]->(c:B)-[:R1 {r: 42}]->(a)-[:R2]->(b)";
 
     @Inject
@@ -63,7 +63,7 @@ class GraphStoreRelationshipVisitorTest {
     @Inject
     Graph graph;
 
-    @GdlGraph(graphNamePrefix = "multipleProps")
+    @GdlGraph(graphNamePrefix = "multipleProps", idOffset = 0)
     static String MULTI_PROPS_CYPHER = "(a)-[:R {p: 42.0D, r: 13.37D}]->(b)";
 
     @Inject

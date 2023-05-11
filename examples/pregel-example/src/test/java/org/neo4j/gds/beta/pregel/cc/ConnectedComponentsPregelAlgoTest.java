@@ -95,16 +95,16 @@ class ConnectedComponentsPregelAlgoTest {
         assertEquals(1, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
-        expected.put("a", 0L);
-        expected.put("b", 0L);
-        expected.put("c", 0L);
-        expected.put("d", 0L);
-        expected.put("e", 4L);
-        expected.put("f", 4L);
-        expected.put("g", 4L);
-        expected.put("h", 7L);
-        expected.put("i", 7L);
-        expected.put("j", 9L);
+        expected.put("a", 3L);
+        expected.put("b", 3L);
+        expected.put("c", 3L);
+        expected.put("d", 3L);
+        expected.put("e", 7L);
+        expected.put("f", 7L);
+        expected.put("g", 7L);
+        expected.put("h", 0L);
+        expected.put("i", 0L);
+        expected.put("j", 2L);
 
         TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
     }

@@ -230,18 +230,19 @@ public final class TestSupport {
     }
 
     public static void assertLongValues(TestGraph graph, Function<Long, Long> actualValues, Map<String, Long> expectedValues) {
+        var softly = new SoftAssertions();
+
         expectedValues.forEach((variable, expectedValue) -> {
             Long actualValue = actualValues.apply(graph.toMappedNodeId(variable));
-            assertEquals(
-                expectedValue,
-                actualValue,
-                formatWithLocale(
-                    "Values do not match for variable %s. Expected %s, got %s.",
-                    variable,
-                    expectedValue.toString(),
-                    actualValue.toString()
-                ));
+            softly.assertThat(actualValue).withFailMessage(formatWithLocale(
+                "Values do not match for variable %s. Expected %s, got %s.",
+                variable,
+                expectedValue.toString(),
+                actualValue.toString()
+            )).isEqualTo(expectedValue);
         });
+
+        softly.assertAll();
     }
 
     public static void assertDoubleValues(TestGraph graph, Function<Long, Double> actualValues, Map<String, Double> expectedValues, double delta) {

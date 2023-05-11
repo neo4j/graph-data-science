@@ -28,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -78,7 +77,7 @@ class KnnTest {
         ", (b { knn: 1.1, prop: 5.0 } )" +
         ", (c { knn: 42.0, prop: 10.0 } )";
     @Inject
-    private Graph graph;
+    private TestGraph graph;
 
     @GdlGraph(graphNamePrefix = "simThreshold")
     private static final String nodeCreateQuery =
@@ -100,12 +99,10 @@ class KnnTest {
     @Inject
     private TestGraph multPropMissingGraph;
 
-
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void shouldRun() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .concurrency(1)
@@ -131,6 +128,8 @@ class KnnTest {
 
     @Test
     void shouldHaveEachNodeConnected() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(2)
@@ -169,6 +168,7 @@ class KnnTest {
 
     @Test
     void shouldWorkWithMultipleProperties() {
+        IdFunction idFunction = graph::toMappedNodeId;
 
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn"), new KnnNodePropertySpec("prop")))
@@ -305,6 +305,8 @@ class KnnTest {
 
     @Test
     void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var nodeProperties = new DoubleTestPropertyValues(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
         var knn = Knn.create(
             graph,
@@ -680,6 +682,8 @@ class KnnTest {
 
         @Test
         void testReasonableTopKWithRandomWalk(SoftAssertions softly) {
+            IdFunction idFunction = graph::toMappedNodeId;
+
             var config = ImmutableKnnBaseConfig.builder()
                 .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
                 .topK(4)

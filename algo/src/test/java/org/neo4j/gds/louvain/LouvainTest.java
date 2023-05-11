@@ -81,7 +81,7 @@ class LouvainTest {
             .concurrency(1);
     }
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed: 1,seed2: -1})" +        // 0
