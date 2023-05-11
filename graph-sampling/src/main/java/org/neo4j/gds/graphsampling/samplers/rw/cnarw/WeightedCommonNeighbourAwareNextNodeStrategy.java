@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
-import com.carrotsearch.hppc.sorting.IndirectComparator;
-import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.compress.DoubleArrayBuffer;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
@@ -53,7 +51,7 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         long candidateNode;
         sortNeighsWithWeights(inputGraph, currentNode, uSortedNeighsIds, uSortedNeighsWeights);
         do {
-            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights);
+            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights.buffer);
             sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsIds, vSortedNeighsWeights);
             var overlap = computeOverlapSimilarity(
                 uSortedNeighsIds, uSortedNeighsWeights,
@@ -84,17 +82,16 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         return similarity;
     }
 
-    private long getCandidateNode(LongArrayBuffer neighs, DoubleArrayBuffer weights) {
+    private long getCandidateNode(LongArrayBuffer neighs, double[] weights) {
         double sumWeights = 0;
-        for (int i = 0; i < neighs.length; i++) {
-            sumWeights += weights.buffer[i];
-        }
+        for (int i = 0; i < neighs.length; i++)
+            sumWeights += weights[i];
 
         var remainingMass = rng.nextDouble(0, sumWeights);
 
         int i = 0;
         while (remainingMass > 0) {
-            remainingMass -= weights.buffer[i++];
+            remainingMass -= weights[i++];
         }
 
         return neighs.buffer[i - 1];
@@ -120,65 +117,6 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
             return true;
         });
 
-        sortDoubleArrayByLongValues(neighs.buffer, weights.buffer, neighsCount);
-    }
-
-    /**
-     * Sort two arrays simultaneously based on values of the first (long) array.
-     * E.g. {[4, 1, 8], [0.5, 1.9, 0.9]} -> {[1, 4, 8], [1,9, 0.5, 0.9]}
-     *
-     * @param longArray   Array of long values (e.g. neighbours ids)
-     * @param doubleArray Array of double values (e.g. neighbours weighs)
-     * @param length      Number of values to sort
-     */
-    private static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
-        assert longArray.length >= length;
-        assert doubleArray.length >= length;
-        if (longArrayIsSorted(longArray, length)) {
-            return;
-        }
-        var order = IndirectSort.mergesort(0, length, new AscendingLongComparator(longArray));
-        for (int i = 0; i < length; i++) {
-            swap(longArray, doubleArray, i, order[i]);
-        }
-    }
-
-    private static boolean longArrayIsSorted(long[] longArray, int length) {
-        if (length <= 1) return true;
-        for (int i = 0; i < length - 1; i++) {
-            if (longArray[i] > longArray[i + 1]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static class AscendingLongComparator implements IndirectComparator {
-        private final long[] array;
-
-        public AscendingLongComparator(long[] array) {
-            this.array = array;
-        }
-
-        public int compare(int indexA, int indexB) {
-            final long a = array[indexA];
-            final long b = array[indexB];
-
-            if (a < b)
-                return -1;
-            if (a > b)
-                return 1;
-            return 0;
-        }
-    }
-
-    private static void swap(long[] l, double[] d, int i, int j) {
-        long tempLong = l[i];
-        l[i] = l[j];
-        l[j] = tempLong;
-
-        double tempDouble = d[i];
-        d[i] = d[j];
-        d[j] = tempDouble;
+        TwoArraysSort.sortDoubleArrayByLongValues(neighs.buffer, weights.buffer, neighsCount);
     }
 }
