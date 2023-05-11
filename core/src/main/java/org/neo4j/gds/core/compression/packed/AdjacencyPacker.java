@@ -422,7 +422,7 @@ public final class AdjacencyPacker {
         // "tail" block, may be smaller than BLOCK_SIZE
         {
             int bits = bitsNeeded(values, offset, tailLength);
-            bytes += (long) bits * tailLength / Long.BYTES;
+            bytes += BitUtil.ceilDiv((long) bits * tailLength, Long.BYTES);
             header[blockIdx] = (byte) bits;
         }
 
