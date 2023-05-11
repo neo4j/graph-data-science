@@ -1,9 +1,9 @@
 [[neo4j-server]]
 = Neo4j Server
 
-On a standalone Neo4j Server, GDS will need to be installed and configured manually.
+On a standalone Neo4j Server you need to install and configure GDS manually.
 
-1. Download `neo4j-graph-data-science-[version].zip` from the https://neo4j.com/download-center/#ngds[Neo4j Download Center]
+1. Download `neo4j-graph-data-science-[version].zip` from the https://neo4j.com/download-center/#ngds[Neo4j Download Center]. Check the version compatibility with your Neo4j Server on xref:installation/supported-neo4j-versions.adoc[Supported Neo4j versions].
 
 2. Unzip the archive and move the `neo4j-graph-data-science-[version].jar` file into the `$NEO4J_HOME/plugins` directory.
 
@@ -22,22 +22,4 @@ dbms.security.procedures.allowlist=gds.*
 ----
 +
 
-5. Restart Neo4j
-
-
-[[neo4j-server-verify]]
-== Verifying installation
-
-To verify your installation, print the version of Graph Data Science by opening Neo4j Browser and running the `gds.version()` function:
-
-[source, cypher, role=noplay]
-----
-RETURN gds.version();
-----
-
-To list all available procedures, run the `gds.list()` procedure:
-
-[source, cypher, role=noplay]
-----
-CALL gds.list();
-----
+5. Restart the Neo4j Server.

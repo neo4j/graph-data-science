@@ -1,13 +1,22 @@
 [[neo4j-desktop]]
 = Neo4j Desktop
 
-The most convenient way of installing the GDS library is through the https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html[Neo4j Desktop^] plugin called Neo4j Graph Data Science.
-The plugin can be found in the 'Plugins' tab of a database.
+After opening Neo4j Desktop, you can find the _Graph Data Science Library_ plugin in the *Plugins* tab of a database.
 
 image::neo4j-desktop-gds.png[width=500]
 
-The installer will download the GDS library and install it in the 'plugins' directory of the database.
-It will also add the following entry to the settings file:
+The installer downloads the GDS library and installs it in the `plugins` directory of the database.
+
+:sectnums!:
+
+== Configuration
+
+[NOTE]
+====
+You can edit the configuration file for a database by clicking on the ellipsis (*...*) button and opening the *Settings...* menu item.
+====
+
+The installer automatically adds the following entry to the configuration:
 
 ----
 dbms.security.procedures.unrestricted=gds.*

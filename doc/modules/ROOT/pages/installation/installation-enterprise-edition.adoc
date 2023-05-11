@@ -1,5 +1,5 @@
 [[installation-enterprise-edition]]
-= Enterprise Edition Configuration
+= GDS Enterprise Edition
 
 Unlocking the Enterprise Edition of the Neo4j Graph Data Science library requires a valid license key.
 To register for a license, please visit https://neo4j.com/contact-us/?ref=graph-data-science[neo4j.com].
@@ -7,7 +7,7 @@ To register for a license, please visit https://neo4j.com/contact-us/?ref=graph-
 The license is issued in the form of a license key file, which needs to be placed in a directory accessible by the Neo4j server.
 You can configure the location of the license key file by setting the `gds.enterprise.license_file` option in the `neo4j.conf` configuration file of your Neo4j installation.
 The location must be specified using an absolute path.
-It is necessary to restart the database when configuring the license key for the first time and every time the license key is changed, e.g., when a new license key is added or the location of the key file changes.
+You must restart the database when configuring the license key for the first time and every time the license key is changed, for example when a new license key is added or the location of the key file changes.
 
 
 Example configuration for the license key file:
@@ -17,4 +17,4 @@ gds.enterprise.license_file=/path/to/my/license/keyfile
 
 If the `gds.enterprise.license_file` setting is set to a non-empty value, the Neo4j Graph Data Science library will verify that the license key file is accessible and contains a valid license key.
 When a valid license key is configured, all Enterprise Edition features are unlocked.
-In case of a problem, e.g, when the license key file is inaccessible, the license has expired or is invalid for any other reason, all calls to the Neo4j Graph Data Science Library will result in an error, stating the problem with the license key.
+In case of a problem, for example when the license key file is inaccessible, the license has expired or is invalid for any other reason, all calls to the Neo4j Graph Data Science library will result in an error, stating the problem with the license key.

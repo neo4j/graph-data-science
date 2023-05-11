@@ -1,1 +1,1 @@
-CAUTION: This feature is not available in AuraDS
+CAUTION: This feature is not available in AuraDS.

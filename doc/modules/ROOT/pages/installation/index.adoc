@@ -1,18 +1,74 @@
+:page-aliases: installation/installation-neo4j-cluster, \
+installation/additional-config-parameters/
+
 [[installation]]
 = Installation
 :description: This chapter provides instructions for installation and basic usage of the Neo4j Graph Data Science library.
 
 
 The Neo4j Graph Data Science (GDS) library is delivered as a plugin to the Neo4j Graph Database.
-The plugin needs to be installed into the database and added to the allowlist in the Neo4j configuration.
-The following sections cover the different installation methods:
+The plugin needs to be installed into the database and configured.
 
-. xref:installation/supported-neo4j-versions.adoc[Supported Neo4j versions]
-. xref:installation/neo4j-desktop.adoc[Neo4j Desktop]
-. xref:installation/neo4j-server.adoc[Neo4j Server]
-. xref:installation/installation-enterprise-edition.adoc[Enterprise Edition Configuration]
-. xref:installation/installation-docker.adoc[Neo4j Docker]
-. xref:installation/installation-neo4j-cluster.adoc[Neo4j cluster]
-. xref:installation/installation-apache-arrow.adoc[Apache Arrow]
-. xref:installation/additional-config-parameters.adoc[Additional configuration options]
-. xref:installation/System-requirements.adoc[System Requirements]
+[NOTE]
+====
+link:https://neo4j.com/data-science-sandbox/[Neo4j Data Science Sandbox] is a free, cloud-based instance of Neo4j with GDS Community Edition preinstalled.
+
+link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS] is the fully managed version of Neo4j GDS Enterprise Edition which does not require any installation.
+====
+
+:sectnums!:
+
+== Installation methods
+
+You can install the GDS library in different ways depending on your Neo4j deployment.
+
+* If you are new to Neo4j, a convenient option to get started is to install the https://neo4j.com/docs/desktop-manual/current/installation/[Neo4j Desktop] application first.
+On Neo4j Desktop you can install the GDS library directly xref:installation/neo4j-desktop.adoc[from the UI].
+
+* If you use any edition of the Neo4j Server (Community or Enterprise), you need to install the GDS library manually as explained in the xref:installation/neo4j-server.adoc[Neo4j Server] section.
+
+* If you run Neo4j in a Docker container, you need to configure the GDS library as a xref:installation/installation-docker.adoc[Neo4j Docker plugin].
+
+* If you run Neo4j in a cluster, you can follow the same instructions for the Neo4j Server with xref:production-deployment/neo4j-cluster.adoc[some additional considerations].
+
+.GDS Enterprise Edition
+
+The Enterprise Edition (EE) of the library requires a _license key_ as well. You can find more details on requesting and configuring a license key in the xref:installation/installation-enterprise-edition.adoc[] section.
+
+GDS EE includes Apache Arrow for advanced graph import and export capabilities. Arrow can be enabled and configured as detailed in the xref:installation/installation-apache-arrow.adoc[Apache Arrow] guide.
+
+== Verifying the installation
+
+To verify your installation, run the `gds.version()` function in the Neo4j Browser:
+
+[source, cypher, role=noplay]
+----
+RETURN gds.version();
+----
+
+To list all available procedures, call the `gds.list()` procedure:
+
+[source, cypher, role=noplay]
+----
+CALL gds.list();
+----
+
+If you have installed GDS EE, call the `gds.debug.sysInfo()` procedure and check that the returned `gdsEdition` value is `Licensed`:
+
+[source, cypher, role=noplay]
+----
+CALL gds.debug.sysInfo();
+----
+
+== Additional configuration
+
+In order to make use of certain features of the GDS library, additional configuration may be necessary.
+For example, exporting graphs xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[to CSV files] requires the configuration parameter `gds.export.location` to be set to the folder in which exported graphs are to be stored. 
+
+You can find the list of all the configuration options xref:production-deployment/configuration-settings/[here].
+Refer to the <<_installation_methods,installation methods>> for details on how to edit a Neo4j database configuration depending on the Neo4j deployment.
+
+== Reference
+
+* xref:installation/supported-neo4j-versions.adoc[Supported Neo4j versions]
+* xref:installation/System-requirements.adoc[System Requirements]

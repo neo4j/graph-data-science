@@ -1,17 +1,14 @@
 [[installation-docker]]
-= Neo4j Docker
+= Neo4j on Docker
 
-The Neo4j Graph Data Science library is available as a plugin for Neo4j on Docker.
-The plugins guide for Docker is found at the https://neo4j.com/docs/operations-manual/current/docker/operations/#docker-neo4jlabs-plugins[operations manual].
+The Neo4j Graph Data Science library is available as a link:https://neo4j.com/docs/operations-manual/current/docker/operations/#docker-neo4j-plugins[plugin] for Neo4j on Docker. You can run the latest version of Neo4j with GDS included using the following Docker command:
 
-To run a Neo4j Container with GDS available, you can run
-
-[source,shell]
+[source, shell]
 ----
 docker run -it --rm \
   --publish=7474:7474 --publish=7687:7687 \
   --user="$(id -u):$(id -g)" \
   -e NEO4J_AUTH=none \
-  --env NEO4JLABS_PLUGINS='["graph-data-science"]' \
-  neo4j:4.4
+  --env NEO4J_PLUGINS='["graph-data-science"]' \
+  neo4j:latest
 ----
