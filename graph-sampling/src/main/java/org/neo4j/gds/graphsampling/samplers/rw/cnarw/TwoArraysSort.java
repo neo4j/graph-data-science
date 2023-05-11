@@ -36,9 +36,6 @@ public final class TwoArraysSort {
     static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
         assert longArray.length >= length;
         assert doubleArray.length >= length;
-        if (checkIfSorted(longArray, length)) {
-            return;
-        }
         var order = IndirectSort.mergesort(0, length, new AscendingLongComparator(longArray));
         reorder(order, longArray, doubleArray, length);
     }
@@ -59,14 +56,6 @@ public final class TwoArraysSort {
                 doubleArray[i] = doubleVal;
             }
         }
-    }
-
-    private static boolean checkIfSorted(long[] longArray, int length) {
-        for (int i = 0; i < length - 1; i++) {
-            if (longArray[i] > longArray[i + 1])
-                return false;
-        }
-        return true;
     }
 
     public static class AscendingLongComparator implements IndirectComparator {
