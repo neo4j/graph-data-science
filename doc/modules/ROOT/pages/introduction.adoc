@@ -83,30 +83,4 @@ The amount of data loaded can be controlled by so called graph projections, whic
 
 For more information see xref:management-ops/index.adoc[Graph Management].
 
-
-[[introduction-editions]]
-== Editions
-
-The Neo4j Graph Data Science library is available in two editions.
-
-* The open source Community Edition:
-** Includes all algorithms.
-** Most of the catalog operations to manage graphs, models and pipelines are available. Unavailable operations are listed below.
-** Limits the concurrency to 4 CPU cores.
-** Limits the capacity of the model catalog to 4 models.
-* The Neo4j Graph Data Science library Enterprise Edition:
-** Can run on an unlimited amount of CPU cores.
-** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition.
-** Support running GDS as part of a xref::production-deployment/neo4j-cluster.adoc[Neo4j cluster deployment].
-** Includes capacity and load xref::common-usage/monitoring-system.adoc[monitoring].
-** Supports various additional graph catalog features, including:
-*** Graph xref::management-ops/backup-restore.adoc[backup and restore].
-*** Data import and export via xref:installation/installation-apache-arrow.adoc[Apache Arrow].
-** Supports various additional model catalog features, including:
-*** Storing unlimited amounts of models in the model catalog.
-*** Sharing of models between users, by xref:model-catalog/publish.adoc[publishing it].
-*** Model xref:model-catalog/store.adoc#model-catalog-store-ops[persistence to disk].
-** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation].
-** Allows the configuration of xref:production-deployment/defaults-and-limits.adoc[defaults and limits].
-
-For more information see xref:installation/System-requirements.adoc#system-requirements-cpu[System Requirements - CPU].
+include::partial$/introduction/enterprise-features.adoc[leveloffset=+1]
