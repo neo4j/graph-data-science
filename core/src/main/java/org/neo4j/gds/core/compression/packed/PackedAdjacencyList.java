@@ -44,6 +44,76 @@ public class PackedAdjacencyList implements AdjacencyList {
 
     private final Cleaner.Cleanable cleanable;
 
+
+    // temp
+    private interface NewCursor {
+        AdjacencyCursor newCursor(long offset, int degree, long[] pages);
+    }
+
+    private interface NewReuseCursor {
+        AdjacencyCursor newCursor(@Nullable AdjacencyCursor reuse, long offset, int degree, long[] pages);
+    }
+
+    private interface NewRawCursor {
+        AdjacencyCursor newRawCursor(long[] pages);
+    }
+
+    private static AdjacencyCursor newCursorWithPackedTail(long offset, int degree, long[] pages) {
+        var cursor = new DecompressingCursorWithPackedTail(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    private static AdjacencyCursor newReuseCursorWithPackedTail(
+        @Nullable AdjacencyCursor reuse,
+        long offset,
+        int degree,
+        long[] pages
+    ) {
+        if (reuse instanceof DecompressingCursorWithPackedTail) {
+            reuse.init(offset, degree);
+            return reuse;
+        } else {
+            var cursor = new DecompressingCursorWithPackedTail(pages);
+            cursor.init(offset, degree);
+            return cursor;
+        }
+    }
+
+    private static AdjacencyCursor newRawCursorWithPackedTail(long[] pages) {
+        return new DecompressingCursorWithPackedTail(pages);
+    }
+
+    private static AdjacencyCursor newCursorWithVarLongTail(long offset, int degree, long[] pages) {
+        var cursor = new DecompressingCursorWithVarLongTail(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    private static AdjacencyCursor newReuseCursorWithVarLongTail(
+        @Nullable AdjacencyCursor reuse,
+        long offset,
+        int degree,
+        long[] pages
+    ) {
+        if (reuse instanceof DecompressingCursorWithVarLongTail) {
+            reuse.init(offset, degree);
+            return reuse;
+        } else {
+            var cursor = new DecompressingCursorWithVarLongTail(pages);
+            cursor.init(offset, degree);
+            return cursor;
+        }
+    }
+
+    private static AdjacencyCursor newRawCursorWithVarLongTail(long[] pages) {
+        return new DecompressingCursorWithVarLongTail(pages);
+    }
+
+    private final NewCursor newCursor;
+    private final NewReuseCursor newReuseCursor;
+    private final NewRawCursor newRawCursor;
+
     PackedAdjacencyList(
         long[] pages,
         int[] allocationSizes,
@@ -57,6 +127,21 @@ public class PackedAdjacencyList implements AdjacencyList {
         this.allocationSizes = allocationSizes;
         this.allocationHistogram = allocationHistogram;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
+
+        switch (System.getProperty("gds.compression", "varlong")) {
+            case "varlong":
+                this.newCursor = PackedAdjacencyList::newCursorWithVarLongTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLongTail;
+                this.newRawCursor = PackedAdjacencyList::newRawCursorWithVarLongTail;
+                break;
+            case "packed":
+                this.newCursor = PackedAdjacencyList::newCursorWithPackedTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithPackedTail;
+                this.newRawCursor = PackedAdjacencyList::newRawCursorWithPackedTail;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown compression type");
+        }
     }
 
     @Override
@@ -72,10 +157,7 @@ public class PackedAdjacencyList implements AdjacencyList {
         }
 
         long offset = this.offsets.get(node);
-        var cursor = new DecompressingCursorWithPackedTail(this.pages);
-        cursor.init(offset, degree);
-
-        return cursor;
+        return this.newCursor.newCursor(offset, degree, this.pages);
     }
 
     @Override
@@ -84,17 +166,14 @@ public class PackedAdjacencyList implements AdjacencyList {
         if (degree == 0) {
             return AdjacencyCursor.empty();
         }
-        if (reuse instanceof DecompressingCursorWithPackedTail) {
-            long offset = this.offsets.get(node);
-            reuse.init(offset, degree);
-            return reuse;
-        }
-        return adjacencyCursor(node, fallbackValue);
+
+        long offset = this.offsets.get(node);
+        return this.newReuseCursor.newCursor(reuse, offset, degree, this.pages);
     }
 
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
-        return new DecompressingCursorWithPackedTail(this.pages);
+        return this.newRawCursor.newRawCursor(this.pages);
     }
 
     @Override
