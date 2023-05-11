@@ -2,6 +2,9 @@
 = Editions
 
 The Neo4j Graph Data Science library is available in two editions.
+By default, GDS will operate as the Community Edition.
+To unlock Enterprise Edition features, a valid Neo4j Graph Data Science Enterprise license file is required.
+See xref:operations-reference/configuration-settings.adoc#gds.enterprise.license_file[Configuration Settings] for how to configure the license.
 
 * The open source Community Edition:
 ** Includes all algorithms.
