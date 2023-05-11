@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.eclipse.collections.impl.lazy.parallel.set.UnsortedSetBatch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junitpioneer.jupiter.params.IntRangeSource;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
@@ -123,16 +125,26 @@ class AdjacencyPackerTest {
     }
 
     @Test
-    void pack5LoopTest() {
+    void loopPack0Test() {
+        long allocation = BitUtil.align(1, Long.BYTES);
+        long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
+        long next = AdjacencyPacking.loopPack(0, new long[0], 0, 0, ptr);
+        assertThat(next).isEqualTo(ptr);
+
+        UnsafeUtil.free(ptr, allocation, EmptyMemoryTracker.INSTANCE);
+    }
+
+    @Test
+    void loopPack5Test() {
         int bits = 5;
-        long upperBound = (1 << bits) - 1;
+        long upperBound = (1L << bits) - 1;
         long[] data = LongStream.rangeClosed(0, upperBound).toArray();
         int length = data.length;
         int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
 
         long allocation = BitUtil.align(requiredBytes, Long.BYTES);
         long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
-        long next = AdjacencyPacking.pack5Loop(data, 0, length, ptr);
+        long next = AdjacencyPacking.loopPack(5, data, 0, length, ptr);
 
         var w0 = UnsafeUtil.getLong(ptr);
         assertThat(w0).isEqualTo(0b1100_01011_01010_01001_01000_00111_00110_00101_00100_00011_00010_00001_00000L);
@@ -142,103 +154,58 @@ class AdjacencyPackerTest {
         assertThat(w2).isEqualTo(0b11111_11110_11101_11100_11011_11010_11L);
 
         assertThat(next).isEqualTo(ptr + allocation);
+
+        UnsafeUtil.free(ptr, allocation, EmptyMemoryTracker.INSTANCE);
     }
 
     @Test
-    void unpack5LoopTest() {
-        int bits = 5;
-        long upperBound = (1 << bits) - 1;
-        long[] data = LongStream.rangeClosed(0, upperBound).toArray();
+    void loopPack64Test() {
+        int bits = 64;
+        long upperBound = (1L << bits) - 1;
+        long[] data = LongStream.concat(LongStream.rangeClosed(0, 42), LongStream.of(upperBound)).toArray();
         int length = data.length;
         int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
 
         long allocation = BitUtil.align(requiredBytes, Long.BYTES);
         long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
-
-        AdjacencyPacking.pack5Loop(data, 0, length, ptr);
-
-        long[] unpacked = new long[(int) BitUtil.align(length, AdjacencyPacking.BLOCK_SIZE)];
-        AdjacencyUnpacking.unpack5Loop(unpacked, 0, length, ptr);
-
-        assertThat(Arrays.copyOf(unpacked, length)).isEqualTo(data);
-    }
-
-    @Test
-    void pack4LoopTest() {
-        int bits = 4;
-        long upperBound = (1 << bits) - 1;
-        long[] data = LongStream.rangeClosed(0, upperBound).toArray();
-        int length = data.length;
-        int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
-
-        long allocation = BitUtil.align(requiredBytes, Long.BYTES);
-        long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
-        long next = AdjacencyPacking.pack4Loop(data, 0, length, ptr);
+        long next = AdjacencyPacking.loopPack(bits, data, 0, length, ptr);
 
         var w0 = UnsafeUtil.getLong(ptr);
-        assertThat(w0).isEqualTo(0b1111_1110_1101_1100_1011_1010_1001_1000_0111_0110_0101_0100_0011_0010_0001_0000L);
-        assertThat(next).isEqualTo(ptr + allocation);
-    }
-
-    @Test
-    void unpack4LoopTest() {
-        int bits = 4;
-        long upperBound = (1 << bits) - 1;
-        long[] data = LongStream.rangeClosed(0, upperBound).toArray();
-        int length = data.length;
-        int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
-
-        long allocation = BitUtil.align(requiredBytes, Long.BYTES);
-        long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
-
-        AdjacencyPacking.pack4Loop(data, 0, length, ptr);
-
-        long[] unpacked = new long[(int) BitUtil.align(length, AdjacencyPacking.BLOCK_SIZE)];
-        AdjacencyUnpacking.unpack4Loop(unpacked, 0, length, ptr);
-
-        assertThat(Arrays.copyOf(unpacked, length)).isEqualTo(data);
-    }
-
-    @Test
-    void pack7LoopTest() {
-        int bits = 7;
-        long upperBound = (1 << bits) - 1;
-        long[] data = LongStream.rangeClosed(0, upperBound).toArray();
-        int length = data.length;
-        int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
-
-        long allocation = BitUtil.align(requiredBytes, Long.BYTES);
-        long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
-        long next = AdjacencyPacking.pack7Loop(data, 0, length, ptr);
-
-        var w0 = UnsafeUtil.getLong(ptr);
-        assertThat(w0).isEqualTo(0b1_0001000_0000111_0000110_0000101_0000100_0000011_0000010_0000001_0000000L);
+        assertThat(w0).isEqualTo(0L);
         var w1 = UnsafeUtil.getLong(ptr + Long.BYTES);
-        assertThat(w1).isEqualTo(0b10_0010001_0010000_0001111_0001110_0001101_0001100_0001011_0001010_000100L);
+        assertThat(w1).isEqualTo(1L);
         var w2 = UnsafeUtil.getLong(ptr + Long.BYTES + Long.BYTES);
-        assertThat(w2).isEqualTo(0b11_0011010_0011001_0011000_0010111_0010110_0010101_0010100_0010011_00100L);
+        assertThat(w2).isEqualTo(2);
+        var w42 = UnsafeUtil.getLong(ptr + Long.BYTES * 42);
+        assertThat(w42).isEqualTo(42);
+        var wUpperBound = UnsafeUtil.getLong(ptr + Long.BYTES * 43);
+        assertThat(wUpperBound).isEqualTo(upperBound);
 
-        assertThat(next).isEqualTo(ptr + allocation);
+        assertThat(next).isEqualTo(ptr + allocation + Long.BYTES);
+
+        UnsafeUtil.free(ptr, allocation, EmptyMemoryTracker.INSTANCE);
     }
 
-    @Test
-    void unpack7LoopTest() {
-        int bits = 7;
-        long upperBound = (1 << bits) - 1;
-        long[] data = LongStream.rangeClosed(0, upperBound).toArray();
-        // todo pick only a subset of the data
+    @ParameterizedTest
+    @IntRangeSource(from = 0, to = 64, closed = true)
+    void loopPackingRoundtripTest(int bits) {
+        long upperBound = (1L << bits) - 1;
+        long[] data = LongStream.concat(LongStream.range(0, Math.min(42, upperBound)), LongStream.of(upperBound))
+            .toArray();
         int length = data.length;
         int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
 
         long allocation = BitUtil.align(requiredBytes, Long.BYTES);
         long ptr = UnsafeUtil.allocateMemory(allocation, EmptyMemoryTracker.INSTANCE);
 
-        AdjacencyPacking.pack7Loop(data, 0, length, ptr);
+        AdjacencyPacking.loopPack(bits, data, 0, length, ptr);
 
         long[] unpacked = new long[(int) BitUtil.align(length, AdjacencyPacking.BLOCK_SIZE)];
-        AdjacencyUnpacking.unpack7Loop(unpacked, 0, length, ptr);
+        AdjacencyUnpacking.loopUnpack(bits, unpacked, 0, length, ptr);
 
         assertThat(Arrays.copyOf(unpacked, length)).isEqualTo(data);
+
+        UnsafeUtil.free(ptr, allocation, EmptyMemoryTracker.INSTANCE);
     }
 
     @Test

@@ -1019,7 +1019,6 @@ mod java {
 
                         for_body.push(if_stmt);
 
-                        // for (int i = 0; i < words; i++)
                         statements.push(Stmt::For {
                             init: Box::new(Stmt::Def(Def::assign("int", LOOP_I, Expr::Literal(0)))),
                             cond: Box::new(Expr::bin(

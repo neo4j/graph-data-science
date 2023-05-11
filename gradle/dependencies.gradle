@@ -73,6 +73,7 @@ ext {
         'jjwt'                 : '0.11.5',
         'jol'                  : '0.17',
         'jqwik'                : '1.7.2',
+        'junit-pioneer'        : '2.0.1',
         'junit5bom'            : '5.9.2',
         'log4j'                : log4js[neo4j_minor],
         'memoryfilesystem'     : '2.5.0',
