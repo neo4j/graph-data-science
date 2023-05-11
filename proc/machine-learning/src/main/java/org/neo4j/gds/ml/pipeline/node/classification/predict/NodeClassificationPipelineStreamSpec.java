@@ -42,26 +42,26 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
-public class NodeClassificationPipelineStreamSpec implements AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineBaseConfig, Stream<NodeClassificationStreamResult>, NodeClassificationPredictPipelineAlgorithmFactory<NodeClassificationPredictPipelineBaseConfig>> {
+public class NodeClassificationPipelineStreamSpec implements AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, NodeClassificationPredictPipelineAlgorithmFactory<NodeClassificationPredictPipelineStreamConfig>> {
     @Override
     public String name() {
         return "NodeClassificationPipelineStream";
     }
 
     @Override
-    public NodeClassificationPredictPipelineAlgorithmFactory<NodeClassificationPredictPipelineBaseConfig> algorithmFactory(
+    public NodeClassificationPredictPipelineAlgorithmFactory<NodeClassificationPredictPipelineStreamConfig> algorithmFactory(
         ExecutionContext executionContext
     ) {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext);
     }
 
     @Override
-    public NewConfigFunction<NodeClassificationPredictPipelineBaseConfig> newConfigFunction() {
-        return NodeClassificationPredictPipelineBaseConfig::of;
+    public NewConfigFunction<NodeClassificationPredictPipelineStreamConfig> newConfigFunction() {
+        return NodeClassificationPredictPipelineStreamConfig::of;
     }
 
     @Override
-    public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineBaseConfig, Stream<NodeClassificationStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) ->
             runWithExceptionLogging(
                 "Result streaming failed",
