@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.pregel.proc.PregelMutateComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
 import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
@@ -141,7 +142,7 @@ public class SpecificationGenerator {
         switch (mode) {
             case STATS: return PregelStatsComputationResultConsumer.class;
 //            case WRITE: return PregelWriteComputationResultConsumer.class;
-//            case MUTATE: return PregelMutateComputationResultConsumer.class;
+            case MUTATE: return PregelMutateComputationResultConsumer.class;
             case STREAM: return PregelStreamComputationResultConsumer.class;
             default: throw new IllegalStateException("Unexpected value: " + mode);
         }

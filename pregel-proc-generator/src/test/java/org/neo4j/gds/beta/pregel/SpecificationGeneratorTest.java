@@ -100,7 +100,7 @@ class SpecificationGeneratorTest {
         );
     }
 
-    @EnumSource(value = GDSMode.class, names = {"STATS", "STREAM"})
+    @EnumSource(value = GDSMode.class, names = {"STATS", "STREAM", "MUTATE"})
     @ParameterizedTest
     void shouldGenerateDifferentlyPerMode(GDSMode mode) {
         var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
