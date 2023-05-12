@@ -30,8 +30,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineWriteConfig
-    extends NodeClassificationPredictPipelineBaseConfig, WritePropertyConfig
+public interface NodeClassificationPredictPipelineWriteConfig extends NodeClassificationPredictPipelineMutateOrWriteConfig, WritePropertyConfig
 {
     @Override
     @Value.Derived
@@ -39,8 +38,6 @@ public interface NodeClassificationPredictPipelineWriteConfig
     default boolean includePredictedProbabilities() {
         return predictedProbabilityProperty().isPresent();
     }
-
-    Optional<String> predictedProbabilityProperty();
 
     @Value.Check
     default void validateWritePropertiesDiffer() {

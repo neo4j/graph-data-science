@@ -19,47 +19,32 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class NodeClassificationPipelineWriteProc
-    extends WriteProc<
-    NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPipelineResult,
-    NodeClassificationPipelineWriteProc.WriteResult,
-    NodeClassificationPredictPipelineWriteConfig>
-{
-
+public class NodeClassificationPipelineWriteProc extends BaseProc {
     @Context
     public ModelCatalog internalModelCatalog;
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.write", mode = Mode.WRITE)
     @Description(PREDICT_DESCRIPTION)
@@ -68,7 +53,10 @@ public class NodeClassificationPipelineWriteProc
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return write(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new NodeClassificationPipelineWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.write.estimate", mode = Mode.READ)
@@ -78,109 +66,15 @@ public class NodeClassificationPipelineWriteProc
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new NodeClassificationPipelineWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
     public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(internalModelCatalog);
-    }
-
-    @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
-        if (computationResult.result().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        var config = computationResult.config();
-        var writeProperty = config.writeProperty();
-        var result = computationResult.result().get();
-        var classProperties = result.predictedClasses().asNodeProperties();
-        var nodeProperties = new ArrayList<NodeProperty>();
-        nodeProperties.add(NodeProperty.of(writeProperty, classProperties));
-
-        result.predictedProbabilities().ifPresent((probabilityProperties) -> {
-            var properties = new DoubleArrayNodePropertyValues() {
-                @Override
-                public long nodeCount() {
-                    return computationResult.graph().nodeCount();
-                }
-
-                @Override
-                public double[] doubleArrayValue(long nodeId) {
-                    return probabilityProperties.get(nodeId);
-                }
-            };
-
-            nodeProperties.add(NodeProperty.of(
-                config.predictedProbabilityProperty().orElseThrow(),
-                properties
-            ));
-        });
-
-        return nodeProperties;
-    }
-
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new WriteResult.Builder();
-    }
-
-    @Override
-    protected NodeClassificationPredictPipelineWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return newConfigFunction().apply(username, config);
-    }
-
-    @Override
-    public NewConfigFunction<NodeClassificationPredictPipelineWriteConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewWriteConfigFn(executionContext().modelCatalog());
-    }
-
-    @Override
-    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory(
-        ExecutionContext executionContext
-    ) {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext);
-    }
-
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends StandardWriteResult {
-
-        public final long nodePropertiesWritten;
-
-        WriteResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                writeMillis,
-                configuration
-            );
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractResultBuilder<WriteResult> {
-
-            @Override
-            public WriteResult build() {
-                return new WriteResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    writeMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder).withModelCatalog(internalModelCatalog);
     }
 }

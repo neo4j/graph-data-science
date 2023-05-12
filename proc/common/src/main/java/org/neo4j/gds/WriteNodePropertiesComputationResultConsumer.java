@@ -47,9 +47,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT>
     implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
 
-    public interface WriteNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig>
-        extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {}
-
     private final ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction;
     private final WriteNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
     private final String procedureName;

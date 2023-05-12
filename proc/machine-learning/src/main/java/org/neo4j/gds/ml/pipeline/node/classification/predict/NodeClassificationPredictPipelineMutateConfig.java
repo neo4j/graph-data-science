@@ -28,23 +28,18 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineMutateConfig
-    extends NodeClassificationPredictPipelineBaseConfig, MutatePropertyConfig
-{
+public interface NodeClassificationPredictPipelineMutateConfig extends NodeClassificationPredictPipelineMutateOrWriteConfig, MutatePropertyConfig {
     @Override
     @Value.Derived
     @Configuration.Ignore
     default boolean includePredictedProbabilities() {
         return predictedProbabilityProperty().isPresent();
     }
-
-    Optional<String> predictedProbabilityProperty();
 
     static NodeClassificationPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPredictPipelineMutateConfigImpl(username, config);

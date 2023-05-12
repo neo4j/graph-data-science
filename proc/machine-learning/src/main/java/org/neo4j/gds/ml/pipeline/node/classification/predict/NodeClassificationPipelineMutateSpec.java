@@ -19,21 +19,17 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.GraphStoreUpdater;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -59,50 +55,29 @@ public class NodeClassificationPipelineMutateSpec implements AlgorithmSpec<NodeC
 
     @Override
     public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig, Stream<PredictMutateResult>> computationResultConsumer() {
-        var resultBuilderFunction = new NodeClassificationPredictPipelineMutateResultBuilderFunction();
-
-        return new NodeClassificationPredictPipelineMutateComputationResultConsumer(
-            resultBuilderFunction,
-            NodeClassificationPipelineMutateSpec::nodePropertyList
-        );
+        return new MutateComputationResultConsumer<>((computationResult, executionContext) -> new PredictMutateResult.Builder()) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult,
+                ExecutionContext executionContext
+            ) {
+                GraphStoreUpdater.UpdateGraphStore(
+                    resultBuilder,
+                    computationResult,
+                    executionContext,
+                    result -> PredictedProbabilities.asProperties(
+                        result.result(),
+                        result.config().mutateProperty(),
+                        result.config()
+                    )
+                );
+            }
+        };
     }
 
     @Override
     public void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        if (! userInput.containsKey("modelName")) return;
-
-        var model = executionContext.modelCatalog().get(
-            executionContext.username(),
-            (String) userInput.get("modelName"),
-            BaseModelData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            Model.CustomInfo.class
-        );
-
-        userInput.putIfAbsent("targetNodeLabels", model.trainConfig().targetNodeLabels());
-        userInput.putIfAbsent("relationshipTypes", model.trainConfig().relationshipTypes());
-    }
-
-    private static List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
-        if (computationResult.result().isEmpty()) return Collections.emptyList();
-
-        var config = computationResult.config();
-        var mutateProperty = config.mutateProperty();
-        var result = computationResult.result().get();
-        var classProperties = result.predictedClasses().asNodeProperties();
-        var nodeProperties = new ArrayList<NodeProperty>();
-
-        nodeProperties.add(NodeProperty.of(mutateProperty, classProperties));
-
-        result.predictedProbabilities().ifPresent(probabilityProperties -> {
-            var properties = probabilityProperties.asNodeProperties();
-
-            nodeProperties.add(NodeProperty.of(
-                config.predictedProbabilityProperty().orElseThrow(),
-                properties
-            ));
-        });
-
-        return nodeProperties;
+        ConfigPreProcessor.Enhance(userInput, executionContext);
     }
 }
