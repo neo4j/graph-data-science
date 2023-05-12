@@ -10,7 +10,7 @@ See xref:installation/installation-enterprise-edition.adoc[] for how to configur
 ** Includes all algorithms.
 ** Limits the catalog operations to manage graphs and models.
    Unavailable operations are listed under the Enterprise Edition below.
-** Limits the xref:installation/System-requirements.adoc#system-requirements-cpu[concurrency to 4 CPU cores].
+** Limits the xref:installation/System-requirements.adoc#system-requirements-cpu[concurrency to maximum 4 CPU cores].
 ** Limits the capacity of the model catalog to 3 models.
 
 * The Neo4j Graph Data Science library Enterprise Edition:
