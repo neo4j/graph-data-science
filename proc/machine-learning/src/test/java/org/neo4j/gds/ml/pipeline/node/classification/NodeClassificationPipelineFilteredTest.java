@@ -25,8 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -69,6 +73,9 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
         ", (x6)-[:R]->(y2)" +
         ", (x8)-[:R]->(y2)" +
         ", (x10)-[:R]->(y2)";
+
+    @Inject
+    IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
@@ -136,6 +143,9 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
         //Score = 1 means the model is able to recover the perfect correlation between degree-class.
         //This implies the correct contextNodes have been used (for degree to be correct)
 
+        IdMap nodes = GraphStoreCatalog.get(getUsername(), db.databaseName(), GRAPH_NAME).graphStore().nodes();
+        IdFunction mappedId = name -> nodes.toMappedNodeId(idFunction.of(name));
+
         // this test identified a bug in the stream path.
         // we need to make sure that the graph consisting of the targetNodeLabels (taken from the train or predict config) is used to map the ids to the id space of the graph store
         assertCypherResult(
@@ -145,16 +155,16 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
             " })" +
             "  YIELD nodeId, predictedClass",
             List.of(
-                Map.of("nodeId", 0L, "predictedClass", 0L),
-                Map.of("nodeId", 1L, "predictedClass", 5L),
-                Map.of("nodeId", 2L, "predictedClass", 0L),
-                Map.of("nodeId", 3L, "predictedClass", 5L),
-                Map.of("nodeId", 4L, "predictedClass", 0L),
-                Map.of("nodeId", 5L, "predictedClass", 5L),
-                Map.of("nodeId", 6L, "predictedClass", 0L),
-                Map.of("nodeId", 7L, "predictedClass", 5L),
-                Map.of("nodeId", 8L, "predictedClass", 0L),
-                Map.of("nodeId", 9L, "predictedClass", 5L)
+                Map.of("nodeId", idFunction.of("x1"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x2"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x3"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x4"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x5"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x6"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x7"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x8"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x9"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x10"), "predictedClass", 5L)
             )
         );
         // this test identified a bug in the mutation path.
@@ -168,18 +178,18 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
             "CALL gds.graph.nodeProperties.stream(" +
             "   'g', " +
             "   ['predictedClass']" +
-            ") YIELD nodeId, propertyValue",
+            ") YIELD nodeId, propertyValue AS predictedClass",
             List.of(
-                Map.of("nodeId", 0L, "propertyValue", 0L),
-                Map.of("nodeId", 1L, "propertyValue", 5L),
-                Map.of("nodeId", 2L, "propertyValue", 0L),
-                Map.of("nodeId", 3L, "propertyValue", 5L),
-                Map.of("nodeId", 4L, "propertyValue", 0L),
-                Map.of("nodeId", 5L, "propertyValue", 5L),
-                Map.of("nodeId", 6L, "propertyValue", 0L),
-                Map.of("nodeId", 7L, "propertyValue", 5L),
-                Map.of("nodeId", 8L, "propertyValue", 0L),
-                Map.of("nodeId", 9L, "propertyValue", 5L)
+                Map.of("nodeId", idFunction.of("x1"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x2"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x3"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x4"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x5"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x6"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x7"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x8"), "predictedClass", 5L),
+                Map.of("nodeId", idFunction.of("x9"), "predictedClass", 0L),
+                Map.of("nodeId", idFunction.of("x10"), "predictedClass", 5L)
             )
         );
     }

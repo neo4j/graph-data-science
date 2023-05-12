@@ -143,18 +143,18 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
     private String expectedMutatedGraph() {
         return
-            "  (a { communityId: 2 }) " +
-            ", (b { communityId: 7 }) " +
-            ", (a)-->({ communityId: 2 }) " +
-            ", (a)-->({ communityId: 3 }) " +
-            ", (a)-->({ communityId: 4 }) " +
-            ", (a)-->({ communityId: 5 }) " +
-            ", (a)-->({ communityId: 6 }) " +
-            ", (b)-->({ communityId: 7 }) " +
-            ", (b)-->({ communityId: 8 }) " +
-            ", (b)-->({ communityId: 9 }) " +
-            ", (b)-->({ communityId: 10 }) " +
-            ", (b)-->({ communityId: 11 })";
+            "  (a { communityId: 44 }) " +
+            ", (b { communityId: 49 }) " +
+            ", (a)-->({ communityId: 44 }) " +
+            ", (a)-->({ communityId: 45 }) " +
+            ", (a)-->({ communityId: 46 }) " +
+            ", (a)-->({ communityId: 47 }) " +
+            ", (a)-->({ communityId: 48 }) " +
+            ", (b)-->({ communityId: 49 }) " +
+            ", (b)-->({ communityId: 50 }) " +
+            ", (b)-->({ communityId: 51 }) " +
+            ", (b)-->({ communityId: 52 }) " +
+            ", (b)-->({ communityId: 53 })";
     }
 
     @Test

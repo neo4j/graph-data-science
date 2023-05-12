@@ -56,6 +56,8 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
     AbstractInMemoryRelationshipScanCursor relationshipScanCursor;
 
+    IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
     @Override
     protected GraphStore graphStore() {
         return new StoreLoaderBuilder()
@@ -100,8 +102,8 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
         assertThat(relationshipScanCursor.next()).isTrue();
         assertThat(relationshipScanCursor.getId()).isEqualTo(2);
-        assertThat(relationshipScanCursor.sourceNodeReference()).isEqualTo(idFunction.of("b"));
-        assertThat(relationshipScanCursor.targetNodeReference()).isEqualTo(idFunction.of("c"));
+        assertThat(relationshipScanCursor.sourceNodeReference()).isEqualTo(mappedId.of("b"));
+        assertThat(relationshipScanCursor.targetNodeReference()).isEqualTo(mappedId.of("c"));
     }
 
     @Test
@@ -135,9 +137,9 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
         }
 
         var expectedRelationships = Map.of(
-            1L, ImmutableRelationship.of(idFunction.of("a"), idFunction.of("c")),
-            2L, ImmutableRelationship.of(idFunction.of("b"), idFunction.of("c")),
-            3L, ImmutableRelationship.of(idFunction.of("a"), idFunction.of("a"))
+            1L, ImmutableRelationship.of(mappedId.of("a"), mappedId.of("c")),
+            2L, ImmutableRelationship.of(mappedId.of("b"), mappedId.of("c")),
+            3L, ImmutableRelationship.of(mappedId.of("a"), mappedId.of("a"))
         );
 
         assertThat(actualRelationships).containsExactlyInAnyOrderEntriesOf(expectedRelationships);

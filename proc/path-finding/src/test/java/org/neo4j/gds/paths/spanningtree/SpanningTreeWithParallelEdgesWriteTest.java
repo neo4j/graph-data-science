@@ -25,6 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +40,9 @@ public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
         "CREATE (b:Place {name: 'B'})" +
         "CREATE (a)-[:LINK {cost:800}]->(b)" +
         "CREATE (a)-[:LINK1 {cost:1}]->(b)";
+
+    @Inject
+    IdFunction idFunction;
 
 
     @BeforeEach
@@ -66,7 +71,7 @@ public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
             .addParameter("writeProperty", "writeCost")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeRelationshipType", "MINST")
-            .addParameter("sourceNode", 0)
+            .addParameter("sourceNode", idFunction.of("a"))
             .yields();
         runQuery(mstQuery);
         
