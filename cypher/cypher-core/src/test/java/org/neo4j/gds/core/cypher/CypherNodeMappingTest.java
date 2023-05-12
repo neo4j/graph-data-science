@@ -65,7 +65,7 @@ class CypherIdMapTest {
     @Test
     void shouldAddNewLabelsToNode() {
         var newNodeLabel = NodeLabel.of("new");
-        var nodeA = idFunction.of("a");
+        var nodeA = graphStore.nodes().toMappedNodeId(idFunction.of("a"));
         this.idMap.addLabelToNode(nodeA, newNodeLabel);
         assertThat(this.idMap.nodeLabels(nodeA)).containsExactlyInAnyOrder(NodeLabel.of("A"), newNodeLabel);
         assertThat(this.idMap.hasLabel(nodeA, newNodeLabel)).isTrue();
@@ -75,7 +75,7 @@ class CypherIdMapTest {
     @Test
     void shouldAddAlreadyExistingLabelsToNode() {
         var existingLabel = NodeLabel.of("B");
-        var nodeA = idFunction.of("a");
+        var nodeA = graphStore.nodes().toMappedNodeId(idFunction.of("a"));
         this.idMap.addLabelToNode(nodeA, existingLabel);
         assertThat(this.idMap.nodeLabels(nodeA)).containsExactlyInAnyOrder(NodeLabel.of("A"), existingLabel);
         assertThat(this.idMap.hasLabel(nodeA, existingLabel)).isTrue();
@@ -86,7 +86,7 @@ class CypherIdMapTest {
     void shouldIterateThroughNewAndExistingAddedNodeLabels() {
         var newNodeLabel = NodeLabel.of("new");
         var existingLabel = NodeLabel.of("B");
-        var nodeA = idFunction.of("a");
+        var nodeA = graphStore.nodes().toMappedNodeId(idFunction.of("a"));
         this.idMap.addLabelToNode(nodeA, newNodeLabel);
         this.idMap.addLabelToNode(nodeA, existingLabel);
 
@@ -97,16 +97,18 @@ class CypherIdMapTest {
 
     @Test
     void shouldRemoveLabelFromNode() {
+        IdFunction mappedId = (name) -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
         var newNodeLabel = NodeLabel.of("new");
         this.idMap.addNodeLabel(newNodeLabel);
-        this.idMap.addLabelToNode(idFunction.of("a"), newNodeLabel);
-        this.idMap.addLabelToNode(idFunction.of("b"), newNodeLabel);
+        this.idMap.addLabelToNode(mappedId.of("a"), newNodeLabel);
+        this.idMap.addLabelToNode(mappedId.of("b"), newNodeLabel);
 
-        assertThat(this.idMap.hasLabel(idFunction.of("b"), newNodeLabel)).isTrue();
+        assertThat(this.idMap.hasLabel(mappedId.of("b"), newNodeLabel)).isTrue();
 
-        this.idMap.removeLabelFromNode(idFunction.of("b"), newNodeLabel);
+        this.idMap.removeLabelFromNode(mappedId.of("b"), newNodeLabel);
 
-        assertThat(this.idMap.hasLabel(idFunction.of("a"), newNodeLabel)).isTrue();
-        assertThat(this.idMap.hasLabel(idFunction.of("b"), newNodeLabel)).isFalse();
+        assertThat(this.idMap.hasLabel(mappedId.of("a"), newNodeLabel)).isTrue();
+        assertThat(this.idMap.hasLabel(mappedId.of("b"), newNodeLabel)).isFalse();
     }
 }

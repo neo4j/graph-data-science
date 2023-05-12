@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
@@ -40,6 +39,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
@@ -117,10 +117,7 @@ class YensTest {
         ", (g)-[:REL {cost: 2.0}]->(h)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     // Each input represents k paths that are expected to be returned by Yen's algorithm.
     // The first node in each path is the start node for the path search, the last node in
@@ -177,7 +174,7 @@ class YensTest {
     @ParameterizedTest
     @MethodSource("pathInput")
     void compute(Collection<String> expectedPaths) {
-        assertResult(graph, idFunction, expectedPaths, false, 4);
+        assertResult(graph, expectedPaths, false, 4);
     }
 
     @Test
@@ -185,8 +182,8 @@ class YensTest {
         int k = 3;
 
         var config = defaultSourceTargetConfigBuilder(1)
-            .sourceNode(idFunction.of("c"))
-            .targetNode(idFunction.of("h"))
+            .sourceNode(graph.toOriginalNodeId("c"))
+            .targetNode(graph.toOriginalNodeId("h"))
             .k(k)
             .build();
 
@@ -223,8 +220,8 @@ class YensTest {
         int k = 3;
 
         var config = defaultSourceTargetConfigBuilder(1)
-            .sourceNode(idFunction.of("z"))
-            .targetNode(idFunction.of("h"))
+            .sourceNode(graph.toOriginalNodeId("z"))
+            .targetNode(graph.toOriginalNodeId("h"))
             .k(k)
             .build();
 
@@ -250,13 +247,12 @@ class YensTest {
 
 
     private static void assertResult(
-        Graph graph,
-        IdFunction idFunction,
+        TestGraph graph,
         Collection<String> expectedPaths,
         boolean trackRelationships,
         int concurrency
     ) {
-        var expectedPathResults = expectedPathResults(idFunction, expectedPaths, trackRelationships);
+        var expectedPathResults = expectedPathResults(graph::toMappedNodeId, expectedPaths, trackRelationships);
 
         var firstResult = expectedPathResults
             .stream()
@@ -270,8 +266,8 @@ class YensTest {
         }
 
         var config = defaultSourceTargetConfigBuilder(concurrency)
-            .sourceNode(firstResult.sourceNode())
-            .targetNode(firstResult.targetNode())
+            .sourceNode(graph.toOriginalNodeId(firstResult.sourceNode()))
+            .targetNode(graph.toOriginalNodeId(firstResult.targetNode()))
             .k(expectedPathResults.size())
             .build();
 
@@ -367,10 +363,7 @@ class YensTest {
             ", (c)-[:REL { cost: 42.0 }]->(d)";
 
         @Inject
-        private Graph graph;
-
-        @Inject
-        private IdFunction idFunction;
+        private TestGraph graph;
 
         Stream<List<String>> pathInput() {
             return Stream.of(
@@ -396,7 +389,7 @@ class YensTest {
         @ParameterizedTest
         @MethodSource("pathInput")
         void compute(Collection<String> expectedPaths) {
-            assertResult(graph, idFunction, expectedPaths, true, 4);
+            assertResult(graph, expectedPaths, true, 4);
         }
     }
 }

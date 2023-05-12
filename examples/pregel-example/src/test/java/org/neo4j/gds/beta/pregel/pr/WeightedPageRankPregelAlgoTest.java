@@ -141,7 +141,7 @@ class WeightedPageRankPregelAlgoTest {
         // normalize expected
         expected.forEach((node, value) -> {
             double total = expected.values().stream().reduce(Double::sum).orElseGet(() -> 0D);
-            expectedValues.set(graph.toOriginalNodeId(node), expected.get(node) / total);
+            expectedValues.set(graph.toMappedNodeId(node), expected.get(node) / total);
         });
 
         // normalize actual values

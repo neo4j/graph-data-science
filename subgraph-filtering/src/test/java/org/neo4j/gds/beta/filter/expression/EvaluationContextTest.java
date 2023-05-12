@@ -79,7 +79,7 @@ public class EvaluationContextTest {
         List<String> expectedLabels
     ) {
         var context = new EvaluationContext.NodeEvaluationContext(graphStore, Map.of());
-        context.init(idFunction.of(variable));
+        context.init(graphStore.nodes().toMappedNodeId(idFunction.of(variable)));
         assertThat(context.getProperty(propertyKey, valueType)).isEqualTo(expectedValue);
         assertThat(context.hasLabelsOrTypes(expectedLabels)).isTrue();
     }
