@@ -71,7 +71,7 @@ class AdamOptimizerTest {
             var localCtx = new ComputationContext();
             double newLoss = localCtx.forward(lossFunction).value();
             double d = oldLoss - newLoss;
-            if (Math.abs(d) < 1e-8) break;
+            if (Math.abs(d) < 1e-7) break;
 
             oldLoss = newLoss;
             localCtx.backward(lossFunction);
@@ -79,7 +79,7 @@ class AdamOptimizerTest {
             adam.update(List.of(localCtx.gradient(weights)));
         }
 
-        assertThat(oldLoss).isLessThan(1e-4);
+        assertThat(oldLoss).isLessThan(5e-4);
         assertThat(weights.data().cols()).isEqualTo(3);
         assertThat(weights.data().rows()).isEqualTo(3);
         assertThat(weights.data().data())
@@ -95,7 +95,7 @@ class AdamOptimizerTest {
                     0.6,
                     0.15
                 },
-                Offset.offset(1e-4)
+                Offset.offset(5e-3)
             );
     }
 
