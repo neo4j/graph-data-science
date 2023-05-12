@@ -163,11 +163,11 @@ class ToUndirectedProcTest extends BaseProcTest {
         assertCypherResult(query, List.of(Map.of(
             "mapView", instanceOf(Map.class),
             "treeView", instanceOf(String.class),
-            "bytesMax", 524632L,
+            "bytesMax", 524640L,
             "heapPercentageMin", 0.1D,
             "nodeCount", 3L,
             "requiredMemory", "[256 KiB ... 512 KiB]",
-            "bytesMin", 262360L,
+            "bytesMin", 262368L,
             "heapPercentageMax", 0.1D,
             "relationshipCount", 3L
         )));

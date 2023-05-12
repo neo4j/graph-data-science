@@ -39,8 +39,8 @@ class NativeFactoryTest {
 
     @Test
     void memoryEstimationBitMapDisabled() {
-        var expectedMinUsage = 3400612752L;
-        var expectedMaxUsage = 4600799544L;
+        var expectedMinUsage = 3400612760L;
+        var expectedMaxUsage = 4600799552L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .relCountUpperBound(500_000_000L)

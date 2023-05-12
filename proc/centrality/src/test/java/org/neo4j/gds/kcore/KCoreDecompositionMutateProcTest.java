@@ -157,8 +157,8 @@ class KCoreDecompositionMutateProcTest extends BaseProcTest {
         String query="CALL gds.kcore.mutate.estimate({nodeCount: 100, relationshipCount: 200, nodeProjection: '*', relationshipProjection: '*'}, {mutateProperty: 'kcore'})";
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(302_376L);
-            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(302_376L);
+            assertThat(row.getNumber("bytesMin")).asInstanceOf(LONG).isEqualTo(302_384L);
+            assertThat(row.getNumber("bytesMax")).asInstanceOf(LONG).isEqualTo(302_384L);
         });
 
         assertThat(rowCount)
