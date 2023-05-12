@@ -118,7 +118,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
                 config.heterogeneous() ? dims.relationshipCounts().size() : 1
             )));
 
-        int outputDimension = config.outputDimension().orElse(FUDGED_BINARY_DIMENSION);
+        int outputDimension = config.outputDimension().orElse(binaryDimension);
         builder.perNode(
             "Embeddings output",
             n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfDoubleArray(outputDimension))
