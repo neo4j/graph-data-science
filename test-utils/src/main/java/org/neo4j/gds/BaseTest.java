@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.extension.NodeFunction;
@@ -66,6 +67,9 @@ public abstract class BaseTest {
 
     @Inject
     public IdFunction idFunction;
+
+    @Inject
+    public IdToVariable idToVariable;
 
     public TestLog testLog;
 

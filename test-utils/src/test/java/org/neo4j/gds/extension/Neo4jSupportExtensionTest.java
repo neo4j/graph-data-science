@@ -53,6 +53,9 @@ class Neo4jSupportExtensionTest extends BaseTest {
         long idB = idFunction.of("b");
         assertEquals(nodeIdByProperty(db, 0), idA);
         assertEquals(nodeIdByProperty(db, 1), idB);
+
+        assertThat(idToVariable.of(idA)).isEqualTo("a");
+        assertThat(idToVariable.of(idB)).isEqualTo("b");
     }
 
     @Test

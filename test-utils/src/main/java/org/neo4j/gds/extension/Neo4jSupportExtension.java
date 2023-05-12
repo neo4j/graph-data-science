@@ -66,8 +66,8 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
         Optional<Pair<String, Boolean>> createQuery = createQueryAndIdOffset(requiredTestClass);
-        Map<String, Node> idMap = neo4jGraphSetup(db, createQuery);
-        injectFields(context, db, idMap);
+        var idFunctions = neo4jGraphSetup(db, createQuery);
+        injectFields(context, db, idFunctions);
     }
 
     private Optional<DatabaseManagementService> getDbms(ExtensionContext context) {
@@ -85,17 +85,17 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             ));
     }
 
-    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Optional<Pair<String, Boolean>> createQueryAndOffset) {
+    private IdFunctions neo4jGraphSetup(GraphDatabaseService db, Optional<Pair<String, Boolean>> createQueryAndOffset) {
         offsetNodeIds(db, createQueryAndOffset.map(Pair::getRight).orElse(false));
 
         return createQueryAndOffset
             .map(Pair::getLeft)
             .map(query -> formatWithLocale("%s %s", query, RETURN_STATEMENT))
             .map(query -> QueryRunner.runQuery(db, query, Neo4jSupportExtension::extractVariableIds))
-            .orElseGet(Map::of);
+            .orElse(IdFunctions.EMPTY);
     }
 
-    private static Map<String, Node> extractVariableIds(Result result) {
+    private static IdFunctions extractVariableIds(Result result) {
         if (!result.hasNext()) {
             throw new IllegalArgumentException("Result of create query was empty");
         }
@@ -103,14 +103,16 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         Map<String, Object> row = result.next();
 
         Map<String, Node> idMap = new HashMap<>();
+        Map<Long, String> variableToIddMap = new HashMap<>();
         columns.forEach(column -> {
             Object value = row.get(column);
             if (value instanceof NodeEntity) {
                 idMap.put(column, (NodeEntity) value);
+                variableToIddMap.put(((NodeEntity) value).getId(), column);
             }
         });
 
-        return idMap;
+        return new IdFunctions(variableToIddMap, idMap);
     }
 
     private void offsetNodeIds(GraphDatabaseService db, boolean offsetIds) {
@@ -123,13 +125,27 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         TestSupport.fullAccessTransaction(db).accept((tx, ktx) -> Neo4jProxy.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
     }
 
-    private void injectFields(ExtensionContext context, GraphDatabaseService db, Map<String, Node> idMap) {
-        NodeFunction nodeFunction = idMap::get;
+    private void injectFields(ExtensionContext context, GraphDatabaseService db, IdFunctions idFunctions) {
+        NodeFunction nodeFunction = idFunctions.variableToId::get;
         IdFunction idFunction = variable -> nodeFunction.of(variable).getId();
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             injectInstance(testInstance, nodeFunction, NodeFunction.class);
             injectInstance(testInstance, idFunction, IdFunction.class);
+            injectInstance(testInstance, idFunctions.idToVariable::get, IdToVariable.class);
             injectInstance(testInstance, db, GraphDatabaseService.class);
         });
+    }
+
+    // Inverse Id mapping
+    private static class IdFunctions {
+
+        static final IdFunctions EMPTY = new IdFunctions(Map.of(), Map.of());
+        final Map<Long, String> idToVariable;
+        final Map<String, Node> variableToId;
+
+        IdFunctions(Map<Long, String> idToVariable, Map<String, Node> variableToId) {
+            this.idToVariable = idToVariable;
+            this.variableToId = variableToId;
+        }
     }
 }
