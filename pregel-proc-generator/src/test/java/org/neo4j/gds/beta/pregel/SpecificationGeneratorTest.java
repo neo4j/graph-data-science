@@ -21,6 +21,8 @@ package org.neo4j.gds.beta.pregel;
 
 import com.squareup.javapoet.TypeName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,5 +98,18 @@ class SpecificationGeneratorTest {
             "  return new org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer<>();" + NL +
             "}" + NL
         );
+    }
+
+    @EnumSource(value = GDSMode.class, names = {"STATS", "STREAM"})
+    @ParameterizedTest
+    void shouldGenerateDifferentlyPerMode(GDSMode mode) {
+        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
+        var configTypeName = TypeName.get(PregelProcedureConfig.class);
+        var specificationType = specificationGenerator.typeSpec(configTypeName, mode).build();
+        assertThat(specificationType.toString())
+            .contains("org.neo4j.gds.pregel.proc.Pregel" + mode.camelCase() + "Result");
+        var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(configTypeName, mode);
+        assertThat(computationResultConsumerMethod.toString())
+            .contains("org.neo4j.gds.pregel.proc.Pregel" + mode.camelCase() + "ComputationResultConsumer");
     }
 }

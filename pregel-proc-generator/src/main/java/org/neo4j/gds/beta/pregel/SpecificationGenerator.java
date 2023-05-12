@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
 import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
+import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 
@@ -141,7 +142,7 @@ public class SpecificationGenerator {
             case STATS: return PregelStatsComputationResultConsumer.class;
 //            case WRITE: return PregelWriteComputationResultConsumer.class;
 //            case MUTATE: return PregelMutateComputationResultConsumer.class;
-//            case STREAM: return PregelStreamComputationResultConsumer.class;
+            case STREAM: return PregelStreamComputationResultConsumer.class;
             default: throw new IllegalStateException("Unexpected value: " + mode);
         }
     }
