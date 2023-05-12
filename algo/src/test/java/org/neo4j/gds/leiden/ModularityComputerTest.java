@@ -37,7 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class ModularityComputerTest {
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE " +
         "  (a0:Node)," +

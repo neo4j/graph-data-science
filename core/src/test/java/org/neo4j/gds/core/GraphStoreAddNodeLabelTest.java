@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -78,8 +80,9 @@ class GraphStoreAddNodeLabelTest {
 
         // Act
         graphStore.addNodeLabel(newLabel);
-        graphStore.nodes().addNodeIdToLabel(b, newLabel);
-        graphStore.nodes().addNodeIdToLabel(c, newLabel);
+        IdMap nodes = graphStore.nodes();
+        nodes.addNodeIdToLabel(nodes.toMappedNodeId(b), newLabel);
+        nodes.addNodeIdToLabel(nodes.toMappedNodeId(c), newLabel);
 
         // Assert
         // the node schema should have the node label
@@ -93,9 +96,11 @@ class GraphStoreAddNodeLabelTest {
         assertThat(newLabelGraph.nodeCount()).isEqualTo(2L);
         assertThat(newLabelGraph.nodeCount(newLabel)).isEqualTo(2L);
 
+        var softly = new SoftAssertions();
         newLabelGraph.forEachNode(nodeId -> {
-            assertThat(newLabelGraph.toOriginalNodeId(nodeId)).isIn(b, c);
+            softly.assertThat(newLabelGraph.toOriginalNodeId(nodeId)).isIn(b, c);
             return true;
         });
+        softly.assertAll();
     }
 }

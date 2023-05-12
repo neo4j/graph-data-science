@@ -41,7 +41,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class GraphAggregationPhaseTest {
 
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE " +
         "  (a0:Node)," +

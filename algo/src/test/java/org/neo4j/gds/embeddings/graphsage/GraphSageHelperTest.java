@@ -49,7 +49,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 class GraphSageHelperTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 0)
     private static final String GDL = GraphSageTestGraph.GDL;
 
     @Inject

@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -115,8 +116,11 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> FeatureExtraction.propertyExtractors(missingArrayGraph, List.of("a", "b")))
             .withMessageContaining(
-                "Missing node property for property key `a` on node with id `0`."
-            );
+                String.format(
+                    Locale.US,
+                "Missing node property for property key `a` on node with id `%s`.",
+                    missingArrayGraph.toOriginalNodeId("n1")
+            ));
     }
 
     @Test

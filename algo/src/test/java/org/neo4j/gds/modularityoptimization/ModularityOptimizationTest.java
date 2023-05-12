@@ -61,9 +61,13 @@ import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLO
 @GdlExtension
 class ModularityOptimizationTest {
 
-    private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
+    private static final String[][] EXPECTED_SEED_COMMUNITIES = {
+        new String[]{"a", "b"},
+        new String[]{"c", "e"},
+        new String[]{"d", "f"}
+    };
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed1:  1,  seed2: 21})" +

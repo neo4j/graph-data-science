@@ -37,8 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class RefinementPhaseTest {
+
     //Fig. C1 from https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-019-41695-z/MediaObjects/41598_2019_41695_MOESM1_ESM.pdf
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE " +
         "  (a0:Node)," +

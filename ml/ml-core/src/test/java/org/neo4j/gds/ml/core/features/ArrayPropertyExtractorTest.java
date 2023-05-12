@@ -20,10 +20,12 @@
 package org.neo4j.gds.ml.core.features;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,7 +37,7 @@ class ArrayPropertyExtractorTest {
     private static final String GDL = "({q: [1.0d, 2.0d]}), ({q: [4.0d, 6.0d, 4.0d]}), (), ({q: [-2.0d, NaN]})";
 
     @Inject
-    private Graph graph;
+    private TestGraph graph;
 
     @Test
     void extracts() {
@@ -53,11 +55,19 @@ class ArrayPropertyExtractorTest {
 
         assertThatThrownBy(() -> extractor.extract(2))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property for property key `q` on node with id `2`");
+            .hasMessageContaining(String.format(
+                Locale.US,
+                "Missing node property for property key `q` on node with id `%s`",
+                graph.toOriginalNodeId(2)
+            ));
 
         assertThatThrownBy(() -> extractor.extract(3))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Node with ID `3` has invalid feature property value NaN for property `q`");
+            .hasMessageContaining(String.format(
+                Locale.US,
+                "Node with ID `%s` has invalid feature property value NaN for property `q`",
+                graph.toOriginalNodeId(3)
+            ));
     }
 
 }
