@@ -26,6 +26,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
@@ -101,8 +102,30 @@ public class SpecificationGenerator {
                     ClassName.get(NewConfigFunction.class),
                     configTypeName
                 )
-            ).addStatement("return (__, userInput) -> $T.of(userInput)", PregelConfig.class)
+            ).addStatement("return (__, userInput) -> $T.of(userInput)", PregelProcedureConfig.class)
             .build();
+    }
+
+    // ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer();
+    MethodSpec computationResultConsumerMethod(TypeName configTypeName, GDSMode mode) {
+        var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
+        return MethodSpec.methodBuilder("computationResultConsumer")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(
+                ParameterizedTypeName.get(
+                    ClassName.get(ComputationResultConsumer.class),
+                    algorithmClassName,
+                    ClassName.get(PregelResult.class),
+                    configTypeName,
+                    ClassName.get(resultTypeForMode(mode))
+                )
+            )
+            // RESULT consume(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext);
+            .addStatement("" +
+                "return (cr, ec) -> {" +
+                ""
+            ).build();
     }
 
     private ClassName derivedClassName(String suffix) {

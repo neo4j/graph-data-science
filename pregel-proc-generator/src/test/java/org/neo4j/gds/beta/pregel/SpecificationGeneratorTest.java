@@ -32,14 +32,14 @@ class SpecificationGeneratorTest {
     @Test
     void shouldGenerateType() {
         var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
-        var configTypeName = TypeName.get(PregelConfig.class);
+        var configTypeName = TypeName.get(PregelProcedureConfig.class);
         var specificationType = specificationGenerator.typeSpec(configTypeName, GDSMode.STATS).build();
 
         assertThat(specificationType.toString()).isEqualTo("" +
             "public final class FooAlgorithmSpecification extends org.neo4j.gds.executor.AlgorithmSpec<" +
             "gds.test.FooAlgorithm, " +
             "org.neo4j.gds.beta.pregel.PregelResult, " +
-            "org.neo4j.gds.beta.pregel.PregelConfig, " +
+            "org.neo4j.gds.beta.pregel.PregelProcedureConfig, " +
             "org.neo4j.gds.pregel.proc.PregelStatsResult, " +
             "gds.test.FooAlgorithmFactory> {" +
             System.lineSeparator() +
@@ -74,12 +74,12 @@ class SpecificationGeneratorTest {
     @Test
     void shouldGenerateNewConfigFunctionMethod() {
         var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
-        var configTypeName = TypeName.get(PregelConfig.class);
+        var configTypeName = TypeName.get(PregelProcedureConfig.class);
         assertThat(specificationGenerator.newConfigFunctionMethod(configTypeName).toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public org.neo4j.gds.executor.NewConfigFunction<org.neo4j.gds.beta.pregel.PregelConfig> newConfigFunction(" + NL +
+            "public org.neo4j.gds.executor.NewConfigFunction<org.neo4j.gds.beta.pregel.PregelProcedureConfig> newConfigFunction(" + NL +
             "    ) {" + NL +
-            "  return (__, userInput) -> org.neo4j.gds.beta.pregel.PregelConfig.of(userInput);" + NL +
+            "  return (__, userInput) -> org.neo4j.gds.beta.pregel.PregelProcedureConfig.of(userInput);" + NL +
             "}" + NL
         );
     }
