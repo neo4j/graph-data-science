@@ -35,6 +35,7 @@ import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
+import org.neo4j.gds.pregel.proc.PregelWriteComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 
 import javax.lang.model.element.Modifier;
@@ -141,7 +142,7 @@ public class SpecificationGenerator {
     private Type computationResultConsumerTypeForMode(GDSMode mode) {
         switch (mode) {
             case STATS: return PregelStatsComputationResultConsumer.class;
-//            case WRITE: return PregelWriteComputationResultConsumer.class;
+            case WRITE: return PregelWriteComputationResultConsumer.class;
             case MUTATE: return PregelMutateComputationResultConsumer.class;
             case STREAM: return PregelStreamComputationResultConsumer.class;
             default: throw new IllegalStateException("Unexpected value: " + mode);
