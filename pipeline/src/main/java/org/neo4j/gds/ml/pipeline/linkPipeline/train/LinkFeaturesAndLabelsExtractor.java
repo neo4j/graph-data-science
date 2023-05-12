@@ -64,7 +64,7 @@ final class LinkFeaturesAndLabelsExtractor {
                 .times(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
                 .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
             .perGraphDimension(
-                setDesc + "relationship targets",
+                setDesc + " relationship targets",
                 (graphDim, threads) -> MemoryRange.of(
                     HugeIntArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
                 )
