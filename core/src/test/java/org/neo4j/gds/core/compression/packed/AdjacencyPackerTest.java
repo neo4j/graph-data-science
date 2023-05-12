@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.eclipse.collections.impl.lazy.parallel.set.UnsortedSetBatch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
