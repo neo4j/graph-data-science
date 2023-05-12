@@ -36,9 +36,7 @@ public class GraphListProc extends BaseProc {
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfoWithHistogram> list(
-        @Name(
-            value = "graphName", defaultValue = GraphListOperator.NO_VALUE
-        ) String graphName
+        @Name(value = "graphName", defaultValue = GraphListOperator.NO_VALUE) String graphName
     ) {
         ProcPreconditions.check();
         return GraphListOperator.list(graphName, executionContext());
