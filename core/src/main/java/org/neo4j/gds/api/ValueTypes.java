@@ -24,15 +24,11 @@ import org.neo4j.values.storable.NumberType;
 
 public final class ValueTypes {
     public static ValueType fromNumberType(NumberType nt) {
-        switch (nt) {
-            case FLOATING_POINT:
-                return ValueType.DOUBLE;
-            case INTEGRAL:
-                return ValueType.LONG;
-            case NO_NUMBER:
-                return ValueType.UNKNOWN;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + nt + " (sad java 😞)");
+        return switch (nt) {
+            case FLOATING_POINT -> ValueType.DOUBLE;
+            case INTEGRAL -> ValueType.LONG;
+            case NO_NUMBER -> ValueType.UNKNOWN;
+            default -> throw new IllegalArgumentException("Unexpected value: " + nt + " (sad java 😞)");
         }
     }
 }
