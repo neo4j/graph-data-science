@@ -35,6 +35,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -318,6 +319,37 @@ class HashGNNTest {
             concurrency,
             MemoryRange.of(expectedMinMemory, expectedMaxMemory)
         );
+    }
+
+    @Test
+    void estimationShouldUseGeneratedDimensionIfOutputIsMissing() {
+        var inputDimension = 1000L;
+        var inputRatio = 0.1;
+        var graphDims = GraphDimensions.of((long) 1e6);
+        var concurrency = 4;
+
+        var bigEstimation = new HashGNNFactory<>()
+            .memoryEstimation(HashGNNStreamConfigImpl
+                .builder()
+                .generateFeatures(Map.of("dimension", inputDimension, "densityLevel", 1))
+                .iterations(3)
+                .embeddingDensity(100)
+                .build())
+            .estimate(graphDims, concurrency)
+            .memoryUsage();
+
+        var smallEstimation = new HashGNNFactory<>()
+            .memoryEstimation(HashGNNStreamConfigImpl
+                .builder()
+                .generateFeatures(Map.of("dimension", (long) (inputRatio * inputDimension), "densityLevel", 1))
+                .iterations(3)
+                .embeddingDensity(100)
+                .build())
+            .estimate(graphDims, concurrency)
+            .memoryUsage();
+
+        var outputRatio = (double) smallEstimation.min / bigEstimation.min;
+        assertThat(outputRatio).isCloseTo(inputRatio, Offset.offset(0.1));
     }
 
     @ParameterizedTest
