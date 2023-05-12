@@ -23,9 +23,8 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 
-public class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> {
+public class HarmonicCentralityAlgorithmFactory<CONFIG extends HarmonicCentralityBaseConfig> extends GraphAlgorithmFactory<HarmonicCentrality, CONFIG> {
     @Override
     public String taskName() {
         return "HarmonicCentrality";
@@ -34,7 +33,7 @@ public class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<Ha
     @Override
     public HarmonicCentrality build(
         Graph graph,
-        HarmonicCentralityConfig configuration,
+        HarmonicCentralityBaseConfig configuration,
         ProgressTracker progressTracker
     ) {
         return new HarmonicCentrality(

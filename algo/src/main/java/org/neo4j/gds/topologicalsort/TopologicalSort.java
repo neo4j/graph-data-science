@@ -57,7 +57,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
     protected TopologicalSort(
         Graph graph,
-        TopologicalSortConfig config,
+        TopologicalSortBaseConfig config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);

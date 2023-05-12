@@ -21,8 +21,14 @@ package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapAccess;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.procedure.Context;
 
-abstract class ModelCatalogProc extends BaseProc {
+public abstract class ModelCatalogProc extends BaseProc {
+
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     static final String NO_VALUE = "__NO_VALUE";
 
@@ -30,4 +36,8 @@ abstract class ModelCatalogProc extends BaseProc {
         CypherMapAccess.failOnBlank("modelName", modelName);
     }
 
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
+    }
 }

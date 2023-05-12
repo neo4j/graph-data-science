@@ -40,7 +40,7 @@ public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<Be
     }
 
     @Override
-    public BetweennessCentralityFactory<BetweennessCentralityStatsConfig> algorithmFactory() {
+    public BetweennessCentralityFactory<BetweennessCentralityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BetweennessCentralityFactory<>();
     }
 

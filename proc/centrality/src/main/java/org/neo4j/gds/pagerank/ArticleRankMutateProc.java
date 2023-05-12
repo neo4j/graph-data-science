@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -29,35 +30,35 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.pagerank.PageRankProc.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.articleRank.mutate", description = ARTICLE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ArticleRankMutateProc extends PageRankMutateProc {
+public class ArticleRankMutateProc extends BaseProc {
 
-    @Override
     @Procedure(value = "gds.articleRank.mutate", mode = READ)
     @Description(ARTICLE_RANK_DESCRIPTION)
-    public Stream<PageRankMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.mutate(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new ArticleRankMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
-    @Override
     @Procedure(value = "gds.articleRank.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new ArticleRankMutateSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
-    }
+
 }

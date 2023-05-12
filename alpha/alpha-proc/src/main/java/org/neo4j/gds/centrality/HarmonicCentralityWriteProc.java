@@ -19,17 +19,11 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
-import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
-import org.neo4j.gds.impl.harmonic.HarmonicResult;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,81 +32,29 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.centrality.HarmonicCentralityProc.DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.alpha.closeness.harmonic.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<CentralityScore.Stats> {
+public class HarmonicCentralityWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+
 
     @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<CentralityScore.Stats> write(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        return new ProcedureExecutor<>(
+            new HarmonicCentralityWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, Stream<CentralityScore.Stats>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var algorithm = computationResult.algorithm();
-            var config = computationResult.config();
-            var graph = computationResult.graph();
-
-            AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(
-                executionContext.returnColumns(),
-                config.concurrency()
-            );
-
-            builder
-                .withNodeCount(graph.nodeCount())
-                .withConfig(config)
-                .withComputeMillis(computationResult.computeMillis())
-                .withPreProcessingMillis(computationResult.preProcessingMillis());
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            var result = computationResult.result().get();
-            builder.withCentralityFunction(result::getCentralityScore);
-
-            try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-                var writeConcurrency = computationResult.config().writeConcurrency();
-                var progressTracker = new TaskProgressTracker(
-                    NodePropertyExporter.baseTask("HarmonicCentrality", graph.nodeCount()),
-                    executionContext.log(),
-                    writeConcurrency,
-                    executionContext.taskRegistryFactory()
-                );
-                NodePropertyExporter exporter =  nodePropertyExporterBuilder
-                    .withIdMap(graph)
-                    .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(progressTracker)
-                    .parallel(Pools.DEFAULT, writeConcurrency)
-                    .build();
-
-                var properties = new DoubleNodePropertyValues() {
-                    @Override
-                    public long nodeCount() {
-                        return computationResult.graph().nodeCount();
-                    }
-
-                    @Override
-                    public double doubleValue(long nodeId) {
-                        return result.getCentralityScore(nodeId);
-                    }
-                };
-
-                exporter.write(
-                    config.writeProperty(),
-                    properties
-                );
-            }
-
-            return Stream.of(builder.build());
-        };
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
+
 }

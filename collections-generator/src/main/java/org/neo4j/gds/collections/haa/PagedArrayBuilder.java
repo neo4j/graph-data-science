@@ -47,7 +47,6 @@ final class PagedArrayBuilder {
 
     static TypeSpec builder(
         TypeName interfaceType,
-        ClassName baseClassName,
         TypeName valueType,
         TypeName unaryOperatorType,
         TypeName pageCreatorType,
@@ -55,8 +54,7 @@ final class PagedArrayBuilder {
     ) {
         var builder = TypeSpec.classBuilder(PAGED_CLASS_NAME)
             .addModifiers(Modifier.STATIC, Modifier.FINAL)
-            .superclass(baseClassName)
-            .addSuperinterface(interfaceType);
+            .superclass(interfaceType);
 
         // class fields
         var pageShift = pageShiftField(specPageShift);

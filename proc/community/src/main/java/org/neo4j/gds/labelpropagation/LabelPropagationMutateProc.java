@@ -19,17 +19,9 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagation, LabelPropagationResult, MutateResult, LabelPropagationMutateConfig> {
+public class LabelPropagationMutateProc extends BaseProc {
 
     @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
@@ -67,36 +59,4 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-    @Override
-    protected LabelPropagationMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return LabelPropagationMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
-        return new LabelPropagationFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult) {
-        return CommunityProcCompanion.nodeProperties(
-            computationResult.config(),
-            computationResult.config().mutateProperty(),
-            computationResult.result()
-                .map(LabelPropagationResult::labels)
-                .orElseGet(() -> HugeLongArray.newArray(0))
-                .asNodeProperties(),
-            () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
-        );
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        return new LabelPropagationMutateSpecification().resultBuilder(computationResult, executionContext);
-    }
-
 }

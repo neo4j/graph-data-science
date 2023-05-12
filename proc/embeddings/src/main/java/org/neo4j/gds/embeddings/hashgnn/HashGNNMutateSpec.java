@@ -45,7 +45,7 @@ public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
     }
 
     @Override
-    public HashGNNFactory<HashGNNMutateConfig> algorithmFactory() {
+    public HashGNNFactory<HashGNNMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new HashGNNFactory<>();
     }
 

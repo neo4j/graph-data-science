@@ -95,7 +95,8 @@ public class PageRankStatsProcTest extends BaseProcTest {
             .statsMode()
             .addParameter("tolerance", 0.1)
             .yields();
-
+        runQuery(query);
+        
         assertCypherResult(query, List.of(Map.of(
             "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),

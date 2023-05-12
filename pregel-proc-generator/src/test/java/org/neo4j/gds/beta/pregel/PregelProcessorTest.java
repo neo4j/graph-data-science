@@ -58,7 +58,8 @@ class PregelProcessorTest {
                 loadExpectedFile(formatWithLocale("expected/%sWriteProc.java", className)),
                 loadExpectedFile(formatWithLocale("expected/%sMutateProc.java", className)),
                 loadExpectedFile(formatWithLocale("expected/%sStatsProc.java", className)),
-                loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className))
+                loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sAlgorithmFactory.java", className))
             );
     }
 
@@ -74,7 +75,8 @@ class PregelProcessorTest {
             .and()
             .generatesSources(
                 loadExpectedFile(formatWithLocale("expected/%sStreamProc.java", className)),
-                loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className))
+                loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sAlgorithmFactory.java", className))
             );
     }
 

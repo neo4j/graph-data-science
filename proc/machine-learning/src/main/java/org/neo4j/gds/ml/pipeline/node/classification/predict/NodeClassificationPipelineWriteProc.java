@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -34,6 +32,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -47,17 +46,20 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class NodeClassificationPipelineWriteProc
     extends WriteProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
+    NodeClassificationPipelineResult,
     NodeClassificationPipelineWriteProc.WriteResult,
     NodeClassificationPredictPipelineWriteConfig>
 {
+
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.write", mode = Mode.WRITE)
     @Description(PREDICT_DESCRIPTION)
@@ -80,15 +82,12 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 
     @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
         if (computationResult.result().isEmpty()) {
             return Collections.emptyList();
         }
@@ -125,7 +124,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
+        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new WriteResult.Builder();
@@ -138,12 +137,14 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     public NewConfigFunction<NodeClassificationPredictPipelineWriteConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewWriteConfigFn(modelCatalog());
+        return new NodeClassificationPredictNewWriteConfigFn(executionContext().modelCatalog());
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
+    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext);
     }
 
     @SuppressWarnings("unused")

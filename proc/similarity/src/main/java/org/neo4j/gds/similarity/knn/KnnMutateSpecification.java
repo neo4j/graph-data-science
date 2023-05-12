@@ -27,6 +27,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -49,7 +50,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, Knn.Result, Kn
     }
 
     @Override
-    public KnnFactory<KnnMutateConfig> algorithmFactory() {
+    public KnnFactory<KnnMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KnnFactory<>();
     }
 

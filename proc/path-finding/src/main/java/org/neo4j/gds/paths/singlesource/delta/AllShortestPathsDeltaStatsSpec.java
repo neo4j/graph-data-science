@@ -21,12 +21,13 @@ package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.allShortestPaths.delta.stats", description = DeltaStepping.DESCRIPTION, executionMode = STATS)
-public class AllShortestPathsDeltaStatsSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStatsConfig, Stream<StandardStatsResult>, DeltaSteppingFactory<AllShortestPathsDeltaStatsConfig>> {
+public class AllShortestPathsDeltaStatsSpec implements AlgorithmSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStatsConfig, Stream<StandardStatsResult>, DeltaSteppingFactory<AllShortestPathsDeltaStatsConfig>> {
 
     @Override
     public String name() {
@@ -42,7 +43,7 @@ public class AllShortestPathsDeltaStatsSpec implements AlgorithmSpec<DeltaSteppi
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaStatsConfig> algorithmFactory() {
+    public DeltaSteppingFactory<AllShortestPathsDeltaStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DeltaSteppingFactory<>();
     }
 
@@ -53,7 +54,7 @@ public class AllShortestPathsDeltaStatsSpec implements AlgorithmSpec<DeltaSteppi
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStatsConfig, Stream<StandardStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStatsConfig, Stream<StandardStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) ->
             Stream.of(new StandardStatsResult(
                 computationResult.preProcessingMillis(),

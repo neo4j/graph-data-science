@@ -68,8 +68,8 @@ public class RandomNegativeSampler implements NegativeSampler {
         var remainingTestSamples = new MutableLong(testSampleCount);
         var remainingTrainSamples = new MutableLong(trainSampleCount);
         var remainingValidSourceNodes = new MutableLong(validSourceNodes.nodeCount());
-        LongPredicate isValidSourceNodes = nodeId -> validSourceNodes.contains(graph.toOriginalNodeId(nodeId));
-        LongPredicate isValidTargetNodes = nodeId -> validTargetNodes.contains(graph.toOriginalNodeId(nodeId));
+        LongPredicate isValidSourceNodes = nodeId -> validSourceNodes.containsOriginalId(graph.toOriginalNodeId(nodeId));
+        LongPredicate isValidTargetNodes = nodeId -> validTargetNodes.containsOriginalId(graph.toOriginalNodeId(nodeId));
 
         graph.forEachNode(nodeId -> {
             if (!isValidSourceNodes.apply(nodeId)) {

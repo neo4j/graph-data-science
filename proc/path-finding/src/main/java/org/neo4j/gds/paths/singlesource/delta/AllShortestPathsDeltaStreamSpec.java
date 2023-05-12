@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
@@ -28,14 +29,14 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.allShortestPaths.delta.stream", description = DeltaStepping.DESCRIPTION, executionMode = STREAM)
-public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>, DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig>> {
+public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>, DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig>> {
 
     @Override
     public String name() {
@@ -43,7 +44,7 @@ public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepp
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig> algorithmFactory() {
+    public DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DeltaSteppingFactory<>();
     }
 
@@ -54,7 +55,7 @@ public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepp
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

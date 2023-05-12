@@ -66,8 +66,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public boolean contains(long originalNodeId) {
-        return idMap.contains(originalNodeId);
+    public boolean containsOriginalId(long originalNodeId) {
+        return idMap.containsOriginalId(originalNodeId);
     }
 
     @Override

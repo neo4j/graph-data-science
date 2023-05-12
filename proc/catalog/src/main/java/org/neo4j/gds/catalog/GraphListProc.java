@@ -19,58 +19,26 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphListProc extends CatalogProc {
+public class GraphListProc extends BaseProc {
 
-    private static final String NO_VALUE = "__NO_VALUE";
     private static final String DESCRIPTION = "Lists information about named graphs stored in the catalog.";
 
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphInfoWithHistogram> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
+    public Stream<GraphInfoWithHistogram> list(
+        @Name(value = "graphName", defaultValue = GraphListOperator.NO_VALUE) String graphName
+    ) {
         ProcPreconditions.check();
-
-        var terminationFlag = TerminationFlag.wrap(executionContext().terminationMonitor());
-
-        var graphEntries = isGdsAdmin()
-            ? GraphStoreCatalog.getAllGraphStores().map(graphStore -> Map.entry(graphStore.config(), graphStore.graphStore()))
-            : GraphStoreCatalog.getGraphStores(username()).entrySet().stream();
-
-        if (graphName != null && !graphName.equals(NO_VALUE)) {
-            validateGraphName(graphName);
-
-            // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
-        }
-
-        return graphEntries.map(e -> {
-            GraphProjectConfig graphProjectConfig = e.getKey();
-            GraphStore graphStore = e.getValue();
-            var returnColumns = executionContext().returnColumns();
-            boolean computeDegreeDistribution = returnColumns.contains("degreeDistribution");
-
-            boolean computeGraphSize = returnColumns.contains("memoryUsage") || returnColumns.contains("sizeInBytes");
-
-            return GraphInfoWithHistogram.of(
-                graphProjectConfig,
-                graphStore,
-                computeDegreeDistribution,
-                computeGraphSize,
-                terminationFlag
-            );
-        });
+        return GraphListOperator.list(graphName, executionContext());
     }
 }

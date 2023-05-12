@@ -1,2 +1,3 @@
 | maxIterations             | Integer | n/a     | no       | Maximum number of iterations to run.
 | minAssociationStrength    | String  | 0.2     | yes      | Minimum influence required for a community to retain a node.
+| partitioning              | String  | "RANGE"  | yes      | The partitioning scheme used to divide the work between threads. Available options are `AUTO`, `RANGE`, `DEGREE`.

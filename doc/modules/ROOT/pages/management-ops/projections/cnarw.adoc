@@ -170,7 +170,7 @@ We can now go on to sample a subgraph from "myGraph" using CNARW.
 Using the "Juliette" node as our set of start nodes, we will venture to visit five nodes in the graph for our sample.
 Since we have six nodes total in our graph, and 5/10 = 0.5 we will use this as our sampling ratio.
 
-[role=query-example]
+[role=query-example, no-result=true]
 --
 .The following will run the Common Neighbour Aware random walk sampling algorithm:
 [source, cypher, role=noplay]
@@ -193,4 +193,7 @@ RETURN nodeCount;
 |===
 --
 
-Five nodes were visited. The main difference between the Common Neighbour Aware Random Walk and Random Walks with Restarts graphs sampling algorithms is that there are more chances to go into another cluster for the first one, which is colored in blue in the example above. The relationships sampled are those connecting these nodes.
+Due to the random nature of the sampling the algorithm may return different counts in different runs.
+
+The main difference between the Common Neighbour Aware Random Walk and Random Walks with Restarts graphs sampling algorithms is that there are more chances to go into another cluster for the first one, which is colored in blue in the example above.
+The relationships sampled are those connecting these nodes.

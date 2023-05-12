@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesStreamProc extends BaseProc {
 
-    @Procedure("gds.beta.scaleProperties.stream")
+    @Procedure("gds.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") String graphName,
@@ -50,7 +50,7 @@ public class ScalePropertiesStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.scaleProperties.stream.estimate", mode = READ)
+    @Procedure(value = "gds.scaleProperties.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
@@ -65,7 +65,7 @@ public class ScalePropertiesStreamProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
-    @Procedure(value = "gds.alpha.scaleProperties.stream", deprecatedBy = "gds.beta.scaleProperties.stream")
+    @Procedure(value = "gds.alpha.scaleProperties.stream", deprecatedBy = "gds.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<Result> alphaStream(
         @Name(value = "graphName") String graphName,

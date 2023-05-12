@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.beta.node2vec.Node2VecStreamProc;
+import org.neo4j.gds.embeddings.node2vec.Node2VecStreamProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;

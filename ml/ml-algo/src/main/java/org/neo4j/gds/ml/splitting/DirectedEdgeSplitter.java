@@ -36,13 +36,22 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
     public DirectedEdgeSplitter(
         Optional<Long> maybeSeed,
+        IdMap rootNodes,
         IdMap sourceLabels,
         IdMap targetLabels,
         RelationshipType selectedRelationshipType,
         RelationshipType remainingRelationshipType,
         int concurrency
     ) {
-        super(maybeSeed, sourceLabels, targetLabels, selectedRelationshipType, remainingRelationshipType, concurrency);
+        super(
+            maybeSeed,
+            rootNodes,
+            sourceLabels,
+            targetLabels,
+            selectedRelationshipType,
+            remainingRelationshipType,
+            concurrency
+        );
     }
 
     @Override

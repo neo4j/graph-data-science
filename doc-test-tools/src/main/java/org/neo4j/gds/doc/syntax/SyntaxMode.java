@@ -44,6 +44,7 @@ public enum SyntaxMode {
     PROJECT_SUBGRAPH("project-subgraph-syntax"),
     REMOVE("include-with-remove"),
     DELETE_RELATIONSHIPS("include-with-delete-relationships"),
+    WRITE_RELATIONSHIP_PROPERTIES("include-with-write-multiple-properties"),
     GRAPH_LIST("graph-list-syntax"),
     MODEL_LIST("model-list-syntax"),
     MODEL_PUBLISH("model-publish-syntax"),

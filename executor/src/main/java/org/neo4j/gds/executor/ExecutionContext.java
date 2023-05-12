@@ -47,6 +47,7 @@ public interface ExecutionContext {
 
     DependencyResolver dependencyResolver();
 
+    @Nullable
     ModelCatalog modelCatalog();
 
     Log log();
@@ -99,6 +100,14 @@ public interface ExecutionContext {
             .builder()
             .from(this)
             .relationshipExporterBuilder(relationshipExporterBuilder)
+            .build();
+    }
+
+    default ExecutionContext withModelCatalog(ModelCatalog modelCatalog) {
+        return ImmutableExecutionContext
+            .builder()
+            .from(this)
+            .modelCatalog(modelCatalog)
             .build();
     }
 

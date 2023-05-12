@@ -23,9 +23,9 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class TopologicalSortFactory<CONFIG extends TopologicalSortConfig> extends GraphAlgorithmFactory<TopologicalSort, CONFIG> {
+public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> extends GraphAlgorithmFactory<TopologicalSort, CONFIG> {
     @Override
-    public TopologicalSort build(Graph graph, TopologicalSortConfig configuration, ProgressTracker progressTracker) {
+    public TopologicalSort build(Graph graph, TopologicalSortBaseConfig configuration, ProgressTracker progressTracker) {
         return new TopologicalSort(
             graph,
             configuration,

@@ -19,15 +19,9 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,19 +30,21 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.beta.modularityOptimization.mutate", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ModularityOptimizationMutateProc extends MutatePropertyProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig> {
+public class ModularityOptimizationMutateProc extends BaseProc {
 
     @Procedure(value = "gds.beta.modularityOptimization.mutate", mode = READ)
-    @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
+    public Stream<ModularityOptimizationMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ModularityOptimizationMutateSpecification(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.mutate.estimate", mode = READ)
@@ -57,100 +53,10 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computationResult
-    ) {
-        return ModularityOptimizationProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return ModularityOptimizationProc.resultBuilder(
-            new MutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    @Override
-    protected ModularityOptimizationMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return ModularityOptimizationMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
-        return new ModularityOptimizationFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static class MutateResult {
-
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final long postProcessingMillis;
-        public final long nodes;
-        public boolean didConverge;
-        public long ranIterations;
-        public double modularity;
-        public final long communityCount;
-        public final Map<String, Object> communityDistribution;
-        public final Map<String, Object> configuration;
-
-        MutateResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            long nodes,
-            boolean didConverge,
-            long ranIterations,
-            double modularity,
-            long communityCount,
-            Map<String, Object> communityDistribution,
-            Map<String, Object> configuration
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodes = nodes;
-            this.didConverge = didConverge;
-            this.ranIterations = ranIterations;
-            this.modularity = modularity;
-            this.communityCount = communityCount;
-            this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected MutateResult buildResult() {
-                return new MutateResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    mutateMillis,
-                    nodeCount,
-                    didConverge,
-                    ranIterations,
-                    modularity,
-                    maybeCommunityCount.orElse(0),
-                    communityHistogramOrNull(),
-                    config.toMap()
-                );
-            }
-        }
+        return new MemoryEstimationExecutor<>(
+            new ModularityOptimizationMutateSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

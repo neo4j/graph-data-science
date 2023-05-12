@@ -42,9 +42,9 @@ public class NodeRegressionPredictPipelineAlgorithmFactory
     private final ModelCatalog modelCatalog;
     private final ExecutionContext executionContext;
 
-    NodeRegressionPredictPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+    NodeRegressionPredictPipelineAlgorithmFactory(ExecutionContext executionContext) {
         super();
-        this.modelCatalog = modelCatalog;
+        this.modelCatalog = executionContext.modelCatalog();
         this.executionContext = executionContext;
     }
 

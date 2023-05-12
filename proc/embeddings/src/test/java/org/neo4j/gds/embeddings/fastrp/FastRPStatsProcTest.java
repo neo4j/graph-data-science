@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -31,21 +34,36 @@ import java.util.Map;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
+class FastRPStatsProcTest extends BaseProcTest {
 
-    @Override
-    GdsCypher.ExecutionModes mode() {
-        return GdsCypher.ExecutionModes.STATS;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a', f1: 0.4, f2: 1.3})" +
+        ", (b:Node {name: 'b', f1: 2.1, f2: 0.5})" +
+        ", (e:Node2 {name: 'e'})" +
+        ", (c:Isolated {name: 'c'})" +
+        ", (d:Isolated {name: 'd'})" +
+        ", (a)-[:REL]->(b)" +
 
-    @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPStatsConfig, ?>> getProcedureClazz() {
-        return FastRPStatsProc.class;
-    }
+        ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
+        ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
-    @Override
-    public FastRPStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return FastRPStatsConfig.of(mapWrapper);
+    private static final String FAST_RP_GRAPH = "myGraph";
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            FastRPStatsProc.class,
+            GraphProjectProc.class
+        );
+
+        runQuery(GdsCypher.call(FAST_RP_GRAPH)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
+            .yields());
     }
 
     @Test

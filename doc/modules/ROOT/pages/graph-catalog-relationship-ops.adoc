@@ -265,6 +265,49 @@ YIELD
 |===
 ======
 
+[.include-with-write-multiple-properties]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.relationshipProperties.write(
+    graphName: String,
+    relationshipType: String,
+    relationshipProperties: List of String,
+    configuration: Map
+)
+YIELD
+  writeMillis: Integer,
+  graphName: String,
+  relationshipType: String,
+  relationshipsWritten: Integer,
+  relationshipProperties: List of String,
+  propertiesWritten: Integer
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name                      | Type    | Optional | Description
+| graphName                 | String  | no       | The name under which the graph is stored in the catalog.
+| relationshipType          | String  | no       | The relationship type in the graph to write back.
+| relationshipProperties    | String  | yes      | The relationship properties to write back.
+| configuration             | Map     | yes      | Additional parameters to configure the procedure.
+|===
+
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                      | Type                     | Description
+| writeMillis               | Integer                  | Milliseconds for writing result data back to Neo4j.
+| graphName                 | String                   | The name of a graph stored in the catalog.
+| relationshipType          | String                   | The type of the relationship that was written.
+| relationshipsWritten      | Integer                  | Number relationships written.
+| relationshipProperties    | String                   | The name of the relationship properties that were written.
+| propertiesWritten         | Integer                  | Number relationships properties written.
+|===
+======
+
 [.include-with-delete-relationships]
 ======
 [source, cypher, role=noplay]
@@ -765,6 +808,90 @@ YIELD
 |===
 | graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
 | "personsAndInstruments" | "SIMILAR"        | "score"              | 10                   | 10
+|===
+--
+
+
+==== Relationship type with multiple properties
+
+In order to demonstrate writing relationships with multiple properties back to Neo4j we will create a small graph in the database first.
+
+image::example-graphs/write-relationship-properties.svg[Visualization of the example graph,align="center"]
+
+
+.The following Cypher statement will create the graph for this example in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Buyer {name: 'Alice'}),
+  (instrumentSeller:Seller {name: 'Instrument Seller'}),
+  (bob:Buyer {name: 'Bob'}),
+  (carol:Buyer {name: 'Carol'}),
+  (alice)-[:PAYS { amount: 1.0}]->(instrumentSeller),
+  (alice)-[:PAYS { amount: 2.0}]->(instrumentSeller),
+  (alice)-[:PAYS { amount: 3.0}]->(instrumentSeller),
+  (alice)-[:PAYS { amount: 4.0}]->(instrumentSeller),
+  (alice)-[:PAYS { amount: 5.0}]->(instrumentSeller),
+  (alice)-[:PAYS { amount: 6.0}]->(instrumentSeller),
+
+  (bob)-[:PAYS { amount: 3.0}]->(instrumentSeller),
+  (bob)-[:PAYS { amount: 4.0}]->(instrumentSeller),
+  (carol)-[:PAYS { amount: 5.0}]->(bob),
+  (carol)-[:PAYS { amount: 6.0}]->(bob)
+----
+
+.Project the graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'aggregatedGraph',
+  ['Buyer', 'Seller'],                                                          // <1>
+  {
+    PAID: {                                                                     // <2>
+      type: 'PAYS',                                                             // <3>
+      properties: {
+        totalAmount: { property: 'amount', aggregation: 'SUM' },                // <4>
+        numberOfPayments: { property: 'amount', aggregation: 'COUNT' }          // <5>
+      }
+    }
+  }
+)
+----
+<1> Project node labels `Buyer` and `Seller`.
+<2> Project relationship type `PAID` to the in-memory graph.
+<3> Use relationship type `PAYS` from the Neo4j database graph.
+<4> Project property `totalAmount` of relationship type `PAYS` using `SUM` aggregation.
+<5> Project property `numberOfPayments` of relationship type `PAYS` using `COUNT` aggregation.
+
+As we can see the Neo4j graph contains some parallel relationships.
+We use GDS projection to condense these into single relationships between the nodes.
+In this example we want to track how many times someone paid someone and what is the total amount of all payments.
+
+To write relationship properties, these have to be explicitly specified.
+
+[role=query-example]
+--
+.Write relationships and their properties to Neo4j:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.relationshipProperties.write(
+  'aggregatedGraph',                    // <1>
+  'PAID',                               // <2>
+  ['totalAmount', 'numberOfPayments'],  // <3>
+  {}
+)
+YIELD
+  graphName, relationshipType, relationshipProperties, relationshipsWritten, propertiesWritten
+----
+<1> The name of the projected graph.
+<2> The relationship type we want to write back to the Neo4j database.
+<3> The property names of the relationship we want to write back to the Neo4j database.
+
+.Results
+[opts="header"]
+|===
+| graphName          | relationshipType | relationshipProperties              | relationshipsWritten | propertiesWritten
+| "aggregatedGraph"  | "PAID"           | [totalAmount, numberOfPayments]     | 3                    | 6
 |===
 --
 

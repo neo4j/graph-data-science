@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -36,7 +35,7 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 
-public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
+public class GraphSage extends Algorithm<GraphSageResult> {
 
     public static final String MODEL_TYPE = "graphSage";
 
@@ -87,15 +86,5 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
             features
         );
         return GraphSageResult.of(embeddings);
-    }
-
-    @ValueClass
-    public
-    interface GraphSageResult {
-        HugeObjectArray<double[]> embeddings();
-
-        static GraphSageResult of(HugeObjectArray<double[]> embeddings) {
-            return ImmutableGraphSageResult.of(embeddings);
-        }
     }
 }

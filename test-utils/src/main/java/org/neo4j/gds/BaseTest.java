@@ -175,6 +175,13 @@ public abstract class BaseTest {
 
     protected void runQuery(
         GraphDatabaseService db,
+        @Language("Cypher") String query
+    ) {
+        runQuery(db, query, Map.of());
+    }
+
+    protected void runQuery(
+        GraphDatabaseService db,
         @Language("Cypher") String query,
         Map<String, Object> params
     ) {

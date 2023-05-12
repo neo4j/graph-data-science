@@ -21,6 +21,7 @@ package org.neo4j.gds.utils;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.logging.Log;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -165,6 +166,14 @@ public final class ExceptionUtil {
     @SuppressWarnings("TypeMayBeWeakened")
     public static <E extends Exception> void run(CheckedRunnable<E> runnable) {
         runnable.run();
+    }
+
+    public static void safeRunWithLogException(Log log, Supplier<String> message, Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            log.warn(message.get(), e);
+        }
     }
 
     public static <T, E extends Exception> Consumer<T> consumer(CheckedConsumer<T, E> consumer) {

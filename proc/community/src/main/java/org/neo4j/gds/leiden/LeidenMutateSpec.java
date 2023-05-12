@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.MutateNodePropertyListFunction;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -47,7 +48,7 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
     }
 
     @Override
-    public LeidenAlgorithmFactory<LeidenMutateConfig> algorithmFactory() {
+    public LeidenAlgorithmFactory<LeidenMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LeidenAlgorithmFactory<>();
     }
 
@@ -58,7 +59,7 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
 
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<Leiden, LeidenResult, LeidenMutateConfig> mutateConfigNodePropertyListFunction =
+        MutateNodePropertyListFunction<Leiden, LeidenResult, LeidenMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 LeidenCompanion.leidenNodeProperties(computationResult, computationResult.config().mutateProperty())

@@ -47,6 +47,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
@@ -164,7 +165,7 @@ class GraphSageTest {
             streamConfig,
             ProgressTracker.NULL_TRACKER
         );
-        GraphSage.GraphSageResult compute = graphSage.compute();
+        GraphSageResult compute = graphSage.compute();
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
             Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> assertThat(embeddingValue).isNotNaN());
         }

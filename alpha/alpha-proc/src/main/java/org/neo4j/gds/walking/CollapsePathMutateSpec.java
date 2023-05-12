@@ -46,7 +46,7 @@ public class CollapsePathMutateSpec implements AlgorithmSpec<CollapsePath, Singl
     }
 
     @Override
-    public CollapsePathAlgorithmFactory algorithmFactory() {
+    public CollapsePathAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
         return new CollapsePathAlgorithmFactory();
     }
 

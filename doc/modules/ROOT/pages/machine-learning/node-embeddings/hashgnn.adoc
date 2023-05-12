@@ -429,7 +429,7 @@ Since we will use binarization and the properties have different scales in some 
 .The following will scale the experience property and mutate the graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.beta.scaleProperties.mutate('persons', {
+CALL gds.scaleProperties.mutate('persons', {
   nodeProperties: ['experience'],
   scaler: 'Minmax',
   mutateProperty: 'experience_scaled'

@@ -21,13 +21,14 @@ package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 
 import java.util.stream.Stream;
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = Dijkstra.DESCRIPTION_SOURCE_TARGET, executionMode = MUTATE_RELATIONSHIP)
-public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig>> {
+public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig>> {
 
     @Override
     public String name() {
@@ -43,7 +44,9 @@ public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstr
     }
 
     @Override
-    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
+    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
         return new DijkstraFactory.AllShortestPathsDijkstraFactory<>();
     }
 
@@ -53,7 +56,7 @@ public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstr
     }
 
     @Override
-    public ComputationResultConsumer<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Dijkstra, PathFindingResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();
     }
 

@@ -19,24 +19,36 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
 
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class KCoreDecompositionAlgorithmFactoryTest {
 
-    @Test
-    void memoryEstimation() {
-        var config = KCoreDecompositionStreamConfig.of(CypherMapWrapper.empty());
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+            arguments(1, 1992L),
+            arguments(4, 5088L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("memoryEstimationTuples")
+    void memoryEstimation(int concurrency, long expectedMemoryEstimation) {
+        var config = KCoreDecompositionStreamConfigImpl.builder().concurrency(concurrency).build();
         var factory = new KCoreDecompositionAlgorithmFactory<>();
         var estimate = factory.memoryEstimation(config)
             .estimate(GraphDimensions.of(100), config.concurrency());
 
         var memoryUsage = estimate.memoryUsage();
-        assertThat(memoryUsage.min).isEqualTo(4624L);
-        assertThat(memoryUsage.max).isEqualTo(4624L);
+        assertThat(memoryUsage.min).isEqualTo(expectedMemoryEstimation);
+        assertThat(memoryUsage.max).isEqualTo(expectedMemoryEstimation);//4624L
     }
 
 }

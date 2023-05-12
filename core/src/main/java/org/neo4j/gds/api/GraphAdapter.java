@@ -104,8 +104,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public boolean contains(long originalNodeId) {
-        return graph.contains(originalNodeId);
+    public boolean containsOriginalId(long originalNodeId) {
+        return graph.containsOriginalId(originalNodeId);
     }
 
     @Override

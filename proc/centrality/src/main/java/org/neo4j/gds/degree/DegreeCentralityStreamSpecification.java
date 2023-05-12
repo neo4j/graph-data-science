@@ -23,6 +23,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -42,7 +43,7 @@ public class DegreeCentralityStreamSpecification implements AlgorithmSpec<Degree
     }
 
     @Override
-    public DegreeCentralityFactory<DegreeCentralityStreamConfig> algorithmFactory() {
+    public DegreeCentralityFactory<DegreeCentralityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DegreeCentralityFactory<>();
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.topologicalsort;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class TopologicalSortStreamProcTest extends BaseProcTest {
 
-    @Neo4jGraph()
+    @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (n0)" +
@@ -55,7 +55,7 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
         runQuery(projectQuery);
     }
 
-    @Disabled
+    @Test
     void testStream() {
         String query = GdsCypher.call("last")
             .algo("gds.alpha.topologicalSort")

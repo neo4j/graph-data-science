@@ -3,7 +3,6 @@
 = Projecting graphs using Apache Arrow
 :description: This chapter explains how to import data using Apache Arrow™ into the Graph Data Science library.
 
-
 include::partial$/operations-reference/alpha-note.adoc[]
 
 Projecting graphs via https://arrow.apache.org/[Apache Arrow] allows importing graph data which is stored outside of Neo4j.
@@ -55,26 +54,25 @@ See xref:graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relati
 
 
 [[arrow-initialize-import-process]]
-== Initializing the Import Process
+== Initializing the import process
 
 An import process is initialized by sending a Flight action using the action type `CREATE_GRAPH`.
 The action body is a JSON document containing metadata for the import process:
 
 ----
 {
-    name: "my_graph",
-    database_name: "neo4j",
-    concurrency: 4,
-    undirected_relationship_types: []
-    inverse_indexed_relationship_types: []
+    name: "my_graph", <1>
+    database_name: "neo4j", <2>
+    concurrency: 4, <3>
+    undirected_relationship_types: [] <4>
+    inverse_indexed_relationship_types: [] <5>
 }
 ----
-
-The `name` is used to identify the import process, it is also the name of the resulting in-memory graph in the graph catalog.
-The `database_name` is used to tell the server on which database the projected graph will be available.
-The `concurrency` key is optional, it is used during finalizing the in-memory graph on the server after all data has been received.
-The `undirected_relationship_types` key is optional, it is used to declare a number of relationship types as undirected. Relationships with the specified types will be imported as undirected. `*` can be used to declare all relationship types as undirected.
-The `inverse_indexed_relationship_types` key is optional, it is used to declare a number of relationship types which will also be indexed in inverse direction.  `*` can be used to declare all relationship types as inverse indexed.
+<1> Used to identify the import process. It is also the name of the resulting in-memory graph in the graph catalog.
+<2> The name of the database on which the projected graph will be available.
+<3> (optional) The level of concurrency that will be set on the in-memory graph after all data has been received.
+<4> (optional) A list of relationship types that must be imported as undirected. A wildcard (`*`) can be used to include all the types.
+<5> (optional) A list of relationship types that must be indexed in inverse direction. A wildcard (`*`) can be used to include all the types.
 
 [NOTE]
 Relationships declared as undirected should only be provided once, i.e. in a single direction.

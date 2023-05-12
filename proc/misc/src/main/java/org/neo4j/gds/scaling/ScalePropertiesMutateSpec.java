@@ -39,7 +39,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
-@GdsCallable(name = "gds.beta.scaleProperties.mutate", aliases = {"gds.alpha.scaleProperties.mutate"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.scaleProperties.mutate", aliases = {"gds.alpha.scaleProperties.mutate"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateProc.MutateResult>, ScalePropertiesFactory<ScalePropertiesMutateConfig>> {
 
     private boolean allowL1L2Scalers = false;
@@ -54,7 +54,7 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
     }
 
     @Override
-    public ScalePropertiesFactory<ScalePropertiesMutateConfig> algorithmFactory() {
+    public ScalePropertiesFactory<ScalePropertiesMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ScalePropertiesFactory<>();
     }
 

@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public final class ProcedureMethodHelper {
 
-    static String methodName(Method method) {
+    public static String methodName(Method method) {
         Procedure procedureAnnotation = method.getDeclaredAnnotation(Procedure.class);
         Objects.requireNonNull(procedureAnnotation, method + " is not annotation with " + Procedure.class);
         String name = procedureAnnotation.name();
@@ -38,23 +38,27 @@ public final class ProcedureMethodHelper {
         return name;
     }
 
-    public static Stream<Method> nonEstimateMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> nonEstimateMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> !methodName(procMethod).endsWith(".estimate"));
     }
 
-    static Stream<Method> writeMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> writeMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".write"));
     }
 
-    public static Stream<Method> mutateMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> mutateMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".mutate"));
     }
 
-    static Stream<Method> streamMethods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> streamMethods(BaseProc proc) {
         return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".stream"));
     }
 
-    private static Stream<Method> methods(AlgoBaseProc<?, ?, ?, ?> proc) {
+    public static Stream<Method> statsMethods(BaseProc proc) {
+        return methods(proc).filter(procMethod -> methodName(procMethod).endsWith(".stats"));
+    }
+
+    private static Stream<Method> methods(BaseProc proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
     }

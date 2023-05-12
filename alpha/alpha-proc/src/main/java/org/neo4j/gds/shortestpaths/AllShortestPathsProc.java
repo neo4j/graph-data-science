@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.msbfs.AllShortestPathsStream;
 import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
@@ -65,7 +66,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     }
 
     @Override
-    public GraphAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

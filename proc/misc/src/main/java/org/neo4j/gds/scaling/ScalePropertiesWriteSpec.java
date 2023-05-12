@@ -23,6 +23,7 @@ import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
-@GdsCallable(name = "gds.beta.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
 
     @Override
@@ -45,7 +46,7 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
     }
 
     @Override
-    public ScalePropertiesFactory<ScalePropertiesWriteConfig> algorithmFactory() {
+    public ScalePropertiesFactory<ScalePropertiesWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ScalePropertiesFactory<>();
     }
 

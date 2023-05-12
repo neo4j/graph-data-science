@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.spanningtree;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.spanningtree.Prim;
@@ -41,7 +42,7 @@ public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, 
     }
 
     @Override
-    public SpanningTreeAlgorithmFactory<SpanningTreeStatsConfig> algorithmFactory() {
+    public SpanningTreeAlgorithmFactory<SpanningTreeStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SpanningTreeAlgorithmFactory<>();
     }
 

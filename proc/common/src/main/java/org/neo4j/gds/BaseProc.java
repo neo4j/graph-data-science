@@ -28,7 +28,6 @@ import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -78,11 +77,6 @@ public abstract class BaseProc {
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
-
-    // Do not access this directly as it could lead to NullPointerExceptions,
-    // instead use org.neo4j.gds.BaseProc.modelCatalog for access
-    @Context
-    public ModelCatalog internalModelCatalog;
 
     protected String username() {
         return username.username();
@@ -168,7 +162,6 @@ public abstract class BaseProc {
                 .builder()
                 .databaseId(databaseId())
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-                .modelCatalog(internalModelCatalog)
                 .log(log)
                 .returnColumns(new ProcedureCallContextReturnColumns(callContext))
                 .userLogRegistryFactory(userLogRegistryFactory)
@@ -186,19 +179,6 @@ public abstract class BaseProc {
         return databaseService == null
             ? EmptyTransactionContext.INSTANCE
             : DatabaseTransactionContext.of(databaseService, procedureTransaction);
-    }
-
-    public ModelCatalog modelCatalog() {
-        if (internalModelCatalog == null) {
-            // you need to set the ModelCatalog if Neo4j is not present (org.neo4j.gds.BaseProc.setModelCatalog).
-            throw new IllegalStateException("ModelCatalog could not be retrieved. Please report the error.");
-        }
-
-        return internalModelCatalog;
-    }
-
-    public void setModelCatalog(ModelCatalog modelCatalog) {
-        this.internalModelCatalog = modelCatalog;
     }
 
     private DatabaseId databaseId() {

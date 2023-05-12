@@ -21,13 +21,14 @@ package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
@@ -35,14 +36,14 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.allShortestPaths.delta.write", description = DeltaStepping.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
+public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
     @Override
     public String name() {
         return "gds.allShortestPaths.delta.write";
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig> algorithmFactory() {
+    public DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DeltaSteppingFactory<>();
     }
 
@@ -53,7 +54,7 @@ public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaSteppi
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
 

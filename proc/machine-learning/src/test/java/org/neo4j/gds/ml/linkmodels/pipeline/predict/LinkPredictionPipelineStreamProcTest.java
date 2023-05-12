@@ -19,22 +19,79 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.catalog.GraphListProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTestBase {
+import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
-    @Override
-    Class<? extends AlgoBaseProc<?, ?, ?, ?>> getProcedureClazz() {
-        return LinkPredictionPipelineStreamProc.class;
+@Neo4jModelCatalogExtension
+class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    static String DB_CYPHER =
+        "CREATE " +
+        "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
+        ", (n1:N {a: 2.0, b: 1.0, c: 1.0})" +
+        ", (n2:N {a: 3.0, b: 1.5, c: 1.0})" +
+        ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
+        ", (n4:N {a: 1.0, b: 0.9, c: 1.0})" +
+        ", (m0:M {a: 1.0, b: 0.8, c: 1.0})" +
+        ", (m1:M {a: 2.0, b: 1.0, c: 1.0})" +
+        ", (m2:M {a: 3.0, b: 1.5, c: 1.0})" +
+        ", (m3:M {a: 0.0, b: 2.8, c: 1.0})" +
+        ", (m4:M {a: 1.0, b: 0.9, c: 1.0})" +
+        ", (n1)-[:T]->(n2)" +
+        ", (n3)-[:T]->(n4)" +
+        ", (n1)-[:T]->(n3)" +
+        ", (n2)-[:T]->(n4)" +
+        ", (m1)-[:T]->(m2)" +
+        ", (m3)-[:T]->(m4)" +
+        ", (m1)-[:T]->(m3)" +
+        ", (m2)-[:T]->(m4)";
+
+    @Inject
+    private ModelCatalog modelCatalog;
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(GraphListProc.class, GraphProjectProc.class, LinkPredictionPipelineStreamProc.class);
+
+        withModelInCatalog();
+
+        var query = "CALL gds.graph.project(" +
+                    "'g', " +
+                    "{" +
+                    "  M: { label: 'M', properties: ['a', 'b', 'c'] }, " +
+                    "  N: { label: 'N', properties: ['a', 'b', 'c'] }" +
+                    "}, " +
+                    "{T: {type: 'T', orientation: 'UNDIRECTED'}})";
+        runQuery(query);
     }
+
 
     @ParameterizedTest
     @CsvSource(value = {"1, N", "4, M"})
@@ -63,22 +120,6 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
                 Map.of("node1", 0L + labelOffset, "node2", 1L + labelOffset, "probability", .11506673204554985)
             )
         );
-    }
-
-    @Test
-    void requiresUndirectedGraph() {
-        runQuery(projectQuery("g2", Orientation.NATURAL));
-
-        var query = GdsCypher
-            .call("g2")
-            .algo("gds.beta.pipeline.linkPrediction.predict")
-            .streamMode()
-            .addParameter("modelName", "model")
-            .addParameter("threshold", 0.5)
-            .addParameter("topN", 9)
-            .yields();
-
-        assertError(query, "Procedure requires all relationships of ['T'] to be UNDIRECTED, but found ['T'] to be directed.");
     }
 
     @ParameterizedTest
@@ -151,4 +192,40 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         );
     }
 
+    private void withModelInCatalog() {
+        var weights = new double[]{2.0, 1.0, -3.0};
+        var pipeline = LinkPredictionPredictPipeline.from(Stream.of(), Stream.of(new L2FeatureStep(List.of("a", "b", "c"))));
+
+        var modelData = ImmutableLogisticRegressionData.of(
+            2,
+            new Weights<>(new Matrix(
+                weights,
+                1,
+                weights.length
+            )),
+            Weights.ofVector(0.0)
+        );
+
+        modelCatalog.set(Model.of(
+            MODEL_TYPE,
+            GraphSchema.empty(),
+            modelData,
+            LinkPredictionTrainConfigImpl.builder()
+                .modelUser(getUsername())
+                .modelName("model")
+                .pipeline("DUMMY")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .targetRelationshipType("T")
+                .graphName("g")
+                .negativeClassWeight(1.0)
+                .build(),
+            LinkPredictionModelInfo.of(
+                Map.of(),
+                Map.of(),
+                ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+                pipeline
+            )
+        ));
+    }
 }

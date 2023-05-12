@@ -77,6 +77,7 @@ public class MemoryEstimationExecutor<
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
+        algoSpec.preProcessConfig(algoConfiguration, executionContext);
         var configParser = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext);
         CONFIG algoConfig = configParser.processInput(algoConfiguration);
 
@@ -123,7 +124,7 @@ public class MemoryEstimationExecutor<
         MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
             graphDims,
             maybeGraphEstimation,
-            algoSpec.algorithmFactory(),
+            algoSpec.algorithmFactory(executionContext),
             algoConfig
         );
 

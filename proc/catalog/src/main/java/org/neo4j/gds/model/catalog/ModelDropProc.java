@@ -42,10 +42,11 @@ public class ModelDropProc extends ModelCatalogProc {
 
         Model<?, ?, ?> model;
 
+        var modelCatalog = executionContext().modelCatalog();
         if (failIfMissing) {
-            model = modelCatalog().dropOrThrow(username(), modelName);
+            model = modelCatalog.dropOrThrow(username(), modelName);
         } else {
-            model = modelCatalog().drop(username(), modelName);
+            model = modelCatalog.drop(username(), modelName);
         }
 
         return Stream.ofNullable(model).map(ModelCatalogResult::new);

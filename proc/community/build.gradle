@@ -40,6 +40,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
 
+    testImplementation project(':memory-usage')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

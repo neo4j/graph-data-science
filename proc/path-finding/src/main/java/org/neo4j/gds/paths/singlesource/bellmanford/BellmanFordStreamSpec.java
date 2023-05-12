@@ -21,13 +21,14 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
@@ -42,7 +43,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
     }
 
     @Override
-    public BellmanFordAlgorithmFactory<BellmanFordStreamConfig> algorithmFactory() {
+    public BellmanFordAlgorithmFactory<BellmanFordStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BellmanFordAlgorithmFactory<>();
     }
 
@@ -72,7 +73,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
             var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup())
                 .withIsCycle(containsNegativeCycle);
 
-            DijkstraResult algorithmResult;
+            PathFindingResult algorithmResult;
             if (containsNegativeCycle) {
                 algorithmResult = result.negativeCycles();
             } else {

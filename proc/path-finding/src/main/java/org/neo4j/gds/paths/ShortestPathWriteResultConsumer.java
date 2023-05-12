@@ -31,7 +31,7 @@ import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -44,11 +44,11 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig> implements ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StandardWriteRelationshipsResult>> {
+public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig> implements ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StandardWriteRelationshipsResult>> {
 
     @Override
     public Stream<StandardWriteRelationshipsResult> consume(
-        ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult, ExecutionContext executionContext
+        ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult, ExecutionContext executionContext
     ) {
         return runWithExceptionLogging("Write relationships failed", executionContext.log(), () -> {
             var config = computationResult.config();
@@ -101,6 +101,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {

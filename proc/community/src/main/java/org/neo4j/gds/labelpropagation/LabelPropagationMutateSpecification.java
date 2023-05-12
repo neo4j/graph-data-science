@@ -46,7 +46,7 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
     }
 
     @Override
-    public LabelPropagationFactory<LabelPropagationMutateConfig> algorithmFactory() {
+    public LabelPropagationFactory<LabelPropagationMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LabelPropagationFactory<>();
     }
 

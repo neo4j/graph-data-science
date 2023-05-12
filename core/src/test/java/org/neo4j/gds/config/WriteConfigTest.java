@@ -22,14 +22,15 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
@@ -47,8 +48,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class WriteConfigTest {
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void validateGraphStoreCapabilities(boolean isBackedByDatabase) {
+    @EnumSource(WriteMode.class)
+    void validateGraphStoreCapabilities(WriteMode writeMode) {
         var config = CypherMapWrapper.empty();
         var testConfig = new TestWriteConfigImpl(config);
 
@@ -59,7 +60,7 @@ class WriteConfigTest {
 
         var testGraphStore = new GraphStoreBuilder()
             .databaseId(DatabaseId.from("neo4j"))
-            .capabilities(ImmutableStaticCapabilities.of(isBackedByDatabase))
+            .capabilities(ImmutableStaticCapabilities.of(writeMode))
             .schema(GraphSchema.mutable())
             .nodes(nodes)
             .relationshipImportResult(RelationshipImportResult.of(Map.of()))
@@ -72,7 +73,7 @@ class WriteConfigTest {
             List.of()
         ));
 
-        if (isBackedByDatabase) {
+        if (testGraphStore.capabilities().canWriteToDatabase() || testGraphStore.capabilities().canWriteToRemoteDatabase()) {
             assertion.doesNotThrowAnyException();
         } else {
             assertion

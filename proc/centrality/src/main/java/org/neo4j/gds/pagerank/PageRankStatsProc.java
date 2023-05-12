@@ -19,17 +19,10 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,11 +31,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.pageRank.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResult, PageRankStatsProc.StatsResult, PageRankStatsConfig> {
+public class PageRankStatsProc extends BaseProc {
 
     @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -50,11 +41,10 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStatsConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stats(computationResult);
+        return new ProcedureExecutor<>(
+            new PageRankStatsSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
@@ -63,70 +53,12 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new PageRankStatsSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return PageRankProc.resultBuilder(
-            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
 
-    @Override
-    protected PageRankStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return PageRankStatsConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>();
-    }
-
-    @SuppressWarnings("unused")
-    public static class StatsResult extends StandardStatsResult {
-
-        public final long ranIterations;
-        public final boolean didConverge;
-        public final Map<String, Object> centralityDistribution;
-
-        StatsResult(
-            long ranIterations,
-            boolean didConverge,
-            @Nullable Map<String, Object> centralityDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.centralityDistribution = centralityDistribution;
-        }
-
-        static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            public StatsResult buildResult() {
-                return new StatsResult(
-                    ranIterations,
-                    didConverge,
-                    centralityHistogram,
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

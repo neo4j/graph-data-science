@@ -21,6 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
@@ -37,7 +38,7 @@ public class LabelPropagationStatsSpecification implements AlgorithmSpec<LabelPr
     }
 
     @Override
-    public LabelPropagationFactory<LabelPropagationStatsConfig> algorithmFactory() {
+    public LabelPropagationFactory<LabelPropagationStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new LabelPropagationFactory<>();
     }
 

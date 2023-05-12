@@ -41,7 +41,7 @@ class NodeIdNodeFilterSpecTest {
         var nodeIdNodeFilterSpec = new NodeIdNodeFilterSpec(Set.of(1L, 2L, 3L, 5L, 8L, 42L));
         var graphStoreMock = mock(GraphStore.class);
         var nodesMock = mock(IdMap.class);
-        doReturn(true).when(nodesMock).contains(anyLong());
+        doReturn(true).when(nodesMock).containsOriginalId(anyLong());
         when(graphStoreMock.nodes()).thenReturn(nodesMock);
 
         assertThatNoException().isThrownBy(() -> nodeIdNodeFilterSpec.validate(graphStoreMock, List.of(), "sourceNodeFilter"));
@@ -53,9 +53,9 @@ class NodeIdNodeFilterSpecTest {
         var nodeIdNodeFilterSpec = new NodeIdNodeFilterSpec(Set.of(1L, 2L, 3L, 5L, 8L, 42L));
         var graphStoreMock = mock(GraphStore.class);
         var nodesMock = mock(IdMap.class);
-        doReturn(true).when(nodesMock).contains(anyLong());
-        doReturn(false).when(nodesMock).contains(3L);
-        doReturn(false).when(nodesMock).contains(42L);
+        doReturn(true).when(nodesMock).containsOriginalId(anyLong());
+        doReturn(false).when(nodesMock).containsOriginalId(3L);
+        doReturn(false).when(nodesMock).containsOriginalId(42L);
         when(graphStoreMock.nodes()).thenReturn(nodesMock);
 
         assertThatThrownBy(

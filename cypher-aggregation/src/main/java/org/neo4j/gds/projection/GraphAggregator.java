@@ -24,8 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
@@ -55,7 +57,7 @@ public class GraphAggregator implements CompatUserAggregator {
 
     private final DatabaseId databaseId;
     private final String username;
-    private final boolean canWriteToDatabase;
+    private final WriteMode writeMode;
 
     private final ProgressTimer progressTimer;
     private final ConfigValidator configValidator;
@@ -71,11 +73,11 @@ public class GraphAggregator implements CompatUserAggregator {
     GraphAggregator(
         DatabaseId databaseId,
         String username,
-        boolean canWriteToDatabase
+        WriteMode writeMode
     ) {
         this.databaseId = databaseId;
         this.username = username;
-        this.canWriteToDatabase = canWriteToDatabase;
+        this.writeMode = writeMode;
         this.progressTimer = ProgressTimer.start();
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
@@ -179,7 +181,8 @@ public class GraphAggregator implements CompatUserAggregator {
                     this.username,
                     this.databaseId,
                     config,
-                    this.canWriteToDatabase
+                    this.writeMode,
+                    PropertyState.PERSISTENT
                 );
             }
             return data;

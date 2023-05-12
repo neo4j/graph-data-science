@@ -27,6 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface NegativeSampler {
@@ -36,6 +37,7 @@ public interface NegativeSampler {
     static NegativeSampler of(
         GraphStore graphStore,
         Graph graph,
+        Collection<NodeLabel> sourceAndTargetNodeLabels,
         Optional<String> negativeRelationshipType,
         double negativeSamplingRatio,
         long testPositiveCount,
@@ -47,7 +49,11 @@ public interface NegativeSampler {
         Optional<Long> randomSeed
     ) {
         if (negativeRelationshipType.isPresent()) {
-            Graph negativeExampleGraph = graphStore.getGraph(RelationshipType.of(negativeRelationshipType.orElseThrow()));
+            Graph negativeExampleGraph = graphStore.getGraph(
+                sourceAndTargetNodeLabels,
+                List.of(RelationshipType.of(negativeRelationshipType.orElseThrow())),
+                Optional.empty()
+            );
             double testTrainFraction = testPositiveCount / (double) (testPositiveCount + trainPositiveCount);
 
             return new UserInputNegativeSampler(

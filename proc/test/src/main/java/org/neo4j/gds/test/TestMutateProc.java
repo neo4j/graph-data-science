@@ -19,22 +19,8 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,85 +28,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.testProc.mutate", description = STATS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
-public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgorithmResult, TestResult, TestMutateConfig> {
+public class TestMutateProc extends BaseProc {
 
     @Procedure(value = "gds.testProc.mutate", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(Constants.STATS_DESCRIPTION)
     public Stream<TestResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return mutate(computationResult);
-    }
+        return new ProcedureExecutor<>(
+            new TestMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
 
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
-        return new LongNodePropertyValues() {
-            @Override
-            public long longValue(long nodeId) {
-                return nodeId;
-            }
-
-            @Override
-            public long nodeCount() {
-                return 0;
-            }
-        };
-    }
-
-    @Override
-    protected AbstractResultBuilder<TestResult> resultBuilder(
-        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
-            .map(TestAlgorithmResult::relationshipCount)
-            .orElse(-1L));
-    }
-
-    @Override
-    protected TestMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return TestMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory() {
-        return new GraphAlgorithmFactory<>() {
-
-            @Override
-            public String taskName() {
-                return "TestAlgorithm";
-            }
-
-            @Override
-            public TestAlgorithm build(
-                Graph graph,
-                TestMutateConfig configuration,
-                ProgressTracker progressTracker
-            ) {
-                return new TestAlgorithm(
-                    graph,
-                    progressTracker,
-                    configuration.throwInCompute()
-                );
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(TestMutateConfig configuration) {
-                if (configuration.throwOnEstimate()) {
-                    throw new MemoryEstimationNotImplementedException();
-                } else {
-                    return MemoryEstimations.of("Accurate estimation", MemoryRange.of(42));
-                }
-            }
-        };
     }
 }

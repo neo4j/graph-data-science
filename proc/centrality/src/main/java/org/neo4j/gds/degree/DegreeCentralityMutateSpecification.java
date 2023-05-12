@@ -42,7 +42,7 @@ public class DegreeCentralityMutateSpecification implements AlgorithmSpec<Degree
     }
 
     @Override
-    public DegreeCentralityFactory<DegreeCentralityMutateConfig> algorithmFactory() {
+    public DegreeCentralityFactory<DegreeCentralityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new DegreeCentralityFactory<>();
     }
 

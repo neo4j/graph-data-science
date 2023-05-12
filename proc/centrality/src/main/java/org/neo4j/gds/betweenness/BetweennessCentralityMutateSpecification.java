@@ -46,7 +46,7 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
     }
 
     @Override
-    public BetweennessCentralityFactory<BetweennessCentralityMutateConfig> algorithmFactory() {
+    public BetweennessCentralityFactory<BetweennessCentralityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BetweennessCentralityFactory<>();
     }
 

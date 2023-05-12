@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.beta.k1coloring.K1ColoringMutateProc;
-import org.neo4j.gds.beta.k1coloring.K1ColoringStatsProc;
-import org.neo4j.gds.beta.k1coloring.K1ColoringStreamProc;
-import org.neo4j.gds.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.k1coloring.K1ColoringMutateProc;
+import org.neo4j.gds.k1coloring.K1ColoringStatsProc;
+import org.neo4j.gds.k1coloring.K1ColoringStreamProc;
+import org.neo4j.gds.k1coloring.K1ColoringWriteProc;
 
 import java.util.List;
 

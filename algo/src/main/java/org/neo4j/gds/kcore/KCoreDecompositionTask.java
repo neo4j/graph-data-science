@@ -41,6 +41,7 @@ class KCoreDecompositionTask implements Runnable {
     private final AtomicLong remainingNodes;
     private final ProgressTracker progressTracker;
     private KCoreDecompositionPhase phase;
+    private NodeProvider nodeProvider;
     private final int chunkSize;
 
     KCoreDecompositionTask(
@@ -50,9 +51,11 @@ class KCoreDecompositionTask implements Runnable {
         AtomicLong nodeIndex,
         AtomicLong remainingNodes,
         int chunkSize,
+        NodeProvider nodeProvider,
         ProgressTracker progressTracker
     ) {
         this.progressTracker = progressTracker;
+        this.nodeProvider = nodeProvider;
         this.localGraph = localGraph;
         this.currentDegrees = currentDegrees;
         this.core = core;
@@ -69,6 +72,10 @@ class KCoreDecompositionTask implements Runnable {
             .build();
     }
 
+    void updateNodeProvider(NodeProvider nodeProvider) {
+        this.nodeProvider = nodeProvider;
+    }
+
     @Override
     public void run() {
         if (phase == KCoreDecompositionPhase.SCAN) {
@@ -82,12 +89,13 @@ class KCoreDecompositionTask implements Runnable {
 
     private void scan() {
 
-        long upperBound = localGraph.nodeCount();
+        long upperBound = nodeProvider.size();
         smallestActiveDegree = -1;
         long offset;
         while ((offset = nodeIndex.getAndAdd(chunkSize)) < upperBound) {
             var currentChunk = Math.min(offset + chunkSize, upperBound);
-            for (long nodeId = offset; nodeId < currentChunk; nodeId++) {
+            for (long indexId = offset; indexId < currentChunk; indexId++) {
+                long nodeId = nodeProvider.node(indexId);
                 int nodeDegree = currentDegrees.get(nodeId);
                 if (nodeDegree >= scanningDegree) {
                     if (nodeDegree == scanningDegree) {
@@ -117,17 +125,26 @@ class KCoreDecompositionTask implements Runnable {
             long nodeId = examinationStack.pop();
             core.set(nodeId, scanningDegree);
             nodesExamined++;
+            
+            relax(nodeId);
 
-            localGraph.forEachRelationship(nodeId, (s, t) -> {
-                var degree = currentDegrees.getAndAdd(t, -1);
-                if (degree == scanningDegree + 1) {
-                    examinationStack.push(t);
-                }
-                return true;
-            });
         }
         remainingNodes.addAndGet(-nodesExamined);
         progressTracker.logProgress(nodesExamined);
+    }
+
+    private void relax(long nodeId) {
+
+        localGraph.forEachRelationship(nodeId, (s, t) -> {
+
+            boolean shouldPushToStack = (core.get(t) == KCoreDecomposition.UNASSIGNED)
+                                        && (currentDegrees.getAndAdd(t, -1) == scanningDegree + 1);
+            if (shouldPushToStack) {
+                examinationStack.push(t);
+            }
+
+            return true;
+        });
     }
 
     enum KCoreDecompositionPhase {

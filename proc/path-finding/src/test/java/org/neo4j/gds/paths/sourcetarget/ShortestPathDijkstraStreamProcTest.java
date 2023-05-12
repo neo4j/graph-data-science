@@ -19,18 +19,17 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestLogProvider;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -45,18 +44,54 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraStreamConfig> {
+class ShortestPathDijkstraStreamProcTest extends BaseProcTest {
 
     TestLog testLog;
 
-    @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig, ?>> getProcedureClazz() {
-        return ShortestPathDijkstraStreamProc.class;
-    }
 
-    @Override
-    public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraStreamConfig.of(mapWrapper);
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (:Offset)" +
+                                            ", (a:Label)" +
+                                            ", (b:Label)" +
+                                            ", (c:Label)" +
+                                            ", (d:Label)" +
+                                            ", (e:Label)" +
+                                            ", (f:Label)" +
+                                            ", (a)-[:TYPE {cost: 4}]->(b)" +
+                                            ", (a)-[:TYPE {cost: 2}]->(c)" +
+                                            ", (b)-[:TYPE {cost: 5}]->(c)" +
+                                            ", (b)-[:TYPE {cost: 10}]->(d)" +
+                                            ", (c)-[:TYPE {cost: 3}]->(e)" +
+                                            ", (d)-[:TYPE {cost: 11}]->(f)" +
+                                            ", (e)-[:TYPE {cost: 4}]->(d)";
+
+    long idA, idC, idD, idE, idF;
+    static long[] ids0;
+    static double[] costs0;
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            ShortestPathDijkstraStreamProc.class,
+            GraphProjectProc.class
+        );
+
+        idA = idFunction.of("a");
+        idC = idFunction.of("c");
+        idD = idFunction.of("d");
+        idE = idFunction.of("e");
+        idF = idFunction.of("f");
+
+        ids0 = new long[]{idA, idC, idE, idD, idF};
+        costs0 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
+
+        runQuery(GdsCypher.call("graph")
+            .graphProject()
+            .withNodeLabel("Label")
+            .withAnyRelationshipType()
+            .withRelationshipProperty("cost")
+            .yields());
     }
 
     @Override
@@ -69,18 +104,18 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Test
     void testStream() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .streamMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
+            .addParameter("sourceNode", idFunction.of("a"))
+            .addParameter("targetNode", idFunction.of("f"))
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
         runInTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
+
             var expectedPath = PathFactory.create(
                 tx::getNodeById,
                 ids0,
@@ -103,13 +138,12 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Test
     void testLazyComputationLoggingFinishes() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .streamMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
+            .addParameter("sourceNode", idFunction.of("a"))
+            .addParameter("targetNode", idFunction.of("f"))
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
@@ -118,4 +152,5 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
         var messages = testLog.getMessages(TestLog.INFO);
         assertThat(messages.get(messages.size() - 1)).contains(":: Finished");
     }
+    
 }

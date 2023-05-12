@@ -166,8 +166,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public boolean contains(final long originalNodeId) {
-        return first.contains(originalNodeId);
+    public boolean containsOriginalId(final long originalNodeId) {
+        return first.containsOriginalId(originalNodeId);
     }
 
     @Override

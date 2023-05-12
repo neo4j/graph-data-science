@@ -20,9 +20,11 @@
 package org.neo4j.gds.core.utils.partition;
 
 import com.carrotsearch.hppc.AbstractIterator;
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
 
@@ -30,14 +32,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.function.Function;
 import java.util.function.LongToIntFunction;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PartitionUtils {
+
+    public static final double MIN_PARTITION_CAPACITY = 0.67;
 
     private PartitionUtils() {}
 
@@ -127,7 +131,7 @@ public final class PartitionUtils {
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
             BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
         );
-        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+        return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> customDegreePartitionWithBatchSize(
@@ -145,7 +149,7 @@ public final class PartitionUtils {
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
             BitUtil.ceilDiv(actualWeightSum, concurrency)
         );
-        return degreePartitionWithBatchSize(graph.nodeIterator(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
+        return degreePartitionWithBatchSize(graph.nodeCount(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
@@ -153,30 +157,94 @@ public final class PartitionUtils {
         long batchSize,
         Function<DegreePartition, TASK> taskCreator
     ) {
-        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+        return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
-        PrimitiveIterator.OfLong nodes,
+        long nodeCount,
         DegreeFunction degrees,
         long batchSize,
         Function<DegreePartition, TASK> taskCreator
     ) {
-        var result = new ArrayList<TASK>();
+        var partitions = new ArrayList<DegreePartition>();
         long start = 0L;
-        while (nodes.hasNext()) {
-            assert batchSize > 0L;
+
+        assert batchSize > 0L;
+
+        long minPartitionSize = Math.round(batchSize * MIN_PARTITION_CAPACITY);
+
+        while(start < nodeCount) {
             long partitionSize = 0L;
-            long nodeId = 0L;
-            while (nodes.hasNext() && partitionSize <= batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
-                nodeId = nodes.nextLong();
-                partitionSize += degrees.degree(nodeId);
+
+            long nodeId = start - 1;
+            // find the next partition
+            while (nodeId < nodeCount - 1 && nodeId - start < Partition.MAX_NODE_COUNT) {
+                int degree = degrees.degree(nodeId + 1);
+
+                boolean partitionIsLargeEnough = partitionSize >= minPartitionSize;
+                if (partitionSize + degree > batchSize && partitionIsLargeEnough) {
+                    break;
+                }
+
+                nodeId++;
+                partitionSize += degree;
             }
 
             long end = nodeId + 1;
-            result.add(taskCreator.apply(DegreePartition.of(start, end - start, partitionSize)));
+            partitions.add(DegreePartition.of(start, end - start, partitionSize));
             start = end;
         }
+
+        // the above loop only merge partition i with i+1 to avoid i being too small
+        // thus we need to check the last partition manually
+        var minLastPartitionSize = Math.round(0.2 * batchSize);
+        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).totalDegree() < minLastPartitionSize) {
+            var lastPartition = partitions.remove(partitions.size() - 1);
+            var partitionToMerge = partitions.remove(partitions.size() - 1);
+
+            DegreePartition mergedPartition = DegreePartition.of(
+                partitionToMerge.startNode(),
+                lastPartition.nodeCount() + partitionToMerge.nodeCount(),
+                partitionToMerge.totalDegree() + lastPartition.totalDegree()
+            );
+
+            partitions.add(mergedPartition);
+        }
+
+        return partitions.stream().map(taskCreator).collect(Collectors.toList());
+    }
+
+    public static <TASK> List<TASK> degreePartitionWithBatchSize(
+        BitSet bitset,
+        DegreeFunction degrees,
+        long degreesPerBatch,
+        Function<IteratorPartition, TASK> taskCreator
+    ) {
+        assert degreesPerBatch > 0L;
+
+        var iterator = bitset.iterator();
+        var totalSize = bitset.cardinality();
+
+        var result = new ArrayList<TASK>();
+        long seen = 0L;
+
+        while (seen < totalSize) {
+            long setBit = iterator.nextSetBit();
+            long currentDegrees = degrees.degree(setBit);
+            long currentLength = 1L;
+            long startIdx = setBit;
+            seen++;
+
+            while (seen < totalSize && currentDegrees < degreesPerBatch && currentLength < Partition.MAX_NODE_COUNT) {
+                setBit = iterator.nextSetBit();
+                currentDegrees += degrees.degree(setBit);
+                currentLength++;
+                seen++;
+            }
+
+            result.add(taskCreator.apply(new IteratorPartition(new SetBitsIterable(bitset, startIdx).iterator(), currentLength)));
+        }
+
         return result;
     }
 

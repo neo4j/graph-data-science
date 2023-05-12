@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -41,6 +42,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.UndirectedEdgeSplitter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,8 +104,9 @@ public class LinkPredictionRelationshipSampler {
         var targetLabels = ElementTypeValidator.resolve(graphStore, List.of(trainConfig.targetNodeLabel()));
         IdMap sourceNodes = graphStore.getGraph(sourceLabels);
         IdMap targetNodes = graphStore.getGraph(targetLabels);
+        Collection<NodeLabel> sourceAndTargetNodeLabels = trainConfig.nodeLabelIdentifiers(graphStore);
         var graph = graphStore.getGraph(
-            trainConfig.nodeLabelIdentifiers(graphStore),
+            sourceAndTargetNodeLabels,
             trainConfig.internalRelationshipTypes(graphStore),
             relationshipWeightProperty);
 
@@ -121,7 +124,7 @@ public class LinkPredictionRelationshipSampler {
         );
         // 2. Split test-complement into (labeled) train and feature-input.
         var testComplementGraph = graphStore.getGraph(
-            trainConfig.nodeLabelIdentifiers(graphStore),
+            sourceAndTargetNodeLabels,
             List.of(splitConfig.testComplementRelationshipType()),
             relationshipWeightProperty
         );
@@ -141,6 +144,7 @@ public class LinkPredictionRelationshipSampler {
         NegativeSampler negativeSampler = NegativeSampler.of(
             graphStore,
             graph,
+            sourceAndTargetNodeLabels,
             splitConfig.negativeRelationshipType(),
             splitConfig.negativeSamplingRatio(),
             testSplitResult.selectedRelCount(),
@@ -180,6 +184,7 @@ public class LinkPredictionRelationshipSampler {
         }
         var splitter = new UndirectedEdgeSplitter(
             trainConfig.randomSeed(),
+            graphStore.nodes(),
             sourceNodes,
             targetNodes,
             selectedRelType,

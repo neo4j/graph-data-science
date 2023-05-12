@@ -51,7 +51,7 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
     private Optional<Orientation> maybeOrientation = Optional.empty();
     private Optional<Log> maybeLog = Optional.empty();
 
-    TestNativeGraphLoader(GraphDatabaseService db) {
+    public TestNativeGraphLoader(GraphDatabaseService db) {
         this.db = db;
         this.nodeLabels = new HashSet<>();
         this.relTypes = new HashSet<>();

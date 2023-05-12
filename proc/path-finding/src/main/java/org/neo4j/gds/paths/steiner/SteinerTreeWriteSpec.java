@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.spanningtree.SpanningGraph;
@@ -46,7 +47,7 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
     }
 
     @Override
-    public SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig> algorithmFactory() {
+    public SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SteinerTreeAlgorithmFactory<>();
     }
 
@@ -89,6 +90,7 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
                         .withIdMappingOperator(spanningGraph::toOriginalNodeId)
                         .withTerminationFlag(terminationFlag)
                         .withProgressTracker(ProgressTracker.NULL_TRACKER)
+                        .withArrowConnectionInfo(config.arrowConnectionInfo())
                         .build()
                         .write(
                             config.writeRelationshipType(),

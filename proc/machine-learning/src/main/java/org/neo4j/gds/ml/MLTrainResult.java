@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
 public class MLTrainResult {
 
     public final long trainMillis;

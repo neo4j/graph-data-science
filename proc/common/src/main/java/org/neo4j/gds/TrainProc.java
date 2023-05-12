@@ -19,28 +19,18 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.procedure.Context;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
 public abstract class TrainProc<
     ALGO extends Algorithm<ALGO_RESULT>,
@@ -48,6 +38,9 @@ public abstract class TrainProc<
     TRAIN_CONFIG extends TrainBaseConfig,
     PROC_RESULT
     > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     protected abstract String modelType();
 
@@ -60,8 +53,8 @@ public abstract class TrainProc<
         return (computationResult, executionContext) -> {
             if (computationResult.result().isPresent()) {
                 var model = extractModel(computationResult.result().get());
-                var modelCatalog = modelCatalog();
-                modelCatalog().set(model);
+                var modelCatalog = executionContext.modelCatalog();
+                modelCatalog.set(model);
 
                 if (computationResult.config().storeModelToDisk()) {
                     try {
@@ -90,71 +83,15 @@ public abstract class TrainProc<
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
                 return List.of(
-                   new TrainingConfigValidation<>(modelCatalog(), username(), modelType())
+                   new VerifyThatModelCanBeStored<>(executionContext.modelCatalog(), username(), modelType())
                 );
             }
         };
     }
 
     @Override
-    public AlgorithmSpec<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, TRAIN_CONFIG>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(modelCatalog);
     }
 
-    public static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {
-        private final ModelCatalog modelCatalog;
-        private final String username;
-        private final String modelType;
-
-        public TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
-            this.modelCatalog = modelCatalog;
-            this.username = username;
-            this.modelType = modelType;
-        }
-
-        @Override
-        public void validateConfigsBeforeLoad(
-            GraphProjectConfig graphProjectConfig,
-            TRAIN_CONFIG config
-        ) {
-            modelCatalog.verifyModelCanBeStored(
-                username,
-                config.modelName(),
-                modelType
-            );
-        }
-    }
-
-    // FIXME replace this with MLTrainResult (duplicate?)
-    @SuppressWarnings("unused")
-    public static class TrainResult {
-
-        public final Map<String, Object> modelInfo;
-        public final Map<String, Object> configuration;
-        public final long trainMillis;
-
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends CustomInfo> TrainResult(
-            Optional<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>> maybeTrainedModel,
-            long trainMillis,
-            long nodeCount,
-            long relationshipCount
-        ) {
-            this.modelInfo = new HashMap<>();
-            this.configuration = new HashMap<>();
-
-            maybeTrainedModel.ifPresent(trainedModel -> {
-                TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
-
-                modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-                modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-                modelInfo.putAll(trainedModel.customInfo().toMap());
-                configuration.putAll(trainConfig.toMap());
-            });
-
-            this.trainMillis = trainMillis;
-        }
-    }
 }

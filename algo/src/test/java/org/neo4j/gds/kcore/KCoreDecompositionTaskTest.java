@@ -32,8 +32,8 @@ class KCoreDecompositionTaskTest {
             .estimate(GraphDimensions.of(100), 4)
             .memoryUsage();
 
-        assertThat(memoryUsage.min).isEqualTo(928L);
-        assertThat(memoryUsage.max).isEqualTo(928L);
+        assertThat(memoryUsage.min).isEqualTo(936L);
+        assertThat(memoryUsage.max).isEqualTo(936L);
     }
 
 }

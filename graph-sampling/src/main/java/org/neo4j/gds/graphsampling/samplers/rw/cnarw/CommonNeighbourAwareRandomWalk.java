@@ -23,15 +23,15 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.graphsampling.NodesSampler;
+import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
@@ -43,7 +43,7 @@ import org.neo4j.gds.graphsampling.samplers.rw.Walker;
 import java.util.Optional;
 import java.util.SplittableRandom;
 
-public class CommonNeighbourAwareRandomWalk implements NodesSampler {
+public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampler {
     private LongHashSet startNodesUsed;
 
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
@@ -105,7 +105,10 @@ public class CommonNeighbourAwareRandomWalk implements NodesSampler {
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
         if (config.hasRelationshipWeightProperty()) {
-            var totalWeights = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(config.concurrency()));
+            var totalWeights = HugeAtomicDoubleArray.of(
+                nodeCount,
+                ParallelDoublePageCreator.passThrough(config.concurrency())
+            );
             totalWeights.setAll(TOTAL_WEIGHT_MISSING);
             return Optional.of(totalWeights);
         }
@@ -114,6 +117,11 @@ public class CommonNeighbourAwareRandomWalk implements NodesSampler {
 
     public LongSet startNodesUsed() {
         return startNodesUsed;
+    }
+
+    @Override
+    public long startNodesCount() {
+        return startNodesUsed.size();
     }
 
     @Override

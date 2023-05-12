@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
@@ -93,11 +94,14 @@ public class CypherAggregation implements CompatUserAggregationFunction {
 
         var username = procedures.lookupComponentProvider(Username.class, true).apply(ctx);
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
+        var writeMode = runsOnCompositeDatabase
+            ? WriteMode.NONE
+            : WriteMode.LOCAL;
 
         return new GraphAggregator(
             DatabaseId.of(databaseService),
             username.username(),
-            !runsOnCompositeDatabase
+            writeMode
         );
     }
 }

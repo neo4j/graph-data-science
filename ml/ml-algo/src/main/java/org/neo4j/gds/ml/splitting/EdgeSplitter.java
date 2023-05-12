@@ -47,17 +47,20 @@ public abstract class EdgeSplitter {
 
     protected final IdMap sourceNodes;
     protected final IdMap targetNodes;
+    protected final IdMap rootNodes;
 
     protected int concurrency;
 
     EdgeSplitter(
         Optional<Long> maybeSeed,
+        IdMap rootNodes,
         IdMap sourceNodes,
         IdMap targetNodes,
         RelationshipType selectedRelationshipType,
         RelationshipType remainingRelationshipType,
         int concurrency
     ) {
+        this.rootNodes = rootNodes;
         this.selectedRelationshipType = selectedRelationshipType;
         this.remainingRelationshipType = remainingRelationshipType;
         this.rng = new Random();
@@ -73,12 +76,12 @@ public abstract class EdgeSplitter {
         double holdoutFraction,
         Optional<String> remainingRelPropertyKey
     ) {
-        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
+        LongPredicate isValidSourceNode = node -> sourceNodes.containsOriginalId(graph.toOriginalNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodes.containsOriginalId(graph.toOriginalNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilder(
-            graph,
+            rootNodes,
             selectedRelationshipType,
             Direction.DIRECTED,
             Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
@@ -89,7 +92,7 @@ public abstract class EdgeSplitter {
         RelationshipsBuilder remainingRelsBuilder;
         RelationshipWithPropertyConsumer remainingRelsConsumer;
 
-        remainingRelsBuilder = newRelationshipsBuilder(graph, remainingRelationshipType, remainingRelDirection, remainingRelPropertyKey);
+        remainingRelsBuilder = newRelationshipsBuilder(rootNodes, remainingRelationshipType, remainingRelDirection, remainingRelPropertyKey);
         remainingRelsConsumer = (s, t, w) -> {
             remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
             return true;
@@ -153,7 +156,7 @@ public abstract class EdgeSplitter {
     }
 
     private static RelationshipsBuilder newRelationshipsBuilder(
-        Graph graph,
+        IdMap rootNodes,
         RelationshipType relationshipType,
         Direction direction,
         Optional<String> propertyKey
@@ -161,7 +164,7 @@ public abstract class EdgeSplitter {
         return GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
             .aggregation(Aggregation.SINGLE)
-            .nodes(graph)
+            .nodes(rootNodes)
             .orientation(direction.toOrientation())
             .addAllPropertyConfigs(propertyKey
                 .map(key -> List.of(GraphFactory.PropertyConfig.of(key, Aggregation.SINGLE, DefaultValue.forDouble())))

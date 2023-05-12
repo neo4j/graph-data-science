@@ -27,6 +27,7 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -44,7 +45,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
     }
 
     @Override
-    public KmeansAlgorithmFactory<KmeansWriteConfig> algorithmFactory() {
+    public KmeansAlgorithmFactory<KmeansWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new KmeansAlgorithmFactory<>();
     }
 
@@ -99,6 +100,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                         writeConcurrency,
                         executionContext
                     ))
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 

@@ -39,7 +39,7 @@ public class ModelExistsProc extends ModelCatalogProc {
     public Stream<ModelExistsResult> exists(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        ModelCatalog modelCatalog = modelCatalog();
+        ModelCatalog modelCatalog = executionContext().modelCatalog();
 
         return Stream.of(new ModelExistsResult(
             modelName,

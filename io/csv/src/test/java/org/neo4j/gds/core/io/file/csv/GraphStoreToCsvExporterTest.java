@@ -30,6 +30,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -586,8 +587,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         assertDataContent(
             GRAPH_CAPABILITIES_FILE_NAME,
             List.of(
-                List.of("canWriteToDatabase"),
-                List.of("true")
+                List.of("writeMode"),
+                List.of(WriteMode.LOCAL.name())
             )
         );
     }

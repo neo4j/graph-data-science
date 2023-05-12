@@ -1,6 +1,6 @@
 ext {
     neos = [
-        '4.4': properties.getOrDefault('neo4jVersion44', '4.4.19'),
+        '4.4': properties.getOrDefault('neo4jVersion44', '4.4.20'),
         '5.1': properties.getOrDefault('neo4jVersion51', '5.1.0'),
         '5.2': properties.getOrDefault('neo4jVersion52', '5.2.0'),
         '5.3': properties.getOrDefault('neo4jVersion53', '5.3.0'),
@@ -24,7 +24,8 @@ ext {
         '5.5': '2.13.8',
         '5.6': '2.13.8',
         '5.7': '2.13.10',
-        '5.8': '2.13.10'
+        '5.8': '2.13.10',
+        '5.9': '2.13.10',
     ]
 
     log4js = [
@@ -37,6 +38,7 @@ ext {
         '5.6': '2.19.0',
         '5.7': '2.20.0',
         '5.8': '2.20.0',
+        '5.9': '2.20.0',
     ]
 
     ver = [

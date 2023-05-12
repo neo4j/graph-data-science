@@ -21,5 +21,5 @@ package org.neo4j.gds.core.loading;
 
 public interface GraphStoreCatalogListener {
 
-    void onProject(String user, String graphName);
+    void onProject(String user, String database, String graphName);
 }

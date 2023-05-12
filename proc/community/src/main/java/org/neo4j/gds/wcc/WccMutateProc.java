@@ -19,16 +19,9 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,23 +30,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
+import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig, WccMutateProc.MutateResult> {
+public class WccMutateProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<WccMutateSpecification.MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new WccMutateSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
-            mutateSpec,
-            pipelineSpec,
+            new WccMutateSpecification(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -64,79 +54,11 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new WccMutateSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
-            mutateSpec,
-            pipelineSpec,
+            new WccMutateSpecification(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected WccMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return WccMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
-        return new WccAlgorithmFactory<>();
-    }
-
-    @Override
-    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new WccMutateSpec().computationResultConsumer();
-    }
-
-    @SuppressWarnings("unused")
-    public static final class MutateResult extends WccStatsProc.StatsResult {
-
-        public final long mutateMillis;
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            long componentCount,
-            Map<String, Object> componentDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                componentCount,
-                componentDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.mutateMillis = mutateMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected MutateResult buildResult() {
-                return new MutateResult(
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
     }
 }

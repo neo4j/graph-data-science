@@ -27,7 +27,19 @@ public interface StaticCapabilities extends Capabilities {
 
     @Value.Default
     @Override
+    default WriteMode writeMode() {
+        return WriteMode.LOCAL;
+    }
+
+    @Value.Lazy
+    @Override
     default boolean canWriteToDatabase() {
-        return true;
+        return Capabilities.super.canWriteToDatabase();
+    }
+
+    @Value.Lazy
+    @Override
+    default boolean canWriteToRemoteDatabase() {
+        return Capabilities.super.canWriteToRemoteDatabase();
     }
 }

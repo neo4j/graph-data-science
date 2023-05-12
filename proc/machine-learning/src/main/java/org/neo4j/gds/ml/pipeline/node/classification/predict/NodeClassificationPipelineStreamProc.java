@@ -19,44 +19,28 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineStreamProc.NodeClassificationStreamResult;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
-public class NodeClassificationPipelineStreamProc
-    extends StreamProc<
-    NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
-    NodeClassificationStreamResult,
-    NodeClassificationPredictPipelineStreamConfig> {
+public class NodeClassificationPipelineStreamProc extends BaseProc {
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -65,103 +49,28 @@ public class NodeClassificationPipelineStreamProc
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new NodeClassificationPipelineStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphName") Object graphName,
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        preparePipelineConfig(graphName, configuration);
+        return new MemoryEstimationExecutor<>(
+            new NodeClassificationPipelineStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override
-    protected Stream<NodeClassificationStreamResult> stream(
-        ComputationResult<
-            NodeClassificationPredictPipelineExecutor,
-            NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
-            NodeClassificationPredictPipelineStreamConfig
-            > computationResult
-    ) {
-        return runWithExceptionLogging("Graph streaming failed", () -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            var pipelineGraphFilter = computationResult.algorithm().nodePropertyStepFilter();
-            var graph = computationResult.graphStore().getGraph(pipelineGraphFilter.nodeLabels());
-
-            var result = computationResult.result().get();
-            var predictedClasses = result.predictedClasses();
-            var predictedProbabilities = result.predictedProbabilities();
-            return LongStream
-                .range(0, graph.nodeCount())
-                .boxed()
-                .map(nodeId ->
-                    new NodeClassificationStreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        predictedClasses.get(nodeId),
-                        nodePropertiesAsList(predictedProbabilities, nodeId)
-                    )
-                );
-        });
-    }
-
-    private static List<Double> nodePropertiesAsList(
-        Optional<HugeObjectArray<double[]>> predictedProbabilities,
-        long nodeId
-    ) {
-        return predictedProbabilities.map(p -> {
-            var values = p.get(nodeId);
-            return Arrays.stream(values).boxed().collect(Collectors.toList());
-        }).orElse(null);
-    }
-
-    @Override
-    protected NodeClassificationStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
-    ) {
-        throw new UnsupportedOperationException("NodeClassification handles result building individually.");
-    }
-
-    @Override
-    protected NodeClassificationPredictPipelineStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return newConfigFunction().apply(username, config);
-    }
-
-    @Override
-    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
-    }
-
-    @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        this.setModelCatalog(modelCatalog);
-        return this;
-    }
-
-    @Override
-    public NewConfigFunction<NodeClassificationPredictPipelineStreamConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewStreamConfigFn(modelCatalog());
-    }
-
-
-    @SuppressWarnings("unused")
-    public static final class NodeClassificationStreamResult {
-
-        public long nodeId;
-        public long predictedClass;
-        public List<Double> predictedProbabilities;
-
-        public NodeClassificationStreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
-            this.nodeId = nodeId;
-            this.predictedClass = predictedClass;
-            this.predictedProbabilities = predictedProbabilities;
-        }
+    public ExecutionContext executionContext() {
+        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 }

@@ -35,7 +35,7 @@ public class ModelListProc extends ModelCatalogProc {
     @Procedure(name = "gds.beta.model.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelCatalogResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
-        ModelCatalog modelCatalog = modelCatalog();
+        ModelCatalog modelCatalog = executionContext().modelCatalog();
         if (modelName == null || modelName.equals(NO_VALUE)) {
             var models = modelCatalog.list(username());
             return models.stream().map(ModelCatalogResult::new);

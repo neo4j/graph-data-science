@@ -149,13 +149,13 @@ class NodeFilteredGraphTest {
     @Test
     void containsOnFilteredGraph() {
         var personGraph = graphStore.getGraph(NodeLabel.of("Person"));
-        assertThat(personGraph.contains(idFunction.of("a"))).isTrue();
-        assertThat(personGraph.contains(idFunction.of("b"))).isTrue();
-        assertThat(personGraph.contains(idFunction.of("c"))).isTrue();
-        assertThat(personGraph.contains(idFunction.of("d"))).isTrue();
+        assertThat(personGraph.containsOriginalId(idFunction.of("a"))).isTrue();
+        assertThat(personGraph.containsOriginalId(idFunction.of("b"))).isTrue();
+        assertThat(personGraph.containsOriginalId(idFunction.of("c"))).isTrue();
+        assertThat(personGraph.containsOriginalId(idFunction.of("d"))).isTrue();
 
-        assertThat(personGraph.contains(idFunction.of("x"))).isFalse();
-        assertThat(personGraph.contains(idFunction.of("e"))).isFalse();
+        assertThat(personGraph.containsOriginalId(idFunction.of("x"))).isFalse();
+        assertThat(personGraph.containsOriginalId(idFunction.of("e"))).isFalse();
     }
 
     @Test

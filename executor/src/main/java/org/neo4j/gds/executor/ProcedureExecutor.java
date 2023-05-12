@@ -70,13 +70,16 @@ public class ProcedureExecutor<
 
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
+        // This is needed in the case of `pipelines` where they either pick stuff from the user input,
+        // or if there is a `modelName` they read stuff from the model stored in the catalog.
+        algoSpec.preProcessConfig(configuration, executionContext);
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
         executionContext.algorithmMetaDataSetter().set(config);
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
-        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory());
+        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory(executionContext));
 
         GraphStore graphStore;
         Graph graph;
@@ -147,7 +150,7 @@ public class ProcedureExecutor<
         CONFIG config
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.terminationMonitor());
-        ALGO algorithm = algoSpec.algorithmFactory()
+        ALGO algorithm = algoSpec.algorithmFactory(executionContext)
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
                 public ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory) {

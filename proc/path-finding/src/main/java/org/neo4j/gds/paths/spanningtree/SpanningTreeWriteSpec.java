@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.spanningtree.Prim;
@@ -45,7 +46,7 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
     }
 
     @Override
-    public SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig> algorithmFactory() {
+    public SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SpanningTreeAlgorithmFactory<>();
     }
 
@@ -87,6 +88,7 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
                         config.writeConcurrency(),
                         executionContext
                     ))
+                    .withArrowConnectionInfo(config.arrowConnectionInfo())
                     .build()
                     .write(config.writeRelationshipType(), config.writeProperty());
             }

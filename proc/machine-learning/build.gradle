@@ -40,6 +40,7 @@ dependencies {
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':transaction')
 
 
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'

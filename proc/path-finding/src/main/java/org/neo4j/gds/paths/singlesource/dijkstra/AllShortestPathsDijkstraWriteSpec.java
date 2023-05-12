@@ -21,12 +21,13 @@ package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = Dijkstra.DESCRIPTION_SOURCE_TARGET, executionMode = WRITE_RELATIONSHIP)
-public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig>> {
+public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig>> {
 
     @Override
     public String name() {
@@ -43,7 +44,9 @@ public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra
     }
 
     @Override
-    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
         return new DijkstraFactory.AllShortestPathsDijkstraFactory<>();
     }
 
@@ -53,7 +56,7 @@ public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra
     }
 
     @Override
-    public ComputationResultConsumer<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Dijkstra, PathFindingResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
 

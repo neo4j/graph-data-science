@@ -26,10 +26,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.embeddings.fastrp.StreamResult;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.procedure.Name;
@@ -47,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @FakeClockExtension
-public class ListProgressProcTest extends BaseProgressTest {
+class ListProgressProcTest extends BaseProgressTest {
 
     @Inject
     public FakeClock fakeClock;
@@ -150,7 +148,7 @@ public class ListProgressProcTest extends BaseProgressTest {
 
         @Override
         @Procedure("gds.test.fastrp")
-        public Stream<FastRPStreamProc.StreamResult> stream(
+        public Stream<StreamResult> stream(
             @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
@@ -158,7 +156,7 @@ public class ListProgressProcTest extends BaseProgressTest {
         }
 
         @Procedure("gds.test.fakerp")
-        public Stream<FastRPStreamProc.StreamResult> fakeStream(
+        public Stream<StreamResult> fakeStream(
             @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
@@ -167,9 +165,5 @@ public class ListProgressProcTest extends BaseProgressTest {
             return super.stream(graphName, configuration);
         }
 
-        @Override
-        public GraphAlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
-            return new FastRPFactory<>();
-        }
     }
 }

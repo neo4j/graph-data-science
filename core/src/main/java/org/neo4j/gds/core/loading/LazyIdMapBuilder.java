@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -38,7 +39,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
     private final NodesBuilder nodesBuilder;
 
-    public LazyIdMapBuilder(int concurrency, boolean hasLabelInformation, boolean hasProperties) {
+    public LazyIdMapBuilder(int concurrency, boolean hasLabelInformation, boolean hasProperties, PropertyState propertyState) {
         this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(concurrency)
@@ -46,6 +47,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(hasProperties)
             .deduplicateIds(false)
+            .propertyState(propertyState)
             .build();
     }
 

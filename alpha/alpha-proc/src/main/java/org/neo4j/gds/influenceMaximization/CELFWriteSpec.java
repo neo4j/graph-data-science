@@ -46,7 +46,7 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
     }
 
     @Override
-    public CELFAlgorithmFactory<InfluenceMaximizationWriteConfig> algorithmFactory() {
+    public CELFAlgorithmFactory<InfluenceMaximizationWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new CELFAlgorithmFactory<>();
     }
 

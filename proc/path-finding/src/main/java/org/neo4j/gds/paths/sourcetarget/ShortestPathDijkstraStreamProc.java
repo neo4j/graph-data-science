@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathStreamProc;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,12 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.shortestPath.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijkstra, ShortestPathDijkstraStreamConfig> {
+public class ShortestPathDijkstraStreamProc extends BaseProc {
 
     @Procedure(name = "gds.shortestPath.dijkstra.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
@@ -48,7 +42,10 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ShortestPathDijkstraStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.dijkstra.stream.estimate", mode = READ)
@@ -57,16 +54,13 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+
+        return new MemoryEstimationExecutor<>(
+            new ShortestPathDijkstraStreamSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    protected ShortestPathDijkstraStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return ShortestPathDijkstraStreamConfig.of(config);
-    }
 
-    @Override
-    public GraphAlgorithmFactory<Dijkstra, ShortestPathDijkstraStreamConfig> algorithmFactory() {
-        return new DijkstraFactory.SourceTargetDijkstraFactory<>();
-    }
 }

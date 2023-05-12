@@ -116,7 +116,7 @@ public abstract class IdMapBuilderTest {
         var highestOriginalId = idMapAndHighestId.highestOriginalId();
 
         assertThat(idMap.nodeCount()).as("node count").isEqualTo(originalIds.length);
-        Arrays.stream(originalIds).forEach(originalId -> assertThat(idMap.contains(originalId))
+        Arrays.stream(originalIds).forEach(originalId -> assertThat(idMap.containsOriginalId(originalId))
             .as(originalId + " is contained in IdMap")
             .isTrue());
 
@@ -128,7 +128,7 @@ public abstract class IdMapBuilderTest {
             .range(0, originalIds.length)
             .map(__ -> rng.nextLong(highestOriginalId + 1))
             .filter(id -> Arrays.binarySearch(originalIds, id) < 0)
-            .forEach(id -> assertThat(idMap.contains(id)).isFalse());
+            .forEach(id -> assertThat(idMap.containsOriginalId(id)).isFalse());
     }
 
     @Property(tries = TRIES)
@@ -249,7 +249,7 @@ public abstract class IdMapBuilderTest {
         assertThat(idMap.highestOriginalId()).as("highest original id").isEqualTo(highestOriginalId);
 
         for (long originalId : originalIds) {
-            assertThat(idMap.contains(originalId)).as("contains original id " + originalId).isTrue();
+            assertThat(idMap.containsOriginalId(originalId)).as("contains original id " + originalId).isTrue();
         }
     }
 
