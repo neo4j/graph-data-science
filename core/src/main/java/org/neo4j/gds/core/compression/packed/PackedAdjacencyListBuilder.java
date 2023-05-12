@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.HdrHistogram.ConcurrentHistogram;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
@@ -31,11 +30,9 @@ import org.neo4j.memory.EmptyMemoryTracker;
 public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Address, PackedAdjacencyList> {
 
     private final BumpAllocator<Address> builder;
-    private final ConcurrentHistogram allocationHistogram;
 
     PackedAdjacencyListBuilder() {
-        this.allocationHistogram = new ConcurrentHistogram(0);
-        this.builder = new BumpAllocator<>(Factory.INSTANCE, this.allocationHistogram);
+        this.builder = new BumpAllocator<>(Factory.INSTANCE);
     }
 
     @Override
@@ -60,7 +57,7 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
             int allocationSize = Math.toIntExact(address.bytes());
             allocationSizes[i] = allocationSize;
         }
-        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, this.allocationHistogram);
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
     }
 
     private enum Factory implements BumpAllocator.Factory<Address> {

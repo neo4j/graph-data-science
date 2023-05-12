@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.HdrHistogram.Histogram;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
@@ -87,9 +86,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
             Aggregation[] aggregations,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
-            HugeLongArray propertyOffsets,
-            Histogram headerAllocations,
-            Histogram valueAllocations
+            HugeLongArray propertyOffsets
         ) {
             AdjacencyListBuilder.Allocator<long[]> firstAllocator;
             AdjacencyListBuilder.PositionalAllocator<long[]>[] otherAllocators;
@@ -115,9 +112,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 adjacencyOffsets,
                 propertyOffsets,
                 noAggregation,
-                aggregations,
-                headerAllocations,
-                valueAllocations
+                aggregations
             );
         }
     }
@@ -130,8 +125,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final HugeLongArray propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
-    private final Histogram headerBitsHistogram;
-    private final Histogram valueAllocationHistogram;
 
     private final LongArrayBuffer buffer;
     private final ModifiableSlice<Address> adjacencySlice;
@@ -148,9 +141,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         HugeLongArray adjacencyOffsets,
         HugeLongArray propertyOffsets,
         boolean noAggregation,
-        Aggregation[] aggregations,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        Aggregation[] aggregations
     ) {
         this.adjacencyAllocator = adjacencyAllocator;
         this.firstPropertyAllocator = firstPropertyAllocator;
@@ -160,8 +151,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
-        this.headerBitsHistogram = headerBitsHistogram;
-        this.valueAllocationHistogram = valueAllocationHistogram;
 
         this.buffer = new LongArrayBuffer();
         this.adjacencySlice = ModifiableSlice.create();
@@ -237,9 +226,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 targetsLength,
                 this.aggregations,
                 this.noAggregation,
-                this.degree,
-                this.headerBitsHistogram,
-                this.valueAllocationHistogram
+                this.degree
             );
         } else {
             offset = AdjacencyPacker.compressWithPropertiesWithVarLongTail(
@@ -250,9 +237,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 targetsLength,
                 this.aggregations,
                 this.noAggregation,
-                this.degree,
-                this.headerBitsHistogram,
-                this.valueAllocationHistogram
+                this.degree
             );
         }
 
@@ -293,9 +278,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 targets,
                 targetsLength,
                 this.aggregations[0],
-                this.degree,
-                this.headerBitsHistogram,
-                this.valueAllocationHistogram
+                this.degree
             );
         } else {
             offset = AdjacencyPacker.compressWithVarLongTail(
@@ -304,9 +287,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 targets,
                 targetsLength,
                 this.aggregations[0],
-                this.degree,
-                this.headerBitsHistogram,
-                this.valueAllocationHistogram
+                this.degree
             );
         }
 

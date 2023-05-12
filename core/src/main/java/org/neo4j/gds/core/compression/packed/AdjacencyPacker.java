@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.HdrHistogram.Histogram;
-import org.HdrHistogram.ValueRecorder;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.core.Aggregation;
@@ -52,12 +50,10 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree,
-        Histogram headerAllocations,
-        Histogram valueAllocations
+        MutableInt degree
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompress(allocator, slice, values, length, aggregation, degree, headerAllocations, valueAllocations);
+        return deltaCompress(allocator, slice, values, length, aggregation, degree);
     }
 
     static long compressWithProperties(
@@ -68,9 +64,7 @@ public final class AdjacencyPacker {
         int length,
         Aggregation[] aggregations,
         boolean noAggregation,
-        MutableInt degree,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        MutableInt degree
     ) {
         if (length > 0) {
             // sort, delta encode, reorder and aggregate properties
@@ -85,7 +79,7 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePacking(allocator, slice, values, length, headerBitsHistogram, valueAllocationHistogram);
+        return preparePacking(allocator, slice, values, length);
     }
 
     private static long deltaCompress(
@@ -94,9 +88,7 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree,
-        Histogram headerAllocations,
-        Histogram valueAllocations
+        MutableInt degree
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
@@ -104,7 +96,7 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePacking(allocator, slice, values, length, headerAllocations, valueAllocations);
+        return preparePacking(allocator, slice, values, length);
     }
 
     public static long compressWithVarLongTail(
@@ -113,12 +105,10 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree,
-        Histogram headerAllocations,
-        Histogram valueAllocations
+        MutableInt degree
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompressWithVarLongTail(allocator, slice, values, length, aggregation, degree, headerAllocations, valueAllocations);
+        return deltaCompressWithVarLongTail(allocator, slice, values, length, aggregation, degree);
     }
 
     static long compressWithPropertiesWithVarLongTail(
@@ -129,9 +119,7 @@ public final class AdjacencyPacker {
         int length,
         Aggregation[] aggregations,
         boolean noAggregation,
-        MutableInt degree,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        MutableInt degree
     ) {
         if (length > 0) {
             // sort, delta encode, reorder and aggregate properties
@@ -146,7 +134,7 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithVarLongTail(allocator, slice, values, length, headerBitsHistogram, valueAllocationHistogram);
+        return preparePackingWithVarLongTail(allocator, slice, values, length);
     }
 
     private static long deltaCompressWithVarLongTail(
@@ -155,9 +143,7 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree,
-        Histogram headerAllocations,
-        Histogram valueAllocations
+        MutableInt degree
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
@@ -165,16 +151,14 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithVarLongTail(allocator, slice, values, length, headerAllocations, valueAllocations);
+        return preparePackingWithVarLongTail(allocator, slice, values, length);
     }
 
     private static long preparePacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        int length
     ) {
         int blocks = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
         var header = new byte[blocks];
@@ -195,7 +179,7 @@ public final class AdjacencyPacker {
             header[blockIdx] = (byte) bits;
         }
 
-        return runPacking(allocator, slice, values, header, bytes, headerBitsHistogram, valueAllocationHistogram);
+        return runPacking(allocator, slice, values, header, bytes);
     }
 
     private static long runPacking(
@@ -203,9 +187,7 @@ public final class AdjacencyPacker {
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
         byte[] header,
-        long requiredBytes,
-        ValueRecorder headerBitsHistogram,
-        ValueRecorder valueAllocationHistogram
+        long requiredBytes
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
@@ -220,10 +202,6 @@ public final class AdjacencyPacker {
 
         long adjacencyOffset = allocator.allocate(allocationSize, slice);
 
-        if (valueAllocationHistogram != null) {
-            valueAllocationHistogram.recordValue(requiredBytes);
-        }
-
         Address address = slice.slice();
         long ptr = address.address() + slice.offset();
 
@@ -234,9 +212,6 @@ public final class AdjacencyPacker {
         // main packing loop
         int in = 0;
         for (byte bits : header) {
-            if (headerBitsHistogram != null) {
-                headerBitsHistogram.recordValue(bits);
-            }
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
@@ -248,9 +223,7 @@ public final class AdjacencyPacker {
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        int length
     ) {
         int blocks = length / AdjacencyPacking.BLOCK_SIZE;
         var header = new byte[blocks];
@@ -276,9 +249,7 @@ public final class AdjacencyPacker {
             blockBytes,
             tailBytes,
             length,
-            tailLength,
-            headerBitsHistogram,
-            valueAllocationHistogram
+            tailLength
         );
     }
 
@@ -290,9 +261,7 @@ public final class AdjacencyPacker {
         long blockBytes,
         long tailBytes,
         int length,
-        int tailLength,
-        ValueRecorder headerBitsHistogram,
-        ValueRecorder valueAllocationHistogram
+        int tailLength
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
@@ -307,10 +276,6 @@ public final class AdjacencyPacker {
 
         long adjacencyOffset = allocator.allocate(allocationSize, slice);
 
-        if (valueAllocationHistogram != null) {
-            valueAllocationHistogram.recordValue(blockBytes + tailBytes);
-        }
-
         Address address = slice.slice();
         long ptr = address.address() + slice.offset();
 
@@ -321,9 +286,6 @@ public final class AdjacencyPacker {
         // main packing loop
         int in = 0;
         for (byte bits : header) {
-            if (headerBitsHistogram != null) {
-                headerBitsHistogram.recordValue(bits);
-            }
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
@@ -343,12 +305,10 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree,
-        Histogram headerAllocations,
-        Histogram valueAllocations
+        MutableInt degree
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompressWithPackedTail(allocator, slice, values, length, aggregation, degree, headerAllocations, valueAllocations);
+        return deltaCompressWithPackedTail(allocator, slice, values, length, aggregation, degree);
     }
 
     static long compressWithPropertiesWithPackedTail(
@@ -359,9 +319,7 @@ public final class AdjacencyPacker {
         int length,
         Aggregation[] aggregations,
         boolean noAggregation,
-        MutableInt degree,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        MutableInt degree
     ) {
         if (length > 0) {
             // sort, delta encode, reorder and aggregate properties
@@ -376,7 +334,7 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithPackedTail(allocator, slice, values, length, headerBitsHistogram, valueAllocationHistogram);
+        return preparePackingWithPackedTail(allocator, slice, values, length);
     }
 
     private static long deltaCompressWithPackedTail(
@@ -385,9 +343,7 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree,
-        Histogram headerAllocations,
-        Histogram valueAllocations
+        MutableInt degree
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
@@ -395,16 +351,14 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithPackedTail(allocator, slice, values, length, headerAllocations, valueAllocations);
+        return preparePackingWithPackedTail(allocator, slice, values, length);
     }
 
     private static long preparePackingWithPackedTail(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        int length
     ) {
         int blocks = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
         var header = new byte[blocks];
@@ -432,10 +386,7 @@ public final class AdjacencyPacker {
             values,
             header,
             bytes,
-            length,
-            tailLength,
-            headerBitsHistogram,
-            valueAllocationHistogram
+            tailLength
         );
     }
 
@@ -445,10 +396,7 @@ public final class AdjacencyPacker {
         long[] values,
         byte[] header,
         long bytes,
-        int length,
-        int tailLength,
-        ValueRecorder headerBitsHistogram,
-        ValueRecorder valueAllocationHistogram
+        int tailLength
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
@@ -462,10 +410,6 @@ public final class AdjacencyPacker {
         int allocationSize = Math.toIntExact(alignedFullSize);
 
         long adjacencyOffset = allocator.allocate(allocationSize, slice);
-
-        if (valueAllocationHistogram != null) {
-            valueAllocationHistogram.recordValue(bytes);
-        }
 
         Address address = slice.slice();
         long ptr = address.address() + slice.offset();
@@ -481,9 +425,6 @@ public final class AdjacencyPacker {
 
         for (int i = 0; i < headerLength; i++) {
             byte bits = header[i];
-            if (headerBitsHistogram != null) {
-                headerBitsHistogram.recordValue(bits);
-            }
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
@@ -491,10 +432,6 @@ public final class AdjacencyPacker {
         // tail packing
         if (hasTail) {
             byte bits = header[header.length - 1];
-
-            if (headerBitsHistogram != null) {
-                headerBitsHistogram.recordValue(bits);
-            }
             AdjacencyPacking.loopPack(bits, values, in, tailLength, ptr);
         }
 

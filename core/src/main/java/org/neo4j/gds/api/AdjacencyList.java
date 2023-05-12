@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.api;
 
-import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Stream;
 
@@ -166,7 +164,5 @@ public interface AdjacencyList {
          * @return Number of bytes or empty if not accessible.
          */
         OptionalLong bytesOffHeap();
-
-        Optional<Histogram> allocationHistogram();
     }
 }
