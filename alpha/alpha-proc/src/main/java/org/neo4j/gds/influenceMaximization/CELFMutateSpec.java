@@ -21,6 +21,7 @@ package org.neo4j.gds.influenceMaximization;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.MutateNodePropertyListFunction;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -57,7 +58,7 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
 
     @Override
     public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig> mutateConfigNodePropertyListFunction =
+        MutateNodePropertyListFunction<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> {
                 var celfSeedSet = computationResult.result()
                     .orElseGet(() -> new LongDoubleScatterMap(0));

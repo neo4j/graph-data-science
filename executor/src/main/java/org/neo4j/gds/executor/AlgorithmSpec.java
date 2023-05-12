@@ -40,13 +40,14 @@ public interface AlgorithmSpec<
 
     /**
      * This is used to enhance the user input, mainly when running ML pipelines and the user has provided pre-trained model.
+     * There you would use this method to collect "missing" parameters, i.e. parameters that were given to steps in the pipeline.
+     * This method has effects on the passed in user input directly.
      *
-     * @param userInput        - user provided configuration
+     * @param userInput        - user provided configuration to enhance
      * @param executionContext - the execution context provided during a procedure execution
-     * @return an enhanced configuration map
      */
-    default Map<String, Object> preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        return userInput;
+    default void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
+        // do nothing
     }
 
     NewConfigFunction<CONFIG> newConfigFunction();

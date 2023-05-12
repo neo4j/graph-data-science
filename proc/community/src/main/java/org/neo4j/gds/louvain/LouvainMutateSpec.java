@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.neo4j.gds.MutateNodePropertyListFunction;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -53,7 +54,7 @@ public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, 
 
     @Override
     public ComputationResultConsumer<Louvain, LouvainResult, LouvainMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<Louvain, LouvainResult, LouvainMutateConfig> mutateConfigNodePropertyListFunction =
+        MutateNodePropertyListFunction<Louvain, LouvainResult, LouvainMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 extractNodeProperties(computationResult, computationResult.config().mutateProperty())

@@ -46,14 +46,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class NodeClassificationPipelineWriteProc
     extends WriteProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
+    NodeClassificationPipelineResult,
     NodeClassificationPipelineWriteProc.WriteResult,
     NodeClassificationPredictPipelineWriteConfig>
 {
@@ -87,7 +87,7 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
         if (computationResult.result().isEmpty()) {
             return Collections.emptyList();
         }
@@ -124,7 +124,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
+        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new WriteResult.Builder();

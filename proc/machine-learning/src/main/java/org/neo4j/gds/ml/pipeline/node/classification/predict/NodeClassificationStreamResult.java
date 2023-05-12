@@ -19,19 +19,17 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
+import java.util.List;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineBaseConfig extends NodePropertyPredictPipelineBaseConfig {
-    @Configuration.Key("includePredictedProbabilities")
-    boolean includePredictedProbabilities();
+public final class NodeClassificationStreamResult {
 
-    static NodeClassificationPredictPipelineBaseConfig of(String username, CypherMapWrapper config) {
-        return new NodeClassificationPredictPipelineBaseConfigImpl(username, config);
+    public long nodeId;
+    public long predictedClass;
+    public List<Double> predictedProbabilities;
+
+    public NodeClassificationStreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
+        this.nodeId = nodeId;
+        this.predictedClass = predictedClass;
+        this.predictedProbabilities = predictedProbabilities;
     }
 }

@@ -17,21 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
+import org.neo4j.gds.config.MutatePropertyConfig;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineBaseConfig extends NodePropertyPredictPipelineBaseConfig {
-    @Configuration.Key("includePredictedProbabilities")
-    boolean includePredictedProbabilities();
-
-    static NodeClassificationPredictPipelineBaseConfig of(String username, CypherMapWrapper config) {
-        return new NodeClassificationPredictPipelineBaseConfigImpl(username, config);
-    }
+/**
+ * A generics adaptation interface?
+ */
+public interface MutateNodePropertyListFunction<
+        ALGO extends Algorithm<ALGO_RESULT>,
+        ALGO_RESULT,
+        CONFIG extends MutatePropertyConfig
+    > extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {
 }

@@ -19,18 +19,12 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -38,25 +32,14 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class NodeClassificationPipelineMutateProc
-    extends MutatePropertyProc<
-    NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
-    PredictMutateResult,
-    NodeClassificationPredictPipelineMutateConfig>
-{
+public class NodeClassificationPipelineMutateProc extends BaseProc {
     @Context
     public ModelCatalog internalModelCatalog;
 
@@ -67,83 +50,28 @@ public class NodeClassificationPipelineMutateProc
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return mutate(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new NodeClassificationPipelineMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "graphName") Object graphName,
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        preparePipelineConfig(graphName, configuration);
+        return new MemoryEstimationExecutor<>(
+            new NodeClassificationPipelineMutateSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override
     public ExecutionContext executionContext() {
         return super.executionContext().withModelCatalog(internalModelCatalog);
     }
-
-    @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
-        if (computationResult.result().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        var config = computationResult.config();
-        var mutateProperty = config.mutateProperty();
-        var result = computationResult.result().get();
-        var classProperties = result.predictedClasses().asNodeProperties();
-        var nodeProperties = new ArrayList<NodeProperty>();
-        nodeProperties.add(NodeProperty.of(mutateProperty, classProperties));
-
-        result.predictedProbabilities().ifPresent(probabilityProperties -> {
-            var properties = new DoubleArrayNodePropertyValues() {
-                @Override
-                public long nodeCount() {
-                    return computationResult.graph().nodeCount();
-                }
-
-                @Override
-                public double[] doubleArrayValue(long nodeId) {
-                    return probabilityProperties.get(nodeId);
-                }
-            };
-
-            nodeProperties.add(NodeProperty.of(
-                config.predictedProbabilityProperty().orElseThrow(),
-                properties
-            ));
-        });
-
-        return nodeProperties;
-    }
-
-
-    @Override
-    protected AbstractResultBuilder<PredictMutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new PredictMutateResult.Builder();
-    }
-
-    @Override
-    protected NodeClassificationPredictPipelineMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return newConfigFunction().apply(username, config);
-    }
-
-    @Override
-    public NewConfigFunction<NodeClassificationPredictPipelineMutateConfig> newConfigFunction() {
-        return new NodeClassificationPredictNewMutateConfigFn(executionContext().modelCatalog());
-    }
-
-    @Override
-    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory(
-        ExecutionContext executionContext
-    ) {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext);
-    }
-
 }
