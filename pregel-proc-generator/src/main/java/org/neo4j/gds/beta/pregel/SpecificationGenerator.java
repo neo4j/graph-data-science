@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
+import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
@@ -106,7 +107,6 @@ public class SpecificationGenerator {
             .build();
     }
 
-    // ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer();
     MethodSpec computationResultConsumerMethod(TypeName configTypeName, GDSMode mode) {
         var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
         return MethodSpec.methodBuilder("computationResultConsumer")
@@ -116,15 +116,9 @@ public class SpecificationGenerator {
                 ParameterizedTypeName.get(
                     ClassName.get(ComputationResultConsumer.class),
                     algorithmClassName,
-                    ClassName.get(PregelResult.class),
-                    configTypeName,
-                    ClassName.get(resultTypeForMode(mode))
-                )
-            )
-            // RESULT consume(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext);
-            .addStatement("" +
-                "return (cr, ec) -> {" +
-                ""
+                    configTypeName
+                ))
+            .addStatement("return new $T<>()", ClassName.get(computationResultConsumerTypeForMode(mode))
             ).build();
     }
 
@@ -138,8 +132,17 @@ public class SpecificationGenerator {
             case WRITE: return PregelWriteResult.class;
             case MUTATE: return PregelMutateResult.class;
             case STREAM: return PregelStreamResult.class;
-
+            default: throw new IllegalStateException("Unexpected value: " + mode);
         }
-        return null;
+    }
+
+    private Type computationResultConsumerTypeForMode(GDSMode mode) {
+        switch (mode) {
+            case STATS: return PregelStatsComputationResultConsumer.class;
+//            case WRITE: return PregelWriteComputationResultConsumer.class;
+//            case MUTATE: return PregelMutateComputationResultConsumer.class;
+//            case STREAM: return PregelStreamComputationResultConsumer.class;
+            default: throw new IllegalStateException("Unexpected value: " + mode);
+        }
     }
 }

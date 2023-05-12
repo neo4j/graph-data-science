@@ -83,4 +83,18 @@ class SpecificationGeneratorTest {
             "}" + NL
         );
     }
+
+    @Test
+    void shouldGenerateComputationResultConsumerMethod() {
+        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
+        var configTypeName = TypeName.get(PregelProcedureConfig.class);
+        var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(configTypeName, GDSMode.STATS).toString();
+        assertThat(computationResultConsumerMethod).isEqualTo("" +
+            "@java.lang.Override" + NL +
+            "public org.neo4j.gds.executor.ComputationResultConsumer<gds.test.FooAlgorithm, org.neo4j.gds.beta.pregel.PregelProcedureConfig> computationResultConsumer(" + NL +
+            "    ) {" + NL +
+            "  return new org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer<>();" + NL +
+            "}" + NL
+        );
+    }
 }
