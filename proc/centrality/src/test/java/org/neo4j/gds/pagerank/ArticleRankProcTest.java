@@ -97,8 +97,8 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(expectedNode0, 1e-5)),
-            Map.of("nodeId", 1L, "score", closeTo(expectedNode1, 1e-5))
+            Map.of("nodeId", idFunction.of("a"), "score", closeTo(expectedNode0, 1e-5)),
+            Map.of("nodeId", idFunction.of("b"), "score", closeTo(expectedNode1, 1e-5))
         ));
     }
 
@@ -142,8 +142,8 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.15, 1e-5)),
-            Map.of("nodeId", 1L, "score", closeTo(0.235, 1e-5))
+            Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.15, 1e-5)),
+            Map.of("nodeId", idFunction.of("b"), "score", closeTo(0.235, 1e-5))
         ));
     }
 
@@ -158,15 +158,15 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.15, 1e-5)),
-            Map.of("nodeId", 1L, "score", closeTo(0.235, 1e-5))
+            Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.15, 1e-5)),
+            Map.of("nodeId", idFunction.of("b"), "score", closeTo(0.235, 1e-5))
         ));
     }
 
     @Test
     void failOnMissingSourceNodes() {
         var sourceNodes = List.of(
-            new NodeEntity(null, 42),
+            new NodeEntity(null, 4242),
             new NodeEntity(null, 1337)
         );
 
@@ -180,7 +180,7 @@ class ArticleRankProcTest extends BaseProcTest {
         assertThatThrownBy(() -> runQuery(query, Map.of("sources", sourceNodes)))
             .hasRootCauseExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Source nodes do not exist in the in-memory graph")
-            .hasMessageContaining("['1337', '42']");
+            .hasMessageContaining("['1337', '4242']");
     }
 
 

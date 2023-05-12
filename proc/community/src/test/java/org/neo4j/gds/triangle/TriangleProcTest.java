@@ -27,6 +27,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 class TriangleProcTest extends BaseProcTest {
 
@@ -65,9 +66,9 @@ class TriangleProcTest extends BaseProcTest {
             "CALL gds.alpha.triangles('graph', {}) " +
             "YIELD nodeA, nodeB, nodeC " +
             "RETURN nodeA + nodeB + nodeC AS triangleSum ORDER BY triangleSum", List.of(
-            Map.of("triangleSum", 0L + 1L + 2L),
-            Map.of("triangleSum", 3L + 4L + 5L),
-            Map.of("triangleSum", 6L + 7L + 8L)
-        ));
+                Map.of("triangleSum", Stream.of("a", "b", "c").mapToLong(idFunction::of).sum()),
+                Map.of("triangleSum", Stream.of("d", "e", "f").mapToLong(idFunction::of).sum()),
+                Map.of("triangleSum", Stream.of("g", "h", "i").mapToLong(idFunction::of).sum())
+            ));
     }
 }

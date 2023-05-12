@@ -128,26 +128,26 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
                 Arguments.of(Map.of("minCommunitySize", 1), Map.of(
-                        0L, 1L,
-                        1L, 1L,
-                        2L, 1L,
-                        3L, 0L,
-                        4L, 0L,
-                        5L, 0L,
-                        6L, 0L
+                        "a", 1L,
+                        "b", 1L,
+                        "c", 1L,
+                        "d", 0L,
+                        "e", 0L,
+                        "f", 0L,
+                        "g", 0L
                 )),
                 Arguments.of(Map.of("minCommunitySize", 4), Map.of(
-                        3L, 0L,
-                        4L, 0L,
-                        5L, 0L,
-                        6L, 0L
+                        "d", 0L,
+                        "e", 0L,
+                        "f", 0L,
+                        "g", 0L
                 ))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testStreamWithMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
+    void testStreamWithMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         String streamQuery = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.maxkcut")
             .streamMode()
@@ -160,7 +160,7 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
         var rowCount = runQueryWithRowConsumer(streamQuery, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long communityId = row.getNumber("communityId").longValue();
-            assertThat(communityId).isEqualTo(expectedResult.get(nodeId));
+            assertThat(communityId).isEqualTo(expectedResult.get(idToVariable.of(nodeId)));
         });
 
         assertThat(rowCount).isEqualTo(expectedResult.keySet().size());

@@ -38,6 +38,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,17 +54,17 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
         "  (a:A {id: 0, seed: 42}) " +
         ", (b:B {id: 1, seed: 42}) " +
 
-        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+        ", (a)-[:X]->(n2:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(n3:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(n4:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(n5:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(n6:A {id: 6,  weight: 8.0, seed: 2}) " +
 
-        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+        ", (b)-[:X]->(n7:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(n8:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(n9:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(n10:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(n11:B {id: 11, weight: 8.0, seed: 2})";
 
     @BeforeEach
     void setup() throws Exception {
@@ -286,7 +287,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             row ->
                 assertThat(row.getNumber("community"))
                     .asInstanceOf(LONG)
-                    .isEqualTo(6L)
+                    .isEqualTo(idFunction.of("n6"))
 
         );
         runQueryWithRowConsumer(
@@ -294,15 +295,21 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             row ->
                 assertThat(row.getNumber("community"))
                     .asInstanceOf(LONG)
-                    .isEqualTo(11L)
+                    .isEqualTo(idFunction.of("n11"))
         );
     }
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-            Arguments.of(Map.of("minCommunitySize", 1), List.of(2L, 7L, 3L, 4L, 5L, 6L, 8L, 9L, 10L, 11L)),
-            Arguments.of(Map.of("minCommunitySize", 2), List.of(2L, 7L)),
-            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)),
+            Arguments.of(Map.of("minCommunitySize", 1),
+                // using the node variables to represent the ids
+                List.of("n2", "n7", "n3", "n4", "n5", "n6", "n8", "n9", "n10", "n11")),
+            Arguments.of(Map.of("minCommunitySize", 2),
+                List.of("n2", "n7")),
+            Arguments.of(
+                Map.of("minCommunitySize", 1, "consecutiveIds", true),
+                List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
+            ),
             Arguments.of(Map.of("minCommunitySize", 2, "consecutiveIds", true), List.of(0L, 1L)),
             Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", "seed"), List.of(1L, 2L)),
             Arguments.of(Map.of("minCommunitySize", 2, "seedProperty", "seed"), List.of(1L, 2L))
@@ -311,7 +318,7 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteWithMinCommunitySize(Map<String, Object> parameters, Iterable<Long> expectedCommunityIds) {
+    void testWriteWithMinCommunitySize(Map<String, Object> parameters, List<Object> expectedCommunities) {
         String writeProp = "writeProp";
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
@@ -341,6 +348,10 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
         assertThat(rowCount)
             .as("`write` mode should always return one row")
             .isEqualTo(1);
+
+        var expectedCommunityIds = expectedCommunities.get(0) instanceof String
+            ? expectedCommunities.stream().map(name -> idFunction.of(((String) name))).collect(Collectors.toList())
+            : expectedCommunities;
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + writeProp + ") AS communities ",
@@ -582,10 +593,10 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
         runQueryWithRowConsumer(check, row -> {
             assertThat(row.getNumber("a"))
                 .asInstanceOf(LONG)
-                .isEqualTo(2);
+                .isEqualTo(idFunction.of("n2"));
             assertThat(row.getNumber("b"))
                 .asInstanceOf(LONG)
-                .isEqualTo(7);
+                .isEqualTo(idFunction.of("n7"));
         });
     }
 
@@ -659,8 +670,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             "community"
         );
         assertCypherResult(validateQuery, Arrays.asList(
-            Map.of("community", 0L, "communitySize", 6L),
-            Map.of("community", 1L, "communitySize", 6L)
+            Map.of("community", idFunction.of("a"), "communitySize", 6L),
+            Map.of("community", idFunction.of("b"), "communitySize", 6L)
         ));
     }
 }
