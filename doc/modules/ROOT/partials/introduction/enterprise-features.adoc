@@ -1,0 +1,28 @@
+[[introduction-editions]]
+= Editions
+
+The Neo4j Graph Data Science library is available in two editions.
+By default, GDS will operate as the Community Edition.
+To unlock Enterprise Edition features, a valid Neo4j Graph Data Science Enterprise license file is required.
+See xref:installation/installation-enterprise-edition.adoc[] for how to configure the license.
+
+* The open source Community Edition:
+** Includes all algorithms.
+** Limits the catalog operations to manage graphs and models.
+   Unavailable operations are listed under the Enterprise Edition below.
+** Limits the xref:installation/System-requirements.adoc#system-requirements-cpu[concurrency to 4 CPU cores].
+** Limits the capacity of the model catalog to 3 models.
+
+* The Neo4j Graph Data Science library Enterprise Edition:
+** Supports running on xref:installation/System-requirements.adoc#system-requirements-cpu[any amount of CPU cores].
+** Supports running GDS write workloads as part of a xref::production-deployment/neo4j-cluster.adoc[Neo4j cluster deployment].
+** Supports capacity and load xref::common-usage/monitoring-system.adoc[monitoring].
+** Supports extended graph catalog features, including:
+*** Graph xref::management-ops/backup-restore.adoc[backup and restore].
+*** Data import and export via xref:installation/installation-apache-arrow.adoc[Apache Arrow].
+** Supports extended model catalog features, including:
+*** Storing any number of models in the model catalog.
+*** Sharing of models between users, through xref:model-catalog/publish.adoc[publishing].
+*** Model xref:model-catalog/store.adoc#model-catalog-store-ops[persistence to disk].
+** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation], enabled by default.
+** Supports the configuration of xref:production-deployment/defaults-and-limits.adoc[defaults and limits].

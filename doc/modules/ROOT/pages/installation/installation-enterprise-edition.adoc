@@ -2,7 +2,7 @@
 = Enterprise Edition Configuration
 
 Unlocking the Enterprise Edition of the Neo4j Graph Data Science library requires a valid license key.
-To register for a license, please contact Neo4j at https://neo4j.com/contact-us/?ref=graph-analytics.
+To register for a license, please visit https://neo4j.com/contact-us/?ref=graph-data-science[neo4j.com].
 
 The license is issued in the form of a license key file, which needs to be placed in a directory accessible by the Neo4j server.
 You can configure the location of the license key file by setting the `gds.enterprise.license_file` option in the `neo4j.conf` configuration file of your Neo4j installation.
