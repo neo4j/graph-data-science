@@ -76,30 +76,29 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     }
 
     private DegreeFunction computeUnweighted() {
-        switch (config.orientation()) {
-            case NATURAL:
+        return switch (config.orientation()) {
+            case NATURAL -> {
                 progressTracker.logProgress(graph.nodeCount());
-                return graph::degree;
-            case REVERSE:
-                return computeDegreeAtomic((partition, degrees) -> new ReverseDegreeTask(
+                yield graph::degree;
+            }
+            case REVERSE -> computeDegreeAtomic((partition, degrees) -> new ReverseDegreeTask(
                         graph.concurrentCopy(),
                         partition,
                         progressTracker,
                         (sourceNodeId, targetNodeId, weight) -> {
                             degrees.getAndAdd(targetNodeId, 1);
-                            return true;
+                            yield true;
                         }
                     )
                 );
-            case UNDIRECTED:
-                return computeDegreeAtomic((partition, degrees) -> new UndirectedDegreeTask(
+            case UNDIRECTED -> computeDegreeAtomic((partition, degrees) -> new UndirectedDegreeTask(
                         graph.concurrentCopy(),
                         partition,
                         degrees,
                         progressTracker
                     )
                 );
-            default:
+            default ->
                 throw new IllegalArgumentException(formatWithLocale(
                     "Orientation %s is not supported",
                     config.orientation()
@@ -108,16 +107,14 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     }
 
     private DegreeFunction computeWeighted() {
-        switch (config.orientation()) {
-            case NATURAL:
-                return computeDegree((partition, degrees) -> new NaturalWeightedDegreeTask(
+        return switch (config.orientation()) {
+            case NATURAL -> computeDegree((partition, degrees) -> new NaturalWeightedDegreeTask(
                     graph.concurrentCopy(),
                     degrees,
                     partition,
                     progressTracker
                 ));
-            case REVERSE:
-                return computeDegreeAtomic((partition, degrees) -> new ReverseDegreeTask(
+            case REVERSE -> computeDegreeAtomic((partition, degrees) -> new ReverseDegreeTask(
                         graph.concurrentCopy(),
                         partition,
                         progressTracker,
@@ -125,19 +122,17 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
                             if (weight > 0.0D) {
                                 degrees.getAndAdd(targetNodeId, weight);
                             }
-                            return true;
+                            yield true;
                         }
                     )
                 );
-            case UNDIRECTED:
-                return computeDegreeAtomic((partition, degrees) -> new UndirectedWeightedDegreeTask(
+            case UNDIRECTED -> computeDegreeAtomic((partition, degrees) -> new UndirectedWeightedDegreeTask(
                     graph.concurrentCopy(),
                     partition,
                     degrees,
                     progressTracker
                 ));
-            default:
-                throw new IllegalArgumentException(formatWithLocale(
+            default -> throw new IllegalArgumentException(formatWithLocale(
                     "Orientation %s is not supported",
                     config.orientation()
                 ));
