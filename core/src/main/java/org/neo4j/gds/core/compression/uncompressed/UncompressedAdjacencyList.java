@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
@@ -182,6 +183,16 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     @Override
     public PropertyCursor rawPropertyCursor() {
         return new Cursor(pages);
+    }
+
+    @Override
+    public MemoryInfo memoryInfo() {
+        var memoryInfoBuilder = ImmutableMemoryInfo.builder().pages(this.pages.length);
+        var onHeapBytes = MemoryUsage.sizeOf(this);
+        if (onHeapBytes >= 0) {
+            memoryInfoBuilder.bytesOnHeap(onHeapBytes);
+        }
+        return memoryInfoBuilder.build();
     }
 
     public static final class Cursor extends MutableIntValue implements AdjacencyCursor, PropertyCursor {

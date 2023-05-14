@@ -63,7 +63,13 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                 "graphName", graphName,
                 "memoryUsage", instanceOf(String.class),
                 "sizeInBytes", allOf(instanceOf(Long.class), greaterThan(0L)),
-                "detailSizeInBytes", allOf(instanceOf(Map.class), hasKey("relationships"), hasKey("total"), hasKey("nodes")),
+                "detailSizeInBytes", allOf(
+                    instanceOf(Map.class),
+                    hasKey("relationships"),
+                    hasKey("total"),
+                    hasKey("nodes"),
+                    hasKey("adjacencyLists")
+                ),
                 "nodeCount", 100L,
                 "relationshipCount", 200L
             )

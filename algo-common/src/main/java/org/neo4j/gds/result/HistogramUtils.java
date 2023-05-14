@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.result;
 
+import org.HdrHistogram.AbstractHistogram;
 import org.HdrHistogram.DoubleHistogram;
-import org.HdrHistogram.Histogram;
 import org.neo4j.gds.compat.MapUtil;
 
 import java.util.Map;
@@ -48,7 +48,7 @@ public final class HistogramUtils {
         );
     }
 
-    static Map<String, Object> communitySummary(Histogram histogram) {
+    public static Map<String, Object> communitySummary(AbstractHistogram histogram) {
         return MapUtil.map(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),

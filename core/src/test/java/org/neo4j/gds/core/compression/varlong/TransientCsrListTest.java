@@ -27,12 +27,11 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -265,6 +264,18 @@ class TransientCsrListTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
+    void memoryInfo(TestMethodRunner runner) {
+        runner.run(() -> {
+            var adjacencyList = adjacencyList(3 * CHUNK_SIZE);
+
+            var memoryInfo = adjacencyList.memoryInfo();
+            assertThat(memoryInfo.bytesTotal()).isPresent();
+            assertThat(memoryInfo.bytesTotal().getAsLong()).isGreaterThan(0);
+        });
+    }
+
     static Stream<Arguments> testRunnersAndDegrees() {
         return TestSupport.crossArguments(
             () -> TestMethodRunner.adjacencyCompressions().map(Arguments::of),
@@ -356,29 +367,42 @@ class TransientCsrListTest {
     }
 
     static AdjacencyCursor adjacencyCursorFromTargets(long[] targets) {
+        IdMap idMap = idMap(targets);
+        long mappedNodeId = idMap.toMappedNodeId(targets[0]);
+        return adjacencyListFromTargets(idMap, targets).adjacencyCursor(mappedNodeId);
+    }
+
+    static AdjacencyList adjacencyList(int length) {
+        long[] targets = IntStream.range(0, length).mapToLong(i -> i).toArray();
+        return adjacencyListFromTargets(idMap(targets), targets);
+    }
+
+    static AdjacencyList adjacencyListFromTargets(long[] targets) {
+        return adjacencyListFromTargets(idMap(targets), targets);
+    }
+
+    static AdjacencyList adjacencyListFromTargets(IdMap idMap, long[] targets) {
         long sourceNodeId = targets[0];
-        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(targets[targets.length - 1])
-            .build();
 
-        for (long target : targets) {
-            nodesBuilder.addNode(target);
-        }
-        IdMap idMap = nodesBuilder.build().idMap();
-
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .relationshipType(RelationshipType.of("REL"))
             .concurrency(1)
             .executorService(Pools.DEFAULT)
             .build();
 
-        for (long target : targets) {
-            relationshipsBuilder.add(sourceNodeId, target);
-        }
-        var relationships = relationshipsBuilder.build();
-        var mappedNodeId = idMap.toMappedNodeId(sourceNodeId);
-        var adjacencyList = relationships.topology().adjacencyList();
-        return adjacencyList.adjacencyCursor(mappedNodeId);
+        Arrays.stream(targets).forEach(target -> relationshipsBuilder.add(sourceNodeId, target));
+
+        return relationshipsBuilder.build().topology().adjacencyList();
+    }
+
+    private static IdMap idMap(long[] targets) {
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(targets[targets.length - 1])
+            .build();
+
+        Arrays.stream(targets).forEach(nodesBuilder::addNode);
+
+        return nodesBuilder.build().idMap();
     }
 }

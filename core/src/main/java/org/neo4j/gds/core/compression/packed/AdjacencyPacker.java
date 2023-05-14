@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.HdrHistogram.Histogram;
+import org.HdrHistogram.ValueRecorder;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.core.Aggregation;
@@ -48,10 +50,12 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree
+        MutableInt degree,
+        Histogram headerAllocations,
+        Histogram valueAllocations
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompress(allocator, slice, values, length, aggregation, degree);
+        return deltaCompress(allocator, slice, values, length, aggregation, degree, headerAllocations, valueAllocations);
     }
 
     static long compressWithProperties(
@@ -62,7 +66,9 @@ public final class AdjacencyPacker {
         int length,
         Aggregation[] aggregations,
         boolean noAggregation,
-        MutableInt degree
+        MutableInt degree,
+        Histogram headerBitsHistogram,
+        Histogram valueAllocationHistogram
     ) {
         if (length > 0) {
             // sort, delta encode, reorder and aggregate properties
@@ -77,7 +83,7 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePacking(allocator, slice, values, length);
+        return preparePacking(allocator, slice, values, length, headerBitsHistogram, valueAllocationHistogram);
     }
 
     private static long deltaCompress(
@@ -86,7 +92,9 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree
+        MutableInt degree,
+        Histogram headerAllocations,
+        Histogram valueAllocations
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
@@ -94,14 +102,16 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePacking(allocator, slice, values, length);
+        return preparePacking(allocator, slice, values, length, headerAllocations, valueAllocations);
     }
 
     private static long preparePacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length
+        int length,
+        Histogram headerBitsHistogram,
+        Histogram valueAllocationHistogram
     ) {
         int blocks = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
         var header = new byte[blocks];
@@ -122,7 +132,7 @@ public final class AdjacencyPacker {
             header[blockIdx] = (byte) bits;
         }
 
-        return runPacking(allocator, slice, values, header, bytes);
+        return runPacking(allocator, slice, values, header, bytes, headerBitsHistogram, valueAllocationHistogram);
     }
 
     private static long runPacking(
@@ -130,7 +140,9 @@ public final class AdjacencyPacker {
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
         byte[] header,
-        long requiredBytes
+        long requiredBytes,
+        ValueRecorder headerBitsHistogram,
+        ValueRecorder valueAllocationHistogram
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
@@ -145,6 +157,10 @@ public final class AdjacencyPacker {
 
         long adjacencyOffset = allocator.allocate(allocationSize, slice);
 
+        if (valueAllocationHistogram != null) {
+            valueAllocationHistogram.recordValue(requiredBytes);
+        }
+
         Address address = slice.slice();
         long ptr = address.address() + slice.offset();
 
@@ -155,6 +171,9 @@ public final class AdjacencyPacker {
         // main packing loop
         int in = 0;
         for (byte bits : header) {
+            if (headerBitsHistogram != null) {
+                headerBitsHistogram.recordValue(bits);
+            }
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }

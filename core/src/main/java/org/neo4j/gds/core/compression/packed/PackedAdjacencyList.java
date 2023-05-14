@@ -19,14 +19,18 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.HdrHistogram.ConcurrentHistogram;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.ref.Cleaner;
+import java.util.Arrays;
 
 public class PackedAdjacencyList implements AdjacencyList {
 
@@ -35,13 +39,23 @@ public class PackedAdjacencyList implements AdjacencyList {
     private final long[] pages;
     private final HugeIntArray degrees;
     private final HugeLongArray offsets;
+    private final int[] allocationSizes;
+    private final ConcurrentHistogram allocationHistogram;
 
     private final Cleaner.Cleanable cleanable;
 
-    PackedAdjacencyList(long[] pages, int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
+    PackedAdjacencyList(
+        long[] pages,
+        int[] allocationSizes,
+        HugeIntArray degrees,
+        HugeLongArray offsets,
+        ConcurrentHistogram allocationHistogram
+    ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.allocationSizes = allocationSizes;
+        this.allocationHistogram = allocationHistogram;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
     }
 
@@ -81,6 +95,24 @@ public class PackedAdjacencyList implements AdjacencyList {
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
         return new DecompressingCursor(this.pages);
+    }
+
+    @Override
+    public MemoryInfo memoryInfo() {
+        long bytesOffHeap = Arrays.stream(this.allocationSizes).asLongStream().sum();
+
+        var memoryInfoBuilder = ImmutableMemoryInfo
+            .builder()
+            .pages(this.pages.length)
+            .allocationHistogram(this.allocationHistogram)
+            .bytesOffHeap(bytesOffHeap);
+
+        var bytesOnHeap = MemoryUsage.sizeOf(this);
+        if (bytesOnHeap >= 0) {
+            memoryInfoBuilder.bytesOnHeap(bytesOnHeap);
+        }
+
+        return memoryInfoBuilder.build();
     }
 
     /**

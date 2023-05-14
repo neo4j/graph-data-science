@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.core.compression.common;
 
+import org.HdrHistogram.AbstractHistogram;
+import org.HdrHistogram.ConcurrentHistogram;
+import org.HdrHistogram.Histogram;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
@@ -26,10 +29,12 @@ import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.ImmutableAdjacencyListsWithProperties;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 
@@ -41,6 +46,9 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
     private final LongAdder relationshipCounter;
+
+    private final Histogram headerAllocations;
+    private final Histogram valueAllocations;
 
     private HugeIntArray adjacencyDegrees;
     private HugeLongArray adjacencyOffsets;
@@ -59,6 +67,8 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
         this.relationshipCounter = new LongAdder();
+        this.headerAllocations = new ConcurrentHistogram(0);
+        this.valueAllocations = new ConcurrentHistogram(0);
     }
 
     @Override
@@ -80,6 +90,9 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
             .builder()
             .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
 
+        var headerHistogram = communitySummary(this.headerAllocations);
+        var valueHistogram = communitySummary(this.valueAllocations);
+
         var propertyBuilders = this.propertyBuilders;
         var propertyOffsets = this.propertyOffsets;
         for (var propertyBuilder : propertyBuilders) {
@@ -90,6 +103,20 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         return builder.relationshipCount(relationshipCounter.longValue()).build();
     }
 
+    public static Map<String, Object> communitySummary(AbstractHistogram histogram) {
+        return MapUtil.map(
+            "min", histogram.getMinValue(),
+            "mean", histogram.getMean(),
+            "max", histogram.getMaxValue(),
+            "p50", histogram.getValueAtPercentile(50),
+            "p75", histogram.getValueAtPercentile(75),
+            "p90", histogram.getValueAtPercentile(90),
+            "p95", histogram.getValueAtPercentile(95),
+            "p99", histogram.getValueAtPercentile(99),
+            "p999", histogram.getValueAtPercentile(99.9)
+        );
+    }
+
     protected abstract AdjacencyCompressor createCompressorFromInternalState(
         AdjacencyListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder,
         AdjacencyListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders,
@@ -97,7 +124,9 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         Aggregation[] aggregations,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
-        HugeLongArray propertyOffsets
+        HugeLongArray propertyOffsets,
+        Histogram headerAllocations,
+        Histogram valueAllocations
     );
 
     @Override
@@ -109,7 +138,9 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
             this.aggregations,
             this.adjacencyDegrees,
             this.adjacencyOffsets,
-            this.propertyOffsets
+            this.propertyOffsets,
+            this.headerAllocations,
+            this.valueAllocations
         );
     }
 }

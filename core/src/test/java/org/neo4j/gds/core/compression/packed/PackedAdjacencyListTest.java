@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.HdrHistogram.ConcurrentHistogram;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.compress.ModifiableSlice;
@@ -30,12 +31,35 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class PackedAdjacencyListTest {
 
     @Test
     void preventUseAfterFree() {
-        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+        var list = adjacencyList(LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray());
+
+        assertThatCode(list::free).doesNotThrowAnyException();
+        assertThatThrownBy(() -> list.adjacencyCursor(0, 42.1337))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("This page has already been freed.");
+    }
+
+    @Test
+    void memoryInfo() {
+        var list = adjacencyList(LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray());
+
+        var memoryInfo = list.memoryInfo();
+
+        assertThat(memoryInfo.bytesTotal()).isPresent();
+        assertThat(memoryInfo.bytesOffHeap()).isPresent();
+        assertThat(memoryInfo.bytesOnHeap()).isPresent();
+        assertThat(memoryInfo.bytesTotal().getAsLong()).isGreaterThan(0L);
+        assertThat(memoryInfo.bytesOnHeap().getAsLong()).isGreaterThan(0L);
+        assertThat(memoryInfo.bytesOffHeap().getAsLong()).isGreaterThan(0L);
+    }
+
+    private static PackedAdjacencyList adjacencyList(long[] data) {
         var allocator = new TestAllocator();
         var slice = ModifiableSlice.<Address>create();
         var degree = new MutableInt(0);
@@ -45,19 +69,18 @@ class PackedAdjacencyListTest {
             data,
             data.length,
             Aggregation.NONE,
-            degree
+            degree,
+            null,
+            null
         );
 
         long ptr = slice.slice().address();
         var pages = new long[]{ptr};
-        var allocationSizes = new int[]{Math.toIntExact(slice.slice().bytes())};
+        var bytesOffHeap = Math.toIntExact(slice.slice().bytes());
+        var allocationSizes = new int[]{bytesOffHeap};
         var degrees = HugeIntArray.of(degree.intValue());
         var offsets = HugeLongArray.of(offset);
-        var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
 
-        assertThatCode(list::free).doesNotThrowAnyException();
-        assertThatThrownBy(() -> list.adjacencyCursor(0, 42.1337))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("This page has already been freed.");
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, new ConcurrentHistogram(0));
     }
 }

@@ -19,7 +19,13 @@
  */
 package org.neo4j.gds.api;
 
+import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.ValueClass;
+
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.stream.Stream;
 
 /**
  * The adjacency list for a mono-partite graph with an optional single relationship property.
@@ -97,6 +103,11 @@ public interface AdjacencyList {
      */
     AdjacencyCursor rawAdjacencyCursor();
 
+    /**
+     * Returns information about on heap and off heap memory usage of this adjacency list.
+     */
+    MemoryInfo memoryInfo();
+
     AdjacencyList EMPTY = new AdjacencyList() {
         @Override
         public int degree(long node) {
@@ -113,5 +124,49 @@ public interface AdjacencyList {
             return AdjacencyCursor.empty();
         }
 
+        @Override
+        public MemoryInfo memoryInfo() {
+            return MemoryInfo.EMPTY;
+        }
+
     };
+
+    @ValueClass
+    interface MemoryInfo {
+
+        MemoryInfo EMPTY = ImmutableMemoryInfo.builder().pages(0).build();
+
+        /**
+         * Returns the total number of bytes occupied by this adjacency list,
+         * including both, on heap and off heap.
+         */
+        default OptionalLong bytesTotal() {
+            return Stream
+                .of(bytesOnHeap(), bytesOffHeap())
+                .filter(OptionalLong::isPresent)
+                .mapToLong(OptionalLong::getAsLong)
+                .reduce(Long::sum);
+        }
+
+        /**
+         * The number of pages this adjacency list occupies.
+         */
+        long pages();
+
+        /**
+         * Number of bytes this adjacency list occupies on heap.
+         *
+         * @return Number of bytes or empty if not accessible.
+         */
+        OptionalLong bytesOnHeap();
+
+        /**
+         * Number of bytes this adjacency list occupies off heap.
+         *
+         * @return Number of bytes or empty if not accessible.
+         */
+        OptionalLong bytesOffHeap();
+
+        Optional<Histogram> allocationHistogram();
+    }
 }

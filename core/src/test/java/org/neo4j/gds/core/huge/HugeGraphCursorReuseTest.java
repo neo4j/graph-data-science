@@ -100,6 +100,11 @@ class HugeGraphCursorReuseTest {
             return new TestAdjacencyCursor();
         }
 
+        @Override
+        public MemoryInfo memoryInfo() {
+            return MemoryInfo.EMPTY;
+        }
+
     }
 
     private static class TestAdjacencyCursor implements AdjacencyCursor {
