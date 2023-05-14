@@ -93,9 +93,6 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
         var headerHistogram = communitySummary(this.headerAllocations);
         var valueHistogram = communitySummary(this.valueAllocations);
 
-        System.out.println("Header bits: " + headerHistogram);
-        System.out.println("Value allocations: " + valueHistogram);
-
         var propertyBuilders = this.propertyBuilders;
         var propertyOffsets = this.propertyOffsets;
         for (var propertyBuilder : propertyBuilders) {
