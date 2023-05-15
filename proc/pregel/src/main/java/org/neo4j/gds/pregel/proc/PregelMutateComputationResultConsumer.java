@@ -20,47 +20,58 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodePropertyListFunction;
-import org.neo4j.gds.ResultBuilderFunction;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
 public abstract class PregelMutateComputationResultConsumer<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig
-  > extends
-    MutateComputationResultConsumer<ALGO, PregelResult, CONFIG, PregelMutateResult> {
-
-    private final MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<ALGO, PregelResult, CONFIG> nodePropertyListFunction;
-
-    public PregelMutateComputationResultConsumer() {
-        super((computationResult, executionContext) -> {
-            var ranIterations = computationResult.result().map(PregelResult::ranIterations).orElse(0);
-            var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
-            return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
-        });
-        this.nodePropertyListFunction = (computationResult) -> PregelBaseProc.nodeProperties(
-            computationResult,
-            computationResult.config().mutateProperty()
-        );
-    }
+  > implements ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelMutateResult>> {
 
     @Override
-    protected void updateGraphStore(
+    public Stream<PregelMutateResult> consume(ComputationResult<ALGO, PregelResult, CONFIG> computationResult, ExecutionContext executionContext) {
+        return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
+            CONFIG config = computationResult.config();
+
+            var ranIterations = computationResult.result().map(PregelResult::ranIterations).orElse(0);
+            var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
+            AbstractResultBuilder<PregelMutateResult> builder = new PregelMutateResult.Builder()
+                .withRanIterations(ranIterations)
+                .didConverge(didConverge)
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
+                .withComputeMillis(computationResult.computeMillis())
+                .withNodeCount(computationResult.graph().nodeCount())
+                .withConfig(config);
+
+            try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
+                if (!computationResult.isGraphEmpty()) {
+                    updateGraphStore(builder, computationResult, executionContext);
+                }
+            }
+
+            return Stream.of(builder.build());
+        });
+    }
+
+    private void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
         ExecutionContext executionContext
@@ -68,7 +79,10 @@ public abstract class PregelMutateComputationResultConsumer<
         var graph = computationResult.graph();
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
-        final var nodeProperties = this.nodePropertyListFunction.apply(computationResult);
+        final var nodeProperties = PregelBaseProc.nodeProperties(
+            computationResult,
+            computationResult.config().mutateProperty()
+        );
 
         var maybeTranslatedProperties = graph
             .asNodeFilteredGraph()
