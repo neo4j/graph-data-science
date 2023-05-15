@@ -56,9 +56,9 @@ final class ModularityManager {
 
     double calculateModularity() {
         var insideRelationships = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
-        var tasks = PartitionUtils.rangePartition(
+        var tasks = PartitionUtils.degreePartition(
+            graph,
             concurrency,
-            graph.nodeCount(),
             partition -> new InsideRelationshipCalculator(
                 partition,
                 graph,

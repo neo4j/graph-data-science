@@ -58,9 +58,9 @@ public final class ModularityComputer {
         ProgressTracker progressTracker
     ) {
         var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
-        var tasks = PartitionUtils.rangePartition(
+        var tasks = PartitionUtils.degreePartition(
+            workingGraph,
             concurrency,
-            workingGraph.nodeCount(),
             partition -> new OutsideRelationshipCalculator(
                 partition,
                 workingGraph,
