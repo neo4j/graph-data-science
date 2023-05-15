@@ -38,6 +38,7 @@ public abstract class RelationshipExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
     protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
+    protected String databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract RelationshipExporter build();
 
@@ -75,7 +76,8 @@ public abstract class RelationshipExporterBuilder {
         return this;
     }
 
-    public RelationshipExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+    public RelationshipExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
+        this.databaseName = databaseName;
         this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
