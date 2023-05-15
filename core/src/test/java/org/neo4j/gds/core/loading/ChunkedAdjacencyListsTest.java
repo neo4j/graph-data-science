@@ -80,6 +80,37 @@ class ChunkedAdjacencyListsTest {
     }
 
     @Test
+    void shouldWriteLargeAdjacencyListsWithOverflow() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
+
+        var smallList = new long[]{42L, 1337L, 5L};
+        var largeList = new long[11240];
+        for (int i = 0; i < largeList.length; i++) {
+            largeList[i] = i;
+        }
+
+        adjacencyLists.add(0, Arrays.copyOf(smallList, smallList.length), 0, 3, 3);
+        adjacencyLists.add(0, Arrays.copyOf(largeList, largeList.length), 0, largeList.length, largeList.length);
+
+        var expectedTargets = new long[smallList.length + largeList.length];
+        System.arraycopy(smallList, 0, expectedTargets, 0, smallList.length);
+        System.arraycopy(largeList, 0, expectedTargets, smallList.length, largeList.length);
+
+        var actualTargets = new long[smallList.length + largeList.length];
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
+            var fullTargets = concat(targets);
+            AdjacencyCompression.zigZagUncompressFrom(
+                actualTargets,
+                fullTargets,
+                length,
+                position,
+                INSTANCE
+            );
+        });
+        assertThat(actualTargets).containsExactly(expectedTargets);
+    }
+
+    @Test
     void shouldWriteWithProperties() {
         var adjacencyLists = ChunkedAdjacencyLists.of(2, 0);
 
