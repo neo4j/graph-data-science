@@ -104,27 +104,16 @@ public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfi
      */
     @Configuration.Ignore
     default Collection<NodeLabel> validNodeLabels(GraphStore graphStore) {
-        Collection<NodeLabel> filteredNodeLabels;
-
-        List<String> allProperties = nodeProperties()
+        List<String> nodePropertiesRequestedByUser = nodeProperties()
             .stream()
-            .map(v -> v.nodeProperty())
+            .map(UserInputWriteProperties.PropertySpec::nodeProperty)
             .collect(Collectors.toList());
-        
-        if (nodeLabels().contains(ElementProjection.PROJECT_ALL)) {
-            // Filter node labels that have all the properties.
-            // Validation guarantees that there is at least one.
-            filteredNodeLabels = nodeLabelIdentifiers(graphStore)
-                .stream()
-                .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(allProperties))
-                .collect(Collectors.toList());
-        } else {
-            // Write for all the labels that are specified.
-            // Validation guarantees that each label has all properties.
-            filteredNodeLabels = nodeLabelIdentifiers(graphStore);
-        }
 
-        return filteredNodeLabels;
+        return nodeLabelIdentifiers(graphStore)
+            .stream()
+            .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(nodePropertiesRequestedByUser))
+            .collect(Collectors.toList());
+
     }
 
     static GraphWriteNodePropertiesConfig of(

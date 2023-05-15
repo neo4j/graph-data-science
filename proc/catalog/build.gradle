@@ -57,4 +57,6 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+    testImplementation group: 'org.mockito', name:'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+
 }
