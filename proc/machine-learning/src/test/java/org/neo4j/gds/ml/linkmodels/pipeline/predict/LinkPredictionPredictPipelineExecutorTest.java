@@ -539,7 +539,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsBaseLabels());
             assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphStoreFilter.predictRelationshipTypes());
@@ -597,7 +598,12 @@ class LinkPredictionPredictPipelineExecutorTest {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(
+            ModelCatalog modelCatalog,
+            String username,
+            List<String> nodeLabels,
+            List<String> relTypes
+        ) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -611,7 +617,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),

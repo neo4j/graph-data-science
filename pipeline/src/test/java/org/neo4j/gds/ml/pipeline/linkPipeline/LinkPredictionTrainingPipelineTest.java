@@ -308,7 +308,8 @@ class LinkPredictionTrainingPipelineTest {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
 
         }

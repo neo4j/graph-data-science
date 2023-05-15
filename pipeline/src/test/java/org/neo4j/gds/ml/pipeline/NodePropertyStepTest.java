@@ -90,7 +90,8 @@ class NodePropertyStepTest extends BaseProcTest {
                 proc.executionContext(),
                 GRAPH_NAME,
                 List.of(NodeLabel.ALL_NODES),
-                List.of(RelationshipType.ALL_RELATIONSHIPS)
+                List.of(RelationshipType.ALL_RELATIONSHIPS),
+                4
             )
         );
 
@@ -114,7 +115,12 @@ class NodePropertyStepTest extends BaseProcTest {
 
         // verify exception is caught
         assertThat(step
-            .estimate(new OpenModelCatalog(), "myUser", List.of(ElementProjection.PROJECT_ALL), List.of(ElementProjection.PROJECT_ALL))
+            .estimate(
+                new OpenModelCatalog(),
+                "myUser",
+                List.of(ElementProjection.PROJECT_ALL),
+                List.of(ElementProjection.PROJECT_ALL)
+            )
             .estimate(GraphDimensions.of(1), 4)
             .memoryUsage().max).isZero();
     }

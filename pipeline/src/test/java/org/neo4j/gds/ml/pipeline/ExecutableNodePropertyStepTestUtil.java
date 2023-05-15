@@ -60,7 +60,12 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(
+            ModelCatalog modelCatalog,
+            String username,
+            List<String> nodeLabels,
+            List<String> relTypes
+        ) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -74,7 +79,8 @@ public class ExecutableNodePropertyStepTestUtil {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             var featureInputNodeLabels = featureInputNodeLabels(graphStore, nodeLabels);
             var graph = graphStore.getGraph(
@@ -145,7 +151,12 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(
+            ModelCatalog modelCatalog,
+            String username,
+            List<String> nodeLabels,
+            List<String> relTypes
+        ) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -159,7 +170,8 @@ public class ExecutableNodePropertyStepTestUtil {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),
@@ -201,7 +213,8 @@ public class ExecutableNodePropertyStepTestUtil {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             throw new NotImplementedException();
         }
@@ -217,7 +230,12 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(
+            ModelCatalog modelCatalog,
+            String username,
+            List<String> nodeLabels,
+            List<String> relTypes
+        ) {
             return memoryEstimation;
         }
 
@@ -249,7 +267,8 @@ public class ExecutableNodePropertyStepTestUtil {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             throw new PipelineExecutionTestExecuteNodeStepFailure();
         }
