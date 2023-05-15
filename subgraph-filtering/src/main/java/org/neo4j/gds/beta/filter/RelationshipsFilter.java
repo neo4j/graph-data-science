@@ -128,7 +128,12 @@ public final class RelationshipsFilter {
             .boxed()
             .collect(Collectors.toMap(propertyKeys::get, Function.identity()));
 
-        var relationshipFilterTasks = PartitionUtils.rangePartition(concurrency, outputNodes.nodeCount(), partition ->
+        var relationshipFilterTasks = PartitionUtils.degreePartition(
+            outputNodes.nodeCount(),
+            graphStore.relationshipCount(relType),
+            compositeIterator::degree,
+            concurrency,
+            partition ->
             new RelationshipFilterTask(
                 partition,
                 relationshipExpr,
