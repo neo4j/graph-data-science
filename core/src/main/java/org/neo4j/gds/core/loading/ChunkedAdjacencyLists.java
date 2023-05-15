@@ -183,19 +183,31 @@ public final class ChunkedAdjacencyLists {
         }
     }
 
-    private static final int[] NEXT_LEVEL = {1, 2, 3, 4, 5, 6, 7, 8, 9, 9};
-    private static final int[] LEVEL_LENGTH = {
-        0,
+    private static final int[] NEXT_CHUNK_LENGTH = {
         64,
-        192,
         256,
-        384,
         512,
         1024,
-        1536,
-        2560,
-        5120,
-        10240,
+        1024,
+        2048,
+        4096,
+        4096,
+        8192,
+        8192,
+        16384,
+        16384,
+        32768,
+        32768,
+        65536,
+        65536,
+        131072,
+        131072,
+        262144,
+        262144,
+        524288,
+        524288,
+        1048576,
+        1048576,
     };
 
     private void copyCompressedBytes(long index, int targetPos, byte[] buffer, int bufferLength) {
@@ -226,9 +238,8 @@ public final class ChunkedAdjacencyLists {
         int newChunkLengthAtLeast = bufferLength - fitsInLastChunk;
 
         // the next chunk size grows slowly depending on the number of chunks we already have
-        int level = compressedTargets.length;
-        int nextLevel = NEXT_LEVEL[level];
-        int nextChunkLength = LEVEL_LENGTH[nextLevel];
+        int nextChunkLevel = Math.min(compressedTargets.length, NEXT_CHUNK_LENGTH.length - 1);
+        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel];
 
         // avoid splitting the buffer into too many chunks
         int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
