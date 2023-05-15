@@ -61,7 +61,7 @@ public class NodeClassificationPipelineWriteSpec implements AlgorithmSpec<NodeCl
                 return PredictedProbabilities.asProperties(
                     computationResult.result(),
                     computationResult.config().writeProperty(),
-                    computationResult.config()
+                    computationResult.config().predictedProbabilityProperty()
                 );
             }
         };
@@ -75,6 +75,6 @@ public class NodeClassificationPipelineWriteSpec implements AlgorithmSpec<NodeCl
 
     @Override
     public void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        ConfigPreProcessor.Enhance(userInput, executionContext);
+        NodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(userInput, executionContext);
     }
 }
