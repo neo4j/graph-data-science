@@ -348,8 +348,15 @@ class HashGNNTest {
             .estimate(graphDims, concurrency)
             .memoryUsage();
 
-        var outputRatio = (double) smallEstimation.min / bigEstimation.min;
-        assertThat(outputRatio).isCloseTo(inputRatio, Offset.offset(0.1));
+        var maxOutputRatio = (double) smallEstimation.max / bigEstimation.max;
+        assertThat(maxOutputRatio).isCloseTo(inputRatio, Offset.offset(0.1));
+
+        //Lower bound of the memory estimation is for bitSet.
+        //upper bound is when all the features are double[].
+        //It is a range because the non-context features need to be converted to double[],
+        // while the context can remain as bitSet
+        var minOutputRatio = (double) smallEstimation.min / bigEstimation.min;
+        assertThat(minOutputRatio).isCloseTo(0.42, Offset.offset(0.01));
     }
 
     @ParameterizedTest
