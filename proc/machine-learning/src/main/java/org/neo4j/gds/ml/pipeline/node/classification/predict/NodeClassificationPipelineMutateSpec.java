@@ -66,10 +66,10 @@ public class NodeClassificationPipelineMutateSpec implements AlgorithmSpec<NodeC
                     resultBuilder,
                     computationResult,
                     executionContext,
-                    result -> PredictedProbabilities.asProperties(
-                        result.result(),
-                        result.config().mutateProperty(),
-                        result.config().predictedProbabilityProperty()
+                    PredictedProbabilities.asProperties(
+                        computationResult.result(),
+                        computationResult.config().mutateProperty(),
+                        computationResult.config().predictedProbabilityProperty()
                     )
                 );
             }

@@ -23,12 +23,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -41,16 +43,14 @@ public final class GraphStoreUpdater {
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext,
-        NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction
+        final List<NodeProperty> nodePropertyList
     ) {
         var graph = computationResult.graph();
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
-        final var nodeProperties = nodePropertyListFunction.apply(computationResult);
-
         var maybeTranslatedProperties = graph
             .asNodeFilteredGraph()
-            .map(filteredGraph -> nodeProperties
+            .map(filteredGraph -> nodePropertyList
                 .stream()
                 .map(nodeProperty -> ImmutableNodeProperty.of(
                     nodeProperty.propertyKey(),
@@ -60,7 +60,7 @@ public final class GraphStoreUpdater {
                     )
                 ))
                 .collect(Collectors.toList()))
-            .orElse(nodeProperties);
+            .orElse(nodePropertyList);
 
         executionContext.log().debug("Updating in-memory graph store");
         GraphStore graphStore = computationResult.graphStore();

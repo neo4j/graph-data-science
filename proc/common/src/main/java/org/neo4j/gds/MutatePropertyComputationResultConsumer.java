@@ -42,6 +42,7 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
-        GraphStoreUpdater.UpdateGraphStore(resultBuilder, computationResult, executionContext, nodePropertyListFunction);
+        var nodePropertyList = nodePropertyListFunction.apply(computationResult);
+        GraphStoreUpdater.UpdateGraphStore(resultBuilder, computationResult, executionContext, nodePropertyList);
     }
 }
