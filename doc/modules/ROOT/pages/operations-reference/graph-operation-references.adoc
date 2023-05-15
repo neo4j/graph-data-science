@@ -77,7 +77,7 @@
 |Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop`
 |Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream`
 |xref:management-ops/projections/rwr.adoc[Sample a subgraph using random walk with restarts] | `gds.alpha.graph.sample.rwr`
-|xref:management-ops/projections/cnarw.adoc[Sample a subgraph using common neighbor aware random walks] | `gds.alpha.graph.sample.cnarw`
+|xref:management-ops/projections/cnarw.adoc[Sample a subgraph using common neighbor aware random walks] | `gds.graph.sample.cnarw`
 |xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[Add node labels to the in-memory graph]   | `gds.alpha.graph.nodeLabel.mutate`
 |xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-label-example[Write node labels to the database]         | `gds.alpha.graph.nodeLabel.write`
 |===
