@@ -43,7 +43,7 @@ public final class AdjacencyCompression {
      */
     public static void zigZagUncompressFrom(
         LongArrayBuffer into,
-        byte[] targets,
+        byte[][] targets,
         int compressedValues,
         int limit,
         AdjacencyCompressor.ValueMapper mapper
@@ -55,7 +55,7 @@ public final class AdjacencyCompression {
 
     public static void zigZagUncompressFrom(
         long[] into,
-        byte[] targets,
+        byte[][] targets,
         int compressedValues,
         int limit,
         AdjacencyCompressor.ValueMapper mapper

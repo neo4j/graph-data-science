@@ -158,7 +158,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     @Override
     public int compress(
         long nodeId,
-        byte[] targets,
+        byte[][] targets,
         long[][] properties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
@@ -202,7 +202,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private int applyVariableDeltaEncodingWithoutProperties(
         long nodeId,
-        byte[] semiCompressedBytesDuringLoading,
+        byte[][] semiCompressedBytesDuringLoading,
         int numberOfCompressedTargets,
         int compressedByteSize,
         ValueMapper mapper
@@ -237,7 +237,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private int applyVariableDeltaEncodingWithProperties(
         long nodeId,
-        byte[] semiCompressedBytesDuringLoading,
+        byte[][] semiCompressedBytesDuringLoading,
         long[][] uncompressedPropertiesPerProperty,
         int numberOfCompressedTargets,
         int compressedByteSize,

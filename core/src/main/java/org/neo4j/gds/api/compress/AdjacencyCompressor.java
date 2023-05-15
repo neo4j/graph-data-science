@@ -58,7 +58,7 @@ public interface AdjacencyCompressor extends AutoCloseable {
      */
     int compress(
         long nodeId,
-        byte[] targets,
+        byte[][] targets,
         long[][] properties,
         int numberOfCompressedTargets,
         int compressedBytesSize,

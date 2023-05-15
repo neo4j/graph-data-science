@@ -32,19 +32,46 @@ public final class ZigZagLongDecoding {
         }
     }
 
-    public static int zigZagUncompress(byte[] array, int limit, long[] out) {
-        return zigZagUncompress(array, 0, limit, out, Identity.INSTANCE);
-    }
-
-    public static int zigZagUncompress(byte[] array, int limit, long[] out, AdjacencyCompressor.ValueMapper mapper) {
-        return zigZagUncompress(array, 0, limit, out, mapper);
-    }
-
-    static int zigZagUncompress(byte[] array, int offset, int length, long[] out, AdjacencyCompressor.ValueMapper mapper) {
+    public static int zigZagUncompress(byte[] chunk, int numberOfBytes, long[] out) {
         long input, startValue = 0L, value = 0L;
-        int into = 0, shift = 0, limit = offset + length;
-        while (offset < limit) {
-            input = array[offset++];
+        int into = 0, shift = 0, offset = 0;
+
+        while (offset < numberOfBytes) {
+            input = chunk[offset++];
+            value += (input & 127L) << shift;
+            if ((input & 128L) == 128L) {
+                startValue += ((value >>> 1L) ^ -(value & 1L));
+                out[into++] = startValue;
+                value = 0L;
+                shift = 0;
+            } else {
+                shift += 7;
+            }
+        }
+        return into;
+    }
+
+    public static int zigZagUncompress(byte[][] chunks, int numberOfBytes, long[] out) {
+        return zigZagUncompress(chunks, numberOfBytes, out, Identity.INSTANCE);
+    }
+
+    public static int zigZagUncompress(
+        byte[][] chunks,
+        int numberOfBytes,
+        long[] out,
+        AdjacencyCompressor.ValueMapper mapper
+    ) {
+        int currentChunk = 0;
+        byte[] chunk = chunks[currentChunk];
+        long input, startValue = 0L, value = 0L;
+        int into = 0, shift = 0, offset = 0;
+
+        while (numberOfBytes-- > 0) {
+            if (offset == chunk.length) {
+                chunk = chunks[++currentChunk];
+                offset = 0;
+            }
+            input = chunk[offset++];
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += ((value >>> 1L) ^ -(value & 1L));

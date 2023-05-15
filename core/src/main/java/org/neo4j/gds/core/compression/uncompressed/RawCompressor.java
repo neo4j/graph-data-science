@@ -157,7 +157,7 @@ public final class RawCompressor implements AdjacencyCompressor {
     @Override
     public int compress(
         long nodeId,
-        byte[] targets,
+        byte[][] targets,
         long[][] properties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
@@ -201,7 +201,7 @@ public final class RawCompressor implements AdjacencyCompressor {
 
     private int withoutProperties(
         long nodeId,
-        byte[] targets,
+        byte[][] targets,
         int numberOfCompressedTargets,
         int compressedBytesSize,
         ValueMapper mapper
@@ -313,7 +313,7 @@ public final class RawCompressor implements AdjacencyCompressor {
 
     private int withProperties(
         long nodeId,
-        byte[] targets,
+        byte[][] targets,
         long[][] uncompressedProperties,
         int numberOfCompressedTargets,
         int compressedBytesSize,

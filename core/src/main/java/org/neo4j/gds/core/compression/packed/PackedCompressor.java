@@ -164,7 +164,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     @Override
     public int compress(
         long nodeId,
-        byte[] targets,
+        byte[][] targets,
         long[][] properties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
@@ -192,7 +192,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
     private int packWithProperties(
         long nodeId,
-        byte[] semiCompressedBytesDuringLoading,
+        byte[][] semiCompressedBytesDuringLoading,
         long[][] uncompressedPropertiesPerProperty,
         int numberOfCompressedTargets,
         int compressedByteSize,
@@ -245,7 +245,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
     private int packWithoutProperties(
         long nodeId,
-        byte[] semiCompressedBytesDuringLoading,
+        byte[][] semiCompressedBytesDuringLoading,
         int numberOfCompressedTargets,
         int compressedByteSize,
         ValueMapper mapper

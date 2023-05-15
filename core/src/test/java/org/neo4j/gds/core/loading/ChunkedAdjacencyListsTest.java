@@ -44,16 +44,13 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
-            var fullTargets = concat(targets);
-            AdjacencyCompression.zigZagUncompressFrom(
-                actualTargets,
-                fullTargets,
-                length,
-                position,
-                INSTANCE
-            );
-        });
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -66,16 +63,13 @@ class ChunkedAdjacencyListsTest {
 
         var expectedTargets = new long[]{42L, 1337L, 5L, 1337L, 5L};
         var actualTargets = new long[5];
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
-            var fullTargets = concat(targets);
-            AdjacencyCompression.zigZagUncompressFrom(
-                actualTargets,
-                fullTargets,
-                length,
-                position,
-                INSTANCE
-            );
-        });
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -97,16 +91,13 @@ class ChunkedAdjacencyListsTest {
         System.arraycopy(largeList, 0, expectedTargets, smallList.length, largeList.length);
 
         var actualTargets = new long[smallList.length + largeList.length];
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
-            var fullTargets = concat(targets);
-            AdjacencyCompression.zigZagUncompressFrom(
-                actualTargets,
-                fullTargets,
-                length,
-                position,
-                INSTANCE
-            );
-        });
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -138,10 +129,8 @@ class ChunkedAdjacencyListsTest {
         adjacencyLists.consume((id, targets, properties, compressedBytesSize, compressedTargets) -> {
             assertThat(properties).isNull();
 
-            var fullTargets = concat(targets);
-
             var uncompressedTargets = new long[compressedTargets];
-            ZigZagLongDecoding.zigZagUncompress(fullTargets, compressedBytesSize, uncompressedTargets);
+            ZigZagLongDecoding.zigZagUncompress(targets, compressedBytesSize, uncompressedTargets);
 
             if (id == 1) {
                 assertThat(uncompressedTargets).containsExactly(42L, 1337L, 5L);
@@ -171,17 +160,13 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
-            var fullTargets = concat(targets);
-
-            AdjacencyCompression.zigZagUncompressFrom(
-                actualTargets,
-                fullTargets,
-                length,
-                position,
-                INSTANCE
-            );
-        });
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -196,11 +181,10 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
 
         adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
-            var fullTargets = concat(targets);
             var actualTargets = new long[3];
             AdjacencyCompression.zigZagUncompressFrom(
                 actualTargets,
-                fullTargets,
+                targets,
                 length,
                 position,
                 INSTANCE
@@ -211,16 +195,5 @@ class ChunkedAdjacencyListsTest {
                 // there is an additional entry, because we double the buffers in size
                 .hasDimensions(1, 4).contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
         });
-    }
-
-    private static byte[] concat(byte[][] arrays) {
-        int fullLength = Arrays.stream(arrays).mapToInt(bs -> bs.length).sum();
-        byte[] fullArray = new byte[fullLength];
-        int pos = 0;
-        for (byte[] array : arrays) {
-            System.arraycopy(array, 0, fullArray, pos, array.length);
-            pos += array.length;
-        }
-        return fullArray;
     }
 }
