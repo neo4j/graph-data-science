@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
