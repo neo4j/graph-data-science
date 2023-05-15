@@ -39,6 +39,7 @@ public abstract class NodeLabelExporterBuilder {
     protected int writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
+    protected String databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract NodeLabelExporter build();
 
@@ -68,8 +69,9 @@ public abstract class NodeLabelExporterBuilder {
         return this;
     }
 
-    public NodeLabelExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+    public NodeLabelExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
+        this.databaseName = databaseName;
         return this;
     }
 
