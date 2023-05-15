@@ -77,7 +77,8 @@ public final class EqualityUtils {
         entry(ArrayTypeName.of(TypeName.INT), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
         entry(ArrayTypeName.of(TypeName.LONG), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
         entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && Arrays.equals(%1$s, %2$s)")
+        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)), "%1$s != null && Arrays.equals(%1$s, %2$s)")
     );
 
     private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.ofEntries(
@@ -92,7 +93,8 @@ public final class EqualityUtils {
         entry(ArrayTypeName.of(TypeName.INT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
         entry(ArrayTypeName.of(TypeName.LONG), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
         entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)")
+        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)), "%1$s != null && !Arrays.equals(%1$s, %2$s)")
     );
 
     private EqualityUtils() {}

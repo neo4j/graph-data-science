@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.core.compression.common.ZigZagLongDecoding.Identity.INSTANCE;
@@ -42,13 +44,16 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
-            actualTargets,
-            targets,
-            length,
-            position,
-            INSTANCE
-        ));
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
+            var fullTargets = concat(targets);
+            AdjacencyCompression.zigZagUncompressFrom(
+                actualTargets,
+                fullTargets,
+                length,
+                position,
+                INSTANCE
+            );
+        });
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -61,13 +66,16 @@ class ChunkedAdjacencyListsTest {
 
         var expectedTargets = new long[]{42L, 1337L, 5L, 1337L, 5L};
         var actualTargets = new long[5];
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
-            actualTargets,
-            targets,
-            length,
-            position,
-            INSTANCE
-        ));
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
+            var fullTargets = concat(targets);
+            AdjacencyCompression.zigZagUncompressFrom(
+                actualTargets,
+                fullTargets,
+                length,
+                position,
+                INSTANCE
+            );
+        });
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -99,8 +107,10 @@ class ChunkedAdjacencyListsTest {
         adjacencyLists.consume((id, targets, properties, compressedBytesSize, compressedTargets) -> {
             assertThat(properties).isNull();
 
+            var fullTargets = concat(targets);
+
             var uncompressedTargets = new long[compressedTargets];
-            ZigZagLongDecoding.zigZagUncompress(targets, compressedBytesSize, uncompressedTargets);
+            ZigZagLongDecoding.zigZagUncompress(fullTargets, compressedBytesSize, uncompressedTargets);
 
             if (id == 1) {
                 assertThat(uncompressedTargets).containsExactly(42L, 1337L, 5L);
@@ -130,13 +140,17 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
-            actualTargets,
-            targets,
-            length,
-            position,
-            INSTANCE
-        ));
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> {
+            var fullTargets = concat(targets);
+
+            AdjacencyCompression.zigZagUncompressFrom(
+                actualTargets,
+                fullTargets,
+                length,
+                position,
+                INSTANCE
+            );
+        });
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -151,10 +165,11 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
 
         adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
+            var fullTargets = concat(targets);
             var actualTargets = new long[3];
             AdjacencyCompression.zigZagUncompressFrom(
                 actualTargets,
-                targets,
+                fullTargets,
                 length,
                 position,
                 INSTANCE
@@ -165,5 +180,16 @@ class ChunkedAdjacencyListsTest {
                 // there is an additional entry, because we double the buffers in size
                 .hasDimensions(1, 4).contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
         });
+    }
+
+    private static byte[] concat(byte[][] arrays) {
+        int fullLength = Arrays.stream(arrays).mapToInt(bs -> bs.length).sum();
+        byte[] fullArray = new byte[fullLength];
+        int pos = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, fullArray, pos, array.length);
+            pos += array.length;
+        }
+        return fullArray;
     }
 }

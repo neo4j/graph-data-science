@@ -308,9 +308,18 @@ public final class AdjacencyBuffer {
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
                     var nodeId = valueMapper.map(sourceNodeId);
+
+                    int targetsLength = Arrays.stream(targets).mapToInt(t -> t.length).sum();
+                    var fullTargets = new byte[targetsLength];
+                    int pos = 0;
+                    for (byte[] target : targets) {
+                        System.arraycopy(target, 0, fullTargets, pos, target.length);
+                        pos += target.length;
+                    }
+
                     importedRelationships.add(compressor.compress(
                         nodeId,
-                        targets,
+                        fullTargets,
                         properties,
                         numberOfCompressedTargets,
                         compressedByteSize,

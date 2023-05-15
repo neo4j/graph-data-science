@@ -162,20 +162,17 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
     ) {
         CodeBlock newPagesBlock;
 
-        if (valueType.isPrimitive()) {
-            newPagesBlock = CodeBlock.of(
-                "this.$N = new $T[numPages][]",
-                pages,
-                valueType
-            );
-        } else {
-            var componentType = ((ArrayTypeName) valueType).componentType;
-            newPagesBlock = CodeBlock.of(
-                "this.$N = new $T[numPages][][]",
-                pages,
-                componentType
-            );
+        var assignmentCode = new StringBuilder("this.$N = new $T[numPages][]");
+        var componentType = valueType;
+        while (!componentType.isPrimitive()) {
+            assignmentCode.append("[]");
+            componentType = ((ArrayTypeName) componentType).componentType;
         }
+        newPagesBlock = CodeBlock.of(
+            assignmentCode.toString(),
+            pages,
+            componentType
+        );
 
         return MethodSpec.constructorBuilder()
             .addParameter(valueType, defaultValue.name)
@@ -355,22 +352,18 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
         // 💪
         var bodyBuilder = CodeBlock.builder();
 
-        if (valueType.isPrimitive()) {
-            bodyBuilder.addStatement(CodeBlock.of(
-                "$T page = new $T[$N]",
-                ArrayTypeName.of(valueType),
-                valueType,
-                pageSize
-            ));
-        } else {
-            var componentType = ((ArrayTypeName) valueType).componentType;
-            bodyBuilder.addStatement(CodeBlock.of(
-                "$T page = new $T[$N][]",
-                ArrayTypeName.of(valueType),
-                componentType,
-                pageSize
-            ));
+        var assignmentCode = new StringBuilder("$T page = new $T[$N]");
+        var componentType = valueType;
+        while (!componentType.isPrimitive()) {
+            assignmentCode.append("[]");
+            componentType = ((ArrayTypeName) componentType).componentType;
         }
+        bodyBuilder.addStatement(CodeBlock.of(
+            assignmentCode.toString(),
+            ArrayTypeName.of(valueType),
+            componentType,
+            pageSize
+        ));
 
         // The following is an optimization applicable for primitive
         // types only: If the default value is equal to the default
