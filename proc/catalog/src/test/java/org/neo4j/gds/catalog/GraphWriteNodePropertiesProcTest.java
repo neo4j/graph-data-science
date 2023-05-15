@@ -19,51 +19,25 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjection;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
-import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.degree.DegreeCentralityMutateProc;
-import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
-import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestProcedureRunner.applyOnProcedure;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
-    private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -89,39 +63,15 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            GraphWriteNodePropertiesProc.class,
-            DegreeCentralityMutateProc.class,
-            PageRankMutateProc.class
+            GraphWriteNodePropertiesProc.class
         );
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call(TEST_GRAPH_SAME_PROPERTIES)
             .graphProject()
-            .withNodeLabel("A")
-            .withNodeLabel("B")
+            .withNodeLabels("A", "B")
             .withNodeProperty("newNodeProp1", "nodeProp1")
             .withNodeProperty("newNodeProp2", "nodeProp2")
-            .withAnyRelationshipType()
-            .yields()
-        );
-
-        runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
-            .graphProject()
-            .withNodeLabel("A", NodeProjection.builder()
-                .label("A")
-                .addProperties(
-                    PropertyMapping.of("newNodeProp1", "nodeProp1", 1337),
-                    PropertyMapping.of("newNodeProp2", "nodeProp2", 1337)
-                ).build()
-            )
-            .withNodeLabel(
-                "B",
-                NodeProjection
-                    .builder()
-                    .label("B")
-                    .addProperty(PropertyMapping.of("newNodeProp1", "nodeProp1", 1337))
-                    .build()
-            )
             .withAnyRelationshipType()
             .yields()
         );
@@ -147,312 +97,5 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             .asString()
             .contains("deprecated")
             .contains("gds.graph.nodeProperties.write");
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Tested in NodePropertiesWriterTest")@ParameterizedTest
-    @ValueSource(strings = {
-        // no labels -> defaults to PROJECT_ALL
-        "CALL gds.graph.nodeProperties.write(" +
-        "   $graphName, " +
-        "   ['newNodeProp1', 'newNodeProp2']" +
-        ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-        // explicit PROJECT_ALL
-        "CALL gds.graph.nodeProperties.write(" +
-        "   $graphName, " +
-        "   ['newNodeProp1', 'newNodeProp2'], " +
-        "   ['*']" +
-        ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten"
-    })
-    void writeLoadedNodeProperties(String graphWriteQuery) {
-        // FIXME: This is actually tested/should-be-tested in the individual NodePropertyExporter implementations
-        runQueryWithRowConsumer(
-            graphWriteQuery,
-            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
-            row -> {
-            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
-            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
-            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
-            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(12L);
-        });
-
-        String validationQuery =
-            "MATCH (n) " +
-            "RETURN " +
-            "  n.newNodeProp1 AS newProp1, " +
-            "  n.newNodeProp2 AS newProp2 " +
-            "ORDER BY newProp1 ASC, newProp2 ASC";
-
-        assertCypherResult(validationQuery, asList(
-            map("newProp1", 0L, "newProp2", 42L),
-            map("newProp1", 1L, "newProp2", 43L),
-            map("newProp1", 2L, "newProp2", 44L),
-            map("newProp1", 3L, "newProp2", 45L),
-            map("newProp1", 4L, "newProp2", 46L),
-            map("newProp1", 5L, "newProp2", 47L)
-        ));
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Tested in NodePropertiesWriterTest")
-    @Test
-    void writeLoadedNodePropertiesForLabel() {
-        assertCypherResult(
-            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp1', 'newNodeProp2'], 'A')",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            List.of(Map.of(
-                "writeMillis", Matchers.greaterThan(-1L),
-                "graphName", TEST_GRAPH_SAME_PROPERTIES,
-                "nodeProperties", Arrays.asList("newNodeProp1", "newNodeProp2"),
-                "propertiesWritten", 6L
-            ))
-        );
-
-        String validationQuery =
-            "MATCH (n) " +
-            "RETURN " +
-            "  labels(n) AS labels, " +
-            "  n.newNodeProp1 AS newProp1, " +
-            "  n.newNodeProp2 AS newProp2 " +
-            "ORDER BY newProp1 ASC, newProp2 ASC";
-
-        assertCypherResult(validationQuery, asList(
-            map("labels", singletonList("A"), "newProp1", 0L, "newProp2", 42L),
-            map("labels", singletonList("A"), "newProp1", 1L, "newProp2", 43L),
-            map("labels", singletonList("A"), "newProp1", 2L, "newProp2", 44L),
-            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
-            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
-            map("labels", singletonList("B"), "newProp1", null, "newProp2", null)
-        ));
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Tested in NodePropertiesWriterTest")
-    @Test
-    void writeLoadedNodePropertiesForLabelSubset() {
-        assertCypherResult(
-            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp1', 'newNodeProp2'])",
-            Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
-            List.of(Map.of(
-                "writeMillis", Matchers.greaterThan(-1L),
-                "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
-                "nodeProperties", Arrays.asList("newNodeProp1", "newNodeProp2"),
-                "propertiesWritten", 6L
-            ))
-        );
-
-        String validationQuery =
-            "MATCH (n) " +
-            "RETURN " +
-            "  labels(n) AS labels, " +
-            "  n.newNodeProp1 AS newProp1, " +
-            "  n.newNodeProp2 AS newProp2 " +
-            "ORDER BY newProp1 ASC, newProp2 ASC";
-
-        assertCypherResult(validationQuery, asList(
-            map("labels", singletonList("A"), "newProp1", 0L, "newProp2", 42L),
-            map("labels", singletonList("A"), "newProp1", 1L, "newProp2", 43L),
-            map("labels", singletonList("A"), "newProp1", 2L, "newProp2", 44L),
-            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
-            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
-            map("labels", singletonList("B"), "newProp1", null, "newProp2", null)
-        ));
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Shouldn't test the procedure input format, it's Neo4j Procedure framework job")
-    @Test
-    void writeShouldComplainWithInvalidInput() {
-
-        assertError(
-            "CALL gds.graph.nodeProperties.write($graph, [['newNodeProp3']])",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            "Type mismatch"
-        );
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Shouldn't test the procedure input format, it's Neo4j Procedure framework job")
-    @Test
-    void writeShouldComplainWithInvalidInputForNodeLabels() {
-
-        assertError(
-            "CALL gds.graph.nodeProperties.write($graph, 'newNodeProp1', [['A']])",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            "Type mismatch for nodeLabels"
-        );
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("What is the purpose of this test? The write doesn't distinguish how a property ended in the GraphStore, it is oblivious of the mutation existence.")
-    @Test
-    void writeMutatedNodeProperties() {
-        long expectedPropertyCount = 6;
-
-        GraphStore graphStore = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES)
-            .graphStore();
-        NodePropertyValues identityProperties = new IdentityPropertyValues(expectedPropertyCount);
-        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
-
-        assertCypherResult(
-            "CALL gds.graph.nodeProperties.write($graph, 'newNodeProp3')",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            List.of(Map.of(
-                "writeMillis", Matchers.greaterThan(-1L),
-                "graphName", TEST_GRAPH_SAME_PROPERTIES,
-                "nodeProperties", List.of("newNodeProp3"),
-                "propertiesWritten", expectedPropertyCount
-            ))
-        );
-
-        String validationQuery =
-            "MATCH (n) " +
-            "RETURN n.newNodeProp3 AS newProp3 " +
-            "ORDER BY newProp3 ASC";
-
-        assertCypherResult(validationQuery, asList(
-            map("newProp3", 0L),
-            map("newProp3", 1L),
-            map("newProp3", 2L),
-            map("newProp3", 3L),
-            map("newProp3", 4L),
-            map("newProp3", 5L)
-        ));
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("This is actually tested/should-be-tested in the individual NodePropertyExporter implementations")
-    @Test
-    void shouldLogProgressForIndividualLabels() {
-        var log = Neo4jProxy.testLog();
-
-        applyOnProcedure(
-            db,
-            GraphWriteNodePropertiesProc.class,
-            log,
-            proc -> {
-                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction));
-                proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
-            }
-        );
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .contains(
-                "Graph :: NodeProperties :: Write :: Label 1 of 2 :: Start",
-                "Graph :: NodeProperties :: Write :: Label 1 of 2 33%",
-                "Graph :: NodeProperties :: Write :: Label 1 of 2 66%",
-                "Graph :: NodeProperties :: Write :: Label 1 of 2 100%",
-                "Graph :: NodeProperties :: Write :: Label 1 of 2 :: Finished",
-                "Graph :: NodeProperties :: Write :: Label 2 of 2 :: Start",
-                "Graph :: NodeProperties :: Write :: Label 2 of 2 33%",
-                "Graph :: NodeProperties :: Write :: Label 2 of 2 66%",
-                "Graph :: NodeProperties :: Write :: Label 2 of 2 100%",
-                "Graph :: NodeProperties :: Write :: Label 2 of 2 :: Finished"
-            );
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("This should be in the configuration test")
-    @Test
-    void shouldFailOnNonExistingNodeProperties() {
-        assertError(
-            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            "Expecting at least one node projection to contain property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']."
-        );
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("This should be in the configuration test")
-    @Test
-    void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
-        assertError(
-            "CALL gds.graph.nodeProperties.write(" +
-            "   $graph, " +
-            "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
-            "   ['A'] " +
-            ")",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            "Expecting all specified node projections to have all given properties defined. " +
-            "Could not find property key(s) ['newNodeProp3'] for label A. " +
-            "Defined keys: ['newNodeProp1', 'newNodeProp2']."
-        );
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Tested in NodePropertiesWriterTest")
-    @Test
-    void shouldRenameSingleProperly() {
-        long expectedPropertyCount = 6;
-
-        GraphStore graphStore = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES)
-            .graphStore();
-        NodePropertyValues identityProperties = new IdentityPropertyValues(expectedPropertyCount);
-        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
-
-        assertCypherResult(
-            "CALL gds.graph.nodeProperties.write(" +
-            "   $graph, " +
-            "   { newNodeProp3: 'foo'} " +
-            ")", Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            List.of(Map.of(
-                "writeMillis", Matchers.greaterThan(-1L),
-                "graphName", TEST_GRAPH_SAME_PROPERTIES,
-                "nodeProperties", List.of("foo"),
-                "propertiesWritten", expectedPropertyCount
-            ))
-        );
-
-        String validationQuery =
-            "MATCH (n) " +
-            "RETURN n.foo AS foo " +
-            "ORDER BY foo ASC";
-
-        assertCypherResult(validationQuery, asList(
-            map("foo", 0L),
-            map("foo", 1L),
-            map("foo", 2L),
-            map("foo", 3L),
-            map("foo", 4L),
-            map("foo", 5L)
-        ));
-    }
-
-    @Deprecated(forRemoval = true)
-    @Disabled("Tested in NodePropertiesWriterTest")
-    @Test
-    void shouldRenameMultipleProperties() {
-        assertCypherResult(
-            "CALL gds.graph.nodeProperties.write($graph, [{newNodeProp1: 'foo', newNodeProp2: 'bar'} ,'newNodeProp1'], 'A')",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
-            List.of(Map.of(
-                "writeMillis", Matchers.greaterThan(-1L),
-                "graphName", TEST_GRAPH_SAME_PROPERTIES,
-                "nodeProperties", List.of("bar", "foo", "newNodeProp1"),
-                "propertiesWritten", 9L
-            ))
-        );
-
-        String validationQuery =
-            "MATCH (n) " +
-            "RETURN " +
-            "  labels(n) AS labels, " +
-            "  n.foo AS foo, " +
-            "  n.bar AS bar, " +
-            "  n.newNodeProp1 AS newNodeProp1 " +
-
-            "ORDER BY foo ASC, bar ASC, newNodeProp1 ASC";
-
-        assertCypherResult(validationQuery, asList(
-            map("labels", singletonList("A"), "foo", 0L, "bar", 42L, "newNodeProp1", 0L),
-            map("labels", singletonList("A"), "foo", 1L, "bar", 43L, "newNodeProp1", 1L),
-            map("labels", singletonList("A"), "foo", 2L, "bar", 44L, "newNodeProp1", 2L),
-            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null),
-            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null),
-            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null)
-        ));
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
@@ -66,8 +65,8 @@ public final class NodePropertiesWriter {
         validateGraphName(graphName);
 
         // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphWriteNodePropertiesConfig config = GraphWriteNodePropertiesConfig.of(
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var config = GraphWriteNodePropertiesConfig.of(
             graphName,
             nodeProperties,
             nodeLabels,
@@ -75,7 +74,7 @@ public final class NodePropertiesWriter {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(
+        var graphStore = graphStoreFromCatalog(
             graphName,
             config,
             executionContext.username(),
@@ -174,8 +173,8 @@ public final class NodePropertiesWriter {
         return propertiesWritten;
     }
 
-    private static @NotNull String validateGraphName(@Nullable String graphName) {
-        return CypherMapAccess.failOnBlank("graphName", graphName);
+    private static void validateGraphName(@Nullable String graphName) {
+        CypherMapAccess.failOnBlank("graphName", graphName);
     }
 
     private static void validateConfig(CypherMapAccess cypherConfig, BaseConfig config) {

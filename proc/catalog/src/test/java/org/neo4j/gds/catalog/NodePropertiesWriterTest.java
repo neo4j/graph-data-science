@@ -113,6 +113,7 @@ class NodePropertiesWriterTest {
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
+        when(nodePropertyExporterMock.propertiesWritten()).thenReturn(8L, 11L);
 
         var executionContext = executionContextBuilder()
             .nodePropertyExporterBuilder(exporterBuilderMock)
@@ -132,6 +133,7 @@ class NodePropertiesWriterTest {
                 assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
                 assertThat(nodePropertiesWriteResult.graphName).isEqualTo("g");
                 assertThat(nodePropertiesWriteResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
+                assertThat(nodePropertiesWriteResult.propertiesWritten).isEqualTo(19L);
             }
         );
 
@@ -157,6 +159,7 @@ class NodePropertiesWriterTest {
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
+        when(nodePropertyExporterMock.propertiesWritten()).thenReturn(11L);
 
         var executionContext = executionContextBuilder()
             .nodePropertyExporterBuilder(exporterBuilderMock)
@@ -176,6 +179,7 @@ class NodePropertiesWriterTest {
                 assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
                 assertThat(nodePropertiesWriteResult.graphName).isEqualTo("propertiesSubsetGraph");
                 assertThat(nodePropertiesWriteResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
+                assertThat(nodePropertiesWriteResult.propertiesWritten).isEqualTo(11L);
             }
         );
 
