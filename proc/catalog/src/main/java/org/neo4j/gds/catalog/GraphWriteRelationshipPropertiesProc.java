@@ -75,7 +75,7 @@ public class GraphWriteRelationshipPropertiesProc extends CatalogProc {
             .withRelationPropertyTranslator(Values::doubleValue)
             .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
             .withProgressTracker(ProgressTracker.NULL_TRACKER)
-            .withArrowConnectionInfo(config.arrowConnectionInfo())
+            .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())
             .withRelationshipCount(relationshipCount)
             .build();
 
