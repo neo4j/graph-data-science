@@ -19,8 +19,18 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+
 import java.util.Optional;
 
 public interface NodeClassificationPredictPipelineMutateOrWriteConfig extends NodeClassificationPredictPipelineBaseConfig {
     Optional<String> predictedProbabilityProperty();
+
+    @Override
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean includePredictedProbabilities() {
+        return predictedProbabilityProperty().isPresent();
+    }
 }

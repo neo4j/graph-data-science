@@ -29,10 +29,10 @@ import java.util.Map;
 /**
  * Enhance user input by adding targetNodeLabels and relationshipTypes from training parameters if appropriate
  */
-final class ConfigPreProcessor {
-    private ConfigPreProcessor() {}
+final class NodeClassificationPredictConfigPreProcessor {
+    private NodeClassificationPredictConfigPreProcessor() {}
 
-    static void Enhance(Map<String, Object> userInput, ExecutionContext executionContext) {
+    static void enhanceInputWithPipelineParameters(Map<String, Object> userInput, ExecutionContext executionContext) {
         if (!userInput.containsKey("modelName")) return;
 
         //noinspection ConstantConditions

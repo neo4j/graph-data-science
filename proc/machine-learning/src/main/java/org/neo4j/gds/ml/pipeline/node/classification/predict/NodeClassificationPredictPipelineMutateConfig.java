@@ -34,13 +34,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictPipelineMutateConfig extends NodeClassificationPredictPipelineMutateOrWriteConfig, MutatePropertyConfig {
-    @Override
-    @Value.Derived
-    @Configuration.Ignore
-    default boolean includePredictedProbabilities() {
-        return predictedProbabilityProperty().isPresent();
-    }
-
     static NodeClassificationPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPredictPipelineMutateConfigImpl(username, config);
     }

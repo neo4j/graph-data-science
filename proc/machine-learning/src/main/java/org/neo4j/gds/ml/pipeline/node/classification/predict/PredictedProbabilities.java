@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
 
 import java.util.ArrayList;
@@ -34,22 +35,19 @@ final class PredictedProbabilities {
     static List<NodeProperty> asProperties(
         Optional<NodeClassificationPipelineResult> result,
         String propertyName,
-        NodeClassificationPredictPipelineMutateOrWriteConfig config
+        Optional<String> predictedProbabilityProperty
     ) {
         if (result.isEmpty()) return Collections.emptyList();
 
         var nodeProperties = new ArrayList<NodeProperty>();
+
         var classProperties = result.get().predictedClasses().asNodeProperties();
         nodeProperties.add(NodeProperty.of(propertyName, classProperties));
 
-        result.get().predictedProbabilities().ifPresent(probabilityProperties -> {
-            var properties = probabilityProperties.asNodeProperties();
+        if (result.get().predictedProbabilities().isEmpty()) return nodeProperties;
 
-            nodeProperties.add(NodeProperty.of(
-                config.predictedProbabilityProperty().orElseThrow(),
-                properties
-            ));
-        });
+        NodePropertyValues nodePropertyValues = result.get().predictedProbabilities().get().asNodeProperties();
+        nodeProperties.add(NodeProperty.of(predictedProbabilityProperty.orElseThrow(), nodePropertyValues));
 
         return nodeProperties;
     }

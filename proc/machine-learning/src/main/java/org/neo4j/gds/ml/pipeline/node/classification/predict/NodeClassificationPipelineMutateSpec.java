@@ -69,7 +69,7 @@ public class NodeClassificationPipelineMutateSpec implements AlgorithmSpec<NodeC
                     result -> PredictedProbabilities.asProperties(
                         result.result(),
                         result.config().mutateProperty(),
-                        result.config()
+                        result.config().predictedProbabilityProperty()
                     )
                 );
             }
@@ -78,6 +78,6 @@ public class NodeClassificationPipelineMutateSpec implements AlgorithmSpec<NodeC
 
     @Override
     public void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        ConfigPreProcessor.Enhance(userInput, executionContext);
+        NodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(userInput, executionContext);
     }
 }
