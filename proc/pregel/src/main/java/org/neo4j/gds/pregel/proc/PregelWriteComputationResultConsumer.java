@@ -37,7 +37,7 @@ public abstract class PregelWriteComputationResultConsumer<
                 var didConverge = computationResult.result().map(PregelResult::didConverge).orElse(false);
                 return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
             },
-            (computationResult) -> PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty()),
+            (computationResult) -> PregelBaseProc.nodeProperties(computationResult, computationResult.config().writeProperty()),
             "PregelWrite"
         );
     }
