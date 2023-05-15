@@ -28,11 +28,9 @@ import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
-import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -128,7 +126,6 @@ public final class RawCompressor implements AdjacencyCompressor {
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
 
-    private final LongArrayBuffer buffer;
     private final ModifiableSlice<long[]> slice;
 
     private RawCompressor(
@@ -150,35 +147,21 @@ public final class RawCompressor implements AdjacencyCompressor {
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
 
-        this.buffer = new LongArrayBuffer();
         this.slice = ModifiableSlice.create();
     }
 
     @Override
-    public int compress(
-        long nodeId,
-        byte[][] targets,
-        long[][] properties,
-        int numberOfCompressedTargets,
-        int compressedBytesSize,
-        ValueMapper mapper
-    ) {
+    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
         if (properties != null) {
             return withProperties(
                 nodeId,
                 targets,
                 properties,
-                numberOfCompressedTargets,
-                compressedBytesSize,
-                mapper
+                degree
             );
         } else {
             return withoutProperties(
-                nodeId,
-                targets,
-                numberOfCompressedTargets,
-                compressedBytesSize,
-                mapper
+                nodeId, targets, degree
             );
         }
     }
@@ -199,25 +182,10 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
     }
 
-    private int withoutProperties(
-        long nodeId,
-        byte[][] targets,
-        int numberOfCompressedTargets,
-        int compressedBytesSize,
-        ValueMapper mapper
-    ) {
-        // decompress target ids
-        AdjacencyCompression.zigZagUncompressFrom(
-            this.buffer,
-            targets,
-            numberOfCompressedTargets,
-            compressedBytesSize,
-            mapper
-        );
+    private int withoutProperties(long nodeId, long[] targets, int degree) {
+        degree = aggregate(targets, degree, this.aggregations[0]);
 
-        int degree = aggregate(this.aggregations[0]);
-
-        long address = copy(this.buffer.buffer, degree);
+        long address = copy(targets, degree);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
@@ -225,10 +193,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private int aggregate(Aggregation aggregation) {
-        var values = this.buffer.buffer;
-        var length = this.buffer.length;
-
+    private int aggregate(long[] values, int length, Aggregation aggregation) {
         Arrays.sort(values, 0, length);
 
         if (aggregation == Aggregation.NONE) {
@@ -247,10 +212,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         return write;
     }
 
-    private int aggregateWithProperties(LongArrayBuffer targets, long[][] properties, Aggregation[] aggregations) {
-        var values = targets.buffer;
-        var length = targets.length;
-
+    private int aggregateWithProperties(long[] values, int length, long[][] properties, Aggregation[] aggregations) {
         int[] order = IndirectSort.mergesort(0, length, new AscendingLongComparator(values));
 
         long[] outValues = new long[length];
@@ -313,23 +275,13 @@ public final class RawCompressor implements AdjacencyCompressor {
 
     private int withProperties(
         long nodeId,
-        byte[][] targets,
+        long[] targets,
         long[][] uncompressedProperties,
-        int numberOfCompressedTargets,
-        int compressedBytesSize,
-        ValueMapper mapper
+        int degree
     ) {
-        AdjacencyCompression.zigZagUncompressFrom(
-            this.buffer,
-            targets,
-            numberOfCompressedTargets,
-            compressedBytesSize,
-            mapper
-        );
+        degree = aggregateWithProperties(targets, degree, uncompressedProperties, this.aggregations);
 
-        int degree = aggregateWithProperties(this.buffer, uncompressedProperties, this.aggregations);
-
-        long address = copy(this.buffer.buffer, degree);
+        long address = copy(targets, degree);
 
         copyProperties(uncompressedProperties, degree, nodeId);
 

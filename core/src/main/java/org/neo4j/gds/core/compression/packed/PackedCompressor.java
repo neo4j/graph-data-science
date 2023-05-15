@@ -28,11 +28,9 @@ import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
-import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
-import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.GdsSystemProperties;
@@ -127,7 +125,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
 
-    private final LongArrayBuffer buffer;
     private final ModifiableSlice<Address> adjacencySlice;
     private final ModifiableSlice<long[]> propertySlice;
     private final MutableInt degree;
@@ -153,7 +150,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
 
-        this.buffer = new LongArrayBuffer();
         this.adjacencySlice = ModifiableSlice.create();
         this.propertySlice = ModifiableSlice.create();
         this.degree = new MutableInt(0);
@@ -162,52 +158,29 @@ public final class PackedCompressor implements AdjacencyCompressor {
     }
 
     @Override
-    public int compress(
-        long nodeId,
-        byte[][] targets,
-        long[][] properties,
-        int numberOfCompressedTargets,
-        int compressedBytesSize,
-        ValueMapper mapper
-    ) {
+    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
         if (properties != null) {
             return packWithProperties(
                 nodeId,
                 targets,
                 properties,
-                numberOfCompressedTargets,
-                compressedBytesSize,
-                mapper
+                degree
             );
         } else {
             return packWithoutProperties(
                 nodeId,
                 targets,
-                numberOfCompressedTargets,
-                compressedBytesSize,
-                mapper
+                degree
             );
         }
     }
 
     private int packWithProperties(
         long nodeId,
-        byte[][] semiCompressedBytesDuringLoading,
+        long[] targets,
         long[][] uncompressedPropertiesPerProperty,
-        int numberOfCompressedTargets,
-        int compressedByteSize,
-        ValueMapper mapper
+        int degree
     ) {
-        AdjacencyCompression.zigZagUncompressFrom(
-            this.buffer,
-            semiCompressedBytesDuringLoading,
-            numberOfCompressedTargets,
-            compressedByteSize,
-            mapper
-        );
-
-        long[] targets = this.buffer.buffer;
-        int targetsLength = this.buffer.length;
         long offset;
         if (this.packed) {
             offset = AdjacencyPacker.compressWithPropertiesWithPackedTail(
@@ -215,7 +188,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 this.adjacencySlice,
                 targets,
                 uncompressedPropertiesPerProperty,
-                targetsLength,
+                degree,
                 this.aggregations,
                 this.noAggregation,
                 this.degree
@@ -226,14 +199,14 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 this.adjacencySlice,
                 targets,
                 uncompressedPropertiesPerProperty,
-                targetsLength,
+                degree,
                 this.aggregations,
                 this.noAggregation,
                 this.degree
             );
         }
 
-        int degree = this.degree.intValue();
+        degree = this.degree.intValue();
 
         copyProperties(uncompressedPropertiesPerProperty, degree, nodeId);
 
@@ -243,24 +216,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private int packWithoutProperties(
-        long nodeId,
-        byte[][] semiCompressedBytesDuringLoading,
-        int numberOfCompressedTargets,
-        int compressedByteSize,
-        ValueMapper mapper
-    ) {
-        AdjacencyCompression.zigZagUncompressFrom(
-            this.buffer,
-            semiCompressedBytesDuringLoading,
-            numberOfCompressedTargets,
-            compressedByteSize,
-            mapper
-        );
-
-        long[] targets = this.buffer.buffer;
-        int targetsLength = this.buffer.length;
-
+    private int packWithoutProperties(long nodeId, long[] targets, int degree) {
         long offset;
 
         if (this.packed) {
@@ -268,7 +224,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 this.adjacencyAllocator,
                 this.adjacencySlice,
                 targets,
-                targetsLength,
+                degree,
                 this.aggregations[0],
                 this.degree
             );
@@ -277,13 +233,13 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 this.adjacencyAllocator,
                 this.adjacencySlice,
                 targets,
-                targetsLength,
+                degree,
                 this.aggregations[0],
                 this.degree
             );
         }
 
-        int degree = this.degree.intValue();
+        degree = this.degree.intValue();
 
         this.adjacencyOffsets.set(nodeId, offset);
         this.adjacencyDegrees.set(nodeId, degree);

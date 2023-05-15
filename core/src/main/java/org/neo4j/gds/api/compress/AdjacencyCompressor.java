@@ -23,8 +23,8 @@ public interface AdjacencyCompressor extends AutoCloseable {
 
     /**
      * Compress a list of target ids into an adjacency list.
-     * The input {@code values} are an unsorted and separately compressed list of target ids.
-     * The provided {@code long[]} must be able to hold at least {@code numberOfCompressedTargets} elements.
+     * The input {@code values} are an unsorted list of target ids.
+     * The provided {@code long[]} must be able to hold at least {@code degree} elements.
      *
      * The input {@code values} might also store properties.
      * The {@code properties} has the number of properties in the first dimension, followed by an
@@ -32,38 +32,24 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * the same array index in the uncompressed target list. Implementors need to make sure to maintain that order
      * when re-ordering the target ids.
      *
-     * Implementors of this method can use the provided {@link LongArrayBuffer} to reuse existing allocations
-     * of a {@code long[]} or share newly created buffers with next invocations of this method.
-     * The buffer exists solely so that implementors can reduce allocations of {@code long[]}.
-     * It is not expected that the buffer contains any useful data after this method invocation.
-     *
-     * The provided {@code targets} array will not be used after this method call.
+     * The provided {@code targets} array will be used after this method call.
      *
      * Implementors will need to write the resulting target list somewhere. Where exactly is up to the implementation.
      * The results should end up in the data that is returned by the
      * {@link AdjacencyCompressorFactory#build()} method.
      * The method only needs to return the degree of the compressed adjacency list. This value can be different from
-     * {@code numberOfCompressedTargets} due to possible deduplication, though it
-     * should never be larger. The return value is only used for tracking progress and reporting, it is not stored in
+     * {@code degree} due to possible deduplication, though it should never be larger.
+     * The return value is only used for tracking progress and reporting, it is not stored in
      * the graph. How the degree is stored so that it can be used by the Graph is up the implementor of this method.
      *
-     * @param nodeId The node id that is the source node for this adjacency list.
-     *              The id is from the GDS internal scope, it is *not* the Neo4j ID.
-     * @param targets A list of target ids, unsorted and compressed.
+     * @param nodeId     The node id that is the source node for this adjacency list.
+     *                   The id is from the GDS internal scope, it is *not* the Neo4j ID.
+     * @param targets    A list of target ids, unsorted.
      * @param properties A nested list of property values.
-     * @param numberOfCompressedTargets The number of targets compressed in `targets`.
-     * @param compressedBytesSize The byte size of targets.
-     * @param mapper A mapper to transform values before compressing them.
+     * @param degree     The number of targets stored in `targets`.
      * @return the degree of the compressed adjacency list
      */
-    int compress(
-        long nodeId,
-        byte[][] targets,
-        long[][] properties,
-        int numberOfCompressedTargets,
-        int compressedBytesSize,
-        ValueMapper mapper
-    );
+    int compress(long nodeId, long[] targets, long[][] properties, int degree);
 
     /**
      * Closing this compressor will release some internal data structures, making them eligible for garbage collection.
