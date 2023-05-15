@@ -129,11 +129,11 @@ public final class ChunkedAdjacencyLists {
             requiredBytes += encodedVLongSize(compressedValue);
         }
         var position = positions.get(index);
-        var newPosition = encodeVLongs(targets, start, end, this.compressBuffer, position);
+        encodeVLongs(targets, start, end, this.compressBuffer, 0);
 
         copyCompressedBytes(index, position, this.compressBuffer, requiredBytes);
 
-        positions.set(index, newPosition);
+        positions.set(index, position + requiredBytes);
 
         this.lastValues.set(index, currentLastValue);
         this.lengths.addTo(index, valuesToAdd);
