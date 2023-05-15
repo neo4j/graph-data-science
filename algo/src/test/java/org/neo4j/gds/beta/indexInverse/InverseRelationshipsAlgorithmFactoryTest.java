@@ -41,7 +41,7 @@ class InverseRelationshipsAlgorithmFactoryTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, MemoryRange.of(1_462_328)),
+            Arguments.of(compressedRunner, MemoryRange.of(1_462_320)),
             Arguments.of(uncompressedRunner, MemoryRange.of(2_248_808))
         );
     }
@@ -57,9 +57,9 @@ class InverseRelationshipsAlgorithmFactoryTest {
         runner.run(() -> {
             var memoryEstimation = factory.memoryEstimation(config);
 
-            var actual = memoryEstimation.estimate(graphDimensions, config.concurrency());
-            assertThat(actual.memoryUsage().min).isEqualTo(expected.min);
-            assertThat(actual.memoryUsage().max).isEqualTo(expected.max);
+            assertThat(memoryEstimation
+                .estimate(graphDimensions, config.concurrency())
+                .memoryUsage()).isEqualTo(expected);
         });
     }
 
@@ -86,8 +86,7 @@ class InverseRelationshipsAlgorithmFactoryTest {
             "Inverse 'T2'"
         );
 
-        assertThat(memoryTree.memoryUsage().min).isEqualTo(MemoryRange.of(2_924_624).min);
-        assertThat(memoryTree.memoryUsage().max).isEqualTo(MemoryRange.of(2_924_624).max);
+        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(2_924_608));
     }
 
     @Test
@@ -113,8 +112,7 @@ class InverseRelationshipsAlgorithmFactoryTest {
         );
         var x = memoryTree.memoryUsage();
 
-        assertThat(memoryTree.memoryUsage().min).isEqualTo(MemoryRange.of(1_462_328).min);
-        assertThat(memoryTree.memoryUsage().max).isEqualTo(MemoryRange.of(1_462_328).max);
+        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(1_462_320));
     }
 
     @Test
@@ -140,7 +138,6 @@ class InverseRelationshipsAlgorithmFactoryTest {
             "Inverse '*'"
         );
 
-        assertThat(memoryTree.memoryUsage().min).isEqualTo(MemoryRange.of(2_924_624).min);
-        assertThat(memoryTree.memoryUsage().max).isEqualTo(MemoryRange.of(2_924_624).max);
+        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(2_924_608));
     }
 }

@@ -47,7 +47,7 @@ class CompressedAdjacencyListTest {
 
         MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 32;
+        long classSize = 24;
         long bestCaseAdjacencySize = 500;
         long worstCaseAdjacencySize = 500;
 
@@ -78,7 +78,7 @@ class CompressedAdjacencyListTest {
 
         MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 32;
+        long classSize = 24;
         long bestCaseAdjacencySize = 100_100_000_000L;
         long worstCaseAdjacencySize = 299_900_000_000L;
 

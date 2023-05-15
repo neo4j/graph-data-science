@@ -21,6 +21,7 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.AbstractHistogram;
 import org.HdrHistogram.DoubleHistogram;
+import org.HdrHistogram.Histogram;
 import org.neo4j.gds.compat.MapUtil;
 
 import java.util.Map;
