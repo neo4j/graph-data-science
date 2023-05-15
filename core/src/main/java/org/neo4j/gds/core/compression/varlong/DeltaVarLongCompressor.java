@@ -32,7 +32,7 @@ import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
-import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
+import org.neo4j.gds.core.compression.common.VarLongEncoding;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -216,18 +216,13 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         );
         int degree = AdjacencyCompression.applyDeltaEncoding(this.buffer, this.aggregations[0]);
 
-        // since we might have to map to larger ids
-        // we can no longer guarantee that we fit into the buffer
-        if (mapper != ZigZagLongDecoding.Identity.INSTANCE) {
-            semiCompressedBytesDuringLoading = AdjacencyCompression.ensureBufferSize(
-                this.buffer,
-                semiCompressedBytesDuringLoading
-            );
-        }
+        int requiredBytes = VarLongEncoding.encodedVLongsSize(this.buffer.buffer, degree);
 
-        int requiredBytes = AdjacencyCompression.compress(this.buffer, semiCompressedBytesDuringLoading);
+        var slice = this.adjacencySlice;
+        long address = this.adjacencyAllocator.allocate(requiredBytes, slice);
 
-        long address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
+        // values are now vlong encoded in the final adjacency list
+        VarLongEncoding.encodeVLongs(this.buffer.buffer, degree, slice.slice(), slice.offset());
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
@@ -265,20 +260,13 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         // values are delta encoded except for the first one
         // values are still uncompressed
 
-        // since we might have to map to larger ids
-        // we can no longer guarantee that we fit into the buffer
-        if (mapper != ZigZagLongDecoding.Identity.INSTANCE) {
-            semiCompressedBytesDuringLoading = AdjacencyCompression.ensureBufferSize(
-                this.buffer,
-                semiCompressedBytesDuringLoading
-            );
-        }
+        int requiredBytes = VarLongEncoding.encodedVLongsSize(this.buffer.buffer, degree);
 
-        int requiredBytes = AdjacencyCompression.compress(this.buffer, semiCompressedBytesDuringLoading);
-        // values are now vlong encoded in the array storage (semiCompressed)
+        var slice = this.adjacencySlice;
+        long address = this.adjacencyAllocator.allocate(requiredBytes, slice);
 
-        long address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
-        // values are in the final adjacency list
+        // values are now vlong encoded in the final adjacency list
+        VarLongEncoding.encodeVLongs(this.buffer.buffer, degree, slice.slice(), slice.offset());
 
         copyProperties(uncompressedPropertiesPerProperty, degree, nodeId);
 
@@ -286,13 +274,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         this.adjacencyOffsets.set(nodeId, address);
 
         return degree;
-    }
-
-    private long copyIds(byte[] targets, int requiredBytes) {
-        var slice = this.adjacencySlice;
-        long address = this.adjacencyAllocator.allocate(requiredBytes, slice);
-        System.arraycopy(targets, 0, slice.slice(), slice.offset(), requiredBytes);
-        return address;
     }
 
     private void copyProperties(long[][] properties, int degree, long nodeId) {
