@@ -145,12 +145,12 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     }
 
     public void initDegreePartition() {
-        this.partitions = PartitionUtils.degreePartition(
-            graph,
+        this.partitions = PartitionUtils.degreePartitionStream(
+            graph.nodeCount(),
+            graph.relationshipCount(),
             concurrency,
-            Function.identity(),
-            Optional.of(minBatchSize)
-        );
+            graph::degree
+        ).collect(Collectors.toList());
     }
 
     void initPropertyVectors() {
