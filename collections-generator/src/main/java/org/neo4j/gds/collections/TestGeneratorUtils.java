@@ -65,7 +65,8 @@ public final class TestGeneratorUtils {
         entry(ArrayTypeName.of(TypeName.LONG), "new long[] { 4, 2 }"),
         entry(ArrayTypeName.of(TypeName.FLOAT), "new float[] { 4.4F, 2.2F }"),
         entry(ArrayTypeName.of(TypeName.DOUBLE), "new double[] { 4.4D, 2.2D }"),
-        entry(ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)), "new byte[][] { new byte[] { 4 }, new byte[] { 2 } }")
+        entry(ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)), "new byte[][] { new byte[] { 4 }, new byte[] { 2 } }"),
+        entry(ArrayTypeName.of(ArrayTypeName.of(TypeName.LONG)), "new long[][] { new long[] { 4 }, new long[] { 2 } }")
     );
 
     public static String nonDefaultValue(TypeName typeName) {
@@ -88,6 +89,10 @@ public final class TestGeneratorUtils {
         entry(
             ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)),
             "new byte[][] { new byte[] {1, 3}, new byte[] {3, 7} }"
+        ),
+        entry(
+            ArrayTypeName.of(ArrayTypeName.of(TypeName.LONG)),
+            "new long[][] { new long[] {1, 3}, new long[] {3, 7} }"
         )
     );
 
@@ -126,6 +131,8 @@ public final class TestGeneratorUtils {
             return "new double[] { " + randomValue(TypeName.DOUBLE) + " }";
         } else if (valueType.equals(ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)))) {
             return "new byte[][] { new byte[] { " + randomValue(TypeName.BYTE) + " } }";
+        } else if (valueType.equals(ArrayTypeName.of(ArrayTypeName.of(TypeName.LONG)))) {
+            return "new long[][] { new long[] { " + randomValue(TypeName.LONG) + " } }";
         } else {
             throw new IllegalArgumentException("Illegal type");
         }
@@ -158,6 +165,8 @@ public final class TestGeneratorUtils {
             return "new double[] { " + variableValue(TypeName.DOUBLE, variable) + " }";
         } else if (valueType.equals(ArrayTypeName.of(ArrayTypeName.of(TypeName.BYTE)))) {
             return "new byte[][] { new byte[] { " + variableValue(TypeName.BYTE, variable) + " } }";
+        } else if (valueType.equals(ArrayTypeName.of(ArrayTypeName.of(TypeName.LONG)))) {
+            return "new long[][] { new long[] { " + variableValue(TypeName.LONG, variable) + " } }";
         } else {
             throw new IllegalArgumentException("Illegal type");
         }

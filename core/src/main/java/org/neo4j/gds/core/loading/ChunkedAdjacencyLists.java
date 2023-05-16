@@ -23,7 +23,7 @@ import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.HugeSparseByteArrayArrayList;
 import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
-import org.neo4j.gds.collections.HugeSparseLongArrayList;
+import org.neo4j.gds.collections.HugeSparseLongArrayArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -40,16 +40,15 @@ import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLong
 import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ChunkedAdjacencyLists {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final byte[][] EMPTY_BYTES_BYTES = new byte[0][];
-    private static final long[] EMPTY_PROPERTIES = new long[0];
+    private static final long[][] EMPTY_PROPERTIES = new long[0][];
 
     private final HugeSparseByteArrayArrayList targetLists;
-    private final HugeSparseLongArrayList[] properties;
+    private final HugeSparseLongArrayArrayList[] properties;
     private final HugeSparseIntList positions;
     private final HugeSparseLongList lastValues;
     private final HugeSparseIntList lengths;
@@ -98,8 +97,8 @@ public final class ChunkedAdjacencyLists {
 
 
         if (numberOfProperties > 0) {
-            this.properties = new HugeSparseLongArrayList[numberOfProperties];
-            Arrays.setAll(this.properties, i -> HugeSparseLongArrayList.of(EMPTY_PROPERTIES, initialCapacity));
+            this.properties = new HugeSparseLongArrayArrayList[numberOfProperties];
+            Arrays.setAll(this.properties, i -> HugeSparseLongArrayArrayList.of(EMPTY_PROPERTIES, initialCapacity));
         } else {
             this.properties = null;
         }
@@ -155,36 +154,12 @@ public final class ChunkedAdjacencyLists {
     public void add(long index, long[] targets, long[][] allProperties, int start, int end, int targetsToAdd) {
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
-            addProperties(index, targets, allProperties[i], start, end, i, targetsToAdd);
+            var length = lengths.get(index);
+            writeProperties(index, targets, i, length, allProperties[i], start, end - start);
         }
 
         // write values
         add(index, targets, start, end, targetsToAdd);
-    }
-
-    private void addProperties(
-        long index,
-        long[] targets,
-        long[] properties,
-        int start,
-        int end,
-        int propertyIndex,
-        int propertiesToAdd
-    ) {
-        var length = lengths.get(index);
-
-        var currentProperties = ensurePropertyCapacity(index, length, propertiesToAdd, propertyIndex);
-
-        if (propertiesToAdd == end - start) {
-            System.arraycopy(properties, start, currentProperties, length, propertiesToAdd);
-        } else {
-            var writePos = length;
-            for (int i = 0; i < (end - start); i++) {
-                if (targets[start + i] != IGNORE_VALUE) {
-                    currentProperties[writePos++] = properties[start + i];
-                }
-            }
-        }
     }
 
     static final int[] NEXT_CHUNK_LENGTH = {
@@ -267,25 +242,70 @@ public final class ChunkedAdjacencyLists {
         targetLists.set(index, compressedTargets);
     }
 
-    private long[] ensurePropertyCapacity(long index, int pos, int required, int propertyIndex) {
-        int targetLength = pos + required;
+    private  void writeProperties(long nodeId, long[] targets, int propertyIndex, int targetPos, long[] buffer, int bufferOffset, int bufferLength) {
+        long[][] properties = this.properties[propertyIndex].get(nodeId);
 
-        var currentProperties = this.properties[propertyIndex].get(index);
-
-        if (targetLength < 0) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
-                pos,
-                required
-            ));
-        } else if (currentProperties.length <= pos + required) {
-//            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
-            int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
-            currentProperties = Arrays.copyOf(currentProperties, newLength);
-            this.properties[propertyIndex].set(index, currentProperties);
+        // last chunk, write pos = posInLastChunk
+        int posInLastChunk = targetPos;
+        for (int targetPage = 0; targetPage < properties.length - 1; targetPage++) {
+            long[] compressedProperty = properties[targetPage];
+            posInLastChunk -= compressedProperty.length;
         }
 
-        return currentProperties;
+        // compact the property buffer and ignore properties from ignored targets
+        var writeIndex = bufferOffset;
+        for (int i = bufferOffset; i < bufferOffset + bufferLength; i++) {
+            if (targets[i] != IGNORE_VALUE) {
+                if (writeIndex != i) {
+                    buffer[writeIndex] = buffer[i];
+                }
+                writeIndex++;
+            }
+        }
+
+        var actualNumberOfProperties = writeIndex - bufferOffset;
+
+        // can we fit everything in the last chunk?
+        if (properties.length > 0) {
+            long[] lastChunk = properties[properties.length - 1];
+            if (lastChunk.length >= posInLastChunk + actualNumberOfProperties) {
+                // fits in last chunk
+                System.arraycopy(buffer, bufferOffset, lastChunk, posInLastChunk, actualNumberOfProperties);
+                return;
+            }
+        }
+
+        // how many bytes do we need to write into the last chunk
+        int fitsInLastChunk = properties.length == 0
+            ? 0
+            : properties[properties.length - 1].length - posInLastChunk;
+
+        int newChunkLengthAtLeast = actualNumberOfProperties - fitsInLastChunk;
+
+        // the next chunk size grows slowly depending on the number of chunks we already have
+        int nextChunkLevel = Math.min(properties.length, NEXT_CHUNK_LENGTH.length - 1);
+        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel];
+
+        // avoid splitting the buffer into too many chunks
+        int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
+
+        // copy buffer into the last chunk and the new chunk
+        long[] newChunk = new long[newChunkLength];
+        if (fitsInLastChunk > 0) {
+            System.arraycopy(
+                buffer,
+                bufferOffset,
+                properties[properties.length - 1],
+                posInLastChunk,
+                fitsInLastChunk
+            );
+        }
+        System.arraycopy(buffer, fitsInLastChunk + bufferOffset, newChunk, 0, actualNumberOfProperties - fitsInLastChunk);
+
+        // add new chunk to the targets list
+        properties = Arrays.copyOf(properties, properties.length + 1);
+        properties[properties.length - 1] = newChunk;
+        this.properties[propertyIndex].set(nodeId, properties);
     }
 
     public long capacity() {
@@ -319,14 +339,14 @@ public final class ChunkedAdjacencyLists {
         private final DrainingIterator.DrainingBatch<long[]> lastValuesListBatch;
         private final DrainingIterator<int[]> lengthsListIterator;
         private final DrainingIterator.DrainingBatch<int[]> lengthsListBatch;
-        private final List<DrainingIterator<long[][]>> propertyIterators;
-        private final List<DrainingIterator.DrainingBatch<long[][]>> propertyBatches;
+        private final List<DrainingIterator<long[][][]>> propertyIterators;
+        private final List<DrainingIterator.DrainingBatch<long[][][]>> propertyBatches;
 
         private final long[][] propertiesBuffer;
 
         CompositeDrainingIterator(
             HugeSparseByteArrayArrayList targets,
-            HugeSparseLongArrayList[] properties,
+            HugeSparseLongArrayArrayList[] properties,
             HugeSparseIntList positions,
             HugeSparseLongList lastValues,
             HugeSparseIntList lengths
@@ -346,7 +366,7 @@ public final class ChunkedAdjacencyLists {
                 propertiesBuffer = null;
             } else {
                 this.propertyIterators = Arrays.stream(properties)
-                    .map(HugeSparseLongArrayList::drainingIterator)
+                    .map(HugeSparseLongArrayArrayList::drainingIterator)
                     .collect(Collectors.toList());
                 this.propertyBatches = this.propertyIterators
                     .stream()
@@ -380,7 +400,16 @@ public final class ChunkedAdjacencyLists {
                     var length = lengthsPage[indexInPage];
                     for (int propertyIndex = 0; propertyIndex < propertyBatches.size(); propertyIndex++) {
                         var page = propertyBatches.get(propertyIndex).page;
-                        propertiesBuffer[propertyIndex] = page[indexInPage];
+
+                        propertiesBuffer[propertyIndex] = new long[length];
+
+                        var written = 0;
+                        for (long[] propertyChunk : page[indexInPage]) {
+                            var valuesToCopy = Math.min(propertyChunk.length, length - written);
+                            System.arraycopy(propertyChunk, 0, propertiesBuffer[propertyIndex], written, valuesToCopy);
+                            written += valuesToCopy;
+                        }
+
                         // make properties eligible for GC
                         page[indexInPage] = null;
                     }

@@ -76,29 +76,56 @@ class ChunkedAdjacencyListsTest {
 
     @Test
     void shouldWriteLargeAdjacencyListsWithOverflow() {
-        var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
+        var adjacencyLists = ChunkedAdjacencyLists.of(1, 0);
 
-        var smallList = new long[]{42L, 1337L, 5L};
-        var largeList = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
-        for (int i = 0; i < largeList.length; i++) {
-            largeList[i] = i;
+        var smallAdjacency = new long[]{42L, 1337L, 5L};
+        var largeAdjacency = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
+        for (int i = 0; i < largeAdjacency.length; i++) {
+            largeAdjacency[i] = i;
         }
 
-        adjacencyLists.add(0, Arrays.copyOf(smallList, smallList.length), 0, 3, 3);
-        adjacencyLists.add(0, Arrays.copyOf(largeList, largeList.length), 0, largeList.length, largeList.length);
+        var smallProperties = new long[]{42L, 1337L, 5L};
+        var largeProperties = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
+        for (int i = 0; i < largeAdjacency.length; i++) {
+            largeProperties[i] = i;
+        }
 
-        var expectedTargets = new long[smallList.length + largeList.length];
-        System.arraycopy(smallList, 0, expectedTargets, 0, smallList.length);
-        System.arraycopy(largeList, 0, expectedTargets, smallList.length, largeList.length);
+        adjacencyLists.add(
+            0,
+            Arrays.copyOf(smallAdjacency, smallAdjacency.length),
+            new long[][]{smallProperties},
+            0,
+            3,
+            3
+        );
+        adjacencyLists.add(
+            0,
+            Arrays.copyOf(largeAdjacency, largeAdjacency.length),
+            new long[][]{largeProperties},
+            0,
+            largeAdjacency.length,
+            largeAdjacency.length
+        );
 
-        var actualTargets = new long[smallList.length + largeList.length];
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
-            actualTargets,
-            targets,
-            length,
-            position,
-            INSTANCE
-        ));
+        var expectedTargets = new long[smallAdjacency.length + largeAdjacency.length];
+        System.arraycopy(smallAdjacency, 0, expectedTargets, 0, smallAdjacency.length);
+        System.arraycopy(largeAdjacency, 0, expectedTargets, smallAdjacency.length, largeAdjacency.length);
+
+        var expectedProperties = new long[smallProperties.length + largeProperties.length];
+        System.arraycopy(smallProperties, 0, expectedProperties, 0, smallProperties.length);
+        System.arraycopy(largeProperties, 0, expectedProperties, smallAdjacency.length, largeProperties.length);
+
+        var actualTargets = new long[smallAdjacency.length + largeAdjacency.length];
+        adjacencyLists.consume((nodeId, targets, properties, position, length) -> {
+            AdjacencyCompression.zigZagUncompressFrom(
+                actualTargets,
+                targets,
+                length,
+                position,
+                INSTANCE
+            );
+            assertThat(Arrays.compare(expectedProperties, properties[0])).isEqualTo(0);
+        });
         assertThat(Arrays.compare(expectedTargets, actualTargets)).isEqualTo(0);
     }
 
@@ -194,7 +221,7 @@ class ChunkedAdjacencyListsTest {
 
             assertThat(actualProperties)
                 // there is an additional entry, because we double the buffers in size
-                .hasDimensions(1, 4).contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
+                .hasDimensions(1, 3).contains(new long[]{3L, 3L, 4L}, Index.atIndex(0));
         });
     }
 }
