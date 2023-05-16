@@ -198,7 +198,7 @@ public class PackedAdjacencyList implements AdjacencyList {
      * so it is not required to call this method to prevent memory leaks.
      */
     @TestOnly
-    void free() {
+    public void free() {
         this.cleanable.clean();
     }
 
