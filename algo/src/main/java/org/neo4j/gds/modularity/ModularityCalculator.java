@@ -77,6 +77,7 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
         var totalCommunityRelationships = HugeAtomicDoubleArray.of(communityCount, ParallelDoublePageCreator.passThrough(concurrency));
         var totalRelationshipWeight = new DoubleAdder();
 
+        // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,

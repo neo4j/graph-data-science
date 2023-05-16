@@ -134,6 +134,21 @@ public final class PartitionUtils {
         return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
     }
 
+    public static <TASK> List<TASK> degreePartition(
+        long nodeCount,
+        long relationshipCount,
+        DegreeFunction degrees,
+        int concurrency,
+        Function<DegreePartition, TASK> taskCreator,
+        Optional<Integer> minBatchSize
+    ) {
+        var batchSize = Math.max(
+            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
+            BitUtil.ceilDiv(relationshipCount, concurrency)
+        );
+        return degreePartitionWithBatchSize(nodeCount, degrees, batchSize, taskCreator);
+    }
+
     public static <TASK> List<TASK> customDegreePartitionWithBatchSize(
         Graph graph,
         int concurrency,
