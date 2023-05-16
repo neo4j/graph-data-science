@@ -41,7 +41,8 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         ExecutionContext executionContext,
         String graphName,
         Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relTypes
+        Collection<RelationshipType> relTypes,
+        int trainConcurrency
     );
 
     Map<String, Object> config();
@@ -60,11 +61,18 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         return List.of();
     }
 
-    default Set<RelationshipType> featureInputRelationshipTypes(GraphStore graphStore, Collection<RelationshipType> relationshipTypes, Set<RelationshipType> availableRelationshipTypesForNodeProperties) {
+    default Set<RelationshipType> featureInputRelationshipTypes(
+        GraphStore graphStore,
+        Collection<RelationshipType> relationshipTypes,
+        Set<RelationshipType> availableRelationshipTypesForNodeProperties
+    ) {
         //In link prediction, when contextRelType is *, we want to expand it to availableRelationshipTypesForNodeProperty.
         //Instead of all relTypes on graphStore, since it has targetRelType, __TRAIN__, __TEST__ that we don't want.
         return Stream
-            .concat(relationshipTypes.stream(), ElementTypeValidator.resolveTypes(graphStore, contextRelationshipTypes()).stream().filter(
+            .concat(relationshipTypes.stream(), ElementTypeValidator.resolveTypes(
+                graphStore,
+                contextRelationshipTypes()
+            ).stream().filter(
                 availableRelationshipTypesForNodeProperties::contains))
             .collect(Collectors.toSet());
     }
@@ -75,7 +83,12 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         return procName();
     }
 
-    MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes);
+    MemoryEstimation estimate(
+        ModelCatalog modelCatalog,
+        String username,
+        List<String> nodeLabels,
+        List<String> relTypes
+    );
 
     String mutateNodeProperty();
 }

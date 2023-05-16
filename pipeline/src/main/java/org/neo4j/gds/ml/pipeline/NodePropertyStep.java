@@ -105,7 +105,12 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes)  {
+    public MemoryEstimation estimate(
+        ModelCatalog modelCatalog,
+        String username,
+        List<String> nodeLabels,
+        List<String> relTypes
+    ) {
         var algoSpec = callableDefinition.algorithmSpec();
 
         var configCopy = new HashMap<>(config);
@@ -116,11 +121,13 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         var defaults = DefaultsConfiguration.Empty;
         var limits = LimitsConfiguration.Empty;
 
-        var algoConfig = new AlgoConfigParser<>(username, algoSpec.newConfigFunction(), defaults, limits).processInput(configCopy);
+        var algoConfig = new AlgoConfigParser<>(username, algoSpec.newConfigFunction(), defaults, limits).processInput(
+            configCopy);
 
         try {
             // FIXME: VN: HOW DO WE PASS THE ExecutionContext here?!
-            return algoSpec.algorithmFactory(ExecutionContext.EMPTY.withModelCatalog(modelCatalog)).memoryEstimation(algoConfig);
+            return algoSpec.algorithmFactory(ExecutionContext.EMPTY.withModelCatalog(modelCatalog)).memoryEstimation(
+                algoConfig);
         } catch (MemoryEstimationNotImplementedException exception) {
             // If a single node property step cannot be estimated, we ignore this step in the estimation
             return MemoryEstimations.of(callableDefinition.name(), MemoryRange.of(0));
@@ -132,13 +139,15 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         ExecutionContext executionContext,
         String graphName,
         Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relTypes
+        Collection<RelationshipType> relTypes,
+        int trainConcurrency
     ) {
         var configCopy = new HashMap<>(config);
         var nodeLabelStrings = nodeLabels.stream().map(ElementIdentifier::name).collect(Collectors.toList());
         var relTypeStrings = relTypes.stream().map(ElementIdentifier::name).collect(Collectors.toList());
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
+        configCopy.putIfAbsent("concurrency", trainConcurrency);
 
         var algorithmSpec = callableDefinition
             .algorithmSpec();

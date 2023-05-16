@@ -835,7 +835,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
             ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
+            Collection<RelationshipType> relTypes,
+            int trainConcurrency
         ) {
             assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(
                 Stream.concat(graphFilter.nodeLabels().stream(), contextNodeLabels().stream().map(NodeLabel::of)).distinct().collect(Collectors.toList())
