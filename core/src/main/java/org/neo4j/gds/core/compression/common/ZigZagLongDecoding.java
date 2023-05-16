@@ -62,25 +62,25 @@ public final class ZigZagLongDecoding {
         AdjacencyCompressor.ValueMapper mapper
     ) {
         int currentChunk = 0;
-        byte[] chunk = chunks[currentChunk];
         long input, startValue = 0L, value = 0L;
-        int into = 0, shift = 0, offset = 0;
+        int into = 0, shift = 0;
 
-        while (numberOfBytes-- > 0) {
-            if (offset == chunk.length) {
-                chunk = chunks[++currentChunk];
-                offset = 0;
+        while (numberOfBytes > 0) {
+            var chunk = chunks[currentChunk++];
+            var bytesToConsumeForChunk = Math.min(numberOfBytes, chunk.length);
+            for (int offset = 0; offset < bytesToConsumeForChunk; offset++) {
+                input = chunk[offset];
+                value += (input & 127L) << shift;
+                if ((input & 128L) == 128L) {
+                    startValue += ((value >>> 1L) ^ -(value & 1L));
+                    out[into++] = mapper.map(startValue);
+                    value = 0L;
+                    shift = 0;
+                } else {
+                    shift += 7;
+                }
             }
-            input = chunk[offset++];
-            value += (input & 127L) << shift;
-            if ((input & 128L) == 128L) {
-                startValue += ((value >>> 1L) ^ -(value & 1L));
-                out[into++] = mapper.map(startValue);
-                value = 0L;
-                shift = 0;
-            } else {
-                shift += 7;
-            }
+            numberOfBytes -= bytesToConsumeForChunk;
         }
         return into;
     }
