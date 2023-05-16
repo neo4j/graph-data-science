@@ -39,7 +39,7 @@ import org.neo4j.gds.pregel.proc.PregelWriteComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 
 import javax.lang.model.element.Modifier;
-import java.lang.reflect.Type;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.pregel.PregelGenerator.ALGORITHM_FACTORY_SUFFIX;
 import static org.neo4j.gds.beta.pregel.PregelGenerator.ALGORITHM_SPECIFICATION_SUFFIX;
@@ -56,19 +56,22 @@ public class SpecificationGenerator {
     }
 
     TypeSpec.Builder typeSpec(TypeName configTypeName, GDSMode mode) {
-        var className = derivedClassName(ALGORITHM_SPECIFICATION_SUFFIX);
+        var className = derivedClassName(mode.camelCase() + ALGORITHM_SPECIFICATION_SUFFIX);
         var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
         var algorithmFactoryClassName = derivedClassName(ALGORITHM_FACTORY_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
             .classBuilder(className)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .superclass(ParameterizedTypeName.get(
+            .addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(AlgorithmSpec.class),
                 algorithmClassName,
                 ClassName.get(PregelResult.class),
                 configTypeName,
-                ClassName.get(resultTypeForMode(mode)),
+                ParameterizedTypeName.get(
+                    ClassName.get(Stream.class),
+                    ClassName.get(resultTypeForMode(mode))
+                ),
                 algorithmFactoryClassName
                 // TODO: add originating element
             ));
@@ -106,12 +109,13 @@ public class SpecificationGenerator {
                     ClassName.get(NewConfigFunction.class),
                     configTypeName
                 )
-            ).addStatement("return (__, userInput) -> $T.of(userInput)", PregelProcedureConfig.class)
+            ).addStatement("return (__, userInput) -> $T.of(userInput)", configTypeName)
             .build();
     }
 
     MethodSpec computationResultConsumerMethod(TypeName configTypeName, GDSMode mode) {
         var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
+        var computationResultConsumerClassName = ClassName.get(computationResultConsumerTypeForMode(mode));
         return MethodSpec.methodBuilder("computationResultConsumer")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -119,17 +123,23 @@ public class SpecificationGenerator {
                 ParameterizedTypeName.get(
                     ClassName.get(ComputationResultConsumer.class),
                     algorithmClassName,
-                    configTypeName
-                ))
-            .addStatement("return new $T<>()", ClassName.get(computationResultConsumerTypeForMode(mode))
-            ).build();
+                    ClassName.get(PregelResult.class),
+                    configTypeName,
+                    ParameterizedTypeName.get(
+                        ClassName.get(Stream.class),
+                        ClassName.get(resultTypeForMode(mode))
+                    )
+                )
+            )
+            .addStatement("return new $T<>()", computationResultConsumerClassName)
+            .build();
     }
 
     private ClassName derivedClassName(String suffix) {
         return ClassName.get(packageName, computationName + suffix);
     }
 
-    private Type resultTypeForMode(GDSMode mode) {
+    private Class<?> resultTypeForMode(GDSMode mode) {
         switch (mode) {
             case STATS: return PregelStatsResult.class;
             case WRITE: return PregelWriteResult.class;
@@ -139,7 +149,7 @@ public class SpecificationGenerator {
         }
     }
 
-    private Type computationResultConsumerTypeForMode(GDSMode mode) {
+    private Class<?> computationResultConsumerTypeForMode(GDSMode mode) {
         switch (mode) {
             case STATS: return PregelStatsComputationResultConsumer.class;
             case WRITE: return PregelWriteComputationResultConsumer.class;

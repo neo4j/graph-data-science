@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
-public abstract class PregelStreamComputationResultConsumer<
+public class PregelStreamComputationResultConsumer<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig
   > implements ComputationResultConsumer<ALGO, PregelResult, CONFIG, Stream<PregelStreamResult>> {

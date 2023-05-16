@@ -24,7 +24,7 @@ import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 
-public abstract class PregelWriteComputationResultConsumer<
+public class PregelWriteComputationResultConsumer<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig
   > extends WriteNodePropertiesComputationResultConsumer<ALGO, PregelResult, CONFIG, PregelWriteResult>

@@ -38,11 +38,11 @@ class SpecificationGeneratorTest {
         var specificationType = specificationGenerator.typeSpec(configTypeName, GDSMode.STATS).build();
 
         assertThat(specificationType.toString()).isEqualTo("" +
-            "public final class FooAlgorithmSpecification extends org.neo4j.gds.executor.AlgorithmSpec<" +
+            "public final class FooStatsSpecification implements org.neo4j.gds.executor.AlgorithmSpec<" +
             "gds.test.FooAlgorithm, " +
             "org.neo4j.gds.beta.pregel.PregelResult, " +
             "org.neo4j.gds.beta.pregel.PregelProcedureConfig, " +
-            "org.neo4j.gds.pregel.proc.PregelStatsResult, " +
+            "java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelStatsResult>, " +
             "gds.test.FooAlgorithmFactory> {" +
             System.lineSeparator() +
             "}" +
@@ -93,7 +93,7 @@ class SpecificationGeneratorTest {
         var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(configTypeName, GDSMode.STATS).toString();
         assertThat(computationResultConsumerMethod).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public org.neo4j.gds.executor.ComputationResultConsumer<gds.test.FooAlgorithm, org.neo4j.gds.beta.pregel.PregelProcedureConfig> computationResultConsumer(" + NL +
+            "public org.neo4j.gds.executor.ComputationResultConsumer<gds.test.FooAlgorithm, org.neo4j.gds.beta.pregel.PregelResult, org.neo4j.gds.beta.pregel.PregelProcedureConfig, java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelStatsResult>> computationResultConsumer(" + NL +
             "    ) {" + NL +
             "  return new org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer<>();" + NL +
             "}" + NL

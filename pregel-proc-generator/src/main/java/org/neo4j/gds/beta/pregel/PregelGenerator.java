@@ -24,6 +24,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
@@ -38,7 +39,7 @@ class PregelGenerator {
     static final String PROCEDURE_SUFFIX = "Proc";
     static final String ALGORITHM_SUFFIX = "Algorithm";
     static final String ALGORITHM_FACTORY_SUFFIX = ALGORITHM_SUFFIX + "Factory";
-    static final String ALGORITHM_SPECIFICATION_SUFFIX = ALGORITHM_SUFFIX + "Specification";
+    static final String ALGORITHM_SPECIFICATION_SUFFIX = "Specification";
 
     private final Elements elementUtils;
     private final SourceVersion sourceVersion;
@@ -55,7 +56,19 @@ class PregelGenerator {
         );
     }
 
+    private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator) {
+        var procedure = ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec);
+        var specification = specificationGenerator.typeSpec(pregelSpec.configTypeName(), mode)
+            .addMethod(specificationGenerator.nameMethod())
+            .addMethod(specificationGenerator.algorithmFactoryMethod())
+            .addMethod(specificationGenerator.newConfigFunctionMethod(pregelSpec.configTypeName()))
+            .addMethod(specificationGenerator.computationResultConsumerMethod(pregelSpec.configTypeName(), mode))
+            .build();
+        return Stream.of(procedure, specification);
+    }
+
     List<JavaFile> generate(PregelValidation.Spec pregelSpec) {
+        var specificationGenerator = new SpecificationGenerator(pregelSpec.rootPackage(), pregelSpec.computationName());
         return Stream.concat(
             Stream.of(
                 new AlgorithmGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec(),
@@ -63,7 +76,7 @@ class PregelGenerator {
             ),
             Arrays
                 .stream(pregelSpec.procedureModes())
-                .map(mode -> ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec))
+                .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator))
         )
             .map(typeSpec -> fileOf(pregelSpec, typeSpec))
             .collect(Collectors.toList());
