@@ -109,7 +109,7 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
-                    .withArrowConnectionInfo(config.arrowConnectionInfo())
+                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {

@@ -149,7 +149,7 @@ public final class NodePropertiesWriter {
                     .withTerminationFlag(TerminationFlag.wrap(executionContext.terminationMonitor()))
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
-                    .withArrowConnectionInfo(config.arrowConnectionInfo())
+                    .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())
                     .build();
 
                 var writeNodeProperties =

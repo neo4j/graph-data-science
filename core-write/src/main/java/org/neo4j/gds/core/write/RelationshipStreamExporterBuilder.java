@@ -38,6 +38,7 @@ public abstract class RelationshipStreamExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected long relationshipCount = -1L;
     protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo;
+    protected String databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract RelationshipStreamExporter build();
 
@@ -81,8 +82,9 @@ public abstract class RelationshipStreamExporterBuilder {
         return this;
     }
 
-    public RelationshipStreamExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo) {
+    public RelationshipStreamExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
+        this.databaseName = databaseName;
         return this;
     }
 }

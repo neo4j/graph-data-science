@@ -147,7 +147,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
-            .withArrowConnectionInfo(arrowConnectionInfo)
+            .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseId().databaseName())
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

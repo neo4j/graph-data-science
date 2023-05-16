@@ -100,7 +100,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                         writeConcurrency,
                         executionContext
                     ))
-                    .withArrowConnectionInfo(config.arrowConnectionInfo())
+                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 

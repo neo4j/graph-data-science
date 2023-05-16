@@ -96,7 +96,7 @@ public abstract class SimilarityWriteProc<
                                 .withGraph(similarityGraph)
                                 .withTerminationFlag(algorithm.getTerminationFlag())
                                 .withProgressTracker(progressTracker)
-                                .withArrowConnectionInfo(config.arrowConnectionInfo())
+                                .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
                                 .build();
 
                             if (SimilarityProc.shouldComputeHistogram(executionContext().returnColumns())) {
