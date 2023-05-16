@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.HdrHistogram.ConcurrentHistogram;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
