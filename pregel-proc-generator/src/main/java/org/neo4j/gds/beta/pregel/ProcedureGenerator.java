@@ -24,6 +24,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.BaseProc;
@@ -105,7 +106,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     @NotNull
     private TypeSpec.Builder getTypeSpecBuilder(
-        com.squareup.javapoet.TypeName configTypeName,
+        TypeName configTypeName,
         ClassName procedureClassName,
         ClassName algorithmClassName
     ) {
