@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.core.compression.common.ZigZagLongDecoding.Identity.INSTANCE;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
+import static org.neo4j.gds.core.loading.ChunkedAdjacencyLists.NEXT_CHUNK_LENGTH;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ChunkedAdjacencyListsTest {
@@ -78,7 +79,7 @@ class ChunkedAdjacencyListsTest {
         var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
 
         var smallList = new long[]{42L, 1337L, 5L};
-        var largeList = new long[11240];
+        var largeList = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
         for (int i = 0; i < largeList.length; i++) {
             largeList[i] = i;
         }
@@ -98,7 +99,7 @@ class ChunkedAdjacencyListsTest {
             position,
             INSTANCE
         ));
-        assertThat(actualTargets).containsExactly(expectedTargets);
+        assertThat(Arrays.compare(expectedTargets, actualTargets)).isEqualTo(0);
     }
 
     @Test

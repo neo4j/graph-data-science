@@ -54,7 +54,7 @@ public final class ChunkedAdjacencyLists {
     private final HugeSparseLongList lastValues;
     private final HugeSparseIntList lengths;
 
-    private final byte[] compressBuffer = new byte[1 << 20]; // 1MiB
+    private byte[] compressBuffer = new byte[1 << 20]; // 1MiB
 
     public static MemoryEstimation memoryEstimation(long avgDegree, long nodeCount, int propertyCount) {
         // Best case scenario:
@@ -129,6 +129,10 @@ public final class ChunkedAdjacencyLists {
             requiredBytes += encodedVLongSize(compressedValue);
         }
         var position = positions.get(index);
+
+        if (requiredBytes > this.compressBuffer.length) {
+            this.compressBuffer = new byte[BitUtil.nextHighestPowerOfTwo(requiredBytes)];
+        }
         encodeVLongs(targets, start, end, this.compressBuffer, 0);
 
         copyCompressedBytes(index, position, this.compressBuffer, requiredBytes);
@@ -183,7 +187,7 @@ public final class ChunkedAdjacencyLists {
         }
     }
 
-    private static final int[] NEXT_CHUNK_LENGTH = {
+    static final int[] NEXT_CHUNK_LENGTH = {
         64,
         256,
         512,
