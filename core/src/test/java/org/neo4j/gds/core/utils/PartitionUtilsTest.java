@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.impl.block.factory.Functions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -439,7 +438,6 @@ class PartitionUtilsTest {
         );
     }
 
-    @Disabled("not implemented yet")
     @Test
     void testDegreePartitioningWithMorePartitionsThanThreads() {
 
@@ -451,16 +449,16 @@ class PartitionUtilsTest {
         // 6 partitions (good):
         // {20} {20} {20} {20} {10} {10}
 
-        var nodeCount = 6;
         int[] degrees = {20, 20, 20, 20, 10, 10};
+        var nodeCount = degrees.length;
+        long relCount = Arrays.stream(degrees).sum();
         var concurrency = 4;
-        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency, 1);
 
-        List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
+        Stream<DegreePartition> partitions = PartitionUtils.degreePartitionStream(
             nodeCount,
-            idx -> degrees[(int) idx],
-            degreesPerPartition,
-            Function.identity()
+            relCount,
+            concurrency,
+            idx -> degrees[(int) idx]
         );
 
         assertThat(partitions).containsExactly(
@@ -468,7 +466,7 @@ class PartitionUtilsTest {
             DegreePartition.of(1, 1, 20),
             DegreePartition.of(2, 1, 20),
             DegreePartition.of(3, 1, 20),
-            DegreePartition.of(4, 2, 10),
+            DegreePartition.of(4, 1, 10),
             DegreePartition.of(5, 1, 10)
         );
     }

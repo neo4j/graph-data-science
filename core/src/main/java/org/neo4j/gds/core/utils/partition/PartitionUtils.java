@@ -180,18 +180,23 @@ public final class PartitionUtils {
     /**
      * Returns a stream of many small partitions (in contrast to list of few big ones)
      */
-    public static Stream<DegreePartition> degreePartition(
+    public static Stream<DegreePartition> degreePartitionStream(
         long nodeCount,
         long relationshipCount,
         int concurrency,
         DegreeFunction degrees
     ) {
-        long numRelationshipsInPartition = Math.floorDiv(relationshipCount, concurrency * DIVISION_FACTOR);
+
+        long numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency * DIVISION_FACTOR);
 
         Stream.Builder<DegreePartition> streamBuilder = Stream.builder();
 
         if (nodeCount <= 0) {
             return streamBuilder.build();
+        }
+
+        if (concurrency == 1) {
+            return Stream.of(DegreePartition.of(0, nodeCount, relationshipCount));
         }
 
         long currentStartNode = 0;
@@ -200,10 +205,12 @@ public final class PartitionUtils {
             long nextRelationshipCount = degrees.degree(i);
             if (currentRelationshipCount + nextRelationshipCount > numRelationshipsInPartition) {
                 streamBuilder.add(DegreePartition.of(currentStartNode, i - currentStartNode, currentRelationshipCount));
-            } else {
-
+                currentStartNode = i;
+                currentRelationshipCount = 0;
             }
+            currentRelationshipCount += nextRelationshipCount;
         }
+        streamBuilder.add(DegreePartition.of(currentStartNode, nodeCount - currentStartNode, currentRelationshipCount));
 
         return streamBuilder.build();
     }
