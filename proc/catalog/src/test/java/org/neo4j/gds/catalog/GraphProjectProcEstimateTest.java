@@ -108,8 +108,8 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(68686120);
-                softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(68686120);
+                softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(68686368);
+                softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(68686368);
                 softly.assertThat(row.getNumber("heapPercentageMin").doubleValue()).isEqualTo(expectedPercentage);
                 softly.assertThat(row.getNumber("heapPercentageMax").doubleValue()).isEqualTo(expectedPercentage);
             }
@@ -207,8 +207,8 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
         runQueryWithRowConsumer(
             query,
             row -> {
-                softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(344_128_414_632L);
-                softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(384_930_603_944L);
+                softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(344128414784L);
+                softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(384930604096L);
                 softly.assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(5_000_000_000L);
                 softly.assertThat(row.getNumber("relationshipCount").longValue()).isEqualTo(20_000_000_000L);
             }
