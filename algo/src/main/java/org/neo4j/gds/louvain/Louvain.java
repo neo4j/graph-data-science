@@ -247,9 +247,10 @@ public final class Louvain extends Algorithm<LouvainResult> {
             .executorService(executorService)
             .build();
 
-        var relationshipCreators = PartitionUtils.degreePartition(
-            workingGraph,
+        // using degreePartitioning did not show an improvement -- assuming as tasks are too small
+        var relationshipCreators = PartitionUtils.rangePartition(
             concurrency,
+            workingGraph.nodeCount(),
             partition ->
                 new RelationshipCreator(
                     relationshipsBuilder,

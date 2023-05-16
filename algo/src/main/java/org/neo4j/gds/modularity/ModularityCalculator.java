@@ -70,14 +70,17 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
 
     @Override
     public ModularityResult compute() {
+        var nodeCount = graph.nodeCount();
+
         var communityCount = communityMapper.size();
         var insideRelationships = HugeAtomicDoubleArray.of(communityCount, ParallelDoublePageCreator.passThrough(concurrency));
         var totalCommunityRelationships = HugeAtomicDoubleArray.of(communityCount, ParallelDoublePageCreator.passThrough(concurrency));
         var totalRelationshipWeight = new DoubleAdder();
 
-        var tasks = PartitionUtils.degreePartition(
-            graph,
+        // using degreePartitioning did not show an improvement -- assuming as tasks are too small
+        var tasks = PartitionUtils.rangePartition(
             concurrency,
+            nodeCount,
             partition -> new RelationshipCountCollector(
                 partition,
                 graph,
