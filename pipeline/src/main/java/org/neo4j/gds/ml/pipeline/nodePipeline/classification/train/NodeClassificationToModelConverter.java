@@ -24,7 +24,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
 
 public class NodeClassificationToModelConverter implements ResultToModelConverter<NodeClassificationModelResult, NodeClassificationTrainResult> {
     private final NodeClassificationTrainingPipeline pipeline;

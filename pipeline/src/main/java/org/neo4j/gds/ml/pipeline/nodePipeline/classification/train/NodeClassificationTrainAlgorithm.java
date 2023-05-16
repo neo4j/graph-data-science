@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
 
 public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeClassificationTrainResult,

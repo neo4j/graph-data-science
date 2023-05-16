@@ -19,22 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.compat.ProxyUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.MLTrainResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainAlgorithm;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
-import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -42,33 +31,26 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
-@GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
-public class NodeClassificationPipelineTrainProc extends TrainProc<
-    NodeClassificationTrainAlgorithm,
-    NodeClassificationModelResult,
-    NodeClassificationPipelineTrainConfig,
-    NodeClassificationPipelineTrainProc.NCTrainResult
-    > {
-
+public class NodeClassificationPipelineTrainProc extends BaseProc {
     @Context
     public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")
-    public Stream<NCTrainResult> train(
+    public Stream<NodeClassificationPipelineTrainResult> train(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         preparePipelineConfig(graphName, configuration);
-        return trainAndSetModelWithResult(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new NodeClassificationPipelineTrainSpec(databaseService, log),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train.estimate", mode = Mode.READ)
@@ -78,58 +60,15 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return new MemoryEstimationExecutor<>(
+            new NodeClassificationPipelineTrainSpec(databaseService, log),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
     public ExecutionContext executionContext() {
         return super.executionContext().withModelCatalog(modelCatalog);
-    }
-
-    @Override
-    protected NodeClassificationPipelineTrainConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeClassificationPipelineTrainConfig.of(username, config);
-    }
-
-
-    @Override
-    public GraphStoreAlgorithmFactory<
-        NodeClassificationTrainAlgorithm,
-        NodeClassificationPipelineTrainConfig
-    > algorithmFactory(ExecutionContext executionContext) {
-        var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
-        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext, gdsVersion);
-    }
-
-    @Override
-    protected String modelType() {
-        return NodeClassificationTrainingPipeline.MODEL_TYPE;
-    }
-
-    @Override
-    protected NCTrainResult constructProcResult(ComputationResult<
-        NodeClassificationTrainAlgorithm,
-        NodeClassificationModelResult,
-        NodeClassificationPipelineTrainConfig> computationResult) {
-        var transformedResult = computationResult.result();
-        return new NCTrainResult(transformedResult, computationResult.computeMillis());
-    }
-
-    @Override
-    protected Model<?, ?, ?> extractModel(NodeClassificationModelResult nodeClassificationModelResult) {
-        return nodeClassificationModelResult.model();
-    }
-
-    public static class NCTrainResult extends MLTrainResult {
-
-        public final Map<String, Object> modelSelectionStats;
-
-        public NCTrainResult(Optional<NodeClassificationModelResult> pipelineResult, long trainMillis) {
-            super(pipelineResult.map(NodeClassificationModelResult::model), trainMillis);
-            this.modelSelectionStats = pipelineResult
-                .map(NodeClassificationModelResult::trainingStatistics)
-                .map(TrainingStatistics::toMap)
-                .orElseGet(Collections::emptyMap);
-        }
     }
 }
