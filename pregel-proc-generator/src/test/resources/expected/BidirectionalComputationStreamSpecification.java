@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel.cc;
 
+import javax.annotation.processing.Generated;
 
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
@@ -31,6 +32,7 @@ import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
 import java.util.stream.Stream;
 
+@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class BidrectionalComputationStreamSpecification implements AlgorithmSpec<BidirectionalComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>, BidirectionalComputationAlgorithmFactory> {
 
     @Override

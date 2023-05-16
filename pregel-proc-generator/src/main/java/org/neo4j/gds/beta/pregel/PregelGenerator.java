@@ -44,12 +44,13 @@ class PregelGenerator {
 
     private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator) {
         var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec);
-        var specification = specificationGenerator.typeSpec(pregelSpec.configTypeName(), mode)
+        var specificationBuilder = specificationGenerator.typeSpec(pregelSpec.configTypeName(), mode)
             .addMethod(specificationGenerator.nameMethod())
             .addMethod(specificationGenerator.algorithmFactoryMethod())
             .addMethod(specificationGenerator.newConfigFunctionMethod(pregelSpec.configTypeName()))
-            .addMethod(specificationGenerator.computationResultConsumerMethod(pregelSpec.configTypeName(), mode))
-            .build();
+            .addMethod(specificationGenerator.computationResultConsumerMethod(pregelSpec.configTypeName(), mode));
+        addGeneratedAnnotation(specificationBuilder);
+        var specification = specificationBuilder.build();
         return Stream.of(procedure, specification);
     }
 

@@ -75,7 +75,6 @@ public class SpecificationGenerator {
                 algorithmFactoryClassName
                 // TODO: add originating element
             ));
-        // TODO: add generated annotation
         return typeSpecBuilder;
     }
 

@@ -31,6 +31,7 @@ import org.neo4j.gds.pregel.proc.PregelMutateResult;
 
 import java.util.Stream;
 
+@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationMutateSpecification implements AlgorithmSpec<ComputationAlgorithm, PregelResult, PregelProcedureConfig, Steam<PregelMutateResult>, ComputationAlgorithmFactory> {
 
     @Override

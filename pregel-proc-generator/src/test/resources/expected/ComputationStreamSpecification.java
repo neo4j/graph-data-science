@@ -31,6 +31,7 @@ import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
 import java.util.Stream;
 
+@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationStreamSpecification implements AlgorithmSpec<ComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>, ComputationAlgorithmFactory> {
 
     @Override
