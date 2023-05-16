@@ -36,12 +36,14 @@ import java.util.function.Function;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PartitionUtils {
 
     public static final double MIN_PARTITION_CAPACITY = 0.67;
+    public static final int DIVISION_FACTOR = 10;
 
     private PartitionUtils() {}
 
@@ -173,6 +175,37 @@ public final class PartitionUtils {
             BitUtil.ceilDiv(actualWeightSum, concurrency)
         );
         return degreePartitionWithBatchSize(graph.nodeCount(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
+    }
+
+    /**
+     * Returns a stream of many small partitions (in contrast to list of few big ones)
+     */
+    public static Stream<DegreePartition> degreePartition(
+        long nodeCount,
+        long relationshipCount,
+        int concurrency,
+        DegreeFunction degrees
+    ) {
+        long numRelationshipsInPartition = Math.floorDiv(relationshipCount, concurrency * DIVISION_FACTOR);
+
+        Stream.Builder<DegreePartition> streamBuilder = Stream.builder();
+
+        if (nodeCount <= 0) {
+            return streamBuilder.build();
+        }
+
+        long currentStartNode = 0;
+        long currentRelationshipCount = degrees.degree(0);
+        for (long i = 1; i < nodeCount; ++i) {
+            long nextRelationshipCount = degrees.degree(i);
+            if (currentRelationshipCount + nextRelationshipCount > numRelationshipsInPartition) {
+                streamBuilder.add(DegreePartition.of(currentStartNode, i - currentStartNode, currentRelationshipCount));
+            } else {
+
+            }
+        }
+
+        return streamBuilder.build();
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
