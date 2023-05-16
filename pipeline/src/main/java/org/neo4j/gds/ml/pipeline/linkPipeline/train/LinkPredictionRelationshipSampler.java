@@ -26,7 +26,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -189,7 +188,7 @@ public class LinkPredictionRelationshipSampler {
             targetNodes,
             selectedRelType,
             remainingRelType,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY
+            trainConfig.concurrency()
         );
 
         var splitResult = splitter.splitPositiveExamples(
