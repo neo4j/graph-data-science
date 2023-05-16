@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -31,16 +32,15 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
 import java.util.Map;
+import java.util.Optional;
 
 class AlgorithmGenerator extends PregelGenerator {
     private final PregelValidation.Spec pregelSpec;
 
-    AlgorithmGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
-        super(elementUtils, sourceVersion);
+    AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
+        super(generatedAnnotationSpec);
         this.pregelSpec = pregelSpec;
     }
 

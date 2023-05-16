@@ -41,10 +41,9 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -53,22 +52,21 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     final PregelValidation.Spec pregelSpec;
 
-    ProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
-        super(elementUtils, sourceVersion);
+    ProcedureGenerator(Optional<AnnotationSpec> annotationSpec, PregelValidation.Spec pregelSpec) {
+        super(annotationSpec);
         this.pregelSpec = pregelSpec;
     }
 
     static TypeSpec forMode(
         GDSMode mode,
-        Elements elementUtils,
-        SourceVersion sourceVersion,
+        Optional<AnnotationSpec> generatedAnnotationSpec,
         PregelValidation.Spec pregelSpec
     ) {
         switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
-            case WRITE: return new WriteProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
-            case MUTATE: return new MutateProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
-            case STATS: return new StatsProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
+            case STREAM: return new StreamProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
+            case WRITE: return new WriteProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
+            case MUTATE: return new MutateProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
+            case STATS: return new StatsProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
             default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
         }
     }

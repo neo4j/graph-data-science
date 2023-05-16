@@ -19,21 +19,17 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import com.squareup.javapoet.AnnotationSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.pregel.proc.PregelStatsProc;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 
-import javax.lang.model.SourceVersion;
-import javax.lang.model.util.Elements;
+import java.util.Optional;
 
 class StatsProcedureGenerator extends WriteProcedureGenerator {
 
-    StatsProcedureGenerator(
-        Elements elementUtils,
-        SourceVersion sourceVersion,
-        PregelValidation.Spec pregelSpec
-    ) {
-        super(elementUtils, sourceVersion, pregelSpec);
+    StatsProcedureGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
+        super(generatedAnnotationSpec, pregelSpec);
     }
 
     @Override

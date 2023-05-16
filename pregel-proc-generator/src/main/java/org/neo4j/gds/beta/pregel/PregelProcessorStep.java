@@ -23,6 +23,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 
 import javax.annotation.processing.Filer;
@@ -32,6 +33,7 @@ import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class PregelProcessorStep implements BasicAnnotationProcessor.Step {
 
@@ -76,13 +78,20 @@ public final class PregelProcessorStep implements BasicAnnotationProcessor.Step 
     private ProcessResult process(Element element) {
         var maybePregelSpec = pregelValidation.validate(element);
 
-        if (maybePregelSpec.isEmpty()) {
-            return ProcessResult.INVALID;
-        }
+        return maybePregelSpec.map((pregelSpec) -> {
+            var files = pregelGenerator.generate(pregelSpec)
+                .map(typeSpec -> fileOf(pregelSpec, typeSpec))
+                .collect(Collectors.toList());
+            return writeFiles(element, files);
+        }).orElse(ProcessResult.INVALID);
+    }
 
-        var files = pregelGenerator.generate(maybePregelSpec.get());
-
-        return writeFiles(element, files);
+    private JavaFile fileOf(PregelValidation.Spec pregelSpec, TypeSpec typeSpec) {
+        return JavaFile
+            .builder(pregelSpec.rootPackage(), typeSpec)
+            .indent("    ")
+            .skipJavaLangImports(true)
+            .build();
     }
 
     private ProcessResult writeFiles(Element element, List<JavaFile> files) {

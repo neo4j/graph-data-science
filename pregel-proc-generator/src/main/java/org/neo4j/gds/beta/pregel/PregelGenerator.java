@@ -19,19 +19,13 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import com.google.auto.common.GeneratedAnnotationSpecs;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 
-import javax.lang.model.SourceVersion;
-import javax.lang.model.util.Elements;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class PregelGenerator {
@@ -41,23 +35,15 @@ class PregelGenerator {
     static final String ALGORITHM_FACTORY_SUFFIX = ALGORITHM_SUFFIX + "Factory";
     static final String ALGORITHM_SPECIFICATION_SUFFIX = "Specification";
 
-    private final Elements elementUtils;
-    private final SourceVersion sourceVersion;
     // produces @Generated meta info
     private final Optional<AnnotationSpec> generatedAnnotationSpec;
 
-    PregelGenerator(Elements elementUtils, SourceVersion sourceVersion) {
-        this.elementUtils = elementUtils;
-        this.sourceVersion = sourceVersion;
-        this.generatedAnnotationSpec = GeneratedAnnotationSpecs.generatedAnnotationSpec(
-            elementUtils,
-            sourceVersion,
-            PregelProcessor.class
-        );
+    PregelGenerator(Optional<AnnotationSpec> generatedAnnotationSpec) {
+        this.generatedAnnotationSpec = generatedAnnotationSpec;
     }
 
     private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator) {
-        var procedure = ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec);
+        var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec);
         var specification = specificationGenerator.typeSpec(pregelSpec.configTypeName(), mode)
             .addMethod(specificationGenerator.nameMethod())
             .addMethod(specificationGenerator.algorithmFactoryMethod())
@@ -67,19 +53,17 @@ class PregelGenerator {
         return Stream.of(procedure, specification);
     }
 
-    List<JavaFile> generate(PregelValidation.Spec pregelSpec) {
+    Stream<TypeSpec> generate(PregelValidation.Spec pregelSpec) {
         var specificationGenerator = new SpecificationGenerator(pregelSpec.rootPackage(), pregelSpec.computationName());
         return Stream.concat(
             Stream.of(
-                new AlgorithmGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec(),
-                new AlgorithmFactoryGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec()
+                new AlgorithmGenerator(generatedAnnotationSpec, pregelSpec).typeSpec(),
+                new AlgorithmFactoryGenerator(generatedAnnotationSpec, pregelSpec).typeSpec()
             ),
             Arrays
                 .stream(pregelSpec.procedureModes())
                 .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator))
-        )
-            .map(typeSpec -> fileOf(pregelSpec, typeSpec))
-            .collect(Collectors.toList());
+        );
     }
 
     // produces @Generated meta info
@@ -89,13 +73,5 @@ class PregelGenerator {
 
     ClassName computationClassName(PregelValidation.Spec pregelSpec, String suffix) {
         return ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + suffix);
-    }
-
-    private JavaFile fileOf(PregelValidation.Spec pregelSpec, TypeSpec typeSpec) {
-        return JavaFile
-            .builder(pregelSpec.rootPackage(), typeSpec)
-            .indent("    ")
-            .skipJavaLangImports(true)
-            .build();
     }
 }

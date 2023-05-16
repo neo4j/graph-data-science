@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -29,15 +30,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
+import java.util.Optional;
 
 public class AlgorithmFactoryGenerator extends PregelGenerator {
     private final PregelValidation.Spec pregelSpec;
 
-    AlgorithmFactoryGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
-        super(elementUtils, sourceVersion);
+    AlgorithmFactoryGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
+        super(generatedAnnotationSpec);
         this.pregelSpec = pregelSpec;
     }
 

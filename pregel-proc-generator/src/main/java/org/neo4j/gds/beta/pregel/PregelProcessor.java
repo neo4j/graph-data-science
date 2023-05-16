@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.pregel;
 
 import com.google.auto.common.BasicAnnotationProcessor;
+import com.google.auto.common.GeneratedAnnotationSpecs;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.Processor;
@@ -42,16 +43,18 @@ public final class PregelProcessor extends BasicAnnotationProcessor {
             processingEnv.getTypeUtils()
         );
 
-        var pregelGeneration = new PregelGenerator(
+        var generatedAnnotationSpec = GeneratedAnnotationSpecs.generatedAnnotationSpec(
             processingEnv.getElementUtils(),
-            getSupportedSourceVersion()
+            getSupportedSourceVersion(),
+            PregelProcessor.class
         );
+        var pregelGenerator = new PregelGenerator(generatedAnnotationSpec);
 
         var processingStep = new PregelProcessorStep(
             processingEnv.getMessager(),
             processingEnv.getFiler(),
             pregelValidation,
-            pregelGeneration
+            pregelGenerator
         );
 
         return Set.of(processingStep);

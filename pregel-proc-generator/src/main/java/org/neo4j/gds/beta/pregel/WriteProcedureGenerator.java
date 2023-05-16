@@ -19,28 +19,24 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.pregel.proc.PregelWriteProc;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
+import java.util.Optional;
 
 class WriteProcedureGenerator extends ProcedureGenerator {
 
-    WriteProcedureGenerator(
-        Elements elementUtils,
-        SourceVersion sourceVersion,
-        PregelValidation.Spec pregelSpec
-    ) {
-        super(elementUtils, sourceVersion, pregelSpec);
+    WriteProcedureGenerator(Optional<AnnotationSpec> annotationSpec, PregelValidation.Spec pregelSpec) {
+        super(annotationSpec, pregelSpec);
     }
 
     @Override
