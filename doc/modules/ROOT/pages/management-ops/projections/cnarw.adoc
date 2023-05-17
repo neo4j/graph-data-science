@@ -1,9 +1,9 @@
-[[alpha-algorithms-cnarw]]
-[.alpha]
+[[algorithms-cnarw]]
+[.beta]
 = Common Neighbour Aware Random Walk sampling
 :description: This section describes the Common Neighbour Aware Random Walk sampling algorithm in the Neo4j Graph Data Science library.
 
-include::partial$/operations-reference/alpha-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 :directed:
 :undirected:
@@ -47,7 +47,7 @@ Same as in the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syn
 .The following describes the API for running the algorithm
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.sample.cnarw(
+CALL gds.graph.sample.cnarw(
   graphName: String,
   fromGraphName: String,
   configuration: Map
@@ -70,7 +70,7 @@ YIELD
 | configuration       | Map     | Additional parameters to configure the subgraph sampling.
 |===
 
-[[alpha-algorithms-cnarw-syntax-configuration]]
+[[algorithms-cnarw-syntax-configuration]]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
@@ -176,7 +176,7 @@ Since we have six nodes total in our graph, and 5/10 = 0.5 we will use this as o
 [source, cypher, role=noplay]
 ----
 MATCH (start:female {id: 'Juliette'})
-CALL gds.alpha.graph.sample.cnarw('mySampleCNARW', 'myGraph',
+CALL gds.graph.sample.cnarw('mySampleCNARW', 'myGraph',
 {
     samplingRatio: 0.5,
     startNodes: [id(start)]

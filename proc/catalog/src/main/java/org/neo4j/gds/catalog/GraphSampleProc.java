@@ -60,7 +60,7 @@ public class GraphSampleProc extends CatalogProc {
     }
 
 
-    @Procedure(name = "gds.alpha.graph.sample.cnarw", mode = READ)
+    @Procedure(name = "gds.graph.sample.cnarw", mode = READ)
     @Description(CNARW_DESCRIPTION)
     public Stream<RandomWalkSamplingResult> sampleCNARW(
         @Name(value = "graphName") String graphName,
