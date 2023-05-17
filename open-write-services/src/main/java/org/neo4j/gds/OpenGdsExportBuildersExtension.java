@@ -21,25 +21,24 @@ package org.neo4j.gds;
 
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.kernel.extension.ExtensionFactory;
-import org.neo4j.kernel.extension.ExtensionType;
-import org.neo4j.kernel.extension.context.ExtensionContext;
-import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.configuration.Config;
+import org.neo4j.gds.core.write.AbstractExportBuildersExtension;
+import org.neo4j.gds.core.write.ExportBuildersProviderSelector;
+import org.neo4j.gds.core.write.NativeExportBuildersProvider;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 @ServiceProvider
-public class OpenGdsExportBuildersExtension extends ExtensionFactory<OpenGdsExportBuildersExtension.Dependencies> {
+public class OpenGdsExportBuildersExtension extends AbstractExportBuildersExtension {
 
     public OpenGdsExportBuildersExtension() {
-        super(ExtensionType.GLOBAL, "GDS");
+        super();
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new OpenGdsExportBuildersContextProvider(dependencies.globalProcedures());
-    }
-
-    public interface Dependencies {
-        GlobalProcedures globalProcedures();
+    protected ExportBuildersProviderSelector exportBuildersProviderSelector(
+        GraphDatabaseService graphDatabaseService,
+        Config config
+    ) {
+        return NativeExportBuildersProvider::new;
     }
 }
