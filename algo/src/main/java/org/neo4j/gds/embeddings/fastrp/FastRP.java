@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -190,13 +191,11 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) == 0) return;
         progressTracker.beginSubTask();
 
-        var tasks = partitions.stream()
-            .map(AddInitialStateToEmbeddingTask::new)
-            .collect(Collectors.toList());
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .run();
+        ParallelUtil.parallelStreamConsume(
+            partitions.stream(),
+            concurrency,
+            (stream) -> stream.forEach((partition) -> this.addInitialStateToEmbedding(partition))
+        );
         progressTracker.endSubTask();
     }
 
@@ -388,22 +387,16 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         }
     }
 
-    private final class AddInitialStateToEmbeddingTask implements Runnable {
-        private final Partition partition;
-
-        private AddInitialStateToEmbeddingTask(Partition partition) {this.partition = partition;}
-
-        @Override
-        public void run() {
-            partition.consume( nodeId -> {
-                var initialVector = embeddingB.get(nodeId);
-                var l2Norm= l2Norm( initialVector);
-                float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
-                addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
-            });
-            progressTracker.logProgress(partition.nodeCount());
-        }
+    private void addInitialStateToEmbedding(Partition partition) {
+        partition.consume( nodeId -> {
+            var initialVector = embeddingB.get(nodeId);
+            var l2Norm= l2Norm( initialVector);
+            float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
+            addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
+        });
+        progressTracker.logProgress(partition.nodeCount());
     }
+
     private final class PropagateEmbeddingsTask implements Runnable {
 
         private final Partition partition;
