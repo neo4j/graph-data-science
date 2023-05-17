@@ -20,6 +20,7 @@
 package org.neo4j.gds.collections.hsl;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.CollectionStep;
 import org.neo4j.gds.collections.HugeSparseList;
@@ -31,6 +32,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 import java.util.Optional;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
@@ -100,23 +102,20 @@ final class HugeSparseListValidation implements CollectionStep.Validation<HugeSp
     }
 
     private boolean isValidValueType(TypeMirror valueType) {
-//        var isPrimitive = valueType.getKind().isPrimitive();
-//        var isArray = valueType.getKind() == TypeKind.ARRAY;
-//
-//        var errorMsg = "value type must be a primitive type or a primitive array type";
-//
-//        if (!isPrimitive && !isArray) {
-//            messager.printMessage(Diagnostic.Kind.ERROR, errorMsg);
-//            return false;
-//        }
-//
-//        if (isArray) {
-//            var componentType = ((ArrayTypeName) TypeName.get(valueType)).componentType;
-//            if (!componentType.isPrimitive()) {
-//                messager.printMessage(Diagnostic.Kind.ERROR, errorMsg);
-//                return false;
-//            }
-//        }
+        var isArray = valueType.getKind() == TypeKind.ARRAY;
+        if (isArray) {
+            var componentType = MoreTypes.asArray(valueType).getComponentType();
+            return isValidValueType(componentType);
+        }
+
+        var isPrimitive = valueType.getKind().isPrimitive();
+        if (!isPrimitive) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "value type must be a primitive type or a primitive array type"
+            );
+            return false;
+        }
 
         return true;
     }
