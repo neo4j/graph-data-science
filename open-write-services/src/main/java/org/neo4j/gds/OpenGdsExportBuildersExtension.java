@@ -30,10 +30,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 @ServiceProvider
 public class OpenGdsExportBuildersExtension extends AbstractExportBuildersExtension {
 
-    public OpenGdsExportBuildersExtension() {
-        super();
-    }
-
     @Override
     protected ExportBuildersProviderSelector exportBuildersProviderSelector(
         GraphDatabaseService graphDatabaseService,
