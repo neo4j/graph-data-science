@@ -73,7 +73,6 @@ public class SpecificationGenerator {
                     ClassName.get(resultTypeForMode(mode))
                 ),
                 algorithmFactoryClassName
-                // TODO: add originating element
             ));
         return typeSpecBuilder;
     }

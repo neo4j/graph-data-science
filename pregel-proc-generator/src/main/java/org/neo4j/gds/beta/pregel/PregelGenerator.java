@@ -48,7 +48,8 @@ class PregelGenerator {
             .addMethod(specificationGenerator.nameMethod())
             .addMethod(specificationGenerator.algorithmFactoryMethod())
             .addMethod(specificationGenerator.newConfigFunctionMethod(pregelSpec.configTypeName()))
-            .addMethod(specificationGenerator.computationResultConsumerMethod(pregelSpec.configTypeName(), mode));
+            .addMethod(specificationGenerator.computationResultConsumerMethod(pregelSpec.configTypeName(), mode))
+            .addOriginatingElement(pregelSpec.element());
         addGeneratedAnnotation(specificationBuilder);
         var specification = specificationBuilder.build();
         return Stream.of(procedure, specification);
