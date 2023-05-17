@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelWriteProc;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -36,8 +37,12 @@ import java.util.Optional;
 
 class WriteProcedureGenerator extends ProcedureGenerator {
 
-    WriteProcedureGenerator(Optional<AnnotationSpec> annotationSpec, PregelValidation.Spec pregelSpec) {
-        super(annotationSpec, pregelSpec);
+    WriteProcedureGenerator(
+        Optional<AnnotationSpec> annotationSpec,
+        PregelValidation.Spec pregelSpec,
+        TypeNames typeNames
+    ) {
+        super(annotationSpec, pregelSpec, typeNames);
     }
 
     @Override
@@ -72,9 +77,9 @@ class WriteProcedureGenerator extends ProcedureGenerator {
             .returns(ParameterizedTypeName.get(AbstractResultBuilder.class, procResultClass()))
             .addParameter(ParameterizedTypeName.get(
                 ClassName.get(ComputationResult.class),
-                computationClassName(pregelSpec, ALGORITHM_SUFFIX),
+                typeNames.algorithm(),
                 ClassName.get(PregelResult.class),
-                pregelSpec.configTypeName()
+                typeNames.config()
             ), "computeResult")
             .addParameter(ExecutionContext.class, "executionContext")
             .addStatement("var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0)")

@@ -35,6 +35,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelBaseProc;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -52,22 +53,25 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 abstract class ProcedureGenerator extends PregelGenerator {
 
     final PregelValidation.Spec pregelSpec;
+    final TypeNames typeNames;
 
-    ProcedureGenerator(Optional<AnnotationSpec> annotationSpec, PregelValidation.Spec pregelSpec) {
+    ProcedureGenerator(Optional<AnnotationSpec> annotationSpec, PregelValidation.Spec pregelSpec, TypeNames typeNames) {
         super(annotationSpec);
         this.pregelSpec = pregelSpec;
+        this.typeNames = typeNames;
     }
 
     static TypeSpec forMode(
         GDSMode mode,
         Optional<AnnotationSpec> generatedAnnotationSpec,
-        PregelValidation.Spec pregelSpec
+        PregelValidation.Spec pregelSpec,
+        TypeNames typeNames
     ) {
         switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
-            case WRITE: return new WriteProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
-            case MUTATE: return new MutateProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
-            case STATS: return new StatsProcedureGenerator(generatedAnnotationSpec, pregelSpec).typeSpec();
+            case STREAM: return new StreamProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
+            case WRITE: return new WriteProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
+            case MUTATE: return new MutateProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
+            case STATS: return new StatsProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
             default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
         }
     }
@@ -83,9 +87,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
     abstract MethodSpec procResultMethod();
 
     TypeSpec typeSpec() {
-        var configTypeName = pregelSpec.configTypeName();
-        var procedureClassName = computationClassName(pregelSpec, procGdsMode().camelCase() + PROCEDURE_SUFFIX);
-        var algorithmClassName = computationClassName(pregelSpec, ALGORITHM_SUFFIX);
+        var configTypeName = typeNames.config();
+        var procedureClassName = typeNames.procedure(procGdsMode());
+        var algorithmClassName = typeNames.algorithm();
 
         var typeSpecBuilder = getTypeSpecBuilder(configTypeName, procedureClassName, algorithmClassName);
 
@@ -95,7 +99,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
         typeSpecBuilder.addMethod(procEstimateMethod());
         typeSpecBuilder.addMethod(procResultMethod());
         typeSpecBuilder.addMethod(newConfigMethod());
-        typeSpecBuilder.addMethod(algorithmFactoryMethod(algorithmClassName));
+        typeSpecBuilder.addMethod(algorithmFactoryMethod());
 
         if (pregelSpec.requiresInverseIndex()) {
             typeSpecBuilder.addMethod(validationConfigMethod());
@@ -222,23 +226,22 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addModifiers(Modifier.PROTECTED)
             .addParameter(String.class, "username")
             .addParameter(CypherMapWrapper.class, "config")
-            .returns(pregelSpec.configTypeName())
-            .addStatement("return $T.of(config)", pregelSpec.configTypeName())
+            .returns(typeNames.config())
+            .addStatement("return $T.of(config)", typeNames.config())
             .build();
     }
 
-    private MethodSpec algorithmFactoryMethod(ClassName algorithmClassName) {
-        var factoryClassName = computationClassName(pregelSpec, ALGORITHM_FACTORY_SUFFIX);
+    private MethodSpec algorithmFactoryMethod() {
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .returns(ParameterizedTypeName.get(
                 ClassName.get(GraphAlgorithmFactory.class),
-                algorithmClassName,
-                pregelSpec.configTypeName()
+                typeNames.algorithm(),
+                typeNames.config()
             ))
-            .addStatement("return new $T()", factoryClassName)
+            .addStatement("return new $T()", typeNames.algorithmFactory())
             .build();
     }
 
@@ -249,7 +252,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .returns(ParameterizedTypeName.get(
                 ClassName.get(ValidationConfiguration.class),
-                pregelSpec.configTypeName()
+                typeNames.config()
             ))
             .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
             .build();

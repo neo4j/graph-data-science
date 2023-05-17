@@ -20,20 +20,15 @@
 package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pregel.generator.TypeNames;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 class PregelGenerator {
-
-    static final String PROCEDURE_SUFFIX = "Proc";
-    static final String ALGORITHM_SUFFIX = "Algorithm";
-    static final String ALGORITHM_FACTORY_SUFFIX = ALGORITHM_SUFFIX + "Factory";
-    static final String ALGORITHM_SPECIFICATION_SUFFIX = "Specification";
 
     // produces @Generated meta info
     private final Optional<AnnotationSpec> generatedAnnotationSpec;
@@ -42,13 +37,13 @@ class PregelGenerator {
         this.generatedAnnotationSpec = generatedAnnotationSpec;
     }
 
-    private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator) {
-        var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec);
-        var specificationBuilder = specificationGenerator.typeSpec(pregelSpec.configTypeName(), mode)
+    private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator, TypeNames typeNames) {
+        var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec, typeNames);
+        var specificationBuilder = specificationGenerator.typeSpec(mode)
             .addMethod(specificationGenerator.nameMethod())
             .addMethod(specificationGenerator.algorithmFactoryMethod())
-            .addMethod(specificationGenerator.newConfigFunctionMethod(pregelSpec.configTypeName()))
-            .addMethod(specificationGenerator.computationResultConsumerMethod(pregelSpec.configTypeName(), mode))
+            .addMethod(specificationGenerator.newConfigFunctionMethod())
+            .addMethod(specificationGenerator.computationResultConsumerMethod(mode))
             .addOriginatingElement(pregelSpec.element());
         addGeneratedAnnotation(specificationBuilder);
         var specification = specificationBuilder.build();
@@ -56,24 +51,25 @@ class PregelGenerator {
     }
 
     Stream<TypeSpec> generate(PregelValidation.Spec pregelSpec) {
-        var specificationGenerator = new SpecificationGenerator(pregelSpec.rootPackage(), pregelSpec.computationName());
+        var typeNames = new TypeNames(
+            pregelSpec.rootPackage(),
+            pregelSpec.computationName(),
+            pregelSpec.configTypeName()
+        );
+        var specificationGenerator = new SpecificationGenerator(typeNames);
         return Stream.concat(
             Stream.of(
-                new AlgorithmGenerator(generatedAnnotationSpec, pregelSpec).typeSpec(),
-                new AlgorithmFactoryGenerator(generatedAnnotationSpec, pregelSpec).typeSpec()
+                new AlgorithmGenerator(generatedAnnotationSpec, pregelSpec.element(), typeNames).typeSpec(),
+                new AlgorithmFactoryGenerator(generatedAnnotationSpec, pregelSpec.element(), typeNames).typeSpec()
             ),
             Arrays
                 .stream(pregelSpec.procedureModes())
-                .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator))
+                .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator, typeNames))
         );
     }
 
     // produces @Generated meta info
     void addGeneratedAnnotation(TypeSpec.Builder typeSpecBuilder) {
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
-    }
-
-    ClassName computationClassName(PregelValidation.Spec pregelSpec, String suffix) {
-        return ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + suffix);
     }
 }

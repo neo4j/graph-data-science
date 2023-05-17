@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pregel.generator.TypeNames;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,9 +35,9 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateType() {
-        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationType = specificationGenerator.typeSpec(configTypeName, GDSMode.STATS).build();
+        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var specificationType = specificationGenerator.typeSpec(GDSMode.STATS).build();
 
         assertThat(specificationType.toString()).isEqualTo("" +
             "public final class FooStatsSpecification implements org.neo4j.gds.executor.AlgorithmSpec<" +
@@ -53,7 +54,8 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateNameMethod() {
-        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
+        var configTypeName = TypeName.get(PregelProcedureConfig.class);
+        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
         assertThat(specificationGenerator.nameMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public java.lang.String name() {" + NL +
@@ -64,7 +66,8 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateAlgorithmFactoryMethod() {
-        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
+        var configTypeName = TypeName.get(PregelProcedureConfig.class);
+        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
         assertThat(specificationGenerator.algorithmFactoryMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public gds.test.FooAlgorithmFactory algorithmFactory(" + NL +
@@ -76,9 +79,9 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateNewConfigFunctionMethod() {
-        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        assertThat(specificationGenerator.newConfigFunctionMethod(configTypeName).toString()).isEqualTo("" +
+        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        assertThat(specificationGenerator.newConfigFunctionMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.executor.NewConfigFunction<org.neo4j.gds.beta.pregel.PregelProcedureConfig> newConfigFunction(" + NL +
             "    ) {" + NL +
@@ -89,9 +92,9 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateComputationResultConsumerMethod() {
-        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(configTypeName, GDSMode.STATS).toString();
+        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(GDSMode.STATS).toString();
         assertThat(computationResultConsumerMethod).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.executor.ComputationResultConsumer<gds.test.FooAlgorithm, org.neo4j.gds.beta.pregel.PregelResult, org.neo4j.gds.beta.pregel.PregelProcedureConfig, java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelStatsResult>> computationResultConsumer(" + NL +
@@ -104,12 +107,12 @@ class SpecificationGeneratorTest {
     @EnumSource(value = GDSMode.class)
     @ParameterizedTest
     void shouldGenerateDifferentlyPerMode(GDSMode mode) {
-        var specificationGenerator = new SpecificationGenerator("gds.test", "Foo");
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationType = specificationGenerator.typeSpec(configTypeName, mode).build();
+        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var specificationType = specificationGenerator.typeSpec(mode).build();
         assertThat(specificationType.toString())
             .contains("org.neo4j.gds.pregel.proc.Pregel" + mode.camelCase() + "Result");
-        var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(configTypeName, mode);
+        var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(mode);
         assertThat(computationResultConsumerMethod.toString())
             .contains("org.neo4j.gds.pregel.proc.Pregel" + mode.camelCase() + "ComputationResultConsumer");
     }

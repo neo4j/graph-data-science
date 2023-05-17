@@ -23,6 +23,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelStreamProc;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
@@ -33,8 +34,13 @@ import static org.neo4j.gds.beta.pregel.annotation.GDSMode.STREAM;
 
 class StreamProcedureGenerator extends ProcedureGenerator {
 
-    StreamProcedureGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
-        super(generatedAnnotationSpec, pregelSpec);
+
+    StreamProcedureGenerator(
+        Optional<AnnotationSpec> generatedAnnotationSpec,
+        PregelValidation.Spec pregelSpec,
+        TypeNames typeNames
+    ) {
+        super(generatedAnnotationSpec, pregelSpec, typeNames);
     }
 
     @Override
@@ -62,7 +68,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
         return MethodSpec.methodBuilder("streamResult")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
-            .returns(procResultClass())
+            .returns(typeNames.procedureResult(STREAM))
             .addParameter(long.class, "originalNodeId")
             .addParameter(long.class, "internalNodeId")
             .addParameter(NodePropertyValues.class, "nodePropertyValues")

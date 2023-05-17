@@ -30,71 +30,78 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.pregel.generator.TypeNames;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
 
 public class AlgorithmFactoryGenerator extends PregelGenerator {
-    private final PregelValidation.Spec pregelSpec;
+    private final Element originatingElement;
+    private final TypeNames typeNames;
 
-    AlgorithmFactoryGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
+    AlgorithmFactoryGenerator(
+        Optional<AnnotationSpec> generatedAnnotationSpec,
+        Element originatingElement,
+        TypeNames typeNames
+    ) {
         super(generatedAnnotationSpec);
-        this.pregelSpec = pregelSpec;
+        this.originatingElement = originatingElement;
+        this.typeNames = typeNames;
     }
 
     TypeSpec typeSpec() {
-        var className = computationClassName(pregelSpec, ALGORITHM_FACTORY_SUFFIX);
-        var algorithmClassName = computationClassName(pregelSpec, ALGORITHM_SUFFIX);
+        var algorithmClassName = typeNames.algorithm();
 
         var typeSpecBuilder = TypeSpec
-            .classBuilder(className)
+            .classBuilder(typeNames.algorithmFactory())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(GraphAlgorithmFactory.class),
                 algorithmClassName,
-                pregelSpec.configTypeName()
+                typeNames.config()
             ))
-            .addOriginatingElement(pregelSpec.element());
+            .addOriginatingElement(originatingElement);
 
         addGeneratedAnnotation(typeSpecBuilder);
 
-        typeSpecBuilder.addMethod(buildMethod(algorithmClassName));
-        typeSpecBuilder.addMethod(taskNameMethod(algorithmClassName));
-        typeSpecBuilder.addMethod(progressTaskMethod(algorithmClassName));
+        typeSpecBuilder.addMethod(buildMethod());
+        typeSpecBuilder.addMethod(taskNameMethod());
+        typeSpecBuilder.addMethod(progressTaskMethod());
         typeSpecBuilder.addMethod(memoryEstimationMethod());
 
         return typeSpecBuilder.build();
     }
 
-    private MethodSpec buildMethod(ClassName algorithmClassName) {
+    private MethodSpec buildMethod() {
         return MethodSpec.methodBuilder("build")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(Graph.class, "graph")
-            .addParameter(pregelSpec.configTypeName(), "configuration")
+            .addParameter(typeNames.config(), "configuration")
             .addParameter(ProgressTracker.class, "progressTracker")
-            .returns(algorithmClassName)
-            .addStatement("return new $T(graph, configuration, progressTracker)", algorithmClassName)
+            .returns(typeNames.algorithm())
+            .addStatement("return new $T(graph, configuration, progressTracker)", typeNames.algorithm())
             .build();
     }
 
-    private MethodSpec taskNameMethod(ClassName algorithmClassName) {
+    private MethodSpec taskNameMethod() {
         return MethodSpec.methodBuilder("taskName")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(String.class)
-            .addStatement("return $T.class.getSimpleName()", algorithmClassName)
+            .addStatement("return $T.class.getSimpleName()", typeNames.algorithm())
             .build();
     }
 
-    private MethodSpec progressTaskMethod(ClassName algorithmClassName) {
+    private MethodSpec progressTaskMethod() {
         return MethodSpec.methodBuilder("progressTask")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(Graph.class, "graph")
-            .addParameter(pregelSpec.configTypeName(), "configuration")
+            .addParameter(typeNames.config(), "configuration")
             .returns(Task.class)
-            .addStatement("return Pregel.progressTask(graph, configuration)", algorithmClassName)
+            .addStatement("return Pregel.progressTask(graph, configuration)", typeNames.algorithm())
             .build();
     }
 
@@ -103,8 +110,8 @@ public class AlgorithmFactoryGenerator extends PregelGenerator {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(MemoryEstimation.class)
-            .addParameter(pregelSpec.configTypeName(), "configuration")
-            .addStatement("var computation = new $T()", computationClassName(pregelSpec, ""))
+            .addParameter(typeNames.config(), "configuration")
+            .addStatement("var computation = new $T()", typeNames.computation())
             .addStatement(
                 "return $T.memoryEstimation(computation.schema(configuration), computation.reducer().isEmpty(), configuration.isAsynchronous())",
                 Pregel.class

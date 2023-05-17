@@ -33,30 +33,32 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.pregel.generator.TypeNames;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.util.Map;
 import java.util.Optional;
 
 class AlgorithmGenerator extends PregelGenerator {
-    private final PregelValidation.Spec pregelSpec;
+    private final Element originatingElement;
+    private final TypeNames typeNames;
 
-    AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
+    AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, Element originatingElement, TypeNames typeNames) {
         super(generatedAnnotationSpec);
-        this.pregelSpec = pregelSpec;
+        this.originatingElement = originatingElement;
+        this.typeNames = typeNames;
     }
 
     TypeSpec typeSpec() {
-        ClassName algorithmClassName = computationClassName(pregelSpec, ALGORITHM_SUFFIX);
-
         var typeSpecBuilder = TypeSpec
-            .classBuilder(algorithmClassName)
+            .classBuilder(typeNames.algorithm())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
                 ClassName.get(PregelResult.class)
             ))
-            .addOriginatingElement(pregelSpec.element());
+            .addOriginatingElement(originatingElement);
 
         addGeneratedAnnotation(typeSpecBuilder);
 
@@ -73,7 +75,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .builder(
                 ParameterizedTypeName.get(
                     ClassName.get(Pregel.class),
-                    pregelSpec.configTypeName()
+                    typeNames.config()
                 ),
                 "pregelJob",
                 Modifier.PRIVATE,
@@ -86,7 +88,7 @@ class AlgorithmGenerator extends PregelGenerator {
         var configurationVar = "configuration";
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
-            .addParameter(pregelSpec.configTypeName(), configurationVar)
+            .addParameter(typeNames.config(), configurationVar)
             .addParameter(ProgressTracker.class, "progressTracker")
             .addStatement(CodeBlock.builder().add("super(progressTracker)").build())
             .addStatement(
@@ -102,7 +104,7 @@ class AlgorithmGenerator extends PregelGenerator {
                         "pregel", Pregel.class,
                         "pools", Pools.class,
                         "config", configurationVar,
-                        "computation", computationClassName(pregelSpec, "")
+                        "computation", typeNames.computation()
                     )
                 )
                     .build()

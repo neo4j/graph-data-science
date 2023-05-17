@@ -21,6 +21,7 @@ package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelMutateProc;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
 
@@ -28,8 +29,12 @@ import java.util.Optional;
 
 class MutateProcedureGenerator extends WriteProcedureGenerator {
 
-    MutateProcedureGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
-        super(generatedAnnotationSpec, pregelSpec);
+    MutateProcedureGenerator(
+        Optional<AnnotationSpec> generatedAnnotationSpec,
+        PregelValidation.Spec pregelSpec,
+        TypeNames typeNames
+    ) {
+        super(generatedAnnotationSpec, pregelSpec, typeNames);
     }
 
     @Override

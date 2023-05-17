@@ -22,7 +22,6 @@ package org.neo4j.gds.pregel;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
@@ -30,131 +29,86 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.pregel.proc.PregelMutateComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelMutateResult;
-import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelStatsResult;
-import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelStreamResult;
-import org.neo4j.gds.pregel.proc.PregelWriteComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelWriteResult;
+import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Modifier;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pregel.PregelGenerator.ALGORITHM_FACTORY_SUFFIX;
-import static org.neo4j.gds.pregel.PregelGenerator.ALGORITHM_SPECIFICATION_SUFFIX;
-import static org.neo4j.gds.pregel.PregelGenerator.ALGORITHM_SUFFIX;
-
 public class SpecificationGenerator {
 
-    private final String packageName;
-    private final String computationName;
+    private final TypeNames typeNames;
 
-    SpecificationGenerator(String packageName, String computationName) {
-        this.packageName = packageName;
-        this.computationName = computationName;
+    SpecificationGenerator(TypeNames typeNames) {
+        this.typeNames = typeNames;
     }
 
-    TypeSpec.Builder typeSpec(TypeName configTypeName, GDSMode mode) {
-        var className = derivedClassName(mode.camelCase() + ALGORITHM_SPECIFICATION_SUFFIX);
-        var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
-        var algorithmFactoryClassName = derivedClassName(ALGORITHM_FACTORY_SUFFIX);
-
+    TypeSpec.Builder typeSpec(GDSMode mode) {
         var typeSpecBuilder = TypeSpec
-            .classBuilder(className)
+            .classBuilder(typeNames.specification(mode))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(AlgorithmSpec.class),
-                algorithmClassName,
+                typeNames.algorithm(),
                 ClassName.get(PregelResult.class),
-                configTypeName,
+                typeNames.config(),
                 ParameterizedTypeName.get(
                     ClassName.get(Stream.class),
-                    ClassName.get(resultTypeForMode(mode))
+                    typeNames.procedureResult(mode)
                 ),
-                algorithmFactoryClassName
+                typeNames.algorithmFactory()
             ));
         return typeSpecBuilder;
     }
 
     MethodSpec nameMethod() {
-        var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
         return MethodSpec.methodBuilder("name")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(String.class)
-            .addStatement("return $T.class.getSimpleName()", algorithmClassName)
+            .addStatement("return $T.class.getSimpleName()", typeNames.algorithm())
             .build();
     }
 
     MethodSpec algorithmFactoryMethod() {
-        var algorithmFactoryClassName = derivedClassName(ALGORITHM_FACTORY_SUFFIX);
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .returns(algorithmFactoryClassName)
+            .returns(typeNames.algorithmFactory())
             .addParameter(ExecutionContext.class, "executionContext")
-            .addStatement("return new $T()", algorithmFactoryClassName)
+            .addStatement("return new $T()", typeNames.algorithmFactory())
             .build();
     }
 
-    MethodSpec newConfigFunctionMethod(TypeName configTypeName) {
+    MethodSpec newConfigFunctionMethod() {
         return MethodSpec.methodBuilder("newConfigFunction")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(
                 ParameterizedTypeName.get(
                     ClassName.get(NewConfigFunction.class),
-                    configTypeName
+                    typeNames.config()
                 )
-            ).addStatement("return (__, userInput) -> $T.of(userInput)", configTypeName)
+            ).addStatement("return (__, userInput) -> $T.of(userInput)", typeNames.config())
             .build();
     }
 
-    MethodSpec computationResultConsumerMethod(TypeName configTypeName, GDSMode mode) {
-        var algorithmClassName = derivedClassName(ALGORITHM_SUFFIX);
-        var computationResultConsumerClassName = ClassName.get(computationResultConsumerTypeForMode(mode));
+    MethodSpec computationResultConsumerMethod(GDSMode mode) {
         return MethodSpec.methodBuilder("computationResultConsumer")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(
                 ParameterizedTypeName.get(
                     ClassName.get(ComputationResultConsumer.class),
-                    algorithmClassName,
+                    typeNames.algorithm(),
                     ClassName.get(PregelResult.class),
-                    configTypeName,
+                    typeNames.config(),
                     ParameterizedTypeName.get(
                         ClassName.get(Stream.class),
-                        ClassName.get(resultTypeForMode(mode))
+                        typeNames.procedureResult(mode)
                     )
                 )
             )
-            .addStatement("return new $T<>()", computationResultConsumerClassName)
+            .addStatement("return new $T<>()", typeNames.computationResultConsumer(mode))
             .build();
-    }
-
-    private ClassName derivedClassName(String suffix) {
-        return ClassName.get(packageName, computationName + suffix);
-    }
-
-    private Class<?> resultTypeForMode(GDSMode mode) {
-        switch (mode) {
-            case STATS: return PregelStatsResult.class;
-            case WRITE: return PregelWriteResult.class;
-            case MUTATE: return PregelMutateResult.class;
-            case STREAM: return PregelStreamResult.class;
-            default: throw new IllegalStateException("Unexpected value: " + mode);
-        }
-    }
-
-    private Class<?> computationResultConsumerTypeForMode(GDSMode mode) {
-        switch (mode) {
-            case STATS: return PregelStatsComputationResultConsumer.class;
-            case WRITE: return PregelWriteComputationResultConsumer.class;
-            case MUTATE: return PregelMutateComputationResultConsumer.class;
-            case STREAM: return PregelStreamComputationResultConsumer.class;
-            default: throw new IllegalStateException("Unexpected value: " + mode);
-        }
     }
 }
