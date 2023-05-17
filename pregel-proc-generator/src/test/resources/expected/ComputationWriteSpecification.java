@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel.cc;
+package org.neo4j.gds.pregel.cc;
 
 import javax.annotation.processing.Generated;
 
@@ -31,7 +31,7 @@ import org.neo4j.gds.pregel.proc.PregelWriteResult;
 
 import java.util.Stream;
 
-@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationWriteSpecification implements AlgorithmSpec<ComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelWriteResult>, ComputationAlgorithmFactory> {
 
     @Override

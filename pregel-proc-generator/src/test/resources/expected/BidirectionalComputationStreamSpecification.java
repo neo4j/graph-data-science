@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel.cc;
+package org.neo4j.gds.pregel.cc;
 
 import javax.annotation.processing.Generated;
 
@@ -32,7 +32,7 @@ import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
 import java.util.stream.Stream;
 
-@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class BidrectionalComputationStreamSpecification implements AlgorithmSpec<BidirectionalComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>, BidirectionalComputationAlgorithmFactory> {
 
     @Override

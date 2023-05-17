@@ -17,24 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
-import org.neo4j.gds.pregel.proc.PregelStatsProc;
-import org.neo4j.gds.pregel.proc.PregelStatsResult;
+import org.neo4j.gds.pregel.proc.PregelMutateProc;
+import org.neo4j.gds.pregel.proc.PregelMutateResult;
 
 import java.util.Optional;
 
-class StatsProcedureGenerator extends WriteProcedureGenerator {
+class MutateProcedureGenerator extends WriteProcedureGenerator {
 
-    StatsProcedureGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
+    MutateProcedureGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, PregelValidation.Spec pregelSpec) {
         super(generatedAnnotationSpec, pregelSpec);
     }
 
     @Override
     GDSMode procGdsMode() {
-        return GDSMode.STATS;
+        return GDSMode.MUTATE;
     }
 
     @Override
@@ -44,16 +44,16 @@ class StatsProcedureGenerator extends WriteProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return PregelStatsProc.class;
+        return PregelMutateProc.class;
     }
 
     @Override
     Class<?> procResultClass() {
-        return PregelStatsResult.class;
+        return PregelMutateResult.class;
     }
 
     @Override
     Class<?> procResultBuilderClass() {
-        return PregelStatsResult.Builder.class;
+        return PregelMutateResult.Builder.class;
     }
 }

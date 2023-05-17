@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -41,9 +42,9 @@ import org.neo4j.gds.pregel.proc.PregelWriteResult;
 import javax.lang.model.element.Modifier;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.beta.pregel.PregelGenerator.ALGORITHM_FACTORY_SUFFIX;
-import static org.neo4j.gds.beta.pregel.PregelGenerator.ALGORITHM_SPECIFICATION_SUFFIX;
-import static org.neo4j.gds.beta.pregel.PregelGenerator.ALGORITHM_SUFFIX;
+import static org.neo4j.gds.pregel.PregelGenerator.ALGORITHM_FACTORY_SUFFIX;
+import static org.neo4j.gds.pregel.PregelGenerator.ALGORITHM_SPECIFICATION_SUFFIX;
+import static org.neo4j.gds.pregel.PregelGenerator.ALGORITHM_SUFFIX;
 
 public class SpecificationGenerator {
 

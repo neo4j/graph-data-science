@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel.cc;
+package org.neo4j.gds.pregel.cc;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -45,7 +45,7 @@ import org.neo4j.procedure.Procedure;
     executionMode = ExecutionMode.WRITE_NODE_PROPERTY,
     description = "Test computation description"
 )
-@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(
         name = "gds.pregel.test.write",
