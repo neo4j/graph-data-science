@@ -36,7 +36,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -45,13 +44,6 @@ import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
 public class NodeClassificationPipelineTrainSpec implements AlgorithmSpec<NodeClassificationTrainAlgorithm, NodeClassificationModelResult, NodeClassificationPipelineTrainConfig, Stream<NodeClassificationPipelineTrainResult>, NodeClassificationTrainPipelineAlgorithmFactory> {
-    private final GraphDatabaseService databaseService;
-    private final Log log;
-
-    NodeClassificationPipelineTrainSpec(GraphDatabaseService databaseService, Log log) {
-        this.databaseService = databaseService;
-        this.log = log;
-    }
 
     @Override
     public String name() {
@@ -78,11 +70,15 @@ public class NodeClassificationPipelineTrainSpec implements AlgorithmSpec<NodeCl
 
                 if (computationResult.config().storeModelToDisk()) {
                     try {
+                        // FIXME: This works but is not what we want to do!
+                        var databaseService = executionContext.dependencyResolver()
+                            .resolveDependency(GraphDatabaseService.class);
+
                         modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
                         var modelDir = modelCatalog.getModelDirectory(databaseService);
                         modelCatalog.store(model.creator(), model.name(), modelDir);
                     } catch (Exception e) {
-                        log.error("Failed to store model to disk after training.", e.getMessage());
+                        executionContext.log().error("Failed to store model to disk after training.", e.getMessage());
                         throw e;
                     }
                 }

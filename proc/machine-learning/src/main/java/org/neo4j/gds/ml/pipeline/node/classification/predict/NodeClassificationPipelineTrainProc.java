@@ -48,7 +48,7 @@ public class NodeClassificationPipelineTrainProc extends BaseProc {
     ) {
         preparePipelineConfig(graphName, configuration);
         return new ProcedureExecutor<>(
-            new NodeClassificationPipelineTrainSpec(databaseService, log),
+            new NodeClassificationPipelineTrainSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }
@@ -61,7 +61,7 @@ public class NodeClassificationPipelineTrainProc extends BaseProc {
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return new MemoryEstimationExecutor<>(
-            new NodeClassificationPipelineTrainSpec(databaseService, log),
+            new NodeClassificationPipelineTrainSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
