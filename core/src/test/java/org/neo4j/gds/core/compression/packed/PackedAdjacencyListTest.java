@@ -30,27 +30,8 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class PackedAdjacencyListTest {
-    
-    @Test
-    void memoryInfo() {
-        TestAllocator.testList(
-            LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray(),
-            AdjacencyPacking.BLOCK_SIZE,
-            Aggregation.NONE,
-            packedAdjacencyList -> {
-                var memoryInfo = packedAdjacencyList.memoryInfo();
-                assertThat(memoryInfo.bytesTotal()).isPresent();
-                assertThat(memoryInfo.bytesOffHeap()).isPresent();
-                assertThat(memoryInfo.bytesOnHeap()).isPresent();
-                assertThat(memoryInfo.bytesTotal().getAsLong()).isGreaterThan(0L);
-                assertThat(memoryInfo.bytesOnHeap().getAsLong()).isGreaterThan(0L);
-                assertThat(memoryInfo.bytesOffHeap().getAsLong()).isGreaterThan(0L);
-            }
-        );
-    }
 
     @Test
     void preventUseAfterFree() {

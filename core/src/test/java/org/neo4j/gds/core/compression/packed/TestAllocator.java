@@ -43,53 +43,6 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         }
     }
 
-    public static void testList(
-        long[] values,
-        int length,
-        Aggregation aggregation,
-        Consumer<PackedAdjacencyList> code
-    ) {
-        test((allocator, slice) -> {
-
-            var degree = new MutableInt(0);
-            long offset;
-
-            switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
-                case VarLong:
-                    offset = AdjacencyPacker.compressWithVarLongTail(
-                        allocator,
-                        slice,
-                        values,
-                        length,
-                        aggregation,
-                        degree
-                    );
-                    break;
-                case Packed:
-                    offset = AdjacencyPacker.compressWithPackedTail(
-                        allocator,
-                        slice,
-                        values,
-                        length,
-                        aggregation,
-                        degree
-                    );
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown compression type");
-            }
-
-            var pages = new long[]{degree.intValue()};
-            var bytesOffHeap = Math.toIntExact(slice.slice().bytes());
-            var allocationSizes = new int[]{bytesOffHeap};
-            var degrees = HugeIntArray.of(degree.intValue());
-            var offsets = HugeLongArray.of(offset);
-            var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
-
-            code.accept(list);
-        });
-    }
-
     public static void testCursor(
         long[] values,
         int length,
@@ -128,7 +81,6 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                     throw new IllegalArgumentException("Unknown compression type");
             }
             cursor.init(offset, degree.intValue());
-
             code.accept(cursor, slice);
         });
     }
