@@ -27,6 +27,7 @@ import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.utils.GdsSystemProperties;
 
 import java.lang.ref.Cleaner;
 import java.util.Arrays;
@@ -124,13 +125,13 @@ public class PackedAdjacencyList implements AdjacencyList {
         this.allocationSizes = allocationSizes;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
 
-        switch (System.getProperty("gds.compression", "packed")) {
-            case "varlong":
+        switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
+            case VarLong:
                 this.newCursor = PackedAdjacencyList::newCursorWithVarLongTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLongTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithVarLongTail;
                 break;
-            case "packed":
+            case Packed:
                 this.newCursor = PackedAdjacencyList::newCursorWithPackedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithPackedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithPackedTail;

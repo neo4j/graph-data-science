@@ -20,11 +20,13 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.GdsSystemProperties;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
@@ -52,8 +54,8 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
             var degree = new MutableInt(0);
             long offset;
 
-            switch (System.getProperty("gds.compression", "packed")) {
-                case "varlong":
+            switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
+                case VarLong:
                     offset = AdjacencyPacker.compressWithVarLongTail(
                         allocator,
                         slice,
@@ -63,7 +65,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree
                     );
                     break;
-                case "packed":
+                case Packed:
                     offset = AdjacencyPacker.compressWithPackedTail(
                         allocator,
                         slice,
@@ -92,14 +94,15 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         long[] values,
         int length,
         Aggregation aggregation,
-        BiConsumer<DecompressingCursorWithPackedTail, AdjacencyListBuilder.Slice<Address>> code
+        BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
             long offset;
+            AdjacencyCursor cursor;
 
-            switch (System.getProperty("gds.compression", "packed")) {
-                case "varlong":
+            switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
+                case VarLong:
                     offset = AdjacencyPacker.compressWithVarLongTail(
                         allocator,
                         slice,
@@ -108,8 +111,9 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         aggregation,
                         degree
                     );
+                    cursor = new DecompressingCursorWithVarLongTail(new long[]{slice.slice().address()});
                     break;
-                case "packed":
+                case Packed:
                     offset = AdjacencyPacker.compressWithPackedTail(
                         allocator,
                         slice,
@@ -118,13 +122,11 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         aggregation,
                         degree
                     );
+                    cursor = new DecompressingCursorWithPackedTail(new long[]{slice.slice().address()});
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown compression type");
             }
-
-            var pages = new long[]{slice.slice().address()};
-            var cursor = new DecompressingCursorWithPackedTail(pages);
             cursor.init(offset, degree.intValue());
 
             code.accept(cursor, slice);

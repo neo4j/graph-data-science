@@ -35,6 +35,7 @@ import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.GdsSystemProperties;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;
@@ -157,16 +158,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.propertySlice = ModifiableSlice.create();
         this.degree = new MutableInt(0);
 
-        switch (System.getProperty("gds.compression", "packed")) {
-            case "varlong":
-                this.packed = false;
-                break;
-            case "packed":
-                this.packed = true;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown compression type");
-        }
+        this.packed = GdsSystemProperties.PACKED_TAIL_COMPRESSION == GdsSystemProperties.PackedTailCompression.Packed;
     }
 
     @Override
