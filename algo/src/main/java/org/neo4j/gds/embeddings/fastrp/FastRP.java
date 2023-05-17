@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -36,12 +35,12 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
@@ -210,19 +209,20 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             var iterationWeight = iterationWeights.get(i).floatValue();
             boolean firstIteration = i == 0;
 
-            var tasks = partitions.stream()
-                .map(partition -> new PropagateEmbeddingsTask(
-                        partition,
-                        currentEmbeddings,
-                        previousEmbeddings,
-                        iterationWeight,
-                        firstIteration
-                    )
-                ).collect(Collectors.toList());
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .run();
+            try (
+                var localTask = CloseableThreadLocal.withInitial(() -> new PropagateEmbeddingsTask(
+                    currentEmbeddings,
+                    previousEmbeddings,
+                    iterationWeight,
+                    firstIteration
+                ))
+            ) {
+                ParallelUtil.parallelStreamConsume(
+                    partitions.stream(),
+                    concurrency,
+                    stream -> stream.forEach(partition -> localTask.get().consume(partition))
+                );
+            }
 
             progressTracker.endSubTask();
         }
@@ -397,40 +397,35 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    private final class PropagateEmbeddingsTask implements Runnable {
+    private final class PropagateEmbeddingsTask {
 
-        private final Partition partition;
         private final HugeObjectArray<float[]> currentEmbeddings;
         private final HugeObjectArray<float[]> previousEmbeddings;
         private final float iterationWeight;
-        private final Graph concurrentGraph;
+        private final Graph localGraph;
         private final boolean firstIteration;
 
         private PropagateEmbeddingsTask(
-            Partition partition,
             HugeObjectArray<float[]> currentEmbeddings,
             HugeObjectArray<float[]> previousEmbeddings,
             float iterationWeight,
             boolean firstIteration
         ) {
-            this.partition = partition;
             this.currentEmbeddings = currentEmbeddings;
             this.previousEmbeddings = previousEmbeddings;
             this.iterationWeight = iterationWeight;
-            this.concurrentGraph = graph.concurrentCopy();
+            this.localGraph = graph.concurrentCopy();
             this.firstIteration = firstIteration;
         }
 
-        @Override
-        public void run() {
-            MutableLong degrees = new MutableLong(0);
+        void consume(DegreePartition partition) {
             partition.consume(nodeId -> {
                 var embedding = embeddings.get(nodeId);
                 var currentEmbedding = currentEmbeddings.get(nodeId);
                 Arrays.fill(currentEmbedding, 0.0f);
 
                 // Collect and combine the neighbour embeddings
-                concurrentGraph.forEachRelationship(nodeId, relationshipWeightFallback, (source, target, weight) -> {
+                localGraph.forEachRelationship(nodeId, relationshipWeightFallback, (source, target, weight) -> {
                     if (firstIteration && Double.isNaN(weight)) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Missing relationship property `%s` on relationship between nodes with ids `%d` and `%d`.",
@@ -451,9 +446,8 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
 
                 // Update the result embedding
                 addWeightedInPlace(embedding, currentEmbedding, iterationWeight);
-                degrees.add(degree);
             });
-            progressTracker.logProgress(degrees.longValue());
+            progressTracker.logProgress(partition.totalDegree());
         }
     }
 
