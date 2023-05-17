@@ -25,14 +25,12 @@ import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
 import org.neo4j.gds.collections.HugeSparseLongArrayArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
-import org.neo4j.gds.collections.HugeSparseObjectArrayList;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -135,7 +133,7 @@ public final class ChunkedAdjacencyLists {
         }
         encodeVLongs(targets, start, end, this.compressBuffer, 0);
 
-        copyData(index, position, this.compressBuffer, 0, requiredBytes, this.targetLists, byte[].class);
+        copyTargetData(index, position, this.compressBuffer, requiredBytes, this.targetLists);
 
         positions.set(index, position + requiredBytes);
 
@@ -171,14 +169,13 @@ public final class ChunkedAdjacencyLists {
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
             var length = lengths.get(index);
-            copyData(
+            copyPropertiesData(
                 index,
                 length,
                 allProperties[i],
                 start,
                 targetsToAdd,
-                this.properties[i],
-                long[].class
+                this.properties[i]
             );
         }
 
@@ -213,30 +210,32 @@ public final class ChunkedAdjacencyLists {
         1048576,
     };
 
-    private static <T> void copyData(
-        long index, int targetPos, T buffer,
-        int bufferOffset,
+    // This method and the one after that ("copyPropertiesData") are the same except for the underlying primitive array type.
+    // Unfortunately, writing this method to be generic over the primitive array type requires us to use methods
+    // that are either reflection based or not optimizable by C2, and it shows on benchmarks.
+    // Any changes made here should also be done in "copyPropertiesData".
+    private static void copyTargetData(
+        long index,
+        int targetPos,
+        byte[] buffer,
         int bufferLength,
-        HugeSparseObjectArrayList<T[], ?> dataLists,
-        Class<T> arrayType
+        HugeSparseByteArrayArrayList dataLists
     ) {
-        assert arrayType.isArray();
-
-        T[] compressedData = dataLists.get(index);
+        byte[][] compressedData = dataLists.get(index);
 
         // last chunk, write pos = posInLastChunk
         int posInLastChunk = targetPos;
         for (int targetPage = 0; targetPage < compressedData.length - 1; targetPage++) {
-            T compressedTarget = compressedData[targetPage];
-            posInLastChunk -= Array.getLength(compressedTarget);
+            byte[] compressedTarget = compressedData[targetPage];
+            posInLastChunk -= compressedTarget.length;
         }
 
         // can we fit everything in the last chunk?
         if (compressedData.length > 0) {
-            T lastChunk = compressedData[compressedData.length - 1];
-            if (Array.getLength(lastChunk) >= posInLastChunk + bufferLength) {
+            byte[] lastChunk = compressedData[compressedData.length - 1];
+            if (lastChunk.length >= posInLastChunk + bufferLength) {
                 // fits in last chunk
-                System.arraycopy(buffer, bufferOffset, lastChunk, posInLastChunk, bufferLength);
+                System.arraycopy(buffer, 0, lastChunk, posInLastChunk, bufferLength);
                 return;
             }
         }
@@ -244,7 +243,7 @@ public final class ChunkedAdjacencyLists {
         // how many bytes do we need to write into the last chunk
         int fitsInLastChunk = compressedData.length == 0
             ? 0
-            : Array.getLength(compressedData[compressedData.length - 1]) - posInLastChunk;
+            : compressedData[compressedData.length - 1].length - posInLastChunk;
 
         int newChunkLengthAtLeast = bufferLength - fitsInLastChunk;
 
@@ -256,7 +255,71 @@ public final class ChunkedAdjacencyLists {
         int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
 
         // copy buffer into the last chunk and the new chunk
-        T newChunk = (T) Array.newInstance(arrayType.getComponentType(), newChunkLength);
+        byte[] newChunk = new byte[newChunkLength];
+        if (fitsInLastChunk > 0) {
+            System.arraycopy(
+                buffer,
+                0,
+                compressedData[compressedData.length - 1],
+                posInLastChunk,
+                fitsInLastChunk
+            );
+        }
+        System.arraycopy(buffer, fitsInLastChunk, newChunk, 0, bufferLength - fitsInLastChunk);
+
+        // add new chunk to the targets list
+        compressedData = Arrays.copyOf(compressedData, compressedData.length + 1);
+        compressedData[compressedData.length - 1] = newChunk;
+        dataLists.set(index, compressedData);
+    }
+
+    // This method and the one before that ("copyTargetData") are the same except for the underlying primitive array type.
+    // Unfortunately, writing this method to be generic over the primitive array type requires us to use methods
+    // that are either reflection based or not optimizable by C2, and it shows on benchmarks.
+    // Any changes made here should also be done in "copyTargetData".
+    private static void copyPropertiesData(
+        long index,
+        int targetPos,
+        long[] buffer,
+        int bufferOffset,
+        int bufferLength,
+        HugeSparseLongArrayArrayList dataLists
+    ) {
+        long[][] compressedData = dataLists.get(index);
+
+        // last chunk, write pos = posInLastChunk
+        int posInLastChunk = targetPos;
+        for (int targetPage = 0; targetPage < compressedData.length - 1; targetPage++) {
+            long[] compressedTarget = compressedData[targetPage];
+            posInLastChunk -= compressedTarget.length;
+        }
+
+        // can we fit everything in the last chunk?
+        if (compressedData.length > 0) {
+            long[] lastChunk = compressedData[compressedData.length - 1];
+            if (lastChunk.length >= posInLastChunk + bufferLength) {
+                // fits in last chunk
+                System.arraycopy(buffer, bufferOffset, lastChunk, posInLastChunk, bufferLength);
+                return;
+            }
+        }
+
+        // how many bytes do we need to write into the last chunk
+        int fitsInLastChunk = compressedData.length == 0
+            ? 0
+            : compressedData[compressedData.length - 1].length - posInLastChunk;
+
+        int newChunkLengthAtLeast = bufferLength - fitsInLastChunk;
+
+        // the next chunk size grows slowly depending on the number of chunks we already have
+        int nextChunkLevel = Math.min(compressedData.length, NEXT_CHUNK_LENGTH.length - 1);
+        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel];
+
+        // avoid splitting the buffer into too many chunks
+        int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
+
+        // copy buffer into the last chunk and the new chunk
+        long[] newChunk = new long[newChunkLength];
         if (fitsInLastChunk > 0) {
             System.arraycopy(
                 buffer,
