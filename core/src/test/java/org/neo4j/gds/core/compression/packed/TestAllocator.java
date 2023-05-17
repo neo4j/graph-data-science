@@ -50,14 +50,32 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         test((allocator, slice) -> {
 
             var degree = new MutableInt(0);
-            var offset = AdjacencyPacker.compressWithPackedTail(
-                allocator,
-                slice,
-                values,
-                length,
-                aggregation,
-                degree
-            );
+            long offset;
+
+            switch (System.getProperty("gds.compression", "packed")) {
+                case "varlong":
+                    offset = AdjacencyPacker.compressWithVarLongTail(
+                        allocator,
+                        slice,
+                        values,
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    break;
+                case "packed":
+                    offset = AdjacencyPacker.compressWithPackedTail(
+                        allocator,
+                        slice,
+                        values,
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown compression type");
+            }
 
             var pages = new long[]{degree.intValue()};
             var bytesOffHeap = Math.toIntExact(slice.slice().bytes());
@@ -78,14 +96,32 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
-            var offset = AdjacencyPacker.compressWithPackedTail(
-                allocator,
-                slice,
-                values.clone(),
-                length,
-                aggregation,
-                degree
-            );
+            long offset;
+
+            switch (System.getProperty("gds.compression", "packed")) {
+                case "varlong":
+                    offset = AdjacencyPacker.compressWithVarLongTail(
+                        allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    break;
+                case "packed":
+                    offset = AdjacencyPacker.compressWithPackedTail(
+                        allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown compression type");
+            }
 
             var pages = new long[]{slice.slice().address()};
             var cursor = new DecompressingCursorWithPackedTail(pages);
