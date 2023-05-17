@@ -360,21 +360,23 @@ public final class AdjacencyPacker {
         long[] values,
         int length
     ) {
+        boolean hasTail = length == 0 || length % AdjacencyPacking.BLOCK_SIZE != 0;
         int blocks = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
         var header = new byte[blocks];
 
         long bytes = 0L;
         int offset = 0;
         int blockIdx = 0;
+        int lastFullBlock = hasTail ? blocks - 1 : blocks;
 
-        for (; blockIdx < blocks - 1; blockIdx++, offset += AdjacencyPacking.BLOCK_SIZE) {
+        for (; blockIdx < lastFullBlock; blockIdx++, offset += AdjacencyPacking.BLOCK_SIZE) {
             int bits = bitsNeeded(values, offset, AdjacencyPacking.BLOCK_SIZE);
             bytes += bytesNeeded(bits);
             header[blockIdx] = (byte) bits;
         }
-        int tailLength = length - offset;
         // "tail" block, may be smaller than BLOCK_SIZE
-        {
+        int tailLength = (length - offset);
+        if (hasTail) {
             int bits = bitsNeeded(values, offset, tailLength);
             bytes += BitUtil.ceilDiv((long) bits * tailLength, Long.BYTES);
             header[blockIdx] = (byte) bits;
