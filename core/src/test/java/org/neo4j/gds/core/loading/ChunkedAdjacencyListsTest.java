@@ -78,25 +78,33 @@ class ChunkedAdjacencyListsTest {
     void shouldWriteLargeAdjacencyListsWithOverflow() {
         var adjacencyLists = ChunkedAdjacencyLists.of(1, 0);
 
-        var smallAdjacency = new long[]{42L, 1337L, 5L};
-        var largeAdjacency = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
-        for (int i = 0; i < largeAdjacency.length; i++) {
-            largeAdjacency[i] = i;
-        }
+        var smallAdjacency = new long[37];
+        Arrays.setAll(smallAdjacency, i -> i);
 
-        var smallProperties = new long[]{42L, 1337L, 5L};
+        var largeAdjacency = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
+        Arrays.setAll(largeAdjacency, i -> i + 42L);
+
+        var smallProperties = new long[37];
+        Arrays.setAll(smallProperties, i -> i);
+
         var largeProperties = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
-        for (int i = 0; i < largeAdjacency.length; i++) {
-            largeProperties[i] = i;
-        }
+        Arrays.setAll(largeProperties, i -> i + 42L);
 
         adjacencyLists.add(
             0,
             Arrays.copyOf(smallAdjacency, smallAdjacency.length),
             new long[][]{smallProperties},
             0,
-            3,
-            3
+            smallAdjacency.length,
+            smallAdjacency.length
+        );
+        adjacencyLists.add(
+            0,
+            Arrays.copyOf(smallAdjacency, smallAdjacency.length),
+            new long[][]{smallProperties},
+            0,
+            smallAdjacency.length,
+            smallAdjacency.length
         );
         adjacencyLists.add(
             0,
@@ -107,15 +115,17 @@ class ChunkedAdjacencyListsTest {
             largeAdjacency.length
         );
 
-        var expectedTargets = new long[smallAdjacency.length + largeAdjacency.length];
+        var expectedTargets = new long[smallAdjacency.length * 2 + largeAdjacency.length];
         System.arraycopy(smallAdjacency, 0, expectedTargets, 0, smallAdjacency.length);
-        System.arraycopy(largeAdjacency, 0, expectedTargets, smallAdjacency.length, largeAdjacency.length);
+        System.arraycopy(smallAdjacency, 0, expectedTargets, smallAdjacency.length, smallAdjacency.length);
+        System.arraycopy(largeAdjacency, 0, expectedTargets, smallAdjacency.length * 2, largeAdjacency.length);
 
-        var expectedProperties = new long[smallProperties.length + largeProperties.length];
+        var expectedProperties = new long[smallProperties.length * 2 + largeProperties.length];
         System.arraycopy(smallProperties, 0, expectedProperties, 0, smallProperties.length);
-        System.arraycopy(largeProperties, 0, expectedProperties, smallAdjacency.length, largeProperties.length);
+        System.arraycopy(smallProperties, 0, expectedProperties, smallAdjacency.length, smallProperties.length);
+        System.arraycopy(largeProperties, 0, expectedProperties, smallAdjacency.length * 2, largeProperties.length);
 
-        var actualTargets = new long[smallAdjacency.length + largeAdjacency.length];
+        var actualTargets = new long[smallAdjacency.length * 2 + largeAdjacency.length];
         adjacencyLists.consume((nodeId, targets, properties, position, length) -> {
             AdjacencyCompression.zigZagUncompressFrom(
                 actualTargets,
@@ -136,6 +146,20 @@ class ChunkedAdjacencyListsTest {
         var input = new long[]{42L, 1337L, 5L, 6L};
         var properties = new long[][]{{42L, 1337L, 5L, 6L}, {8L, 8L, 8L, 8L}};
         adjacencyLists.add(0, input, properties, 0, 4, 4);
+
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
+            .hasDimensions(2, 4)
+            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
+            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
+    }
+
+    @Test
+    void shouldWriteWithPropertiesWithOffset() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(2, 0);
+
+        var input = new long[]{13L, 37L, 42L, 1337L, 5L, 6L};
+        var properties = new long[][]{{0L, 0L, 42L, 1337L, 5L, 6L}, {0L, 0L, 8L, 8L, 8L, 8L}};
+        adjacencyLists.add(0, input, properties, 2, 6, 4);
 
         adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
             .hasDimensions(2, 4)
