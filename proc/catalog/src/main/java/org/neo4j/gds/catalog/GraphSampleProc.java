@@ -19,7 +19,14 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
+import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -79,5 +86,29 @@ public class GraphSampleProc extends CatalogProc {
 
     }
 
+    @Procedure(name = "gds.graph.sample.cnarw.estimate", mode = READ)
+    @Description("Estimate memory requirements for sampling graph using CNARW algorithm")
+    public Stream<MemoryEstimateResult> estimateCNARW(
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var cypherMap = CypherMapWrapper.create(configuration);
+        var cnarwConfig = CommonNeighbourAwareRandomWalkConfig.of(cypherMap);
 
+        var loader = new GraphStoreFromCatalogLoader(
+            fromGraphName,
+            cnarwConfig,
+            executionContext().username(),
+            executionContext().databaseId(),
+            executionContext().isGdsAdmin()
+        );
+
+        MemoryTree memoryTree = CommonNeighbourAwareRandomWalk.memoryEstimation(cnarwConfig)
+            .estimate(loader.graphDimensions(), cnarwConfig.concurrency());
+
+        return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(
+            memoryTree,
+            loader.graphDimensions()
+        )));
+    }
 }

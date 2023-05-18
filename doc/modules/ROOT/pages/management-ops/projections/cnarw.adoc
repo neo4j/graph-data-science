@@ -197,3 +197,35 @@ Due to the random nature of the sampling the algorithm may return different coun
 
 The main difference between the Common Neighbour Aware Random Walk and Random Walks with Restarts graphs sampling algorithms is that there are more chances to go into another cluster for the first one, which is colored in blue in the example above.
 The relationships sampled are those connecting these nodes.
+
+[[cnarw-examples-memory-estimation]]
+=== Memory Estimation
+
+First off, we will estimate the cost of running the algorithm using the `estimate` procedure.
+This can be done with any execution mode.
+Estimating the sampling procedure is useful to understand the memory impact that running the procedure on your graph will have.
+If the estimation shows that there is a very high probability of the execution going over its memory limitations, the execution is prohibited.
+To read more about this, see xref:common-usage/memory-estimation.adoc#estimate-heap-control[Automatic estimation and execution blocking].
+
+For more details on `estimate` in general, see xref:common-usage/memory-estimation.adoc[Memory Estimation].
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the sampling algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.sample.cnarw.estimate('myGraph',
+{
+    samplingRatio: 0.5
+})
+YIELD requiredMemory
+RETURN requiredMemory;
+----
+
+.Results
+[opts="header"]
+|===
+| requiredMemory
+| "1264 Bytes"
+|===
+--
