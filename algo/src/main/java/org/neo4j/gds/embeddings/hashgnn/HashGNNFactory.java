@@ -123,7 +123,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         Optional<Integer> outputDimension = config.outputDimension();
         LongUnaryOperator denseResultEstimation = n -> HugeObjectArray.memoryEstimation(
             n,
-            MemoryUsage.sizeOfDoubleArray(outputDimension.orElse(FUDGED_BINARY_DIMENSION))
+            MemoryUsage.sizeOfDoubleArray(outputDimension.orElse(binaryDimension))
         );
 
         if (outputDimension.isPresent()) {
@@ -131,7 +131,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         } else {
             // in the sparse case we store the bitset, but we convert the result to double[] before returning to the user
             builder.rangePerNode("Embeddings output", n -> MemoryRange.of(
-                HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(FUDGED_BINARY_DIMENSION)),
+                HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(binaryDimension)),
                 denseResultEstimation.applyAsLong(n)
             ));
         }
