@@ -214,7 +214,7 @@ For more details on `estimate` in general, see xref:common-usage/memory-estimati
 .The following will estimate the memory requirements for running the sampling algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.sample.cnarw.estimate('myGraph',
+CALL gds.graph.sample.cnarw.estimate('myGraph',
 {
     samplingRatio: 0.5
 })
