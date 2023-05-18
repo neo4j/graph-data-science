@@ -20,10 +20,13 @@
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
 import org.assertj.core.data.Offset;
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -39,10 +42,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.neo4j.gds.TestSupport.assertMemoryRangeIsClose;
 
 @GdlExtension
 class CommonNeighbourAwareRandomWalkTest {
@@ -494,10 +502,148 @@ class CommonNeighbourAwareRandomWalkTest {
             result2 = cnarw.compute(naturalUnionGraph, ProgressTracker.NULL_TRACKER);
         }
 
-        assertThat(result1.size() > 0);
+        assertThat(!result1.isEmpty());
         assertEquals(result1.size(), result2.size());
         for (int i = 0; i < result1.size(); i++) {
             assertEquals(result1.get(i), result2.get(i));
         }
+    }
+
+    @Test
+    void memoryEstimationNodeCount() {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .build();
+
+        MemoryRange mem1k = CommonNeighbourAwareRandomWalk.memoryEstimation(config).estimate(
+            GraphDimensions.of(1000),
+            -1
+        ).memoryUsage();
+
+        MemoryRange mem10k = CommonNeighbourAwareRandomWalk.memoryEstimation(config).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        assertMemoryRange(mem1k, 116_224L);
+        assertMemoryRange(mem10k, 1_161_352L);
+
+        assertMemoryRangeIsClose(mem10k, mem1k.times(10), Percentage.withPercentage(1));
+    }
+
+    @Test
+    void memoryEstimationSamplingRatio() {
+        var config01 = CommonNeighbourAwareRandomWalkConfigImpl.builder().samplingRatio(0.1).build();
+        var config05 = CommonNeighbourAwareRandomWalkConfigImpl.builder().samplingRatio(0.5).build();
+        var config09 = CommonNeighbourAwareRandomWalkConfigImpl.builder().samplingRatio(0.9).build();
+
+        MemoryRange mem01 = CommonNeighbourAwareRandomWalk.memoryEstimation(config01).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        MemoryRange mem05 = CommonNeighbourAwareRandomWalk.memoryEstimation(config05).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        MemoryRange mem09 = CommonNeighbourAwareRandomWalk.memoryEstimation(config09).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        assertMemoryRange(mem01, 745_352L);
+        assertMemoryRange(mem05, 1_161_352L);
+        assertMemoryRange(mem09, 1_577_352);
+
+        MemoryRange delta = mem05.elementWiseSubtract(mem01);
+        MemoryRange twoDelta = mem09.elementWiseSubtract(mem01);
+        assertMemoryRangeIsClose(twoDelta, delta.times(2), Percentage.withPercentage(1));
+    }
+
+    @Test
+    void memoryEstimationStartNodes() {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .startNodes(LongStream.range(0, 1000).boxed().collect(Collectors.toList()))
+            .build();
+
+        assertMemoryEstimation(
+            CommonNeighbourAwareRandomWalk.memoryEstimation(config),
+            GraphDimensions.of(1000),
+            -1,
+            MemoryRange.of(132_224L)
+        );
+    }
+
+    @Test
+    void memoryEstimationStartNodesScale() {
+        var config1k = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .startNodes(LongStream.range(0, 1000).boxed().collect(Collectors.toList()))
+            .build();
+
+        var config3k = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .startNodes(LongStream.range(0, 3000).boxed().collect(Collectors.toList()))
+            .build();
+
+        var config5k = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .startNodes(LongStream.range(0, 5000).boxed().collect(Collectors.toList()))
+            .build();
+
+        MemoryRange mem1k = CommonNeighbourAwareRandomWalk.memoryEstimation(config1k).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        MemoryRange mem3k = CommonNeighbourAwareRandomWalk.memoryEstimation(config3k).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        MemoryRange mem5k = CommonNeighbourAwareRandomWalk.memoryEstimation(config5k).estimate(
+            GraphDimensions.of(10000),
+            -1
+        ).memoryUsage();
+
+        assertMemoryRange(mem1k, 1_177_352L);
+        assertMemoryRange(mem3k, 1_209_352L);
+        assertMemoryRange(mem5k, 1_241_352L);
+
+        MemoryRange delta = mem3k.elementWiseSubtract(mem1k);
+        MemoryRange twoDelta = mem5k.elementWiseSubtract(mem1k);
+        assertMemoryRangeIsClose(twoDelta, delta.times(2), Percentage.withPercentage(1));
+    }
+
+    @Test
+    void memoryEstimationConcurrency() {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .concurrency(1)
+            .build();
+
+        assertMemoryEstimation(
+            CommonNeighbourAwareRandomWalk.memoryEstimation(config),
+            GraphDimensions.of(1000),
+            -1,
+            MemoryRange.of(32_224L)
+        );
+    }
+
+    @Test
+    void memoryEstimationWeights() {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .samplingRatio(0.5)
+            .relationshipWeightProperty("prop")
+            .build();
+
+        assertMemoryEstimation(
+            CommonNeighbourAwareRandomWalk.memoryEstimation(config),
+            GraphDimensions.of(1000),
+            -1,
+            MemoryRange.of(124_264L)
+        );
     }
 }

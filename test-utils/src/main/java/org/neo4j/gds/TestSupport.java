@@ -23,6 +23,7 @@ import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.data.Percentage;
 import org.hamcrest.Matcher;
 import org.immutables.builder.Builder;
 import org.intellij.lang.annotations.Language;
@@ -328,6 +329,11 @@ public final class TestSupport {
 
     public static void assertMemoryRange(MemoryRange actual, MemoryRange expected) {
         assertMemoryRange(actual, expected.min, expected.max);
+    }
+
+    public static void assertMemoryRangeIsClose(MemoryRange actual, MemoryRange expected, Percentage p) {
+        assertThat(actual.min).isCloseTo(expected.min, p);
+        assertThat(actual.max).isCloseTo(expected.max, p);
     }
 
     public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {

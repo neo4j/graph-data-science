@@ -26,6 +26,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -101,6 +103,24 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         progressTracker.endSubTask("Sample nodes");
 
         return seenNodes.sampledNodes();
+    }
+
+    public static MemoryEstimation memoryEstimation(RandomWalkWithRestartsConfig config) {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(CommonNeighbourAwareRandomWalk.class)
+            .perNode("seenNodes", HugeAtomicBitSet::memoryEstimation)
+            // initialStartQualities has two 8-bytes-element array lists
+            .fixed("initialStartQualities", 2L * 8L * config.startNodes().size());
+        if (config.hasRelationshipWeightProperty()) {
+            builder.perNode("totalWeights", HugeAtomicDoubleArray::memoryEstimation);
+        }
+        builder.perNode("random walks", nodeCount -> {
+            // Three 8-bytes-element structures of size nodeCount * samplingRatio
+            // Two 8-bytes-element structures of size nodeCount
+            // Used for every thread
+            return (long) (config.concurrency() * nodeCount * (config.samplingRatio() * 3L * 8L + 2L * 8L));
+        });
+        builder.perNode("startNodesUsed", nodeCount -> (long) (nodeCount * config.samplingRatio() * 8L));
+        return builder.build();
     }
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {

@@ -32,6 +32,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.lessThan;
 
 class GraphSampleProcTest extends BaseProcTest {
 
@@ -139,6 +142,26 @@ class GraphSampleProcTest extends BaseProcTest {
                 .asInstanceOf(MAP)
                 .containsEntry("samplingRatio", 0.5);
         });
+    }
+
+    @Test
+    void estimateCNARW() {
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        assertCypherResult(
+            "CALL gds.graph.sample.cnarw.estimate('g', {samplingRatio: 0.5})",
+            List.of(Map.of(
+                "mapView", isA(Map.class),
+                "treeView", isA(String.class),
+                "bytesMax", greaterThan(0L),
+                "heapPercentageMin", greaterThan(0D),
+                "nodeCount", 14L,
+                "requiredMemory", isA(String.class),
+                "bytesMin", greaterThan(0L),
+                "heapPercentageMax", lessThan(1.0D),
+                "relationshipCount", 12L
+            ))
+        );
     }
 
     @Test
