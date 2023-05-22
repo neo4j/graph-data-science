@@ -23,6 +23,8 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.core.compression.packed.PackedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.uncompressed.RawCompressor;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyList;
@@ -30,7 +32,6 @@ import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyListBuil
 import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList;
 import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
-import org.neo4j.gds.core.compression.packed.PackedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -73,7 +74,8 @@ public interface AdjacencyListBehavior {
             CompressedAdjacencyListBuilderFactory.of(),
             propertyMappings,
             aggregations,
-            noAggregation
+            noAggregation,
+            MemoryTracker.of()
         );
     }
 
@@ -88,7 +90,8 @@ public interface AdjacencyListBehavior {
             UncompressedAdjacencyListBuilderFactory.of(),
             propertyMappings,
             aggregations,
-            noAggregation
+            noAggregation,
+            MemoryTracker.of()
         );
     }
 
@@ -103,7 +106,8 @@ public interface AdjacencyListBehavior {
             PackedAdjacencyListBuilderFactory.of(),
             propertyMappings,
             aggregations,
-            noAggregation
+            noAggregation,
+            MemoryTracker.of()
         );
     }
 

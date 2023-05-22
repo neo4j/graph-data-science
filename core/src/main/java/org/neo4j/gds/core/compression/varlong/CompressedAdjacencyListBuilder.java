@@ -22,20 +22,23 @@ package org.neo4j.gds.core.compression.varlong;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
     private final BumpAllocator<byte[]> builder;
+    private final MemoryTracker memoryTracker;
 
-    CompressedAdjacencyListBuilder() {
+    CompressedAdjacencyListBuilder(MemoryTracker memoryTracker) {
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
     public Allocator newAllocator() {
-        return new Allocator(this.builder.newLocalAllocator());
+        return new Allocator(this.builder.newLocalAllocator(), this.memoryTracker);
     }
 
     @Override
@@ -67,13 +70,16 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     static final class Allocator implements AdjacencyListBuilder.Allocator<byte[]> {
 
         private final BumpAllocator.LocalAllocator<byte[]> allocator;
+        private final MemoryTracker memoryTracker;
 
-        private Allocator(BumpAllocator.LocalAllocator<byte[]> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<byte[]> allocator, MemoryTracker memoryTracker) {
             this.allocator = allocator;
+            this.memoryTracker = memoryTracker;
         }
 
         @Override
         public long allocate(int length, Slice<byte[]> into) {
+            this.memoryTracker.recordHeapAllocation(length);
             return allocator.insertInto(length, (ModifiableSlice<byte[]>) into);
         }
 

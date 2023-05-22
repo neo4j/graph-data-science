@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.uncompressed;
 
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 
 public final class UncompressedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<long[], UncompressedAdjacencyList, long[], UncompressedAdjacencyList> {
 
@@ -31,12 +32,12 @@ public final class UncompressedAdjacencyListBuilderFactory implements AdjacencyL
     }
 
     @Override
-    public UncompressedAdjacencyListBuilder newAdjacencyListBuilder() {
-        return new UncompressedAdjacencyListBuilder();
+    public UncompressedAdjacencyListBuilder newAdjacencyListBuilder(MemoryTracker memoryTracker) {
+        return new UncompressedAdjacencyListBuilder(memoryTracker);
     }
 
     @Override
-    public UncompressedAdjacencyListBuilder newAdjacencyPropertiesBuilder() {
-        return new UncompressedAdjacencyListBuilder();
+    public UncompressedAdjacencyListBuilder newAdjacencyPropertiesBuilder(MemoryTracker memoryTracker) {
+        return new UncompressedAdjacencyListBuilder(memoryTracker);
     }
 }

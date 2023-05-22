@@ -32,6 +32,7 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -48,18 +49,20 @@ public final class RawCompressor implements AdjacencyCompressor {
         AdjacencyListBuilderFactory<long[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
-        boolean noAggregation
+        boolean noAggregation,
+        MemoryTracker memoryTracker
     ) {
         @SuppressWarnings("unchecked")
         AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
-        Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
+        Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(
             nodeCountSupplier,
-            adjacencyListBuilderFactory.newAdjacencyListBuilder(),
+            adjacencyListBuilderFactory.newAdjacencyListBuilder(memoryTracker),
             propertyBuilders,
             noAggregation,
-            aggregations
+            aggregations,
+            memoryTracker
         );
     }
 
@@ -70,7 +73,8 @@ public final class RawCompressor implements AdjacencyCompressor {
             AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
             AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             boolean noAggregation,
-            Aggregation[] aggregations
+            Aggregation[] aggregations,
+            MemoryTracker memoryTracker
         ) {
             super(
                 nodeCountSupplier,

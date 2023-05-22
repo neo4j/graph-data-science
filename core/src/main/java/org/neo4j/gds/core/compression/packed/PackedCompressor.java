@@ -32,6 +32,7 @@ import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.GdsSystemProperties;
@@ -46,28 +47,33 @@ public final class PackedCompressor implements AdjacencyCompressor {
         AdjacencyListBuilderFactory<Address, ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
-        boolean noAggregation
+        boolean noAggregation,
+        MemoryTracker memoryTracker
     ) {
         AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
-        Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
+        Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(
             nodeCountSupplier,
-            adjacencyListBuilderFactory.newAdjacencyListBuilder(),
+            adjacencyListBuilderFactory.newAdjacencyListBuilder(memoryTracker),
             propertyBuilders,
             noAggregation,
-            aggregations
+            aggregations,
+            memoryTracker
         );
     }
 
     static class Factory extends AbstractAdjacencyCompressorFactory<Address, long[]> {
+
+        private final MemoryTracker memoryTracker;
 
         Factory(
             LongSupplier nodeCountSupplier,
             AdjacencyListBuilder<Address, ? extends AdjacencyList> adjacencyBuilder,
             AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             boolean noAggregation,
-            Aggregation[] aggregations
+            Aggregation[] aggregations,
+            MemoryTracker memoryTracker
         ) {
             super(
                 nodeCountSupplier,
@@ -76,6 +82,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 noAggregation,
                 aggregations
             );
+
+            this.memoryTracker = memoryTracker;
         }
 
         @Override
@@ -112,7 +120,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 adjacencyOffsets,
                 propertyOffsets,
                 noAggregation,
-                aggregations
+                aggregations,
+                this.memoryTracker
             );
         }
     }
@@ -125,6 +134,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final HugeLongArray propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
+    private final MemoryTracker memoryTracker;
 
     private final ModifiableSlice<Address> adjacencySlice;
     private final ModifiableSlice<long[]> propertySlice;
@@ -140,7 +150,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
         HugeLongArray adjacencyOffsets,
         HugeLongArray propertyOffsets,
         boolean noAggregation,
-        Aggregation[] aggregations
+        Aggregation[] aggregations,
+        MemoryTracker memoryTracker
     ) {
         this.adjacencyAllocator = adjacencyAllocator;
         this.firstPropertyAllocator = firstPropertyAllocator;
@@ -150,6 +161,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
+        this.memoryTracker = memoryTracker;
 
         this.adjacencySlice = ModifiableSlice.create();
         this.propertySlice = ModifiableSlice.create();
@@ -203,14 +215,16 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 this.adjacencyAllocator,
                 this.adjacencySlice,
                 targets,
-                degree
+                degree,
+                this.memoryTracker
             );
         } else {
             offset = AdjacencyPacker.compressWithPropertiesWithVarLongTail(
                 this.adjacencyAllocator,
                 this.adjacencySlice,
                 targets,
-                degree
+                degree,
+                this.memoryTracker
             );
         }
 
@@ -234,7 +248,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 targets,
                 degree,
                 this.aggregations[0],
-                this.degree
+                this.degree,
+                this.memoryTracker
             );
         } else {
             offset = AdjacencyPacker.compressWithVarLongTail(
@@ -243,7 +258,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 targets,
                 degree,
                 this.aggregations[0],
-                this.degree
+                this.degree,
+                this.memoryTracker
             );
         }
 
