@@ -29,6 +29,7 @@ import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.function.ThrowingSupplier;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.StorageEngineFactoryIdProvider;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -120,14 +121,9 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_8, StorageEngineFactory.class);
     }
 
-    // Record storage = 0, Freki = 1
-    // Let's leave some room for future storage engines
-    // This arbitrary seems quite future-proof
-    public static final byte ID = 42;
-
     @Override
     public byte id() {
-        return ID;
+        return StorageEngineFactoryIdProvider.ID;
     }
 
     @Override
