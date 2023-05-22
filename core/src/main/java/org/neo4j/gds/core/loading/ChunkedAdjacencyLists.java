@@ -151,20 +151,22 @@ public final class ChunkedAdjacencyLists {
      * @param targetsToAdd  the actual number of targets to import from this range
      */
     public void add(long index, long[] targets, long[][] allProperties, int start, int end, int targetsToAdd) {
-        // compact the property buffer and ignore properties from ignored targets
-        var writeIndex = start;
-        for (int i = start; i < end; i++) {
-            if (targets[i] != IGNORE_VALUE) {
-                if (writeIndex != i) {
-                    for (long[] properties : allProperties) {
-                        properties[writeIndex] = properties[i];
+        if (end - start != targetsToAdd) {
+            // compact the property buffer and ignore properties from ignored targets
+            var writeIndex = start;
+            for (int i = start; i < end; i++) {
+                if (targets[i] != IGNORE_VALUE) {
+                    if (writeIndex != i) {
+                        for (long[] properties : allProperties) {
+                            properties[writeIndex] = properties[i];
+                        }
                     }
+                    writeIndex++;
                 }
-                writeIndex++;
             }
-        }
 
-        assert targetsToAdd == writeIndex - start;
+            assert targetsToAdd == writeIndex - start;
+        }
 
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
