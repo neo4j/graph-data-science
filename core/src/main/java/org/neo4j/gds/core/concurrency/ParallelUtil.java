@@ -147,6 +147,22 @@ public final class ParallelUtil {
         }
     }
 
+    // TODO compare with FJ version above
+    public static <P extends Partition> void parallelPartitionsConsume(
+        RunWithConcurrency.Builder runnerBuilder,
+        Stream<P> partitions,
+        Supplier<PartitionConsumer<P>> localConsumerSupplier
+    ) {
+        try (
+            var localConsumer = CloseableThreadLocal.withInitial(localConsumerSupplier);
+        ) {
+            var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
+            runnerBuilder.tasks(taskStream);
+            runnerBuilder.run();
+        }
+
+    }
+
     /**
      * @return the number of threads required to compute elementCount with the given batchSize
      */

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -212,18 +213,17 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             var iterationWeight = iterationWeights.get(i).floatValue();
             boolean firstIteration = i == 0;
 
-            Supplier<PartitionConsumer<DegreePartition>> taskSupplier = () -> new PropagateEmbeddingsTask(
+            Supplier<PartitionConsumer<DegreePartition>> consumerSupplier = () -> new PropagateEmbeddingsTask(
                 currentEmbeddings,
                 previousEmbeddings,
                 iterationWeight,
                 firstIteration
             );
 
-            ParallelUtil.parallelConsumePartitions(
+            ParallelUtil.parallelPartitionsConsume(
+                RunWithConcurrency.builder().executor(Pools.DEFAULT).concurrency(concurrency),
                 partitions.stream(),
-                taskSupplier,
-                concurrency,
-                terminationFlag
+                consumerSupplier
             );
 
             progressTracker.endSubTask();
