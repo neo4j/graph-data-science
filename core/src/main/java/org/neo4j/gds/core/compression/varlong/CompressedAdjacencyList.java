@@ -25,7 +25,6 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
@@ -103,10 +102,13 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    private final MemoryInfo memoryInfo;
+
+    CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets, MemoryInfo memoryInfo) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.memoryInfo = memoryInfo;
     }
 
     @Override
@@ -148,19 +150,12 @@ public final class CompressedAdjacencyList implements AdjacencyList {
 
     @Override
     public MemoryInfo memoryInfo() {
-        var memoryInfoBuilder = ImmutableMemoryInfo.builder()
-            .pages(this.pages.length);
-
-        var onHeapBytes = MemoryUsage.sizeOf(this);
-        if (onHeapBytes >= 0) {
-            memoryInfoBuilder.bytesOnHeap(onHeapBytes);
-        }
-        return memoryInfoBuilder.build();
+        return this.memoryInfo;
     }
 
     public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {
 
-        private byte[][] pages;
+        private final byte[][] pages;
         private final AdjacencyDecompressingReader decompress;
 
         private int maxTargets;
