@@ -32,4 +32,8 @@ public interface TestWriteConfig extends TestConfig, WriteConfig, WritePropertyC
     static TestWriteConfig of(CypherMapWrapper config) {
         return new TestWriteConfigImpl(config);
     }
+
+    static TestWriteConfig of(@SuppressWarnings("unused") String username, CypherMapWrapper config) {
+        return of(config);
+    }
 }
