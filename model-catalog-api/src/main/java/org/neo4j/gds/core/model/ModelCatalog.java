@@ -26,11 +26,21 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public interface ModelCatalog {
 
-    void registerListener(ModelCatalogListener listener);
+    Set<ModelCatalogListener> LISTENERS = new HashSet<>();
+
+    static void registerListener(ModelCatalogListener listener) {
+        LISTENERS.add(listener);
+    }
+
+    static void unregisterListener(ModelCatalogListener listener) {
+        LISTENERS.remove(listener);
+    }
 
     void set(Model<?, ?, ?> model);
 

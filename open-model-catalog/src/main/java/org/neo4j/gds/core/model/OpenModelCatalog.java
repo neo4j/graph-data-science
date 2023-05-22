@@ -28,7 +28,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -41,16 +40,8 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     private final Map<String, OpenUserCatalog> userCatalogs;
 
-    private final List<ModelCatalogListener> listeners;
-
     public OpenModelCatalog() {
         this.userCatalogs = new ConcurrentHashMap<>();
-        this.listeners = new ArrayList<>();
-    }
-
-    @Override
-    public void registerListener(ModelCatalogListener listener) {
-        listeners.add(listener);
     }
 
     @Override
@@ -63,7 +54,7 @@ public final class OpenModelCatalog implements ModelCatalog {
             return userCatalog;
         });
 
-        listeners.forEach(listener -> listener.onInsert(model));
+        LISTENERS.forEach(listener -> listener.onInsert(model));
     }
 
     @Override
