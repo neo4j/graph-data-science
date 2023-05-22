@@ -151,23 +151,6 @@ public final class ChunkedAdjacencyLists {
      * @param targetsToAdd  the actual number of targets to import from this range
      */
     public void add(long index, long[] targets, long[][] allProperties, int start, int end, int targetsToAdd) {
-        if (end - start != targetsToAdd) {
-            // compact the property buffer and ignore properties from ignored targets
-            var writeIndex = start;
-            for (int i = start; i < end; i++) {
-                if (targets[i] != IGNORE_VALUE) {
-                    if (writeIndex != i) {
-                        for (long[] properties : allProperties) {
-                            properties[writeIndex] = properties[i];
-                        }
-                    }
-                    writeIndex++;
-                }
-            }
-
-            assert targetsToAdd == writeIndex - start;
-        }
-
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
             var length = lengths.get(index);
@@ -176,6 +159,8 @@ public final class ChunkedAdjacencyLists {
                 length,
                 allProperties[i],
                 start,
+                end,
+                targets,
                 targetsToAdd,
                 this.properties[i]
             );
@@ -284,9 +269,26 @@ public final class ChunkedAdjacencyLists {
         int targetPos,
         long[] buffer,
         int bufferOffset,
+        int bufferEnd,
+        long[] targets,
         int bufferLength,
         HugeSparseLongArrayArrayList dataLists
     ) {
+        if (bufferEnd - bufferOffset != bufferLength) {
+            // compact the property buffer and ignore properties from ignored targets
+            var writeIndex = bufferOffset;
+            for (int i = bufferOffset; i < bufferEnd; i++) {
+                if (targets[i] != IGNORE_VALUE) {
+                    if (writeIndex != i) {
+                        buffer[writeIndex] = buffer[i];
+                    }
+                    writeIndex++;
+                }
+            }
+
+            assert bufferLength == writeIndex - bufferOffset;
+        }
+
         long[][] compressedData = dataLists.get(index);
 
         // last chunk, write pos = posInLastChunk
