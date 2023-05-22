@@ -83,7 +83,7 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 |Neo4j 5.2.0
 |Neo4j 5.3.0
 |Neo4j 5.4.0
-.8+<.^|GDS 2.3.x
+.9+<.^|GDS 2.3.x
 |Neo4j 4.4.9 - 4.4.20
 |Neo4j 5.1.0
 |Neo4j 5.2.0
@@ -92,7 +92,8 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 |Neo4j 5.5.0
 |Neo4j 5.6.0
 |Neo4j 5.7.0
-.8+<.^|GDS 2.4.x
+|Neo4j 5.8.0
+.9+<.^|GDS 2.4.x
 |Neo4j 4.4.9 - 4.4.20
 |Neo4j 5.1.0
 |Neo4j 5.2.0
@@ -101,6 +102,7 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 |Neo4j 5.5.0
 |Neo4j 5.6.0
 |Neo4j 5.7.0
+|Neo4j 5.8.0
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
