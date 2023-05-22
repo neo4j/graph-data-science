@@ -25,12 +25,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.hasKey;
 
@@ -74,5 +77,53 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                 "relationshipCount", 200L
             )
         ));
+    }
+
+    @Test
+    void testWithAdjacencyMemoryTracking() {
+        var graphName = "g";
+        var params = Map.of("name", (Object) graphName);
+        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.enableAndRun(() -> {
+            runQuery(
+                "CALL gds.beta.graph.generate($name, 100, 2)",
+                params
+            );
+
+            assertCypherResult("CALL gds.internal.graph.sizeOf($name)", params, List.of(
+                Map.of(
+                    "graphName", graphName,
+                    "memoryUsage", instanceOf(String.class),
+                    "sizeInBytes", allOf(instanceOf(Long.class), greaterThan(0L)),
+                    "detailSizeInBytes", Map.of(
+                        "relationships", instanceOf(Map.class),
+                        "total", allOf(instanceOf(Long.class), greaterThan(0L)),
+                        "nodes", instanceOf(Map.class),
+                        "adjacencyLists", Map.of(
+                            "REL", Map.of(
+                                "pages",
+                                allOf(instanceOf(Long.class), greaterThan(0L)),
+                                "bytesTotal",
+                                allOf(instanceOf(Long.class), greaterThan(0L)),
+                                "bytesOnHeap",
+                                allOf(instanceOf(Long.class), greaterThan(0L)),
+                                "bytesOffHeap",
+                                instanceOf(Long.class),
+                                "pageSizes",
+                                allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThan(0D))),
+                                "heapAllocations",
+                                allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThan(0D))),
+                                "nativeAllocations",
+                                instanceOf(Map.class),
+                                "headerBits",
+                                instanceOf(Map.class),
+                                "headerAllocations",
+                                instanceOf(Map.class)
+                            ))
+                    ),
+                    "nodeCount", 100L,
+                    "relationshipCount", 200L
+                )
+            ));
+        });
     }
 }
