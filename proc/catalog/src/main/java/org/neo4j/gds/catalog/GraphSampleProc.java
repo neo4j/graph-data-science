@@ -46,7 +46,7 @@ public class GraphSampleProc extends CatalogProc {
     private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
 
 
-    @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
+    @Procedure(name = "gds.graph.sample.rwr", mode = READ)
     @Description(RWR_DESCRIPTION)
     public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestarts(
         @Name(value = "graphName") String graphName,

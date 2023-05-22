@@ -69,7 +69,7 @@ At this time there is no support for relationship type stratification.
 .The following describes the API for running the algorithm
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.sample.rwr(
+CALL gds.graph.sample.rwr(
   graphName: String,
   fromGraphName: String,
   configuration: Map
@@ -180,7 +180,7 @@ Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as
 [source, cypher, role=noplay]
 ----
 MATCH (start:User {name: 'Alice'})
-CALL gds.alpha.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
+CALL gds.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
 YIELD nodeCount, relationshipCount
 RETURN nodeCount, relationshipCount
 ----

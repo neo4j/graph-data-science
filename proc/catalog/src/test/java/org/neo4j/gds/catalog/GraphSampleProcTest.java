@@ -89,7 +89,7 @@ class GraphSampleProcTest extends BaseProcTest {
     void shouldListCorrectGraphProjectionConfigRWR() {
         runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
 
-        runQuery("CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5})");
+        runQuery("CALL gds.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5})");
         assertGraphExists("sample");
         runQueryWithRowConsumer("CALL gds.graph.list('sample') YIELD configuration", resultRow -> {
             assertThat(resultRow.get("configuration"))
@@ -106,7 +106,7 @@ class GraphSampleProcTest extends BaseProcTest {
         runQuery("CALL gds.graph.project('g', '*', '*')");
 
         var query =
-            "CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
+            "CALL gds.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
         assertCypherResult(query, List.of(
             Map.of("nodeCount", expectedNodeCount)
         ));
