@@ -29,18 +29,19 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionConsumer;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
-import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
@@ -193,8 +194,10 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         ParallelUtil.parallelStreamConsume(
             partitions.stream(),
             concurrency,
-            (stream) -> stream.forEach((partition) -> this.addInitialStateToEmbedding(partition))
+            terminationFlag,
+            stream -> stream.forEach(this::addInitialStateToEmbedding)
         );
+
         progressTracker.endSubTask();
     }
 
@@ -209,20 +212,19 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             var iterationWeight = iterationWeights.get(i).floatValue();
             boolean firstIteration = i == 0;
 
-            try (
-                var localTask = CloseableThreadLocal.withInitial(() -> new PropagateEmbeddingsTask(
-                    currentEmbeddings,
-                    previousEmbeddings,
-                    iterationWeight,
-                    firstIteration
-                ))
-            ) {
-                ParallelUtil.parallelStreamConsume(
-                    partitions.stream(),
-                    concurrency,
-                    stream -> stream.forEach(partition -> localTask.get().consume(partition))
-                );
-            }
+            Supplier<PartitionConsumer<DegreePartition>> taskSupplier = () -> new PropagateEmbeddingsTask(
+                currentEmbeddings,
+                previousEmbeddings,
+                iterationWeight,
+                firstIteration
+            );
+
+            ParallelUtil.parallelConsumePartitions(
+                partitions.stream(),
+                taskSupplier,
+                concurrency,
+                terminationFlag
+            );
 
             progressTracker.endSubTask();
         }
@@ -397,7 +399,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    private final class PropagateEmbeddingsTask {
+    private final class PropagateEmbeddingsTask implements PartitionConsumer<DegreePartition> {
 
         private final HugeObjectArray<float[]> currentEmbeddings;
         private final HugeObjectArray<float[]> previousEmbeddings;
@@ -418,7 +420,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             this.firstIteration = firstIteration;
         }
 
-        void consume(DegreePartition partition) {
+        public void consume(DegreePartition partition) {
             partition.consume(nodeId -> {
                 var embedding = embeddings.get(nodeId);
                 var currentEmbedding = currentEmbeddings.get(nodeId);

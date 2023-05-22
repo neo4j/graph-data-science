@@ -21,7 +21,10 @@ package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionConsumer;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;
@@ -51,6 +54,7 @@ import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -120,6 +124,24 @@ public final class ParallelUtil {
             terminationFlag,
             stream -> stream.forEach(consumer)
         );
+    }
+
+    public static <P extends Partition> void parallelConsumePartitions(
+        Stream<P> partitions,
+        Supplier<PartitionConsumer<P>> localConsumerSupplier,
+        int concurrency,
+        TerminationFlag terminationFlag
+    ) {
+        try (
+            var localTask = CloseableThreadLocal.withInitial(localConsumerSupplier);
+        ) {
+            ParallelUtil.parallelStreamConsume(
+                partitions,
+                concurrency,
+                terminationFlag,
+                stream -> stream.forEach(partition -> localTask.get().consume(partition))
+            );
+        }
     }
 
     /**
