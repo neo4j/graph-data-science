@@ -30,6 +30,10 @@ import org.neo4j.gds.executor.ExecutionContext;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated Used in Pregel things which will go away, do not add new usages.
+ */
+@Deprecated(forRemoval = true)
 public abstract class StreamProc<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,

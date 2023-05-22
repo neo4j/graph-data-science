@@ -46,7 +46,7 @@ public class TestSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResul
 
     @Override
     public NewConfigFunction<TestWriteConfig> newConfigFunction() {
-        return (__, userInput) -> TestWriteConfig.of(userInput);
+        return TestWriteConfig::of;
     }
 
     @Override

@@ -26,6 +26,10 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
+/**
+ * @deprecated Used transitively in Pregel things which will go away, do not add new usages.
+ */
+@Deprecated(forRemoval = true)
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,

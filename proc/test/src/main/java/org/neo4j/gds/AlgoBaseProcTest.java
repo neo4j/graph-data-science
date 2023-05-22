@@ -38,7 +38,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -85,15 +84,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             getProcedureClazz(),
             proc -> {
                 if (proc instanceof NodePropertiesWriter) {
+                    /*
+                     * This is really a WriteProc dependency and thus tied to Pregel things.
+                     */
                     ((NodePropertiesWriter<?, ?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                        DatabaseTransactionContext.of(
-                            proc.databaseService,
-                            proc.procedureTransaction
-                        ));
-                }
-
-                if (proc instanceof WriteRelationshipsProc) {
-                    ((WriteRelationshipsProc<?, ?, ?, ?>) proc).relationshipExporterBuilder = new NativeRelationshipExporterBuilder(
                         DatabaseTransactionContext.of(
                             proc.databaseService,
                             proc.procedureTransaction
