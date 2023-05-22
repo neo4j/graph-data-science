@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.HdrHistogram.Histogram;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
@@ -36,6 +35,7 @@ import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.GdsSystemProperties;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;
@@ -87,9 +87,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
             Aggregation[] aggregations,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
-            HugeLongArray propertyOffsets,
-            Histogram headerAllocations,
-            Histogram valueAllocations
+            HugeLongArray propertyOffsets
         ) {
             AdjacencyListBuilder.Allocator<long[]> firstAllocator;
             AdjacencyListBuilder.PositionalAllocator<long[]>[] otherAllocators;
@@ -115,9 +113,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 adjacencyOffsets,
                 propertyOffsets,
                 noAggregation,
-                aggregations,
-                headerAllocations,
-                valueAllocations
+                aggregations
             );
         }
     }
@@ -130,13 +126,13 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final HugeLongArray propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
-    private final Histogram headerBitsHistogram;
-    private final Histogram valueAllocationHistogram;
 
     private final LongArrayBuffer buffer;
     private final ModifiableSlice<Address> adjacencySlice;
     private final ModifiableSlice<long[]> propertySlice;
     private final MutableInt degree;
+
+    private final boolean packed;
 
     private PackedCompressor(
         AdjacencyListBuilder.Allocator<Address> adjacencyAllocator,
@@ -146,9 +142,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         HugeLongArray adjacencyOffsets,
         HugeLongArray propertyOffsets,
         boolean noAggregation,
-        Aggregation[] aggregations,
-        Histogram headerBitsHistogram,
-        Histogram valueAllocationHistogram
+        Aggregation[] aggregations
     ) {
         this.adjacencyAllocator = adjacencyAllocator;
         this.firstPropertyAllocator = firstPropertyAllocator;
@@ -158,13 +152,13 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
-        this.headerBitsHistogram = headerBitsHistogram;
-        this.valueAllocationHistogram = valueAllocationHistogram;
 
         this.buffer = new LongArrayBuffer();
         this.adjacencySlice = ModifiableSlice.create();
         this.propertySlice = ModifiableSlice.create();
         this.degree = new MutableInt(0);
+
+        this.packed = GdsSystemProperties.PACKED_TAIL_COMPRESSION == GdsSystemProperties.PackedTailCompression.Packed;
     }
 
     @Override
@@ -214,19 +208,30 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
         long[] targets = this.buffer.buffer;
         int targetsLength = this.buffer.length;
-
-        long offset = AdjacencyPacker.compressWithProperties(
-            this.adjacencyAllocator,
-            this.adjacencySlice,
-            targets,
-            uncompressedPropertiesPerProperty,
-            targetsLength,
-            this.aggregations,
-            this.noAggregation,
-            this.degree,
-            this.headerBitsHistogram,
-            this.valueAllocationHistogram
-        );
+        long offset;
+        if (this.packed) {
+            offset = AdjacencyPacker.compressWithPropertiesWithPackedTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                uncompressedPropertiesPerProperty,
+                targetsLength,
+                this.aggregations,
+                this.noAggregation,
+                this.degree
+            );
+        } else {
+            offset = AdjacencyPacker.compressWithPropertiesWithVarLongTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                uncompressedPropertiesPerProperty,
+                targetsLength,
+                this.aggregations,
+                this.noAggregation,
+                this.degree
+            );
+        }
 
         int degree = this.degree.intValue();
 
@@ -256,16 +261,27 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[] targets = this.buffer.buffer;
         int targetsLength = this.buffer.length;
 
-        long offset = AdjacencyPacker.compress(
-            this.adjacencyAllocator,
-            this.adjacencySlice,
-            targets,
-            targetsLength,
-            this.aggregations[0],
-            this.degree,
-            this.headerBitsHistogram,
-            this.valueAllocationHistogram
-        );
+        long offset;
+
+        if (this.packed) {
+            offset = AdjacencyPacker.compressWithPackedTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                targetsLength,
+                this.aggregations[0],
+                this.degree
+            );
+        } else {
+            offset = AdjacencyPacker.compressWithVarLongTail(
+                this.adjacencyAllocator,
+                this.adjacencySlice,
+                targets,
+                targetsLength,
+                this.aggregations[0],
+                this.degree
+            );
+        }
 
         int degree = this.degree.intValue();
 

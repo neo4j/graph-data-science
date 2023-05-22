@@ -53,7 +53,7 @@ public final class VarLongDecoding {
         long previousValue,
         long ptr,
         long[] out,
-        int offset
+        int outOffset
     ) {
         long input, value = 0L;
         int shift = 0;
@@ -63,7 +63,7 @@ public final class VarLongDecoding {
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 previousValue += value;
-                out[offset++] = previousValue;
+                out[outOffset++] = previousValue;
                 value = 0L;
                 shift = 0;
                 length--;

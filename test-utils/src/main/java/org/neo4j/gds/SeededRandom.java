@@ -36,4 +36,11 @@ public interface SeededRandom {
         random.setSeed(seed);
         return ImmutableSeededRandom.of(random, seed);
     }
+
+    static SeededRandom newRandom(long seed) {
+        var random = new Random();
+        random.setSeed(seed);
+        return ImmutableSeededRandom.of(random, seed);
+    }
+
 }

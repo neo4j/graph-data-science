@@ -26,7 +26,6 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -187,10 +186,6 @@ public class GraphMemoryUsageProc extends CatalogProc {
                         "bytesOnHeap", memoryInfo.bytesOnHeap().orElse(0),
                         "bytesOffHeap", memoryInfo.bytesOffHeap().orElse(0)
                     ));
-                    memoryInfo.allocationHistogram().ifPresent(histogram -> {
-                        var histogramDetails = HistogramUtils.communitySummary(histogram);
-                        adjacencyListDetails.put("allocations", histogramDetails);
-                    });
                 });
                 details.put("adjacencyLists", adjacencyListDetails);
             }

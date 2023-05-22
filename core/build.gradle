@@ -65,8 +65,9 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':edition-api')
 
-    testImplementation group: 'net.jqwik',       name: 'jqwik',               version: ver.'jqwik'
-    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
+    testImplementation group: 'net.jqwik',          name: 'jqwik',                  version: ver.'jqwik'
+    testImplementation group: 'io.qala.datagen',    name: 'qala-datagen-junit5',    version: ver.'qala-datagen'
+    testImplementation group: 'org.junit-pioneer',  name: 'junit-pioneer',          version: ver.'junit-pioneer'
 }
 
 afterEvaluate {

@@ -19,18 +19,16 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.HdrHistogram.ConcurrentHistogram;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.GdsSystemProperties;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     private Address address;
@@ -42,60 +40,44 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         }
     }
 
-    public static void testList(
-        long[] values,
-        int length,
-        Aggregation aggregation,
-        Consumer<PackedAdjacencyList> code
-    ) {
-        test((allocator, slice) -> {
-
-            var degree = new MutableInt(0);
-            var offset = AdjacencyPacker.compress(
-                allocator,
-                slice,
-                values,
-                length,
-                aggregation,
-                degree,
-                null,
-                null
-            );
-
-            var pages = new long[]{degree.intValue()};
-            var bytesOffHeap = Math.toIntExact(slice.slice().bytes());
-            var allocationSizes = new int[]{bytesOffHeap};
-            var degrees = HugeIntArray.of(degree.intValue());
-            var offsets = HugeLongArray.of(offset);
-            var list = new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, new ConcurrentHistogram(0));
-
-            code.accept(list);
-        });
-    }
-
     public static void testCursor(
         long[] values,
         int length,
         Aggregation aggregation,
-        BiConsumer<DecompressingCursor, AdjacencyListBuilder.Slice<Address>> code
+        BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
     ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
-            var offset = AdjacencyPacker.compress(
-                allocator,
-                slice,
-                values.clone(),
-                length,
-                aggregation,
-                degree,
-                null,
-                null
-            );
+            long offset;
+            AdjacencyCursor cursor;
 
-            var pages = new long[]{slice.slice().address()};
-            var cursor = new DecompressingCursor(pages);
+            switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
+                case VarLong:
+                    offset = AdjacencyPacker.compressWithVarLongTail(
+                        allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    cursor = new DecompressingCursorWithVarLongTail(new long[]{slice.slice().address()});
+                    break;
+                case Packed:
+                    offset = AdjacencyPacker.compressWithPackedTail(
+                        allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    cursor = new DecompressingCursorWithPackedTail(new long[]{slice.slice().address()});
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown compression type");
+            }
             cursor.init(offset, degree.intValue());
-
             code.accept(cursor, slice);
         });
     }

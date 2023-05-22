@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.HdrHistogram.ConcurrentHistogram;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
@@ -30,11 +29,8 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
 
     private final BumpAllocator<byte[]> builder;
 
-    private final ConcurrentHistogram allocationHistogram;
-
     CompressedAdjacencyListBuilder() {
-        this.allocationHistogram = new ConcurrentHistogram(0);
-        this.builder = new BumpAllocator<>(Factory.INSTANCE, this.allocationHistogram);
+        this.builder = new BumpAllocator<>(Factory.INSTANCE);
     }
 
     @Override
@@ -51,7 +47,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
         var intoPages = builder.intoPages();
         reorder(intoPages, offsets, degrees);
-        return new CompressedAdjacencyList(intoPages, degrees, offsets, this.allocationHistogram);
+        return new CompressedAdjacencyList(intoPages, degrees, offsets);
     }
 
     private enum Factory implements BumpAllocator.Factory<byte[]> {

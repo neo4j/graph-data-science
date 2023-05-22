@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.common;
 
-import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.compress.ModifiableSlice;
@@ -52,12 +51,10 @@ public final class BumpAllocator<PAGE> {
     private volatile PAGE[] pages;
 
     private final Factory<PAGE> pageFactory;
-    private final Histogram allocationHistogram;
     private final ReentrantLock growLock;
 
-    public BumpAllocator(Factory<PAGE> pageFactory, Histogram allocationhistogram) {
+    public BumpAllocator(Factory<PAGE> pageFactory) {
         this.pageFactory = pageFactory;
-        this.allocationHistogram = allocationhistogram;
         this.growLock = new ReentrantLock(true);
         this.pages = pageFactory.newEmptyPages();
     }
@@ -72,7 +69,7 @@ public final class BumpAllocator<PAGE> {
     }
 
     public LocalAllocator<PAGE> newLocalAllocator() {
-        return new LocalAllocator<>(this, this.allocationHistogram);
+        return new LocalAllocator<>(this);
     }
 
     public LocalPositionalAllocator<PAGE> newLocalPositionalAllocator(PositionalFactory<PAGE> positionalFactory) {
@@ -194,22 +191,18 @@ public final class BumpAllocator<PAGE> {
 
         private long top;
 
-        private final Histogram allocationHistogram;
-
         private PAGE page;
         private int offset;
 
-        private LocalAllocator(BumpAllocator<PAGE> globalAllocator, Histogram allocationHistogram) {
+        private LocalAllocator(BumpAllocator<PAGE> globalAllocator) {
             this.globalAllocator = globalAllocator;
             this.offset = PAGE_SIZE;
-            this.allocationHistogram = allocationHistogram;
         }
 
         /**
          * Allocate some memory into the slice, returns global address
          */
         public long insertInto(int length, ModifiableSlice<PAGE> slice) {
-            this.allocationHistogram.recordValue(length);
             int maxOffset = PAGE_SIZE - length;
             if (maxOffset >= this.offset) {
                 long address = this.top;

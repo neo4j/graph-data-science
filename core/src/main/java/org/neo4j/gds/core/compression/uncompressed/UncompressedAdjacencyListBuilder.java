@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.uncompressed;
 
-import org.HdrHistogram.ConcurrentHistogram;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
@@ -31,11 +30,9 @@ import java.util.Arrays;
 public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuilder<long[], UncompressedAdjacencyList> {
 
     private final BumpAllocator<long[]> builder;
-    private final ConcurrentHistogram allocationHistogram;
 
     public UncompressedAdjacencyListBuilder() {
-        this.allocationHistogram = new ConcurrentHistogram(0);
-        this.builder = new BumpAllocator<>(Factory.INSTANCE, this.allocationHistogram);
+        this.builder = new BumpAllocator<>(Factory.INSTANCE);
     }
 
     @Override

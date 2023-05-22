@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.HdrHistogram.ConcurrentHistogram;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.compress.ModifiableSlice;
@@ -31,7 +30,6 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class PackedAdjacencyListTest {
 
@@ -45,33 +43,17 @@ class PackedAdjacencyListTest {
             .hasMessage("This page has already been freed.");
     }
 
-    @Test
-    void memoryInfo() {
-        var list = adjacencyList(LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray());
-
-        var memoryInfo = list.memoryInfo();
-
-        assertThat(memoryInfo.bytesTotal()).isPresent();
-        assertThat(memoryInfo.bytesOffHeap()).isPresent();
-        assertThat(memoryInfo.bytesOnHeap()).isPresent();
-        assertThat(memoryInfo.bytesTotal().getAsLong()).isGreaterThan(0L);
-        assertThat(memoryInfo.bytesOnHeap().getAsLong()).isGreaterThan(0L);
-        assertThat(memoryInfo.bytesOffHeap().getAsLong()).isGreaterThan(0L);
-    }
-
     private static PackedAdjacencyList adjacencyList(long[] data) {
         var allocator = new TestAllocator();
         var slice = ModifiableSlice.<Address>create();
         var degree = new MutableInt(0);
-        var offset = AdjacencyPacker.compress(
+        var offset = AdjacencyPacker.compressWithVarLongTail(
             allocator,
             slice,
             data,
             data.length,
             Aggregation.NONE,
-            degree,
-            null,
-            null
+            degree
         );
 
         long ptr = slice.slice().address();
@@ -81,6 +63,6 @@ class PackedAdjacencyListTest {
         var degrees = HugeIntArray.of(degree.intValue());
         var offsets = HugeLongArray.of(offset);
 
-        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, new ConcurrentHistogram(0));
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
     }
 }
