@@ -27,6 +27,10 @@ import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.List;
 
+/**
+ * @deprecated Used in Pregel things which will go away, do not add new usages.
+ */
+@Deprecated(forRemoval = true)
 public abstract class MutatePropertyProc<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,

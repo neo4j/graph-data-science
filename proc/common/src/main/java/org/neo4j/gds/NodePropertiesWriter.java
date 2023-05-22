@@ -24,6 +24,10 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.procedure.Context;
 
+/**
+ * @deprecated Used transitively in Pregel things which will go away, do not add new usages.
+ */
+@Deprecated(forRemoval = true)
 public abstract class NodePropertiesWriter<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig, PROC_RESULT>
     extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
