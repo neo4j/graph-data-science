@@ -24,14 +24,11 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.GdsSystemProperties;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     private Address address;
