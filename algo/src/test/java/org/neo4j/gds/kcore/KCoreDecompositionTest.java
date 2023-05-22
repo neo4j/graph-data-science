@@ -72,9 +72,6 @@ class KCoreDecompositionTest {
         @Inject
         private TestGraph graph;
 
-        @Inject
-        private IdFunction idFunction;
-
         @ParameterizedTest
         @ValueSource(ints = {1, 4})
         void shouldComputeCoreDecomposition(int concurrency) {
@@ -83,15 +80,15 @@ class KCoreDecompositionTest {
             assertThat(kcore.degeneracy()).isEqualTo(2);
             var coreValues = kcore.coreValues();
 
-            assertThat(coreValues.get(idFunction.of("z"))).isEqualTo(0);
-            assertThat(coreValues.get(idFunction.of("a"))).isEqualTo(1);
-            assertThat(coreValues.get(idFunction.of("b"))).isEqualTo(1);
-            assertThat(coreValues.get(idFunction.of("c"))).isEqualTo(2);
-            assertThat(coreValues.get(idFunction.of("d"))).isEqualTo(2);
-            assertThat(coreValues.get(idFunction.of("e"))).isEqualTo(2);
-            assertThat(coreValues.get(idFunction.of("f"))).isEqualTo(2);
-            assertThat(coreValues.get(idFunction.of("g"))).isEqualTo(2);
-            assertThat(coreValues.get(idFunction.of("h"))).isEqualTo(2);
+            assertThat(coreValues.get(graph.toMappedNodeId("z"))).isEqualTo(0);
+            assertThat(coreValues.get(graph.toMappedNodeId("a"))).isEqualTo(1);
+            assertThat(coreValues.get(graph.toMappedNodeId("b"))).isEqualTo(1);
+            assertThat(coreValues.get(graph.toMappedNodeId("c"))).isEqualTo(2);
+            assertThat(coreValues.get(graph.toMappedNodeId("d"))).isEqualTo(2);
+            assertThat(coreValues.get(graph.toMappedNodeId("e"))).isEqualTo(2);
+            assertThat(coreValues.get(graph.toMappedNodeId("f"))).isEqualTo(2);
+            assertThat(coreValues.get(graph.toMappedNodeId("g"))).isEqualTo(2);
+            assertThat(coreValues.get(graph.toMappedNodeId("h"))).isEqualTo(2);
 
         }
 
@@ -168,12 +165,10 @@ class KCoreDecompositionTest {
         @Inject
         private TestGraph graph;
 
-        @Inject
-        private IdFunction idFunction;
-
         @ParameterizedTest
         @ValueSource(ints = {1, 4})
         void shouldComputeCoreDecomposition(int concurrency) {
+            IdFunction idFunction = graph::toMappedNodeId;
 
             var kcore = new KCoreDecomposition(graph, concurrency, ProgressTracker.NULL_TRACKER, 1).compute();
             assertThat(kcore.degeneracy()).isEqualTo(3);
@@ -207,9 +202,6 @@ class KCoreDecompositionTest {
         @Inject
         private TestGraph graph;
 
-        @Inject
-        private IdFunction idFunction;
-
         @Test
         void shouldComputeCoreDecomposition() {
 
@@ -217,8 +209,8 @@ class KCoreDecompositionTest {
             assertThat(kcore.degeneracy()).isEqualTo(0);
             var coreValues = kcore.coreValues();
 
-            assertThat(coreValues.get(idFunction.of("a"))).isEqualTo(0L);
-            assertThat(coreValues.get(idFunction.of("b"))).isEqualTo(0L);
+            assertThat(coreValues.get(graph.toMappedNodeId("a"))).isEqualTo(0L);
+            assertThat(coreValues.get(graph.toMappedNodeId("b"))).isEqualTo(0L);
 
         }
 

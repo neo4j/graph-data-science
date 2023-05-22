@@ -54,7 +54,8 @@ class LabelPropagationTest {
 
     private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(CypherMapWrapper.empty());
 
-    @GdlGraph
+    // override idOffset for seedId to be actual neo4j ids
+    @GdlGraph(idOffset = 0)
     private static final String GRAPH =
         "CREATE" +
         "  (nAlice:User   {seedId: 2})" +

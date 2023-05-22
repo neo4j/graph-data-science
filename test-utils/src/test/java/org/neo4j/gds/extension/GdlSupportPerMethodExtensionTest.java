@@ -39,5 +39,7 @@ class GdlSupportPerMethodExtensionTest {
         assertThat(idOffsetGraph.relationshipCount()).isEqualTo(1L);
         assertThat(idOffsetIdFunction.of("a")).isEqualTo(42L);
         assertThat(idOffsetIdFunction.of("b")).isEqualTo(43L);
+        assertThat(idOffsetGraph.toMappedNodeId(42L)).isEqualTo(0L);
+        assertThat(idOffsetGraph.toMappedNodeId(43L)).isEqualTo(1L);
     }
 }

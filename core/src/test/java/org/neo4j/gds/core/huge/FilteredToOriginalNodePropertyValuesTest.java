@@ -22,14 +22,13 @@ package org.neo4j.gds.core.huge;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Set;
 
@@ -45,13 +44,10 @@ class FilteredToOriginalNodePropertyValuesTest {
         " (c:ignore)";
 
     @Inject
-    private CSRGraph graph;
+    private TestGraph graph;
 
     @Inject
     private GraphStore graphStore;
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void testDoubleArray() {
@@ -63,8 +59,8 @@ class FilteredToOriginalNodePropertyValuesTest {
             )
         );
 
-        assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
-        assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("b"))).containsExactly(
+        assertThat(filteredNodeProperties.doubleArrayValue(graph.toMappedNodeId("a"))).containsExactly(1D);
+        assertThat(filteredNodeProperties.doubleArrayValue(graph.toMappedNodeId("b"))).containsExactly(
             new double[]{1D, 2.22D, 1.337D},
             Offset.offset(1e-5)
         );
@@ -80,8 +76,8 @@ class FilteredToOriginalNodePropertyValuesTest {
             )
         );
 
-        assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
-        assertThat(filteredNodeProperties.longArrayValue(idFunction.of("b"))).containsExactly(1L, 222L, 1337L);
+        assertThat(filteredNodeProperties.longArrayValue(graph.toMappedNodeId("a"))).containsExactly(1L);
+        assertThat(filteredNodeProperties.longArrayValue(graph.toMappedNodeId("b"))).containsExactly(1L, 222L, 1337L);
     }
 
     @Test
@@ -94,7 +90,7 @@ class FilteredToOriginalNodePropertyValuesTest {
             )
         );
 
-        assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);
-        assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("b"))).containsExactly(1.0F, 2.22F, 1.337F);
+        assertThat(filteredNodeProperties.floatArrayValue(graph.toMappedNodeId("a"))).containsExactly(1.0F);
+        assertThat(filteredNodeProperties.floatArrayValue(graph.toMappedNodeId("b"))).containsExactly(1.0F, 2.22F, 1.337F);
     }
 }

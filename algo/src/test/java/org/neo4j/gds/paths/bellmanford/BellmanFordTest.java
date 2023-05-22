@@ -37,9 +37,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -64,9 +62,6 @@ class BellmanFordTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @GdlGraph(graphNamePrefix = "loop")
     private static final String LOOP_DB_CYPHER =
         "CREATE " +
@@ -83,9 +78,6 @@ class BellmanFordTest {
 
     @Inject
     private TestGraph loopGraph;
-
-    @Inject
-    private IdFunction loopIdFunction;
 
     // another graph: https://www.javatpoint.com/bellman-ford-algorithm
     @GdlGraph(graphNamePrefix = "third")
@@ -111,11 +103,10 @@ class BellmanFordTest {
     @Inject
     private TestGraph thirdGraph;
 
-    @Inject
-    private IdFunction thirdIdFunction;
-
     @Test
     void shouldComputeShortestPathsWithoutLoops() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         long[] a = new long[]{
             idFunction.of("a0"),
             idFunction.of("a1"),
@@ -150,7 +141,7 @@ class BellmanFordTest {
 
     @Test
     void shouldTrackNegativeCycles() {
-        long a0 = loopIdFunction.of("a0");
+        long a0 = loopGraph.toMappedNodeId("a0");
         var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, true, true, 1).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
@@ -160,7 +151,7 @@ class BellmanFordTest {
 
     @Test
     void shouldNotTrackNegativeCycles() {
-        long a0 = loopIdFunction.of("a0");
+        long a0 = loopGraph.toMappedNodeId("a0");
         var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, false, true, 1).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
@@ -170,13 +161,15 @@ class BellmanFordTest {
 
     @Test
     void shouldUpdateBasedOnNegativeCorrectly() {
+        IdFunction idFunction = thirdGraph::toMappedNodeId;
+
         long[] nodes = new long[]{
-            thirdIdFunction.of("A"),
-            thirdIdFunction.of("B"),
-            thirdIdFunction.of("C"),
-            thirdIdFunction.of("D"),
-            thirdIdFunction.of("E"),
-            thirdIdFunction.of("F")};
+            idFunction.of("A"),
+            idFunction.of("B"),
+            idFunction.of("C"),
+            idFunction.of("D"),
+            idFunction.of("E"),
+            idFunction.of("F")};
 
         var result = new BellmanFord(thirdGraph, ProgressTracker.NULL_TRACKER, nodes[0], true, true, 1).compute();
         long[][] EXPECTED_PATHS = new long[6][];
@@ -210,7 +203,7 @@ class BellmanFordTest {
     void shouldLogProgress() {
         var config = BellmanFordStatsConfigImpl.builder()
             .concurrency(4)
-            .sourceNode(idFunction.of("a0"))
+            .sourceNode(graph.toOriginalNodeId("a0"))
             .build();
 
         var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
@@ -220,9 +213,6 @@ class BellmanFordTest {
         new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)
             .compute()
             .shortestPaths().pathSet();
-
-        List<AtomicLong> progresses = progressTracker.getProgresses();
-        //  assertEquals(7, progresses.size());
 
         var messagesInOrder = testLog.getMessages(INFO);
 

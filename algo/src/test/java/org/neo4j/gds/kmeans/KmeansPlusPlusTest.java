@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
@@ -39,7 +38,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class KmeansPlusPlusTest {
 
-    @GdlGraph
+    // override offset as test involved sampling
+    @GdlGraph(idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a1 {  kmeans: [1.0]} )" +
@@ -55,10 +55,6 @@ public class KmeansPlusPlusTest {
 
     @Inject
     private Graph graph;
-
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void KmeansPlusPlusShouldWork() {

@@ -25,7 +25,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.TestGraphs;
@@ -44,9 +43,6 @@ class LocalMovePhaseKarateTest {
 
     @Inject
     private TestGraph graph;
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void testLocalMovePhase() {
@@ -72,7 +68,7 @@ class LocalMovePhaseKarateTest {
         var communitiesMap = LongStream
             .range(0, localMoveCommunities.size())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> localMoveCommunities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> localMoveCommunities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(

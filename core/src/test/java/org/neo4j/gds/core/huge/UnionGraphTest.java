@@ -42,8 +42,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @GdlExtension
@@ -105,16 +105,18 @@ class UnionGraphTest {
     @ParameterizedTest
     @MethodSource("nodeRelCombinations")
     void shouldSelectGivenRelationships(String sourceVariable, Set<RelationshipType> relTypes, Collection<String> targetVariables) {
+        IdFunction mappedIdFunction = name -> multiRelTypeGraphStore.nodes().toMappedNodeId(multiRelTypeIdFunction.of(name));
+
         Graph graph = multiRelTypeGraphStore.getUnion();
 
         var filteredGraph = graph.relationshipTypeFilteredGraph(relTypes);
         long[] actualTargets = filteredGraph
             .streamRelationships(
-                multiRelTypeIdFunction.of(sourceVariable),
+                mappedIdFunction.of(sourceVariable),
                 Double.NaN
             )
             .mapToLong(RelationshipCursor::targetId).toArray();
-        long[] expectedTargets = targetVariables.stream().mapToLong(multiRelTypeIdFunction::of).toArray();
+        long[] expectedTargets = targetVariables.stream().mapToLong(mappedIdFunction::of).toArray();
 
         assertThat(actualTargets).containsExactlyInAnyOrder(expectedTargets);
     }

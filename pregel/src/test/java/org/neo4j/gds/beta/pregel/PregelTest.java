@@ -331,28 +331,28 @@ class PregelTest {
 
         var result = pregelJob.run().nodeValues();
 
-        assertEquals(46L, result.longValue(LONG_KEY, graph.toOriginalNodeId("alice")));
-        assertEquals(84.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("alice")));
-        assertArrayEquals(new long[]{46L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("alice")));
+        assertEquals(46L, result.longValue(LONG_KEY, graph.toMappedNodeId("alice")));
+        assertEquals(84.0D, result.doubleValue(DOUBLE_KEY, graph.toMappedNodeId("alice")));
+        assertArrayEquals(new long[]{46L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toMappedNodeId("alice")));
         assertArrayEquals(
             new double[]{84.0D},
-            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("alice"))
+            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toMappedNodeId("alice"))
         );
 
-        assertEquals(48L, result.longValue(LONG_KEY, graph.toOriginalNodeId("bob")));
-        assertEquals(86.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("bob")));
-        assertArrayEquals(new long[]{48L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("bob")));
+        assertEquals(48L, result.longValue(LONG_KEY, graph.toMappedNodeId("bob")));
+        assertEquals(86.0D, result.doubleValue(DOUBLE_KEY, graph.toMappedNodeId("bob")));
+        assertArrayEquals(new long[]{48L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toMappedNodeId("bob")));
         assertArrayEquals(
             new double[]{86.0D},
-            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("bob"))
+            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toMappedNodeId("bob"))
         );
 
-        assertEquals(50L, result.longValue(LONG_KEY, graph.toOriginalNodeId("eve")));
-        assertEquals(88.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("eve")));
-        assertArrayEquals(new long[]{50L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("eve")));
+        assertEquals(50L, result.longValue(LONG_KEY, graph.toMappedNodeId("eve")));
+        assertEquals(88.0D, result.doubleValue(DOUBLE_KEY, graph.toMappedNodeId("eve")));
+        assertArrayEquals(new long[]{50L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toMappedNodeId("eve")));
         assertArrayEquals(
             new double[]{88.0D},
-            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("eve"))
+            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toMappedNodeId("eve"))
         );
     }
 

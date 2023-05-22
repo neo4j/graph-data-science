@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphStore;
@@ -33,8 +32,8 @@ import org.neo4j.gds.core.huge.FilteredNodePropertyValues.OriginalToFilteredNode
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,13 +52,10 @@ class OriginalToFilteredNodePropertiesTest {
         " (c:Ignore)";
 
     @Inject
-    private CSRGraph graph;
+    private TestGraph graph;
 
     @Inject
     private GraphStore graphStore;
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void testDoubleArray() {
@@ -71,8 +67,8 @@ class OriginalToFilteredNodePropertiesTest {
             )
         );
 
-        assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
-        assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("b"))).containsExactly(
+        assertThat(filteredNodeProperties.doubleArrayValue(graph.toMappedNodeId("a"))).containsExactly(1D);
+        assertThat(filteredNodeProperties.doubleArrayValue(graph.toMappedNodeId("b"))).containsExactly(
             new double[]{1D, 2.22D, 1.337D},
             Offset.offset(1e-5)
         );
@@ -88,8 +84,8 @@ class OriginalToFilteredNodePropertiesTest {
             )
         );
 
-        assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
-        assertThat(filteredNodeProperties.longArrayValue(idFunction.of("b"))).containsExactly(1L, 222L, 1337L);
+        assertThat(filteredNodeProperties.longArrayValue(graph.toMappedNodeId("a"))).containsExactly(1L);
+        assertThat(filteredNodeProperties.longArrayValue(graph.toMappedNodeId("b"))).containsExactly(1L, 222L, 1337L);
     }
 
     @Test
@@ -102,8 +98,8 @@ class OriginalToFilteredNodePropertiesTest {
             )
         );
 
-        assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);
-        assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("b"))).containsExactly(1.0F, 2.22F, 1.337F);
+        assertThat(filteredNodeProperties.floatArrayValue(graph.toMappedNodeId("a"))).containsExactly(1.0F);
+        assertThat(filteredNodeProperties.floatArrayValue(graph.toMappedNodeId("b"))).containsExactly(1.0F, 2.22F, 1.337F);
     }
 
     @ParameterizedTest
@@ -123,8 +119,8 @@ class OriginalToFilteredNodePropertiesTest {
             nodeFilteredGraph
         );
 
-        assertThat(filteredNodeProperties.longValue(idFunction.of("a"))).isEqualTo(expectedAValue);
-        assertThat(filteredNodeProperties.longValue(idFunction.of("b"))).isEqualTo(expectedBValue);
+        assertThat(filteredNodeProperties.longValue(graph.toMappedNodeId("a"))).isEqualTo(expectedAValue);
+        assertThat(filteredNodeProperties.longValue(graph.toMappedNodeId("b"))).isEqualTo(expectedBValue);
     }
 
     static Stream<Arguments> expectedFilteredValue() {

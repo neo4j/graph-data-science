@@ -72,6 +72,8 @@ class CSRCompositeRelationshipIteratorTest {
 
     @Test
     void canIterateSingleProperty() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1")
@@ -79,24 +81,26 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertIteration(
             iterator,
-            idFunction.of("a"),
+            mappedId.of("a"),
             Map.of(
-                idFunction.of("b"), List.of(42.0D)
+                mappedId.of("b"), List.of(42.0D)
             )
         );
 
         assertIteration(
             iterator,
-            idFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                idFunction.of("a"), List.of(1.0D),
-                idFunction.of("c"), List.of(4.0D)
+                mappedId.of("a"), List.of(1.0D),
+                mappedId.of("c"), List.of(4.0D)
             )
         );
     }
 
     @Test
     void canInverselyIterateSingleProperty() {
+        IdFunction mappedId = name -> inverseGraphStore.nodes().toMappedNodeId(inverseIdFunction.of(name));
+
         var iterator = inverseGraphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1")
@@ -104,31 +108,33 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertInverseIteration(
             iterator,
-            inverseIdFunction.of("a"),
+            mappedId.of("a"),
             Map.of(
-                inverseIdFunction.of("b"), List.of(1.0D)
+                mappedId.of("b"), List.of(1.0D)
             )
         );
 
         assertInverseIteration(
             iterator,
-            inverseIdFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                inverseIdFunction.of("a"), List.of(42.0D)
+                mappedId.of("a"), List.of(42.0D)
             )
         );
 
         assertInverseIteration(
             iterator,
-            inverseIdFunction.of("c"),
+            mappedId.of("c"),
             Map.of(
-                inverseIdFunction.of("b"), List.of(4.0D)
+                mappedId.of("b"), List.of(4.0D)
             )
         );
     }
 
     @Test
     void canIterateMultipleProperties() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1", "prop2", "prop3")
@@ -136,24 +142,26 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertIteration(
             iterator,
-            idFunction.of("a"),
+            mappedId.of("a"),
             Map.of(
-                idFunction.of("b"), List.of(42.0D, 84.0D, 1337.0D)
+                mappedId.of("b"), List.of(42.0D, 84.0D, 1337.0D)
             )
         );
 
         assertIteration(
             iterator,
-            idFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                idFunction.of("a"), List.of(1.0D, 2.0D, 3.0D),
-                idFunction.of("c"), List.of(4.0D, 5.0D, 6.0D)
+                mappedId.of("a"), List.of(1.0D, 2.0D, 3.0D),
+                mappedId.of("c"), List.of(4.0D, 5.0D, 6.0D)
             )
         );
     }
 
     @Test
     void canInverselyIterateMultipleProperties() {
+        IdFunction mappedId = name -> inverseGraphStore.nodes().toMappedNodeId(inverseIdFunction.of(name));
+
         var iterator = inverseGraphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1", "prop2", "prop3")
@@ -161,31 +169,32 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertInverseIteration(
             iterator,
-            inverseIdFunction.of("a"),
+            mappedId.of("a"),
             Map.of(
-                inverseIdFunction.of("b"), List.of(1.0D, 2.0D, 3.0D)
+                mappedId.of("b"), List.of(1.0D, 2.0D, 3.0D)
             )
         );
 
         assertInverseIteration(
             iterator,
-            inverseIdFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                inverseIdFunction.of("a"), List.of(42.0D, 84.0D, 1337.0D)
+                mappedId.of("a"), List.of(42.0D, 84.0D, 1337.0D)
             )
         );
 
         assertInverseIteration(
             iterator,
-            inverseIdFunction.of("c"),
+            mappedId.of("c"),
             Map.of(
-                inverseIdFunction.of("b"), List.of(4.0D, 5.0D, 6.0D)
+                mappedId.of("b"), List.of(4.0D, 5.0D, 6.0D)
             )
         );
     }
 
     @Test
     void respectInGivenPropertyOrder() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop3", "prop2", "prop1")
@@ -193,24 +202,25 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertIteration(
             iterator,
-            idFunction.of("a"),
+            mappedId.of("a"),
             Map.of(
-                idFunction.of("b"), List.of(1337.0D, 84.0D, 42.0D)
+                mappedId.of("b"), List.of(1337.0D, 84.0D, 42.0D)
             )
         );
 
         assertIteration(
             iterator,
-            idFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                idFunction.of("a"), List.of(3.0D, 2.0D, 1.0D),
-                idFunction.of("c"), List.of(6.0D, 5.0D, 4.0D)
+                mappedId.of("a"), List.of(3.0D, 2.0D, 1.0D),
+                mappedId.of("c"), List.of(6.0D, 5.0D, 4.0D)
             )
         );
     }
 
     @Test
     void worksWithoutRelationshipsPresent() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T2"),
             List.of("prop4")
@@ -218,13 +228,14 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertIteration(
             iterator,
-            idFunction.of("b"),
+            mappedId.of("b"),
             Map.of()
         );
     }
 
     @Test
     void worksWithoutAnyProperty() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of()
@@ -232,23 +243,24 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertIteration(
             iterator,
-            idFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                idFunction.of("a"), List.of(),
-                idFunction.of("c"), List.of()
+                mappedId.of("a"), List.of(),
+                mappedId.of("c"), List.of()
             )
         );
     }
 
     @Test
     void abortWhenConsumerReturnsFalse() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1")
         );
 
         var callCounter = new MutableInt(0);
-        iterator.forEachRelationship(idFunction.of("b"), (s, t, p) -> {
+        iterator.forEachRelationship(mappedId.of("b"), (s, t, p) -> {
             callCounter.increment();
             return false;
         });
@@ -258,14 +270,15 @@ class CSRCompositeRelationshipIteratorTest {
 
     @Test
     void degree() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1")
         );
 
-        assertThat(iterator.degree(idFunction.of("a"))).isEqualTo(1);
-        assertThat(iterator.degree(idFunction.of("b"))).isEqualTo(2);
-        assertThat(iterator.degree(idFunction.of("c"))).isEqualTo(0);
+        assertThat(iterator.degree(mappedId.of("a"))).isEqualTo(1);
+        assertThat(iterator.degree(mappedId.of("b"))).isEqualTo(2);
+        assertThat(iterator.degree(mappedId.of("c"))).isEqualTo(0);
     }
 
     @Test
@@ -351,6 +364,7 @@ class CSRCompositeRelationshipIteratorTest {
 
     @Test
     void canIterateMultiplePropertiesWithSomeMissing() {
+        IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T3"),
             List.of("prop1", "prop2", "prop3")
@@ -358,11 +372,11 @@ class CSRCompositeRelationshipIteratorTest {
 
         assertIteration(
             iterator,
-            idFunction.of("b"),
+            mappedId.of("b"),
             Map.of(
-                idFunction.of("a"), List.of(Double.NaN, 5.0D, 6.0D),
-                idFunction.of("b"), List.of(4.0D, Double.NaN, 6.0D),
-                idFunction.of("c"), List.of(4.0D, 5.0D, Double.NaN)
+                mappedId.of("a"), List.of(Double.NaN, 5.0D, 6.0D),
+                mappedId.of("b"), List.of(4.0D, Double.NaN, 6.0D),
+                mappedId.of("c"), List.of(4.0D, 5.0D, Double.NaN)
             )
         );
     }

@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -66,12 +65,9 @@ class ShortestPathsSteinerAlgorithmTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void shouldWorkCorrectly() {
-        long[] a = SteinerTestUtils.getNodes(idFunction, 10);
+        long[] a = SteinerTestUtils.getNodes(graph::toMappedNodeId, 10);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             graph,
             a[0],
@@ -98,7 +94,7 @@ class ShortestPathsSteinerAlgorithmTest {
         };
         double[] parentCostArray = new double[]{0, pruned, 1, 1, 1, pruned, 1, 1, 1, pruned};
 
-        SteinerTestUtils.assertTreeIsCorrect(idFunction, steinerTreeResult, parentArray, parentCostArray, 6.0);
+        SteinerTestUtils.assertTreeIsCorrect(graph::toMappedNodeId, steinerTreeResult, parentArray, parentCostArray, 6.0);
 
     }
 

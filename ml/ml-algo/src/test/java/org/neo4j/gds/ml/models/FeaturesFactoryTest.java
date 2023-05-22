@@ -23,7 +23,6 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -46,66 +45,63 @@ class FeaturesFactoryTest {
     @Inject
     TestGraph graph;
 
-    @Inject
-    IdFunction idFunction;
-
     @Test
     void lazyFeaturesSingleScalar() {
         var features = FeaturesFactory.extractLazyFeatures(graph, List.of("a"));
-        assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{1.2}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{1.32}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{1.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("d"))).containsExactly(new double[]{5.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("e"))).containsExactly(new double[]{1.0}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("a"))).containsExactly(new double[]{1.2}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("b"))).containsExactly(new double[]{1.32}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("c"))).containsExactly(new double[]{1.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("d"))).containsExactly(new double[]{5.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("e"))).containsExactly(new double[]{1.0}, Offset.offset(1e-6));
     }
 
     @Test
     void lazyFeaturesSingleArray() {
         var features = FeaturesFactory.extractLazyFeatures(graph, List.of("arrayProperty"));
-        assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{1.2, 1.2}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{1.32, 0.5}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{1.3, 1.5}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("d"))).containsExactly(new double[]{5.3, 10.5}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("e"))).containsExactly(new double[]{1.0, 0.9}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("a"))).containsExactly(new double[]{1.2, 1.2}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("b"))).containsExactly(new double[]{1.32, 0.5}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("c"))).containsExactly(new double[]{1.3, 1.5}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("d"))).containsExactly(new double[]{5.3, 10.5}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("e"))).containsExactly(new double[]{1.0, 0.9}, Offset.offset(1e-6));
     }
 
     @Test
     void lazyFeaturesArrayAndTwoScalars() {
         var features = FeaturesFactory.extractLazyFeatures(graph, List.of("bananas", "arrayProperty", "a"));
-        assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{100.0, 1.2, 1.2, 1.2}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{100.0, 1.32, 0.5, 1.32}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{100.0, 1.3, 1.5, 1.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("d"))).containsExactly(new double[]{100.0, 5.3, 10.5, 5.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("e"))).containsExactly(new double[]{100.0, 1.0, 0.9, 1.0}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("a"))).containsExactly(new double[]{100.0, 1.2, 1.2, 1.2}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("b"))).containsExactly(new double[]{100.0, 1.32, 0.5, 1.32}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("c"))).containsExactly(new double[]{100.0, 1.3, 1.5, 1.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("d"))).containsExactly(new double[]{100.0, 5.3, 10.5, 5.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("e"))).containsExactly(new double[]{100.0, 1.0, 0.9, 1.0}, Offset.offset(1e-6));
     }
 
     @Test
     void eagerFeaturesSingleScalar() {
         var features = FeaturesFactory.extractEagerFeatures(graph, List.of("a"));
-        assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{1.2}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{1.32}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{1.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("d"))).containsExactly(new double[]{5.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("e"))).containsExactly(new double[]{1.0}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("a"))).containsExactly(new double[]{1.2}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("b"))).containsExactly(new double[]{1.32}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("c"))).containsExactly(new double[]{1.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("d"))).containsExactly(new double[]{5.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("e"))).containsExactly(new double[]{1.0}, Offset.offset(1e-6));
     }
 
     @Test
     void eagerFeaturesSingleArray() {
         var features = FeaturesFactory.extractEagerFeatures(graph, List.of("arrayProperty"));
-        assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{1.2, 1.2}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{1.32, 0.5}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{1.3, 1.5}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("d"))).containsExactly(new double[]{5.3, 10.5}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("e"))).containsExactly(new double[]{1.0, 0.9}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("a"))).containsExactly(new double[]{1.2, 1.2}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("b"))).containsExactly(new double[]{1.32, 0.5}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("c"))).containsExactly(new double[]{1.3, 1.5}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("d"))).containsExactly(new double[]{5.3, 10.5}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("e"))).containsExactly(new double[]{1.0, 0.9}, Offset.offset(1e-6));
     }
 
     @Test
     void eagerFeaturesArrayAndTwoScalars() {
         var features = FeaturesFactory.extractEagerFeatures(graph, List.of("bananas", "arrayProperty", "a"));
-        assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{100.0, 1.2, 1.2, 1.2}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{100.0, 1.32, 0.5, 1.32}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{100.0, 1.3, 1.5, 1.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("d"))).containsExactly(new double[]{100.0, 5.3, 10.5, 5.3}, Offset.offset(1e-6));
-        assertThat(features.get(idFunction.of("e"))).containsExactly(new double[]{100.0, 1.0, 0.9, 1.0}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("a"))).containsExactly(new double[]{100.0, 1.2, 1.2, 1.2}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("b"))).containsExactly(new double[]{100.0, 1.32, 0.5, 1.32}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("c"))).containsExactly(new double[]{100.0, 1.3, 1.5, 1.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("d"))).containsExactly(new double[]{100.0, 5.3, 10.5, 5.3}, Offset.offset(1e-6));
+        assertThat(features.get(graph.toMappedNodeId("e"))).containsExactly(new double[]{100.0, 1.0, 0.9, 1.0}, Offset.offset(1e-6));
     }
 }

@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -36,6 +35,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.stream.Stream;
 
@@ -80,12 +80,14 @@ class PrimTest {
 
     private static long a, b, c, d, e, y, z;
     @Inject
-    private Graph graph;
-    @Inject
+    private TestGraph graph;
+
     private IdFunction idFunction;
     private static final String ROOT = "-1";
     @BeforeEach
     void setUp() {
+        idFunction = graph::toMappedNodeId;
+
         a = idFunction.of("a");
         b = idFunction.of("b");
         c = idFunction.of("c");
@@ -145,7 +147,7 @@ class PrimTest {
     @Test
     void shouldLogProgress() {
         var config = SpanningTreeStatsConfigImpl.builder().
-            sourceNode(a).
+            sourceNode(graph.toOriginalNodeId("a")).
             relationshipWeightProperty("cost").
             build();
         var factory = new SpanningTreeAlgorithmFactory<>();

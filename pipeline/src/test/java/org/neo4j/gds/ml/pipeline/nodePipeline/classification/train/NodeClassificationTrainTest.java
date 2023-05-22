@@ -80,7 +80,7 @@ class NodeClassificationTrainTest {
     private static final String GRAPH_NAME = "g";
     private static final String GRAPH_NAME_WITH_RELATIONSHIPS = "gRel";
 
-    @GdlGraph(graphNamePrefix = "node")
+    @GdlGraph(graphNamePrefix = "node", idOffset = 1)
     private static final String DB_QUERY1 =
         "CREATE " +
         "  (a1:N {bananas: 100.0, arrayProperty: [1.2, 1.2], a: 1.2, b: 1.2, t: 0})" +
@@ -99,7 +99,7 @@ class NodeClassificationTrainTest {
         ", (a14:N {bananas: 100.0, arrayProperty: [4.0, 5.8], a: 4.0, b: 5.8, t: 1})" +
         ", (a15:N {bananas: 100.0, arrayProperty: [1.0, 0.9], a: 1.0, b: 0.9, t: 1})";
 
-    @GdlGraph(graphNamePrefix = "rel")
+    @GdlGraph(graphNamePrefix = "rel", idOffset = 1)
     private static final String REL_GRAPH_QUERY =
         "CREATE " +
         "  (b1:M {scalar: 1.2, array: [1.0, -1.0], t: 0})" +

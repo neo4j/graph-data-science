@@ -21,15 +21,14 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.CommunityHelper;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +46,7 @@ class SamplingTaskTest {
         ", (d)-->(e)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void shouldOnlySampleTheFirstTwoElements() {
@@ -76,8 +72,8 @@ class SamplingTaskTest {
                 // (a)-->(c) => union
                 // (a)-->(d) => skipped due to NEIGHBOR_ROUNDS = 2
                 // (d)-->(e) => union
-                List.of(idFunction.of("a"), idFunction.of("b"), idFunction.of("c")),
-                List.of(idFunction.of("d"), idFunction.of("e"))
+                List.of(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), graph.toMappedNodeId("c")),
+                List.of(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"))
             )
         );
     }

@@ -20,11 +20,10 @@
 package org.neo4j.gds.ml.core.features;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,10 +35,7 @@ class ScalarPropertyExtractorTest {
     private static final String GDL = "(a {q: 1.0d}), (b {q: NaN}), (c)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void extracts() {
@@ -48,16 +44,17 @@ class ScalarPropertyExtractorTest {
         assertThat(extractor.dimension()).isEqualTo(1);
 
         // succeeds
-        assertThat(extractor.extract(idFunction.of("a"))).isEqualTo(1D);
+        assertThat(extractor.extract(graph.toMappedNodeId("a"))).isEqualTo(1D);
 
         // failure conditions
-        assertThatThrownBy(() -> extractor.extract(idFunction.of("b")))
+        assertThatThrownBy(() -> extractor.extract(graph.toMappedNodeId("b")))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Node with ID `" + idFunction.of("b") + "` has invalid feature property value `NaN` for property `q`");
+            .hasMessageContaining("Node with ID `" + graph.toOriginalNodeId("b") + "` has invalid feature property value `NaN` for property `q`");
+
         // missing is default NaN
-        assertThatThrownBy(() -> extractor.extract(idFunction.of("c")))
+        assertThatThrownBy(() -> extractor.extract(graph.toMappedNodeId("c")))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Node with ID `" + idFunction.of("c") + "` has invalid feature property value `NaN` for property `q`");
+            .hasMessageContaining("Node with ID `" + graph.toOriginalNodeId("c") + "` has invalid feature property value `NaN` for property `q`");
     }
 
 }

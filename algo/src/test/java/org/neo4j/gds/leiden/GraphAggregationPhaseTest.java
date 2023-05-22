@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -42,7 +41,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class GraphAggregationPhaseTest {
 
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE " +
         "  (a0:Node)," +
@@ -71,9 +70,6 @@ class GraphAggregationPhaseTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void testGraphAggregation() {
         var communities = HugeLongArray.of(0, 1, 0, 0, 0, 1, 1, 1);
@@ -98,6 +94,7 @@ class GraphAggregationPhaseTest {
             return true;
         });
 
+        // FIXME why do the weights differ now?
         assertGraphEquals(
             fromGdl(
                 "(c1), (c2), " +

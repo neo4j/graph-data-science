@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.closeness;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -31,6 +30,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -84,13 +84,12 @@ class ClosenessCentralityTest {
         ", (e)-[:TYPE]->(d)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void testGetCentrality() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var algo = ClosenessCentrality.of(
             graph,
             ImmutableClosenessCentralityStreamConfig.builder().build(),

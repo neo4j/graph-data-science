@@ -169,12 +169,12 @@ class MultiLabelGraphSageTrainTest {
 
     @Test
     void shouldFailMissingArrayPropertyNode0() {
-        shouldFailMissingArrayProperty(missingArrayGraph, "p2", 0);
+        shouldFailMissingArrayProperty(missingArrayGraph, "p2", missingArrayGraph.toOriginalNodeId("n0"));
     }
 
     @Test
     void shouldFailMissingArrayPropertyNode1() {
-        shouldFailMissingArrayProperty(missingArray2Graph, "p2", 1);
+        shouldFailMissingArrayProperty(missingArray2Graph, "p2", missingArray2Graph.toOriginalNodeId("n1"));
     }
 
     @Test

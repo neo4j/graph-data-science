@@ -21,15 +21,14 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.CommunityHelper;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +49,7 @@ class LinkTaskTest {
 
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void shouldNotUnionNodesInSkipComponent() {
@@ -63,7 +59,7 @@ class LinkTaskTest {
         var task = new SampledStrategy.LinkTask(
             graph,
             partition,
-            idFunction.of("a"),
+            graph.toMappedNodeId("a"),
             components,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -82,10 +78,10 @@ class LinkTaskTest {
                 // (d)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
                 // (d)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
                 // (d)-->(e) => union
-                List.of(idFunction.of("a")),
-                List.of(idFunction.of("b")),
-                List.of(idFunction.of("c")),
-                List.of(idFunction.of("d"), idFunction.of("e"))
+                List.of(graph.toMappedNodeId("a")),
+                List.of(graph.toMappedNodeId("b")),
+                List.of(graph.toMappedNodeId("c")),
+                List.of(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"))
             )
         );
     }
@@ -117,9 +113,9 @@ class LinkTaskTest {
                 // (d)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
                 // (d)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
                 // (d)-->(e) => union
-                List.of(idFunction.of("a"), idFunction.of("d"), idFunction.of("e")),
-                List.of(idFunction.of("b")),
-                List.of(idFunction.of("c"))
+                List.of(graph.toMappedNodeId("a"), graph.toMappedNodeId("d"), graph.toMappedNodeId("e")),
+                List.of(graph.toMappedNodeId("b")),
+                List.of(graph.toMappedNodeId("c"))
             )
         );
     }

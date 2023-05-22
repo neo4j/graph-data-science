@@ -74,9 +74,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class NodeSimilarityTest {
 
-    @GdlGraph(graphNamePrefix = "natural", orientation = NATURAL)
-    @GdlGraph(graphNamePrefix = "reverse", orientation = REVERSE)
-    @GdlGraph(graphNamePrefix = "undirected", orientation = UNDIRECTED)
+    // fixing idOffset to 0 as the expecatations hard-code ids
+    @GdlGraph(graphNamePrefix = "natural", orientation = NATURAL, idOffset = 0)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = REVERSE, idOffset = 0)
+    @GdlGraph(graphNamePrefix = "undirected", orientation = UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person)" +
@@ -97,7 +98,7 @@ final class NodeSimilarityTest {
         ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
         ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
-    @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL)
+    @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL, idOffset = 0)
     private static final String DB_CYPHER_UNION =
         "CREATE" +
         "  (a:Person)" +

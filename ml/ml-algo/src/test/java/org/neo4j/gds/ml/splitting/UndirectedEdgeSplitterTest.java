@@ -247,18 +247,18 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var splitResult1 = new UndirectedEdgeSplitter(
             Optional.of(42L),
-            graphStore.nodes(),
-            graphStore.nodes(),
-            graphStore.nodes(),
+            graph,
+            graph,
+            graph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var splitResult2 = new UndirectedEdgeSplitter(
             Optional.of(117L),
-            graphStore.nodes(),
-            graphStore.nodes(),
-            graphStore.nodes(),
+            graph,
+            graph,
+            graph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
             4

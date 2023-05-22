@@ -137,67 +137,50 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
     private static final String DB_CYPHER = getGraphQuery;
     @Inject
     private TestGraph graph;
-    @Inject
-    private IdFunction idFunction;
 
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "inv", indexInverse = true)
     private static final String invDB_CYPHER = getGraphQuery;
     @Inject
     private TestGraph invGraph;
-    @Inject
-    private IdFunction invIdFunction;
     //////////////
     @GdlGraph(graphNamePrefix = "noReroute")
     private static final String nodeCreateQuery = getNoRerouteQuery;
     @Inject
     private TestGraph noRerouteGraph;
-    @Inject
-    private IdFunction noRerouteIdFunction;
 
     @GdlGraph(graphNamePrefix = "invnoReroute", indexInverse = true)
     private static final String invnodeCreateQuery = getNoRerouteQuery;
     @Inject
     private TestGraph invnoRerouteGraph;
-    @Inject
-    private IdFunction invnoRerouteIdFunction;
     ///////////
     @GdlGraph(graphNamePrefix = "twoReroutes")
     private static final String twoReroutesQuery = getTwoReroutesQuery;
     @Inject
     private TestGraph twoReroutesGraph;
-    @Inject
-    private IdFunction twoReroutesIdFunction;
 
     @GdlGraph(graphNamePrefix = "invtwoReroutes", indexInverse = true)
     private static final String invtwoReroutesQuery = getTwoReroutesQuery;
     @Inject
     private TestGraph invtwoReroutesGraph;
-    @Inject
-    private IdFunction invtwoReroutesIdFunction;
     ////////
 
     @GdlGraph(graphNamePrefix = "crossRoad")
     private static final String crossRoadQuery = getCrossRoadQuery;
     @Inject
     private TestGraph crossRoadGraph;
-    @Inject
-    private IdFunction crossRoadIdFunction;
     @GdlGraph(graphNamePrefix = "invcrossRoad", indexInverse = true)
     private static final String invcrossRoadQuery = getCrossRoadQuery;
     @Inject
     private TestGraph invcrossRoadGraph;
-    @Inject
-    private IdFunction invcrossRoadIdFunction;
 
     @GdlGraph(graphNamePrefix = "docs", indexInverse = true)
     private static final String docs = getDocsExampleQuery;
     @Inject
     private TestGraph docsGraph;
-    @Inject
-    private IdFunction docsIdFunction;
 
     @Test
     void shouldPruneUnusedIfRerouting() {
+        IdFunction idFunction = graph::toMappedNodeId;
 
         var steinerResult = new ShortestPathsSteinerAlgorithm(
             graph,
@@ -231,6 +214,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldPruneUnusedIfReroutingOnInvertedIndex() {
+        IdFunction invIdFunction = invGraph::toMappedNodeId;
+
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             invGraph,
             invIdFunction.of("a0"),
@@ -248,6 +233,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void rerouteShouldNotCreateLoops() {
+        IdFunction noRerouteIdFunction = noRerouteGraph::toMappedNodeId;
+
         var steinerResult = new ShortestPathsSteinerAlgorithm(
             noRerouteGraph,
             noRerouteIdFunction.of("a0"),
@@ -260,10 +247,10 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         ).compute();
         var parent = steinerResult.parentArray().toArray();
 
-        assertThat(parent[(int) idFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOT_NODE);
-        assertThat(parent[(int) idFunction.of("a1")]).isEqualTo(idFunction.of("a0"));
-        assertThat(parent[(int) idFunction.of("a2")]).isEqualTo(idFunction.of("a1"));
-        assertThat(parent[(int) idFunction.of("a3")]).isEqualTo(idFunction.of("a2"));
+        assertThat(parent[(int) noRerouteIdFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOT_NODE);
+        assertThat(parent[(int) noRerouteIdFunction.of("a1")]).isEqualTo(noRerouteIdFunction.of("a0"));
+        assertThat(parent[(int) noRerouteIdFunction.of("a2")]).isEqualTo(noRerouteIdFunction.of("a1"));
+        assertThat(parent[(int) noRerouteIdFunction.of("a3")]).isEqualTo(noRerouteIdFunction.of("a2"));
 
         assertThat(steinerResult.totalCost()).isEqualTo(3);
 
@@ -271,6 +258,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void rerouteShouldNotCreateLoopsOnInvertedIndex() {
+        IdFunction invnoRerouteIdFunction = invnoRerouteGraph::toMappedNodeId;
+
         var steinerResult = new ShortestPathsSteinerAlgorithm(
             invnoRerouteGraph,
             invnoRerouteIdFunction.of("a0"),
@@ -294,6 +283,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldWorkForUnreachableAndReachableTerminals() {
+        IdFunction idFunction = graph::toMappedNodeId;
 
         Assertions.assertDoesNotThrow(() -> {
 
@@ -314,6 +304,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldWorkIfNoReachableTerminals() {
+        IdFunction idFunction = graph::toMappedNodeId;
 
         Assertions.assertDoesNotThrow(() -> {
 
@@ -335,10 +326,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldLogProgress() {
-
-        var sourceId = graph.toOriginalNodeId(idFunction.of("a0"));
-        var target1 = graph.toOriginalNodeId(idFunction.of("a3"));
-        var target2 = graph.toOriginalNodeId(idFunction.of("a4"));
+        var sourceId = graph.toOriginalNodeId("a0");
+        var target1 = graph.toOriginalNodeId("a3");
+        var target2 = graph.toOriginalNodeId("a4");
 
         var config = SteinerTreeStatsConfigImpl
             .builder()
@@ -376,9 +366,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
     @Test
     void shouldLogProgressWithRerouting() {
 
-        var sourceId = graph.toOriginalNodeId(idFunction.of("a0"));
-        var target1 = graph.toOriginalNodeId(idFunction.of("a3"));
-        var target2 = graph.toOriginalNodeId(idFunction.of("a4"));
+        var sourceId = graph.toOriginalNodeId("a0");
+        var target1 = graph.toOriginalNodeId("a3");
+        var target2 = graph.toOriginalNodeId("a4");
 
         var config = SteinerTreeStatsConfigImpl
             .builder()
@@ -423,9 +413,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
     @Test
     void shouldLogProgressWithInverseRerouting() {
 
-        var sourceId = invGraph.toOriginalNodeId(invIdFunction.of("a0"));
-        var target1 = invGraph.toOriginalNodeId(invIdFunction.of("a3"));
-        var target2 = invGraph.toOriginalNodeId(invIdFunction.of("a4"));
+        var sourceId = invGraph.toOriginalNodeId("a0");
+        var target1 = invGraph.toOriginalNodeId("a3");
+        var target2 = invGraph.toOriginalNodeId("a4");
 
         var config = SteinerTreeStatsConfigImpl
             .builder()
@@ -469,6 +459,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldNotGetOptimalWithoutBetterRerouting() {
+        IdFunction twoReroutesIdFunction = twoReroutesGraph::toMappedNodeId;
 
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             twoReroutesGraph,
@@ -493,6 +484,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldHandleMultiplePruningsOnSameTreeAndGetBetter() {
+        IdFunction invtwoReroutesIdFunction = invtwoReroutesGraph::toMappedNodeId;
 
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             invtwoReroutesGraph,
@@ -517,6 +509,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldNotPruneUnprunableNodes() {
+        IdFunction invcrossRoadIdFunction = invcrossRoadGraph::toMappedNodeId;
 
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             invcrossRoadGraph,
@@ -540,6 +533,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldTakeAdvantageOfNewSingleParents() {
+        IdFunction docsIdFunction = docsGraph::toMappedNodeId;
+
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             docsGraph,
             docsIdFunction.of("a0"),

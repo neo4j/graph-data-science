@@ -104,7 +104,7 @@ class BFSPregelAlgoTest {
 
         var config = ImmutableBFSPregelConfig.builder()
             .maxIterations(maxIterations)
-            .startNode(0)
+            .startNode(graph.toMappedNodeId("a"))
             .build();
 
         var pregelJob = Pregel.create(
@@ -140,7 +140,7 @@ class BFSPregelAlgoTest {
 
         var config = ImmutableBFSPregelConfig.builder()
             .maxIterations(maxIterations)
-            .startNode(0)
+            .startNode(graph.toMappedNodeId("a"))
             .build();
 
         var pregelJob = Pregel.create(
@@ -157,13 +157,13 @@ class BFSPregelAlgoTest {
         assertEquals(4, result.ranIterations());
 
         var expected = Map.of(
-            "a", 0L,
-            "b", 0L,
-            "c", 0L,
-            "d", 1L,
-            "e", 3L,
-            "f", 3L,
-            "g", 4L,
+            "a", graph.toMappedNodeId("a"),
+            "b", graph.toMappedNodeId("a"),
+            "c", graph.toMappedNodeId("a"),
+            "d", graph.toMappedNodeId("b"),
+            "e", graph.toMappedNodeId("d"),
+            "f", graph.toMappedNodeId("d"),
+            "g", graph.toMappedNodeId("e"),
             "i", Long.MAX_VALUE
         );
 
@@ -176,7 +176,7 @@ class BFSPregelAlgoTest {
 
         var config = ImmutableBFSPregelConfig.builder()
             .maxIterations(maxIterations)
-            .startNode(parentGraph.toOriginalNodeId("a"))
+            .startNode(parentGraph.toMappedNodeId("a"))
             .build();
 
         var pregelJob = Pregel.create(
@@ -188,15 +188,15 @@ class BFSPregelAlgoTest {
         );
 
         var expected = Map.of(
-            "a", parentGraph.toOriginalNodeId("a"),
-            "b", parentGraph.toOriginalNodeId("a"),
-            "c", parentGraph.toOriginalNodeId("b"),
-            "d", parentGraph.toOriginalNodeId("a"),
+            "a", parentGraph.toMappedNodeId("a"),
+            "b", parentGraph.toMappedNodeId("a"),
+            "c", parentGraph.toMappedNodeId("b"),
+            "d", parentGraph.toMappedNodeId("a"),
             "e", BFSParentPregel.NOT_FOUND,
-            "f", parentGraph.toOriginalNodeId("a"),
-            "g", parentGraph.toOriginalNodeId("d"),
+            "f", parentGraph.toMappedNodeId("a"),
+            "g", parentGraph.toMappedNodeId("d"),
             "h", BFSParentPregel.NOT_FOUND,
-            "i", parentGraph.toOriginalNodeId("d"),
+            "i", parentGraph.toMappedNodeId("d"),
             "j", BFSParentPregel.NOT_FOUND
         );
 

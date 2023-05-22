@@ -37,7 +37,7 @@ import static org.neo4j.gds.TestSupport.crossArguments;
 @GdlExtension
 class BFSComplexTreeTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 0)
     private static final String CYPHER =
         "CREATE " +
         "  (a:Node)" +

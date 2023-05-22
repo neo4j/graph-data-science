@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.TestGraphs;
@@ -40,14 +39,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RefinementPhaseKarateTest {
 
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    // override offset as test uses randomSeed
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER = TestGraphs.KARATE_CLUB_GRAPH;
 
     @Inject
     private TestGraph graph;
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void testRefinementPhase() {
@@ -86,7 +83,7 @@ class RefinementPhaseKarateTest {
         var communitiesMap = LongStream
             .range(0, refinedCommunities.size())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> refinedCommunities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> refinedCommunities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(

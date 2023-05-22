@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
@@ -116,16 +116,13 @@ final class DijkstraTest {
             ", (e)-[:TYPE {cost: 4}]->(d)";
 
         @Inject
-        private Graph graph;
-
-        @Inject
-        private IdFunction idFunction;
+        private TestGraph graph;
 
         @Test
         void nonExisting() {
             var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("f"))
-                .targetNode(idFunction.of("a"))
+                .sourceNode(graph.toOriginalNodeId("f"))
+                .targetNode(graph.toOriginalNodeId("a"))
                 .build();
 
             var paths = Dijkstra
@@ -138,11 +135,11 @@ final class DijkstraTest {
 
         @Test
         void sourceTarget() {
-            var expected = expected(idFunction, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
+            var expected = expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
 
             var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
+                .sourceNode(graph.toOriginalNodeId("a"))
+                .targetNode(graph.toOriginalNodeId("f"))
                 .build();
 
             var path = Dijkstra
@@ -157,10 +154,10 @@ final class DijkstraTest {
         @ParameterizedTest
         @MethodSource("predicatesAndPaths")
         void sourceTargetWithRelationshipFilter(Dijkstra.RelationshipFilter relationshipFilter, double[] expectedCosts, List<String> expectedPath) {
-            var expected = expected(idFunction, 0, expectedCosts, expectedPath.toArray(String[]::new));
+            var expected = expected(graph::toMappedNodeId, 0, expectedCosts, expectedPath.toArray(String[]::new));
 
-            var sourceNode = idFunction.of(expectedPath.get(0));
-            var targetNode = idFunction.of(expectedPath.get(expectedPath.size() - 1));
+            var sourceNode = graph.toOriginalNodeId(expectedPath.get(0));
+            var targetNode = graph.toOriginalNodeId(expectedPath.get(expectedPath.size() - 1));
 
             var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(sourceNode)
@@ -182,13 +179,13 @@ final class DijkstraTest {
         void sourceTargetWithRelationshipIds() {
             var expected = ImmutablePathResult
                 .builder()
-                .from(expected(idFunction, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f"))
+                .from(expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f"))
                 .relationshipIds(1, 0, 0, 0)
                 .build();
 
             var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
+                .sourceNode(graph.toOriginalNodeId("a"))
+                .targetNode(graph.toOriginalNodeId("f"))
                 .trackRelationships(true)
                 .build();
 
@@ -202,6 +199,7 @@ final class DijkstraTest {
         }
 
         Stream<Arguments> predicatesAndPaths() {
+            IdFunction idFunction = graph::toMappedNodeId;
             return Stream.of(
                 Arguments.of((Dijkstra.RelationshipFilter) (source, target, relationshipId) ->
                     source != idFunction.of("c"), new double[]{0.0, 4.0, 14.0, 25.0}, List.of("a", "b", "d", "f")),
@@ -218,15 +216,15 @@ final class DijkstraTest {
         @Test
         void singleSource() {
             var expected = Set.of(
-                expected(idFunction, 0, new double[]{0.0}, "a"),
-                expected(idFunction, 1, new double[]{0.0, 2.0}, "a", "c"),
-                expected(idFunction, 2, new double[]{0.0, 4.0}, "a", "b"),
-                expected(idFunction, 3, new double[]{0.0, 2.0, 5.0}, "a", "c", "e"),
-                expected(idFunction, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "a", "c", "e", "d"),
-                expected(idFunction, 5, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f")
+                expected(graph::toMappedNodeId, 0, new double[]{0.0}, "a"),
+                expected(graph::toMappedNodeId, 1, new double[]{0.0, 2.0}, "a", "c"),
+                expected(graph::toMappedNodeId, 2, new double[]{0.0, 4.0}, "a", "b"),
+                expected(graph::toMappedNodeId, 3, new double[]{0.0, 2.0, 5.0}, "a", "c", "e"),
+                expected(graph::toMappedNodeId, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "a", "c", "e", "d"),
+                expected(graph::toMappedNodeId, 5, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f")
             );
 
-            var sourceNode = idFunction.of("a");
+            var sourceNode = graph.toOriginalNodeId("a");
 
             var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
@@ -241,6 +239,8 @@ final class DijkstraTest {
 
         @Test
         void singleSourceFromDisconnectedNode() {
+            IdFunction idFunction = graph::toMappedNodeId;
+
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "c"),
                 expected(idFunction, 1, new double[]{0.0, 3.0}, "c", "e"),
@@ -248,7 +248,7 @@ final class DijkstraTest {
                 expected(idFunction, 3, new double[]{0.0, 3.0, 7.0, 18.0}, "c", "e", "d", "f")
             );
 
-            var sourceNode = idFunction.of("c");
+            var sourceNode = graph.toOriginalNodeId("c");
 
             var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
@@ -265,8 +265,8 @@ final class DijkstraTest {
         void shouldLogProgress() {
 
             var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
+                .sourceNode(graph.toOriginalNodeId("a"))
+                .targetNode(graph.toOriginalNodeId("f"))
                 .build();
 
             var progressTask = new DijkstraFactory.SourceTargetDijkstraFactory<>().progressTask(graph, config);
@@ -324,18 +324,15 @@ final class DijkstraTest {
             ", (n6)-[:TYPE {cost: 1}]->(n7)";
 
         @Inject
-        private Graph graph;
-
-        @Inject
-        private IdFunction idFunction;
+        private TestGraph graph;
 
         @Test
         void sourceTarget() {
-            var expected = expected(idFunction, 0, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7");
+            var expected = expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7");
 
             var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("n1"))
-                .targetNode(idFunction.of("n7"))
+                .sourceNode(graph.toOriginalNodeId("n1"))
+                .targetNode(graph.toOriginalNodeId("n7"))
                 .build();
 
             var path = Dijkstra
@@ -349,17 +346,19 @@ final class DijkstraTest {
 
         @Test
         void singleSource() {
+            IdFunction mappedId = graph::toMappedNodeId;
+
             var expected = Set.of(
-                expected(idFunction, 0, new double[]{0.0}, "n1"),
-                expected(idFunction, 1, new double[]{0.0, 2.0}, "n1", "n3"),
-                expected(idFunction, 2, new double[]{0.0, 2.0, 5.0}, "n1", "n3", "n5"),
-                expected(idFunction, 3, new double[]{0.0, 6.0}, "n1", "n2"),
-                expected(idFunction, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "n1", "n3", "n5", "n4"),
-                expected(idFunction, 5, new double[]{0.0, 2.0, 10.0}, "n1", "n3", "n6"),
-                expected(idFunction, 6, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7")
+                expected(mappedId, 0, new double[]{0.0}, "n1"),
+                expected(mappedId, 1, new double[]{0.0, 2.0}, "n1", "n3"),
+                expected(mappedId, 2, new double[]{0.0, 2.0, 5.0}, "n1", "n3", "n5"),
+                expected(mappedId, 3, new double[]{0.0, 6.0}, "n1", "n2"),
+                expected(mappedId, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "n1", "n3", "n5", "n4"),
+                expected(mappedId, 5, new double[]{0.0, 2.0, 10.0}, "n1", "n3", "n6"),
+                expected(mappedId, 6, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7")
             );
 
-            var sourceNode = idFunction.of("n1");
+            var sourceNode = graph.toOriginalNodeId("n1");
 
             var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
@@ -394,18 +393,15 @@ final class DijkstraTest {
             ", (e)-[:TYPE {cost: 4}]->(d)";
 
         @Inject
-        Graph graph;
-
-        @Inject
-        IdFunction idFunction;
+        TestGraph graph;
 
         @Test
         void sourceTargetWithHeuristic() {
-            var expected = expected(idFunction, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
+            var expected = expected(graph::toMappedNodeId, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
 
             var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
+                .sourceNode(graph.toOriginalNodeId("a"))
+                .targetNode(graph.toOriginalNodeId("f"))
                 .build();
 
             var heapComparisons = new ArrayList<Long>();

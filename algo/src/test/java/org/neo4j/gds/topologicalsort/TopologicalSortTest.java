@@ -29,10 +29,11 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.List;
 import java.util.Random;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
@@ -228,10 +229,13 @@ class TopologicalSortTest {
         long first = nodes.get(0);
         long second = nodes.get(1);
         long third = nodes.get(2);
-        assertTrue(first == 7 || first == 8);
-        assertTrue(second == 7 || second == 8);
+
+        assertThat(List.of(first, second)).containsExactlyInAnyOrder(
+            cyclesGraph.toMappedNodeId("n7"),
+            cyclesGraph.toMappedNodeId("n8")
+        );
         assertEquals(3, result.size());
-        assertEquals(6, third);
+        assertThat(third).isEqualTo(cyclesGraph.toMappedNodeId("n6"));
     }
 
     @Test

@@ -68,9 +68,6 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
 
     @GdlGraph(graphNamePrefix = "line", orientation = Orientation.NATURAL)
     private static final String lineQuery =
@@ -92,9 +89,6 @@ class ShortestPathSteinerAlgorithmExtendedTest {
 
     @Inject
     private TestGraph lineGraph;
-
-    @Inject
-    private IdFunction lineIdFunction;
 
 
     @GdlGraph(graphNamePrefix = "ext", orientation = Orientation.NATURAL)
@@ -121,9 +115,6 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph extGraph;
 
-    @Inject
-    private IdFunction extIdFunction;
-
     @GdlGraph(graphNamePrefix = "triangle", orientation = Orientation.NATURAL)
     private static final String triangle =
         "CREATE " +
@@ -140,9 +131,6 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph triangleGraph;
 
-    @Inject
-    private IdFunction triangleIdFunction;
-
     static Stream<Arguments> inputTuples() {
         return Stream.of(
 
@@ -155,6 +143,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @ParameterizedTest
     @MethodSource("inputTuples")
     void shouldWorkCorrectly(double delta, int binSizeThreshold) {
+        IdFunction idFunction = graph::toMappedNodeId;
 
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
@@ -178,7 +167,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Test
     void shouldWorkCorrectlyWithLineGraph() {
 
-        var a = SteinerTestUtils.getNodes(lineIdFunction, 5);
+        var a = SteinerTestUtils.getNodes(lineGraph::toMappedNodeId, 5);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             lineGraph,
             a[0],
@@ -195,12 +184,14 @@ class ShortestPathSteinerAlgorithmExtendedTest {
 
         double[] parentCostArray = new double[]{0, 1, 1, 1, 1};
 
-        SteinerTestUtils.assertTreeIsCorrect(lineIdFunction, steinerTreeResult, parentArray, parentCostArray, 4);
+        SteinerTestUtils.assertTreeIsCorrect(lineGraph::toMappedNodeId, steinerTreeResult, parentArray, parentCostArray, 4);
     }
 
 
     @Test
     void deltaSteppingShouldWorkCorrectly() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var isTerminal = new BitSet(graph.nodeCount());
         isTerminal.set(a[2]);
@@ -230,7 +221,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
 
     @Test
     void shouldWorkIfRevisitsVertices() {
-        var a = SteinerTestUtils.getNodes(extIdFunction, 7);
+        var a = SteinerTestUtils.getNodes(extGraph::toMappedNodeId, 7);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             extGraph,
             a[0],
@@ -253,13 +244,13 @@ class ShortestPathSteinerAlgorithmExtendedTest {
         };
         double[] parentCostArray = new double[]{0, 1, 2.1, 8.1, 1, 0.1, 0.1};
 
-        SteinerTestUtils.assertTreeIsCorrect(extIdFunction, steinerTreeResult, parentArray, parentCostArray, 12.4);
+        SteinerTestUtils.assertTreeIsCorrect(extGraph::toMappedNodeId, steinerTreeResult, parentArray, parentCostArray, 12.4);
 
     }
 
     @Test
     void shouldWorkOnTriangle() {
-        var a = SteinerTestUtils.getNodes(triangleIdFunction, 4);
+        var a = SteinerTestUtils.getNodes(triangleGraph::toMappedNodeId, 4);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             triangleGraph,
             a[0],
@@ -274,7 +265,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOT_NODE, a[0], a[1], a[2]};
         double[] parentCostArray = new double[]{0, 15, 3, 6};
 
-        SteinerTestUtils.assertTreeIsCorrect(triangleIdFunction, steinerTreeResult, parentArray, parentCostArray, 24);
+        SteinerTestUtils.assertTreeIsCorrect(triangleGraph::toMappedNodeId, steinerTreeResult, parentArray, parentCostArray, 24);
 
     }
 

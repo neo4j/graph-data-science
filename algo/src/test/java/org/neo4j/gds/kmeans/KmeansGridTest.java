@@ -36,7 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class KmeansGridTest {
-    @GdlGraph
+
+    // override offset as test involved sampling
+    @GdlGraph(idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a11 {  kmeans: [1.0, 1.0]} )" +

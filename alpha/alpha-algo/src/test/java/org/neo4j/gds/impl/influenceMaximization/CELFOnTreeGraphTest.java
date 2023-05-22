@@ -66,7 +66,6 @@ class CELFOnTreeGraphTest {
 
     @Test
     void testSpreadWithSeed1() {
-
         //a1 : a2 a3
         //a2: a1 a3 a4 a5
         //a3: a1 a2 a5
@@ -131,6 +130,8 @@ class CELFOnTreeGraphTest {
         //then  a4 is picked with 1/3 (independntant)
 
         //finally a5 has a gain of 0
+        IdFunction mappedId = variable -> graph.toMappedNodeId(idFunction.of(variable));
+
         CELF celf = new CELF(
             graph,
             5,
@@ -146,23 +147,23 @@ class CELFOnTreeGraphTest {
         var softAssertions = new SoftAssertions();
 
         softAssertions
-            .assertThat(celfResult.get(idFunction.of("a1")))
+            .assertThat(celfResult.get(mappedId.of("a1")))
             .as("spread of a1")
             .isEqualTo(1 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celfResult.get(idFunction.of("a2")))
+            .assertThat(celfResult.get(mappedId.of("a2")))
             .as("spread of a2")
             .isEqualTo(1 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celfResult.get(idFunction.of("a3")))
+            .assertThat(celfResult.get(mappedId.of("a3")))
             .as("spread of a3")
             .isEqualTo(4.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celfResult.get(idFunction.of("a4")))
+            .assertThat(celfResult.get(mappedId.of("a4")))
             .as("spread of a4")
             .isEqualTo(1 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celfResult.get(idFunction.of("a5")))
+            .assertThat(celfResult.get(mappedId.of("a5")))
             .as("spread of a5")
             .isEqualTo(0, Offset.offset(1e-5));
 

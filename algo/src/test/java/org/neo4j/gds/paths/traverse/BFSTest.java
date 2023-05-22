@@ -109,8 +109,9 @@ class BFSTest {
             BFS.ALL_DEPTHS_ALLOWED
         ).compute().toArray();
 
+        // algorithms return mapped ids
         assertThat(nodes).isEqualTo(
-            Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toMappedNodeId).toArray()
         );
     }
 
@@ -158,7 +159,7 @@ class BFSTest {
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
-            Stream.of("a", "b", "c", "d", "e", "f").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("a", "b", "c", "d", "e", "f").mapToLong(naturalGraph::toMappedNodeId).toArray()
         );
     }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -35,7 +34,6 @@ import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +49,7 @@ class FilteredKnnTest {
         ", (b { knn: 1.1, prop: 5.0 } )" +
         ", (c { knn: 42.0, prop: 10.0 } )";
     @Inject
-    private Graph graph;
+    private TestGraph graph;
 
     @GdlGraph(graphNamePrefix = "simThreshold")
     private static final String nodeCreateQuery =
@@ -73,12 +71,10 @@ class FilteredKnnTest {
     @Inject
     private TestGraph multPropMissingGraph;
 
-
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void shouldRunJustLikeKnnWhenYouDoNotSpecifySourceNodeFilterOrTargetNodeFilter() {
+        IdFunction idFunction = graph::toMappedNodeId;
+
         var knnConfig = ImmutableFilteredKnnBaseConfig.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .concurrency(1)
@@ -131,7 +127,7 @@ class FilteredKnnTest {
 
         @Test
         void shouldOnlyProduceResultsForFilteredSourceNode() {
-            var filteredSourceNode = idFunction.of("a");
+            var filteredSourceNode = "a";
             var config = FilteredKnnBaseConfigImpl.builder()
                 .nodeProperties(List.of("knn"))
                 .topK(3)
@@ -139,7 +135,7 @@ class FilteredKnnTest {
                 .maxIterations(1)
                 .randomSeed(20L)
                 .concurrency(1)
-                .sourceNodeFilter(filteredSourceNode)
+                .sourceNodeFilter(graph.toOriginalNodeId(filteredSourceNode))
                 .build();
             var knnContext = KnnContext.empty();
             var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
@@ -148,13 +144,12 @@ class FilteredKnnTest {
             assertThat(result.similarityResultStream()
                 .map(sr -> sr.node1)
                 .collect(Collectors.toSet())
-            ).isEqualTo(Set.of(filteredSourceNode));
+            ).containsExactly(graph.toMappedNodeId(filteredSourceNode));
         }
 
         @Test
         void shouldOnlyProduceResultsForMultipleFilteredSourceNode() {
-            var filteredNode1 = idFunction.of("a");
-            var filteredNode2 = idFunction.of("b");
+            var filteredNodes = List.of("a", "b");
             var config = FilteredKnnBaseConfigImpl.builder()
                 .nodeProperties("knn")
                 .topK(3)
@@ -162,7 +157,7 @@ class FilteredKnnTest {
                 .maxIterations(1)
                 .randomSeed(20L)
                 .concurrency(1)
-                .sourceNodeFilter(List.of(filteredNode1, filteredNode2))
+                .sourceNodeFilter(filteredNodes.stream().map(graph::toOriginalNodeId).collect(Collectors.toList()))
                 .build();
             var knnContext = KnnContext.empty();
             var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
@@ -171,7 +166,7 @@ class FilteredKnnTest {
             assertThat(result.similarityResultStream()
                 .map(sr -> sr.node1)
                 .collect(Collectors.toSet())
-            ).isEqualTo(Set.of(filteredNode1, filteredNode2));
+            ).isEqualTo(filteredNodes.stream().map(graph::toMappedNodeId).collect(Collectors.toSet()));
         }
     }
 
@@ -188,7 +183,7 @@ class FilteredKnnTest {
 
         @Test
         void shouldOnlyProduceResultsForFilteredTargetNode() {
-            var targetNode = idFunction.of("a");
+            var targetNode = "a";
             var config = FilteredKnnBaseConfigImpl.builder()
                 .nodeProperties(List.of("knn"))
                 .topK(3)
@@ -196,7 +191,7 @@ class FilteredKnnTest {
                 .maxIterations(1)
                 .randomSeed(20L)
                 .concurrency(1)
-                .targetNodeFilter(targetNode)
+                .targetNodeFilter(graph.toOriginalNodeId(targetNode))
                 .build();
             var knnContext = KnnContext.empty();
             var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
@@ -205,13 +200,12 @@ class FilteredKnnTest {
             assertThat(result.similarityResultStream()
                 .map(SimilarityResult::targetNodeId)
                 .collect(Collectors.toSet())
-            ).isEqualTo(Set.of(targetNode));
+            ).containsExactly(graph.toMappedNodeId(targetNode));
         }
 
         @Test
         void shouldOnlyProduceResultsForFilteredTargetNodes() {
-            var targetNode1 = idFunction.of("a");
-            var targetNode2 = idFunction.of("b");
+            var targetNodes = List.of("a", "b");
             var config = FilteredKnnBaseConfigImpl.builder()
                 .nodeProperties("knn")
                 .topK(3)
@@ -219,7 +213,7 @@ class FilteredKnnTest {
                 .maxIterations(1)
                 .randomSeed(20L)
                 .concurrency(1)
-                .targetNodeFilter(List.of(targetNode1, targetNode2))
+                .targetNodeFilter(targetNodes.stream().map(graph::toOriginalNodeId).collect(Collectors.toList()))
                 .build();
             var knnContext = KnnContext.empty();
             var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
@@ -228,7 +222,7 @@ class FilteredKnnTest {
             assertThat(result.similarityResultStream()
                 .map(SimilarityResult::targetNodeId)
                 .collect(Collectors.toSet())
-            ).isEqualTo(Set.of(targetNode1, targetNode2));
+            ).isEqualTo(targetNodes.stream().map(graph::toMappedNodeId).collect(Collectors.toSet()));
         }
     }
 
@@ -298,10 +292,10 @@ class FilteredKnnTest {
              * So here we confirm the first three nodes are the undesirables ones, and tacit knowledge says they will
              * form the seed.
              */
-            var targetNodeX = idFunction.of("x");
-            var targetNodeY = idFunction.of("y");
-            var targetNodeZ = idFunction.of("z");
-            var targetNodeA = idFunction.of("a");
+            var targetNodeX = graph.toMappedNodeId("x");
+            var targetNodeY = graph.toMappedNodeId("y");
+            var targetNodeZ = graph.toMappedNodeId("z");
+            var targetNodeA = graph.toMappedNodeId("a");
             assertThat(targetNodeX).isLessThan(targetNodeY).isLessThan(targetNodeZ).isLessThan(targetNodeA);
 
             // no target node filter specified -> everything is a target node

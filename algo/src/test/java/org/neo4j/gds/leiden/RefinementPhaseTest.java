@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -38,8 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class RefinementPhaseTest {
+
     //Fig. C1 from https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-019-41695-z/MediaObjects/41598_2019_41695_MOESM1_ESM.pdf
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE " +
         "  (a0:Node)," +
@@ -66,9 +66,6 @@ class RefinementPhaseTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void shouldRefine() {
         var localPhaseCommunities = HugeLongArray.of(0, 0, 2, 2, 2, 7, 7, 7);
@@ -92,7 +89,7 @@ class RefinementPhaseTest {
         var communitiesMap = LongStream
             .range(0, 8)
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> communities.get(graph.toMappedNodeId(v))));
 
         assertThat(communitiesMap.values())
             .hasSize(3)

@@ -23,7 +23,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -34,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfigImpl;
@@ -61,10 +61,7 @@ class CELFOnConnectedGraphTest {
 
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    private TestGraph graph;
 
     @Test
     void testSpreadWithSeed1() {
@@ -103,7 +100,7 @@ class CELFOnConnectedGraphTest {
 
         //round 5
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
-
+        IdFunction idFunction = variable -> graph.toMappedNodeId(variable);
 
         CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
