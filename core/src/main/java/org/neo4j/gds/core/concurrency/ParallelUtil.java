@@ -126,7 +126,10 @@ public final class ParallelUtil {
         );
     }
 
-    public static <P extends Partition> void parallelConsumePartitions(
+    /**
+     * using a FJ pool under the hood
+     */
+    public static <P extends Partition> void parallelPartitionsConsume(
         Stream<P> partitions,
         Supplier<PartitionConsumer<P>> localConsumerSupplier,
         int concurrency,

@@ -43,7 +43,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class PartitionUtils {
 
     private static final double MIN_PARTITION_CAPACITY = 0.67;
-    private static final long DIVISION_FACTOR = 10;
 
     private PartitionUtils() {}
 
@@ -178,7 +177,7 @@ public final class PartitionUtils {
     }
 
     /**
-     * Returns a stream of many small partitions (in contrast to list of few big ones)
+     * Returns a lazy stream of many small partitions (in contrast to list of few big ones)
      */
     public static Stream<DegreePartition> degreePartitionStream(
         long nodeCount,
@@ -186,33 +185,7 @@ public final class PartitionUtils {
         int concurrency,
         DegreeFunction degrees
     ) {
-
-        long numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency * DIVISION_FACTOR);
-
-        Stream.Builder<DegreePartition> streamBuilder = Stream.builder();
-
-        if (nodeCount <= 0) {
-            return streamBuilder.build();
-        }
-
-        if (concurrency == 1) {
-            return Stream.of(DegreePartition.of(0, nodeCount, relationshipCount));
-        }
-
-        long currentStartNode = 0;
-        long currentRelationshipCount = degrees.degree(0);
-        for (long i = 1; i < nodeCount; ++i) {
-            long nextRelationshipCount = degrees.degree(i);
-            if (currentRelationshipCount + nextRelationshipCount > numRelationshipsInPartition) {
-                streamBuilder.add(DegreePartition.of(currentStartNode, i - currentStartNode, currentRelationshipCount));
-                currentStartNode = i;
-                currentRelationshipCount = 0;
-            }
-            currentRelationshipCount += nextRelationshipCount;
-        }
-        streamBuilder.add(DegreePartition.of(currentStartNode, nodeCount - currentStartNode, currentRelationshipCount));
-
-        return streamBuilder.build();
+        return LazyDegreePartitionIterator.of(nodeCount, relationshipCount, concurrency, degrees).stream();
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(

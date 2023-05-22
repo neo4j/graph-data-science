@@ -439,7 +439,7 @@ class PartitionUtilsTest {
     }
 
     @Test
-    void testDegreePartitioningWithMorePartitionsThanThreads() {
+    void testDegreePartitioningStreamWithMorePartitionsThanThreads() {
 
         // 4 threads
         // 4 partitions (not good):
