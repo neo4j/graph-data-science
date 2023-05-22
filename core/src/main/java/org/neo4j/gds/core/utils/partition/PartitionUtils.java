@@ -42,8 +42,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PartitionUtils {
 
-    public static final double MIN_PARTITION_CAPACITY = 0.67;
-    public static final int DIVISION_FACTOR = 10;
+    private static final double MIN_PARTITION_CAPACITY = 0.67;
+    private static final long DIVISION_FACTOR = 10;
 
     private PartitionUtils() {}
 
