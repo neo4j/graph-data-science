@@ -192,11 +192,11 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) == 0) return;
         progressTracker.beginSubTask();
 
-        ParallelUtil.parallelStreamConsume(
-            partitions.stream(),
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
             concurrency,
             terminationFlag,
-            stream -> stream.forEach(this::addInitialStateToEmbedding)
+            this::addInitialStateToEmbedding
         );
 
         progressTracker.endSubTask();
@@ -389,14 +389,13 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         }
     }
 
-    private void addInitialStateToEmbedding(Partition partition) {
-        partition.consume( nodeId -> {
-            var initialVector = embeddingB.get(nodeId);
-            var l2Norm= l2Norm( initialVector);
-            float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
-            addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
-        });
-        progressTracker.logProgress(partition.nodeCount());
+    private void addInitialStateToEmbedding(long nodeId) {
+        var initialVector = embeddingB.get(nodeId);
+        var l2Norm = l2Norm(initialVector);
+        float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
+        addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
+
+        progressTracker.logProgress(1);
     }
 
     private final class PropagateEmbeddingsTask implements PartitionConsumer<DegreePartition> {
