@@ -24,7 +24,6 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -122,7 +121,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         progressTracker.beginSubTask("Traverse");
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray parentCost = HugeDoubleArray.newArray(graph.nodeCount());
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, TerminationFlag.RUNNING_TRUE, v -> {
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, terminationFlag, v -> {
             parentCost.set(v, PRUNED);
             parent.set(v, PRUNED);
         });
@@ -150,7 +149,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                 examinationQueue,
                 indexQueue,
                 concurrency,
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
             rerouter.reroute(parent, parentCost, totalCost, effectiveNodeCount);
         }
