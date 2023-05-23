@@ -1,4 +1,4 @@
-:page-aliases: production-deployment/causal-cluster
+:page-aliases: production-deployment/causal-cluster, installation/installation-neo4j-cluster/
 
 [.enterprise-edition]
 [[cluster]]

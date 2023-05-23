@@ -2,6 +2,8 @@
 = Configuration Settings
 :description: This section describes the available configuration settings in the Neo4j Graph Data Science library.
 
+:page-aliases: installation/additional-config-parameters/
+
 This page describes the available configuration settings in GDS.
 Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf[neo4j.conf] file for details on how to use configuration settings.
 
