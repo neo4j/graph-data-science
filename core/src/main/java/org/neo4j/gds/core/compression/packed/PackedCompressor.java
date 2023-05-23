@@ -31,6 +31,7 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
+import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.GdsSystemProperties;
@@ -158,7 +159,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     }
 
     @Override
-    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
+    public int compress(long nodeId, long[] targets, long[][][] properties, int degree) {
         if (properties != null) {
             return packWithProperties(
                 nodeId,
@@ -178,15 +179,17 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private int packWithProperties(
         long nodeId,
         long[] targets,
-        long[][] uncompressedPropertiesPerProperty,
+        long[][][] unsortedProperties,
         int degree
     ) {
+        long[][] sortedProperties = new long[unsortedProperties.length][degree];
         if (degree > 0) {
             // sort, delta encode, reorder and aggregate properties
             degree = AdjacencyCompression.applyDeltaEncoding(
                 targets,
                 degree,
-                uncompressedPropertiesPerProperty,
+                unsortedProperties,
+                sortedProperties,
                 this.aggregations,
                 this.noAggregation
             );
@@ -213,7 +216,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
         degree = this.degree.intValue();
 
-        copyProperties(uncompressedPropertiesPerProperty, degree, nodeId);
+        copyProperties(sortedProperties, degree, nodeId);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, offset);

@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.core.compression.common;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
@@ -29,6 +31,7 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static java.lang.Double.doubleToLongBits;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -38,7 +41,7 @@ class AdjacencyCompressionTest {
     @MethodSource("aggregationsWithResults")
     void shouldCountRelationships(
         long[] targetNodeIds,
-        long[][] weights,
+        long[][] unsortedProperties,
         Aggregation[] aggregations,
         double[][] expected,
         String aggregationType
@@ -48,11 +51,19 @@ class AdjacencyCompressionTest {
         // Calculate this before applying the delta because the target node ids array is updated in place
         long expectedDataLength = Arrays.stream(targetNodeIds).distinct().count();
 
-        AdjacencyCompression.applyDeltaEncoding(data, weights, aggregations, false);
+        long[][] sortedProperties = new long[unsortedProperties.length][targetNodeIds.length];
+
+        AdjacencyCompression.applyDeltaEncoding(
+            data,
+            new long[][][]{new long[][]{unsortedProperties[0]}, new long[][]{unsortedProperties[1]}},
+            sortedProperties,
+            aggregations,
+            false
+        );
 
         for (int i = 0; i < expected.length; i++) {
             for (int j = 0; j < expected[i].length; j++) {
-                assertEquals(expected[i][j], Double.longBitsToDouble(weights[i][j]));
+                assertEquals(expected[i][j], Double.longBitsToDouble(sortedProperties[i][j]));
             }
         }
 
@@ -65,6 +76,25 @@ class AdjacencyCompressionTest {
         // These contain the `deltas` computed during the compression
         assertEquals(1L, data.buffer[0]);
         assertEquals(4L, data.buffer[1]);
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "0, 0, 0",
+            "9, 0, 9",
+            "10, 1, 0",
+            "41, 1, 31",
+            "42, 2, 0",
+        }
+    )
+    void findPosition(int position, int expectedPageIndex, int expectedIndexInPage) {
+        int[] lengths = {10, 42, 1337};
+        var pageIndex = new MutableInt();
+        var indexInPage = new MutableInt();
+        AdjacencyCompression.findPosition(lengths, position, pageIndex, indexInPage);
+        assertThat(pageIndex.getValue()).isEqualTo(expectedPageIndex);
+        assertThat(indexInPage.getValue()).isEqualTo(expectedIndexInPage);
     }
 
     static Stream<Arguments> aggregationsWithResults() {

@@ -153,7 +153,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     @Override
-    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
+    public int compress(long nodeId, long[] targets, long[][][] properties, int degree) {
         if (properties != null) {
             return applyVariableDeltaEncodingWithProperties(
                 nodeId,
@@ -206,15 +206,17 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private int applyVariableDeltaEncodingWithProperties(
         long nodeId,
         long[] targets,
-        long[][] uncompressedPropertiesPerProperty,
+        long[][][] unsortedProperties,
         int degree
     ) {
         // buffer contains uncompressed, unsorted target list
+        long[][] sortedProperties = new long[unsortedProperties.length][degree];
 
         degree = AdjacencyCompression.applyDeltaEncoding(
             targets,
             degree,
-            uncompressedPropertiesPerProperty,
+            unsortedProperties,
+            sortedProperties,
             this.aggregations,
             this.noAggregation
         );
@@ -231,7 +233,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         // values are now vlong encoded in the final adjacency list
         VarLongEncoding.encodeVLongs(targets, degree, slice.slice(), slice.offset());
 
-        copyProperties(uncompressedPropertiesPerProperty, degree, nodeId);
+        copyProperties(sortedProperties, degree, nodeId);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);

@@ -357,7 +357,7 @@ public final class ChunkedAdjacencyLists {
         void accept(
             long sourceId,
             byte[][] targets,
-            long[][] properties,
+            long[][][] properties,
             int compressedByteSize,
             int numberOfCompressedTargets
         );
@@ -375,7 +375,7 @@ public final class ChunkedAdjacencyLists {
         private final List<DrainingIterator<long[][][]>> propertyIterators;
         private final List<DrainingIterator.DrainingBatch<long[][][]>> propertyBatches;
 
-        private final long[][] propertiesBuffer;
+        private final long[][][] propertiesBuffer;
 
         CompositeDrainingIterator(
             HugeSparseByteArrayArrayList targets,
@@ -405,7 +405,7 @@ public final class ChunkedAdjacencyLists {
                     .stream()
                     .map(DrainingIterator::drainingBatch)
                     .collect(Collectors.toList());
-                propertiesBuffer = new long[properties.length][];
+                propertiesBuffer = new long[properties.length][][];
             }
         }
 
@@ -429,25 +429,18 @@ public final class ChunkedAdjacencyLists {
                     if (targets == EMPTY_BYTES_BYTES) {
                         continue;
                     }
+                    // make targets eligible for GC
+                    targetsPage[indexInPage] = null;
+
                     var position = positionsPage[indexInPage];
                     var length = lengthsPage[indexInPage];
                     for (int propertyIndex = 0; propertyIndex < propertyBatches.size(); propertyIndex++) {
-                        var page = propertyBatches.get(propertyIndex).page;
+                        long[][][] page = propertyBatches.get(propertyIndex).page;
 
-                        propertiesBuffer[propertyIndex] = new long[length];
-
-                        var written = 0;
-                        for (long[] propertyChunk : page[indexInPage]) {
-                            var valuesToCopy = Math.min(propertyChunk.length, length - written);
-                            System.arraycopy(propertyChunk, 0, propertiesBuffer[propertyIndex], written, valuesToCopy);
-                            written += valuesToCopy;
-                        }
-
+                        propertiesBuffer[propertyIndex] = page[indexInPage];
                         // make properties eligible for GC
                         page[indexInPage] = null;
                     }
-                    // make targets eligible for GC
-                    targetsPage[indexInPage] = null;
 
                     consumer.accept(offset + indexInPage, targets, propertiesBuffer, position, length);
                 }

@@ -49,7 +49,7 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * @param degree     The number of targets stored in `targets`.
      * @return the degree of the compressed adjacency list
      */
-    int compress(long nodeId, long[] targets, long[][] properties, int degree);
+    int compress(long nodeId, long[] targets, long[][][] properties, int degree);
 
     /**
      * Closing this compressor will release some internal data structures, making them eligible for garbage collection.

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.assertj.core.data.Index;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
@@ -134,7 +133,15 @@ class ChunkedAdjacencyListsTest {
                 position,
                 INSTANCE
             );
-            assertThat(Arrays.compare(expectedProperties, properties[0])).isEqualTo(0);
+
+            long[] actualProperties = new long[expectedProperties.length];
+            var written = 0;
+            for (long[] propertyChunk : properties[0]) {
+                var valuesToCopy = Math.min(propertyChunk.length, length - written);
+                System.arraycopy(propertyChunk, 0, actualProperties, written, valuesToCopy);
+                written += valuesToCopy;
+            }
+            assertThat(Arrays.compare(expectedProperties, actualProperties)).isEqualTo(0);
         });
         assertThat(Arrays.compare(expectedTargets, actualTargets)).isEqualTo(0);
     }
@@ -147,10 +154,14 @@ class ChunkedAdjacencyListsTest {
         var properties = new long[][]{{42L, 1337L, 5L, 6L}, {8L, 8L, 8L, 8L}};
         adjacencyLists.add(0, input, properties, 0, 4, 4);
 
-        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
-            .hasDimensions(2, 4)
-            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
-            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
+            assertThat(actualProperties).hasNumberOfRows(2);
+            assertThat(actualProperties[0]).hasNumberOfRows(1);
+            assertThat(actualProperties[1]).hasNumberOfRows(1);
+
+            assertThat(actualProperties[0][0]).containsSequence(42L, 1337L, 5L, 6L);
+            assertThat(actualProperties[1][0]).containsSequence(8L, 8L, 8L, 8L);
+        });
     }
 
     @Test
@@ -161,10 +172,14 @@ class ChunkedAdjacencyListsTest {
         var properties = new long[][]{{0L, 0L, 42L, 1337L, 5L, 6L}, {0L, 0L, 8L, 8L, 8L, 8L}};
         adjacencyLists.add(0, input, properties, 2, 6, 4);
 
-        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
-            .hasDimensions(2, 4)
-            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
-            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
+            assertThat(actualProperties).hasNumberOfRows(2);
+            assertThat(actualProperties[0]).hasNumberOfRows(1);
+            assertThat(actualProperties[1]).hasNumberOfRows(1);
+
+            assertThat(actualProperties[0][0]).containsSequence(42L, 1337L, 5L, 6L);
+            assertThat(actualProperties[1][0]).containsSequence(8L, 8L, 8L, 8L);
+        });
     }
 
     @Test
@@ -243,9 +258,9 @@ class ChunkedAdjacencyListsTest {
             );
             assertThat(actualTargets).containsExactly(expectedTargets);
 
-            assertThat(actualProperties)
-                // there is an additional entry, because we double the buffers in size
-                .hasDimensions(1, 3).contains(new long[]{3L, 3L, 4L}, Index.atIndex(0));
+            assertThat(actualProperties).hasNumberOfRows(1);
+            assertThat(actualProperties[0]).hasNumberOfRows(1);
+            assertThat(actualProperties[0][0]).containsSequence(3L, 3L, 4L);
         });
     }
 }

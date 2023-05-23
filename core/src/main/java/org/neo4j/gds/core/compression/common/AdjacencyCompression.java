@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.common;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
@@ -76,31 +77,39 @@ public final class AdjacencyCompression {
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
     public static int applyDeltaEncoding(
         LongArrayBuffer data,
-        long[][] weights,
+        long[][][] weights,
+        long[][] sortedWeights,
         Aggregation[] aggregations,
         boolean noAggregation
     ) {
-        return data.length = applyDeltaEncoding(data.buffer, data.length, weights, aggregations, noAggregation);
+        return data.length = applyDeltaEncoding(
+            data.buffer,
+            data.length,
+            weights,
+            sortedWeights,
+            aggregations,
+            noAggregation
+        );
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
     public static int applyDeltaEncoding(
         long[] data,
         int length,
-        long[][] weights,
+        long[][][] unsortedWeights,
+        long[][] sortedWeights,
         Aggregation[] aggregations,
         boolean noAggregation
     ) {
         int[] order = IndirectSort.mergesort(0, length, new AscendingLongComparator(data));
 
         long[] sortedValues = new long[length];
-        long[][] sortedWeights = new long[weights.length][length];
 
         length = applyDelta(
             order,
             data,
             sortedValues,
-            weights,
+            unsortedWeights,
             sortedWeights,
             length,
             aggregations,
@@ -108,10 +117,6 @@ public final class AdjacencyCompression {
         );
 
         System.arraycopy(sortedValues, 0, data, 0, length);
-        for (int i = 0; i < sortedWeights.length; i++) {
-            long[] sortedWeight = sortedWeights[i];
-            System.arraycopy(sortedWeight, 0, weights[i], 0, length);
-        }
 
         return length;
     }
@@ -228,20 +233,20 @@ public final class AdjacencyCompression {
      * Applies delta encoding to the given {@code values}.
      * Weights are not encoded.
      *
-     * @param order         Ordered indices into {@code values} and {@code weights} for consuming these in ascending value order.
-     * @param values        Relationships represented by target node ID.
-     * @param outValues     Sorted, delta-encoded and optionally aggregated relationships.
-     * @param weights       Relationship properties by key, ordered by {@code order}.
-     * @param outWeights    Sorted and optionally aggregated relationship properties.
-     * @param length        Number of relationships (degree of source node) to process.
-     * @param aggregations  Aggregations to apply to parallel edges. One per relationship property key in {@code weights}.
-     * @param noAggregation Is true iff all aggregations are NONE.
+     * @param order           Ordered indices into {@code values} and {@code weights} for consuming these in ascending value order.
+     * @param values          Relationships represented by target node ID.
+     * @param outValues       Sorted, delta-encoded and optionally aggregated relationships.
+     * @param unsortedWeights Relationship properties by key, ordered by {@code order}.
+     * @param outWeights      Sorted and optionally aggregated relationship properties.
+     * @param length          Number of relationships (degree of source node) to process.
+     * @param aggregations    Aggregations to apply to parallel edges. One per relationship property key in {@code weights}.
+     * @param noAggregation   Is true iff all aggregations are NONE.
      */
     private static int applyDelta(
         int[] order,
         long[] values,
         long[] outValues,
-        long[][] weights,
+        long[][][] unsortedWeights,
         long[][] outWeights,
         int length,
         Aggregation[] aggregations,
@@ -251,35 +256,59 @@ public final class AdjacencyCompression {
         long value = values[firstSortIdx];
         long delta;
 
+        int[] chunkLengths = new int[unsortedWeights[0].length];
+        int totalChunkLength = 0;
+        for (int i = 0; i < unsortedWeights[0].length; i++) {
+            totalChunkLength += unsortedWeights[0][i].length;
+            chunkLengths[i] = totalChunkLength;
+        }
+
+        var pageIndex = new MutableInt();
+        var indexInPage = new MutableInt();
+        findPosition(chunkLengths, firstSortIdx, pageIndex, indexInPage);
+
         outValues[0] = values[firstSortIdx];
-        for (int i = 0; i < weights.length; i++) {
-            outWeights[i][0] = weights[i][firstSortIdx];
+        for (int i = 0; i < unsortedWeights.length; i++) {
+            outWeights[i][0] = unsortedWeights[i][pageIndex.intValue()][indexInPage.intValue()];
         }
 
         int in = 1, out = 1;
         for (; in < length; ++in) {
             final int sortIdx = order[in];
+            findPosition(chunkLengths, sortIdx, pageIndex, indexInPage);
             delta = values[sortIdx] - value;
             value = values[sortIdx];
 
             if (delta > 0L || noAggregation) {
-                for (int i = 0; i < weights.length; i++) {
-                    outWeights[i][out] = weights[i][sortIdx];
+                for (int i = 0; i < unsortedWeights.length; i++) {
+                    outWeights[i][out] = unsortedWeights[i][pageIndex.intValue()][indexInPage.intValue()];
                 }
                 outValues[out++] = delta;
             } else {
-                for (int i = 0; i < weights.length; i++) {
+                for (int i = 0; i < unsortedWeights.length; i++) {
                     Aggregation aggregation = aggregations[i];
                     int existingIdx = out - 1;
                     long[] outWeight = outWeights[i];
                     double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
-                    double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
+                    double newWeight = Double.longBitsToDouble(unsortedWeights[i][pageIndex.intValue()][indexInPage.intValue()]);
                     newWeight = aggregation.merge(existingWeight, newWeight);
                     outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
                 }
             }
         }
         return out;
+    }
+
+    public static void findPosition(int[] chunkLengths, int position, MutableInt pageIndex, MutableInt indexInPage) {
+        int chunkPosition = Arrays.binarySearch(chunkLengths, position);
+        if (chunkPosition >= 0) {
+            pageIndex.setValue(chunkPosition + 1);
+            indexInPage.setValue(0);
+        } else {
+            int index = -chunkPosition - 1;
+            pageIndex.setValue(index);
+            indexInPage.setValue(position - (index == 0 ? 0 : chunkLengths[index - 1]));
+        }
     }
 
     private AdjacencyCompression() {
