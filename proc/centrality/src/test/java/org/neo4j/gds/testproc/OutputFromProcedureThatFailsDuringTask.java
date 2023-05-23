@@ -19,18 +19,6 @@
  */
 package org.neo4j.gds.testproc;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-class FailingAlgorithm extends Algorithm<OutputFromProcedureThatFailsDuringTask> {
-    FailingAlgorithm(ProgressTracker progressTracker) {
-        super(progressTracker);
-    }
-
-    @Override
-    public OutputFromProcedureThatFailsDuringTask compute() {
-        progressTracker.beginSubTask();
-        throw new IllegalStateException("Oops");
-    }
-
+public class OutputFromProcedureThatFailsDuringTask {
+    public Object out = new Object();
 }

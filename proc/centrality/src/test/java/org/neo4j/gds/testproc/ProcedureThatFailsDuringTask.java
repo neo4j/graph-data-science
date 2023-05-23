@@ -19,15 +19,8 @@
  */
 package org.neo4j.gds.testproc;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.test.config.DummyConfig;
-import org.neo4j.gds.test.config.DummyConfigImpl;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,50 +28,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm, ProcedureThatFailsDuringTask.Output, DummyConfig, ProcedureThatFailsDuringTask.Output> {
+public class ProcedureThatFailsDuringTask extends BaseProc {
     @Procedure(name = "very.strange.procedure", mode = Mode.READ)
-    public Stream<Output> run(
+    public Stream<OutputFromProcedureThatFailsDuringTask> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphName, configuration);
-        assert result.result().isPresent();
+        var result = new ProcedureExecutor<>(
+            new SpecForProcedureThatFailsDuringTask(),
+            executionContext()
+        ).compute(graphName, configuration);
+
         // meaningless code to avoid spotBugs error
-        Output out = new Output();
+        OutputFromProcedureThatFailsDuringTask out = new OutputFromProcedureThatFailsDuringTask();
         int i = out.out.hashCode();
-        return i*i == -1 ? Stream.of(result.result().get()) : Stream.of(out);
-    }
-
-    @Override
-    protected DummyConfig newConfig(String username, CypherMapWrapper config) {
-        return new DummyConfigImpl(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<FailingAlgorithm, DummyConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new GraphAlgorithmFactory<FailingAlgorithm, DummyConfig>() {
-            @Override
-            public String taskName() {
-                return "Failing Algorithm";
-            }
-
-            @Override
-            public FailingAlgorithm build(
-                Graph graph,
-                DummyConfig configuration,
-                ProgressTracker progressTracker
-            ) {
-                return new FailingAlgorithm(progressTracker);
-            }
-       };
-    }
-
-    @Override
-    public ComputationResultConsumer<FailingAlgorithm, Output, DummyConfig, Stream<Output>> computationResultConsumer() {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    public class Output {
-        public Object out = new Object();
+        return i * i == -1 ? result : Stream.of(out);
     }
 }
