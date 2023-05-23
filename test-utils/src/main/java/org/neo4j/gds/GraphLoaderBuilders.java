@@ -79,7 +79,7 @@ public final class GraphLoaderBuilders {
         Optional<JobId> jobId,
         Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation,
-        Optional<Boolean> gloabelIndexInverse,
+        Optional<Boolean> globalIndexInverse,
         Optional<Boolean> validateRelationships
     ) {
 
@@ -98,7 +98,7 @@ public final class GraphLoaderBuilders {
             jobId,
             globalOrientation,
             globalAggregation,
-            gloabelIndexInverse,
+            globalIndexInverse,
             validateRelationships
         );
 
