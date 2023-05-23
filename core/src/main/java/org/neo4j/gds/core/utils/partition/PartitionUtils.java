@@ -36,12 +36,13 @@ import java.util.function.Function;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PartitionUtils {
 
-    public static final double MIN_PARTITION_CAPACITY = 0.67;
+    private static final double MIN_PARTITION_CAPACITY = 0.67;
 
     private PartitionUtils() {}
 
@@ -175,6 +176,22 @@ public final class PartitionUtils {
         return degreePartitionWithBatchSize(graph.nodeCount(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
     }
 
+    /**
+     * Returns a lazy stream of many small partitions (in contrast to list of few big ones)
+     */
+    public static Stream<DegreePartition> degreePartitionStream(
+        long nodeCount,
+        long relationshipCount,
+        int concurrency,
+        DegreeFunction degrees
+    ) {
+        if (concurrency == 1) {
+            return Stream.of(new DegreePartition(0, nodeCount, relationshipCount));
+        }
+
+        return LazyDegreePartitionIterator.of(nodeCount, relationshipCount, concurrency, degrees).stream();
+    }
+
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
         Graph graph,
         long batchSize,
@@ -221,14 +238,14 @@ public final class PartitionUtils {
         // the above loop only merge partition i with i+1 to avoid i being too small
         // thus we need to check the last partition manually
         var minLastPartitionSize = Math.round(0.2 * batchSize);
-        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).totalDegree() < minLastPartitionSize) {
+        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).relationshipCount() < minLastPartitionSize) {
             var lastPartition = partitions.remove(partitions.size() - 1);
             var partitionToMerge = partitions.remove(partitions.size() - 1);
 
             DegreePartition mergedPartition = DegreePartition.of(
                 partitionToMerge.startNode(),
                 lastPartition.nodeCount() + partitionToMerge.nodeCount(),
-                partitionToMerge.totalDegree() + lastPartition.totalDegree()
+                partitionToMerge.relationshipCount() + lastPartition.relationshipCount()
             );
 
             partitions.add(mergedPartition);

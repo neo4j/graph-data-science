@@ -21,7 +21,10 @@ package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionConsumer;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;
@@ -51,6 +54,7 @@ import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -120,6 +124,25 @@ public final class ParallelUtil {
             terminationFlag,
             stream -> stream.forEach(consumer)
         );
+    }
+
+    /**
+     * This method is useful, when |partitions| >> concurrency as we only create a single consumer per thread.
+     * Compared to parallelForEachNode, thread local state does not need to be resolved for each node but only per partition.
+     */
+    public static <P extends Partition> void parallelPartitionsConsume(
+        RunWithConcurrency.Builder runnerBuilder,
+        Stream<P> partitions,
+        Supplier<PartitionConsumer<P>> taskSupplier
+    ) {
+        try (
+            var localConsumer = CloseableThreadLocal.withInitial(taskSupplier);
+        ) {
+            var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
+            runnerBuilder.tasks(taskStream);
+            runnerBuilder.run();
+        }
+
     }
 
     /**

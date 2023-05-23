@@ -19,16 +19,18 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionConsumer;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -40,7 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
@@ -145,12 +147,12 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     }
 
     public void initDegreePartition() {
-        this.partitions = PartitionUtils.degreePartition(
-            graph,
+        this.partitions = PartitionUtils.degreePartitionStream(
+            graph.nodeCount(),
+            graph.relationshipCount(),
             concurrency,
-            Function.identity(),
-            Optional.of(minBatchSize)
-        );
+            graph::degree
+        ).collect(Collectors.toList());
     }
 
     void initPropertyVectors() {
@@ -190,13 +192,13 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) == 0) return;
         progressTracker.beginSubTask();
 
-        var tasks = partitions.stream()
-            .map(AddInitialStateToEmbeddingTask::new)
-            .collect(Collectors.toList());
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .run();
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            concurrency,
+            terminationFlag,
+            this::addInitialStateToEmbedding
+        );
+
         progressTracker.endSubTask();
     }
 
@@ -211,19 +213,18 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             var iterationWeight = iterationWeights.get(i).floatValue();
             boolean firstIteration = i == 0;
 
-            var tasks = partitions.stream()
-                .map(partition -> new PropagateEmbeddingsTask(
-                        partition,
-                        currentEmbeddings,
-                        previousEmbeddings,
-                        iterationWeight,
-                        firstIteration
-                    )
-                ).collect(Collectors.toList());
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .run();
+            Supplier<PartitionConsumer<DegreePartition>> taskSupplier = () -> new PropagateEmbeddingsTask(
+                currentEmbeddings,
+                previousEmbeddings,
+                iterationWeight,
+                firstIteration
+            );
+
+            ParallelUtil.parallelPartitionsConsume(
+                RunWithConcurrency.builder().executor(Pools.DEFAULT).concurrency(concurrency),
+                partitions.stream(),
+                taskSupplier
+            );
 
             progressTracker.endSubTask();
         }
@@ -388,56 +389,44 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         }
     }
 
-    private final class AddInitialStateToEmbeddingTask implements Runnable {
-        private final Partition partition;
+    private void addInitialStateToEmbedding(long nodeId) {
+        var initialVector = embeddingB.get(nodeId);
+        var l2Norm = l2Norm(initialVector);
+        float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
+        addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
 
-        private AddInitialStateToEmbeddingTask(Partition partition) {this.partition = partition;}
-
-        @Override
-        public void run() {
-            partition.consume( nodeId -> {
-                var initialVector = embeddingB.get(nodeId);
-                var l2Norm= l2Norm( initialVector);
-                float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
-                addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
-            });
-            progressTracker.logProgress(partition.nodeCount());
-        }
+        progressTracker.logProgress(1);
     }
-    private final class PropagateEmbeddingsTask implements Runnable {
 
-        private final Partition partition;
+    private final class PropagateEmbeddingsTask implements PartitionConsumer<DegreePartition> {
+
         private final HugeObjectArray<float[]> currentEmbeddings;
         private final HugeObjectArray<float[]> previousEmbeddings;
         private final float iterationWeight;
-        private final Graph concurrentGraph;
+        private final Graph localGraph;
         private final boolean firstIteration;
 
         private PropagateEmbeddingsTask(
-            Partition partition,
             HugeObjectArray<float[]> currentEmbeddings,
             HugeObjectArray<float[]> previousEmbeddings,
             float iterationWeight,
             boolean firstIteration
         ) {
-            this.partition = partition;
             this.currentEmbeddings = currentEmbeddings;
             this.previousEmbeddings = previousEmbeddings;
             this.iterationWeight = iterationWeight;
-            this.concurrentGraph = graph.concurrentCopy();
+            this.localGraph = graph.concurrentCopy();
             this.firstIteration = firstIteration;
         }
 
-        @Override
-        public void run() {
-            MutableLong degrees = new MutableLong(0);
+        public void consume(DegreePartition partition) {
             partition.consume(nodeId -> {
                 var embedding = embeddings.get(nodeId);
                 var currentEmbedding = currentEmbeddings.get(nodeId);
                 Arrays.fill(currentEmbedding, 0.0f);
 
                 // Collect and combine the neighbour embeddings
-                concurrentGraph.forEachRelationship(nodeId, relationshipWeightFallback, (source, target, weight) -> {
+                localGraph.forEachRelationship(nodeId, relationshipWeightFallback, (source, target, weight) -> {
                     if (firstIteration && Double.isNaN(weight)) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Missing relationship property `%s` on relationship between nodes with ids `%d` and `%d`.",
@@ -458,9 +447,8 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
 
                 // Update the result embedding
                 addWeightedInPlace(embedding, currentEmbedding, iterationWeight);
-                degrees.add(degree);
             });
-            progressTracker.logProgress(degrees.longValue());
+            progressTracker.logProgress(partition.relationshipCount());
         }
     }
 

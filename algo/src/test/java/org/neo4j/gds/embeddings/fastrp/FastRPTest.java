@@ -96,7 +96,7 @@ public class FastRPTest {
         ", (b:Node1 {f1: 2.1, f2: 0.5, f3: 1.8})" +
         ", (c:Node2 {f1: -0.3, f2: 0.8, f3: 2.8})" +
         ", (d:Isolated {f1: 2.5, f2: 8.1, f3: 1.3})" +
-        ", (e:Isolated {f1: -0.6, f2: 0.5, f3: 5.2]})" +
+        ", (e:Isolated {f1: -0.6, f2: 0.5, f3: 5.2})" +
         ", (a)-[:REL {weight: 2.0}]->(b)" +
         ", (b)-[:REL {weight: 1.0}]->(a)" +
         ", (a)-[:REL {weight: 1.0}]->(c)" +
