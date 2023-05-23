@@ -181,28 +181,33 @@ public final class PackedCompressor implements AdjacencyCompressor {
         long[][] uncompressedPropertiesPerProperty,
         int degree
     ) {
+        if (degree > 0) {
+            // sort, delta encode, reorder and aggregate properties
+            degree = AdjacencyCompression.applyDeltaEncoding(
+                targets,
+                degree,
+                uncompressedPropertiesPerProperty,
+                this.aggregations,
+                this.noAggregation
+            );
+        }
+
+        this.degree.setValue(degree);
+
         long offset;
         if (this.packed) {
             offset = AdjacencyPacker.compressWithPropertiesWithPackedTail(
                 this.adjacencyAllocator,
                 this.adjacencySlice,
                 targets,
-                uncompressedPropertiesPerProperty,
-                degree,
-                this.aggregations,
-                this.noAggregation,
-                this.degree
+                degree
             );
         } else {
             offset = AdjacencyPacker.compressWithPropertiesWithVarLongTail(
                 this.adjacencyAllocator,
                 this.adjacencySlice,
                 targets,
-                uncompressedPropertiesPerProperty,
-                degree,
-                this.aggregations,
-                this.noAggregation,
-                this.degree
+                degree
             );
         }
 
