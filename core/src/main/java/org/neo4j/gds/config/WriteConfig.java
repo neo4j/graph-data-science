@@ -80,6 +80,10 @@ public interface WriteConfig extends ConcurrencyConfig {
         String hostname();
         int port();
         String bearerToken();
+        @Value.Default
+        default boolean useEncryption() {
+            return true;
+        }
 
         static @Nullable ArrowConnectionInfo parse(Object input) {
             if (input instanceof Map) {
@@ -87,8 +91,9 @@ public interface WriteConfig extends ConcurrencyConfig {
                 var hostname = map.getString("hostname").orElseThrow();
                 var port = map.getLongAsInt("port");
                 var bearerToken = map.getString("bearerToken").orElseThrow();
+                var useEncryption = map.getBool("useEncryption", true);
 
-                return ImmutableArrowConnectionInfo.of(hostname, port, bearerToken);
+                return ImmutableArrowConnectionInfo.of(hostname, port, bearerToken, useEncryption);
             }
             if (input instanceof Optional<?>) {
                 Optional<?> optionalInput = (Optional<?>) input;

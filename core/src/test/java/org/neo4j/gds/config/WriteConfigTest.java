@@ -90,7 +90,8 @@ class WriteConfigTest {
             Map.of(
                "hostname", "localhost",
                 "port", 4242,
-                "bearerToken", bearerToken
+                "bearerToken", bearerToken,
+                "useEncryption", false
             )
         ));
 
@@ -109,7 +110,8 @@ class WriteConfigTest {
                 .arrowConnectionInfo(Optional.of(ImmutableArrowConnectionInfo.of(
                     "localhost",
                     4242,
-                    UUID.randomUUID().toString()
+                    UUID.randomUUID().toString(),
+                    false
                 )))
                 .concurrency(2)
                 .build()),
