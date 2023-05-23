@@ -127,27 +127,9 @@ public final class ParallelUtil {
     }
 
     /**
-     * using a FJ pool under the hood
+     * This method is useful, when |partitions| >> concurrency as we only create a single consumer per thread.
+     * Compared to parallelForEachNode, thread local state does not need to be resolved for each node but only per partition.
      */
-    public static <P extends Partition> void parallelPartitionsConsume(
-        Stream<P> partitions,
-        Supplier<PartitionConsumer<P>> localConsumerSupplier,
-        int concurrency,
-        TerminationFlag terminationFlag
-    ) {
-        try (
-            var localTask = CloseableThreadLocal.withInitial(localConsumerSupplier);
-        ) {
-            ParallelUtil.parallelStreamConsume(
-                partitions,
-                concurrency,
-                terminationFlag,
-                stream -> stream.forEach(partition -> localTask.get().consume(partition))
-            );
-        }
-    }
-
-    // TODO compare with FJ version above
     public static <P extends Partition> void parallelPartitionsConsume(
         RunWithConcurrency.Builder runnerBuilder,
         Stream<P> partitions,
