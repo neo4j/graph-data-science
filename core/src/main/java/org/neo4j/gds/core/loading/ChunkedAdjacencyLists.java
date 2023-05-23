@@ -311,7 +311,7 @@ public final class ChunkedAdjacencyLists {
 
         // the next chunk size grows slowly depending on the number of chunks we already have
         int nextChunkLevel = Math.min(compressedData.length, NEXT_CHUNK_LENGTH.length - 1);
-        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel] * 2;
+        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel];
 
         // avoid splitting the buffer into too many chunks
         int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
