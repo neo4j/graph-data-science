@@ -213,7 +213,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             var iterationWeight = iterationWeights.get(i).floatValue();
             boolean firstIteration = i == 0;
 
-            Supplier<PartitionConsumer<DegreePartition>> consumerSupplier = () -> new PropagateEmbeddingsTask(
+            Supplier<PartitionConsumer<DegreePartition>> taskSupplier = () -> new PropagateEmbeddingsTask(
                 currentEmbeddings,
                 previousEmbeddings,
                 iterationWeight,
@@ -223,7 +223,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             ParallelUtil.parallelPartitionsConsume(
                 RunWithConcurrency.builder().executor(Pools.DEFAULT).concurrency(concurrency),
                 partitions.stream(),
-                consumerSupplier
+                taskSupplier
             );
 
             progressTracker.endSubTask();

@@ -185,6 +185,10 @@ public final class PartitionUtils {
         int concurrency,
         DegreeFunction degrees
     ) {
+        if (concurrency == 1) {
+            return Stream.of(new DegreePartition(0, nodeCount, relationshipCount));
+        }
+
         return LazyDegreePartitionIterator.of(nodeCount, relationshipCount, concurrency, degrees).stream();
     }
 

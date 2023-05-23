@@ -133,10 +133,10 @@ public final class ParallelUtil {
     public static <P extends Partition> void parallelPartitionsConsume(
         RunWithConcurrency.Builder runnerBuilder,
         Stream<P> partitions,
-        Supplier<PartitionConsumer<P>> localConsumerSupplier
+        Supplier<PartitionConsumer<P>> taskSupplier
     ) {
         try (
-            var localConsumer = CloseableThreadLocal.withInitial(localConsumerSupplier);
+            var localConsumer = CloseableThreadLocal.withInitial(taskSupplier);
         ) {
             var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
             runnerBuilder.tasks(taskStream);

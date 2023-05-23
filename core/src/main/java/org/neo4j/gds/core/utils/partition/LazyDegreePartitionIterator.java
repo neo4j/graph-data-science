@@ -40,10 +40,6 @@ public abstract class LazyDegreePartitionIterator extends AbstractIterator<Degre
         int concurrency,
         PartitionUtils.DegreeFunction degrees
     ) {
-        if (concurrency == 1) {
-            return new SingleDegreePartitionIterator(nodeCount, relationshipCount);
-        }
-
         long numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency * DIVISION_FACTOR);
 
         return new MultiDegreePartitionIterator(nodeCount, numRelationshipsInPartition, degrees);
@@ -107,37 +103,5 @@ public abstract class LazyDegreePartitionIterator extends AbstractIterator<Degre
             ), false);
         }
 
-    }
-
-    private static final class SingleDegreePartitionIterator extends LazyDegreePartitionIterator {
-
-        private final long nodeCount;
-        private final long relationshipCount;
-
-        private boolean calledBefore;
-
-        SingleDegreePartitionIterator(
-            long nodeCount,
-            long relationshipCount
-        ) {
-            this.relationshipCount = relationshipCount;
-            this.nodeCount = nodeCount;
-            this.calledBefore = false;
-        }
-
-        @Override
-        protected DegreePartition fetch() {
-            if (!calledBefore) {
-                this.calledBefore = true;
-                return DegreePartition.of(0, nodeCount, relationshipCount);
-            } else {
-                return done();
-            }
-        }
-
-        @Override
-        Stream<DegreePartition> stream() {
-            return Stream.of(fetch());
-        }
     }
 }
