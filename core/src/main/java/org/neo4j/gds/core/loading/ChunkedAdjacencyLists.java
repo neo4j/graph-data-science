@@ -171,30 +171,24 @@ public final class ChunkedAdjacencyLists {
     }
 
     static final int[] NEXT_CHUNK_LENGTH = {
+        32,
         64,
+        128,
         256,
         512,
         1024,
-        1024,
         2048,
         4096,
-        4096,
-        8192,
         8192,
         16384,
-        16384,
-        32768,
         32768,
         65536,
-        65536,
-        131072,
         131072,
         262144,
-        262144,
-        524288,
         524288,
         1048576,
-        1048576,
+        2097152,
+        4194304,
     };
 
     // This method and the one after that ("copyPropertiesData") are the same except for the underlying primitive array type.
