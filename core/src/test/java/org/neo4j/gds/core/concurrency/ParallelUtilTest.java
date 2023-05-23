@@ -117,7 +117,7 @@ final class ParallelUtilTest {
     @ParameterizedTest
     void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency(int concurrency) {
         LongStream data = LongStream.range(0, 100_000);
-        parallelStreamConsume(data, concurrency, (s) -> {
+        parallelStreamConsume(data, concurrency, TerminationFlag.RUNNING_TRUE, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);

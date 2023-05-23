@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
@@ -114,16 +115,21 @@ public class SimpleRerouter extends ReroutingAlgorithm {
             }
         }
 
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
-            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOT_NODE) {
-                if (!endsAtTerminal.get(nodeId)) {
-                    parent.set(nodeId, PRUNED);
-                    totalCost.add(-parentCost.get(nodeId));
-                    parentCost.set(nodeId, PRUNED);
-                    effectiveNodeCount.decrement();
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            concurrency,
+            TerminationFlag.RUNNING_TRUE,
+            nodeId -> {
+                if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOT_NODE) {
+                    if (!endsAtTerminal.get(nodeId)) {
+                        parent.set(nodeId, PRUNED);
+                        totalCost.add(-parentCost.get(nodeId));
+                        parentCost.set(nodeId, PRUNED);
+                        effectiveNodeCount.decrement();
+                    }
                 }
             }
-        });
+        );
 
     }
 }

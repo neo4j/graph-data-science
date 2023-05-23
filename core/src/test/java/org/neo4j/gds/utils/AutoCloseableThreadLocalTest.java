@@ -22,6 +22,7 @@ package org.neo4j.gds.utils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +37,11 @@ class AutoCloseableThreadLocalTest {
         // Spawns a ForkJoin pool, where each thread manages a CloseableWithState.
         // Closing the ForkJoin pool makes the thread eligible for GC.
         // We need to make sure that the CloseableWithState outlives the thread and is around in the close method.
-        ParallelUtil.parallelForEachNode(10_000_000, concurrency, (__) -> threadLocal.get());
+        ParallelUtil.parallelForEachNode(
+            10_000_000,
+            concurrency, TerminationFlag.RUNNING_TRUE,
+            (__) -> threadLocal.get()
+        );
 
         // Try to run GC, so that the ForkJoin Threads can be collected.
         Thread.sleep(100);

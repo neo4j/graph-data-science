@@ -247,15 +247,14 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
             trainConfig.concurrency(),
+            TerminationFlag.RUNNING_TRUE,
             idx -> localPredictions.set(idx, regressor.predict(features.get(evaluationSet.get(idx))))
         );
 
         terminationFlag.assertRunning();
 
         HugeDoubleArray localTargets = HugeDoubleArray.newArray(evaluationSet.size());
-        ParallelUtil.parallelForEachNode(
-            evaluationSet.size(),
-            trainConfig.concurrency(),
+        ParallelUtil.parallelForEachNode(evaluationSet.size(), trainConfig.concurrency(), TerminationFlag.RUNNING_TRUE,
             idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
         );
 

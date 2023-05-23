@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -101,13 +102,14 @@ interface RandomWalkProbabilities {
             ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, nodeCount),
                 concurrency,
+                TerminationFlag.RUNNING_TRUE,
                 nodeStream -> nodeStream.forEach(nodeId -> {
-                    double frequency = ((double) nodeFrequencies.get(nodeId)) / sum;
-                    centerProbabilities.set(
-                        nodeId,
-                        (Math.sqrt(frequency / positiveSamplingFactor) + 1) * (positiveSamplingFactor / frequency)
-                    );
-                })
+                        double frequency = ((double) nodeFrequencies.get(nodeId)) / sum;
+                        centerProbabilities.set(
+                            nodeId,
+                            (Math.sqrt(frequency / positiveSamplingFactor) + 1) * (positiveSamplingFactor / frequency)
+                        );
+                    })
             );
 
             return centerProbabilities;

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -307,9 +308,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), sourceNodes, Math.abs(config.normalizedK()), comparator);
+
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableSourceNodeStream(),
             concurrency,
+            TerminationFlag.RUNNING_TRUE,
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);

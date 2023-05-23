@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.haa.PageCreator;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.stream.IntStream;
 
@@ -40,9 +41,8 @@ public final class ParallelIntPageCreator implements PageCreator.IntPageCreator 
         parallelStreamConsume(
             IntStream.range(0, lastPageIndex),
             concurrency,
-            stream -> stream.forEach(pageIndex -> {
-                createPage(pages, pageIndex, pageSize);
-            })
+            TerminationFlag.RUNNING_TRUE,
+            stream -> stream.forEach(pageIndex -> createPage(pages, pageIndex, pageSize))
         );
 
         createPage(pages, lastPageIndex, lastPageSize);

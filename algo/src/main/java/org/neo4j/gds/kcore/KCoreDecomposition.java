@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
@@ -77,7 +78,10 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
         AtomicLong degreeZeroNodes = new AtomicLong();
 
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency,
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            concurrency,
+            TerminationFlag.RUNNING_TRUE,
             v -> {
                 int degree = graph.degree(v);
                 currentDegrees.set(v, degree);
@@ -89,7 +93,6 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 core.set(v, coreInitilization);
 
             }
-
         );
         long rebuildLimit = (long) Math.ceil(REBUILD_CONSTANT * graph.nodeCount());
         AtomicLong remainingNodes = new AtomicLong(graph.nodeCount() - degreeZeroNodes.get());

@@ -96,18 +96,6 @@ public final class ParallelUtil {
         });
     }
 
-    public static <T extends BaseStream<?, T>> void parallelStreamConsume(
-        T data,
-        int concurrency,
-        Consumer<T> consumer
-    ) {
-        parallelStreamConsume(data, concurrency, TerminationFlag.RUNNING_TRUE, consumer);
-    }
-
-    public static void parallelForEachNode(long nodeCount, int concurrency, LongConsumer consumer) {
-        parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, consumer);
-    }
-
     public static void parallelForEachNode(
         long nodeCount,
         int concurrency,

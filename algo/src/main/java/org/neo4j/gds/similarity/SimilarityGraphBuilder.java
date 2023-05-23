@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
@@ -95,6 +96,7 @@ public class SimilarityGraphBuilder {
         ParallelUtil.parallelStreamConsume(
             stream,
             concurrency,
+            TerminationFlag.RUNNING_TRUE,
             similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
                 idMap.toRootNodeId(similarityResult.sourceNodeId()),
                 idMap.toRootNodeId(similarityResult.targetNodeId()),
