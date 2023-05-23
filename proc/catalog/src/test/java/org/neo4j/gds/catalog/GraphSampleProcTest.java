@@ -84,6 +84,50 @@ class GraphSampleProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
+    @Test
+    void shouldListCorrectGraphProjectionConfigRWRAlpha() {
+        runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
+
+        runQuery("CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5})");
+        assertGraphExists("sample");
+        runQueryWithRowConsumer("CALL gds.graph.list('sample') YIELD configuration", resultRow -> {
+            assertThat(resultRow.get("configuration"))
+                .isInstanceOf(Map.class)
+                .asInstanceOf(MAP)
+                .containsEntry("samplingRatio", 0.5);
+        });
+    }
+
+    @Test
+    void shouldMutateCorrectGraphRWRAlpha() {
+        long expectedNodeCount = 7L;
+
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        var query =
+            "CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
+        assertCypherResult(query, List.of(
+            Map.of("nodeCount", expectedNodeCount)
+        ));
+        assertGraphExists("sample");
+
+        assertCypherResult(
+            "CALL gds.pageRank.mutate('sample', {mutateProperty: 'rank'}) YIELD nodePropertiesWritten",
+            List.of(
+                Map.of("nodePropertiesWritten", expectedNodeCount)
+            )
+        );
+
+        var numberOfStreamedProperties = runQueryWithRowConsumer(
+            "CALL gds.graph.nodeProperty.stream('sample', 'rank')",
+            unused -> {}
+        );
+        assertThat(numberOfStreamedProperties).isEqualTo(expectedNodeCount);
+
+        assertThatThrownBy(() -> runQuery("CALL gds.graph.nodeProperty.stream('g', 'rank')"))
+            .hasRootCauseInstanceOf(IllegalArgumentException.class);
+    }
+
 
     @Test
     void shouldListCorrectGraphProjectionConfigRWR() {
@@ -129,7 +173,6 @@ class GraphSampleProcTest extends BaseProcTest {
             .hasRootCauseInstanceOf(IllegalArgumentException.class);
     }
 
-    
     @Test
     void shouldListCorrectGraphProjectionConfigCNARW() {
         runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
