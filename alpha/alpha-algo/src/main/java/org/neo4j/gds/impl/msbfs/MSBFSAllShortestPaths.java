@@ -38,9 +38,9 @@ import java.util.stream.Stream;
  * add elements to it.
  */
 public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
+    private final BlockingQueue<AllShortestPathsStreamResult> resultQueue = new LinkedBlockingQueue<>();
 
-    private Graph graph;
-    private BlockingQueue<AllShortestPathsStream.Result> resultQueue;
+    private final Graph graph;
     private final int concurrency;
     private final ExecutorService executorService;
 
@@ -53,7 +53,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.resultQueue = new LinkedBlockingQueue<>(); // TODO limit size?
     }
 
     /**
@@ -63,7 +62,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
      * @return the result stream
      */
     @Override
-    public Stream<AllShortestPathsStream.Result> compute() {
+    public Stream<AllShortestPathsStreamResult> compute() {
         progressTracker.beginSubTask();
         executorService.submit(new ShortestPathTask(concurrency, executorService));
         return AllShortestPathsStream.stream(resultQueue, progressTracker::endSubTask);
@@ -94,7 +93,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                     (target, distance, sources) -> {
                         while (sources.hasNext()) {
                             long source = sources.nextLong();
-                            var result = AllShortestPathsStream.result(
+                            var result = AllShortestPathsStreamResult.result(
                                 graph.toOriginalNodeId(source),
                                 graph.toOriginalNodeId(target),
                                 distance
@@ -111,7 +110,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                     }
             ).run(concurrency, executorService);
 
-            resultQueue.add(AllShortestPathsStream.DONE);
+            resultQueue.add(AllShortestPathsStreamResult.DONE);
         }
     }
 }

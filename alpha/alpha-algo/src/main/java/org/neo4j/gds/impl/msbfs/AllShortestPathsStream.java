@@ -27,53 +27,21 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class AllShortestPathsStream {
-
+final class AllShortestPathsStream {
     private AllShortestPathsStream() {}
 
-    public static final class Result {
-        public final long sourceNodeId;
-        public final long targetNodeId;
-        public final double distance;
-
-        private Result(long sourceNodeId, long targetNodeId, double distance) {
-            this.sourceNodeId = sourceNodeId;
-            this.targetNodeId = targetNodeId;
-            this.distance = distance;
-        }
-
-        @Override
-        public String toString() {
-            return "Result{"
-                   + "sourceNodeId=" + sourceNodeId
-                   + ", targetNodeId=" + targetNodeId
-                   + ", distance=" + distance
-                   + "}";
-        }
-    }
-
-    static final Result DONE = new Result(-1, -1, -1);
-
-    static Result result(
-        long sourceNodeId,
-        long targetNodeId,
-        double distance
-    ) {
-        return new Result(sourceNodeId, targetNodeId, distance);
-    }
-
-    static Stream<Result> stream(BlockingQueue<Result> resultQueue, Runnable closeAction) {
+    static Stream<AllShortestPathsStreamResult> stream(BlockingQueue<AllShortestPathsStreamResult> resultQueue, Runnable closeAction) {
         var spliterator = new ResultSpliterator(resultQueue, closeAction);
         return StreamSupport.stream(spliterator, false).onClose(spliterator::close);
     }
 
-    private static class ResultSpliterator implements Spliterator<Result>, AutoCloseable {
-        private final BlockingQueue<Result> resultQueue;
+    private static class ResultSpliterator implements Spliterator<AllShortestPathsStreamResult>, AutoCloseable {
+        private final BlockingQueue<AllShortestPathsStreamResult> resultQueue;
         private final Runnable closeAction;
         private final AtomicBoolean isClosed;
 
         ResultSpliterator(
-            BlockingQueue<Result> resultQueue,
+            BlockingQueue<AllShortestPathsStreamResult> resultQueue,
             Runnable closeAction
         ) {
             this.resultQueue = resultQueue;
@@ -82,13 +50,13 @@ public final class AllShortestPathsStream {
         }
 
         @Override
-        public Spliterator<Result> trySplit() {
+        public Spliterator<AllShortestPathsStreamResult> trySplit() {
             // no parallel consumption/splitting possible
             return null;
         }
 
         @Override
-        public void forEachRemaining(Consumer<? super Result> action) {
+        public void forEachRemaining(Consumer<? super AllShortestPathsStreamResult> action) {
             Objects.requireNonNull(action);
             if (isClosed()) {
                 return;
@@ -101,14 +69,14 @@ public final class AllShortestPathsStream {
         }
 
         @Override
-        public boolean tryAdvance(Consumer<? super Result> action) {
+        public boolean tryAdvance(Consumer<? super AllShortestPathsStreamResult> action) {
             Objects.requireNonNull(action);
             if (isClosed()) {
                 return false;
             }
             try {
                 var result = resultQueue.take();
-                if (result != DONE) {
+                if (result != AllShortestPathsStreamResult.DONE) {
                     action.accept(result);
                     return true;
                 }

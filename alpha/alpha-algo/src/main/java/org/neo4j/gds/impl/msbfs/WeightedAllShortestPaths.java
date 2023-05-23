@@ -53,13 +53,13 @@ import static org.neo4j.gds.Converters.longToIntConsumer;
  * prematurely the workers get closed too.
  */
 public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
+    private final BlockingQueue<AllShortestPathsStreamResult> resultQueue = new LinkedBlockingQueue<>();
 
     private final int nodeCount;
     private final int concurrency; // maximum number of workers
     private final ExecutorService executorService;
-    private Graph graph;
-    private AtomicInteger counter; // nodeId counter (init with nodeCount, counts down for each node)
-    private BlockingQueue<AllShortestPathsStream.Result> resultQueue;
+    private final Graph graph;
+    private final AtomicInteger counter; // nodeId counter (init with nodeCount, counts down for each node)
 
     private volatile boolean outputStreamOpen;
 
@@ -77,7 +77,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         }
         this.concurrency = concurrency;
         this.counter = new AtomicInteger();
-        this.resultQueue = new LinkedBlockingQueue<>(); // TODO limit size?
     }
 
     /**
@@ -87,7 +86,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
      * @return the result stream
      */
     @Override
-    public Stream<AllShortestPathsStream.Result> compute() {
+    public Stream<AllShortestPathsStreamResult> compute() {
         progressTracker.beginSubTask();
 
         counter.set(0);
@@ -110,7 +109,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
      * and starts dijkstra on it. It starts emitting results to the
      * queue once all reachable nodes have been visited.
      */
-    private class ShortestPathTask implements Runnable {
+    private final class ShortestPathTask implements Runnable {
 
         private final IntPriorityQueue queue;
         private final double[] distance;
@@ -128,7 +127,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             while (outputStreamOpen && terminationFlag.running() && (startNode = counter.getAndIncrement()) < nodeCount) {
                 compute(startNode);
                 for (int i = 0; i < nodeCount; i++) {
-                    var result = AllShortestPathsStream.result(
+                    var result = AllShortestPathsStreamResult.result(
                         graph.toOriginalNodeId(startNode),
                         graph.toOriginalNodeId(i),
                         distance[i]
@@ -144,7 +143,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             }
         }
 
-        public void compute(int startNode) {
+        void compute(int startNode) {
             Arrays.fill(distance, Double.POSITIVE_INFINITY);
             distance[startNode] = 0D;
             queue.add(startNode, 0D);

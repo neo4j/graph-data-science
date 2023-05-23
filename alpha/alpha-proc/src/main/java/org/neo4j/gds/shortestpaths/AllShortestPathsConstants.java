@@ -19,22 +19,6 @@
  */
 package org.neo4j.gds.shortestpaths;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-
-    static AllShortestPathsConfig of(CypherMapWrapper userInput) {
-        return new AllShortestPathsConfigImpl(userInput);
-    }
-
-    static AllShortestPathsConfig of(String username, CypherMapWrapper userInput) {
-        return of(userInput);
-    }
+public class AllShortestPathsConstants {
+    public static final String DESCRIPTION = "The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.";
 }
