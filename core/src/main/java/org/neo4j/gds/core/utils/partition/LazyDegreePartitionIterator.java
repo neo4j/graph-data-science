@@ -29,6 +29,9 @@ import java.util.stream.StreamSupport;
 
 public abstract class LazyDegreePartitionIterator extends AbstractIterator<DegreePartition> {
 
+    // This is a good guess to achieve smaller partitions
+    private static final long DIVISION_FACTOR = 10;
+
     abstract Stream<DegreePartition> stream();
 
     static LazyDegreePartitionIterator of(
@@ -41,56 +44,57 @@ public abstract class LazyDegreePartitionIterator extends AbstractIterator<Degre
             return new SingleDegreePartitionIterator(nodeCount, relationshipCount);
         }
 
-        return new MultiDegreePartitionIterator(nodeCount, relationshipCount, concurrency, degrees);
+        long numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency * DIVISION_FACTOR);
+
+        return new MultiDegreePartitionIterator(nodeCount, numRelationshipsInPartition, degrees);
     }
 
     private final static class MultiDegreePartitionIterator extends LazyDegreePartitionIterator {
 
-        private static final long DIVISION_FACTOR = 10;
-
         private final long nodeCount;
         private final PartitionUtils.DegreeFunction degrees;
-        private long currentStartNode;
-        private final long numRelationshipsInPartition;
+
+        private long nextStartNode;
+        private final long partitionSize;
 
         MultiDegreePartitionIterator(
             long nodeCount,
-            long relationshipCount,
-            long concurrency,
+            long partitionSize,
             PartitionUtils.DegreeFunction degrees
         ) {
             this.nodeCount = nodeCount;
             this.degrees = degrees;
-            this.currentStartNode = 0;
-            this.numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency * DIVISION_FACTOR);
+            this.nextStartNode = 0;
+            this.partitionSize = partitionSize;
         }
 
         @Override
         protected DegreePartition fetch() {
-            long nodeId = this.currentStartNode;
+            long nodeId = this.nextStartNode;
 
             if (nodeId >= nodeCount) {
                 return done();
             }
 
-            long currentRelationshipCount = 0;
+            long relsInPartition = 0;
             long startNode = nodeId;
 
             for (; nodeId < nodeCount; nodeId++) {
                 long nextRelationshipCount = degrees.degree(nodeId);
-                if (currentRelationshipCount + nextRelationshipCount > numRelationshipsInPartition) {
-                    this.currentStartNode = nodeId + 1;
+
+                relsInPartition += nextRelationshipCount;
+                if (relsInPartition > partitionSize) {
+                    this.nextStartNode = nodeId + 1;
                     return DegreePartition.of(
                         startNode,
-                        currentStartNode - startNode,
-                        currentRelationshipCount + nextRelationshipCount
+                        nextStartNode - startNode,
+                        relsInPartition
                     );
                 }
-                currentRelationshipCount += nextRelationshipCount;
             }
 
-            this.currentStartNode = nodeId + 1;
-            return DegreePartition.of(startNode, nodeCount - startNode, currentRelationshipCount);
+            this.nextStartNode = nodeId + 1;
+            return DegreePartition.of(startNode, nodeCount - startNode, relsInPartition);
         }
 
         public Stream<DegreePartition> stream() {
