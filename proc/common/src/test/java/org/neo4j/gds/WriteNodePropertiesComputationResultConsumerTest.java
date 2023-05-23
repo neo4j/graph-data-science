@@ -119,7 +119,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
     void shouldThrowWhenArrowConnectionInfoIsGivenForLocalWriteBack() {
         var config = ImmutableTestWriteConfig.builder()
             .writeProperty("writeProp")
-            .arrowConnectionInfo(ImmutableArrowConnectionInfo.of("localhost", 1337, "token"))
+            .arrowConnectionInfo(ImmutableArrowConnectionInfo.of("localhost", 1337, "token", false))
             .build();
 
         assertThatThrownBy(() -> executeWrite(config, PropertyState.PERSISTENT, WriteMode.LOCAL))
