@@ -126,10 +126,10 @@ final class LinkFeaturesAndLabelsExtractor {
                     }
                     return true;
                 }));
-                    progressTracker.logSteps(partition.totalDegree());
+                    progressTracker.logSteps(partition.relationshipCount());
                 }
             );
-            relationshipOffset.add(partition.totalDegree());
+            relationshipOffset.add(partition.relationshipCount());
         }
 
         RunWithConcurrency.builder()

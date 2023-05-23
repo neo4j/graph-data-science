@@ -238,14 +238,14 @@ public final class PartitionUtils {
         // the above loop only merge partition i with i+1 to avoid i being too small
         // thus we need to check the last partition manually
         var minLastPartitionSize = Math.round(0.2 * batchSize);
-        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).totalDegree() < minLastPartitionSize) {
+        if (partitions.size() > 1 && partitions.get(partitions.size() - 1).relationshipCount() < minLastPartitionSize) {
             var lastPartition = partitions.remove(partitions.size() - 1);
             var partitionToMerge = partitions.remove(partitions.size() - 1);
 
             DegreePartition mergedPartition = DegreePartition.of(
                 partitionToMerge.startNode(),
                 lastPartition.nodeCount() + partitionToMerge.nodeCount(),
-                partitionToMerge.totalDegree() + lastPartition.totalDegree()
+                partitionToMerge.relationshipCount() + lastPartition.relationshipCount()
             );
 
             partitions.add(mergedPartition);

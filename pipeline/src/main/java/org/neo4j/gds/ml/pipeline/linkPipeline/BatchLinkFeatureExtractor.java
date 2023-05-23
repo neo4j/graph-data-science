@@ -61,7 +61,7 @@ class BatchLinkFeatureExtractor implements Runnable {
             }));
         });
 
-        progressTracker.logSteps(partition.totalDegree());
+        progressTracker.logSteps(partition.relationshipCount());
     }
 }
 

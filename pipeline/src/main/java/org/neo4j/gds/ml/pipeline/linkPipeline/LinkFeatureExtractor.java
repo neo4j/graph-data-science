@@ -92,7 +92,7 @@ public final class LinkFeatureExtractor {
                 linkFeatures,
                 progressTracker
             ));
-            relationshipOffset += partition.totalDegree();
+            relationshipOffset += partition.relationshipCount();
         }
 
         RunWithConcurrency.builder()

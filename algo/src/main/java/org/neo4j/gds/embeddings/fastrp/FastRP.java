@@ -448,7 +448,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
                 // Update the result embedding
                 addWeightedInPlace(embedding, currentEmbedding, iterationWeight);
             });
-            progressTracker.logProgress(partition.totalDegree());
+            progressTracker.logProgress(partition.relationshipCount());
         }
     }
 

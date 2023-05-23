@@ -54,7 +54,7 @@ class LazyDegreePartitionIteratorTest {
             .stream()
             .collect(Collectors.toList());
 
-        assertThat(partitions.stream().mapToLong(DegreePartition::totalDegree).sum()).isEqualTo(graph.relationshipCount());
+        assertThat(partitions.stream().mapToLong(DegreePartition::relationshipCount).sum()).isEqualTo(graph.relationshipCount());
 
         for (int i = 0; i < partitions.size() - 1; i++) {
             DegreePartition partition = partitions.get(i);

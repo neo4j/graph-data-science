@@ -23,15 +23,15 @@ import java.util.Objects;
 
 public class DegreePartition extends Partition {
 
-    private final long totalDegree;
+    private final long relationshipCount;
 
-    public DegreePartition(long startNode, long nodeCount, long totalDegree) {
+    public DegreePartition(long startNode, long nodeCount, long relationshipCount) {
         super(startNode, nodeCount);
-        this.totalDegree = totalDegree;
+        this.relationshipCount = relationshipCount;
     }
 
-    public long totalDegree() {
-        return totalDegree;
+    public long relationshipCount() {
+        return relationshipCount;
     }
 
     public static DegreePartition of(long startNode, long nodeCount, long totalDegree) {
@@ -44,12 +44,12 @@ public class DegreePartition extends Partition {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DegreePartition that = (DegreePartition) o;
-        return totalDegree == that.totalDegree;
+        return relationshipCount == that.relationshipCount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), totalDegree);
+        return Objects.hash(super.hashCode(), relationshipCount);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class DegreePartition extends Partition {
         return "DegreePartition{" +
             "start:" + this.startNode() +
             ", length:" + this.nodeCount() +
-            ", totalDegree=" + totalDegree +
+            ", relationshipCount=" + relationshipCount +
             '}';
     }
 }

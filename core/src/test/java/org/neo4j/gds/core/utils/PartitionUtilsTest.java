@@ -229,7 +229,7 @@ class PartitionUtilsTest {
 
         var partitions = PartitionUtils.degreePartition(graph, concurrency, Functions.identity(), Optional.empty());
 
-        assertThat(partitions.stream().mapToLong(DegreePartition::totalDegree).sum()).isEqualTo(graph.relationshipCount());
+        assertThat(partitions.stream().mapToLong(DegreePartition::relationshipCount).sum()).isEqualTo(graph.relationshipCount());
         assertThat(partitions).containsExactlyElementsOf(expectedPartitions);
 
     }
