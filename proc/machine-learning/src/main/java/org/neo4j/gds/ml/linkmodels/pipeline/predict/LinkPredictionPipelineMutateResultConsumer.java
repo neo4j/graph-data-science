@@ -75,7 +75,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
         ParallelUtil.parallelStreamConsume(
             predictedLinkStream,
             concurrency,
-            TerminationFlag.RUNNING_TRUE,
+            TerminationFlag.wrap(executionContext.terminationMonitor()),
             stream -> stream.forEach(predictedLink -> {
                 relationshipsBuilder.addFromInternal(
                     graph.toRootNodeId(predictedLink.sourceId()),

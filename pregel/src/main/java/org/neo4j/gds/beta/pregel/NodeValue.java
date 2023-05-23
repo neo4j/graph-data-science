@@ -35,7 +35,6 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import static org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE;
 import static org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_ARRAY;
