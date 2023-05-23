@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 
@@ -44,7 +45,8 @@ final class KnnProc {
         Graph similarityGraph = new SimilarityGraphBuilder(
             graph,
             concurrency,
-            executor
+            executor,
+            TerminationFlag.RUNNING_TRUE
         ).build(result.streamSimilarityResult());
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -72,7 +73,8 @@ class SimilarityGraphBuilderTest {
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             unlabelledGraph,
             1,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            TerminationFlag.RUNNING_TRUE
         );
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
@@ -94,7 +96,8 @@ class SimilarityGraphBuilderTest {
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             graph,
             1,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            TerminationFlag.RUNNING_TRUE
         );
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
@@ -128,7 +131,8 @@ class SimilarityGraphBuilderTest {
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             filteredIdMap,
             1,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            TerminationFlag.RUNNING_TRUE
         );
 
         Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(

@@ -70,17 +70,20 @@ public class SimilarityGraphBuilder {
     }
 
     private final IdMap idMap;
+    private final TerminationFlag terminationFlag;
     private final int concurrency;
     private final ExecutorService executorService;
 
     public SimilarityGraphBuilder(
         IdMap idMap,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.idMap = idMap;
+        this.terminationFlag = terminationFlag;
     }
 
     public Graph build(Stream<SimilarityResult> stream) {
@@ -96,7 +99,7 @@ public class SimilarityGraphBuilder {
         ParallelUtil.parallelStreamConsume(
             stream,
             concurrency,
-            TerminationFlag.RUNNING_TRUE,
+            terminationFlag,
             similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
                 idMap.toRootNodeId(similarityResult.sourceNodeId()),
                 idMap.toRootNodeId(similarityResult.targetNodeId()),
