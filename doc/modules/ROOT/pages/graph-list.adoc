@@ -108,7 +108,7 @@ CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 ----
 MATCH (n:Person)
 OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
-RETURN gds.alpha.graph.project('personsCypher', n, m,
+RETURN gds.graph.project('personsCypher', n, m,
   {
     sourceNodeLabels: labels(n),
     targetNodeLabels: labels(m)

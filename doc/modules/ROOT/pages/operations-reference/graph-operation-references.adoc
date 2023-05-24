@@ -13,7 +13,7 @@
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher`
 | `gds.graph.project.cypher.estimate`
-| `gds.alpha.graph.project`
+| `gds.graph.project` (aggregation function)
 .2+<.^|xref:graph-exists.adoc[Check if a graph exists]
 | `gds.graph.exists`
 | `_gds.graph.exists_`

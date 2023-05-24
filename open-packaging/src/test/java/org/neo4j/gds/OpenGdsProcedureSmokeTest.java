@@ -126,7 +126,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.nodeSimilarity.filtered.stream.estimate",
         "gds.alpha.nodeSimilarity.filtered.write",
         "gds.alpha.nodeSimilarity.filtered.write.estimate",
-        
+
        // "gds.alpha.topologicalSort.stream",
 
         "gds.beta.hashgnn.mutate",
@@ -527,7 +527,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
     );
 
     private static final List<String> AGGREGATION_FUNCTIONS = List.of(
-        "gds.alpha.graph.project"
+        "gds.graph.project"
     );
 
     private static final List<String> PAGE_RANK = asList(

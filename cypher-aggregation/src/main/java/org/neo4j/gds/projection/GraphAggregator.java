@@ -85,7 +85,7 @@ public class GraphAggregator implements CompatUserAggregator {
     }
 
     // NOTE: keep in sync with `CypherAggregation.FUNCTION_NAME`
-    @CustomProcedure("gds.alpha.graph.project")
+    @CustomProcedure("gds.graph.project")
     public AggregationResult procedureSyntax(
         @Name("graphName") TextValue graphName,
         @Name("sourceNode") AnyValue sourceNode,

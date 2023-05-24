@@ -16,7 +16,7 @@ Example for incorrect use.
 
 // Project a graph
 MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
-RETURN gds.alpha.graph.project(
+RETURN gds.graph.project(
   'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }
 );
 
@@ -57,7 +57,7 @@ Project a graph.
 :BEGIN
 
 MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
-RETURN gds.alpha.graph.project(
+RETURN gds.graph.project(
   'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }
 );
 
@@ -95,7 +95,7 @@ static final String CYPHER_DROP_GDS_GRAPH_IF_EXISTS =
 // Projects a graph
 static final String CYPHER_PROJECT_GDS_GRAPH_ARTIST_GENRE =
     "MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)" +
-    "RETURN gds.alpha.graph.project(" +
+    "RETURN gds.graph.project(" +
     "  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }" +
     ")";
 
