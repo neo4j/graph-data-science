@@ -247,6 +247,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
             trainConfig.concurrency(),
+            terminationFlag,
             idx -> localPredictions.set(idx, regressor.predict(features.get(evaluationSet.get(idx))))
         );
 
@@ -256,6 +257,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
             trainConfig.concurrency(),
+            terminationFlag,
             idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
         );
 

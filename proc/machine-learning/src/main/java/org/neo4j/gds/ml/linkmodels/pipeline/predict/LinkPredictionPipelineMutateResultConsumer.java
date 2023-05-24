@@ -28,6 +28,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
@@ -74,6 +75,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
         ParallelUtil.parallelStreamConsume(
             predictedLinkStream,
             concurrency,
+            TerminationFlag.wrap(executionContext.terminationMonitor()),
             stream -> stream.forEach(predictedLink -> {
                 relationshipsBuilder.addFromInternal(
                     graph.toRootNodeId(predictedLink.sourceId()),
@@ -81,8 +83,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
                     predictedLink.probability()
                 );
                 resultWithHistogramBuilder.recordHistogramValue(predictedLink.probability());
-            })
-        );
+            }));
 
         var relationships = relationshipsBuilder.build();
 

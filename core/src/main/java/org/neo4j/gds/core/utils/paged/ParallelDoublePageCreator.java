@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.haa.PageCreator;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.IntStream;
@@ -44,6 +45,7 @@ public final class ParallelDoublePageCreator implements PageCreator.DoublePageCr
         parallelStreamConsume(
             IntStream.range(0, lastPageIndex),
             concurrency,
+            TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(pageIndex -> {
                 createAndFillPage(pages, pageIndex, pageSize, pageShift);
             })

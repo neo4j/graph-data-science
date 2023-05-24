@@ -21,6 +21,7 @@ package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -37,7 +38,8 @@ final class ReroutingSupplier {
         HugeLongArray examinationQueue,
         LongAdder indexQueue,
         int concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
 
         if (graph.characteristics().isInverseIndexed() && !graph.characteristics().isUndirected()) {
@@ -51,7 +53,7 @@ final class ReroutingSupplier {
                 progressTracker
             );
         } else {
-            return new SimpleRerouter(graph, sourceId, terminals, concurrency, progressTracker);
+            return new SimpleRerouter(graph, sourceId, terminals, concurrency, progressTracker, terminationFlag);
         }
     }
 }

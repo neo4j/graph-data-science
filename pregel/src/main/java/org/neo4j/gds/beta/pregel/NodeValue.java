@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -34,7 +35,6 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import static org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE;
 import static org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_ARRAY;
@@ -187,24 +187,20 @@ public abstract class NodeValue {
         switch (element.propertyType()) {
             case DOUBLE:
                 var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);
-                ParallelUtil.parallelStreamConsume(
-                    LongStream.range(0, nodeCount),
+                ParallelUtil.parallelForEachNode(
+                    nodeCount,
                     concurrency,
-                    nodeIds -> nodeIds.forEach(nodeId -> doubleNodeValues.set(
-                        nodeId,
-                        DefaultValue.DOUBLE_DEFAULT_FALLBACK
-                    ))
+                    TerminationFlag.RUNNING_TRUE,
+                    nodeId -> doubleNodeValues.set(nodeId, DefaultValue.DOUBLE_DEFAULT_FALLBACK)
                 );
                 return doubleNodeValues;
             case LONG:
                 var longNodeValues = HugeLongArray.newArray(nodeCount);
-                ParallelUtil.parallelStreamConsume(
-                    LongStream.range(0, nodeCount),
+                ParallelUtil.parallelForEachNode(
+                    nodeCount,
                     concurrency,
-                    nodeIds -> nodeIds.forEach(nodeId -> longNodeValues.set(
-                        nodeId,
-                        DefaultValue.LONG_DEFAULT_FALLBACK
-                    ))
+                    TerminationFlag.RUNNING_TRUE,
+                    nodeId -> longNodeValues.set(nodeId, DefaultValue.LONG_DEFAULT_FALLBACK)
                 );
                 return longNodeValues;
             case LONG_ARRAY:

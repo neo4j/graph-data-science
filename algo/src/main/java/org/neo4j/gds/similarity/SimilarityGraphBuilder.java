@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
@@ -69,17 +70,20 @@ public class SimilarityGraphBuilder {
     }
 
     private final IdMap idMap;
+    private final TerminationFlag terminationFlag;
     private final int concurrency;
     private final ExecutorService executorService;
 
     public SimilarityGraphBuilder(
         IdMap idMap,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.idMap = idMap;
+        this.terminationFlag = terminationFlag;
     }
 
     public Graph build(Stream<SimilarityResult> stream) {
@@ -95,6 +99,7 @@ public class SimilarityGraphBuilder {
         ParallelUtil.parallelStreamConsume(
             stream,
             concurrency,
+            terminationFlag,
             similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
                 idMap.toRootNodeId(similarityResult.sourceNodeId()),
                 idMap.toRootNodeId(similarityResult.targetNodeId()),

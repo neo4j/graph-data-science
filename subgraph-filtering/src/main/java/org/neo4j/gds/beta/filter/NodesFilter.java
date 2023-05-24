@@ -40,6 +40,7 @@ import org.neo4j.gds.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder
 import org.neo4j.gds.core.loading.nodeproperties.InnerNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -140,6 +141,7 @@ public final class NodesFilter {
             ParallelUtil.parallelForEachNode(
                 filteredNodeCount,
                 concurrency,
+                TerminationFlag.RUNNING_TRUE,
                 filteredNode -> {
                     var inputNode = inputMapping.toMappedNodeId(filteredIdMap.toOriginalNodeId(filteredNode));
                     nodePropertiesBuilder.accept(inputNode, filteredNode);

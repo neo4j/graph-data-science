@@ -30,6 +30,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
@@ -332,6 +333,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, colorCount),
             concurrency,
+            TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(indexId -> {
                 long actualIndexId = currentStandingPosition + indexId;
                 long nodeId = modularityColorArray.nodeAtPosition(actualIndexId);
@@ -342,6 +344,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
             concurrency,
+            TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);
                 modularityManager.communityWeightUpdate(nodeId, update);

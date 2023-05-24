@@ -179,7 +179,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             similarityGraph = new SimilarityGraphBuilder(
                 graph,
                 concurrency,
-                executorService
+                executorService,
+                terminationFlag
             ).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, sourceNodes.cardinality(), isTopKGraph);
@@ -307,9 +308,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), sourceNodes, Math.abs(config.normalizedK()), comparator);
+
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableSourceNodeStream(),
             concurrency,
+            terminationFlag,
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);

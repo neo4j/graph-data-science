@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -100,8 +101,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         ForkJoinPool forkJoinPool = Pools.createForkJoinPool(concurrency);
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency,
-            nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 result.addNode(nodeId);
                 tasks.add(new TraversalTask(null, nodeId, graph.concurrentCopy(), result, inDegrees));

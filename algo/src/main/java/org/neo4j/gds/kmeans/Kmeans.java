@@ -26,6 +26,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -317,7 +318,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
             }
         }
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
                 var value = nodePropertyValues.floatArrayValue(nodeId);
                 if (value == null) {
