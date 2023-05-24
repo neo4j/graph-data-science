@@ -24,11 +24,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 
 class HighLimitIdMapTest {
 
@@ -50,6 +53,19 @@ class HighLimitIdMapTest {
             assertThat(idMap.toRootNodeId(nodeId)).isEqualTo(nodeId);
             return true;
         });
+    }
+
+    @Test
+    void shouldHandleUnmappedIds() {
+        var intermediateIdMapBuilder = ShardedLongLongMap.builder(1);
+        intermediateIdMapBuilder.addNode(0);
+        var intermediateIdMap = intermediateIdMapBuilder.build(0);
+        var internalIdMap = new DirectIdMap(1);
+
+        var highLimitIdMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
+
+        assertThat(highLimitIdMap.toMappedNodeId(1337)).isEqualTo(NOT_FOUND);
+        assertThat(highLimitIdMap.containsOriginalId(1337)).isFalse();
     }
 
     @Nested
