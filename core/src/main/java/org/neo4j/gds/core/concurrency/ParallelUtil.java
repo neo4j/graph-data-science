@@ -127,7 +127,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * This method is useful, when |partitions| >> concurrency as we only create a single consumer per thread.
+     * This method is useful, when |partitions| is greatly larger than concurrency as we only create a single consumer per thread.
      * Compared to parallelForEachNode, thread local state does not need to be resolved for each node but only per partition.
      */
     public static <P extends Partition> void parallelPartitionsConsume(
