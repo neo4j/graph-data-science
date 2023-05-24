@@ -219,6 +219,13 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
+    void testInvalidNegativId() {
+        assertThatThrownBy(() -> runQuery("RETURN gds.alpha.graph.project('g', -1)"))
+            .rootCause()
+            .hasMessage("GDS expects node ids to be positive. But got a negative id of `-1`.");
+    }
+
+    @Test
     void testInvalidRelationshipAsArbitraryId() {
         var query = "MATCH ()-[r]-() RETURN gds.alpha.graph.project('g', r)";
         assertThatThrownBy(() -> runQuery(query))
