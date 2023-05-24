@@ -249,11 +249,13 @@ public final class GraphFactory {
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
             .build();
 
+        var validateImportedRelationships = validateRelationships.orElse(false);
+
         var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
-            .validateRelationships(validateRelationships.orElse(false))
+            .validateRelationships(validateImportedRelationships)
             .build();
 
         var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
@@ -284,13 +286,13 @@ public final class GraphFactory {
                 .importMetaData(inverseImportMetaData)
                 .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
                 .importSizing(importSizing)
-                .validateRelationships(validateRelationships.orElse(false))
+                .validateRelationships(validateImportedRelationships)
                 .build();
 
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build());
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), validateImportedRelationships);
     }
 
     /**
