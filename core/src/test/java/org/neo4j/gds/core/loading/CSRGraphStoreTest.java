@@ -30,7 +30,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.GraphProperty;
+import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -42,11 +43,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -245,24 +247,41 @@ class CSRGraphStoreTest {
     void shouldAddNewGraphProperties() {
         var factory = GdlFactory.of("(:A), (:A), (:B), (:C)");
         var graphStore = factory.build();
+        assertThat(graphStore.hasGraphProperty("longProp")).isFalse();
 
-        graphStore.addGraphProperty("longProp", new LongGraphPropertyValues() {
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, 4);
-            }
+        var graphPropertyValuesMock = mock(GraphPropertyValues.class);
+        when(graphPropertyValuesMock.valueCount()).thenReturn(19L);
+        when(graphPropertyValuesMock.valueType()).thenReturn(ValueType.LONG);
 
-            @Override
-            public long valueCount() {
-                return 4;
-            }
-        });
+        graphStore.addGraphProperty("longProp", graphPropertyValuesMock);
 
-        assertThat(graphStore.graphProperty("longProp")).isNotNull();
+        assertThat(graphStore.hasGraphProperty("longProp")).isTrue();
+        assertThat(graphStore.graphProperty("longProp"))
+            .isEqualTo(GraphProperty.of("longProp", graphPropertyValuesMock));
+
         assertThat(graphStore.schema().graphProperties()).containsEntry(
             "longProp",
             PropertySchema.of("longProp", ValueType.LONG)
         );
+    }
+
+    @Test
+    void shouldRemoveGraphProperty() {
+        var factory = GdlFactory.of("(:A), (:A), (:B), (:C)");
+        var graphStore = factory.build();
+
+        var graphPropertyValuesMock = mock(GraphPropertyValues.class);
+        when(graphPropertyValuesMock.valueCount()).thenReturn(19L);
+        when(graphPropertyValuesMock.valueType()).thenReturn(ValueType.DOUBLE);
+
+        graphStore.addGraphProperty("goo", graphPropertyValuesMock);
+
+        assertThat(graphStore.hasGraphProperty("goo")).isTrue();
+
+        graphStore.removeGraphProperty("goo");
+
+        assertThat(graphStore.schema().graphProperties()).doesNotContainKey("goo");
+        assertThat(graphStore.hasGraphProperty("goo")).isFalse();
     }
 
     @ParameterizedTest
