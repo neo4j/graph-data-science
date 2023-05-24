@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 ext.vendor = { ->
     // By specifying the vendor, we force us (and CI) to
     // use that specific JDK version. If it is not locally
@@ -87,9 +90,36 @@ allprojects {
 
             // enable verbose test logging
             testLogging {
-                // `0` corresponds to the Gradle-generated test suite for the whole test run
-                maxGranularity = 0
-                events "passed", "skipped", "failed"
+                // set options for log level LIFECYCLE (the default)
+                lifecycle {
+                    events TestLogEvent.FAILED
+                    exceptionFormat TestExceptionFormat.FULL
+                    showExceptions true
+                }
+
+                // set options for log level INFO
+                info {
+                    events TestLogEvent.FAILED,
+                        TestLogEvent.SKIPPED,
+                        TestLogEvent.STANDARD_ERROR,
+                        TestLogEvent.STANDARD_OUT
+                    exceptionFormat TestExceptionFormat.FULL
+                    showExceptions true
+                }
+
+                // set options for log level DEBUG
+                debug {
+                    events TestLogEvent.STARTED,
+                        TestLogEvent.FAILED,
+                        TestLogEvent.PASSED,
+                        TestLogEvent.SKIPPED,
+                        TestLogEvent.STANDARD_ERROR,
+                        TestLogEvent.STANDARD_OUT
+                    exceptionFormat TestExceptionFormat.FULL
+                    showExceptions true
+                    showCauses true
+                    showStackTraces true
+                }
 
                 afterSuite { desc, result ->
                     if (!desc.parent) { // will match the outermost suite
