@@ -21,37 +21,36 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.kernel.api.procedure.Context;
 
 public final class NativeExportBuildersProvider implements ExportBuildersProvider {
 
     @Override
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder(Context ctx) {
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder(ExporterContext ctx) {
         return new NativeNodePropertiesExporterBuilder(transactionContext(ctx));
     }
 
     @Override
-    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder(Context ctx) {
+    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder(ExporterContext ctx) {
         return new NativeRelationshipStreamExporterBuilder(transactionContext(ctx));
     }
 
     @Override
-    public RelationshipExporterBuilder relationshipExporterBuilder(Context ctx) {
+    public RelationshipExporterBuilder relationshipExporterBuilder(ExporterContext ctx) {
         return new NativeRelationshipExporterBuilder(transactionContext(ctx));
     }
 
     @Override
-    public RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder(Context ctx) {
+    public RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder(ExporterContext ctx) {
         return new NativeRelationshipPropertiesExporterBuilder(transactionContext(ctx));
     }
 
     @Override
-    public NodeLabelExporterBuilder nodeLabelExporterBuilder(Context ctx) {
+    public NodeLabelExporterBuilder nodeLabelExporterBuilder(ExporterContext ctx) {
         return new NativeNodeLabelExporterBuilder(transactionContext(ctx));
     }
 
-    private static TransactionContext transactionContext(Context ctx) {
-        return DatabaseTransactionContext.of(ctx.graphDatabaseAPI(), ctx.internalTransactionOrNull());
+    private static TransactionContext transactionContext(ExporterContext ctx) {
+        return DatabaseTransactionContext.of(ctx.graphDatabaseAPI(), ctx.internalTransaction());
     }
 
 }

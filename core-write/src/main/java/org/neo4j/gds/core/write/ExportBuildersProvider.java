@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.kernel.api.procedure.Context;
-
 public interface ExportBuildersProvider {
-    NodePropertyExporterBuilder nodePropertyExporterBuilder(Context ctx);
-    RelationshipStreamExporterBuilder relationshipStreamExporterBuilder(Context ctx);
-    RelationshipExporterBuilder relationshipExporterBuilder(Context ctx);
-    RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder(Context ctx);
-    NodeLabelExporterBuilder nodeLabelExporterBuilder(Context ctx);
+    NodePropertyExporterBuilder nodePropertyExporterBuilder(ExporterContext ctx);
+
+    RelationshipStreamExporterBuilder relationshipStreamExporterBuilder(ExporterContext ctx);
+
+    RelationshipExporterBuilder relationshipExporterBuilder(ExporterContext ctx);
+
+    RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder(ExporterContext ctx);
+
+    NodeLabelExporterBuilder nodeLabelExporterBuilder(ExporterContext ctx);
 }

@@ -28,7 +28,8 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-public abstract class AbstractExportBuildersExtension extends ExtensionFactory<AbstractExportBuildersExtension.Dependencies> {
+public abstract class AbstractExportBuildersExtension extends
+    ExtensionFactory<AbstractExportBuildersExtension.Dependencies> {
 
     protected AbstractExportBuildersExtension() {
         super(ExtensionType.DATABASE, "gds.write-services");
@@ -40,7 +41,10 @@ public abstract class AbstractExportBuildersExtension extends ExtensionFactory<A
             dependencies.graphDatabaseService(),
             dependencies.config()
         );
-        return new GlobalProceduresExporterComponentProvider(dependencies.globalProcedures(), exportBuildersProviderSelector);
+        return new GlobalProceduresExporterComponentProvider(
+            dependencies.globalProcedures(),
+            exportBuildersProviderSelector
+        );
     }
 
     protected abstract ExportBuildersProviderSelector exportBuildersProviderSelector(
@@ -66,31 +70,41 @@ public abstract class AbstractExportBuildersExtension extends ExtensionFactory<A
             var exportBuildersProvider = exportBuildersProviderSelector.select();
             globalProcedures.registerComponent(
                 NodePropertyExporterBuilder.class,
-                exportBuildersProvider::nodePropertyExporterBuilder,
+                (ctx) -> exportBuildersProvider.nodePropertyExporterBuilder(
+                    new ExporterContext.ProcedureContextWrapper(ctx)
+                ),
                 true
             );
 
             globalProcedures.registerComponent(
                 RelationshipStreamExporterBuilder.class,
-                exportBuildersProvider::relationshipStreamExporterBuilder,
+                (ctx) -> exportBuildersProvider.relationshipStreamExporterBuilder(
+                    new ExporterContext.ProcedureContextWrapper(ctx)
+                ),
                 true
             );
 
             globalProcedures.registerComponent(
                 RelationshipExporterBuilder.class,
-                exportBuildersProvider::relationshipExporterBuilder,
+                (ctx) -> exportBuildersProvider.relationshipExporterBuilder(
+                    new ExporterContext.ProcedureContextWrapper(ctx)
+                ),
                 true
             );
 
             globalProcedures.registerComponent(
                 RelationshipPropertiesExporterBuilder.class,
-                exportBuildersProvider::relationshipPropertiesExporterBuilder,
+                (ctx) -> exportBuildersProvider.relationshipPropertiesExporterBuilder(
+                    new ExporterContext.ProcedureContextWrapper(ctx)
+                ),
                 true
             );
 
             globalProcedures.registerComponent(
                 NodeLabelExporterBuilder.class,
-                exportBuildersProvider::nodeLabelExporterBuilder,
+                (ctx) -> exportBuildersProvider.nodeLabelExporterBuilder(
+                    new ExporterContext.ProcedureContextWrapper(ctx)
+                ),
                 true
             );
         }
