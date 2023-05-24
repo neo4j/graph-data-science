@@ -25,8 +25,8 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
 
     private final String username;
     private final TaskStore taskStore;
-    
-    LocalTaskRegistryFactory(String username, TaskStore taskStore) {
+
+    public LocalTaskRegistryFactory(String username, TaskStore taskStore) {
         this.username = username;
         this.taskStore = taskStore;
     }
@@ -36,10 +36,12 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
         taskStore
             .query(username, jobId)
             .ifPresent(id -> {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "There's already a job running with jobId '%s'",
-                    jobId.asString()
-                ));
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "There's already a job running with jobId '%s'",
+                        jobId.asString()
+                    )
+                );
             });
 
         return new TaskRegistry(username, taskStore, jobId);
