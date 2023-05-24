@@ -106,10 +106,14 @@ CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 .Project `Person` nodes and `KNOWS` relationships using Cypher projections:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project.cypher(
-  'personsCypher',
-  'MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels',
-  'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target, type(r) as type')
+MATCH (n:Person) OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
+RETURN gds.alpha.graph.project('personsCypher', n, m,
+  {
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m)
+  },
+  { relationshipType: type(r) }
+)
 ----
 
 .Project `Person` nodes with property `age` and `KNOWS` relationships using Native projections:
@@ -156,16 +160,15 @@ ORDER BY graphName ASC
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
-YIELD graphName, configuration
-RETURN graphName, configuration.nodeQuery AS nodeQuery
+YIELD graphName
+RETURN graphName
 ----
 
 .Results
 [opts="header"]
 |===
-| graphName | nodeQuery
+| graphName
 | "personsCypher"
-| "MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels"
 |===
 --
 

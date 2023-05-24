@@ -15,11 +15,9 @@ Example for incorrect use.
 :BEGIN
 
 // Project a graph
-CALL gds.graph.project.cypher(
-  'test',
-  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
-  'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
-   RETURN id(g) AS source, id(a) AS target, "IS_ASSOCIATED_WITH" AS type'
+MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
+RETURN gds.alpha.graph.project(
+  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }
 );
 
 // Delete the old stuff
@@ -58,11 +56,9 @@ Project a graph.
 ----
 :BEGIN
 
-CALL gds.graph.project.cypher(
-  'test',
-  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
-  'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
-   RETURN id(g) AS source, id(a) AS target, "IS_ASSOCIATED_WITH" AS type'
+MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
+RETURN gds.alpha.graph.project(
+  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }
 );
 
 :COMMIT
@@ -98,11 +94,9 @@ static final String CYPHER_DROP_GDS_GRAPH_IF_EXISTS =
 
 // Projects a graph
 static final String CYPHER_PROJECT_GDS_GRAPH_ARTIST_GENRE =
-    "CALL gds.graph.project.cypher(" +
-    "    'test', " +
-    "    'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id', " +
-    "    'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre) " +
-    "       RETURN id(g) AS source, id(a) AS target, \"IS_ASSOCIATED_WITH\" AS type'" +
+    "MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)" +
+    "RETURN gds.alpha.graph.project(" +
+    "  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }" +
     ")";
 
 // Runs NodeSimilarity in `write` mode over the in-memory graph
