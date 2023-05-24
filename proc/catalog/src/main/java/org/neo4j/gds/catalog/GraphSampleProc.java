@@ -28,6 +28,7 @@ import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -45,8 +46,18 @@ public class GraphSampleProc extends CatalogProc {
     private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
     private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
 
+    @Internal
+    @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ, deprecatedBy = "gds.graph.sample.rwr")
+    @Description(RWR_DESCRIPTION)
+    public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestartsAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);
+    }
 
-    @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
+    @Procedure(name = "gds.graph.sample.rwr", mode = READ)
     @Description(RWR_DESCRIPTION)
     public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestarts(
         @Name(value = "graphName") String graphName,

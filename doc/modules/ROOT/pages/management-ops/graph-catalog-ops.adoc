@@ -55,7 +55,7 @@ xref:management-ops/projections/graph-generation.adoc[Randomised graphs can be g
 | xref:management-ops/projections/graph-project-cypher.adoc[gds.graph.project.cypher]            | Adds a graph to the catalog using Cypher projection.
 | xref:management-ops/projections/graph-project-cypher-aggregation.adoc[gds.alpha.graph.project] | Adds a graph to the catalog using Cypher Aggregation.
 | xref:management-ops/projections/graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]   | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
-| xref:management-ops/projections/rwr.adoc[gds.alpha.graph.sample.rwr]                           | Adds a graph to the catalog by sampling an existing graph using random walk with restarts.
+| xref:management-ops/projections/rwr.adoc[gds.graph.sample.rwr]                           | Adds a graph to the catalog by sampling an existing graph using random walk with restarts.
 | xref:management-ops/projections/cnarw.adoc[gds.graph.sample.cnarw]                           | Adds a graph to the catalog by sampling an existing graph using Common Neighbour Aware Random Walk algorithm.
 | xref:management-ops/projections/graph-generation.adoc[gds.beta.graph.generate]                 | Creates a new random graph projection of the user-defined properties and dimensions.
 |===
