@@ -52,13 +52,23 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class ProcedureGenerator extends PregelGenerator {
 
-    final PregelValidation.Spec pregelSpec;
     final TypeNames typeNames;
+    private final String procedureName;
+    private final Optional<String> description;
+    private final boolean requiresInverseIndex;
 
-    ProcedureGenerator(Optional<AnnotationSpec> annotationSpec, PregelValidation.Spec pregelSpec, TypeNames typeNames) {
-        super(annotationSpec);
-        this.pregelSpec = pregelSpec;
+    ProcedureGenerator(
+        Optional<AnnotationSpec> generatedAnnotationSpec,
+        TypeNames typeNames,
+        String procedureName,
+        Optional<String> description,
+        boolean requiresInverseIndex
+    ) {
+        super(generatedAnnotationSpec);
         this.typeNames = typeNames;
+        this.procedureName = procedureName;
+        this.description = description;
+        this.requiresInverseIndex = requiresInverseIndex;
     }
 
     static TypeSpec forMode(
@@ -67,11 +77,14 @@ abstract class ProcedureGenerator extends PregelGenerator {
         PregelValidation.Spec pregelSpec,
         TypeNames typeNames
     ) {
+        var description = pregelSpec.description();
+        var procedureName = pregelSpec.procedureName();
+        var requiresInverseIndex = pregelSpec.requiresInverseIndex();
         switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
-            case WRITE: return new WriteProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
-            case MUTATE: return new MutateProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
-            case STATS: return new StatsProcedureGenerator(generatedAnnotationSpec, pregelSpec, typeNames).typeSpec();
+            case STREAM: return new StreamProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
+            case WRITE: return new WriteProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
+            case MUTATE: return new MutateProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
+            case STATS: return new StatsProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
             default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
         }
     }
@@ -101,7 +114,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
         typeSpecBuilder.addMethod(newConfigMethod());
         typeSpecBuilder.addMethod(algorithmFactoryMethod());
 
-        if (pregelSpec.requiresInverseIndex()) {
+        if (requiresInverseIndex) {
             typeSpecBuilder.addMethod(validationConfigMethod());
         }
 
@@ -126,9 +139,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
         var gdsCallableAnnotationBuilder = AnnotationSpec
             .builder(GdsCallable.class)
-            .addMember("name", "$S", formatWithLocale("%s.%s", pregelSpec.procedureName(), procGdsMode().lowerCase()))
+            .addMember("name", "$S", formatWithLocale("%s.%s", procedureName, procGdsMode().lowerCase()))
             .addMember("executionMode", "$T.$L", ExecutionMode.class, executionMode);
-        pregelSpec.description().ifPresent(description ->
+        description.ifPresent(description ->
             gdsCallableAnnotationBuilder.addMember("description", "$S", description)
         );
 
@@ -145,7 +158,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     private MethodSpec procMethod() {
         var methodBuilder = procMethodSignature(procExecMode());
-        pregelSpec.description().ifPresent(description -> methodBuilder.addAnnotation(
+        description.ifPresent(description -> methodBuilder.addAnnotation(
             AnnotationSpec.builder(Description.class)
                 .addMember("value", "$S", description)
                 .build()
@@ -173,7 +186,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addMember(
                     "name",
                     "$S",
-                    formatWithLocale("%s.%s", pregelSpec.procedureName(), procGdsMode().lowerCase())
+                    formatWithLocale("%s.%s", procedureName, procGdsMode().lowerCase())
                 )
                 .addMember("mode", "$T.$L", Mode.class, procExecMode)
                 .build()
@@ -200,7 +213,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addMember(
                     "name",
                     "$S",
-                    formatWithLocale("%s.%s.estimate", pregelSpec.procedureName(), procGdsMode().lowerCase())
+                    formatWithLocale("%s.%s.estimate", procedureName, procGdsMode().lowerCase())
                 )
                 .addMember("mode", "$T.$L", Mode.class, Mode.READ)
                 .build()

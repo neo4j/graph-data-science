@@ -38,11 +38,13 @@ import java.util.Optional;
 class WriteProcedureGenerator extends ProcedureGenerator {
 
     WriteProcedureGenerator(
-        Optional<AnnotationSpec> annotationSpec,
-        PregelValidation.Spec pregelSpec,
-        TypeNames typeNames
+        Optional<AnnotationSpec> generatedAnnotationSpec,
+        TypeNames typeNames,
+        String procedureName,
+        Optional<String> description,
+        boolean requiresInverseIndex
     ) {
-        super(annotationSpec, pregelSpec, typeNames);
+        super(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex);
     }
 
     @Override

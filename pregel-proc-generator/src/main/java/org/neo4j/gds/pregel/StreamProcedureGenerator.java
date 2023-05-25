@@ -37,10 +37,12 @@ class StreamProcedureGenerator extends ProcedureGenerator {
 
     StreamProcedureGenerator(
         Optional<AnnotationSpec> generatedAnnotationSpec,
-        PregelValidation.Spec pregelSpec,
-        TypeNames typeNames
+        TypeNames typeNames,
+        String procedureName,
+        Optional<String> description,
+        boolean requiresInverseIndex
     ) {
-        super(generatedAnnotationSpec, pregelSpec, typeNames);
+        super(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex);
     }
 
     @Override
