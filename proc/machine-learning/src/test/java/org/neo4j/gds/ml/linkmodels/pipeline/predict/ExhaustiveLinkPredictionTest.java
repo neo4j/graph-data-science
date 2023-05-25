@@ -241,17 +241,28 @@ class ExhaustiveLinkPredictionTest {
         var predictedLinks = predictionResult.stream().collect(Collectors.toList());
         assertThat(predictedLinks).hasSize(Math.min(topN, 2));
 
+
         var expectedLinks = List.of(
             PredictedLink.of(0, 3, 0.5),
             PredictedLink.of(3,5,0.5)
         );
 
-        var endIndex = Math.min(topN, expectedLinks.size());
-        assertThat(predictedLinks)
-            .usingElementComparator(compareWithPrecision(1e-10))
-            .containsExactlyInAnyOrder(expectedLinks
-                .subList(0, endIndex)
-                .toArray(PredictedLink[]::new));
+        var expectedSize = Math.min(topN, expectedLinks.size());
+
+        assertThat(predictedLinks.size()).isEqualTo(expectedSize);
+
+        if (topN == 1) {
+            // for topN =1 its not clear which of the two will be returned
+            assertThat(predictedLinks)
+                .usingElementComparator(compareWithPrecision(1e-10))
+                .containsAnyElementsOf(expectedLinks);
+        } else {
+            assertThat(predictedLinks)
+                .usingElementComparator(compareWithPrecision(1e-10))
+                .contains(expectedLinks
+                    .subList(0, expectedSize)
+                    .toArray(PredictedLink[]::new));
+        }
     }
 
     @ParameterizedTest

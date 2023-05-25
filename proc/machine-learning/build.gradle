@@ -27,6 +27,7 @@ dependencies {
     implementation project(':collections')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':graph-schema-api')

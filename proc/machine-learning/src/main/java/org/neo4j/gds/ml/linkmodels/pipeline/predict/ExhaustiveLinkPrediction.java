@@ -22,21 +22,22 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
-import java.util.Optional;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.LongConsumer;
+import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
 public class ExhaustiveLinkPrediction extends LinkPrediction {
@@ -85,32 +86,36 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
         var predictionQueue = BoundedLongLongPriorityQueue.max(topN);
 
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            graph.nodeCount(),
-            partition -> new LinkPredictionScoreByIdsConsumer(
-                graph.concurrentCopy(),
-                sourceNodeFilter::test,
-                targetNodeFilter::test,
-                linkPredictionSimilarityComputer,
-                predictionQueue,
-                partition,
-                progressTracker
-            ),
-            Optional.of(MIN_NODE_BATCH_SIZE)
+        var linksConsidered = new LongAdder();
+
+        // the workload per load is very hard to estimate as its based on degree, nodeId, and the node filters
+        // so we use parallelForEachNode to distribute the work
+        Supplier<LongConsumer> linkPredictorSupplier = () -> new LinkPredictionScoreByIdsConsumer(
+            graph,
+            sourceNodeFilter::test,
+            targetNodeFilter::test,
+            linkPredictionSimilarityComputer,
+            predictionQueue,
+            progressTracker,
+            linksConsidered
         );
 
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .terminationFlag(terminationFlag)
-            .tasks(tasks)
-            .run();
+        try (
+            var localLinkPredictor = CloseableThreadLocal.withInitial(linkPredictorSupplier)
+        ) {
+            ParallelUtil.parallelForEachNode(
+                graph.nodeCount(),
+                concurrency,
+                terminationFlag,
+                nodeId -> localLinkPredictor.get().accept(nodeId)
+            );
+        }
 
-        long linksConsidered = tasks.stream().mapToLong(LinkPredictionScoreByIdsConsumer::linksConsidered).sum();
-        return new ExhaustiveLinkPredictionResult(predictionQueue, linksConsidered);
+
+        return new ExhaustiveLinkPredictionResult(predictionQueue, linksConsidered.longValue());
     }
 
-    final class LinkPredictionScoreByIdsConsumer implements Runnable {
+    final class LinkPredictionScoreByIdsConsumer implements LongConsumer {
         private final Graph graph;
 
         private final LongPredicate sourceNodeFilter;
@@ -120,8 +125,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final BoundedLongLongPriorityQueue predictionQueue;
         private final ProgressTracker progressTracker;
-        private final Partition partition;
-        private long linksConsidered;
+        private final LongAdder linksConsidered;
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
@@ -129,30 +133,27 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             LongPredicate targetNodeFilter,
             LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
             BoundedLongLongPriorityQueue predictionQueue,
-            Partition partition,
-            ProgressTracker progressTracker
+            ProgressTracker progressTracker,
+            LongAdder linksConsidered
         ) {
-            this.graph = graph;
+            this.graph = graph.concurrentCopy();
             this.sourceNodeFilter = sourceNodeFilter;
             this.targetNodeFilter = targetNodeFilter;
             this.linkPredictionSimilarityComputer = linkPredictionSimilarityComputer;
             this.predictionQueue = predictionQueue;
             this.progressTracker = progressTracker;
-            this.partition = partition;
-            this.linksConsidered = 0;
+            this.linksConsidered = linksConsidered;
         }
 
         @Override
-        public void run() {
-            partition.consume(sourceId -> {
-                if (sourceNodeFilter.apply(sourceId)) {
-                    predictLinksFromNode(sourceId, targetNodeFilter);
-                } else if (targetNodeFilter.apply(sourceId)) {
-                    predictLinksFromNode(sourceId, sourceNodeFilter);
-                }
-            });
+        public void accept(long sourceId) {
+            if (sourceNodeFilter.apply(sourceId)) {
+                predictLinksFromNode(sourceId, targetNodeFilter);
+            } else if (targetNodeFilter.apply(sourceId)) {
+                predictLinksFromNode(sourceId, sourceNodeFilter);
+            }
 
-            progressTracker.logSteps(partition.nodeCount());
+            progressTracker.logSteps(1);
         }
 
         private LongHashSet largerValidNeighbors(long sourceId, LongPredicate targetNodeFilter) {
@@ -174,7 +175,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                     if (largerNeighbors.contains(targetId)) return;
                     if (nodeFilter.apply(targetId)) {
                         var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
-                        linksConsidered++;
+                        linksConsidered.increment();
                         if (probability < threshold) return;
 
                         synchronized (predictionQueue) {
@@ -183,10 +184,6 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                     }
                 }
             );
-        }
-
-        long linksConsidered() {
-            return linksConsidered;
         }
     }
 }
