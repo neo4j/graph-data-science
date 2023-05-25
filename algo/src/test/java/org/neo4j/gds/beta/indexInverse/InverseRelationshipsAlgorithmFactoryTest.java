@@ -41,8 +41,8 @@ class InverseRelationshipsAlgorithmFactoryTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, MemoryRange.of(1_462_320)),
-            Arguments.of(uncompressedRunner, MemoryRange.of(2_248_808))
+            Arguments.of(compressedRunner, MemoryRange.of(1_462_328)),
+            Arguments.of(uncompressedRunner, MemoryRange.of(2_248_816))
         );
     }
 
@@ -57,9 +57,11 @@ class InverseRelationshipsAlgorithmFactoryTest {
         runner.run(() -> {
             var memoryEstimation = factory.memoryEstimation(config);
 
-            assertThat(memoryEstimation
+            var actual = memoryEstimation
                 .estimate(graphDimensions, config.concurrency())
-                .memoryUsage()).isEqualTo(expected);
+                .memoryUsage();
+            assertThat(actual.min).isEqualTo(expected.min);
+            assertThat(actual.max).isEqualTo(expected.max);
         });
     }
 
@@ -86,7 +88,10 @@ class InverseRelationshipsAlgorithmFactoryTest {
             "Inverse 'T2'"
         );
 
-        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(2_924_608));
+        var actual = memoryTree.memoryUsage();
+        var expected = MemoryRange.of(2_924_624);
+        assertThat(actual.min).isEqualTo(expected.min);
+        assertThat(actual.max).isEqualTo(expected.max);
     }
 
     @Test
@@ -110,9 +115,10 @@ class InverseRelationshipsAlgorithmFactoryTest {
             "this.instance",
             "Inverse 'T2'"
         );
-        var x = memoryTree.memoryUsage();
-
-        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(1_462_320));
+        var expected = MemoryRange.of(1_462_328);
+        var actual = memoryTree.memoryUsage();
+        assertThat(actual.min).isEqualTo(expected.min);
+        assertThat(actual.max).isEqualTo(expected.max);
     }
 
     @Test
@@ -138,6 +144,9 @@ class InverseRelationshipsAlgorithmFactoryTest {
             "Inverse '*'"
         );
 
-        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(2_924_608));
+        var actual = memoryTree.memoryUsage();
+        var expected = MemoryRange.of(2_924_624);
+        assertThat(actual.min).isEqualTo(expected.min);
+        assertThat(actual.max).isEqualTo(expected.max);
     }
 }

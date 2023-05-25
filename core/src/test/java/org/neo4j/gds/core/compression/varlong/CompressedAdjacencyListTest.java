@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_MASK;
 import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SHIFT;
@@ -47,7 +48,7 @@ class CompressedAdjacencyListTest {
 
         MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 32;
         long bestCaseAdjacencySize = 500;
         long worstCaseAdjacencySize = 500;
 
@@ -65,7 +66,9 @@ class CompressedAdjacencyListTest {
             classSize + maxAdjacencyPages + degrees + offsets
         );
 
-        assertEquals(expected, memRec.memoryUsage());
+        var actual = memRec.memoryUsage();
+        assertThat(actual.min).isEqualTo(expected.min);
+        assertThat(actual.max).isEqualTo(expected.max);
     }
 
     @Test
@@ -78,7 +81,7 @@ class CompressedAdjacencyListTest {
 
         MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 32;
         long bestCaseAdjacencySize = 100_100_000_000L;
         long worstCaseAdjacencySize = 299_900_000_000L;
 
@@ -96,7 +99,9 @@ class CompressedAdjacencyListTest {
             classSize + maxAdjacencyPages + degrees + offsets
         );
 
-        assertEquals(expected, memRec.memoryUsage());
+        var actual = memRec.memoryUsage();
+        assertThat(actual.min).isEqualTo(expected.min);
+        assertThat(actual.max).isEqualTo(expected.max);
     }
 
     @Test

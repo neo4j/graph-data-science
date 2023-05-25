@@ -37,8 +37,8 @@ class ToUndirectedAlgorithmFactoryTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, MemoryRange.of(1_724_480, 1_724_480)),
-            Arguments.of(uncompressedRunner, MemoryRange.of(3_035_304, 3_035_304))
+            Arguments.of(compressedRunner, MemoryRange.of(1_724_488, 1_724_488)),
+            Arguments.of(uncompressedRunner, MemoryRange.of(3_035_312, 3_035_312))
         );
     }
 
@@ -53,9 +53,11 @@ class ToUndirectedAlgorithmFactoryTest {
         runner.run(() -> {
             var memoryEstimation = factory.memoryEstimation(config);
 
-            assertThat(memoryEstimation
+            var actual = memoryEstimation
                 .estimate(graphDimensions, config.concurrency())
-                .memoryUsage()).isEqualTo(expected);
+                .memoryUsage();
+            assertThat(actual.min).isEqualTo(expected.min);
+            assertThat(actual.max).isEqualTo(expected.max);
         });
     }
 
