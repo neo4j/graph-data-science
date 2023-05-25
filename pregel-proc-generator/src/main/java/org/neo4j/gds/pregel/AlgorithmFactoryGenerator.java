@@ -35,19 +35,15 @@ import org.neo4j.gds.pregel.generator.TypeNames;
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
 
-public class AlgorithmFactoryGenerator extends PregelGenerator {
+public class AlgorithmFactoryGenerator {
 
     private final TypeNames typeNames;
 
-    AlgorithmFactoryGenerator(
-        Optional<AnnotationSpec> generatedAnnotationSpec,
-        TypeNames typeNames
-    ) {
-        super(generatedAnnotationSpec);
+    AlgorithmFactoryGenerator(TypeNames typeNames) {
         this.typeNames = typeNames;
     }
 
-    TypeSpec typeSpec() {
+    TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec) {
         var algorithmClassName = typeNames.algorithm();
 
         var typeSpecBuilder = TypeSpec
@@ -59,7 +55,7 @@ public class AlgorithmFactoryGenerator extends PregelGenerator {
                 typeNames.config()
             ));
 
-        addGeneratedAnnotation(typeSpecBuilder);
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
         typeSpecBuilder.addMethod(buildMethod());
         typeSpecBuilder.addMethod(taskNameMethod());

@@ -39,11 +39,12 @@ import javax.lang.model.element.Modifier;
 import java.util.Map;
 import java.util.Optional;
 
-class AlgorithmGenerator extends PregelGenerator {
+class AlgorithmGenerator {
+    private final Optional<AnnotationSpec> generatedAnnotationSpec;
     private final TypeNames typeNames;
 
     AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, TypeNames typeNames) {
-        super(generatedAnnotationSpec);
+        this.generatedAnnotationSpec = generatedAnnotationSpec;
         this.typeNames = typeNames;
     }
 
@@ -56,7 +57,7 @@ class AlgorithmGenerator extends PregelGenerator {
                 ClassName.get(PregelResult.class)
             ));
 
-        addGeneratedAnnotation(typeSpecBuilder);
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
         typeSpecBuilder.addField(pregelJobField());
         typeSpecBuilder.addMethod(constructor());

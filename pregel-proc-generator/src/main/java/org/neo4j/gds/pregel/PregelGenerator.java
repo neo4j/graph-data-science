@@ -64,8 +64,8 @@ class PregelGenerator {
             .toBuilder()
             .addOriginatingElement(pregelSpec.element())
             .build();
-        var algorithmFactorySpec = new AlgorithmFactoryGenerator(generatedAnnotationSpec, typeNames)
-            .typeSpec()
+        var algorithmFactorySpec = new AlgorithmFactoryGenerator(typeNames)
+            .typeSpec(generatedAnnotationSpec)
             .toBuilder()
             .addOriginatingElement(pregelSpec.element())
             .build();

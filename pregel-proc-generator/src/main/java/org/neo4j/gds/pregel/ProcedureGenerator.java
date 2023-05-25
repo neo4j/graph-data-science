@@ -50,8 +50,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class ProcedureGenerator extends PregelGenerator {
+abstract class ProcedureGenerator {
 
+    private final Optional<AnnotationSpec> generatedAnnotationSpec;
     final TypeNames typeNames;
     private final String procedureName;
     private final Optional<String> description;
@@ -64,7 +65,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
         Optional<String> description,
         boolean requiresInverseIndex
     ) {
-        super(generatedAnnotationSpec);
+        this.generatedAnnotationSpec = generatedAnnotationSpec;
         this.typeNames = typeNames;
         this.procedureName = procedureName;
         this.description = description;
@@ -106,7 +107,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
         var typeSpecBuilder = getTypeSpecBuilder(configTypeName, procedureClassName, algorithmClassName);
 
-        addGeneratedAnnotation(typeSpecBuilder);
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
         typeSpecBuilder.addMethod(procMethod());
         typeSpecBuilder.addMethod(procEstimateMethod());
