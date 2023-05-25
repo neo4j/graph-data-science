@@ -26,9 +26,11 @@ import org.neo4j.gds.model.ModelConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -38,8 +40,21 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     private final Map<String, OpenUserCatalog> userCatalogs;
 
+    private final Set<ModelCatalogListener> listeners;
+
     public OpenModelCatalog() {
         this.userCatalogs = new ConcurrentHashMap<>();
+        this.listeners = new HashSet<>();
+    }
+
+    @Override
+    public void registerListener(ModelCatalogListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void unregisterListener(ModelCatalogListener listener) {
+        listeners.remove(listener);
     }
 
     @Override
@@ -52,7 +67,7 @@ public final class OpenModelCatalog implements ModelCatalog {
             return userCatalog;
         });
 
-        LISTENERS.forEach(listener -> listener.onInsert(model));
+        listeners.forEach(listener -> listener.onInsert(model));
     }
 
     @Override

@@ -24,21 +24,13 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public interface ModelCatalog {
 
-    Set<ModelCatalogListener> LISTENERS = new HashSet<>();
+    void registerListener(ModelCatalogListener listener);
 
-    static void registerListener(ModelCatalogListener listener) {
-        LISTENERS.add(listener);
-    }
-
-    static void unregisterListener(ModelCatalogListener listener) {
-        LISTENERS.remove(listener);
-    }
+    void unregisterListener(ModelCatalogListener listener);
 
     void set(Model<?, ?, ?> model);
 
