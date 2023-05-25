@@ -241,21 +241,21 @@ public final class GraphFactory {
             }
         }
 
+        boolean skipDangling = skipDanglingRelationships.orElse(true);
+
         var importMetaData = ImmutableImportMetaData.builder()
             .projection(projection)
             .aggregations(aggregations)
             .propertyKeyIds(propertyKeyIds)
             .defaultValues(defaultValues)
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
+            .skipDanglingRelationships(skipDangling)
             .build();
-
-        boolean skipDangling = skipDanglingRelationships.orElse(true);
 
         var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
-            .skipDanglingRelationships(skipDangling)
             .build();
 
         var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
@@ -280,13 +280,13 @@ public final class GraphFactory {
             var inverseImportMetaData = ImmutableImportMetaData.builder()
                 .from(importMetaData)
                 .projection(inverseProjection)
+                .skipDanglingRelationships(skipDangling)
                 .build();
 
             var inverseImporter = new SingleTypeRelationshipImporterBuilder()
                 .importMetaData(inverseImportMetaData)
                 .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
                 .importSizing(importSizing)
-                .skipDanglingRelationships(skipDangling)
                 .build();
 
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
