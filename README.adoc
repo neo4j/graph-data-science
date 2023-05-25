@@ -8,15 +8,15 @@ https://community.neo4j.com/[image:https://img.shields.io/website?down_color=lig
 
 This repository hosts the open sources of the Neo4j Graph Data Science (GDS) library.
 The GDS library is a plugin for the Neo4j graph database.
-The library consists of a number of graph algorithms, exposed as procedures and executed in Neo4j.
+GDS comprises graph algorithms, graph transformations, and machine learning pipelines, operated via Cypher procedures from within a Neo4j DBMS.
 
 The Neo4j Graph Data Science library is the successor of the Neo4j Graph Algorithms library.
 
 
 == Downloading and installing releases
 
-The latest releases of Neo4j GDS can always be found at the https://neo4j.com/graph-data-science-software/[Neo4j Graph Data Science Download Page].
-To install the plugin in Neo4j place the downloaded JAR file it in the `plugins` directory of your Neo4j database and restart the database.
+The latest releases of Neo4j Graph Data Science can always be found at the https://neo4j.com/graph-data-science-software/[Neo4j Graph Data Science Download Page].
+To install the plugin into a Neo4j DBMS place the downloaded JAR file it in the `plugins` directory of your Neo4j database and restart the database.
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
 If you are using Neo4j Desktop you can simply add the Graph Data Science library on the plugins page of your project.
