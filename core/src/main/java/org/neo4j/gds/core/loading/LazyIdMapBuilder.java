@@ -29,6 +29,7 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
+import java.util.Locale;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -56,6 +57,8 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     public long addNode(long nodeId, NodeLabelToken nodeLabels) {
         long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
+        checkPositiveId(nodeId);
+
         // deduplication
         if (intermediateId < 0) {
             return -(intermediateId + 1);
@@ -66,12 +69,27 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         return intermediateId;
     }
 
+    /**
+     * GDS has the general assumption of non-negative original node ids.
+     */
+    private static void checkPositiveId(long nodeId) {
+        if (nodeId < 0) {
+            throw new IllegalArgumentException(String.format(
+                Locale.US,
+                "GDS expects node ids to be positive. But got a negative id of `%d`.",
+                nodeId
+            ));
+        }
+    }
+
     public long addNodeWithProperties(
         long nodeId,
         PropertyValues properties,
         NodeLabelToken nodeLabels
     ) {
         long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
+
+        checkPositiveId(nodeId);
 
         // deduplication
         if (intermediateId < 0) {
