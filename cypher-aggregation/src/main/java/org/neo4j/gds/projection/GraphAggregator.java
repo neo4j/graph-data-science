@@ -22,7 +22,6 @@ package org.neo4j.gds.projection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
@@ -35,7 +34,6 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.util.ValueUtils;
-import org.neo4j.procedure.Name;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
@@ -82,19 +80,6 @@ public class GraphAggregator implements CompatUserAggregator {
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
         this.extractNodeId = new ExtractNodeId();
-    }
-
-    // NOTE: keep in sync with `CypherAggregation.FUNCTION_NAME`
-    @CustomProcedure(value = "gds.graph.project", namespace = CustomProcedure.Namespace.AGGREGATION_FUNCTION)
-    public AggregationResult procedureSyntax(
-        @Name("graphName") TextValue graphName,
-        @Name("sourceNode") AnyValue sourceNode,
-        @Name("targetNode") AnyValue targetNode,
-        @Name("nodesConfig") AnyValue nodesConfig,
-        @Name("relationshipConfig") AnyValue relationshipConfig,
-        @Name("configuration") AnyValue config
-    ) {
-        throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
     }
 
     @Override

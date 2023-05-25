@@ -20,6 +20,7 @@
 package org.neo4j.gds.projection;
 
 import com.neo4j.gds.internal.CustomProceduresUtil;
+import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.CompatUserAggregator;
@@ -33,22 +34,23 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.procedure.Name;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.storable.TextValue;
 
 import java.util.List;
 
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
 public class CypherAggregation implements CompatUserAggregationFunction {
-    // NOTE: keep in sync with `GraphAggregator.procedureSyntax`
+
+    // NOTE: keep in sync with `procedureSyntax`
     static final QualifiedName FUNCTION_NAME = new QualifiedName(
         new String[]{"gds", "graph"},
         "project"
     );
 
-    public static CompatUserAggregationFunction newInstance() {
-        return new CypherAggregation();
-    }
-
+    // NOTE: keep in sync with `procedureSyntax`
     @Override
     public UserFunctionSignature signature() {
         return Neo4jProxy.userFunctionSignature(
@@ -77,6 +79,23 @@ public class CypherAggregation implements CompatUserAggregationFunction {
             // thread-safe, yes please
             true
         );
+    }
+
+    // NOTE: keep in sync with `FUNCTION_NAME` and `signature`
+    @CustomProcedure(value = "gds.graph.project", namespace = CustomProcedure.Namespace.AGGREGATION_FUNCTION)
+    public AggregationResult procedureSyntax(
+        @Name("graphName") TextValue graphName,
+        @Name("sourceNode") AnyValue sourceNode,
+        @Name("targetNode") AnyValue targetNode,
+        @Name("nodesConfig") AnyValue nodesConfig,
+        @Name("relationshipConfig") AnyValue relationshipConfig,
+        @Name("configuration") AnyValue config
+    ) {
+        throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
+    }
+
+    public static CompatUserAggregationFunction newInstance() {
+        return new CypherAggregation();
     }
 
     @Override
