@@ -108,7 +108,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                         .importMetaData(importMetaData)
                         .nodeCountSupplier(dimensions::nodeCount)
                         .importSizing(sizing)
-                        .validateRelationships(graphProjectConfig.validateRelationships())
+                        .skipDanglingRelationships(!graphProjectConfig.validateRelationships())
                         .build();
 
                     var contexts = new ArrayList<SingleTypeRelationshipImportContext>();
@@ -160,7 +160,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             .importMetaData(inverseImportMetaData)
             .nodeCountSupplier(dimensions::nodeCount)
             .importSizing(sizing)
-            .validateRelationships(graphProjectConfig.validateRelationships())
+            .skipDanglingRelationships(!graphProjectConfig.validateRelationships())
             .build();
 
         return ImmutableSingleTypeRelationshipImportContext.builder()

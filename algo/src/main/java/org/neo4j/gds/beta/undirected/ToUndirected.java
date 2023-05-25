@@ -114,9 +114,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             .concurrency(config.concurrency())
             .nodes(graphStore.nodes())
             .executorService(executorService)
-            .orientation(Orientation.UNDIRECTED)
-            .validateRelationships(false);
-
+            .orientation(Orientation.UNDIRECTED);
 
         config
             .aggregation()

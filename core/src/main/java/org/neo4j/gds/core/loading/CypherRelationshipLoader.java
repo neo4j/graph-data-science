@@ -162,7 +162,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
                 .concurrency(cypherConfig.readConcurrency())
                 .propertyConfigs(propertyConfigs)
                 .orientation(Orientation.NATURAL)
-                .validateRelationships(cypherConfig.validateRelationships())
+                .skipDanglingRelationships(!cypherConfig.validateRelationships())
                 .build();
         }
     }

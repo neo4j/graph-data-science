@@ -38,20 +38,20 @@ public class RelationshipsBuilder {
     private final PartialIdMap idMap;
     private final SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
     private final AutoCloseableThreadLocal<ThreadLocalRelationshipsBuilder> threadLocalRelationshipsBuilders;
-    private final boolean throwOnUnmappedNodeIds;
+    private final boolean skipDanglingRelationships;
 
-    RelationshipsBuilder(SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder, boolean throwOnUnmappedNodeIds) {
+    RelationshipsBuilder(SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder, boolean skipDanglingRelationships) {
         this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
         this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
         this.threadLocalRelationshipsBuilders = AutoCloseableThreadLocal.withInitial(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
-        this.throwOnUnmappedNodeIds = throwOnUnmappedNodeIds;
+        this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
     public void add(long originalSourceId, long originalTargetId) {
         if (!addFromInternal(
             idMap.toMappedNodeId(originalSourceId),
             idMap.toMappedNodeId(originalTargetId)
-        ) && throwOnUnmappedNodeIds) {
+        ) && !skipDanglingRelationships) {
             throwUnmappedNodeIds(originalSourceId, originalTargetId, idMap);
         }
     }
@@ -61,17 +61,17 @@ public class RelationshipsBuilder {
             idMap.toMappedNodeId(source),
             idMap.toMappedNodeId(target),
             relationshipPropertyValue
-        ) && throwOnUnmappedNodeIds) {
+        ) && !skipDanglingRelationships) {
             throwUnmappedNodeIds(source, target, idMap);
         }
     }
 
     public void add(long source, long target, double[] relationshipPropertyValues) {
-        if(!addFromInternal(
+        if (!addFromInternal(
             idMap.toMappedNodeId(source),
             idMap.toMappedNodeId(target),
             relationshipPropertyValues
-        )) {
+        ) && !skipDanglingRelationships) {
             throwUnmappedNodeIds(source, target, idMap);
         }
     }

@@ -192,7 +192,7 @@ public final class GraphFactory {
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
-        Optional<Boolean> validateRelationships,
+        Optional<Boolean> skipDanglingRelationships,
         Optional<Integer> concurrency,
         Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService
@@ -249,13 +249,13 @@ public final class GraphFactory {
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
             .build();
 
-        var validateImportedRelationships = validateRelationships.orElse(false);
+        boolean skipDangling = skipDanglingRelationships.orElse(true);
 
         var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
-            .validateRelationships(validateImportedRelationships)
+            .skipDanglingRelationships(skipDangling)
             .build();
 
         var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
@@ -286,13 +286,13 @@ public final class GraphFactory {
                 .importMetaData(inverseImportMetaData)
                 .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
                 .importSizing(importSizing)
-                .validateRelationships(validateImportedRelationships)
+                .skipDanglingRelationships(skipDangling)
                 .build();
 
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), validateImportedRelationships);
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling);
     }
 
     /**

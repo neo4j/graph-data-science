@@ -47,13 +47,13 @@ public final class SingleTypeRelationshipImporter {
 
     private final AdjacencyBuffer adjacencyBuffer;
     // TODO: move to importmetadata
-    private final boolean validateRelationships;
+    private final boolean skipDanglingRelationships;
 
     @org.immutables.builder.Builder.Factory
     public static SingleTypeRelationshipImporter of(
         ImportMetaData importMetaData,
         LongSupplier nodeCountSupplier,
-        boolean validateRelationships,
+        boolean skipDanglingRelationships,
         ImportSizing importSizing
     ) {
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
@@ -73,7 +73,7 @@ public final class SingleTypeRelationshipImporter {
             adjacencyBuffer,
             importMetaData,
             importMetaData.typeTokenId(),
-            validateRelationships
+            skipDanglingRelationships
         );
     }
 
@@ -82,13 +82,13 @@ public final class SingleTypeRelationshipImporter {
         AdjacencyBuffer adjacencyBuffer,
         ImportMetaData importMetaData,
         int typeToken,
-        boolean validateRelationships
+        boolean skipDanglingRelationships
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.importMetaData = importMetaData;
         this.typeId = typeToken;
         this.adjacencyBuffer = adjacencyBuffer;
-        this.validateRelationships = validateRelationships;
+        this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
@@ -140,7 +140,7 @@ public final class SingleTypeRelationshipImporter {
             idMap,
             typeId,
             bulkSize,
-            validateRelationships
+            skipDanglingRelationships
         );
     }
 
