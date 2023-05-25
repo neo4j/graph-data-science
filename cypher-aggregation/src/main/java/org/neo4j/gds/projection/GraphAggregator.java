@@ -49,9 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-// public is required for the Cypher runtime
-@SuppressWarnings("WeakerAccess")
-public class GraphAggregator implements CompatUserAggregator {
+abstract class GraphAggregator implements CompatUserAggregator {
 
     private final DatabaseId databaseId;
     private final String username;
@@ -80,28 +78,6 @@ public class GraphAggregator implements CompatUserAggregator {
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
         this.extractNodeId = new ExtractNodeId();
-    }
-
-    @Override
-    public void update(AnyValue[] input) throws ProcedureException {
-        try {
-            this.projectNextRelationship(
-                (TextValue) input[0],
-                input[1],
-                input[2],
-                input[3],
-                input[4],
-                input[5]
-            );
-        } catch (Exception e) {
-            throw new ProcedureException(
-                Status.Procedure.ProcedureCallFailed,
-                e,
-                "Failed to invoke function `%s`: Caused by: %s",
-                CypherAggregation.FUNCTION_NAME,
-                e
-            );
-        }
     }
 
     void projectNextRelationship(
