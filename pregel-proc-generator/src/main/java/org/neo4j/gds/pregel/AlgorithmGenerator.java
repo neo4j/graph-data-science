@@ -40,15 +40,13 @@ import java.util.Map;
 import java.util.Optional;
 
 class AlgorithmGenerator {
-    private final Optional<AnnotationSpec> generatedAnnotationSpec;
     private final TypeNames typeNames;
 
-    AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, TypeNames typeNames) {
-        this.generatedAnnotationSpec = generatedAnnotationSpec;
+    AlgorithmGenerator(TypeNames typeNames) {
         this.typeNames = typeNames;
     }
 
-    TypeSpec typeSpec() {
+    TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec) {
         var typeSpecBuilder = TypeSpec
             .classBuilder(typeNames.algorithm())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)

@@ -27,6 +27,8 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SpecificationGeneratorTest {
@@ -37,7 +39,7 @@ class SpecificationGeneratorTest {
     void shouldGenerateType() {
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
         var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
-        var specificationType = specificationGenerator.typeSpec(GDSMode.STATS).build();
+        var specificationType = specificationGenerator.typeSpec(GDSMode.STATS, Optional.empty());
 
         assertThat(specificationType.toString()).isEqualTo("" +
             "public final class FooStatsSpecification implements org.neo4j.gds.executor.AlgorithmSpec<" +
@@ -109,7 +111,7 @@ class SpecificationGeneratorTest {
     void shouldGenerateDifferentlyPerMode(GDSMode mode) {
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
         var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
-        var specificationType = specificationGenerator.typeSpec(mode).build();
+        var specificationType = specificationGenerator.typeSpec(mode, Optional.empty());
         assertThat(specificationType.toString())
             .contains("org.neo4j.gds.pregel.proc.Pregel" + mode.camelCase() + "Result");
         var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(mode);

@@ -52,20 +52,17 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class ProcedureGenerator {
 
-    private final Optional<AnnotationSpec> generatedAnnotationSpec;
     final TypeNames typeNames;
     private final String procedureName;
     private final Optional<String> description;
     private final boolean requiresInverseIndex;
 
     ProcedureGenerator(
-        Optional<AnnotationSpec> generatedAnnotationSpec,
         TypeNames typeNames,
         String procedureName,
         Optional<String> description,
         boolean requiresInverseIndex
     ) {
-        this.generatedAnnotationSpec = generatedAnnotationSpec;
         this.typeNames = typeNames;
         this.procedureName = procedureName;
         this.description = description;
@@ -82,10 +79,10 @@ abstract class ProcedureGenerator {
         var procedureName = pregelSpec.procedureName();
         var requiresInverseIndex = pregelSpec.requiresInverseIndex();
         switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
-            case WRITE: return new WriteProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
-            case MUTATE: return new MutateProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
-            case STATS: return new StatsProcedureGenerator(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex).typeSpec();
+            case STREAM: return new StreamProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
+            case WRITE: return new WriteProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
+            case MUTATE: return new MutateProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
+            case STATS: return new StatsProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
             default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
         }
     }
@@ -100,7 +97,7 @@ abstract class ProcedureGenerator {
 
     abstract MethodSpec procResultMethod();
 
-    TypeSpec typeSpec() {
+    TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec) {
         var configTypeName = typeNames.config();
         var procedureClassName = typeNames.procedure(procGdsMode());
         var algorithmClassName = typeNames.algorithm();

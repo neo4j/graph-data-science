@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pregel;
 
-import com.squareup.javapoet.AnnotationSpec;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelStatsProc;
@@ -30,13 +29,12 @@ import java.util.Optional;
 class StatsProcedureGenerator extends WriteProcedureGenerator {
 
     StatsProcedureGenerator(
-        Optional<AnnotationSpec> generatedAnnotationSpec,
         TypeNames typeNames,
         String procedureName,
         Optional<String> description,
         boolean requiresInverseIndex
     ) {
-        super(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex);
+        super(typeNames, procedureName, description, requiresInverseIndex);
     }
 
     @Override

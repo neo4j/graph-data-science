@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pregel;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
@@ -36,13 +35,12 @@ class StreamProcedureGenerator extends ProcedureGenerator {
 
 
     StreamProcedureGenerator(
-        Optional<AnnotationSpec> generatedAnnotationSpec,
         TypeNames typeNames,
         String procedureName,
         Optional<String> description,
         boolean requiresInverseIndex
     ) {
-        super(generatedAnnotationSpec, typeNames, procedureName, description, requiresInverseIndex);
+        super(typeNames, procedureName, description, requiresInverseIndex);
     }
 
     @Override

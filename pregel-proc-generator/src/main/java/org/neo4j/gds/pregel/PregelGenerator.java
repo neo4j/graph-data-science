@@ -42,14 +42,14 @@ class PregelGenerator {
             .toBuilder()
             .addOriginatingElement(pregelSpec.element())
             .build();
-        var specificationBuilder = specificationGenerator.typeSpec(mode)
+        var specification = specificationGenerator.typeSpec(mode, generatedAnnotationSpec)
+            .toBuilder()
             .addMethod(specificationGenerator.nameMethod())
             .addMethod(specificationGenerator.algorithmFactoryMethod())
             .addMethod(specificationGenerator.newConfigFunctionMethod())
             .addMethod(specificationGenerator.computationResultConsumerMethod(mode))
-            .addOriginatingElement(pregelSpec.element());
-        addGeneratedAnnotation(specificationBuilder);
-        var specification = specificationBuilder.build();
+            .addOriginatingElement(pregelSpec.element())
+            .build();
         return Stream.of(procedure, specification);
     }
 
@@ -59,8 +59,8 @@ class PregelGenerator {
             pregelSpec.computationName(),
             pregelSpec.configTypeName()
         );
-        var algorithmSpec = new AlgorithmGenerator(generatedAnnotationSpec, typeNames)
-            .typeSpec()
+        var algorithmSpec = new AlgorithmGenerator(typeNames)
+            .typeSpec(generatedAnnotationSpec)
             .toBuilder()
             .addOriginatingElement(pregelSpec.element())
             .build();
@@ -75,10 +75,5 @@ class PregelGenerator {
             Arrays.stream(pregelSpec.procedureModes())
                 .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator, typeNames))
         );
-    }
-
-    // produces @Generated meta info
-    void addGeneratedAnnotation(TypeSpec.Builder typeSpecBuilder) {
-        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
     }
 }

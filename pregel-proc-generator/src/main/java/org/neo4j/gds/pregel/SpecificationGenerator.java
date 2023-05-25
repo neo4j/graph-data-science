@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pregel;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -32,6 +33,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Modifier;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class SpecificationGenerator {
@@ -42,7 +44,7 @@ public class SpecificationGenerator {
         this.typeNames = typeNames;
     }
 
-    TypeSpec.Builder typeSpec(GDSMode mode) {
+    TypeSpec typeSpec(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
         var typeSpecBuilder = TypeSpec
             .classBuilder(typeNames.specification(mode))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -57,7 +59,10 @@ public class SpecificationGenerator {
                 ),
                 typeNames.algorithmFactory()
             ));
-        return typeSpecBuilder;
+
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
+
+        return typeSpecBuilder.build();
     }
 
     MethodSpec nameMethod() {
