@@ -101,14 +101,14 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                     var importMetaData = SingleTypeRelationshipImporter.ImportMetaData.of(
                         projection,
                         dimensions.relationshipTypeTokenMapping().get(relationshipType),
-                        dimensions.relationshipPropertyTokens()
+                        dimensions.relationshipPropertyTokens(),
+                        !graphProjectConfig.validateRelationships()
                     );
 
                     var importer = new SingleTypeRelationshipImporterBuilder()
                         .importMetaData(importMetaData)
                         .nodeCountSupplier(dimensions::nodeCount)
                         .importSizing(sizing)
-                        .validateRelationships(graphProjectConfig.validateRelationships())
                         .build();
 
                     var contexts = new ArrayList<SingleTypeRelationshipImportContext>();
@@ -153,14 +153,14 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         var inverseImportMetaData = SingleTypeRelationshipImporter.ImportMetaData.of(
             inverseProjection,
             dimensions.relationshipTypeTokenMapping().get(relationshipType),
-            dimensions.relationshipPropertyTokens()
+            dimensions.relationshipPropertyTokens(),
+            !graphProjectConfig.validateRelationships()
         );
 
         var inverseImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(inverseImportMetaData)
             .nodeCountSupplier(dimensions::nodeCount)
             .importSizing(sizing)
-            .validateRelationships(graphProjectConfig.validateRelationships())
             .build();
 
         return ImmutableSingleTypeRelationshipImportContext.builder()

@@ -44,12 +44,20 @@ public class HighLimitIdMap extends IdMapAdapter {
 
     @Override
     public long toMappedNodeId(long originalNodeId) {
-        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(originalNodeId));
+        var mappedNodeId = this.highToLowIdSpace.toMappedNodeId(originalNodeId);
+        if (mappedNodeId == NOT_FOUND) {
+            return NOT_FOUND;
+        }
+        return super.toMappedNodeId(mappedNodeId);
     }
 
     @Override
     public boolean containsOriginalId(long originalNodeId) {
-        return super.containsOriginalId(highToLowIdSpace.toMappedNodeId(originalNodeId));
+        var mappedNodeId = this.highToLowIdSpace.toMappedNodeId(originalNodeId);
+        if (mappedNodeId == NOT_FOUND) {
+            return false;
+        }
+        return super.containsOriginalId(mappedNodeId);
     }
 
     @Override

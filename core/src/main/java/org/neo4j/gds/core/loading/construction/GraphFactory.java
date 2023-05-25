@@ -192,7 +192,7 @@ public final class GraphFactory {
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
-        Optional<Boolean> validateRelationships,
+        Optional<Boolean> skipDanglingRelationships,
         Optional<Integer> concurrency,
         Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService
@@ -241,19 +241,21 @@ public final class GraphFactory {
             }
         }
 
+        boolean skipDangling = skipDanglingRelationships.orElse(true);
+
         var importMetaData = ImmutableImportMetaData.builder()
             .projection(projection)
             .aggregations(aggregations)
             .propertyKeyIds(propertyKeyIds)
             .defaultValues(defaultValues)
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
+            .skipDanglingRelationships(skipDangling)
             .build();
 
         var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
-            .validateRelationships(validateRelationships.orElse(false))
             .build();
 
         var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
@@ -278,19 +280,19 @@ public final class GraphFactory {
             var inverseImportMetaData = ImmutableImportMetaData.builder()
                 .from(importMetaData)
                 .projection(inverseProjection)
+                .skipDanglingRelationships(skipDangling)
                 .build();
 
             var inverseImporter = new SingleTypeRelationshipImporterBuilder()
                 .importMetaData(inverseImportMetaData)
                 .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
                 .importSizing(importSizing)
-                .validateRelationships(validateRelationships.orElse(false))
                 .build();
 
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build());
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling);
     }
 
     /**

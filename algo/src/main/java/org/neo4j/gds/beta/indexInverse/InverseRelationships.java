@@ -116,8 +116,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
             .nodes(graphStore.nodes())
             .executorService(executorService)
             .orientation(Orientation.NATURAL)
-            .indexInverse(false)
-            .validateRelationships(false);
+            .indexInverse(false);
 
         propertySchemas.forEach(propertySchema ->
             relationshipsBuilderBuilder.addPropertyConfig(

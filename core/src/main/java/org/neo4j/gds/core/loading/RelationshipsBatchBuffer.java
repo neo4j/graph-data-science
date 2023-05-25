@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.PropertyReference;
 
+import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsLoaded;
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
@@ -36,7 +37,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     private final PartialIdMap idMap;
     private final int type;
-    private final boolean throwOnUnMappedNodeIds;
+    private final boolean skipDanglingRelationships;
 
     private final long[] relationshipReferences;
     private final PropertyReference[] propertyReferences;
@@ -58,12 +59,12 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
         final PartialIdMap idMap,
         final int type,
         int capacity,
-        boolean throwOnUnMappedNodeIds
+        boolean skipDanglingRelationships
     ) {
         super(Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity));
         this.idMap = idMap;
         this.type = type;
-        this.throwOnUnMappedNodeIds = throwOnUnMappedNodeIds;
+        this.skipDanglingRelationships = skipDanglingRelationships;
         this.relationshipReferences = new long[capacity];
         this.propertyReferences = new PropertyReference[capacity];
         bufferCopy = RadixSort.newCopy(buffer);
@@ -78,11 +79,12 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
             long source = idMap.toMappedNodeId(record.sourceNodeReference());
             long target = idMap.toMappedNodeId(record.targetNodeReference());
 
-            if (throwOnUnMappedNodeIds) {
+            if (source == NOT_FOUND || target == NOT_FOUND) {
+                if (skipDanglingRelationships) {
+                    return true;
+                }
                 validateSourceNodeIsLoaded(source, record.sourceNodeReference());
                 validateTargetNodeIsLoaded(target, record.targetNodeReference());
-            } else if (source == -1 || target == -1) {
-                return true;
             }
 
             add(source, target, record.relationshipId(), record.propertiesReference());

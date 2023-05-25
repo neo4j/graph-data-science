@@ -23,41 +23,57 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.LongConsumer;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 
 public class RelationshipsBuilder {
 
     private final PartialIdMap idMap;
     private final SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
     private final AutoCloseableThreadLocal<ThreadLocalRelationshipsBuilder> threadLocalRelationshipsBuilders;
+    private final boolean skipDanglingRelationships;
 
-    RelationshipsBuilder(SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder) {
+    RelationshipsBuilder(SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder, boolean skipDanglingRelationships) {
         this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
         this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
         this.threadLocalRelationshipsBuilders = AutoCloseableThreadLocal.withInitial(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+        this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
-    public void add(long source, long target) {
-        addFromInternal(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target));
+    public void add(long originalSourceId, long originalTargetId) {
+        if (!addFromInternal(
+            idMap.toMappedNodeId(originalSourceId),
+            idMap.toMappedNodeId(originalTargetId)
+        ) && !skipDanglingRelationships) {
+            throwUnmappedNodeIds(originalSourceId, originalTargetId, idMap);
+        }
     }
 
     public void add(long source, long target, double relationshipPropertyValue) {
-        addFromInternal(
+        if (!addFromInternal(
             idMap.toMappedNodeId(source),
             idMap.toMappedNodeId(target),
             relationshipPropertyValue
-        );
+        ) && !skipDanglingRelationships) {
+            throwUnmappedNodeIds(source, target, idMap);
+        }
     }
 
     public void add(long source, long target, double[] relationshipPropertyValues) {
-        addFromInternal(
+        if (!addFromInternal(
             idMap.toMappedNodeId(source),
             idMap.toMappedNodeId(target),
             relationshipPropertyValues
-        );
+        ) && !skipDanglingRelationships) {
+            throwUnmappedNodeIds(source, target, idMap);
+        }
     }
 
     public <T extends Relationship> void add(Stream<T> relationshipStream) {
@@ -76,24 +92,60 @@ public class RelationshipsBuilder {
         addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
     }
 
-    public void addFromInternal(long source, long target) {
-        this.threadLocalRelationshipsBuilders.get().addRelationship(source, target);
+    public boolean addFromInternal(long mappedSourceId, long mappedTargetId) {
+        if (validateRelationships(mappedSourceId, mappedTargetId)) {
+            this.threadLocalRelationshipsBuilders.get().addRelationship(mappedSourceId, mappedTargetId);
+            return true;
+        }
+        return false;
     }
 
-    public void addFromInternal(long source, long target, double relationshipPropertyValue) {
-        this.threadLocalRelationshipsBuilders.get().addRelationship(
-            source,
-            target,
-            relationshipPropertyValue
-        );
+    public boolean addFromInternal(long mappedSourceId, long mappedTargetId, double relationshipPropertyValue) {
+        if (validateRelationships(mappedSourceId, mappedTargetId)) {
+            this.threadLocalRelationshipsBuilders.get().addRelationship(
+                mappedSourceId,
+                mappedTargetId,
+                relationshipPropertyValue
+            );
+            return true;
+        }
+        return false;
     }
 
-    public void addFromInternal(long source, long target, double[] relationshipPropertyValues) {
-        this.threadLocalRelationshipsBuilders.get().addRelationship(
-            source,
-            target,
-            relationshipPropertyValues
+    public boolean addFromInternal(long source, long target, double[] relationshipPropertyValues) {
+        if (validateRelationships(source, target)) {
+            this.threadLocalRelationshipsBuilders.get().addRelationship(
+                source,
+                target,
+                relationshipPropertyValues
+            );
+            return true;
+        }
+        return false;
+    }
+
+    private boolean validateRelationships(long source, long target) {
+        return source != NOT_FOUND && target != NOT_FOUND;
+    }
+
+    private static void throwUnmappedNodeIds(long source, long target, PartialIdMap idMap) {
+        long mappedSource = idMap.toMappedNodeId(source);
+        long mappedTarget = idMap.toMappedNodeId(target);
+
+        var strings = new ArrayList<String>();
+        if (mappedSource == NOT_FOUND) {
+            strings.add(Long.toString(source));
+        }
+        if (mappedTarget == NOT_FOUND) {
+            strings.add(Long.toString(target));
+        }
+
+        var message = String.format(
+            Locale.US, "The following node ids are not present in the node id space: %s",
+            StringJoining.join(strings)
         );
+
+        throw new IllegalArgumentException(message);
     }
 
     public SingleTypeRelationships build() {

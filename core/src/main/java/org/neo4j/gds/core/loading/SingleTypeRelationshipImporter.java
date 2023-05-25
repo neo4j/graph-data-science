@@ -46,14 +46,11 @@ public final class SingleTypeRelationshipImporter {
     private final int typeId;
 
     private final AdjacencyBuffer adjacencyBuffer;
-    // TODO: move to importmetadata
-    private final boolean validateRelationships;
 
     @org.immutables.builder.Builder.Factory
     public static SingleTypeRelationshipImporter of(
         ImportMetaData importMetaData,
         LongSupplier nodeCountSupplier,
-        boolean validateRelationships,
         ImportSizing importSizing
     ) {
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
@@ -72,8 +69,7 @@ public final class SingleTypeRelationshipImporter {
             adjacencyCompressorFactory,
             adjacencyBuffer,
             importMetaData,
-            importMetaData.typeTokenId(),
-            validateRelationships
+            importMetaData.typeTokenId()
         );
     }
 
@@ -81,14 +77,12 @@ public final class SingleTypeRelationshipImporter {
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         AdjacencyBuffer adjacencyBuffer,
         ImportMetaData importMetaData,
-        int typeToken,
-        boolean validateRelationships
+        int typeToken
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.importMetaData = importMetaData;
         this.typeId = typeToken;
         this.adjacencyBuffer = adjacencyBuffer;
-        this.validateRelationships = validateRelationships;
     }
 
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
@@ -140,7 +134,7 @@ public final class SingleTypeRelationshipImporter {
             idMap,
             typeId,
             bulkSize,
-            validateRelationships
+            importMetaData.skipDanglingRelationships()
         );
     }
 
@@ -160,10 +154,13 @@ public final class SingleTypeRelationshipImporter {
 
         int typeTokenId();
 
+        boolean skipDanglingRelationships();
+
         static ImportMetaData of(
             RelationshipProjection projection,
             int typeTokenId,
-            Map<String, Integer> relationshipPropertyTokens
+            Map<String, Integer> relationshipPropertyTokens,
+            boolean skipDanglingRelationships
         ) {
             return ImmutableImportMetaData
                 .builder()
@@ -172,6 +169,7 @@ public final class SingleTypeRelationshipImporter {
                 .propertyKeyIds(propertyKeyIds(projection, relationshipPropertyTokens))
                 .defaultValues(defaultValues(projection))
                 .typeTokenId(typeTokenId)
+                .skipDanglingRelationships(skipDanglingRelationships)
                 .build();
         }
 

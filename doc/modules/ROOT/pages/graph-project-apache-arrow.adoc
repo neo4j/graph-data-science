@@ -66,6 +66,7 @@ The action body is a JSON document containing metadata for the import process:
     concurrency: 4, <3>
     undirected_relationship_types: [] <4>
     inverse_indexed_relationship_types: [] <5>
+    skip_dangling_relationships: false <6>
 }
 ----
 <1> Used to identify the import process. It is also the name of the resulting in-memory graph in the graph catalog.
@@ -73,6 +74,7 @@ The action body is a JSON document containing metadata for the import process:
 <3> (optional) The level of concurrency that will be set on the in-memory graph after all data has been received.
 <4> (optional) A list of relationship types that must be imported as undirected. A wildcard (`*`) can be used to include all the types.
 <5> (optional) A list of relationship types that must be indexed in inverse direction. A wildcard (`*`) can be used to include all the types.
+<6> (optional) If set to `true`, dangling relationships will be skipped during the import process. Otherwise, the import process will fail if dangling relationships are detected.
 
 [NOTE]
 Relationships declared as undirected should only be provided once, i.e. in a single direction.
