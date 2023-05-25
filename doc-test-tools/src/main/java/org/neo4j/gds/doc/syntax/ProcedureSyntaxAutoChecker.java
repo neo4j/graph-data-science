@@ -88,7 +88,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var procedureName = ProcedureNameExtractor.findProcedureName(codeSnippet);
 
             var documentedArguments = ProcedureArgumentsExtractor.findArguments(codeSnippet);
-            var expectedArguments = procedureLookup.findArgumentNames(procedureName);
+            var expectedArguments = procedureLookup.findArgumentNames(procedureName, mode.syntaxMode().namespace);
 
             if (mode.syntaxMode().hasParameters) {
                 syntaxAssertions.assertThat(documentedArguments)
@@ -99,7 +99,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             }
 
             // YIELD fields
-            var resultClass = procedureLookup.findResultType(procedureName);
+            var resultClass = procedureLookup.findResultType(procedureName, mode.syntaxMode().namespace);
             var expectedResultFieldsFromCode = extractExpectedResultFields(resultClass);
 
             var yieldResultColumns = extractDocResultFields(codeSnippet);

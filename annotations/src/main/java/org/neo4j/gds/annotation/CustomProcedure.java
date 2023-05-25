@@ -47,10 +47,20 @@ public @interface CustomProcedure {
     String value();
 
     /**
+     * The namespace of the procedure.
+     */
+    Namespace namespace() default Namespace.PROCEDURE;
+
+    /**
      * Annotated methods are included in the result definition.
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface ResultField {
+    }
+
+    enum Namespace {
+        PROCEDURE,
+        AGGREGATION_FUNCTION,
     }
 }
