@@ -21,88 +21,35 @@ For further instructions, see our https://neo4j.com/docs/graph-data-science/curr
 
 If you are using Neo4j Desktop you can simply add the Graph Data Science library on the plugins page of your project.
 
-.Compatibility matrix
+When installing GDS manually, please refer to the below compatibility matrix:
+
+.Compatibility matrix (italicized version is in development)
 |===
 |GDS version | Neo4j version | Java Version
-
-|GDS 1.0.x
-|Neo4j 3.5.9 - 3.5.20
-.2+<.^|Java 1.8
-
-|GDS 1.1.x
-|Neo4j 3.5.9 - 3.5.33
-
-|GDS 1.2.x
-|Neo4j 4.0.0 – 4.0.6
-.24+.^|Java 11
-
-.2+<.^|GDS 1.3.x
-|Neo4j 4.0.0 - 4.0.9
-|Neo4j 4.1.0 - 4.1.5
-
-.3+<.^|GDS 1.4.x
-|Neo4j 4.0.0 - 4.0.11
-|Neo4j 4.1.0 - 4.1.7
-|Neo4j 4.2.0 - 4.2.3
-
-.3+<.^|GDS 1.5.x
-|Neo4j 4.0.0 - 4.0.11
-|Neo4j 4.1.0 - 4.1.8
-|Neo4j 4.2.0 - 4.2.5
-
-.4+<.^|GDS 1.6.x
-|Neo4j 4.0.0 - 4.0.12
-|Neo4j 4.1.0 - 4.1.10
-|Neo4j 4.2.0 - 4.2.15
-|Neo4j 4.3.0 - 4.3.4
-
-.3+<.^|GDS 1.7.x
-|Neo4j 4.1.0 - 4.1.11
-|Neo4j 4.2.0 - 4.2.15
-|Neo4j 4.3.0 - 4.3.12
-
-.4+<.^|GDS 1.8.x
-|Neo4j 4.1.0 - 4.1.11
-|Neo4j 4.2.0 - 4.2.18
-|Neo4j 4.3.0 - 4.3.12
-|Neo4j 4.4.0 - 4.4.5
-
-.2+<.^|GDS 2.0.x
-|Neo4j 4.3.0 - 4.3.14
-|Neo4j 4.4.0 - 4.4.7
-
-.2+<.^|GDS 2.1.x
-|Neo4j 4.3.0 - 4.3.18
-|Neo4j 4.4.0 - 4.4.11
-
-.6+<.^|GDS 2.2.x
-|Neo4j 4.3.15 - 4.3.23
-.24+.^|Java 11 & Java 17
-|Neo4j 4.4.9 - 4.4.16
-|Neo4j 5.1.0
-|Neo4j 5.2.0
+.9+<.^|_GDS 2.4.x_
+|Neo4j 5.8.0
+.8+.^|Java 17
+|Neo4j 5.7.0
+|Neo4j 5.6.0
 |Neo4j 5.3.0
+|Neo4j 5.5.0
 |Neo4j 5.4.0
+|Neo4j 5.2.0
+|Neo4j 5.1.0
+|Neo4j 4.4.9 - 4.4.21
+.1+.^|Java 11
 .9+<.^|GDS 2.3.x
-|Neo4j 4.4.9 - 4.4.21
-|Neo4j 5.1.0
-|Neo4j 5.2.0
-|Neo4j 5.3.0
-|Neo4j 5.4.0
-|Neo4j 5.5.0
-|Neo4j 5.6.0
-|Neo4j 5.7.0
 |Neo4j 5.8.0
-.9+<.^|GDS 2.4.x
-|Neo4j 4.4.9 - 4.4.21
-|Neo4j 5.1.0
-|Neo4j 5.2.0
-|Neo4j 5.3.0
-|Neo4j 5.4.0
-|Neo4j 5.5.0
-|Neo4j 5.6.0
+.8+.^|Java 17
 |Neo4j 5.7.0
-|Neo4j 5.8.0
+|Neo4j 5.6.0
+|Neo4j 5.5.0
+|Neo4j 5.4.0
+|Neo4j 5.3.0
+|Neo4j 5.2.0
+|Neo4j 5.1.0
+|Neo4j 4.4.9 - 4.4.21
+.1+.^|Java 11
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
