@@ -35,18 +35,15 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.util.Map;
 import java.util.Optional;
 
 class AlgorithmGenerator extends PregelGenerator {
-    private final Element originatingElement;
     private final TypeNames typeNames;
 
-    AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, Element originatingElement, TypeNames typeNames) {
+    AlgorithmGenerator(Optional<AnnotationSpec> generatedAnnotationSpec, TypeNames typeNames) {
         super(generatedAnnotationSpec);
-        this.originatingElement = originatingElement;
         this.typeNames = typeNames;
     }
 
@@ -57,8 +54,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
                 ClassName.get(PregelResult.class)
-            ))
-            .addOriginatingElement(originatingElement);
+            ));
 
         addGeneratedAnnotation(typeSpecBuilder);
 

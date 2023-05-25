@@ -32,21 +32,18 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
 
 public class AlgorithmFactoryGenerator extends PregelGenerator {
-    private final Element originatingElement;
+
     private final TypeNames typeNames;
 
     AlgorithmFactoryGenerator(
         Optional<AnnotationSpec> generatedAnnotationSpec,
-        Element originatingElement,
         TypeNames typeNames
     ) {
         super(generatedAnnotationSpec);
-        this.originatingElement = originatingElement;
         this.typeNames = typeNames;
     }
 
@@ -60,8 +57,7 @@ public class AlgorithmFactoryGenerator extends PregelGenerator {
                 ClassName.get(GraphAlgorithmFactory.class),
                 algorithmClassName,
                 typeNames.config()
-            ))
-            .addOriginatingElement(originatingElement);
+            ));
 
         addGeneratedAnnotation(typeSpecBuilder);
 

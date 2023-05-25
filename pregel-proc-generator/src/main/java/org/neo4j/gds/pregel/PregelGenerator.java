@@ -38,7 +38,10 @@ class PregelGenerator {
     }
 
     private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator, TypeNames typeNames) {
-        var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec, typeNames);
+        var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec, typeNames)
+            .toBuilder()
+            .addOriginatingElement(pregelSpec.element())
+            .build();
         var specificationBuilder = specificationGenerator.typeSpec(mode)
             .addMethod(specificationGenerator.nameMethod())
             .addMethod(specificationGenerator.algorithmFactoryMethod())
@@ -56,14 +59,20 @@ class PregelGenerator {
             pregelSpec.computationName(),
             pregelSpec.configTypeName()
         );
+        var algorithmSpec = new AlgorithmGenerator(generatedAnnotationSpec, typeNames)
+            .typeSpec()
+            .toBuilder()
+            .addOriginatingElement(pregelSpec.element())
+            .build();
+        var algorithmFactorySpec = new AlgorithmFactoryGenerator(generatedAnnotationSpec, typeNames)
+            .typeSpec()
+            .toBuilder()
+            .addOriginatingElement(pregelSpec.element())
+            .build();
         var specificationGenerator = new SpecificationGenerator(typeNames);
         return Stream.concat(
-            Stream.of(
-                new AlgorithmGenerator(generatedAnnotationSpec, pregelSpec.element(), typeNames).typeSpec(),
-                new AlgorithmFactoryGenerator(generatedAnnotationSpec, pregelSpec.element(), typeNames).typeSpec()
-            ),
-            Arrays
-                .stream(pregelSpec.procedureModes())
+            Stream.of(algorithmSpec, algorithmFactorySpec),
+            Arrays.stream(pregelSpec.procedureModes())
                 .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator, typeNames))
         );
     }

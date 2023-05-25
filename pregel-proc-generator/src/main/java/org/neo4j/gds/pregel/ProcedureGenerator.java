@@ -140,8 +140,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 algorithmClassName,
                 configTypeName
             ))
-            .addAnnotation(gdsCallableAnnotationBuilder.build())
-            .addOriginatingElement(pregelSpec.element());
+            .addAnnotation(gdsCallableAnnotationBuilder.build());
     }
 
     private MethodSpec procMethod() {
