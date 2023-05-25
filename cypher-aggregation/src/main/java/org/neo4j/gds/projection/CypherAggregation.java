@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.projection;
 
+import com.neo4j.gds.internal.CustomProceduresUtil;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.CompatUserAggregator;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -33,7 +33,6 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.util.List;
 
@@ -82,17 +81,9 @@ public class CypherAggregation implements CompatUserAggregationFunction {
 
     @Override
     public CompatUserAggregator create(Context ctx) throws ProcedureException {
-        // TODO: reuse AuraProcedureUtil
+        var databaseService = CustomProceduresUtil.lookupSafeComponentProvider(ctx, GraphDatabaseService.class);
+        var username = CustomProceduresUtil.lookupSafeComponentProvider(ctx, Username.class);
 
-        var procedures = GraphDatabaseApiProxy.resolveDependency(
-            ctx.dependencyResolver(),
-            GlobalProcedures.class
-        );
-        var databaseService = procedures
-            .lookupComponentProvider(GraphDatabaseService.class, true)
-            .apply(ctx);
-
-        var username = procedures.lookupComponentProvider(Username.class, true).apply(ctx);
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
         var writeMode = runsOnCompositeDatabase
             ? WriteMode.NONE
