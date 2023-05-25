@@ -55,9 +55,9 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     public long addNode(long nodeId, NodeLabelToken nodeLabels) {
-        long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
-
         checkPositiveId(nodeId);
+
+        long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         // deduplication
         if (intermediateId < 0) {
