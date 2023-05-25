@@ -31,18 +31,18 @@ public final class DatabaseId {
     public static final DatabaseId EMPTY = new DatabaseId("");
 
     public static DatabaseId of(GraphDatabaseService databaseService) {
-        return new DatabaseId(normalizeDatabseName(databaseService.databaseName()));
+        return new DatabaseId(normalizeDatabaseName(databaseService.databaseName()));
     }
 
     public static DatabaseId from(String databaseName) {
-        return new DatabaseId(normalizeDatabseName(databaseName));
+        return new DatabaseId(normalizeDatabaseName(databaseName));
     }
 
     public static DatabaseId random() {
-        return from(normalizeDatabseName(UUID.randomUUID().toString()));
+        return from(normalizeDatabaseName(UUID.randomUUID().toString()));
     }
 
-    private static String normalizeDatabseName(String databaseName) {
+    private static String normalizeDatabaseName(String databaseName) {
         requireNonNull(databaseName, "Database name should be not null.");
         return toLowerCaseWithLocale(databaseName);
     }
