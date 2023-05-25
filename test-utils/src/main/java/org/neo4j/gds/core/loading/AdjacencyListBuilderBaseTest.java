@@ -158,6 +158,7 @@ public abstract class AdjacencyListBuilderBaseTest {
             : propertyAggregations;
 
         var importMetaData = ImmutableImportMetaData.builder()
+            .skipDanglingRelationships(false)
             .projection(relationshipProjection)
             .aggregations(importAggregations)
             .propertyKeyIds(propertyKeyIds)
