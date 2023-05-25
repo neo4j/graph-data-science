@@ -172,8 +172,8 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 Install both JDK 11 and JDK 17 Temurin:
 [source]
 ----
-sdk install java 11.0.13-tem
-sdk install java 17.0.1-tem
+sdk install java 11.0.19-tem
+sdk install java 17.0.7-tem
 ----
 
 NOTE: These versions were the latest at the time of writing these notes. To see a list of the available versions you can run `sdk list java`.
