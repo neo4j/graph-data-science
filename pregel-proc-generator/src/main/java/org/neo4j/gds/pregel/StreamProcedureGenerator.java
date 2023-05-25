@@ -37,10 +37,9 @@ class StreamProcedureGenerator extends ProcedureGenerator {
     StreamProcedureGenerator(
         TypeNames typeNames,
         String procedureName,
-        Optional<String> description,
-        boolean requiresInverseIndex
+        Optional<String> description
     ) {
-        super(typeNames, procedureName, description, requiresInverseIndex);
+        super(typeNames, procedureName, description);
     }
 
     @Override

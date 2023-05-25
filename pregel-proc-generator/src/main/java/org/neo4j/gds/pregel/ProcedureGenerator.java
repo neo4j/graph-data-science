@@ -55,18 +55,11 @@ abstract class ProcedureGenerator {
     final TypeNames typeNames;
     private final String procedureName;
     private final Optional<String> description;
-    private final boolean requiresInverseIndex;
 
-    ProcedureGenerator(
-        TypeNames typeNames,
-        String procedureName,
-        Optional<String> description,
-        boolean requiresInverseIndex
-    ) {
+    ProcedureGenerator(TypeNames typeNames, String procedureName, Optional<String> description) {
         this.typeNames = typeNames;
         this.procedureName = procedureName;
         this.description = description;
-        this.requiresInverseIndex = requiresInverseIndex;
     }
 
     static TypeSpec forMode(
@@ -79,10 +72,10 @@ abstract class ProcedureGenerator {
         var procedureName = pregelSpec.procedureName();
         var requiresInverseIndex = pregelSpec.requiresInverseIndex();
         switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
-            case WRITE: return new WriteProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
-            case MUTATE: return new MutateProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
-            case STATS: return new StatsProcedureGenerator(typeNames, procedureName, description, requiresInverseIndex).typeSpec(generatedAnnotationSpec);
+            case STREAM: return new StreamProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
+            case WRITE: return new WriteProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
+            case MUTATE: return new MutateProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
+            case STATS: return new StatsProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
             default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
         }
     }
@@ -97,7 +90,7 @@ abstract class ProcedureGenerator {
 
     abstract MethodSpec procResultMethod();
 
-    TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec) {
+    TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec, boolean requiresInverseIndex) {
         var configTypeName = typeNames.config();
         var procedureClassName = typeNames.procedure(procGdsMode());
         var algorithmClassName = typeNames.algorithm();
