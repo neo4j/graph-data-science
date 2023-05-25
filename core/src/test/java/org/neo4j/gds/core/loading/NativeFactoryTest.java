@@ -83,8 +83,8 @@ class NativeFactoryTest {
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
-        assertEquals(6_828_526_776L, estimate.memoryUsage().min);
-        assertEquals(7_633_833_144L, estimate.memoryUsage().max);
+        assertEquals(6_828_526_824L, estimate.memoryUsage().min);
+        assertEquals(7_633_833_192L, estimate.memoryUsage().max);
     }
 
     @Test
@@ -112,8 +112,8 @@ class NativeFactoryTest {
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
-        assertEquals(12_056_534_400L, estimate.memoryUsage().min);
-        assertEquals(13_667_147_136L, estimate.memoryUsage().max);
+        assertEquals(12_056_534_496L, estimate.memoryUsage().min);
+        assertEquals(13_667_147_232L, estimate.memoryUsage().max);
     }
 
     @Test
@@ -135,7 +135,7 @@ class NativeFactoryTest {
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
-        assertEquals(12_056_534_400L, estimate.memoryUsage().min);
-        assertEquals(13_667_147_136L, estimate.memoryUsage().max);
+        assertEquals(12_056_534_496L, estimate.memoryUsage().min);
+        assertEquals(13_667_147_232L, estimate.memoryUsage().max);
     }
 }

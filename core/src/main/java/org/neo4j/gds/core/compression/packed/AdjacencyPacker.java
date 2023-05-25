@@ -56,32 +56,6 @@ public final class AdjacencyPacker {
         return deltaCompress(allocator, slice, values, length, aggregation, degree);
     }
 
-    static long compressWithProperties(
-        AdjacencyListBuilder.Allocator<Address> allocator,
-        AdjacencyListBuilder.Slice<Address> slice,
-        long[] values,
-        long[][] properties,
-        int length,
-        Aggregation[] aggregations,
-        boolean noAggregation,
-        MutableInt degree
-    ) {
-        if (length > 0) {
-            // sort, delta encode, reorder and aggregate properties
-            length = AdjacencyCompression.applyDeltaEncoding(
-                values,
-                length,
-                properties,
-                aggregations,
-                noAggregation
-            );
-        }
-
-        degree.setValue(length);
-
-        return preparePacking(allocator, slice, values, length);
-    }
-
     private static long deltaCompress(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
@@ -115,25 +89,8 @@ public final class AdjacencyPacker {
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        long[][] properties,
-        int length,
-        Aggregation[] aggregations,
-        boolean noAggregation,
-        MutableInt degree
+        int length
     ) {
-        if (length > 0) {
-            // sort, delta encode, reorder and aggregate properties
-            length = AdjacencyCompression.applyDeltaEncoding(
-                values,
-                length,
-                properties,
-                aggregations,
-                noAggregation
-            );
-        }
-
-        degree.setValue(length);
-
         return preparePackingWithVarLongTail(allocator, slice, values, length);
     }
 
@@ -315,25 +272,8 @@ public final class AdjacencyPacker {
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        long[][] properties,
-        int length,
-        Aggregation[] aggregations,
-        boolean noAggregation,
-        MutableInt degree
+        int length
     ) {
-        if (length > 0) {
-            // sort, delta encode, reorder and aggregate properties
-            length = AdjacencyCompression.applyDeltaEncoding(
-                values,
-                length,
-                properties,
-                aggregations,
-                noAggregation
-            );
-        }
-
-        degree.setValue(length);
-
         return preparePackingWithPackedTail(allocator, slice, values, length);
     }
 

@@ -27,7 +27,9 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -304,17 +306,25 @@ public final class AdjacencyBuffer {
         @Override
         public void run() {
             try (var compressor = adjacencyCompressorFactory.createCompressor()) {
+                var buffer = new LongArrayBuffer();
                 var importedRelationships = new MutableLong(0L);
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
                     var nodeId = valueMapper.map(sourceNodeId);
-                    importedRelationships.add(compressor.compress(
-                        nodeId,
+
+                    AdjacencyCompression.zigZagUncompressFrom(
+                        buffer,
                         targets,
-                        properties,
                         numberOfCompressedTargets,
                         compressedByteSize,
                         valueMapper
+                    );
+
+                    importedRelationships.add(compressor.compress(
+                        nodeId,
+                        buffer.buffer,
+                        properties,
+                        numberOfCompressedTargets
                     ));
                 });
                 relationshipCounter.add(importedRelationships.longValue());

@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.collections.DrainingIterator;
-import org.neo4j.gds.collections.HugeSparseByteArrayList;
+import org.neo4j.gds.collections.HugeSparseByteArrayArrayList;
 import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
-import org.neo4j.gds.collections.HugeSparseLongArrayList;
+import org.neo4j.gds.collections.HugeSparseLongArrayArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -40,18 +40,19 @@ import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLong
 import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ChunkedAdjacencyLists {
 
-    private static final byte[] EMPTY_BYTES = new byte[0];
-    private static final long[] EMPTY_PROPERTIES = new long[0];
+    private static final byte[][] EMPTY_BYTES_BYTES = new byte[0][];
+    private static final long[][] EMPTY_PROPERTIES = new long[0][];
 
-    private final HugeSparseByteArrayList targetLists;
-    private final HugeSparseLongArrayList[] properties;
+    private final HugeSparseByteArrayArrayList targetLists;
+    private final HugeSparseLongArrayArrayList[] properties;
     private final HugeSparseIntList positions;
     private final HugeSparseLongList lastValues;
     private final HugeSparseIntList lengths;
+
+    private byte[] compressBuffer = new byte[1 << 20]; // 1MiB
 
     public static MemoryEstimation memoryEstimation(long avgDegree, long nodeCount, int propertyCount) {
         // Best case scenario:
@@ -88,15 +89,15 @@ public final class ChunkedAdjacencyLists {
     }
 
     private ChunkedAdjacencyLists(int numberOfProperties, long initialCapacity) {
-        this.targetLists = HugeSparseByteArrayList.of(EMPTY_BYTES, initialCapacity);
+        this.targetLists = HugeSparseByteArrayArrayList.of(EMPTY_BYTES_BYTES, initialCapacity);
         this.positions = HugeSparseIntList.of(0, initialCapacity);
         this.lastValues = HugeSparseLongList.of(0, initialCapacity);
         this.lengths = HugeSparseIntList.of(0, initialCapacity);
 
 
         if (numberOfProperties > 0) {
-            this.properties = new HugeSparseLongArrayList[numberOfProperties];
-            Arrays.setAll(this.properties, i -> HugeSparseLongArrayList.of(EMPTY_PROPERTIES, initialCapacity));
+            this.properties = new HugeSparseLongArrayArrayList[numberOfProperties];
+            Arrays.setAll(this.properties, i -> HugeSparseLongArrayArrayList.of(EMPTY_PROPERTIES, initialCapacity));
         } else {
             this.properties = null;
         }
@@ -127,11 +128,14 @@ public final class ChunkedAdjacencyLists {
         }
         var position = positions.get(index);
 
-        var compressedTargets = ensureCompressedTargetsCapacity(index, position, requiredBytes);
+        if (requiredBytes > this.compressBuffer.length) {
+            this.compressBuffer = new byte[BitUtil.nextHighestPowerOfTwo(requiredBytes)];
+        }
+        encodeVLongs(targets, start, end, this.compressBuffer, 0);
 
-        var newPosition = encodeVLongs(targets, start, end, compressedTargets, position);
+        copyTargetData(index, position, this.compressBuffer, requiredBytes, this.targetLists);
 
-        positions.set(index, newPosition);
+        positions.set(index, position + requiredBytes);
 
         this.lastValues.set(index, currentLastValue);
         this.lengths.addTo(index, valuesToAdd);
@@ -149,77 +153,192 @@ public final class ChunkedAdjacencyLists {
     public void add(long index, long[] targets, long[][] allProperties, int start, int end, int targetsToAdd) {
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
-            addProperties(index, targets, allProperties[i], start, end, i, targetsToAdd);
+            var length = lengths.get(index);
+            copyPropertiesData(
+                index,
+                length,
+                allProperties[i],
+                start,
+                end,
+                targets,
+                targetsToAdd,
+                this.properties[i]
+            );
         }
 
         // write values
         add(index, targets, start, end, targetsToAdd);
     }
 
-    private void addProperties(
+    static final int[] NEXT_CHUNK_LENGTH = {
+        32,
+        32,
+        64,
+        64,
+        128,
+        128,
+        256,
+        256,
+        512,
+        512,
+        1024,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        131072,
+        262144,
+        524288,
+        1048576,
+        2097152,
+        4194304,
+    };
+
+    // This method and the one after that ("copyPropertiesData") are the same except for the underlying primitive array type.
+    // Unfortunately, writing this method to be generic over the primitive array type requires us to use methods
+    // that are either reflection based or not optimizable by C2, and it shows on benchmarks.
+    // Any changes made here should also be done in "copyPropertiesData".
+    private static void copyTargetData(
         long index,
-        long[] targets,
-        long[] properties,
-        int start,
-        int end,
-        int propertyIndex,
-        int propertiesToAdd
+        int targetPos,
+        byte[] buffer,
+        int bufferLength,
+        HugeSparseByteArrayArrayList dataLists
     ) {
-        var length = lengths.get(index);
+        byte[][] compressedData = dataLists.get(index);
 
-        var currentProperties = ensurePropertyCapacity(index, length, propertiesToAdd, propertyIndex);
+        // last chunk, write pos = posInLastChunk
+        int posInLastChunk = targetPos;
+        for (int targetPage = 0; targetPage < compressedData.length - 1; targetPage++) {
+            byte[] compressedTarget = compressedData[targetPage];
+            posInLastChunk -= compressedTarget.length;
+        }
 
-        if (propertiesToAdd == end - start) {
-            System.arraycopy(properties, start, currentProperties, length, propertiesToAdd);
-        } else {
-            var writePos = length;
-            for (int i = 0; i < (end - start); i++) {
-                if (targets[start + i] != IGNORE_VALUE) {
-                    currentProperties[writePos++] = properties[start + i];
-                }
+        // can we fit everything in the last chunk?
+        if (compressedData.length > 0) {
+            byte[] lastChunk = compressedData[compressedData.length - 1];
+            if (lastChunk.length >= posInLastChunk + bufferLength) {
+                // fits in last chunk
+                System.arraycopy(buffer, 0, lastChunk, posInLastChunk, bufferLength);
+                return;
             }
         }
+
+        // how many bytes do we need to write into the last chunk
+        int fitsInLastChunk = compressedData.length == 0
+            ? 0
+            : compressedData[compressedData.length - 1].length - posInLastChunk;
+
+        int newChunkLengthAtLeast = bufferLength - fitsInLastChunk;
+
+        // the next chunk size grows slowly depending on the number of chunks we already have
+        int nextChunkLevel = Math.min(compressedData.length, NEXT_CHUNK_LENGTH.length - 1);
+        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel];
+
+        // avoid splitting the buffer into too many chunks
+        int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
+
+        // copy buffer into the last chunk and the new chunk
+        byte[] newChunk = new byte[newChunkLength];
+        if (fitsInLastChunk > 0) {
+            System.arraycopy(
+                buffer,
+                0,
+                compressedData[compressedData.length - 1],
+                posInLastChunk,
+                fitsInLastChunk
+            );
+        }
+        System.arraycopy(buffer, fitsInLastChunk, newChunk, 0, bufferLength - fitsInLastChunk);
+
+        // add new chunk to the targets list
+        compressedData = Arrays.copyOf(compressedData, compressedData.length + 1);
+        compressedData[compressedData.length - 1] = newChunk;
+        dataLists.set(index, compressedData);
     }
 
-    private byte[] ensureCompressedTargetsCapacity(long index, int pos, int required) {
-        int targetLength = pos + required;
-        var compressedTargets = targetLists.get(index);
+    // This method and the one before that ("copyTargetData") are the same except for the underlying primitive array type.
+    // Unfortunately, writing this method to be generic over the primitive array type requires us to use methods
+    // that are either reflection based or not optimizable by C2, and it shows on benchmarks.
+    // Any changes made here should also be done in "copyTargetData".
+    private static void copyPropertiesData(
+        long index,
+        int targetPos,
+        long[] buffer,
+        int bufferOffset,
+        int bufferEnd,
+        long[] targets,
+        int bufferLength,
+        HugeSparseLongArrayArrayList dataLists
+    ) {
+        if (bufferEnd - bufferOffset != bufferLength) {
+            // compact the property buffer and ignore properties from ignored targets
+            var writeIndex = bufferOffset;
+            for (int i = bufferOffset; i < bufferEnd; i++) {
+                if (targets[i] != IGNORE_VALUE) {
+                    if (writeIndex != i) {
+                        buffer[writeIndex] = buffer[i];
+                    }
+                    writeIndex++;
+                }
+            }
 
-        if (targetLength < 0) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
-                pos,
-                required
-            ));
-        } else if (compressedTargets.length <= targetLength) {
-            int newLength = BitUtil.nextHighestPowerOfTwo(targetLength);
-//            int newLength = ArrayUtil.oversize(pos + required, Byte.BYTES);
-            compressedTargets = Arrays.copyOf(compressedTargets, newLength);
-            this.targetLists.set(index, compressedTargets);
+            assert bufferLength == writeIndex - bufferOffset;
         }
 
-        return compressedTargets;
-    }
+        long[][] compressedData = dataLists.get(index);
 
-    private long[] ensurePropertyCapacity(long index, int pos, int required, int propertyIndex) {
-        int targetLength = pos + required;
-
-        var currentProperties = this.properties[propertyIndex].get(index);
-
-        if (targetLength < 0) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
-                pos,
-                required
-            ));
-        } else if (currentProperties.length <= pos + required) {
-//            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
-            int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
-            currentProperties = Arrays.copyOf(currentProperties, newLength);
-            this.properties[propertyIndex].set(index, currentProperties);
+        // last chunk, write pos = posInLastChunk
+        int posInLastChunk = targetPos;
+        for (int targetPage = 0; targetPage < compressedData.length - 1; targetPage++) {
+            long[] compressedTarget = compressedData[targetPage];
+            posInLastChunk -= compressedTarget.length;
         }
 
-        return currentProperties;
+        // can we fit everything in the last chunk?
+        if (compressedData.length > 0) {
+            long[] lastChunk = compressedData[compressedData.length - 1];
+            if (lastChunk.length >= posInLastChunk + bufferLength) {
+                // fits in last chunk
+                System.arraycopy(buffer, bufferOffset, lastChunk, posInLastChunk, bufferLength);
+                return;
+            }
+        }
+
+        // how many bytes do we need to write into the last chunk
+        int fitsInLastChunk = compressedData.length == 0
+            ? 0
+            : compressedData[compressedData.length - 1].length - posInLastChunk;
+
+        int newChunkLengthAtLeast = bufferLength - fitsInLastChunk;
+
+        // the next chunk size grows slowly depending on the number of chunks we already have
+        int nextChunkLevel = Math.min(compressedData.length, NEXT_CHUNK_LENGTH.length - 1);
+        int nextChunkLength = NEXT_CHUNK_LENGTH[nextChunkLevel] / 2;
+
+        // avoid splitting the buffer into too many chunks
+        int newChunkLength = Math.max(newChunkLengthAtLeast, nextChunkLength);
+
+        // copy buffer into the last chunk and the new chunk
+        long[] newChunk = new long[newChunkLength];
+        if (fitsInLastChunk > 0) {
+            System.arraycopy(
+                buffer,
+                bufferOffset,
+                compressedData[compressedData.length - 1],
+                posInLastChunk,
+                fitsInLastChunk
+            );
+        }
+        System.arraycopy(buffer, fitsInLastChunk + bufferOffset, newChunk, 0, bufferLength - fitsInLastChunk);
+
+        // add new chunk to the targets list
+        compressedData = Arrays.copyOf(compressedData, compressedData.length + 1);
+        compressedData[compressedData.length - 1] = newChunk;
+        dataLists.set(index, compressedData);
     }
 
     public long capacity() {
@@ -235,26 +354,32 @@ public final class ChunkedAdjacencyLists {
     }
 
     public interface Consumer {
-        void accept(long sourceId, byte[] targets, long[][] properties, int compressedByteSize, int numberOfCompressedTargets);
+        void accept(
+            long sourceId,
+            byte[][] targets,
+            long[][][] properties,
+            int compressedByteSize,
+            int numberOfCompressedTargets
+        );
     }
 
     private static class CompositeDrainingIterator {
-        private final DrainingIterator<byte[][]> targetListIterator;
-        private final DrainingIterator.DrainingBatch<byte[][]> targetListBatch;
+        private final DrainingIterator<byte[][][]> targetListIterator;
+        private final DrainingIterator.DrainingBatch<byte[][][]> targetListBatch;
         private final DrainingIterator<int[]> positionsListIterator;
         private final DrainingIterator.DrainingBatch<int[]> positionsListBatch;
         private final DrainingIterator<long[]> lastValuesListIterator;
         private final DrainingIterator.DrainingBatch<long[]> lastValuesListBatch;
         private final DrainingIterator<int[]> lengthsListIterator;
         private final DrainingIterator.DrainingBatch<int[]> lengthsListBatch;
-        private final List<DrainingIterator<long[][]>> propertyIterators;
-        private final List<DrainingIterator.DrainingBatch<long[][]>> propertyBatches;
+        private final List<DrainingIterator<long[][][]>> propertyIterators;
+        private final List<DrainingIterator.DrainingBatch<long[][][]>> propertyBatches;
 
-        private final long[][] propertiesBuffer;
+        private final long[][][] propertiesBuffer;
 
         CompositeDrainingIterator(
-            HugeSparseByteArrayList targets,
-            HugeSparseLongArrayList[] properties,
+            HugeSparseByteArrayArrayList targets,
+            HugeSparseLongArrayArrayList[] properties,
             HugeSparseIntList positions,
             HugeSparseLongList lastValues,
             HugeSparseIntList lengths
@@ -274,13 +399,13 @@ public final class ChunkedAdjacencyLists {
                 propertiesBuffer = null;
             } else {
                 this.propertyIterators = Arrays.stream(properties)
-                    .map(HugeSparseLongArrayList::drainingIterator)
+                    .map(HugeSparseLongArrayArrayList::drainingIterator)
                     .collect(Collectors.toList());
                 this.propertyBatches = this.propertyIterators
                     .stream()
                     .map(DrainingIterator::drainingBatch)
                     .collect(Collectors.toList());
-                propertiesBuffer = new long[properties.length][];
+                propertiesBuffer = new long[properties.length][][];
             }
         }
 
@@ -301,19 +426,21 @@ public final class ChunkedAdjacencyLists {
 
                 for (int indexInPage = 0; indexInPage < targetsPage.length; indexInPage++) {
                     var targets = targetsPage[indexInPage];
-                    if (targets == EMPTY_BYTES) {
+                    if (targets == EMPTY_BYTES_BYTES) {
                         continue;
                     }
+                    // make targets eligible for GC
+                    targetsPage[indexInPage] = null;
+
                     var position = positionsPage[indexInPage];
                     var length = lengthsPage[indexInPage];
                     for (int propertyIndex = 0; propertyIndex < propertyBatches.size(); propertyIndex++) {
-                        var page = propertyBatches.get(propertyIndex).page;
+                        long[][][] page = propertyBatches.get(propertyIndex).page;
+
                         propertiesBuffer[propertyIndex] = page[indexInPage];
                         // make properties eligible for GC
                         page[indexInPage] = null;
                     }
-                    // make targets eligible for GC
-                    targetsPage[indexInPage] = null;
 
                     consumer.accept(offset + indexInPage, targets, propertiesBuffer, position, length);
                 }

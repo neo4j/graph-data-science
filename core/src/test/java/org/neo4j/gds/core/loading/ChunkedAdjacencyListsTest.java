@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.assertj.core.data.Index;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.core.compression.common.ZigZagLongDecoding.Identity.INSTANCE;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
+import static org.neo4j.gds.core.loading.ChunkedAdjacencyLists.NEXT_CHUNK_LENGTH;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ChunkedAdjacencyListsTest {
@@ -72,6 +74,79 @@ class ChunkedAdjacencyListsTest {
     }
 
     @Test
+    void shouldWriteLargeAdjacencyListsWithOverflow() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(1, 0);
+
+        var smallAdjacency = new long[37];
+        Arrays.setAll(smallAdjacency, i -> i);
+
+        var largeAdjacency = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
+        Arrays.setAll(largeAdjacency, i -> i + 42L);
+
+        var smallProperties = new long[37];
+        Arrays.setAll(smallProperties, i -> i);
+
+        var largeProperties = new long[NEXT_CHUNK_LENGTH[NEXT_CHUNK_LENGTH.length - 1] + 100];
+        Arrays.setAll(largeProperties, i -> i + 42L);
+
+        adjacencyLists.add(
+            0,
+            Arrays.copyOf(smallAdjacency, smallAdjacency.length),
+            new long[][]{smallProperties},
+            0,
+            smallAdjacency.length,
+            smallAdjacency.length
+        );
+        adjacencyLists.add(
+            0,
+            Arrays.copyOf(smallAdjacency, smallAdjacency.length),
+            new long[][]{smallProperties},
+            0,
+            smallAdjacency.length,
+            smallAdjacency.length
+        );
+        adjacencyLists.add(
+            0,
+            Arrays.copyOf(largeAdjacency, largeAdjacency.length),
+            new long[][]{largeProperties},
+            0,
+            largeAdjacency.length,
+            largeAdjacency.length
+        );
+
+        var expectedTargets = new long[smallAdjacency.length * 2 + largeAdjacency.length];
+        System.arraycopy(smallAdjacency, 0, expectedTargets, 0, smallAdjacency.length);
+        System.arraycopy(smallAdjacency, 0, expectedTargets, smallAdjacency.length, smallAdjacency.length);
+        System.arraycopy(largeAdjacency, 0, expectedTargets, smallAdjacency.length * 2, largeAdjacency.length);
+
+        var expectedProperties = new long[smallProperties.length * 2 + largeProperties.length];
+        System.arraycopy(smallProperties, 0, expectedProperties, 0, smallProperties.length);
+        System.arraycopy(smallProperties, 0, expectedProperties, smallAdjacency.length, smallProperties.length);
+        System.arraycopy(largeProperties, 0, expectedProperties, smallAdjacency.length * 2, largeProperties.length);
+
+        var actualTargets = new long[smallAdjacency.length * 2 + largeAdjacency.length];
+        adjacencyLists.consume((nodeId, targets, properties, position, length) -> {
+            AdjacencyCompression.zigZagUncompressFrom(
+                actualTargets,
+                targets,
+                length,
+                position,
+                INSTANCE
+            );
+
+            long[] actualProperties = new long[expectedProperties.length];
+            var written = 0;
+            for (long[] propertyChunk : properties[0]) {
+                var valuesToCopy = Math.min(propertyChunk.length, length - written);
+                System.arraycopy(propertyChunk, 0, actualProperties, written, valuesToCopy);
+                written += valuesToCopy;
+            }
+            assertThat(Arrays.compare(expectedProperties, actualProperties)).isEqualTo(0);
+        });
+        assertThat(Arrays.compare(expectedTargets, actualTargets)).isEqualTo(0);
+    }
+
+    @Test
     void shouldWriteWithProperties() {
         var adjacencyLists = ChunkedAdjacencyLists.of(2, 0);
 
@@ -79,10 +154,32 @@ class ChunkedAdjacencyListsTest {
         var properties = new long[][]{{42L, 1337L, 5L, 6L}, {8L, 8L, 8L, 8L}};
         adjacencyLists.add(0, input, properties, 0, 4, 4);
 
-        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
-            .hasDimensions(2, 4)
-            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
-            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
+            assertThat(actualProperties).hasNumberOfRows(2);
+            assertThat(actualProperties[0]).hasNumberOfRows(1);
+            assertThat(actualProperties[1]).hasNumberOfRows(1);
+
+            assertThat(actualProperties[0][0]).containsSequence(42L, 1337L, 5L, 6L);
+            assertThat(actualProperties[1][0]).containsSequence(8L, 8L, 8L, 8L);
+        });
+    }
+
+    @Test
+    void shouldWriteWithPropertiesWithOffset() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(2, 0);
+
+        var input = new long[]{13L, 37L, 42L, 1337L, 5L, 6L};
+        var properties = new long[][]{{0L, 0L, 42L, 1337L, 5L, 6L}, {0L, 0L, 8L, 8L, 8L, 8L}};
+        adjacencyLists.add(0, input, properties, 2, 6, 4);
+
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
+            assertThat(actualProperties).hasNumberOfRows(2);
+            assertThat(actualProperties[0]).hasNumberOfRows(1);
+            assertThat(actualProperties[1]).hasNumberOfRows(1);
+
+            assertThat(actualProperties[0][0]).containsSequence(42L, 1337L, 5L, 6L);
+            assertThat(actualProperties[1][0]).containsSequence(8L, 8L, 8L, 8L);
+        });
     }
 
     @Test
@@ -161,9 +258,9 @@ class ChunkedAdjacencyListsTest {
             );
             assertThat(actualTargets).containsExactly(expectedTargets);
 
-            assertThat(actualProperties)
-                // there is an additional entry, because we double the buffers in size
-                .hasDimensions(1, 4).contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
+            assertThat(actualProperties).hasNumberOfRows(1);
+            assertThat(actualProperties[0]).hasNumberOfRows(1);
+            assertThat(actualProperties[0][0]).containsSequence(3L, 3L, 4L);
         });
     }
 }
