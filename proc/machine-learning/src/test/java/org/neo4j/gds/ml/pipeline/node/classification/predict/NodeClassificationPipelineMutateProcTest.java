@@ -31,6 +31,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -45,7 +46,6 @@ import java.util.Set;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
-import static org.neo4j.gds.AlgoBaseProcTest.TEST_USERNAME;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.GRAPH_NAME;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.TEST_GRAPH_QUERY;
@@ -103,7 +103,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class"));
         assertThat(mutatedGraph.nodeProperties("class").nodeCount()).isEqualTo(5);
     }
@@ -130,7 +130,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class", "probabilities"));
         assertThat(mutatedGraph.nodeProperties("class").nodeCount()).isEqualTo(5);
         assertThat(mutatedGraph.nodeProperties("probabilities").nodeCount()).isEqualTo(5);
