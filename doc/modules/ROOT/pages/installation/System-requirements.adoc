@@ -72,6 +72,15 @@ Decreasing the page cache size in favor of heap size is *not* recommended if the
 See https://neo4j.com/docs/operations-manual/4.4/performance/memory-configuration/[Neo4j memory configuration] for general information about page cache sizing.
 ====
 
+=== Off heap memory
+
+The off heap space is used by the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow server] to store received data.
+
+If you have the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow server] enabled, we also recommend to reserve some off heap memory.
+The amount of memory required depends on the batch size used by the client.
+Received data through Arrow will be temporarily stored in direct memory before being processed into an on-heap graph.
+
+
 [[system-requirements-cpu]]
 == CPU
 
