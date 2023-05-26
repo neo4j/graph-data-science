@@ -23,16 +23,12 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.pregel.proc.PregelMutateComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelMutateProc;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
 import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelStatsProc;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelStreamProc;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 import org.neo4j.gds.pregel.proc.PregelWriteComputationResultConsumer;
-import org.neo4j.gds.pregel.proc.PregelWriteProc;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 
 /**
@@ -81,10 +77,6 @@ public class TypeNames {
         return ClassName.get(resultTypeForMode(mode));
     }
 
-    ClassName procedureBase(GDSMode mode) {
-        return ClassName.get(procedureBaseTypeForMode(mode));
-    }
-
     ClassName specification(GDSMode mode) {
         var simpleName = computation.simpleName() + mode.camelCase() + "Specification";
         return computation.peerClass(simpleName);
@@ -114,16 +106,6 @@ public class TypeNames {
             case WRITE: return PregelWriteComputationResultConsumer.class;
             case MUTATE: return PregelMutateComputationResultConsumer.class;
             case STREAM: return PregelStreamComputationResultConsumer.class;
-            default: throw new IllegalStateException("Unexpected value: " + mode);
-        }
-    }
-
-    private Class<?> procedureBaseTypeForMode(GDSMode mode) {
-        switch (mode) {
-            case STATS: return PregelStatsProc.class;
-            case WRITE: return PregelWriteProc.class;
-            case MUTATE: return PregelMutateProc.class;
-            case STREAM: return PregelStreamProc.class;
             default: throw new IllegalStateException("Unexpected value: " + mode);
         }
     }
