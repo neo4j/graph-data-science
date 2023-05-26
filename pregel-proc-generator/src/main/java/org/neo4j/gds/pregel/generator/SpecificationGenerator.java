@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.pregel.generator;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -30,7 +30,6 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -40,11 +39,11 @@ public class SpecificationGenerator {
 
     private final TypeNames typeNames;
 
-    SpecificationGenerator(TypeNames typeNames) {
+    public SpecificationGenerator(TypeNames typeNames) {
         this.typeNames = typeNames;
     }
 
-    TypeSpec generate(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
+    public TypeSpec generate(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
         return typeSpec(mode, generatedAnnotationSpec).toBuilder()
             .addMethod(nameMethod())
             .addMethod(algorithmFactoryMethod())

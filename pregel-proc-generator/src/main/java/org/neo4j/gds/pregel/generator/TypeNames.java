@@ -60,41 +60,41 @@ public class TypeNames {
         this.config = config;
     }
 
-    public ClassName computation() {
+    ClassName computation() {
         return computation;
     }
 
-    public ClassName algorithm() {
+    ClassName algorithm() {
         return algorithm;
     }
 
-    public ClassName algorithmFactory() {
+    ClassName algorithmFactory() {
         return algorithmFactory;
     }
 
-    public ClassName procedure(GDSMode mode) {
+    ClassName procedure(GDSMode mode) {
         var simpleName = computation.simpleName() + mode.camelCase() + "Proc";
         return computation.peerClass(simpleName);
     }
 
-    public ClassName procedureResult(GDSMode mode) {
+    ClassName procedureResult(GDSMode mode) {
         return ClassName.get(resultTypeForMode(mode));
     }
 
-    public ClassName procedureBase(GDSMode mode) {
+    ClassName procedureBase(GDSMode mode) {
         return ClassName.get(procedureBaseTypeForMode(mode));
     }
 
-    public ClassName specification(GDSMode mode) {
+    ClassName specification(GDSMode mode) {
         var simpleName = computation.simpleName() + mode.camelCase() + "Specification";
         return computation.peerClass(simpleName);
     }
 
-    public ClassName computationResultConsumer(GDSMode mode) {
+    ClassName computationResultConsumer(GDSMode mode) {
         return ClassName.get(computationResultConsumerTypeForMode(mode));
     }
 
-    public TypeName config() {
+    TypeName config() {
         return config;
     }
 

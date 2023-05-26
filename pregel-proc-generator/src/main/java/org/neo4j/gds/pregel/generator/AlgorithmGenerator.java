@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.pregel.generator;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -32,19 +32,18 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
 
-class AlgorithmGenerator {
+public class AlgorithmGenerator {
     private final TypeNames typeNames;
 
-    AlgorithmGenerator(TypeNames typeNames) {
+    public AlgorithmGenerator(TypeNames typeNames) {
         this.typeNames = typeNames;
     }
 
-    TypeSpec generate(Optional<AnnotationSpec> generatedAnnotationSpec) {
+    public TypeSpec generate(Optional<AnnotationSpec> generatedAnnotationSpec) {
         return typeSpec(generatedAnnotationSpec).toBuilder()
             .addField(pregelJobField())
             .addMethod(constructor())

@@ -21,6 +21,10 @@ package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.pregel.generator.AlgorithmFactoryGenerator;
+import org.neo4j.gds.pregel.generator.AlgorithmGenerator;
+import org.neo4j.gds.pregel.generator.ProcedureGenerator;
+import org.neo4j.gds.pregel.generator.SpecificationGenerator;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Element;

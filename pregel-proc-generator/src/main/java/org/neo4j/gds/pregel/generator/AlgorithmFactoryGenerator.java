@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.pregel.generator;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -30,7 +30,6 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -39,11 +38,11 @@ public class AlgorithmFactoryGenerator {
 
     private final TypeNames typeNames;
 
-    AlgorithmFactoryGenerator(TypeNames typeNames) {
+    public AlgorithmFactoryGenerator(TypeNames typeNames) {
         this.typeNames = typeNames;
     }
 
-    TypeSpec generate(Optional<AnnotationSpec> generatedAnnotationSpec) {
+    public TypeSpec generate(Optional<AnnotationSpec> generatedAnnotationSpec) {
         return typeSpec(generatedAnnotationSpec).toBuilder()
             .addMethod(buildMethod())
             .addMethod(taskNameMethod())

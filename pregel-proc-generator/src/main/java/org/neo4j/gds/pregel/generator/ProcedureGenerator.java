@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.pregel.generator;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -36,7 +36,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelBaseProc;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -52,13 +51,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ProcedureGenerator {
+public class ProcedureGenerator {
 
     private final TypeNames typeNames;
     private final String procedureBaseName;
     private final Optional<String> description;
 
-    ProcedureGenerator(
+    public ProcedureGenerator(
         TypeNames typeNames,
         String procedureBaseName,
         Optional<String> description
@@ -68,7 +67,7 @@ class ProcedureGenerator {
         this.description = description;
     }
 
-    TypeSpec generate(GDSMode gdsMode, boolean requiresInverseIndex, Optional<AnnotationSpec> generatedAnnotationSpec) {
+    public TypeSpec generate(GDSMode gdsMode, boolean requiresInverseIndex, Optional<AnnotationSpec> generatedAnnotationSpec) {
         var typeSpecBuilder = typeSpec(gdsMode, generatedAnnotationSpec).toBuilder();
         typeSpecBuilder.addMethod(procMethod(gdsMode));
         typeSpecBuilder.addMethod(procEstimateMethod(gdsMode));
