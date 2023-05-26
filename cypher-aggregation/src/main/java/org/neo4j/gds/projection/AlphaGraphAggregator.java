@@ -24,7 +24,9 @@ import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.values.AnyValue;
+import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
+import org.neo4j.values.virtual.MapValue;
 
 // public is required for the Cypher runtime
 @SuppressWarnings("WeakerAccess")
@@ -41,12 +43,16 @@ public class AlphaGraphAggregator extends GraphAggregator {
     @Override
     public void update(AnyValue[] input) throws ProcedureException {
         try {
+            var nodesConfig = input[3];
+            var relationshipsConfig = input[4];
+            AnyValue dataConfig = NoValue.NO_VALUE;
+            dataConfig = mergeMaps(dataConfig, nodesConfig);
+            dataConfig = mergeMaps(dataConfig, relationshipsConfig);
             super.projectNextRelationship(
                 (TextValue) input[0],
                 input[1],
                 input[2],
-                input[3],
-                input[4],
+                dataConfig,
                 input[5]
             );
         } catch (Exception e) {
@@ -58,5 +64,15 @@ public class AlphaGraphAggregator extends GraphAggregator {
                 e
             );
         }
+    }
+
+    private static AnyValue mergeMaps(AnyValue left, AnyValue right) {
+        if (left == NoValue.NO_VALUE || ((MapValue) left).isEmpty()) {
+            return right;
+        }
+        if (right == NoValue.NO_VALUE || ((MapValue) right).isEmpty()) {
+            return left;
+        }
+        return ((MapValue) left).updatedWith((MapValue) right);
     }
 }

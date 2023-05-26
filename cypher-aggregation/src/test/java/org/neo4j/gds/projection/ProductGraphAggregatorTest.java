@@ -46,7 +46,6 @@ class ProductGraphAggregatorTest {
             Values.longValue(source),
             Values.longValue(target),
             MapValue.EMPTY,
-            MapValue.EMPTY,
             MapValue.EMPTY
         );
 

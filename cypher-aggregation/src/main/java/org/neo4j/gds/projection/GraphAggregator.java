@@ -51,6 +51,13 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class GraphAggregator implements CompatUserAggregator {
 
+    private static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
+    private static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
+    private static final String TARGET_NODE_PROPERTIES = "targetNodeProperties";
+    private static final String TARGET_NODE_LABELS = "targetNodeLabels";
+    private static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
+    private static final String RELATIONSHIP_TYPE = "relationshipType";
+
     private final DatabaseId databaseId;
     private final String username;
     private final WriteMode writeMode;
@@ -84,11 +91,10 @@ abstract class GraphAggregator implements CompatUserAggregator {
         TextValue graphName,
         AnyValue sourceNode,
         AnyValue targetNode,
-        AnyValue nodesConfig,
-        AnyValue relationshipConfig,
+        AnyValue dataConfig,
         AnyValue config
     ) {
-        this.configValidator.validateConfigs(nodesConfig, relationshipConfig);
+        this.configValidator.validateConfig(dataConfig);
 
         var data = initGraphData(graphName, config);
 
@@ -97,22 +103,22 @@ abstract class GraphAggregator implements CompatUserAggregator {
         NodeLabelToken sourceNodeLabels = NodeLabelTokens.missing();
         NodeLabelToken targetNodeLabels = NodeLabelTokens.missing();
 
-        if (nodesConfig instanceof MapValue) {
-            sourceNodePropertyValues = propertiesConfig("sourceNodeProperties", (MapValue) nodesConfig);
-            sourceNodeLabels = labelsConfig("sourceNodeLabels", (MapValue) nodesConfig);
+        if (dataConfig instanceof MapValue) {
+            sourceNodePropertyValues = propertiesConfig(SOURCE_NODE_PROPERTIES, (MapValue) dataConfig);
+            sourceNodeLabels = labelsConfig(SOURCE_NODE_LABELS, (MapValue) dataConfig);
 
             if (targetNode != NoValue.NO_VALUE) {
-                targetNodePropertyValues = propertiesConfig("targetNodeProperties", (MapValue) nodesConfig);
-                targetNodeLabels = labelsConfig("targetNodeLabels", (MapValue) nodesConfig);
+                targetNodePropertyValues = propertiesConfig(TARGET_NODE_PROPERTIES, (MapValue) dataConfig);
+                targetNodeLabels = labelsConfig(TARGET_NODE_LABELS, (MapValue) dataConfig);
             }
         }
 
         PropertyValues relationshipProperties = null;
         RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
 
-        if (relationshipConfig instanceof MapValue) {
-            relationshipProperties = propertiesConfig("properties", (MapValue) relationshipConfig);
-            relationshipType = typeConfig("relationshipType", (MapValue) relationshipConfig);
+        if (dataConfig instanceof MapValue) {
+            relationshipProperties = propertiesConfig(RELATIONSHIP_PROPERTIES, (MapValue) dataConfig);
+            relationshipType = typeConfig(RELATIONSHIP_TYPE, (MapValue) dataConfig);
         }
 
         data.update(
@@ -266,41 +272,28 @@ abstract class GraphAggregator implements CompatUserAggregator {
     }
 
     private static final class ConfigValidator {
-        private static final Set<String> NODES_CONFIG_KEYS = Set.of(
-            "sourceNodeProperties",
-            "sourceNodeLabels",
-            "targetNodeProperties",
-            "targetNodeLabels"
+        private static final Set<String> DATA_CONFIG_KEYS = Set.of(
+            SOURCE_NODE_PROPERTIES,
+            SOURCE_NODE_LABELS,
+            TARGET_NODE_PROPERTIES,
+            TARGET_NODE_LABELS,
+            RELATIONSHIP_PROPERTIES,
+            RELATIONSHIP_TYPE
         );
-
-        private static final Set<String> RELATIONSHIPS_CONFIG_KEYS = Set.of(
-            "properties",
-            "relationshipType"
-        );
-
 
         private final AtomicBoolean validate = new AtomicBoolean(true);
 
-        void validateConfigs(AnyValue nodesConfig, AnyValue relationshipConfig) {
-            if (nodesConfig instanceof MapValue || relationshipConfig instanceof MapValue) {
+        void validateConfig(AnyValue dataConfig) {
+            if (dataConfig instanceof MapValue) {
                 if (this.validate.get()) {
                     if (this.validate.getAndSet(false)) {
-                        if (nodesConfig instanceof MapValue) {
-                            ConfigKeyValidation.requireOnlyKeysFrom(
-                                NODES_CONFIG_KEYS,
-                                ((MapValue) nodesConfig).keySet()
-                            );
-                        }
-                        if (relationshipConfig instanceof MapValue) {
-                            ConfigKeyValidation.requireOnlyKeysFrom(
-                                RELATIONSHIPS_CONFIG_KEYS,
-                                ((MapValue) relationshipConfig).keySet()
-                            );
-                        }
+                        ConfigKeyValidation.requireOnlyKeysFrom(
+                            DATA_CONFIG_KEYS,
+                            ((MapValue) dataConfig).keySet()
+                        );
                     }
                 }
             }
         }
     }
-
 }

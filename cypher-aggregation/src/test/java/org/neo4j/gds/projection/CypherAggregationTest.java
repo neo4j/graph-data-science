@@ -823,7 +823,8 @@ class CypherAggregationTest extends BaseProcTest {
         assertThatThrownBy(() -> runQuery(query))
             .rootCause()
             .hasMessage(
-                "Unexpected configuration key: sourceNode (Did you mean one of [sourceNodeLabels, sourceNodeProperties]?)");
+                "Unexpected configuration key: sourceNode (Did you mean one of [sourceNodeLabels, sourceNodeProperties]?)"
+            );
     }
 
     @Test
@@ -832,7 +833,9 @@ class CypherAggregationTest extends BaseProcTest {
         assertThatThrownBy(() -> runQuery(query))
             .rootCause()
             .hasMessage(
-                "Unexpected configuration key: property (Did you mean [relationshipProperties]?)");
+                "Unexpected configuration key: relationshipProperty " +
+                    "(Did you mean one of [relationshipProperties, relationshipType]?)"
+            );
     }
 
 }

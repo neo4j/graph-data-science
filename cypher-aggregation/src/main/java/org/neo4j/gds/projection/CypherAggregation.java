@@ -64,10 +64,8 @@ public class CypherAggregation implements CompatUserAggregationFunction {
                 FieldSignature.inputField("sourceNode", Neo4jTypes.NTAny),
                 // @Name(value = "targetNode", defaultValue = "null") AnyValue targetNode
                 FieldSignature.inputField("targetNode", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
-                // @Name(value = "nodesConfig", defaultValue = "null") AnyValue nodesConfig
-                FieldSignature.inputField("nodesConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
-                // @Name(value = "relationshipConfig", defaultValue = "null") AnyValue relationshipConfig
-                FieldSignature.inputField("relationshipConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
+                // @Name(value = "dataConfig", defaultValue = "null") AnyValue dataConfig
+                FieldSignature.inputField("dataConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
                 // @Name(value = "configuration", defaultValue = "null") AnyValue config
                 FieldSignature.inputField("configuration", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny))
             ),
@@ -90,8 +88,7 @@ public class CypherAggregation implements CompatUserAggregationFunction {
         @Name("graphName") TextValue graphName,
         @Name("sourceNode") AnyValue sourceNode,
         @Name("targetNode") AnyValue targetNode,
-        @Name("nodesConfig") AnyValue nodesConfig,
-        @Name("relationshipConfig") AnyValue relationshipConfig,
+        @Name("dataConfig") AnyValue dataConfig,
         @Name("configuration") AnyValue config
     ) {
         throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
