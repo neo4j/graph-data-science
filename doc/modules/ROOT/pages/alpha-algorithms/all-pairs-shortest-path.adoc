@@ -157,8 +157,7 @@ RETURN gds.graph.project(
   'cypherGraph',
   src,
   trg,
-  {},
-  {relationshipType: type(r), properties: {cost: r.cost}},
+  {relationshipType: type(r), relationshipProperties: {cost: r.cost}},
   {undirectedRelationshipTypes: ['ROAD']
 })
 ----

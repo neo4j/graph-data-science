@@ -111,9 +111,9 @@ OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
 RETURN gds.graph.project('personsCypher', n, m,
   {
     sourceNodeLabels: labels(n),
-    targetNodeLabels: labels(m)
-  },
-  { relationshipType: type(r) }
+    targetNodeLabels: labels(m),
+    relationshipType: type(r)
+  }
 )
 ----
 

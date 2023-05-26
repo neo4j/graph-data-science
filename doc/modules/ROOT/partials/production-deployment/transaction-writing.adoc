@@ -16,9 +16,7 @@ Example for incorrect use.
 
 // Project a graph
 MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
-RETURN gds.graph.project(
-  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }
-);
+RETURN gds.graph.project('test', g, a, { relationshipType: 'IS_ASSOCIATED_WITH' });
 
 // Delete the old stuff
 MATCH ()-[r:SIMILAR_TO]->() DELETE r;
@@ -57,9 +55,7 @@ Project a graph.
 :BEGIN
 
 MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
-RETURN gds.graph.project(
-  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }
-);
+RETURN gds.graph.project('test', g, a, { relationshipType: 'IS_ASSOCIATED_WITH' });
 
 :COMMIT
 ----
@@ -96,7 +92,7 @@ static final String CYPHER_DROP_GDS_GRAPH_IF_EXISTS =
 static final String CYPHER_PROJECT_GDS_GRAPH_ARTIST_GENRE =
     "MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)" +
     "RETURN gds.graph.project(" +
-    "  'test', g, a, null, { relationshipType: 'IS_ASSOCIATED_WITH' }" +
+    "  'test', g, a, { relationshipType: 'IS_ASSOCIATED_WITH' }" +
     ")";
 
 // Runs NodeSimilarity in `write` mode over the in-memory graph
