@@ -43,6 +43,15 @@ public class AlgorithmFactoryGenerator {
         this.typeNames = typeNames;
     }
 
+    TypeSpec generate(Optional<AnnotationSpec> generatedAnnotationSpec) {
+        return typeSpec(generatedAnnotationSpec).toBuilder()
+            .addMethod(buildMethod())
+            .addMethod(taskNameMethod())
+            .addMethod(progressTaskMethod())
+            .addMethod(memoryEstimationMethod())
+            .build();
+    }
+
     TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec) {
         var algorithmClassName = typeNames.algorithm();
 
@@ -57,15 +66,10 @@ public class AlgorithmFactoryGenerator {
 
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
-        typeSpecBuilder.addMethod(buildMethod());
-        typeSpecBuilder.addMethod(taskNameMethod());
-        typeSpecBuilder.addMethod(progressTaskMethod());
-        typeSpecBuilder.addMethod(memoryEstimationMethod());
-
         return typeSpecBuilder.build();
     }
 
-    private MethodSpec buildMethod() {
+    MethodSpec buildMethod() {
         return MethodSpec.methodBuilder("build")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -77,7 +81,7 @@ public class AlgorithmFactoryGenerator {
             .build();
     }
 
-    private MethodSpec taskNameMethod() {
+    MethodSpec taskNameMethod() {
         return MethodSpec.methodBuilder("taskName")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -86,7 +90,7 @@ public class AlgorithmFactoryGenerator {
             .build();
     }
 
-    private MethodSpec progressTaskMethod() {
+    MethodSpec progressTaskMethod() {
         return MethodSpec.methodBuilder("progressTask")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -97,7 +101,7 @@ public class AlgorithmFactoryGenerator {
             .build();
     }
 
-    private MethodSpec memoryEstimationMethod() {
+    MethodSpec memoryEstimationMethod() {
         return MethodSpec.methodBuilder("memoryEstimation")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
