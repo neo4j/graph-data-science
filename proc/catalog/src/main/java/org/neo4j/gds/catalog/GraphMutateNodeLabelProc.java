@@ -19,12 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.beta.filter.NodesFilter;
-import org.neo4j.gds.config.MutateLabelConfig;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,10 +26,8 @@ import org.neo4j.procedure.Procedure;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.NodeFilterParser.parseAndValidate;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMutateNodeLabelProc extends CatalogProc {
@@ -49,42 +41,7 @@ public class GraphMutateNodeLabelProc extends CatalogProc {
     ) throws ParseException {
 
         ProcPreconditions.check();
+        return NodeLabelMutator.mutateNodeLabel(graphName, nodeLabel, configuration, executionContext());
 
-        var procedureConfig = MutateLabelConfig.of(configuration);
-        var graphStore = graphStoreFromCatalog(graphName).graphStore();
-        var nodeFilter = parseAndValidate(graphStore, procedureConfig.nodeFilter());
-        var nodeLabelToMutate = NodeLabel.of(nodeLabel);
-
-        var resultBuilder = MutateLabelResult.builder(graphName, nodeLabel).withConfig(procedureConfig.toMap());
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            var filteredNodes = NodesFilter.filterNodes(
-                graphStore,
-                nodeFilter,
-                procedureConfig.concurrency(),
-                Map.of(),
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER
-            );
-
-            var nodeCounter = new LongAdder();
-            var idMap = filteredNodes.idMap();
-            graphStore.addNodeLabel(nodeLabelToMutate);
-            idMap.forEachNode(
-                nodeId -> {
-                    var originalNodeId = idMap.toOriginalNodeId(nodeId);
-                    var mappedNodeId = graphStore.nodes().safeToMappedNodeId(originalNodeId);
-                    graphStore.nodes().addNodeIdToLabel(mappedNodeId, nodeLabelToMutate);
-                    nodeCounter.increment();
-                    return true;
-                }
-            );
-
-            resultBuilder
-                .withNodeLabelsWritten(nodeCounter.longValue())
-                .withNodeCount(graphStore.nodeCount());
-        }
-
-
-        return Stream.of(resultBuilder.build());
     }
 }
