@@ -38,7 +38,9 @@ Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties
 == Syntax
 
 A Cypher aggregation is used in a query as an aggregation over the relationships that are being projected.
-It takes three mandatory arguments: `graphName`, `sourceNode` and `targetNode`.
+It takes two mandatory arguments: `graphName`, and `sourceNode`.
+The third parameter is `targetNode` and is usually provided.
+The parameter is optional and can be `null` to project an unconnected node.
 The next and fourth optional `dataConfig` parameter can be used to project node properties and labels as well as relationship properties and type.
 The last and fifth optional `configuration` parameter can be used for general configuration of the projection such as `readConcurrency`.
 
