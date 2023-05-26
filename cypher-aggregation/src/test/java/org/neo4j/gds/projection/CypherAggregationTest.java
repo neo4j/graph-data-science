@@ -173,9 +173,12 @@ class CypherAggregationTest extends BaseProcTest {
             "    'g'," +
             "    data[0]," +
             "    data[1]," +
-            "    {sourceNodeLabels: data[2], sourceNodeProperties: data[3]}," +
-            "    {relationshipType: data[4], properties: data[5]}," +
-            "    {}" +
+            "    {" +
+            "        sourceNodeLabels: data[2]," +
+            "        sourceNodeProperties: data[3]," +
+            "        relationshipType: data[4]," +
+            "        relationshipProperties: data[5]" +
+            "    }" +
             ")";
 
         runQuery(query);
@@ -274,7 +277,7 @@ class CypherAggregationTest extends BaseProcTest {
             }).collect(Collectors.toList());
 
             runQuery(
-                "UNWIND $data AS data WITH data RETURN gds.graph.project('g', data[0], data[1], {}, {}, {readConcurrency: 1})",
+                "UNWIND $data AS data WITH data RETURN gds.graph.project('g', data[0], data[1], {}, {readConcurrency: 1})",
                 Map.of("data", rows)
             );
 
@@ -333,8 +336,8 @@ class CypherAggregationTest extends BaseProcTest {
                     "OPTIONAL MATCH (s)-[r:REL]->(t:B) " +
                     "WITH s, t, r " +
                     "ORDER BY id(s) DESC " +
-                    "RETURN gds.graph.project('g', s, t, {}," +
-                    " { properties: { weight: coalesce(r.weight, 13.37) } }" +
+                    "RETURN gds.graph.project('g', s, t," +
+                    " { relationshipProperties: { weight: coalesce(r.weight, 13.37) } }" +
                     ")"
             );
 
@@ -503,7 +506,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testRelationshipType(String type) {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-                "gds.graph.project('g', s, t, null," +
+                "gds.graph.project('g', s, t," +
                 "   { relationshipType: " + type + " }" +
                 ")");
 
@@ -521,7 +524,7 @@ class CypherAggregationTest extends BaseProcTest {
     void ignoreRelationshipTypeIfTargetIsNull() {
         runQuery(
             "UNWIND [[1, null, null], [1, 2, 'REL']] AS data" +
-                " RETURN gds.graph.project('g', data[0], data[1], {}, {relationshipType: data[2]})"
+                " RETURN gds.graph.project('g', data[0], data[1], {relationshipType: data[2]})"
         );
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
@@ -545,8 +548,8 @@ class CypherAggregationTest extends BaseProcTest {
     void testSingleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-                "gds.graph.project('g', s, t, null," +
-                "   { properties: r {.prop} }" +
+                "gds.graph.project('g', s, t," +
+                "   { relationshipProperties: r {.prop} }" +
                 ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
@@ -583,8 +586,8 @@ class CypherAggregationTest extends BaseProcTest {
     void testMultipleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-                "gds.graph.project('g', s, t, null, " +
-                "   { properties: r {.prop, prop_by_another_name: r.prop} }" +
+                "gds.graph.project('g', s, t, " +
+                "   { relationshipProperties: r {.prop, prop_by_another_name: r.prop} }" +
                 ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
@@ -629,8 +632,8 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery(
             "MATCH (s:B { prop1: 42 })-[r:REL]->(t:B { prop1: 43 }) " +
                 "WITH s, t, avg(r.prop) AS average, sum(r.prop) AS sum, max(r.prop) AS max, min(r.prop) AS min " +
-                "RETURN gds.graph.project('g', s, t, null," +
-                "   { properties: {average: average, sum: sum, max: max, min: min} }" +
+                "RETURN gds.graph.project('g', s, t," +
+                "   { relationshipProperties: {average: average, sum: sum, max: max, min: min} }" +
                 ")"
         );
 
@@ -679,7 +682,7 @@ class CypherAggregationTest extends BaseProcTest {
                 " {s: 0, t: 1, type: 'UNDIRECTED'}, " +
                 " {s: 1, t: 2, type: 'DIRECTED'} " +
                 "] as d" +
-                " RETURN gds.graph.project('g', d.s, d.t, null, {relationshipType: d.type}, {undirectedRelationshipTypes: $undirected})",
+                " RETURN gds.graph.project('g', d.s, d.t, {relationshipType: d.type}, {undirectedRelationshipTypes: $undirected})",
             Map.of("undirected", undirectedConfig)
         );
 
@@ -720,7 +723,7 @@ class CypherAggregationTest extends BaseProcTest {
             " {s: 0, t: 1, type: 'INDEXED'}, " +
             " {s: 1, t: 2, type: 'REL'} " +
             "] as d" +
-                " RETURN gds.graph.project('g', d.s, d.t, null, {relationshipType: d.type}, {inverseIndexedRelationshipTypes: ['INDEXED']})"
+                " RETURN gds.graph.project('g', d.s, d.t, {relationshipType: d.type}, {inverseIndexedRelationshipTypes: ['INDEXED']})"
         );
 
         assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
@@ -786,7 +789,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testParsingAnInvalidConfig() {
         assertThatThrownBy(() -> runQuery(
-            "MATCH (s) RETURN gds.graph.project('g', s, null, {}, {}, {readConcurrency: 80})"))
+            "MATCH (s) RETURN gds.graph.project('g', s, null, {}, {readConcurrency: 80})"))
             .rootCause()
             .hasMessageContaining("80")
             .hasMessageContaining("readConcurrency");
@@ -797,7 +800,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testReadConcurrencyIsParsedCorrectly() {
         var configMap = (Map<String, Object>) runQuery(
             "MATCH (s)" +
-                "RETURN gds.graph.project('g', s, null, {}, {}, {readConcurrency: 2}).configuration as config",
+                "RETURN gds.graph.project('g', s, null, {}, {readConcurrency: 2}).configuration as config",
             (Result result) -> result.next().get("config")
         );
 
@@ -824,20 +827,12 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
-    void testUnknownRelationshipConfigKeys() {
-        var query = "MATCH (s)-->(t) RETURN gds.graph.project('g', s, t, null, {foo: 'bar'})";
-        assertThatThrownBy(() -> runQuery(query))
-            .rootCause()
-            .hasMessage("Unexpected configuration key: foo");
-    }
-
-    @Test
     void testUnknownRelationshipConfigKeysWithSuggestion() {
-        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, null, {property: 'bar'})";
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {relationshipProperty: 'bar'})";
         assertThatThrownBy(() -> runQuery(query))
             .rootCause()
             .hasMessage(
-                "Unexpected configuration key: property (Did you mean [properties]?)");
+                "Unexpected configuration key: property (Did you mean [relationshipProperties]?)");
     }
 
 }
