@@ -307,7 +307,8 @@ public interface Neo4jProxyApi {
         Neo4jTypes.AnyType type,
         String description,
         boolean internal,
-        boolean threadSafe
+        boolean threadSafe,
+        Optional<String> deprecatedBy
     );
 
     @SuppressForbidden(reason = "This is the compat API")

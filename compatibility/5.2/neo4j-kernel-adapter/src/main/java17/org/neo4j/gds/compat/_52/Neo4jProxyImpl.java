@@ -879,9 +879,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Neo4jTypes.AnyType type,
         String description,
         boolean internal,
-        boolean threadSafe
+        boolean threadSafe,
+        Optional<String> deprecatedBy
     ) {
-        String deprecated = null;    // no depracation
         String category = null;      // No predefined categpry (like temporal or math)
         var caseInsensitive = false; // case sensitive name match
         var isBuiltIn = false;       // is built in; never true for GDS
@@ -890,7 +890,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             name,
             inputSignature,
             type,
-            deprecated,
+            deprecatedBy.orElse(null),
             description,
             category,
             caseInsensitive,

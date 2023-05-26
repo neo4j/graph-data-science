@@ -39,6 +39,7 @@ import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
@@ -77,7 +78,9 @@ public class CypherAggregation implements CompatUserAggregationFunction {
             // not internal
             false,
             // thread-safe, yes please
-            true
+            true,
+            // not deprecated
+            Optional.empty()
         );
     }
 
