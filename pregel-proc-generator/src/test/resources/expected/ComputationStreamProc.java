@@ -28,8 +28,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.pregel.proc.PregelStreamProc;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -38,11 +36,6 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-@GdsCallable(
-    name = "gds.pregel.test.stream",
-    executionMode = ExecutionMode.STREAM,
-    description = "Test computation description"
-)
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationStreamProc extends PregelStreamProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(

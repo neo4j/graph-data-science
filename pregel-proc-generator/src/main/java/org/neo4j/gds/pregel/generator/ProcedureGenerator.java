@@ -33,8 +33,6 @@ import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.pregel.proc.PregelBaseProc;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -83,13 +81,6 @@ public class ProcedureGenerator {
     }
 
     TypeSpec typeSpec(GDSMode gdsMode, Optional<AnnotationSpec> generatedAnnotationSpec) {
-        var fullProcedureName = formatWithLocale("%s.%s", procedureBaseName, gdsMode.lowerCase());
-        var gdsCallableAnnotationBuilder = AnnotationSpec
-            .builder(GdsCallable.class)
-            .addMember("name", "$S", fullProcedureName)
-            .addMember("executionMode", "$T.$L", ExecutionMode.class, executionMode(gdsMode));
-        description.ifPresent(description -> gdsCallableAnnotationBuilder.addMember("description", "$S", description));
-
         var typeSpecBuilder = TypeSpec
             .classBuilder(typeNames.procedure(gdsMode))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -97,9 +88,7 @@ public class ProcedureGenerator {
                 typeNames.procedureBase(gdsMode),
                 typeNames.algorithm(),
                 typeNames.config()
-            ))
-            .addAnnotation(gdsCallableAnnotationBuilder.build());
-
+            ));
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
         return typeSpecBuilder.build();
     }
@@ -251,16 +240,6 @@ public class ProcedureGenerator {
             .addStatement("var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false)")
             .addStatement("return new $T().withRanIterations(ranIterations).didConverge(didConverge)", typeNames.procedureResult(gdsMode).nestedClass("Builder"))
             .build();
-    }
-
-    private ExecutionMode executionMode(GDSMode mode) {
-        switch (mode) {
-            case STREAM: return ExecutionMode.STREAM;
-            case WRITE: return ExecutionMode.WRITE_NODE_PROPERTY;
-            case MUTATE: return ExecutionMode.MUTATE_NODE_PROPERTY;
-            case STATS: return ExecutionMode.STATS;
-            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
-        }
     }
 
     private Mode neo4jProcedureMode(GDSMode mode) {

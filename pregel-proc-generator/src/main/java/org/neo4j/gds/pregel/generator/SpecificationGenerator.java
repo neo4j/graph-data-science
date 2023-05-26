@@ -29,18 +29,26 @@ import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class SpecificationGenerator {
 
     private final TypeNames typeNames;
+    private final String procedureBaseName;
+    private final Optional<String> description;
 
-    public SpecificationGenerator(TypeNames typeNames) {
+    public SpecificationGenerator(TypeNames typeNames, String procedureBaseName, Optional<String> description) {
         this.typeNames = typeNames;
+        this.procedureBaseName = procedureBaseName;
+        this.description = description;
     }
 
     public TypeSpec generate(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
@@ -66,11 +74,22 @@ public class SpecificationGenerator {
                     typeNames.procedureResult(mode)
                 ),
                 typeNames.algorithmFactory()
-            ));
+            ))
+            .addAnnotation(gdsCallableAnnotation(mode));
 
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
         return typeSpecBuilder.build();
+    }
+
+    AnnotationSpec gdsCallableAnnotation(GDSMode mode) {
+        var fullProcedureName = formatWithLocale("%s.%s", procedureBaseName, mode.lowerCase());
+        var gdsCallableAnnotationBuilder = AnnotationSpec
+            .builder(GdsCallable.class)
+            .addMember("name", "$S", fullProcedureName)
+            .addMember("executionMode", "$T.$L", ExecutionMode.class, executionMode(mode));
+        description.ifPresent(description -> gdsCallableAnnotationBuilder.addMember("description", "$S", description));
+        return gdsCallableAnnotationBuilder.build();
     }
 
     MethodSpec nameMethod() {
@@ -123,5 +142,15 @@ public class SpecificationGenerator {
             )
             .addStatement("return new $T<>()", typeNames.computationResultConsumer(mode))
             .build();
+    }
+
+    private ExecutionMode executionMode(GDSMode mode) {
+        switch (mode) {
+            case STREAM: return ExecutionMode.STREAM;
+            case WRITE: return ExecutionMode.WRITE_NODE_PROPERTY;
+            case MUTATE: return ExecutionMode.MUTATE_NODE_PROPERTY;
+            case STATS: return ExecutionMode.STATS;
+            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
+        }
     }
 }

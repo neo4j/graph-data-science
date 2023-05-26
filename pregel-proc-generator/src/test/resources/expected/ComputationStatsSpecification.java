@@ -25,12 +25,19 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.proc.PregelStatsComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 
 import java.util.Stream;
 
+@GdsCallable(
+    name = "gds.pregel.test.write",
+    executionMode = ExecutionMode.STATS,
+    description = "Test computation description"
+)
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationStatsSpecification implements AlgorithmSpec<ComputationAlgorithm, PregelResult, PregelProcedureConfig, Steam<PregelStatsResult>, ComputationAlgorithmFactory> {
 

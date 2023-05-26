@@ -37,10 +37,6 @@ class ProcedureGeneratorTest {
         var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
         var typeSpec = procedureGenerator.typeSpec(GDSMode.MUTATE, Optional.empty());
         assertThat(typeSpec.toString()).isEqualTo("" +
-            "@org.neo4j.gds.executor.GdsCallable(" + NL +
-            "    name = \"gds.bar.mutate\"," + NL +
-            "    executionMode = org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY" + NL +
-            ")" + NL +
             "public final class BarMutateProc extends org.neo4j.gds.pregel.proc.PregelMutateProc<gds.test.BarAlgorithm, gds.test.config.BarConfig> {" + NL +
             "}" + NL
         );

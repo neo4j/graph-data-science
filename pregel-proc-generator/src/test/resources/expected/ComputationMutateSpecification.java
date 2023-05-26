@@ -25,12 +25,19 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.proc.PregelMutateComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelMutateResult;
 
 import java.util.Stream;
 
+@GdsCallable(
+    name = "gds.pregel.test.write",
+    executionMode = ExecutionMode.MUTATE_NODE_PROPERTY,
+    description = "Test computation description"
+)
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationMutateSpecification implements AlgorithmSpec<ComputationAlgorithm, PregelResult, PregelProcedureConfig, Steam<PregelMutateResult>, ComputationAlgorithmFactory> {
 

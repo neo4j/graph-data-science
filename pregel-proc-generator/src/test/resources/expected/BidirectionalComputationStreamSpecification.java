@@ -26,12 +26,19 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
 import java.util.stream.Stream;
 
+@GdsCallable(
+    name = "gds.pregel.bidirectionalTest.stream",
+    executionMode = ExecutionMode.STREAM,
+    description = "Bidirectional Test computation description"
+)
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class BidrectionalComputationStreamSpecification implements AlgorithmSpec<BidirectionalComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>, BidirectionalComputationAlgorithmFactory> {
 

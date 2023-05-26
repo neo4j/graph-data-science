@@ -36,27 +36,38 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateType() {
-        var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
-        var specificationType = specificationGenerator.typeSpec(GDSMode.STATS, Optional.empty());
-
+        var typeNames = new TypeNames("gds.test", "Foo", TypeName.get(PregelProcedureConfig.class));
+        var specificationGenerator = new SpecificationGenerator(typeNames, "foo.foo", Optional.empty());
+        var specificationType = specificationGenerator.typeSpec(GDSMode.MUTATE, Optional.empty());
         assertThat(specificationType.toString()).isEqualTo("" +
-            "public final class FooStatsSpecification implements org.neo4j.gds.executor.AlgorithmSpec<" +
+            "@org.neo4j.gds.executor.GdsCallable(" + NL +
+            "    name = \"foo.foo.mutate\"," + NL +
+            "    executionMode = org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY" + NL +
+            ")" + NL +
+            "public final class FooMutateSpecification implements org.neo4j.gds.executor.AlgorithmSpec<" +
             "gds.test.FooAlgorithm, " +
             "org.neo4j.gds.beta.pregel.PregelResult, " +
             "org.neo4j.gds.beta.pregel.PregelProcedureConfig, " +
-            "java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelStatsResult>, " +
-            "gds.test.FooAlgorithmFactory> {" +
-            System.lineSeparator() +
-            "}" +
-            System.lineSeparator()
+            "java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelMutateResult>, " +
+            "gds.test.FooAlgorithmFactory> {" + NL +
+            "}" + NL
+        );
+    }
+
+    @Test
+    void shouldGenerateGdsCallableAnnotationWithDescription() {
+        var typeNames = new TypeNames("gds.test", "Foo", TypeName.get(PregelProcedureConfig.class));
+        var specificationGenerator = new SpecificationGenerator(typeNames, "foo.foo", Optional.of("a great description"));
+        var specificationType = specificationGenerator.gdsCallableAnnotation(GDSMode.MUTATE);
+        assertThat(specificationType.toString()).isEqualTo("" +
+            "@org.neo4j.gds.executor.GdsCallable(name = \"foo.foo.mutate\", executionMode = org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY, description = \"a great description\")"
         );
     }
 
     @Test
     void shouldGenerateNameMethod() {
-        var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var typeNames = new TypeNames("gds.test", "Foo", TypeName.get(PregelProcedureConfig.class));
+        var specificationGenerator = new SpecificationGenerator(typeNames, "doesn't matter", Optional.empty());
         assertThat(specificationGenerator.nameMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public java.lang.String name() {" + NL +
@@ -67,8 +78,8 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateAlgorithmFactoryMethod() {
-        var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var typeNames = new TypeNames("gds.test", "Foo", TypeName.get(PregelProcedureConfig.class));
+        var specificationGenerator = new SpecificationGenerator(typeNames, "doesn't matter", Optional.empty());
         assertThat(specificationGenerator.algorithmFactoryMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public gds.test.FooAlgorithmFactory algorithmFactory(" + NL +
@@ -80,8 +91,8 @@ class SpecificationGeneratorTest {
 
     @Test
     void shouldGenerateNewConfigFunctionMethod() {
-        var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var typeNames = new TypeNames("gds.test", "Foo", TypeName.get(PregelProcedureConfig.class));
+        var specificationGenerator = new SpecificationGenerator(typeNames, "doesn't matter", Optional.empty());
         assertThat(specificationGenerator.newConfigFunctionMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.executor.NewConfigFunction<org.neo4j.gds.beta.pregel.PregelProcedureConfig> newConfigFunction(" + NL +
@@ -94,7 +105,8 @@ class SpecificationGeneratorTest {
     @Test
     void shouldGenerateComputationResultConsumerMethod() {
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var typeNames = new TypeNames("gds.test", "Foo", configTypeName);
+        var specificationGenerator = new SpecificationGenerator(typeNames, "doesn't matter", Optional.empty());
         var computationResultConsumerMethod = specificationGenerator.computationResultConsumerMethod(GDSMode.STATS).toString();
         assertThat(computationResultConsumerMethod).isEqualTo("" +
             "@java.lang.Override" + NL +
@@ -109,7 +121,8 @@ class SpecificationGeneratorTest {
     @ParameterizedTest
     void shouldGenerateDifferentlyPerMode(GDSMode mode) {
         var configTypeName = TypeName.get(PregelProcedureConfig.class);
-        var specificationGenerator = new SpecificationGenerator(new TypeNames("gds.test", "Foo", configTypeName));
+        var typeNames = new TypeNames("gds.test", "Foo", configTypeName);
+        var specificationGenerator = new SpecificationGenerator(typeNames, "doesn't matter", Optional.empty());
         var specificationType = specificationGenerator.typeSpec(mode, Optional.empty());
         assertThat(specificationType.toString())
             .contains("org.neo4j.gds.pregel.proc.Pregel" + mode.camelCase() + "Result");
