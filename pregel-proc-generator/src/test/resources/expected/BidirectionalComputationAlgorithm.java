@@ -36,7 +36,8 @@ public final class BidirectionalComputationAlgorithm extends Algorithm<PregelRes
     BidirectionalComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
                                       ProgressTracker progressTracker) {
         super(progressTracker);
-        this.pregelJob = Pregel.create(graph, configuration, new BidirectionalComputation(), Pools.DEFAULT, progressTracker);
+        var computation = new BidirectionalComputation();
+        this.pregelJob = Pregel.create(graph, configuration, computation, Pools.DEFAULT, progressTracker);
     }
 
     @Override

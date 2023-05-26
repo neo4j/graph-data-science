@@ -50,7 +50,7 @@ class PregelGenerator {
 
         var typeSpecs = new ArrayList<TypeSpec>();
 
-        var algorithmSpec = new AlgorithmGenerator(typeNames).typeSpec(generatedAnnotationSpec);
+        var algorithmSpec = new AlgorithmGenerator(typeNames).generate(generatedAnnotationSpec);
         typeSpecs.add(withOriginatingElement(algorithmSpec, originatingElement));
 
         var algorithmFactorySpec = new AlgorithmFactoryGenerator(typeNames).generate(generatedAnnotationSpec);

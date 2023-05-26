@@ -21,7 +21,6 @@ package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -36,7 +35,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
 import javax.lang.model.element.Modifier;
-import java.util.Map;
 import java.util.Optional;
 
 class AlgorithmGenerator {
@@ -44,6 +42,15 @@ class AlgorithmGenerator {
 
     AlgorithmGenerator(TypeNames typeNames) {
         this.typeNames = typeNames;
+    }
+
+    TypeSpec generate(Optional<AnnotationSpec> generatedAnnotationSpec) {
+        return typeSpec(generatedAnnotationSpec).toBuilder()
+            .addField(pregelJobField())
+            .addMethod(constructor())
+            .addMethod(setTerminatonFlag())
+            .addMethod(computeMethod())
+            .build();
     }
 
     TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec) {
@@ -57,15 +64,10 @@ class AlgorithmGenerator {
 
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
-        typeSpecBuilder.addField(pregelJobField());
-        typeSpecBuilder.addMethod(constructor());
-        typeSpecBuilder.addMethod(setTerminatonFlag());
-        typeSpecBuilder.addMethod(computeMethod());
-
         return typeSpecBuilder.build();
     }
 
-    private FieldSpec pregelJobField() {
+    FieldSpec pregelJobField() {
         return FieldSpec
             .builder(
                 ParameterizedTypeName.get(
@@ -79,35 +81,21 @@ class AlgorithmGenerator {
             .build();
     }
 
-    private MethodSpec constructor() {
-        var configurationVar = "configuration";
+    MethodSpec constructor() {
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
-            .addParameter(typeNames.config(), configurationVar)
+            .addParameter(typeNames.config(), "configuration")
             .addParameter(ProgressTracker.class, "progressTracker")
-            .addStatement(CodeBlock.builder().add("super(progressTracker)").build())
+            .addStatement("super(progressTracker)")
+            .addStatement("var computation = new $T()", typeNames.computation())
             .addStatement(
-                CodeBlock.builder().addNamed(
-                    "this.pregelJob = $pregel:T.create(" +
-                    "graph, " +
-                    "$config:N, " +
-                    "new $computation:T(), " +
-                    "$pools:T.DEFAULT, " +
-                    "progressTracker" +
-                    ")",
-                    Map.of(
-                        "pregel", Pregel.class,
-                        "pools", Pools.class,
-                        "config", configurationVar,
-                        "computation", typeNames.computation()
-                    )
-                )
-                    .build()
-            )
-            .build();
+                "this.pregelJob = $T.create(graph, configuration, computation, $T.DEFAULT, progressTracker)",
+                Pregel.class,
+                Pools.class
+            ).build();
     }
 
-    private MethodSpec computeMethod() {
+    MethodSpec computeMethod() {
         return MethodSpec.methodBuilder("compute")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -116,11 +104,11 @@ class AlgorithmGenerator {
             .build();
     }
 
-    private MethodSpec setTerminatonFlag() {
+    MethodSpec setTerminatonFlag() {
         return MethodSpec.methodBuilder("setTerminationFlag")
             .addAnnotation(Override.class)
-            .addParameter(TerminationFlag.class, "terminationFlag")
             .addModifiers(Modifier.PUBLIC)
+            .addParameter(TerminationFlag.class, "terminationFlag")
             .addStatement("super.setTerminationFlag(terminationFlag)")
             .addStatement("pregelJob.setTerminationFlag(terminationFlag)")
             .build();
