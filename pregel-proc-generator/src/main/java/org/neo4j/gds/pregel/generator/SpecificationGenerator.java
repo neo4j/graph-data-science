@@ -32,6 +32,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.pregel.proc.PregelBaseProc;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -51,13 +53,18 @@ public class SpecificationGenerator {
         this.description = description;
     }
 
-    public TypeSpec generate(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
-        return typeSpec(mode, generatedAnnotationSpec).toBuilder()
+    public TypeSpec generate(GDSMode mode, boolean requiresInverseIndex, Optional<AnnotationSpec> generatedAnnotationSpec) {
+        var builder = typeSpec(mode, generatedAnnotationSpec).toBuilder()
             .addMethod(nameMethod())
             .addMethod(algorithmFactoryMethod())
             .addMethod(newConfigFunctionMethod())
-            .addMethod(computationResultConsumerMethod(mode))
-            .build();
+            .addMethod(computationResultConsumerMethod(mode));
+
+        if (requiresInverseIndex) {
+            builder.addMethod(inverseIndexValidationOverride());
+        }
+
+        return builder.build();
     }
 
     TypeSpec typeSpec(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
@@ -141,6 +148,19 @@ public class SpecificationGenerator {
                 )
             )
             .addStatement("return new $T<>()", typeNames.computationResultConsumer(mode))
+            .build();
+    }
+
+    MethodSpec inverseIndexValidationOverride() {
+        return MethodSpec.methodBuilder("validationConfig")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(ParameterizedTypeName.get(
+                ClassName.get(ValidationConfiguration.class),
+                typeNames.config()
+            ))
+            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
+            .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
             .build();
     }
 

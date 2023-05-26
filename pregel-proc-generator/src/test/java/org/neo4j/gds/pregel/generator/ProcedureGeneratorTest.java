@@ -37,7 +37,7 @@ class ProcedureGeneratorTest {
         var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
         var typeSpec = procedureGenerator.typeSpec(GDSMode.MUTATE, Optional.empty());
         assertThat(typeSpec.toString()).isEqualTo("" +
-            "public final class BarMutateProc extends org.neo4j.gds.pregel.proc.PregelMutateProc<gds.test.BarAlgorithm, gds.test.config.BarConfig> {" + NL +
+            "public final class BarMutateProc extends org.neo4j.gds.BaseProc {" + NL +
             "}" + NL
         );
     }
@@ -55,7 +55,9 @@ class ProcedureGeneratorTest {
             "public java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelMutateResult> mutate(" + NL +
             "    @org.neo4j.procedure.Name(\"graphName\") java.lang.String graphName," + NL +
             "    @org.neo4j.procedure.Name(value = \"configuration\", defaultValue = \"{}\") java.util.Map<java.lang.String, java.lang.Object> configuration) {" + NL +
-            "  return mutate(compute(graphName, configuration));" + NL +
+            "  var specification = new gds.test.BarMutateSpecification();" + NL +
+            "  var executor = new org.neo4j.gds.executor.ProcedureExecutor<>(specification, executionContext());" + NL +
+            "  return executor.compute(graphName, configuration);" + NL +
             "}" + NL
         );
     }
@@ -74,49 +76,33 @@ class ProcedureGeneratorTest {
             "public java.util.stream.Stream<org.neo4j.gds.results.MemoryEstimateResult> estimate(" + NL +
             "    @org.neo4j.procedure.Name(\"graphNameOrConfiguration\") java.lang.Object graphNameOrConfiguration," + NL +
             "    @org.neo4j.procedure.Name(\"algoConfiguration\") java.util.Map<java.lang.String, java.lang.Object> algoConfiguration) {" + NL +
-            "  return computeEstimate(graphNameOrConfiguration, algoConfiguration);" + NL +
+            "  var specification = new gds.test.BarMutateSpecification();" + NL +
+            "  var executor = new org.neo4j.gds.executor.MemoryEstimationExecutor<>(specification, executionContext(), transactionContext());" + NL +
+            "  return executor.computeEstimate(graphNameOrConfiguration, algoConfiguration);" + NL +
             "}" + NL
         );
     }
 
     @Test
-    void shouldGenerateNewConfigMethod() {
+    void shouldGenerateNodeExporterBuilderField() {
         var typeNames = new TypeNames("gds.test", "Bar", ClassName.get("gds.test.config", "BarConfig"));
         var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
-        var methodSpec = procedureGenerator.newConfigMethod();
-        assertThat(methodSpec.toString()).isEqualTo("" +
-            "@java.lang.Override" + NL +
-            "protected gds.test.config.BarConfig newConfig(java.lang.String username," + NL +
-            "    org.neo4j.gds.core.CypherMapWrapper config) {" + NL +
-            "  return gds.test.config.BarConfig.of(config);" + NL +
-            "}" + NL
+        var spec = procedureGenerator.nodeExporterBuilderField();
+        assertThat(spec.toString()).isEqualTo("" +
+            "@org.neo4j.procedure.Context" + NL +
+            "public org.neo4j.gds.core.write.NodePropertyExporterBuilder nodePropertyExporterBuilder;" + NL
         );
     }
 
     @Test
-    void shouldGenerateAlgorithmFactoryMethod() {
+    void shouldGenerateExecutionContextOverride() {
         var typeNames = new TypeNames("gds.test", "Bar", ClassName.get("gds.test.config", "BarConfig"));
         var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
-        var methodSpec = procedureGenerator.algorithmFactoryMethod();
+        var methodSpec = procedureGenerator.executionContextOverride();
         assertThat(methodSpec.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public org.neo4j.gds.GraphAlgorithmFactory<gds.test.BarAlgorithm, gds.test.config.BarConfig> algorithmFactory(" + NL +
-            "    org.neo4j.gds.executor.ExecutionContext executionContext) {" + NL +
-            "  return new gds.test.BarAlgorithmFactory();" + NL +
-            "}" + NL
-        );
-    }
-
-    @Test
-    void shouldGenerateValidationConfigMethod() {
-        var typeNames = new TypeNames("gds.test", "Bar", ClassName.get("gds.test.config", "BarConfig"));
-        var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
-        var methodSpec = procedureGenerator.inverseIndexValidationOverride();
-        assertThat(methodSpec.toString()).isEqualTo("" +
-            "@java.lang.Override" + NL +
-            "public org.neo4j.gds.executor.validation.ValidationConfiguration<gds.test.config.BarConfig> validationConfig(" + NL +
-            "    org.neo4j.gds.executor.ExecutionContext executionContext) {" + NL +
-            "  return org.neo4j.gds.pregel.proc.PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());" + NL +
+            "public org.neo4j.gds.executor.ExecutionContext executionContext() {" + NL +
+            "  return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);" + NL +
             "}" + NL
         );
     }

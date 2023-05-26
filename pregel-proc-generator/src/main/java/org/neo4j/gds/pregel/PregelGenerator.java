@@ -65,10 +65,10 @@ class PregelGenerator {
 
         var requiresInverseIndex = pregelSpec.requiresInverseIndex();
         for (var mode : pregelSpec.procedureModes()) {
-            var procedure = procedureGenerator.generate(mode, requiresInverseIndex, generatedAnnotationSpec);
+            var procedure = procedureGenerator.generate(mode, generatedAnnotationSpec);
             typeSpecs.add(withOriginatingElement(procedure, originatingElement));
 
-            var specification = specificationGenerator.generate(mode, generatedAnnotationSpec);
+            var specification = specificationGenerator.generate(mode, requiresInverseIndex, generatedAnnotationSpec);
             typeSpecs.add(withOriginatingElement(specification, originatingElement));
         }
         return typeSpecs.stream();

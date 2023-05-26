@@ -24,11 +24,13 @@ import javax.annotation.processing.Generated;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResultConsumer
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.pregel.proc.PregelBaseProc;
 import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
@@ -40,7 +42,7 @@ import java.util.stream.Stream;
     description = "Bidirectional Test computation description"
 )
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
-public final class BidrectionalComputationStreamSpecification implements AlgorithmSpec<BidirectionalComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>, BidirectionalComputationAlgorithmFactory> {
+public final class BidirectionalComputationStreamSpecification implements AlgorithmSpec<BidirectionalComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>, BidirectionalComputationAlgorithmFactory> {
 
     @Override
     public String name() {
@@ -60,5 +62,11 @@ public final class BidrectionalComputationStreamSpecification implements Algorit
     @Override
     public ComputationResultConsumer<BidirectionalComputationAlgorithm, PregelResult, PregelProcedureConfig, Stream<PregelStreamResult>> computationResultConsumer() {
         return new PregelStreamComputationResultConsumer<>();
+    }
+
+    @Override
+    public ValidationConfiguration<PregelProcedureConfig> validationConfig(
+        ExecutionContext executionContext) {
+        return PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());
     }
 }

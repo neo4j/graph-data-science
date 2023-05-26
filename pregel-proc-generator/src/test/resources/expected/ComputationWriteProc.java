@@ -23,23 +23,29 @@ import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
-import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.pregel.proc.PregelWriteProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
-public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgorithm, PregelProcedureConfig> {
+public final class ComputationWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
+    }
+
     @Procedure(
         name = "gds.pregel.test.write",
         mode = Mode.WRITE
@@ -47,7 +53,9 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     @Description("Test computation description")
     public Stream<PregelWriteResult> write(@Name("graphName") String graphName,
                                            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return write(compute(graphName, configuration));
+        var specification = new ComputationWriteSpecification();
+        var executor = new ProcedureExecutor<>(specification, executionContext());
+        return executor.compute(graphName, configuration);
     }
 
     @Procedure(
@@ -58,25 +66,8 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     public Stream<MemoryEstimateResult> estimate(
         @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
-        ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
-        ExecutionContext executionContext) {
-        var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0);
-        var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false);
-        return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
-    }
-
-    @Override
-    protected PregelProcedureConfig newConfig(String username, CypherMapWrapper config) {
-        return PregelProcedureConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ComputationAlgorithmFactory();
+        var specification = new ComputationWriteSpecification();
+        var executor = new MemoryEstimationExecutor<>(specification, executionContext(), transactionContext());
+        return executor.computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
