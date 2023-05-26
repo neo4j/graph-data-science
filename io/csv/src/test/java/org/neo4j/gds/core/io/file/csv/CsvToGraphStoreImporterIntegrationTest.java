@@ -30,7 +30,7 @@ import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
-import org.neo4j.gds.core.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfigImpl;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -155,9 +155,10 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     private GraphStoreToFileExporterConfig exportConfig(int concurrency) {
-        return ImmutableGraphStoreToFileExporterConfig.builder()
+        return GraphStoreToFileExporterConfigImpl.builder()
             .exportName("my-export")
             .writeConcurrency(concurrency)
+            .username("")
             .includeMetaData(true)
             .build();
     }

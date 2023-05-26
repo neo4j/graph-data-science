@@ -21,15 +21,18 @@ package org.neo4j.gds.core.io.file;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseConfig {
+
+    @Value.Default
+    default boolean includeMetaData() {
+        return false;
+    }
 
     @Configuration.Parameter
     @Value.Default

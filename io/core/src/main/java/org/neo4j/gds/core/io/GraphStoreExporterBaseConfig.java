@@ -28,12 +28,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
-    @Configuration.Ignore
-    @Value.Default
-    default boolean includeMetaData() {
-        return false;
-    }
-
     @Value.Default
     default String defaultRelationshipType() {
         return RelationshipType.ALL_RELATIONSHIPS.name;

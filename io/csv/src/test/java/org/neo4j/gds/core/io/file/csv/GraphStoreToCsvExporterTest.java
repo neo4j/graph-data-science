@@ -29,7 +29,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfigImpl;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -135,10 +135,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportTopology() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
+            .username("")
             .includeMetaData(true)
             .build();
 
@@ -227,11 +228,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphProperties() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
             .includeMetaData(false)
+            .username("")
             .build();
 
         var graphPropertyValues = new LongGraphPropertyValues() {
@@ -272,11 +274,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportMultithreaded() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(2)
             .includeMetaData(true)
+            .username("")
             .build();
 
         // export db
@@ -330,11 +333,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportGraphPropertiesMultithreaded() throws IOException {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(4)
             .includeMetaData(false)
+            .username("")
             .build();
 
         var graphPropertyValues = new LongGraphPropertyValues() {
@@ -393,11 +397,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaAndDatabaseId() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
             .includeMetaData(true)
+            .username("")
             .build();
 
         graphStore.addGraphProperty("graphProp", new LongGraphPropertyValues() {
@@ -475,7 +480,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportUsername() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .username("UserA")
@@ -495,11 +500,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaWithoutProperties() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
             .includeMetaData(true)
+            .username("")
             .build();
 
         var exporter = GraphStoreToCsvExporter.create(noPropertiesGraphStore, config, tempDir);
@@ -538,10 +544,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             .build()
             .build();
 
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
+            .username("")
             .includeMetaData(false)
             .build();
 
@@ -572,11 +579,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphCapabilities() {
-        var config = ImmutableGraphStoreToFileExporterConfig
+        var config = GraphStoreToFileExporterConfigImpl
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
             .includeMetaData(true)
+            .username("")
             .build();
 
         var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
