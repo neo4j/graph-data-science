@@ -24,19 +24,21 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.pregel.generator.TypeNames;
 import org.neo4j.gds.pregel.proc.PregelBaseProc;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -50,136 +52,65 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class ProcedureGenerator {
+class ProcedureGenerator {
 
-    final TypeNames typeNames;
-    private final String procedureName;
+    private final TypeNames typeNames;
+    private final String procedureBaseName;
     private final Optional<String> description;
 
-    ProcedureGenerator(TypeNames typeNames, String procedureName, Optional<String> description) {
+    ProcedureGenerator(
+        TypeNames typeNames,
+        String procedureBaseName,
+        Optional<String> description
+    ) {
         this.typeNames = typeNames;
-        this.procedureName = procedureName;
+        this.procedureBaseName = procedureBaseName;
         this.description = description;
     }
 
-    static TypeSpec forMode(
-        GDSMode mode,
-        Optional<AnnotationSpec> generatedAnnotationSpec,
-        PregelValidation.Spec pregelSpec,
-        TypeNames typeNames
-    ) {
-        var description = pregelSpec.description();
-        var procedureName = pregelSpec.procedureName();
-        var requiresInverseIndex = pregelSpec.requiresInverseIndex();
-        switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
-            case WRITE: return new WriteProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
-            case MUTATE: return new MutateProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
-            case STATS: return new StatsProcedureGenerator(typeNames, procedureName, description).typeSpec(generatedAnnotationSpec, requiresInverseIndex);
-            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
-        }
-    }
-
-    abstract GDSMode procGdsMode();
-
-    abstract Mode procExecMode();
-
-    abstract Class<?> procBaseClass();
-
-    abstract Class<?> procResultClass();
-
-    abstract MethodSpec procResultMethod();
-
-    TypeSpec typeSpec(Optional<AnnotationSpec> generatedAnnotationSpec, boolean requiresInverseIndex) {
-        var configTypeName = typeNames.config();
-        var procedureClassName = typeNames.procedure(procGdsMode());
-        var algorithmClassName = typeNames.algorithm();
-
-        var typeSpecBuilder = getTypeSpecBuilder(configTypeName, procedureClassName, algorithmClassName);
-
-        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
-
-        typeSpecBuilder.addMethod(procMethod());
-        typeSpecBuilder.addMethod(procEstimateMethod());
-        typeSpecBuilder.addMethod(procResultMethod());
+    TypeSpec generate(GDSMode gdsMode, boolean requiresInverseIndex, Optional<AnnotationSpec> generatedAnnotationSpec) {
+        var typeSpecBuilder = typeSpec(gdsMode, generatedAnnotationSpec).toBuilder();
+        typeSpecBuilder.addMethod(procMethod(gdsMode));
+        typeSpecBuilder.addMethod(procEstimateMethod(gdsMode));
+        typeSpecBuilder.addMethod(procResultMethod(gdsMode));
         typeSpecBuilder.addMethod(newConfigMethod());
         typeSpecBuilder.addMethod(algorithmFactoryMethod());
 
         if (requiresInverseIndex) {
-            typeSpecBuilder.addMethod(validationConfigMethod());
+            typeSpecBuilder.addMethod(inverseIndexValidationOverride());
         }
 
         return typeSpecBuilder.build();
     }
 
-    @NotNull
-    private TypeSpec.Builder getTypeSpecBuilder(
-        TypeName configTypeName,
-        ClassName procedureClassName,
-        ClassName algorithmClassName
-    ) {
-
-        ExecutionMode executionMode;
-        switch (procGdsMode()) {
-            case STATS: executionMode = ExecutionMode.STATS; break;
-            case WRITE: executionMode = ExecutionMode.WRITE_NODE_PROPERTY; break;
-            case MUTATE: executionMode = ExecutionMode.MUTATE_NODE_PROPERTY; break;
-            case STREAM: executionMode = ExecutionMode.STREAM; break;
-            default: throw new IllegalArgumentException("Unsupported procedure mode: " + procGdsMode());
-        }
-
+    TypeSpec typeSpec(GDSMode gdsMode, Optional<AnnotationSpec> generatedAnnotationSpec) {
+        var fullProcedureName = formatWithLocale("%s.%s", procedureBaseName, gdsMode.lowerCase());
         var gdsCallableAnnotationBuilder = AnnotationSpec
             .builder(GdsCallable.class)
-            .addMember("name", "$S", formatWithLocale("%s.%s", procedureName, procGdsMode().lowerCase()))
-            .addMember("executionMode", "$T.$L", ExecutionMode.class, executionMode);
-        description.ifPresent(description ->
-            gdsCallableAnnotationBuilder.addMember("description", "$S", description)
-        );
+            .addMember("name", "$S", fullProcedureName)
+            .addMember("executionMode", "$T.$L", ExecutionMode.class, executionMode(gdsMode));
+        description.ifPresent(description -> gdsCallableAnnotationBuilder.addMember("description", "$S", description));
 
-        return TypeSpec
-            .classBuilder(procedureClassName)
+        var typeSpecBuilder = TypeSpec
+            .classBuilder(typeNames.procedure(gdsMode))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
-                ClassName.get(procBaseClass()),
-                algorithmClassName,
-                configTypeName
+                typeNames.procedureBase(gdsMode),
+                typeNames.algorithm(),
+                typeNames.config()
             ))
             .addAnnotation(gdsCallableAnnotationBuilder.build());
+
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
+        return typeSpecBuilder.build();
     }
 
-    private MethodSpec procMethod() {
-        var methodBuilder = procMethodSignature(procExecMode());
-        description.ifPresent(description -> methodBuilder.addAnnotation(
-            AnnotationSpec.builder(Description.class)
-                .addMember("value", "$S", description)
-                .build()
-        ));
-        return methodBuilder
-            .addStatement("return $L(compute(graphName, configuration))", procGdsMode().lowerCase())
-            .returns(ParameterizedTypeName.get(Stream.class, procResultClass()))
-            .build();
-    }
-
-    private MethodSpec procEstimateMethod() {
-        return estimateMethodSignature()
-            .addAnnotation(AnnotationSpec.builder(Description.class)
-                .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
-                .build()
-            )
-            .addStatement("return computeEstimate(graphNameOrConfiguration, algoConfiguration)", procGdsMode().lowerCase())
-            .returns(ParameterizedTypeName.get(Stream.class, MemoryEstimateResult.class))
-            .build();
-    }
-
-    private MethodSpec.@NotNull Builder procMethodSignature(Mode procExecMode) {
-        return MethodSpec.methodBuilder(procGdsMode().lowerCase())
+    MethodSpec procMethod(GDSMode gdsMode) {
+        var fullProcedureName = formatWithLocale("%s.%s", procedureBaseName, gdsMode.lowerCase());
+        var methodBuilder = MethodSpec.methodBuilder(gdsMode.lowerCase())
             .addAnnotation(AnnotationSpec.builder(Procedure.class)
-                .addMember(
-                    "name",
-                    "$S",
-                    formatWithLocale("%s.%s", procedureName, procGdsMode().lowerCase())
-                )
-                .addMember("mode", "$T.$L", Mode.class, procExecMode)
+                .addMember("name", "$S", fullProcedureName)
+                .addMember("mode", "$T.$L", Mode.class, neo4jProcedureMode(gdsMode))
                 .build()
             )
             .addModifiers(Modifier.PUBLIC)
@@ -195,69 +126,153 @@ abstract class ProcedureGenerator {
                     .addMember("defaultValue", "$S", "{}")
                     .build())
                 .build());
+        description.ifPresent(description -> methodBuilder.addAnnotation(
+            AnnotationSpec.builder(Description.class)
+                .addMember("value", "$S", description)
+                .build()
+        ));
+        methodBuilder
+            .addStatement("return $L(compute(graphName, configuration))", gdsMode.lowerCase())
+            .returns(ParameterizedTypeName.get(
+                ClassName.get(Stream.class),
+                typeNames.procedureResult(gdsMode))
+            );
+        return methodBuilder.build();
     }
 
-    @NotNull
-    private MethodSpec.Builder estimateMethodSignature() {
+    MethodSpec procEstimateMethod(GDSMode gdsMode) {
+        return estimateMethodSignature(gdsMode)
+            .addAnnotation(AnnotationSpec.builder(Description.class)
+                .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
+                .build()
+            )
+            .addStatement("return computeEstimate(graphNameOrConfiguration, algoConfiguration)", gdsMode.lowerCase())
+            .returns(ParameterizedTypeName.get(Stream.class, MemoryEstimateResult.class))
+            .build();
+    }
+
+    private MethodSpec.Builder estimateMethodSignature(GDSMode gdsMode) {
+        var fullProcedureName = formatWithLocale("%s.%s.estimate", procedureBaseName, gdsMode.lowerCase());
         return MethodSpec.methodBuilder("estimate")
             .addAnnotation(AnnotationSpec.builder(Procedure.class)
-                .addMember(
-                    "name",
-                    "$S",
-                    formatWithLocale("%s.%s.estimate", procedureName, procGdsMode().lowerCase())
-                )
+                .addMember("name", "$S", fullProcedureName)
                 .addMember("mode", "$T.$L", Mode.class, Mode.READ)
                 .build()
             )
             .addModifiers(Modifier.PUBLIC)
             .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfiguration")
                 .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "graphNameOrConfiguration")
-                    .build())
-                .build())
-            .addParameter(ParameterSpec
+                    .addMember("value", "$S", "graphNameOrConfiguration").build()
+                ).build()
+            ).addParameter(ParameterSpec
                 .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "algoConfiguration")
                 .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "algoConfiguration")
-                    .build())
-                .build());
+                    .addMember("value", "$S", "algoConfiguration").build()
+                ).build());
     }
 
-    private MethodSpec newConfigMethod() {
+    MethodSpec procResultMethod(GDSMode gdsMode) {
+        switch (gdsMode) {
+            case MUTATE:
+            case STATS:
+            case WRITE:
+                return nonThrowingResultBuilderMethod(gdsMode);
+            case STREAM:
+                return throwingStreamResultMethod();
+            default: throw new IllegalStateException("Unexpected value: " + gdsMode);
+        }
+    }
+
+    MethodSpec newConfigMethod() {
         return MethodSpec.methodBuilder("newConfig")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
+            .returns(typeNames.config())
             .addParameter(String.class, "username")
             .addParameter(CypherMapWrapper.class, "config")
-            .returns(typeNames.config())
             .addStatement("return $T.of(config)", typeNames.config())
             .build();
     }
 
-    private MethodSpec algorithmFactoryMethod() {
+    MethodSpec algorithmFactoryMethod() {
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .returns(ParameterizedTypeName.get(
                 ClassName.get(GraphAlgorithmFactory.class),
                 typeNames.algorithm(),
                 typeNames.config()
             ))
+            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .addStatement("return new $T()", typeNames.algorithmFactory())
             .build();
     }
 
-    private MethodSpec validationConfigMethod() {
+    MethodSpec inverseIndexValidationOverride() {
         return MethodSpec.methodBuilder("validationConfig")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .returns(ParameterizedTypeName.get(
                 ClassName.get(ValidationConfiguration.class),
                 typeNames.config()
             ))
+            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
             .build();
+    }
+
+    private MethodSpec throwingStreamResultMethod() {
+        return MethodSpec.methodBuilder("streamResult")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PROTECTED)
+            .returns(typeNames.procedureResult(GDSMode.STREAM))
+            .addParameter(long.class, "originalNodeId")
+            .addParameter(long.class, "internalNodeId")
+            .addParameter(NodePropertyValues.class, "nodePropertyValues")
+            .addStatement("throw new $T()", UnsupportedOperationException.class)
+            .build();
+    }
+
+    private MethodSpec nonThrowingResultBuilderMethod(GDSMode gdsMode) {
+        return MethodSpec.methodBuilder("resultBuilder")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PROTECTED)
+            .returns(ParameterizedTypeName.get(
+                    ClassName.get(AbstractResultBuilder.class),
+                    typeNames.procedureResult(gdsMode)
+                )
+            ).addParameter(ParameterizedTypeName.get(
+                ClassName.get(ComputationResult.class),
+                typeNames.algorithm(),
+                ClassName.get(PregelResult.class),
+                typeNames.config()
+            ), "computeResult")
+            .addParameter(ExecutionContext.class, "executionContext")
+            .addStatement("var ranIterations = computeResult.result().map(PregelResult::ranIterations).orElse(0)")
+            .addStatement("var didConverge = computeResult.result().map(PregelResult::didConverge).orElse(false)")
+            .addStatement("return new $T().withRanIterations(ranIterations).didConverge(didConverge)", typeNames.procedureResult(gdsMode).nestedClass("Builder"))
+            .build();
+    }
+
+    private ExecutionMode executionMode(GDSMode mode) {
+        switch (mode) {
+            case STREAM: return ExecutionMode.STREAM;
+            case WRITE: return ExecutionMode.WRITE_NODE_PROPERTY;
+            case MUTATE: return ExecutionMode.MUTATE_NODE_PROPERTY;
+            case STATS: return ExecutionMode.STATS;
+            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
+        }
+    }
+
+    private Mode neo4jProcedureMode(GDSMode mode) {
+        switch (mode) {
+            case STREAM:
+            case MUTATE:
+            case STATS:
+                return Mode.READ;
+            case WRITE:
+                return Mode.WRITE;
+            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
+        }
     }
 }

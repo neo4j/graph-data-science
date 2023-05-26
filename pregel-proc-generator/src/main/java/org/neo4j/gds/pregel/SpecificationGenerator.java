@@ -44,6 +44,15 @@ public class SpecificationGenerator {
         this.typeNames = typeNames;
     }
 
+    TypeSpec generate(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
+        return typeSpec(mode, generatedAnnotationSpec).toBuilder()
+            .addMethod(nameMethod())
+            .addMethod(algorithmFactoryMethod())
+            .addMethod(newConfigFunctionMethod())
+            .addMethod(computationResultConsumerMethod(mode))
+            .build();
+    }
+
     TypeSpec typeSpec(GDSMode mode, Optional<AnnotationSpec> generatedAnnotationSpec) {
         var typeSpecBuilder = TypeSpec
             .classBuilder(typeNames.specification(mode))

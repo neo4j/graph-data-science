@@ -21,13 +21,16 @@ package org.neo4j.gds.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeSpec;
-import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.pregel.generator.TypeNames;
 
-import java.util.Arrays;
+import javax.lang.model.element.Element;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * The PregelGenerator's job is to coordinate the generation of code necessary to use a Pregel computation via Neo4j procedures.
+ */
 class PregelGenerator {
 
     // produces @Generated meta info
@@ -37,43 +40,37 @@ class PregelGenerator {
         this.generatedAnnotationSpec = generatedAnnotationSpec;
     }
 
-    private Stream<TypeSpec> typesForMode(GDSMode mode, PregelValidation.Spec pregelSpec, SpecificationGenerator specificationGenerator, TypeNames typeNames) {
-        var procedure = ProcedureGenerator.forMode(mode, generatedAnnotationSpec, pregelSpec, typeNames)
-            .toBuilder()
-            .addOriginatingElement(pregelSpec.element())
-            .build();
-        var specification = specificationGenerator.typeSpec(mode, generatedAnnotationSpec)
-            .toBuilder()
-            .addMethod(specificationGenerator.nameMethod())
-            .addMethod(specificationGenerator.algorithmFactoryMethod())
-            .addMethod(specificationGenerator.newConfigFunctionMethod())
-            .addMethod(specificationGenerator.computationResultConsumerMethod(mode))
-            .addOriginatingElement(pregelSpec.element())
-            .build();
-        return Stream.of(procedure, specification);
-    }
-
     Stream<TypeSpec> generate(PregelValidation.Spec pregelSpec) {
         var typeNames = new TypeNames(
             pregelSpec.rootPackage(),
             pregelSpec.computationName(),
             pregelSpec.configTypeName()
         );
-        var algorithmSpec = new AlgorithmGenerator(typeNames)
-            .typeSpec(generatedAnnotationSpec)
-            .toBuilder()
-            .addOriginatingElement(pregelSpec.element())
-            .build();
-        var algorithmFactorySpec = new AlgorithmFactoryGenerator(typeNames)
-            .typeSpec(generatedAnnotationSpec)
-            .toBuilder()
-            .addOriginatingElement(pregelSpec.element())
-            .build();
+        var originatingElement = pregelSpec.element();
+
+        var typeSpecs = new ArrayList<TypeSpec>();
+
+        var algorithmSpec = new AlgorithmGenerator(typeNames).typeSpec(generatedAnnotationSpec);
+        typeSpecs.add(withOriginatingElement(algorithmSpec, originatingElement));
+
+        var algorithmFactorySpec = new AlgorithmFactoryGenerator(typeNames).typeSpec(generatedAnnotationSpec);
+        typeSpecs.add(withOriginatingElement(algorithmFactorySpec, originatingElement));
+
         var specificationGenerator = new SpecificationGenerator(typeNames);
-        return Stream.concat(
-            Stream.of(algorithmSpec, algorithmFactorySpec),
-            Arrays.stream(pregelSpec.procedureModes())
-                .flatMap(mode -> typesForMode(mode, pregelSpec, specificationGenerator, typeNames))
-        );
+        var procedureGenerator = new ProcedureGenerator(typeNames, pregelSpec.procedureName(), pregelSpec.description());
+
+        var requiresInverseIndex = pregelSpec.requiresInverseIndex();
+        for (var mode : pregelSpec.procedureModes()) {
+            var procedure = procedureGenerator.generate(mode, requiresInverseIndex, generatedAnnotationSpec);
+            typeSpecs.add(withOriginatingElement(procedure, originatingElement));
+
+            var specification = specificationGenerator.generate(mode, generatedAnnotationSpec);
+            typeSpecs.add(withOriginatingElement(specification, originatingElement));
+        }
+        return typeSpecs.stream();
+    }
+
+    private TypeSpec withOriginatingElement(TypeSpec typeSpec, Element element) {
+        return typeSpec.toBuilder().addOriginatingElement(element).build();
     }
 }
