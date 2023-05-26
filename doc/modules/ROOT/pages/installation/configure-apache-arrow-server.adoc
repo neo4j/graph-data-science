@@ -12,6 +12,14 @@ For using Arrow Flight with an Arrow client, please refer to our documentation f
 
 Arrow is bundled with GDS Enterprise Edition which must be xref:installation/installation-enterprise-edition.adoc[installed].
 
+[NOTE]
+====
+For link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS], Arrow is enabled by default, and you can check `CALL gds.debug.arrow()` for its configuration.
+
+The simplest way to use Arrow is through our https://neo4j.com/docs/graph-data-science-client/current/[Neo4j Graph Data Science Client].
+There Arrow will be used by default if available.
+====
+
 
 == Installation
 
