@@ -214,9 +214,8 @@ RETURN
 
 [NOTE]
 --
-The projected graph does not know that the IDs did not originate from an existing node.
-Any procedure that interacts with the underlying db (such as the `.write` procedures)
-will likely produce wrong results or trigger exceptions.
+The projected graph can no longer connect to projected nodes to existing nodes in the underlying database.
+As such, `.write` procedures cannot be executed on this graph.
 --
 
 
