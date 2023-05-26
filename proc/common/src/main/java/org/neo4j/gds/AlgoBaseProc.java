@@ -57,8 +57,6 @@ public abstract class AlgoBaseProc<
     PROC_RESULT
 > extends BaseProc implements AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, CONFIG>> {
 
-    public static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
-
     public ProcConfigParser<CONFIG> configParser() {
         var defaults = DefaultsConfiguration.Instance;
         var limits = LimitsConfiguration.Instance;
