@@ -1,8 +1,8 @@
 [.enterprise-edition]
 [[installation-apache-arrow]]
-= Apache Arrow
+= Configure Apache Arrow server
 :description: This chapter explains how to set up Apache Arrow™ in the Neo4j Graph Data Science library.
-
+:page-aliases: installation/installation-apache-arrow/
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
