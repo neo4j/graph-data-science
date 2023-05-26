@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds;
 
-public final class ProcedurePreconditionsProvider {
-    private static ProcedurePreconditions instance = new OpenGdsProcedurePreconditions();
+public final class PreconditionsProvider {
+    private static Preconditions instance = new OpenGdsPreconditions();
 
-    public static void procedurePreconditions(ProcedurePreconditions procedurePreconditions) {
-        instance = procedurePreconditions;
+    public static void preconditions(Preconditions preconditions) {
+        instance = preconditions;
     }
 
-    public static ProcedurePreconditions procedurePreconditions() {
+    public static Preconditions preconditions() {
         return instance;
     }
 
-    private ProcedurePreconditionsProvider() {}
+    private PreconditionsProvider() {}
 }

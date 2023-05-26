@@ -23,7 +23,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -65,7 +65,7 @@ public class GraphSampleProc extends CatalogProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(username(), graphName);
         return SamplerOperator.performSampling(
             fromGraphName,
@@ -85,7 +85,7 @@ public class GraphSampleProc extends CatalogProc {
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(username(), graphName);
         return SamplerOperator.performSampling(
             fromGraphName,

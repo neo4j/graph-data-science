@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -52,7 +52,7 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
         @Name(value = "configuration") Map<String, Object> configuration
     ) throws ParseException {
 
-        ProcPreconditions.check();
+        Preconditions.check();
 
         var procedureConfig = WriteLabelConfig.of(configuration);
         var graphStore = graphStoreFromCatalog(graphName).graphStore();

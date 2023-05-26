@@ -1,0 +1,24 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    // necessary in order to activate the extension
+    annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+
+    // the Neo4j things necessary for just the extension
+    compileOnly(group: 'org.neo4j', name: 'annotations', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+
+    // the necessary GDS things for the extension to construct the application
+    implementation project(':core') // this is where the business facade lives (currently)
+    implementation project(':executor') // Preconditions
+    implementation project(':neo4j-kernel-adapter') // Neo4jProxy
+    implementation project(':proc-catalog') // this is where the (catalog) procedures facade lives
+}

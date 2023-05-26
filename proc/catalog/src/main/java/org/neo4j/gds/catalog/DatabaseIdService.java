@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.catalog;
 
-import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-@ServiceProvider
-public class OpenGdsProcedurePreconditionsFactory implements ProcedurePreconditionsFactory {
-    @Override
-    public ProcedurePreconditions create(LicenseState licenseState) {
-        return new OpenGdsProcedurePreconditions();
+public class DatabaseIdService {
+    private final GraphDatabaseService databaseService;
+
+    public DatabaseIdService(GraphDatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
 
-    @Override
-    public int priority() {
-        return 0;
+    public DatabaseId getDatabaseId() {
+        return DatabaseId.of(databaseService);
     }
 }

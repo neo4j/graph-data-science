@@ -87,12 +87,12 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
     private void setupProcedurePreconditions(LicenseState licenseState) {
         var procedurePreconditionsFactory = loadService(
-            ProcedurePreconditionsFactory.class,
-            ProcedurePreconditionsFactory::priority
+            PreconditionsFactory.class,
+            PreconditionsFactory::priority
         );
 
         var procedurePreconditions = procedurePreconditionsFactory.create(licenseState);
-        ProcedurePreconditionsProvider.procedurePreconditions(procedurePreconditions);
+        PreconditionsProvider.preconditions(procedurePreconditions);
     }
 
     private void setupIdMapBehavior(LicenseState licenseState) {

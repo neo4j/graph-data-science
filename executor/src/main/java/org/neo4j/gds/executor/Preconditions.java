@@ -17,24 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.executor;
 
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.UserFunction;
+import org.neo4j.gds.PreconditionsProvider;
 
-import java.util.function.Function;
+public final class Preconditions {
+    private Preconditions() {}
 
-public class GraphExistsFunc {
-    @SuppressWarnings("WeakerAccess")
-    @Context
-    public GraphStoreCatalogProcedureFacade facade;
-
-    @SuppressWarnings("unused")
-    @UserFunction("gds.graph.exists.better")
-    @Description(GraphCatalogConstants.DESCRIPTION)
-    public boolean existsFunctionButBetter(@Name(value = "graphName") String graphName) {
-        return facade.graphExists(graphName, Function.identity());
+    public static void check() throws IllegalStateException {
+        PreconditionsProvider.preconditions().check();
     }
 }

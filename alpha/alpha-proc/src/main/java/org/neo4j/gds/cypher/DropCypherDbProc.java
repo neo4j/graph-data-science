@@ -25,7 +25,7 @@ import org.neo4j.dbms.api.DatabaseNotFoundException;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +45,7 @@ public class DropCypherDbProc extends BaseProc {
     public Stream<DropCypherDbResult> dropDb(
         @Name(value = "dbName") String dbName
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         DropCypherDbResult result = runWithExceptionLogging(
             "Drop in-memory Cypher database failed",

@@ -66,7 +66,7 @@ public class ProcedureExecutor<
         String graphName,
         Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
