@@ -42,6 +42,7 @@ import static org.neo4j.gds.config.SourceNodeConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.config.TargetNodeConfig.TARGET_NODE_KEY;
 
 class ShortestPathYensStreamProcTest extends BaseProcTest {
+
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
         "  (c:Label)" +
