@@ -30,6 +30,8 @@ public interface ModelCatalog {
 
     void registerListener(ModelCatalogListener listener);
 
+    void unregisterListener(ModelCatalogListener listener);
+
     void set(Model<?, ?, ?> model);
 
     <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
