@@ -22,6 +22,7 @@ package org.neo4j.gds.scaleproperties;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -31,10 +32,13 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.scaling.Scaler;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
 import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -236,15 +240,18 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             public double doubleValue(long nodeId) {
                 var propertyValue = property.floatArrayValue(nodeId);
 
-                if (propertyValue == null || propertyValue.length != dimension) {
-                    throw createInvalidArrayException(
-                        propertyName,
-                        dimension,
-                        nodeId,
-                        Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0)
-                    );
-                }
-                return propertyValue[idx];
+                return new MissingArrayHandler(
+                    config.failOnMisalignedArrays(),
+                    dimension,
+                    propertyName,
+                    nodeId,
+                    graph
+                ).doubleValue(
+                    propertyValue,
+                    () -> propertyValue.length,
+                    idx,
+                    () -> propertyValue[idx]
+                );
             }
 
             @Override
@@ -265,15 +272,18 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             public double doubleValue(long nodeId) {
                 var propertyValue = property.doubleArrayValue(nodeId);
 
-                if (propertyValue == null || propertyValue.length != dimension) {
-                    throw createInvalidArrayException(
-                        propertyName,
-                        dimension,
-                        nodeId,
-                        Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0)
-                    );
-                }
-                return propertyValue[idx];
+                return new MissingArrayHandler(
+                    config.failOnMisalignedArrays(),
+                    dimension,
+                    propertyName,
+                    nodeId,
+                    graph
+                ).doubleValue(
+                    propertyValue,
+                    () -> propertyValue.length,
+                    idx,
+                    () -> propertyValue[idx]
+                );
             }
 
             @Override
@@ -294,15 +304,18 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             public double doubleValue(long nodeId) {
                 var propertyValue = property.longArrayValue(nodeId);
 
-                if (propertyValue == null || propertyValue.length != dimension) {
-                    throw createInvalidArrayException(
-                        propertyName,
-                        dimension,
-                        nodeId,
-                        Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0)
-                    );
-                }
-                return propertyValue[idx];
+                return new MissingArrayHandler(
+                    config.failOnMisalignedArrays(),
+                    dimension,
+                    propertyName,
+                    nodeId,
+                    graph
+                ).doubleValue(
+                    propertyValue,
+                    () -> propertyValue.length,
+                    idx,
+                    () -> propertyValue[idx]
+                );
             }
 
             @Override
@@ -312,18 +325,65 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         };
     }
 
-    private IllegalArgumentException createInvalidArrayException(
-        String propertyName,
-        int dimension,
-        long nodeId,
-        int actualLength
-    ) {
-        return new IllegalArgumentException(formatWithLocale(
-            "For scaling property `%s` expected array of length %d but got length %d for node %d",
-            propertyName,
-            dimension,
-            actualLength,
-            graph.toOriginalNodeId(nodeId)
-        ));
+    private static final class MissingArrayHandler {
+
+        private final boolean failOnMisalignedArrays;
+        private final int dimension;
+        private final String propertyName;
+        private final long nodeId;
+        private final IdMap idMap;
+
+        private MissingArrayHandler(
+            boolean failOnMisalignedArrays,
+            int dimension,
+            String propertyName,
+            long nodeId,
+            IdMap idMap
+        ) {
+            this.failOnMisalignedArrays = failOnMisalignedArrays;
+            this.dimension = dimension;
+            this.propertyName = propertyName;
+            this.nodeId = nodeId;
+            this.idMap = idMap;
+        }
+
+        double doubleValue(@Nullable Object array, IntSupplier arrayLengthSupplier, int idx, DoubleSupplier valueAtIndex) {
+            // missing the array altogether
+            if (array == null) {
+                return Double.NaN;
+            }
+            var arrayLength = arrayLengthSupplier.getAsInt();
+            // array is not of expected dimension
+            if (failOnMisalignedArrays && arrayLength != dimension) {
+                throw createInvalidArrayException(
+                    propertyName,
+                    dimension,
+                    nodeId,
+                    arrayLength
+                );
+            }
+            // array has lower dimension than expected; backfill with NaN on the right
+            if (idx >= arrayLength) {
+                return Double.NaN;
+            }
+
+            // OK it seems safe now to index the array
+            return valueAtIndex.getAsDouble();
+        }
+
+        private IllegalArgumentException createInvalidArrayException(
+            String propertyName,
+            int dimension,
+            long nodeId,
+            int actualLength
+        ) {
+            return new IllegalArgumentException(formatWithLocale(
+                "For scaling property `%s` expected array of length %d but got length %d for node %d",
+                propertyName,
+                dimension,
+                actualLength,
+                idMap.toOriginalNodeId(nodeId)
+            ));
+        }
     }
 }

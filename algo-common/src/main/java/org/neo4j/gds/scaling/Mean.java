@@ -48,7 +48,7 @@ public final class Mean extends ScalarScaler {
         return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
     }
 
-    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+    public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override

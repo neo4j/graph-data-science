@@ -27,6 +27,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.scaling.Max;
+import org.neo4j.gds.scaling.MinMax;
 import org.neo4j.gds.scaling.StdScore;
 
 import java.util.List;
@@ -39,14 +41,50 @@ class ScalePropertiesMissingPropsTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50, arrayOn4: [20L], mixedSizeArray: [1.0, 1.0], arrayOn1: [1.0,2.0]}), " +
+        "(a:A {a: 1.1D, b: 20, c: 50, arrayOn4: [20L], mixedSizeArray: [-1.0D, 1.0D, NaN], arrayOn1: [1.0,2.0]}), " +
         "(b:A {         b: 21, c: 51, arrayOn4: [21L], mixedSizeArray: [1.0]}), " +
         "(c:A {                c: 52, arrayOn4: [22L], mixedSizeArray: [1.0]}), " +
-        "(d:A {                       arrayOn4: [23L], mixedSizeArray: [1.0]}), " +
-        "(e:A {         b: 25,                         mixedSizeArray: [1.0, 2.0, 3.0]})";
+        "(d:A {                       arrayOn4: [23L], mixedSizeArray: [1.0D, NaN,  2.0D, 99.0D, -99.0D]}), " +
+        "(e:A {         b: 25,                         mixedSizeArray: [1.0D, 2.0D, 3.0D]})";
 
     @Inject
     TestGraph graph;
+
+    @Test
+    void testMixedSizeArray() {
+        var config = ScalePropertiesStreamConfigImpl.builder()
+            .nodeProperties(List.of("mixedSizeArray"))
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
+            .build();
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+
+        var result = algo.compute();
+        var resultProperties = result.scaledProperties().toArray();
+
+        assertArrayEquals(new double[]{0D, 0D,  NaN}, resultProperties[(int) graph.toMappedNodeId("a")], 1e-3);
+        assertArrayEquals(new double[]{1D, NaN, NaN}, resultProperties[(int) graph.toMappedNodeId("b")], 1e-3);
+        assertArrayEquals(new double[]{1D, NaN, NaN}, resultProperties[(int) graph.toMappedNodeId("c")], 1e-3);
+        assertArrayEquals(new double[]{1D, NaN, 0D }, resultProperties[(int) graph.toMappedNodeId("d")], 1e-3);
+        assertArrayEquals(new double[]{1D, 1D,  1D }, resultProperties[(int) graph.toMappedNodeId("e")], 1e-3);
+    }
+
+    @Test
+    void partialArrays() {
+        var config = ScalePropertiesStreamConfigImpl.builder()
+            .nodeProperties(List.of("arrayOn4", "arrayOn1"))
+            .scaler(Max.buildFrom(CypherMapWrapper.empty()))
+            .build();
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+
+        var result = algo.compute();
+        var resultProperties = result.scaledProperties().toArray();
+
+        assertArrayEquals(new double[]{.869, 1D,  1D }, resultProperties[(int) graph.toMappedNodeId("a")], 1e-3);
+        assertArrayEquals(new double[]{.913, NaN, NaN}, resultProperties[(int) graph.toMappedNodeId("b")], 1e-3);
+        assertArrayEquals(new double[]{.956, NaN, NaN}, resultProperties[(int) graph.toMappedNodeId("c")], 1e-3);
+        assertArrayEquals(new double[]{1D,   NaN, NaN}, resultProperties[(int) graph.toMappedNodeId("d")], 1e-3);
+        assertArrayEquals(new double[]{NaN,  NaN, NaN}, resultProperties[(int) graph.toMappedNodeId("e")], 1e-3);
+    }
 
     @Test
     void testMissingScalar() {

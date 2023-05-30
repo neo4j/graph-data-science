@@ -46,7 +46,7 @@ public final class Max extends ScalarScaler {
         return properties.doubleValue(nodeId) / maxAbs;
     }
 
-    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+    public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
