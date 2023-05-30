@@ -869,4 +869,132 @@ class CypherAggregationTest extends BaseProcTest {
             );
     }
 
+    @Test
+    void testMigrationNoteForOldPropertiesKey() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {properties: 'bar'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The configuration key 'properties' is now called 'relationshipProperties'. "
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "relationshipType: 'REL'",
+            "relationshipProperties: r { .prop }",
+            // does the validation also when the old key is present
+            "properties: r { .prop }",
+        }
+    )
+    void testSplitMapsValidation(String relationshipConfig) {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {}, {" + relationshipConfig + "})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The parameters for `nodesConfig` and `relationshipsConfig` have been merged. " +
+                    "Update your query by merging the 4th and 5th parameter into one parameter."
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "readConcurrency: 2",
+            ""
+        }
+    )
+    void testSplitMapsConfigurationValidation(String configuration) {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {}, {}, {" + configuration + "})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The parameters for `nodesConfig` and `relationshipsConfig` have been merged. " +
+                    "Update your query by merging the 4th and 5th parameter into one parameter."
+            );
+    }
+
+    @Test
+    void testSwappedConfigurationMaps() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {readConcurrency: 2}, {relationshipType: 'REL'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The configuration parameters are provided in the wrong order. " +
+                    "Update your query by swapping the 4th and 5th parameter."
+            );
+    }
+
+    @Test
+    void testMergedConfigurationMaps() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {relationshipType: 'REL', readConcurrency: 2})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The configuration parameters are merged and provided as one parameter. " +
+                    "Update your query by splitting the configuration into two parameters. " +
+                    "Refer to the documentation for details."
+            );
+    }
+
+    @Test
+    void testMissingDataConfig() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {readConcurrency: 2})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The `dataConfig` configuration parameters is missing. " +
+                    "If you meant to provide an empty configuration for the 4th parameter, " +
+                    "you can pass an empty map: '{}'. "
+            );
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "sourceNodeLabels, labels(s), targetNodeLabels",
+            "sourceNodeProperties, s { .prop1 }, targetNodeProperties",
+            "targetNodeLabels, labels(t), sourceNodeLabels",
+            "targetNodeProperties, t { .prop1 }, sourceNodeProperties",
+        }
+    )
+    void testMissingSourceOrTargetNodeInformation(String presentKey, String value, String missingKey) {
+        var query = formatWithLocale(
+            "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {%s: %s})",
+            presentKey,
+            value
+        );
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                formatWithLocale(
+                    "The configuration key '%1$s' is missing, but '%2$s' is provided. " +
+                        "If you really meant to only provide `%2$s` with no value for `%1$s`, " +
+                        "you can set `%1$s` to an empty map: `{}`.",
+                    missingKey,
+                    presentKey
+                )
+            );
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "sourceNodeLabels, labels(s), targetNodeLabels",
+            "sourceNodeProperties, s { .prop1 }, targetNodeProperties",
+            "targetNodeLabels, labels(t), sourceNodeLabels",
+            "targetNodeProperties, t { .prop1 }, sourceNodeProperties",
+        }
+    )
+    void testExplicitlyMissingSourceOrTargetNodeInformation(String presentKey, String value, String missingKey) {
+        var query = formatWithLocale(
+            "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {%s: %s, %s: {}})",
+            presentKey,
+            value,
+            missingKey
+        );
+        assertThatCode(() -> runQuery(query))
+            .doesNotThrowAnyException();
+    }
 }
