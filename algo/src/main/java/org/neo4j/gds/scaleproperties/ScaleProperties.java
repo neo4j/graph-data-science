@@ -241,7 +241,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                 var propertyValue = property.floatArrayValue(nodeId);
 
                 return new MissingArrayHandler(
-                    config.strictValidation(),
                     dimension,
                     propertyName,
                     nodeId,
@@ -273,7 +272,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                 var propertyValue = property.doubleArrayValue(nodeId);
 
                 return new MissingArrayHandler(
-                    config.strictValidation(),
                     dimension,
                     propertyName,
                     nodeId,
@@ -305,7 +303,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                 var propertyValue = property.longArrayValue(nodeId);
 
                 return new MissingArrayHandler(
-                    config.strictValidation(),
                     dimension,
                     propertyName,
                     nodeId,
@@ -327,20 +324,17 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
 
     private static final class MissingArrayHandler {
 
-        private final boolean failOnMisalignedArrays;
         private final int dimension;
         private final String propertyName;
         private final long nodeId;
         private final IdMap idMap;
 
         private MissingArrayHandler(
-            boolean failOnMisalignedArrays,
             int dimension,
             String propertyName,
             long nodeId,
             IdMap idMap
         ) {
-            this.failOnMisalignedArrays = failOnMisalignedArrays;
             this.dimension = dimension;
             this.propertyName = propertyName;
             this.nodeId = nodeId;
@@ -354,7 +348,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
             var arrayLength = arrayLengthSupplier.getAsInt();
             // array is not of expected dimension
-            if (failOnMisalignedArrays && arrayLength != dimension) {
+            if (arrayLength != dimension) {
                 throw createInvalidArrayException(
                     propertyName,
                     dimension,

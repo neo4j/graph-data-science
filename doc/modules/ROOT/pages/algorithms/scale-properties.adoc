@@ -19,15 +19,14 @@ It scales the node properties based on the specified scaler.
 Multiple properties can be scaled at once and are returned in a list property.
 
 The input properties must be numbers or lists of numbers.
-If the lists do not all have the same size, shorter lists will be padded with `NaN` values.
-Control this behaviour using the `strictValidation` configuration parameter.
+The lists must all have the same size.
 The output property will always be a list.
 The size of the output list is equal to the sum of length of the input properties.
 That is, if the input properties are two scalar numeric properties and one list property of length three, the output list will have a total length of five.
 
 If a node is missing a value for a property, the node will be omitted from scaling of that property.
-It will receive an output value of `NaN` for that property.
-This extends to list properties; each missing value in a list property will be replaced with `NaN`.
+It will receive an output value of `NaN`.
+This includes list properties.
 
 There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scaler` configuration parameter.

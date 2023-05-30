@@ -45,10 +45,6 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalerFactory#toString")
     ScalerFactory scaler();
 
-    default boolean strictValidation() {
-        return false;
-    }
-
     @Configuration.GraphStoreValidationCheck
     default void validateNodeProperties(
         GraphStore graphStore,
