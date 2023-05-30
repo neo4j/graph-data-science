@@ -106,7 +106,8 @@ CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 .Project `Person` nodes and `KNOWS` relationships using Cypher projections:
 [source, cypher, role=noplay graph-project-query]
 ----
-MATCH (n:Person) OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
+MATCH (n:Person)
+OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
 RETURN gds.alpha.graph.project('personsCypher', n, m,
   {
     sourceNodeLabels: labels(n),
