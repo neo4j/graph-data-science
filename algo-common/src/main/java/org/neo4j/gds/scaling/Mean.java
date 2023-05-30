@@ -79,9 +79,10 @@ public final class Mean extends ScalarScaler {
                 var min = tasks.stream().mapToDouble(ComputeMaxMinSum::min).min().orElse(Double.MAX_VALUE);
                 var max = tasks.stream().mapToDouble(ComputeMaxMinSum::max).max().orElse(-Double.MAX_VALUE);
                 var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
+                var nodeCountOmittingMissingProperties = tasks.stream().mapToLong(AggregatesComputer::nodeCountOmittingMissingValues).sum();
 
                 var maxMinDiff = max - min;
-                var avg = sum / nodeCount;
+                var avg = sum / nodeCountOmittingMissingProperties;
                 var statistics = Map.of(
                     "min", List.of(min),
                     "avg", List.of(avg),
@@ -111,8 +112,7 @@ public final class Mean extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            var propertyValue = properties.doubleValue(nodeId);
+        void compute(double propertyValue) {
             sum += propertyValue;
             if (propertyValue < min) {
                 min = propertyValue;

@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -70,5 +72,27 @@ class CenterTest {
         double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
     }
+
+    @Test
+    void handlesMissingValue() {
+        var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
+        var scaler = Center.buildFrom(CypherMapWrapper.empty()).create(
+            properties,
+            10,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        );
+
+        var avg = 4.444;
+        for (int i = 0; i < 5; i++) {
+            assertThat(scaler.scaleProperty(i)).isCloseTo(i - avg, Offset.offset(1e-3));
+        }
+        assertThat(scaler.scaleProperty(5)).isNaN();
+        for (int i = 6; i < 10; i++) {
+            assertThat(scaler.scaleProperty(i)).isCloseTo(i - avg, Offset.offset(1e-3));
+        }
+    }
+
 
 }

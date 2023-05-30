@@ -97,8 +97,8 @@ public final class Max extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            var absoluteValue = Math.abs(properties.doubleValue(nodeId));
+        void compute(double propertyValue) {
+            var absoluteValue = Math.abs(propertyValue);
             if (absoluteValue > absMax) {
                 absMax = absoluteValue;
             }

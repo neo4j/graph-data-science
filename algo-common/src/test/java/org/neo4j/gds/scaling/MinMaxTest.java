@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -86,6 +87,27 @@ class MinMaxTest {
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
+        }
+    }
+
+    @Test
+    void handlesMissingValue() {
+        var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
+        var scaler = MinMax.buildFrom(CypherMapWrapper.empty()).create(
+            properties,
+            10,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        );
+
+
+        for (int i = 0; i < 5; i++) {
+            assertThat(scaler.scaleProperty(i)).isCloseTo(i / 9D, Offset.offset(1e-3));
+        }
+        assertThat(scaler.scaleProperty(5)).isNaN();
+        for (int i = 6; i < 10; i++) {
+            assertThat(scaler.scaleProperty(i)).isCloseTo(i / 9D, Offset.offset(1e-3));
         }
     }
 

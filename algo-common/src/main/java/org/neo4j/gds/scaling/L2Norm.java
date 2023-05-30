@@ -100,8 +100,7 @@ public final class L2Norm extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            var propertyValue = properties.doubleValue(nodeId);
+        void compute(double propertyValue) {
             squaredSum += propertyValue * propertyValue;
         }
 
