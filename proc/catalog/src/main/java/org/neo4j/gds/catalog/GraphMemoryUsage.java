@@ -157,7 +157,12 @@ public  final class GraphMemoryUsage {
                     "pages", memoryInfo.pages(),
                     "bytesTotal", memoryInfo.bytesTotal().orElse(0),
                     "bytesOnHeap", memoryInfo.bytesOnHeap().orElse(0),
-                    "bytesOffHeap", memoryInfo.bytesOffHeap().orElse(0)
+                    "bytesOffHeap", memoryInfo.bytesOffHeap().orElse(0),
+                    "pageSizes", memoryInfo.pageSizes().toMap(),
+                    "heapAllocations", memoryInfo.heapAllocations().toMap(),
+                    "nativeAllocations", memoryInfo.nativeAllocations().toMap(),
+                    "headerAllocations", memoryInfo.headerAllocations().toMap(),
+                    "headerBits", memoryInfo.headerBits().toMap()
                 ));
             });
             details.put("adjacencyLists", adjacencyListDetails);
