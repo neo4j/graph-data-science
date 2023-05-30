@@ -32,6 +32,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.ResourceUtil;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -764,6 +765,36 @@ class CypherAggregationTest extends BaseProcTest {
                 "RETURN count(DISTINCT componentId) as numberOfComponents",
             List.of(Map.of("numberOfComponents", 2L))
         );
+    }
+
+    @Test
+    void testAlphaForwarding() {
+        runQuery(
+            "MATCH (s:B)-[r:REL]-(t:B) " +
+                "RETURN gds.alpha.graph.project('g1', s, t," +
+                "  { sourceNodeLabels: labels(s), targetNodeLabels: labels(t)," +
+                "    sourceNodeProperties: s { .prop1 }, targetNodeProperties: t { .prop1 } }," +
+                "  { relationshipType: type(r), properties: r { .prop } }," +
+                "  { undirectedRelationshipTypes: ['REL'] }" +
+                ");"
+        );
+
+        runQuery(
+            "MATCH (s:B)-[r:REL]-(t:B) " +
+                "RETURN gds.graph.project('g2', s, t," +
+                "  { sourceNodeLabels: labels(s), targetNodeLabels: labels(t)," +
+                "    sourceNodeProperties: s { .prop1 }, targetNodeProperties: t { .prop1 }," +
+                "    relationshipType: type(r), relationshipProperties: r { .prop } }," +
+                "  { undirectedRelationshipTypes: ['REL'] }" +
+                ");"
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g1")).isTrue();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g2")).isTrue();
+        var g1 = GraphStoreCatalog.get("", db.databaseName(), "g1").graphStore().getUnion();
+        var g2 = GraphStoreCatalog.get("", db.databaseName(), "g2").graphStore().getUnion();
+
+        TestSupport.assertGraphEquals(g1, g2);
     }
 
     @ParameterizedTest
