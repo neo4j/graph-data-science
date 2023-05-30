@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,14 +29,12 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMemoryUsageProc extends CatalogProc {
-
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
-        ProcPreconditions.check();
-        
+        Preconditions.check();
+
         var memoryUsage = GraphMemoryUsage.of(graphName, executionContext());
         return Stream.of(memoryUsage);
     }
-
 }
