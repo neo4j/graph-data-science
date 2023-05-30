@@ -35,6 +35,7 @@ dependencies {
     compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
     compileOnly "org.neo4j.gds:config-api:$gdsVersion"
     compileOnly "org.neo4j.gds:progress-tracking:$gdsVersion"
+    compileOnly "org.neo4j.gds:transaction:$gdsVersion"
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
