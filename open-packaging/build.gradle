@@ -12,7 +12,6 @@ dependencies {
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
 
-    // how do I load the extension? This rite?
     implementation project(':procedure-facade')
 
     testImplementation project(':proc-test')
