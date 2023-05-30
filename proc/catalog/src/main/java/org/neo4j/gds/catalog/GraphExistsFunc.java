@@ -32,7 +32,7 @@ public class GraphExistsFunc {
     public GraphStoreCatalogProcedureFacade facade;
 
     @SuppressWarnings("unused")
-    @UserFunction("gds.graph.exists.better")
+    @UserFunction("gds.graph.exists")
     @Description(GraphCatalogConstants.DESCRIPTION)
     public boolean existsFunctionButBetter(@Name(value = "graphName") String graphName) {
         return facade.graphExists(graphName, Function.identity());
