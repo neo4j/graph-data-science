@@ -20,7 +20,7 @@ Multiple properties can be scaled at once and are returned in a list property.
 
 The input properties must be numbers or lists of numbers.
 If the lists do not all have the same size, shorter lists will be padded with `NaN` values.
-Control this behaviour using the `failOnMisalignedArrays` configuration parameter.
+Control this behaviour using the `strictValidation` configuration parameter.
 The output property will always be a list.
 The size of the output list is equal to the sum of length of the input properties.
 That is, if the input properties are two scalar numeric properties and one list property of length three, the output list will have a total length of five.

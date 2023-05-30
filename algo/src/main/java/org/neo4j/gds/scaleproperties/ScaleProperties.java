@@ -241,7 +241,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                 var propertyValue = property.floatArrayValue(nodeId);
 
                 return new MissingArrayHandler(
-                    config.failOnMisalignedArrays(),
+                    config.strictValidation(),
                     dimension,
                     propertyName,
                     nodeId,
@@ -273,7 +273,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                 var propertyValue = property.doubleArrayValue(nodeId);
 
                 return new MissingArrayHandler(
-                    config.failOnMisalignedArrays(),
+                    config.strictValidation(),
                     dimension,
                     propertyName,
                     nodeId,
@@ -305,7 +305,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                 var propertyValue = property.longArrayValue(nodeId);
 
                 return new MissingArrayHandler(
-                    config.failOnMisalignedArrays(),
+                    config.strictValidation(),
                     dimension,
                     propertyName,
                     nodeId,
