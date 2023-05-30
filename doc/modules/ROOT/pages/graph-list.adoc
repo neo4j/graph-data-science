@@ -161,53 +161,12 @@ ORDER BY graphName ASC
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
-YIELD graphName
-RETURN graphName
-----
-
-.Results
-[opts="header"]
-|===
-| graphName
-| "personsCypher"
-|===
---
-
-[role=query-example]
---
-.List extended information about a specific native named graph in the catalog:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.list('personsNative')
-YIELD graphName, configuration
-RETURN graphName, configuration.nodeProjection AS nodeProjection
-----
-
-.Results
-[opts="header"]
-|===
-| graphName       | nodeProjection
-| "personsNative"
-| {Person={label=Person, properties={}}}
-|===
---
-
-The above examples demonstrate that `nodeQuery` only has value when the graph is projected using Cypher projection while `nodeProjection` is present when we have a native graph.
-This is also true for `relationshipQuery` and relationshipProjection` respectively.
-
-Despite different result columns being present for the different projections that we can use the Graph Schemas are the same, which is demonstrated in the example below.
-
-[role=query-example]
---
-.Cypher graph schema:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.list('personsCypher')
 YIELD graphName, schemaWithOrientation
+RETURN graphName, schemaWithOrientation
 ----
 
 .Results
-[opts="header",cols="2,8"]
+[opts="header"]
 |===
 | graphName | schemaWithOrientation
 | "personsCypher"
@@ -217,21 +176,28 @@ YIELD graphName, schemaWithOrientation
 
 [role=query-example]
 --
-.Native graph schema:
+.List extended information about a specific native named graph in the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsNative')
-YIELD graphName, schemaWithOrientation
+YIELD graphName, schemaWithOrientation, configuration
+RETURN graphName, schemaWithOrientation, configuration.nodeProjection AS nodeProjection
 ----
 
 .Results
-[opts="header",cols="2,8"]
+[opts="header"]
 |===
-| graphName       | schemaWithOrientation
+| graphName | schemaWithOrientation | nodeProjection
 | "personsNative"
 | {graphProperties={}, nodes={Person={}}, relationships={KNOWS={properties={}, direction=DIRECTED}}}
+| {Person={label=Person, properties={}}}
 |===
 --
+
+The above examples demonstrate that `nodeProjection` only has a value when the graph is projected using native projection.
+This is also true for `relationshipProjection`.
+
+Despite different result columns being present for the different projections that we can use, other data such as the Graph Schema is the same, as we can see in the examples above.
 
 
 === Degree distribution of a specific graph
