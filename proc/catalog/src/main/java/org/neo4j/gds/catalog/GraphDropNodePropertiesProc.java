@@ -26,7 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -73,7 +73,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
         Map<String, Object> configuration,
         Optional<String> deprecationWarning
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(graphName);
 
         // input

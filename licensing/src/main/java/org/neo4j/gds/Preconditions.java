@@ -17,24 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds;
 
-import org.neo4j.gds.executor.Preconditions;
-import org.neo4j.procedure.Internal;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
-
-import java.util.stream.Stream;
-
-import static org.neo4j.procedure.Mode.READ;
-
-public class GraphMemoryUsageProc extends CatalogProc {
-    @Internal
-    @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
-    public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
-        Preconditions.check();
-
-        var memoryUsage = GraphMemoryUsage.of(graphName, executionContext());
-        return Stream.of(memoryUsage);
-    }
+public interface Preconditions {
+    void check() throws IllegalStateException;
 }

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -59,7 +59,7 @@ public class GraphWriteRelationshipPropertiesProc extends CatalogProc {
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
 
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(graphName);
 
         // validation

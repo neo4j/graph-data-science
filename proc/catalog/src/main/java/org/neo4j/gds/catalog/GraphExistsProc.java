@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,30 +28,18 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphExistsProc extends CatalogProc {
+public class GraphExistsProc {
+    @SuppressWarnings("WeakerAccess")
+    @Context
+    public GraphStoreCatalogProcedureFacade facade;
 
-    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
-
-    @Procedure(name = "gds.graph.exists", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<GraphExistsResult> exists(@Name(value = "graphName") String graphName) {
-        ProcPreconditions.check();
-        validateGraphName(graphName);
-        return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(
-            username(),
-            executionContext().databaseId(),
-            graphName
-        )));
-    }
-
+    /**
+     * This would be dumber (=better) if the bespoke conversion didn't live here. Think it over.
+     */
     @SuppressWarnings("unused")
-    public static class GraphExistsResult {
-        public final String graphName;
-        public final boolean exists;
-
-        GraphExistsResult(String graphName, boolean exists) {
-            this.graphName = graphName;
-            this.exists = exists;
-        }
+    @Procedure(name = "gds.graph.exists", mode = READ)
+    @Description(GraphCatalogConstants.DESCRIPTION)
+    public Stream<GraphExistsResult> existsBetter(@Name(value = "graphName") String graphName) {
+        return facade.graphExists(graphName, b -> Stream.of(new GraphExistsResult(graphName, b)));
     }
 }

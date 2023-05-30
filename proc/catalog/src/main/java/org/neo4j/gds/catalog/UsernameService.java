@@ -17,12 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.catalog;
 
-public class OpenGdsProcedurePreconditions implements ProcedurePreconditions {
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-    @Override
-    public void check() throws IllegalStateException {
-        // No preconditions
+/**
+ * An abstraction that allows us to stack off Neo4j concerns cleanly
+ */
+public class UsernameService {
+    private final SecurityContext securityContext;
+
+    public UsernameService(SecurityContext securityContext) {
+        this.securityContext = securityContext;
+    }
+
+    public String getUsername() {
+        return Neo4jProxy.username(securityContext.subject());
     }
 }

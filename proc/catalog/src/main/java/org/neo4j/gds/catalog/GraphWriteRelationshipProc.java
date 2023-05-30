@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -82,7 +82,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         Map<String, Object> configuration,
         Optional<String> deprecationWarning
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(graphName);
 
         // input

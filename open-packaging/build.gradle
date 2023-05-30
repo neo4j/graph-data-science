@@ -12,6 +12,8 @@ dependencies {
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
 
+    implementation project(':procedure-facade')
+
     testImplementation project(':proc-test')
 }
 

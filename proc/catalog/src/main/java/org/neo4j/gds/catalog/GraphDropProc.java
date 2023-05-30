@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,7 +49,7 @@ public class GraphDropProc extends CatalogProc {
         @Name(value = "dbName", defaultValue = "") String dbName,
         @Name(value = "username", defaultValue = "") String username
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         final List<String> graphNames;
         if (graphName instanceof Collection<?>) {

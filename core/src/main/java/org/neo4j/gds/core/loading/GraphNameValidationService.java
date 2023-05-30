@@ -17,13 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.core.loading;
 
-import org.neo4j.annotations.service.Service;
+import org.neo4j.gds.core.CypherMapAccess;
 
-@Service
-public interface ProcedurePreconditionsFactory {
-    ProcedurePreconditions create(LicenseState licenseState);
-
-    int priority();
+/**
+ * I'm not loving this tiny service; but I am loving it more than a static method on an unrelated class.
+ * <p>
+ * GraphName ought to be a micro type. That would strengthen our domain model. And we could then create a guard,
+ * where it could only get constructed in a known good state - i.e. not blank.
+ */
+public class GraphNameValidationService {
+    public void ensureIsNotBlank(String graphName) {
+        CypherMapAccess.failOnBlank("graphName", graphName);
+    }
 }

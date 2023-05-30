@@ -23,7 +23,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphAccessGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,7 +42,7 @@ public class GraphStreamGraphPropertiesProc extends CatalogProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(graphName);
 
         // input

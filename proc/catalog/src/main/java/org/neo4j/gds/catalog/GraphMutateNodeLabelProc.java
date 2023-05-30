@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,7 +40,7 @@ public class GraphMutateNodeLabelProc extends CatalogProc {
         @Name(value = "configuration") Map<String, Object> configuration
     ) throws ParseException {
 
-        ProcPreconditions.check();
+        Preconditions.check();
         return NodeLabelMutator.mutateNodeLabel(graphName, nodeLabel, configuration, executionContext());
 
     }

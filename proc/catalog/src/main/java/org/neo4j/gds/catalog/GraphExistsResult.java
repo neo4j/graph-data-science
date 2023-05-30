@@ -19,26 +19,15 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.Preconditions;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
+/**
+ * A Neo4j Procedure Framework output compatible POJO
+ */
+public class GraphExistsResult {
+    public final String graphName;
+    public final boolean exists;
 
-import java.util.stream.Stream;
-
-import static org.neo4j.procedure.Mode.READ;
-
-public class GraphListProc extends BaseProc {
-
-    private static final String DESCRIPTION = "Lists information about named graphs stored in the catalog.";
-
-    @Procedure(name = "gds.graph.list", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<GraphInfoWithHistogram> list(
-        @Name(value = "graphName", defaultValue = GraphListOperator.NO_VALUE) String graphName
-    ) {
-        Preconditions.check();
-        return GraphListOperator.list(graphName, executionContext());
+    GraphExistsResult(String graphName, boolean exists) {
+        this.graphName = graphName;
+        this.exists = exists;
     }
 }

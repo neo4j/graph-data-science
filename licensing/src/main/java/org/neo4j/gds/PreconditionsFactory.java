@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds;
 
-public interface ProcedurePreconditions {
-    void check() throws IllegalStateException;
+import org.neo4j.annotations.service.Service;
+
+@Service
+public interface PreconditionsFactory {
+    Preconditions create(LicenseState licenseState);
+
+    int priority();
 }
