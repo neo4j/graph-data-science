@@ -84,7 +84,7 @@ final class StdScore extends ScalarScaler {
                 // (Σ(pᵢ²) + Σ(avg²) - 2avgΣ(pᵢ)) / N =
                 // (Σ(pᵢ²) + Navg² - 2avgΣ(pᵢ)) / N =
                 // (Σ(pᵢ²) + avg(Navg - 2Σ(pᵢ)) / N
-                var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
+                var variance = (squaredSum - avg * sum) / nodeCount;
                 var std = Math.sqrt(variance);
 
                 var statistics = Map.of(
