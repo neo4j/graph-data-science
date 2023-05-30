@@ -55,7 +55,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
     private static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
     private static final String TARGET_NODE_PROPERTIES = "targetNodeProperties";
     private static final String TARGET_NODE_LABELS = "targetNodeLabels";
-    private static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
+    static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
     private static final String RELATIONSHIP_TYPE = "relationshipType";
 
     private final DatabaseId databaseId;

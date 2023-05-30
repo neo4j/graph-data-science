@@ -44,7 +44,7 @@ public class AlphaGraphAggregator extends GraphAggregator {
     public void update(AnyValue[] input) throws ProcedureException {
         try {
             var nodesConfig = input[3];
-            var relationshipsConfig = input[4];
+            var relationshipsConfig = relationshipConfigMap(input[4]);
             AnyValue dataConfig = NoValue.NO_VALUE;
             dataConfig = mergeMaps(dataConfig, nodesConfig);
             dataConfig = mergeMaps(dataConfig, relationshipsConfig);
@@ -64,6 +64,22 @@ public class AlphaGraphAggregator extends GraphAggregator {
                 e
             );
         }
+    }
+
+    private static AnyValue relationshipConfigMap(AnyValue relationshipConfig) {
+        if (relationshipConfig == NoValue.NO_VALUE) {
+            return NoValue.NO_VALUE;
+        }
+
+        var config = ((MapValue) relationshipConfig);
+
+        if (config.containsKey("properties") && !config.containsKey(RELATIONSHIP_PROPERTIES)) {
+            return config
+                .filter((key, value) -> !key.equals("properties"))
+                .updatedWith(RELATIONSHIP_PROPERTIES, config.get("properties"));
+        }
+
+        return config;
     }
 
     private static AnyValue mergeMaps(AnyValue left, AnyValue right) {
