@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
+package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.sorting.IndirectComparator;
 import com.carrotsearch.hppc.sorting.IndirectSort;
@@ -33,7 +33,7 @@ public final class TwoArraysSort {
      * @param doubleArray Array of double values (e.g. neighbours weighs)
      * @param length      Number of values to sort
      */
-    static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
+    public static void sortDoubleArrayByLongValues(long[] longArray, double[] doubleArray, int length) {
         assert longArray.length >= length;
         assert doubleArray.length >= length;
         var order = IndirectSort.mergesort(0, length, new AscendingLongComparator(longArray));
