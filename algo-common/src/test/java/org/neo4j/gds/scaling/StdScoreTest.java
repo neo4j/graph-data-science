@@ -72,7 +72,7 @@ class StdScoreTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 4D);
-        var scaler = Mean.buildFrom(CypherMapWrapper.empty()).create(
+        var scaler = StdScore.buildFrom(CypherMapWrapper.empty()).create(
             properties,
             10,
             1,
