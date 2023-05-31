@@ -20,9 +20,6 @@
 package org.neo4j.gds.walking;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.beta.walking.CollapsePath;
-import org.neo4j.gds.beta.walking.CollapsePathAlgorithmFactory;
-import org.neo4j.gds.beta.walking.CollapsePathConfig;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
