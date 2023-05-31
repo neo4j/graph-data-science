@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.msbfs;
+package org.neo4j.gds.allshortestpaths;
 
 import java.util.Objects;
 import java.util.Spliterator;

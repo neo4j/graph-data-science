@@ -29,10 +29,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.msbfs.AllShortestPathsStreamResult;
-import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
-import org.neo4j.gds.impl.msbfs.MSBFSAllShortestPaths;
-import org.neo4j.gds.impl.msbfs.WeightedAllShortestPaths;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
+import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
+import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 
 import java.util.stream.Stream;
 
