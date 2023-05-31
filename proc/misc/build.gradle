@@ -19,6 +19,7 @@ dependencies {
     implementation project(':proc-common')
     implementation project(':proc-embeddings')
     implementation project(':progress-tracking')
+    implementation project(':storage-engine-adapter')
     implementation project(':string-formatting')
     implementation project(':transaction')
 
