@@ -17,15 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.scc;
+package org.neo4j.gds.scc;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-@Configuration
-public interface SccStreamConfig extends SccBaseConfig {
+public interface SccBaseConfig extends AlgoBaseConfig {
 
-    static SccStreamConfig of(CypherMapWrapper userInput) {
-        return new SccStreamConfigImpl(userInput);
-    }
 }

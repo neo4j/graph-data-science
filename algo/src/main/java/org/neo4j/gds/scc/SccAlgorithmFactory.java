@@ -17,22 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.scc;
+package org.neo4j.gds.scc;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-@Configuration
-public interface SccWriteConfig extends SccBaseConfig, WritePropertyConfig {
-    
-    @Value.Default
+public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
+
     @Override
-    default String writeProperty() {
-        return "componentId";
+    public Scc build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return new Scc(
+            graph,
+            progressTracker
+        );
     }
-    static SccWriteConfig of(CypherMapWrapper userInput) {
-        return new SccWriteConfigImpl(userInput);
+
+    @Override
+    public String taskName() {
+        return "Scc";
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), graph.nodeCount());
     }
 }

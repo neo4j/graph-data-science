@@ -26,16 +26,13 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.scc.Scc;
-import org.neo4j.gds.impl.scc.SccAlgorithmFactory;
-import org.neo4j.gds.impl.scc.SccStreamConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.impl.scc.Scc.NOT_VALID;
-import static org.neo4j.gds.impl.scc.Scc.SCC_DESCRIPTION;
+import static org.neo4j.gds.scc.Scc.NOT_VALID;
+import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.scc.stream", description = SCC_DESCRIPTION, executionMode = STREAM)
 public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
