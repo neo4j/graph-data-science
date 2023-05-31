@@ -24,10 +24,9 @@ import com.carrotsearch.hppc.sorting.IndirectSort;
 
 public final class TwoArraysSort {
     private TwoArraysSort() {}
-
     /**
      * Sort two arrays simultaneously based on values of the first (long) array.
-     * E.g. {[4, 1, 8], [0.5, 1.9, 0.9]} -> {[1, 4, 8], [1,9, 0.5, 0.9]}
+     * E.g. {[4, 1, 8], [0.5, 1.9, 0.9]} yields  {[1, 4, 8], [1,9, 0.5, 0.9]}
      *
      * @param longArray   Array of long values (e.g. neighbours ids)
      * @param doubleArray Array of double values (e.g. neighbours weighs)
