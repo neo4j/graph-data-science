@@ -37,7 +37,8 @@ public enum GdsFeatureToggles {
     USE_PACKED_ADJACENCY_LIST(false),
     USE_REORDERED_ADJACENCY_LIST(false),
     ENABLE_ARROW_DATABASE_IMPORT(true),
-    THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS(false);
+    THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS(false),
+    ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING(false);
 
     public boolean isEnabled() {
         return current.get();

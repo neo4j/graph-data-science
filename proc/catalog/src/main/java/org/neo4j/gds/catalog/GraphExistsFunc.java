@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
-public class GraphExistsFunc extends CatalogProc {
+import java.util.function.Function;
 
-    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
+public class GraphExistsFunc {
+    @SuppressWarnings("WeakerAccess")
+    @Context
+    public GraphStoreCatalogProcedureFacade facade;
 
+    @SuppressWarnings("unused")
     @UserFunction("gds.graph.exists")
-    @Description(DESCRIPTION)
-    public boolean existsFunction(@Name(value = "graphName") String graphName) {
-        ProcPreconditions.check();
-        validateGraphName(graphName);
-        return GraphStoreCatalog.exists(username(), executionContext().databaseId(), graphName);
+    @Description(GraphCatalogConstants.DESCRIPTION)
+    public boolean existsFunctionButBetter(@Name(value = "graphName") String graphName) {
+        return facade.graphExists(graphName, Function.identity());
     }
-
 }

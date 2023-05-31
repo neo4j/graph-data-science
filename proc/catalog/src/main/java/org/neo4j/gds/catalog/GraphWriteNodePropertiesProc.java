@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -46,7 +46,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         return NodePropertiesWriter.write(
             graphName,
@@ -66,7 +66,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.write`";
         return NodePropertiesWriter.write(

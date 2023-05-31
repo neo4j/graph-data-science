@@ -3,7 +3,7 @@
 
 == Main Memory
 
-The GDS library runs within a Neo4j instance and is therefore subject to the general https://neo4j.com/docs/operations-manual/4.4/performance/memory-configuration/[Neo4j memory configuration].
+The GDS library runs within a Neo4j instance and is therefore subject to the general https://neo4j.com/docs/operations-manual/current/performance/memory-configuration/[Neo4j memory configuration].
 
 .GDS heap memory usage
 image::memory-usage.png[width=600]
@@ -61,6 +61,8 @@ However, setting a minimum page cache size is still important when projecting gr
 
 * For xref:management-ops/projections/graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
 * For xref:management-ops/projections/graph-project-cypher.adoc[Cypher projections], a higher page cache is required depending on the query complexity.
+* For xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher aggregation], a higher page cache is required depending on the query complexity.
+* For xref:graph-project-apache-arrow.adoc[projections through Apache Arrow], the page cache is irrelevant.
 
 However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
 We recommend starting with a page cache size of roughly `250MB * writeConcurrency` and evaluate write performance and adapt accordingly.
@@ -71,6 +73,15 @@ Ideally, if the xref:common-usage/memory-estimation.adoc[memory estimation] feat
 Decreasing the page cache size in favor of heap size is *not* recommended if the Neo4j instance runs both, operational and analytical workloads at the same time.
 See https://neo4j.com/docs/operations-manual/4.4/performance/memory-configuration/[Neo4j memory configuration] for general information about page cache sizing.
 ====
+
+=== Off-heap memory
+
+The off-heap space is used by the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow server] to store received data.
+
+If you have the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow server] enabled, we also recommend to reserve some off-heap memory.
+The amount of memory required depends on the batch size used by the client.
+Data received through Arrow is temporarily stored in direct memory before being converted and loaded into an on-heap graph.
+
 
 [[system-requirements-cpu]]
 == CPU

@@ -19,23 +19,29 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.api.AdjacencyList.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
     private final BumpAllocator<byte[]> builder;
+    private final MemoryTracker memoryTracker;
 
-    CompressedAdjacencyListBuilder() {
+    CompressedAdjacencyListBuilder(MemoryTracker memoryTracker) {
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
     public Allocator newAllocator() {
-        return new Allocator(this.builder.newLocalAllocator());
+        return new Allocator(this.builder.newLocalAllocator(), this.memoryTracker);
     }
 
     @Override
@@ -45,9 +51,30 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
 
     @Override
     public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
-        var intoPages = builder.intoPages();
+        byte[][] intoPages = builder.intoPages();
         reorder(intoPages, offsets, degrees);
-        return new CompressedAdjacencyList(intoPages, degrees, offsets);
+        var memoryInfo = memoryInfo(intoPages, degrees, offsets);
+
+        return new CompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
+    }
+
+    private MemoryInfo memoryInfo(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+        for (byte[] page : pages) {
+            this.memoryTracker.recordPageSize(page.length * Byte.BYTES);
+        }
+
+        var memoryInfoBuilder = MemoryInfo
+            .builder(memoryTracker)
+            .pages(pages.length)
+            .bytesOffHeap(0);
+
+        var sizeOnHeap = new MutableLong();
+        MemoryUsage.sizeOfObject(pages).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
+        memoryInfoBuilder.bytesOnHeap(sizeOnHeap.longValue());
+
+        return memoryInfoBuilder.build();
     }
 
     private enum Factory implements BumpAllocator.Factory<byte[]> {
@@ -67,13 +94,16 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     static final class Allocator implements AdjacencyListBuilder.Allocator<byte[]> {
 
         private final BumpAllocator.LocalAllocator<byte[]> allocator;
+        private final MemoryTracker memoryTracker;
 
-        private Allocator(BumpAllocator.LocalAllocator<byte[]> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<byte[]> allocator, MemoryTracker memoryTracker) {
             this.allocator = allocator;
+            this.memoryTracker = memoryTracker;
         }
 
         @Override
         public long allocate(int length, Slice<byte[]> into) {
+            this.memoryTracker.recordHeapAllocation(length);
             return allocator.insertInto(length, (ModifiableSlice<byte[]>) into);
         }
 

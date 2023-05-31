@@ -93,13 +93,15 @@ public final class StreamResult {
 
             Path path = null;
             if (createCypherPath) {
-                path = create(
-                    nodeLookup,
-                    nodeIds,
-                    costs,
-                    relationshipType,
-                    COST_PROPERTY_NAME
-                );
+                    path = create(
+                        nodeLookup,
+                        nodeIds,
+                        costs,
+                        relationshipType,
+                        COST_PROPERTY_NAME
+                    );
+
+
             }
 
             return new StreamResult(

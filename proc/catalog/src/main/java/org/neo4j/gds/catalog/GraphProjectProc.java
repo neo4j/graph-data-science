@@ -40,7 +40,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.FictitiousGraphStoreLoader;
 import org.neo4j.gds.executor.GraphStoreCreator;
 import org.neo4j.gds.executor.GraphStoreFromDatabaseLoader;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;
@@ -75,7 +75,7 @@ public class GraphProjectProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(username(), graphName);
 
         // input
@@ -105,7 +105,7 @@ public class GraphProjectProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphProjectConfig config = GraphProjectFromStoreConfig.of(
@@ -127,7 +127,7 @@ public class GraphProjectProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(username(), graphName);
 
         // input
@@ -157,7 +157,7 @@ public class GraphProjectProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphProjectFromCypherConfig config = GraphProjectFromCypherConfig.of(
@@ -181,7 +181,7 @@ public class GraphProjectProc extends CatalogProc {
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         validateGraphName(username(), graphName);
 
         var procedureConfig = CypherMapWrapper.create(configuration);

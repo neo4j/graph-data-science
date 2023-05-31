@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel.cc;
+package org.neo4j.gds.pregel.cc;
 
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.GraphAlgorithmFactory;
@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationAlgorithmFactory extends GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> {
     @Override
     public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,

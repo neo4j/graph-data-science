@@ -86,8 +86,10 @@ public abstract class BaseTest {
 
     protected long clearDb() {
         var deletedNodes = new AtomicLong();
-        runQueryWithRowConsumer("MATCH (n) DETACH DELETE n RETURN count(n)",
-            row -> deletedNodes.set(row.getNumber("count(n)").longValue()));
+        runQueryWithRowConsumer(
+            "MATCH (n) DETACH DELETE n RETURN count(n)",
+            row -> deletedNodes.set(row.getNumber("count(n)").longValue())
+        );
         return deletedNodes.get();
     }
 
@@ -99,7 +101,10 @@ public abstract class BaseTest {
 
     protected List<Node> allNodesWithLabel(String label) {
         var sourceNodes = new ArrayList<Node>();
-        runQueryWithRowConsumer(formatWithLocale("MATCH (n:%s) RETURN n", label), row -> sourceNodes.add(row.getNode("n")));
+        runQueryWithRowConsumer(
+            formatWithLocale("MATCH (n:%s) RETURN n", label),
+            row -> sourceNodes.add(row.getNode("n"))
+        );
         return sourceNodes;
     }
 

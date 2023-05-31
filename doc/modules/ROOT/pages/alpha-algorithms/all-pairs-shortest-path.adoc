@@ -153,7 +153,7 @@ F and E appear to be quite distant from the others.
 [source, cypher, role=noplay graph-project-query, group=cypher]
 ----
 MATCH (src:Loc)-[r:ROAD]->(trg:Loc)
-RETURN gds.alpha.graph.project(
+RETURN gds.graph.project(
   'cypherGraph',
   src,
   trg,

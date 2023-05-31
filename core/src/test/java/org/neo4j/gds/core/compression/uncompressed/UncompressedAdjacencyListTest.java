@@ -44,7 +44,7 @@ class UncompressedAdjacencyListTest {
 
         MemoryTree memRec = UncompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 32;
         long uncompressedAdjacencySize = 1200;
 
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
@@ -68,7 +68,7 @@ class UncompressedAdjacencyListTest {
 
         MemoryTree memRec = UncompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 32;
 
         long uncompressedAdjacencySize = 800_000_000_000L;
 

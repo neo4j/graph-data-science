@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST;
@@ -256,5 +257,24 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("value", (long) defaultValue))
         );
         assertEquals(defaultValue, GdsFeatureToggles.PAGES_PER_THREAD.get());
+    }
+
+    @Test
+    void toggleEnableAdjacencyCompressionMemoryTracking() {
+        var enableAdjacencyCompressionMemoryTracking = ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled();
+        runQuery("CALL gds.features.enableAdjacencyCompressionMemoryTracking($value)", Map.of("value", !enableAdjacencyCompressionMemoryTracking));
+        assertEquals(!enableAdjacencyCompressionMemoryTracking, ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled());
+        runQuery("CALL gds.features.enableAdjacencyCompressionMemoryTracking($value)", Map.of("value", enableAdjacencyCompressionMemoryTracking));
+        assertEquals(enableAdjacencyCompressionMemoryTracking, ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled());
+    }
+
+    @Test
+    void resetEnableAdjacencyCompressionMemoryTracking() {
+        ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.reset();
+        assertCypherResult(
+            "CALL gds.features.enableAdjacencyCompressionMemoryTracking.reset()",
+            List.of(Map.of("enabled", false))
+        );
+        assertTrue(ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isDisabled());
     }
 }

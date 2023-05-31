@@ -459,9 +459,10 @@ public final class Neo4jProxy {
         Neo4jTypes.AnyType type,
         String description,
         boolean internal,
-        boolean threadSafe
+        boolean threadSafe,
+        Optional<String> deprecatedBy
     ) {
-        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal, threadSafe);
+        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal, threadSafe, deprecatedBy);
     }
 
     @SuppressForbidden(reason = "This is the compat API")

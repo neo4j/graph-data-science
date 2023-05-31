@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
@@ -79,19 +80,21 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree
+        MutableInt degree,
+        MemoryTracker memoryTracker
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompressWithVarLongTail(allocator, slice, values, length, aggregation, degree);
+        return deltaCompressWithVarLongTail(allocator, slice, values, length, aggregation, degree, memoryTracker);
     }
 
     static long compressWithPropertiesWithVarLongTail(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length
+        int length,
+        MemoryTracker memoryTracker
     ) {
-        return preparePackingWithVarLongTail(allocator, slice, values, length);
+        return preparePackingWithVarLongTail(allocator, slice, values, length, memoryTracker);
     }
 
     private static long deltaCompressWithVarLongTail(
@@ -100,7 +103,8 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree
+        MutableInt degree,
+        MemoryTracker memoryTracker
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
@@ -108,7 +112,7 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithVarLongTail(allocator, slice, values, length);
+        return preparePackingWithVarLongTail(allocator, slice, values, length, memoryTracker);
     }
 
     private static long preparePacking(
@@ -180,7 +184,8 @@ public final class AdjacencyPacker {
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length
+        int length,
+        MemoryTracker memoryTracker
     ) {
         int blocks = length / AdjacencyPacking.BLOCK_SIZE;
         var header = new byte[blocks];
@@ -191,6 +196,7 @@ public final class AdjacencyPacker {
 
         for (; blockIdx < blocks; blockIdx++, offset += AdjacencyPacking.BLOCK_SIZE) {
             int bits = bitsNeeded(values, offset, AdjacencyPacking.BLOCK_SIZE);
+            memoryTracker.recordHeaderBits(bits);
             blockBytes += bytesNeeded(bits);
             header[blockIdx] = (byte) bits;
         }
@@ -262,19 +268,21 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree
+        MutableInt degree,
+        MemoryTracker memoryTracker
     ) {
         Arrays.sort(values, 0, length);
-        return deltaCompressWithPackedTail(allocator, slice, values, length, aggregation, degree);
+        return deltaCompressWithPackedTail(allocator, slice, values, length, aggregation, degree, memoryTracker);
     }
 
     static long compressWithPropertiesWithPackedTail(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length
+        int length,
+        MemoryTracker memoryTracker
     ) {
-        return preparePackingWithPackedTail(allocator, slice, values, length);
+        return preparePackingWithPackedTail(allocator, slice, values, length, memoryTracker);
     }
 
     private static long deltaCompressWithPackedTail(
@@ -283,7 +291,8 @@ public final class AdjacencyPacker {
         long[] values,
         int length,
         Aggregation aggregation,
-        MutableInt degree
+        MutableInt degree,
+        MemoryTracker memoryTracker
     ) {
         if (length > 0) {
             length = AdjacencyCompression.deltaEncodeSortedValues(values, 0, length, aggregation);
@@ -291,14 +300,15 @@ public final class AdjacencyPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithPackedTail(allocator, slice, values, length);
+        return preparePackingWithPackedTail(allocator, slice, values, length, memoryTracker);
     }
 
     private static long preparePackingWithPackedTail(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
-        int length
+        int length,
+        MemoryTracker memoryTracker
     ) {
         boolean hasTail = length == 0 || length % AdjacencyPacking.BLOCK_SIZE != 0;
         int blocks = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
@@ -311,6 +321,7 @@ public final class AdjacencyPacker {
 
         for (; blockIdx < lastFullBlock; blockIdx++, offset += AdjacencyPacking.BLOCK_SIZE) {
             int bits = bitsNeeded(values, offset, AdjacencyPacking.BLOCK_SIZE);
+            memoryTracker.recordHeaderBits(bits);
             bytes += bytesNeeded(bits);
             header[blockIdx] = (byte) bits;
         }
@@ -318,6 +329,7 @@ public final class AdjacencyPacker {
         int tailLength = (length - offset);
         if (hasTail) {
             int bits = bitsNeeded(values, offset, tailLength);
+            memoryTracker.recordHeaderBits(bits);
             bytes += BitUtil.ceilDiv((long) bits * tailLength, Long.BYTES);
             header[blockIdx] = (byte) bits;
         }
@@ -328,7 +340,8 @@ public final class AdjacencyPacker {
             values,
             header,
             bytes,
-            tailLength
+            tailLength,
+            memoryTracker
         );
     }
 
@@ -338,7 +351,8 @@ public final class AdjacencyPacker {
         long[] values,
         byte[] header,
         long bytes,
-        int tailLength
+        int tailLength,
+        MemoryTracker memoryTracker
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
@@ -350,6 +364,7 @@ public final class AdjacencyPacker {
         // we must align to long because we write in terms of longs, not single bytes
         long alignedFullSize = BitUtil.align(fullSize, Long.BYTES);
         int allocationSize = Math.toIntExact(alignedFullSize);
+        memoryTracker.recordHeaderAllocation(alignedHeaderSize);
 
         long adjacencyOffset = allocator.allocate(allocationSize, slice);
 

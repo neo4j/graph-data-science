@@ -57,7 +57,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -402,7 +401,7 @@ class LinkPredictionPredictPipelineExecutorTest {
 
         pipelineExecutor.compute();
 
-        var expectedMessages = new ArrayList<>(List.of(
+        var expectedMessages = List.of(
             "Link Prediction Predict Pipeline :: Start",
             "Link Prediction Predict Pipeline :: Execute node property steps :: Start",
             "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Start",
@@ -410,14 +409,10 @@ class LinkPredictionPredictPipelineExecutorTest {
             "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Finished",
             "Link Prediction Predict Pipeline :: Execute node property steps :: Finished",
             "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Start",
-            "Link Prediction Predict Pipeline :: Exhaustive link prediction 16%",
-            "Link Prediction Predict Pipeline :: Exhaustive link prediction 33%",
-            "Link Prediction Predict Pipeline :: Exhaustive link prediction 75%",
-            "Link Prediction Predict Pipeline :: Exhaustive link prediction 91%",
             "Link Prediction Predict Pipeline :: Exhaustive link prediction 100%",
             "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Finished",
             "Link Prediction Predict Pipeline :: Finished"
-        ));
+        );
 
         assertThat(progressTracker.log().getMessages(INFO))
             .extracting(removingThreadId())

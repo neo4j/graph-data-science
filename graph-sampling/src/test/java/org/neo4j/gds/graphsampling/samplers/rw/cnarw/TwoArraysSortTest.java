@@ -20,6 +20,7 @@
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.TwoArraysSort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

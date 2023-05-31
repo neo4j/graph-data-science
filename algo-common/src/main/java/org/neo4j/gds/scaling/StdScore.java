@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class StdScore extends ScalarScaler {
+public final class StdScore extends ScalarScaler {
 
     static final String TYPE = "stdscore";
     final double avg;
@@ -45,10 +45,11 @@ final class StdScore extends ScalarScaler {
 
     @Override
     public double scaleProperty(long nodeId) {
-        return (properties.doubleValue(nodeId) - avg) / std;
+        var v = properties.doubleValue(nodeId);
+        return (v - avg) / std;
     }
 
-    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+    public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
@@ -79,12 +80,13 @@ final class StdScore extends ScalarScaler {
                 // calculate global metrics
                 var squaredSum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::squaredSum).sum();
                 var sum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::sum).sum();
-                var avg = sum / nodeCount;
+                var nodeCountOmittingMissingProperties = tasks.stream().mapToLong(AggregatesComputer::nodeCountOmittingMissingValues).sum();
+                var avg = sum / nodeCountOmittingMissingProperties;
                 // std = σ² = Σ(pᵢ - avg)² / N =
                 // (Σ(pᵢ²) + Σ(avg²) - 2avgΣ(pᵢ)) / N =
                 // (Σ(pᵢ²) + Navg² - 2avgΣ(pᵢ)) / N =
                 // (Σ(pᵢ²) + avg(Navg - 2Σ(pᵢ)) / N
-                var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
+                var variance = (squaredSum - avg * sum) / nodeCountOmittingMissingProperties;
                 var std = Math.sqrt(variance);
 
                 var statistics = Map.of(
@@ -92,7 +94,7 @@ final class StdScore extends ScalarScaler {
                     "std", List.of(std)
                 );
 
-                if (Math.abs(std) < CLOSE_TO_ZERO) {
+                if (std < CLOSE_TO_ZERO) {
                     return new StatsOnly(statistics);
                 } else {
                     return new StdScore(properties, statistics, avg, std);
@@ -113,8 +115,7 @@ final class StdScore extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            double propertyValue = properties.doubleValue(nodeId);
+        void compute(double propertyValue) {
             this.sum += propertyValue;
             this.squaredSum += propertyValue * propertyValue;
         }

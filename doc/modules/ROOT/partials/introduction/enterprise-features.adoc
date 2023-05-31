@@ -19,7 +19,7 @@ See xref:installation/installation-enterprise-edition.adoc[] for how to configur
 ** Supports capacity and load xref::common-usage/monitoring-system.adoc[monitoring].
 ** Supports extended graph catalog features, including:
 *** Graph xref::management-ops/backup-restore.adoc[backup and restore].
-*** Data import and export via xref:installation/installation-apache-arrow.adoc[Apache Arrow].
+*** Data import and export via xref:installation/configure-apache-arrow-server.adoc[Apache Arrow].
 ** Supports extended model catalog features, including:
 *** Storing any number of models in the model catalog.
 *** Sharing of models between users, through xref:model-catalog/publish.adoc[publishing].

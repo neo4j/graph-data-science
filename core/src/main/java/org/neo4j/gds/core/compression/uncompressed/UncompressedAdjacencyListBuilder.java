@@ -19,25 +19,31 @@
  */
 package org.neo4j.gds.core.compression.uncompressed;
 
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.api.AdjacencyList.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 
 public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuilder<long[], UncompressedAdjacencyList> {
 
     private final BumpAllocator<long[]> builder;
+    private final MemoryTracker memoryTracker;
 
-    public UncompressedAdjacencyListBuilder() {
+    public UncompressedAdjacencyListBuilder(MemoryTracker memoryTracker) {
+        this.memoryTracker = memoryTracker;
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
     }
 
     @Override
     public Allocator newAllocator() {
-        return new Allocator(this.builder.newLocalAllocator());
+        return new Allocator(this.builder.newLocalAllocator(), this.memoryTracker);
     }
 
     @Override
@@ -47,9 +53,30 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
 
     @Override
     public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
-        var intoPages = builder.intoPages();
+        long[][] intoPages = builder.intoPages();
         reorder(intoPages, offsets, degrees);
-        return new UncompressedAdjacencyList(intoPages, degrees, offsets);
+        var memoryInfo = memoryInfo(intoPages, degrees, offsets);
+
+        return new UncompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
+    }
+
+    private MemoryInfo memoryInfo(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+        for (long[] page : pages) {
+            this.memoryTracker.recordPageSize(page.length * Long.BYTES);
+        }
+
+        var memoryInfoBuilder = MemoryInfo
+            .builder(memoryTracker)
+            .pages(pages.length)
+            .bytesOffHeap(0);
+
+        var sizeOnHeap = new MutableLong();
+        MemoryUsage.sizeOfObject(pages).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
+        memoryInfoBuilder.bytesOnHeap(sizeOnHeap.longValue());
+
+        return memoryInfoBuilder.build();
     }
 
     private enum Factory implements BumpAllocator.Factory<long[]> {
@@ -83,13 +110,16 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
     public static final class Allocator implements AdjacencyListBuilder.Allocator<long[]> {
 
         private final BumpAllocator.LocalAllocator<long[]> allocator;
+        private final MemoryTracker memoryTracker;
 
-        private Allocator(BumpAllocator.LocalAllocator<long[]> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<long[]> allocator, MemoryTracker memoryTracker) {
             this.allocator = allocator;
+            this.memoryTracker = memoryTracker;
         }
 
         @Override
         public long allocate(int length, Slice<long[]> into) {
+            this.memoryTracker.recordHeapAllocation(length);
             return allocator.insertInto(length, (ModifiableSlice<long[]>) into);
         }
 

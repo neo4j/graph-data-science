@@ -140,7 +140,7 @@ CALL {
   MATCH (p:Person) OPTIONAL MATCH (p)-[:KNOWS]->(n:Person)
   RETURN p, n
 }
-WITH gds.alpha.graph.project('graph', p, n) AS graph
+WITH gds.graph.project('graph', p, n) AS graph
 RETURN
   graph.graphName AS graphName,
   graph.nodeCount AS nodeCount,

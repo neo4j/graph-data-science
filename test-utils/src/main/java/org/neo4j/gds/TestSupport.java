@@ -450,34 +450,44 @@ public final class TestSupport {
                 )
                 .hasSize(expected.size());
 
-            for (int i = 0; i < expected.size(); ++i) {
-                Map<String, Object> expectedRow = expected.get(i);
-                Map<String, Object> actualRow = actual.get(i);
+            for (int rowId = 0; rowId < expected.size(); ++rowId) {
+                Map<String, Object> expectedRow = expected.get(rowId);
+                Map<String, Object> actualRow = actual.get(rowId);
 
-                softAssertions.assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
-
-                int rowNumber = i;
-                expectedRow.forEach((key, expectedValue) -> {
-                    Object actualValue = actualRow.get(key);
-                    ObjectAssert<Object> assertion = softAssertions.assertThat(actualValue)
-                        .withFailMessage(
-                            "Different value for column '%s' of row %d (expected %s, but got %s)",
-                            key,
-                            rowNumber,
-                            expectedValue,
-                            actualValue
-                        );
-
-                    if (expectedValue instanceof Matcher) {
-                        assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
-                    } else if (expectedValue instanceof Condition) {
-                        assertion.is((Condition<Object>) expectedValue);
-                    } else {
-                        assertion.isEqualTo(expectedValue);
-                    }
-                });
+                assertRow(softAssertions, rowId, expectedRow, actualRow);
             }
             softAssertions.assertAll();
+        });
+    }
+
+    private static void assertRow(
+        SoftAssertions softAssertions,
+        int rowId,
+        Map<String, Object> expectedRow,
+        Map<String, Object> actualRow
+    ) {
+        softAssertions.assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
+
+        expectedRow.forEach((key, expectedValue) -> {
+            Object actualValue = actualRow.get(key);
+            ObjectAssert<Object> assertion = softAssertions.assertThat(actualValue)
+                .withFailMessage(
+                    "Different value for column '%s' of row %d (expected %s, but got %s)",
+                    key,
+                    rowId,
+                    expectedValue,
+                    actualValue
+                );
+
+            if (expectedValue instanceof Matcher) {
+                assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
+            } else if (expectedValue instanceof Condition) {
+                assertion.is((Condition<Object>) expectedValue);
+            } else if (expectedValue instanceof Map) {
+                assertRow(softAssertions, rowId, (Map<String, Object>) expectedValue, (Map<String, Object>) actualValue);
+            } else {
+                assertion.isEqualTo(expectedValue);
+            }
         });
     }
 

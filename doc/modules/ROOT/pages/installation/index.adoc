@@ -35,7 +35,7 @@ On Neo4j Desktop you can install the GDS library directly xref:installation/neo4
 
 The Enterprise Edition (EE) of the library requires a _license key_ as well. You can find more details on requesting and configuring a license key in the xref:installation/installation-enterprise-edition.adoc[] section.
 
-GDS EE includes Apache Arrow for advanced graph import and export capabilities. Arrow can be enabled and configured as detailed in the xref:installation/installation-apache-arrow.adoc[Apache Arrow] guide.
+GDS EE includes Apache Arrow for advanced graph import and export capabilities. Arrow can be enabled and configured as detailed in the xref:installation/configure-apache-arrow-server.adoc[Apache Arrow] guide.
 
 == Verifying the installation
 

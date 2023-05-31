@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.api.compress;
 
+import org.neo4j.gds.core.compression.common.MemoryTracker;
+
 public interface AdjacencyListBuilderFactory<TARGET_PAGE, TARGET_TYPE, PROPERTY_PAGE, PROPERTY_TYPE> {
 
-    AdjacencyListBuilder<TARGET_PAGE, TARGET_TYPE> newAdjacencyListBuilder();
+    AdjacencyListBuilder<TARGET_PAGE, TARGET_TYPE> newAdjacencyListBuilder(MemoryTracker memoryTracker);
 
-    AdjacencyListBuilder<PROPERTY_PAGE, PROPERTY_TYPE> newAdjacencyPropertiesBuilder();
+    AdjacencyListBuilder<PROPERTY_PAGE, PROPERTY_TYPE> newAdjacencyPropertiesBuilder(MemoryTracker memoryTracker);
 }

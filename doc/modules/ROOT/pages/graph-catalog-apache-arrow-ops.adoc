@@ -12,7 +12,7 @@ Those are documented in xref:graph-catalog-node-ops.adoc[Node operations] and xr
 Similar to the procedures, GDS also supports exporting properties via Arrow Flight.
 
 In this chapter, we assume that a Flight server has been set up and configured.
-To learn more about the installation, please refer to the xref:installation/installation-apache-arrow.adoc[installation chapter].
+To learn more about the installation, please refer to the xref:installation/configure-apache-arrow-server.adoc[installation chapter].
 
 
 == Arrow Ticket format

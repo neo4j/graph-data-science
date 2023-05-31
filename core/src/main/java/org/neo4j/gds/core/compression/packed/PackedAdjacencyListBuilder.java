@@ -19,25 +19,33 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
+
+import java.util.Arrays;
 
 public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Address, PackedAdjacencyList> {
 
     private final BumpAllocator<Address> builder;
+    private final MemoryTracker memoryTracker;
 
-    PackedAdjacencyListBuilder() {
+    PackedAdjacencyListBuilder(MemoryTracker memoryTracker) {
         this.builder = new BumpAllocator<>(Factory.INSTANCE);
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
     public Allocator newAllocator() {
-        return new Allocator(this.builder.newLocalAllocator());
+        return new Allocator(this.builder.newLocalAllocator(), this.memoryTracker);
     }
 
     @Override
@@ -57,7 +65,26 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
             int allocationSize = Math.toIntExact(address.bytes());
             allocationSizes[i] = allocationSize;
         }
-        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets);
+
+        var memoryInfo = memoryInfo(allocationSizes, degrees, offsets);
+
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, memoryInfo);
+    }
+
+    private AdjacencyList.MemoryInfo memoryInfo(int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
+        long bytesOffHeap = Arrays.stream(allocationSizes).peek(this.memoryTracker::recordPageSize).asLongStream().sum();
+
+        var memoryInfoBuilder = AdjacencyList.MemoryInfo
+            .builder(memoryTracker)
+            .pages(allocationSizes.length)
+            .bytesOffHeap(bytesOffHeap);
+
+        var sizeOnHeap = new MutableLong();
+        MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
+        memoryInfoBuilder.bytesOnHeap(sizeOnHeap.longValue());
+
+        return memoryInfoBuilder.build();
     }
 
     private enum Factory implements BumpAllocator.Factory<Address> {
@@ -78,13 +105,16 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
     static final class Allocator implements AdjacencyListBuilder.Allocator<Address> {
 
         private final BumpAllocator.LocalAllocator<Address> allocator;
+        private final MemoryTracker memoryTracker;
 
-        private Allocator(BumpAllocator.LocalAllocator<Address> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<Address> allocator, MemoryTracker memoryTracker) {
             this.allocator = allocator;
+            this.memoryTracker = memoryTracker;
         }
 
         @Override
         public long allocate(int length, Slice<Address> into) {
+            this.memoryTracker.recordNativeAllocation(length);
             return this.allocator.insertInto(length, (ModifiableSlice<Address>) into);
         }
 

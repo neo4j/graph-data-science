@@ -41,6 +41,7 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.OptionalLong;
 
 import static java.lang.Integer.numberOfTrailingZeros;
 
@@ -304,6 +305,11 @@ public final class MemoryUsage {
         } catch (RuntimeException e) {
             return -1;
         }
+    }
+
+    public static OptionalLong sizeOfObject(Object thing) {
+        long size = sizeOf(thing);
+        return size == -1 ? OptionalLong.empty() : OptionalLong.of(size);
     }
 
     /**

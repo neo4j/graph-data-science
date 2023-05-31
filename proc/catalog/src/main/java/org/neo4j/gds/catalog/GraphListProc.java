@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,7 +38,7 @@ public class GraphListProc extends BaseProc {
     public Stream<GraphInfoWithHistogram> list(
         @Name(value = "graphName", defaultValue = GraphListOperator.NO_VALUE) String graphName
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
         return GraphListOperator.list(graphName, executionContext());
     }
 }

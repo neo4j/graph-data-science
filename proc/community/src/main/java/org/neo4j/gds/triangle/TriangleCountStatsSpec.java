@@ -27,7 +27,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)

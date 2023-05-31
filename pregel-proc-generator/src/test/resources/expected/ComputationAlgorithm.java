@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel.cc;
+package org.neo4j.gds.pregel.cc;
 
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.Algorithm;
@@ -29,14 +29,15 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<PregelResult> {
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
                          ProgressTracker progressTracker) {
         super(progressTracker);
-        this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT, progressTracker);
+        var computation = new Computation();
+        this.pregelJob = Pregel.create(graph, configuration, computation, Pools.DEFAULT, progressTracker);
     }
 
     @Override

@@ -39,31 +39,35 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ProcedureLookup {
 
-    private final Map<String, ProcedureSpec> procedureSpecs;
+    private final Map<ProcedureKey, ProcedureSpec> procedureSpecs;
 
     public static ProcedureLookup forPackages(List<String> packages) {
         var procedureSpecs = packages.stream()
             .map(pkg -> new Reflections(pkg, Scanners.MethodsAnnotated)).flatMap(r -> Stream.concat(
                 r.getMethodsAnnotatedWith(Procedure.class).stream().map(ProcedureLookup::specFromProcedure),
                 r.getMethodsAnnotatedWith(CustomProcedure.class).stream().map(ProcedureLookup::specFromCustomProcedure)
-            )).collect(Collectors.toMap(ProcedureSpec::name, s -> s, (keep, first) -> keep));
+            )).collect(Collectors.toMap(
+                p -> ImmutableProcedureKey.of(p.name(), p.namespace()),
+                s -> s,
+                (keep, first) -> keep
+            ));
 
         return new ProcedureLookup(procedureSpecs);
     }
 
-    private ProcedureLookup(Map<String, ProcedureSpec> procedureSpecs) {
+    private ProcedureLookup(Map<ProcedureKey, ProcedureSpec> procedureSpecs) {
         this.procedureSpecs = procedureSpecs;
     }
 
-    Class<?> findResultType(String fullyQualifiedProcedureName) {
-        var spec = tryFindProcedureSpec(fullyQualifiedProcedureName)
+    Class<?> findResultType(String fullyQualifiedProcedureName, CustomProcedure.Namespace namespace) {
+        var spec = tryFindProcedureSpec(fullyQualifiedProcedureName, namespace)
             .orElseThrow(() -> unknownProcedure(fullyQualifiedProcedureName));
 
         return spec.resultType();
     }
 
-    List<String> findArgumentNames(String fullyQualifiedProcedureName) {
-        var spec = tryFindProcedureSpec(fullyQualifiedProcedureName)
+    List<String> findArgumentNames(String fullyQualifiedProcedureName, CustomProcedure.Namespace namespace) {
+        var spec = tryFindProcedureSpec(fullyQualifiedProcedureName, namespace)
             .orElseThrow(() -> unknownProcedure(fullyQualifiedProcedureName));
 
         return spec.argumentNames();
@@ -101,13 +105,19 @@ final class ProcedureLookup {
             resultType = ((Class<?>) actualResultType);
         }
 
-        return ImmutableProcedureSpec.of(name, (Class<?>) resultType, parameterNames(method));
+        return ImmutableProcedureSpec.of(
+            name,
+            (Class<?>) resultType,
+            parameterNames(method),
+            CustomProcedure.Namespace.PROCEDURE
+        );
     }
 
     private static ProcedureSpec specFromCustomProcedure(Method method) {
-        var name = method.getAnnotation(CustomProcedure.class).value();
+        var customProcedure = method.getAnnotation(CustomProcedure.class);
+        var name = customProcedure.value();
         var resultType = method.getReturnType();
-        return ImmutableProcedureSpec.of(name, resultType, parameterNames(method));
+        return ImmutableProcedureSpec.of(name, resultType, parameterNames(method), customProcedure.namespace());
     }
 
     private static List<String> parameterNames(Method method) {
@@ -118,8 +128,14 @@ final class ProcedureLookup {
             .collect(Collectors.toList());
     }
 
-    private Optional<ProcedureSpec> tryFindProcedureSpec(String fullyQualifiedProcedureName) {
-        return Optional.ofNullable(this.procedureSpecs.get(fullyQualifiedProcedureName));
+    private Optional<ProcedureSpec> tryFindProcedureSpec(
+        String fullyQualifiedProcedureName,
+        CustomProcedure.Namespace namespace
+    ) {
+        return Optional.ofNullable(this.procedureSpecs.get(ImmutableProcedureKey.of(
+            fullyQualifiedProcedureName,
+            namespace
+        )));
     }
 
     private IllegalArgumentException unknownProcedure(String fullyQualifiedProcedureName) {
@@ -137,5 +153,15 @@ final class ProcedureLookup {
         Class<?> resultType();
 
         List<String> argumentNames();
+
+        CustomProcedure.Namespace namespace();
+    }
+
+    @ValueClass
+    interface ProcedureKey {
+
+        String name();
+
+        CustomProcedure.Namespace namespace();
     }
 }

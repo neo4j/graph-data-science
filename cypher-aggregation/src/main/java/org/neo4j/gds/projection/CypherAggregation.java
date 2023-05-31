@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.projection;
 
+import com.neo4j.gds.internal.CustomProceduresUtil;
+import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.CompatUserAggregator;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -33,23 +34,24 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.procedure.Name;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.storable.TextValue;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
 public class CypherAggregation implements CompatUserAggregationFunction {
-    // NOTE: keep in sync with `GraphAggregator.procedureSyntax`
+
+    // NOTE: keep in sync with `procedureSyntax`
     static final QualifiedName FUNCTION_NAME = new QualifiedName(
-        new String[]{"gds", "alpha", "graph"},
+        new String[]{"gds", "graph"},
         "project"
     );
 
-    public static CompatUserAggregationFunction newInstance() {
-        return new CypherAggregation();
-    }
-
+    // NOTE: keep in sync with `procedureSyntax`
     @Override
     public UserFunctionSignature signature() {
         return Neo4jProxy.userFunctionSignature(
@@ -76,23 +78,34 @@ public class CypherAggregation implements CompatUserAggregationFunction {
             // not internal
             false,
             // thread-safe, yes please
-            true
+            true,
+            // not deprecated
+            Optional.empty()
         );
+    }
+
+    // NOTE: keep in sync with `FUNCTION_NAME` and `signature`
+    @CustomProcedure(value = "gds.graph.project", namespace = CustomProcedure.Namespace.AGGREGATION_FUNCTION)
+    public AggregationResult procedureSyntax(
+        @Name("graphName") TextValue graphName,
+        @Name("sourceNode") AnyValue sourceNode,
+        @Name("targetNode") AnyValue targetNode,
+        @Name("nodesConfig") AnyValue nodesConfig,
+        @Name("relationshipConfig") AnyValue relationshipConfig,
+        @Name("configuration") AnyValue config
+    ) {
+        throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
+    }
+
+    public static CompatUserAggregationFunction newInstance() {
+        return new CypherAggregation();
     }
 
     @Override
     public CompatUserAggregator create(Context ctx) throws ProcedureException {
-        // TODO: reuse AuraProcedureUtil
+        var databaseService = CustomProceduresUtil.lookupSafeComponentProvider(ctx, GraphDatabaseService.class);
+        var username = CustomProceduresUtil.lookupSafeComponentProvider(ctx, Username.class);
 
-        var procedures = GraphDatabaseApiProxy.resolveDependency(
-            ctx.dependencyResolver(),
-            GlobalProcedures.class
-        );
-        var databaseService = procedures
-            .lookupComponentProvider(GraphDatabaseService.class, true)
-            .apply(ctx);
-
-        var username = procedures.lookupComponentProvider(Username.class, true).apply(ctx);
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
         var writeMode = runsOnCompositeDatabase
             ? WriteMode.NONE

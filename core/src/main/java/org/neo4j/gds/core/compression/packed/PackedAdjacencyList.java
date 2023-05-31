@@ -23,14 +23,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.GdsSystemProperties;
 
 import java.lang.ref.Cleaner;
-import java.util.Arrays;
 
 public class PackedAdjacencyList implements AdjacencyList {
 
@@ -39,8 +36,8 @@ public class PackedAdjacencyList implements AdjacencyList {
     private final long[] pages;
     private final HugeIntArray degrees;
     private final HugeLongArray offsets;
-    private final int[] allocationSizes;
 
+    private final MemoryInfo memoryInfo;
     private final Cleaner.Cleanable cleanable;
 
 
@@ -117,12 +114,13 @@ public class PackedAdjacencyList implements AdjacencyList {
         long[] pages,
         int[] allocationSizes,
         HugeIntArray degrees,
-        HugeLongArray offsets
+        HugeLongArray offsets,
+        MemoryInfo memoryInfo
     ) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
-        this.allocationSizes = allocationSizes;
+        this.memoryInfo = memoryInfo;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
 
         switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
@@ -175,19 +173,7 @@ public class PackedAdjacencyList implements AdjacencyList {
 
     @Override
     public MemoryInfo memoryInfo() {
-        long bytesOffHeap = Arrays.stream(this.allocationSizes).asLongStream().sum();
-
-        var memoryInfoBuilder = ImmutableMemoryInfo
-            .builder()
-            .pages(this.pages.length)
-            .bytesOffHeap(bytesOffHeap);
-
-        var bytesOnHeap = MemoryUsage.sizeOf(this);
-        if (bytesOnHeap >= 0) {
-            memoryInfoBuilder.bytesOnHeap(bytesOnHeap);
-        }
-
-        return memoryInfoBuilder.build();
+        return this.memoryInfo;
     }
 
     /**

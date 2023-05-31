@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc.syntax;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.annotation.CustomProcedure;
 
 import java.util.List;
 
@@ -29,9 +30,12 @@ class ProcedureLookupTest {
 
     @Test
     void findArgumentNames() {
-        var foundArguments = ProcedureLookup
-            .forPackages(List.of("org.neo4j.gds"))
-            .findArgumentNames("gds.labelPropagation.stream");
+        ProcedureLookup procedureLookup = ProcedureLookup
+            .forPackages(List.of("org.neo4j.gds"));
+        var foundArguments = procedureLookup.findArgumentNames(
+            "gds.labelPropagation.stream",
+            CustomProcedure.Namespace.PROCEDURE
+        );
         assertThat(foundArguments).containsExactlyInAnyOrder("graphName", "configuration");
     }
 

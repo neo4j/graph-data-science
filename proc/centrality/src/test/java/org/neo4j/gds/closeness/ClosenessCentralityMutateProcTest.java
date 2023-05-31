@@ -21,7 +21,6 @@ package org.neo4j.gds.closeness;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -163,11 +162,5 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
             ),
             expectedCentralityResult
         );
-    }
-
-
-    @Test
-    @Disabled("Mutate on empty graph has not been covered in AlgoBaseProcTest 🙈")
-    public void testRunOnEmptyGraph() {
     }
 }

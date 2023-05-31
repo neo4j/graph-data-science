@@ -25,6 +25,9 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.utils.TwoArraysSort;
+
+import java.util.Arrays;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -69,6 +72,8 @@ abstract class VectorComputer {
             : new UnweightedVectorComputer(graph);
     }
 
+    abstract void sortTargetIds();
+
     static final class UnweightedVectorComputer extends VectorComputer implements RelationshipConsumer {
 
         UnweightedVectorComputer(Graph graph) {
@@ -89,6 +94,11 @@ abstract class VectorComputer {
                 "Method `getWeights` is not supported for %s",
                 this.getClass().getSimpleName()
             ));
+        }
+
+        @Override
+        void sortTargetIds() {
+            Arrays.sort(targetIds.buffer);
         }
 
         @Override
@@ -128,6 +138,12 @@ abstract class VectorComputer {
         void reset(int degree) {
             super.reset(degree);
             weights = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
+        }
+
+        @Override
+        void sortTargetIds() {
+            int length = weights.buffer.length;
+            TwoArraysSort.sortDoubleArrayByLongValues(targetIds.buffer, weights.buffer, length);
         }
     }
 }

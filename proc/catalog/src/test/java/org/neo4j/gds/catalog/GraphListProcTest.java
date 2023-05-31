@@ -305,7 +305,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void listCypherAggregation() {
-        runQuery("MATCH (n0)-->(n1) WITH gds.alpha.graph.project('g', n0, n1) AS g RETURN *");
+        runQuery("MATCH (n0)-->(n1) WITH gds.graph.project('g', n0, n1) AS g RETURN *");
 
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(

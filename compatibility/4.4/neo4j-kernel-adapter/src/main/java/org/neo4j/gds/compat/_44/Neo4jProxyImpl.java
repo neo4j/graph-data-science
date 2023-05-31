@@ -763,9 +763,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Neo4jTypes.AnyType type,
         String description,
         boolean internal,
-        boolean threadSafe
+        boolean threadSafe,
+        Optional<String> deprecatedBy
     ) {
-        String deprecated = null;    // no depracation
         String category = null;      // No predefined categpry (like temporal or math)
         var allowed = new String[0]; // empty allow - related to advanced function permissions
         var caseInsensitive = false; // case sensitive name match
@@ -774,7 +774,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             name,
             inputSignature,
             type,
-            deprecated,
+            deprecatedBy.orElse(null),
             allowed,
             description,
             category,

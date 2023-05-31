@@ -74,7 +74,9 @@ public final class Center extends ScalarScaler {
                     .executor(executor)
                     .run();
                 var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
-                var avg = sum / nodeCount;
+                var nodeCountOmittingMissingProperties = tasks.stream().mapToLong(AggregatesComputer::nodeCountOmittingMissingValues).sum();
+
+                var avg = sum / nodeCountOmittingMissingProperties;
 
                 return new Center(properties, avg);
             }
@@ -91,8 +93,7 @@ public final class Center extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            double propertyValue = properties.doubleValue(nodeId);
+        void compute(double propertyValue) {
             this.sum += propertyValue;
         }
 

@@ -26,7 +26,7 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.executor.ProcPreconditions;
+import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -65,7 +65,7 @@ public class GraphDropRelationshipProc extends CatalogProc {
         String relationshipType,
         Optional<String> deprecationWarning
     ) {
-        ProcPreconditions.check();
+        Preconditions.check();
 
         GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
 

@@ -108,8 +108,7 @@ public final class MinMax extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            var propertyValue = properties.doubleValue(nodeId);
+        void compute(double propertyValue) {
             if (propertyValue < min) {
                 min = propertyValue;
             }

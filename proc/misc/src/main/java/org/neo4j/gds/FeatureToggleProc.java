@@ -177,6 +177,21 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureValue(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING));
     }
 
+    @Internal
+    @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking")
+    @Description("Enables memory tracking during the construction of an adjacency list.")
+    public void enableAdjacencyCompressionMemoryTracking(@Name(value = "enableAdjacencyCompressionMemoryTracking") boolean enableAdjacencyCompressionMemoryTracking) {
+        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.toggle(enableAdjacencyCompressionMemoryTracking);
+    }
+
+    @Internal
+    @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking.reset")
+    @Description("Sets the default behaviour for enabling memory tracking during the construction of an adjacency list. That value is returned.")
+    public Stream<FeatureState> resetEnableAdjacencyCompressionMemoryTracking() {
+        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled()));
+    }
+
     @SuppressWarnings("unused")
     public static final class FeatureState {
         public final boolean enabled;

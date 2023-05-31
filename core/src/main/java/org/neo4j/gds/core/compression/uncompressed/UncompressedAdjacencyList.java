@@ -26,7 +26,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
@@ -110,14 +109,17 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
     }
 
-    private long[][] pages;
-    private HugeIntArray degrees;
-    private HugeLongArray offsets;
+    private final long[][] pages;
+    private final HugeIntArray degrees;
+    private final HugeLongArray offsets;
 
-    public UncompressedAdjacencyList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    private final MemoryInfo memoryInfo;
+
+    UncompressedAdjacencyList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets, MemoryInfo memoryInfo) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+        this.memoryInfo = memoryInfo;
     }
 
     @Override
@@ -187,12 +189,7 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
 
     @Override
     public MemoryInfo memoryInfo() {
-        var memoryInfoBuilder = ImmutableMemoryInfo.builder().pages(this.pages.length);
-        var onHeapBytes = MemoryUsage.sizeOf(this);
-        if (onHeapBytes >= 0) {
-            memoryInfoBuilder.bytesOnHeap(onHeapBytes);
-        }
-        return memoryInfoBuilder.build();
+        return this.memoryInfo;
     }
 
     public static final class Cursor extends MutableIntValue implements AdjacencyCursor, PropertyCursor {

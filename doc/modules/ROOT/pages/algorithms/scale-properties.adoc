@@ -24,6 +24,10 @@ The output property will always be a list.
 The size of the output list is equal to the sum of length of the input properties.
 That is, if the input properties are two scalar numeric properties and one list property of length three, the output list will have a total length of five.
 
+If a node is missing a value for a property, the node will be omitted from scaling of that property.
+It will receive an output value of `NaN`.
+This includes list properties.
+
 There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scaler` configuration parameter.
 

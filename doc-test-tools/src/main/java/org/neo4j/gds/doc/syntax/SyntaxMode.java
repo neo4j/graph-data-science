@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.neo4j.gds.annotation.CustomProcedure;
+
 public enum SyntaxMode {
     STATS("include-with-stats"),
     STREAM("include-with-stream"),
@@ -30,7 +32,11 @@ public enum SyntaxMode {
     MODEL_DROP("model-drop-syntax"),
     GRAPH_PROJECT("graph-project-syntax"),
     GRAPH_PROJECT_CYPHER("graph-project-cypher-syntax"),
-    GRAPH_PROJECT_CYPHER_AGGREGATION("graph-project-cypher-aggregation-syntax"),
+    GRAPH_PROJECT_CYPHER_AGGREGATION(
+        "graph-project-cypher-aggregation-syntax",
+        true,
+        CustomProcedure.Namespace.AGGREGATION_FUNCTION
+    ),
     STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
     STREAM_SINGLE_PROPERTY("include-with-stream-single-property"),
 
@@ -71,15 +77,24 @@ public enum SyntaxMode {
 
     private final String mode;
     public final boolean hasParameters;
+    public final CustomProcedure.Namespace namespace;
 
     SyntaxMode(String mode) {
         this.mode = mode;
         this.hasParameters = true;
+        this.namespace = CustomProcedure.Namespace.PROCEDURE;
     }
 
     SyntaxMode(String mode, boolean hasParameters) {
         this.mode = mode;
         this.hasParameters = hasParameters;
+        this.namespace = CustomProcedure.Namespace.PROCEDURE;
+    }
+
+    SyntaxMode(String mode, boolean hasParameters, CustomProcedure.Namespace namespace) {
+        this.mode = mode;
+        this.hasParameters = hasParameters;
+        this.namespace = namespace;
     }
 
     public String mode() {

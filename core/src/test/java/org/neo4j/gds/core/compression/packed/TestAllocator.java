@@ -24,6 +24,7 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.utils.GdsSystemProperties;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -59,9 +60,11 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         values.clone(),
                         length,
                         aggregation,
-                        degree
-                    );
-                    cursor = new DecompressingCursorWithVarLongTail(new long[]{slice.slice().address()});
+                        degree,
+                        MemoryTracker.empty()
+            );
+
+            cursor = new DecompressingCursorWithVarLongTail(new long[]{slice.slice().address()});
                     break;
                 case Packed:
                     offset = AdjacencyPacker.compressWithPackedTail(
@@ -70,7 +73,8 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         values.clone(),
                         length,
                         aggregation,
-                        degree
+                        degree,
+                        MemoryTracker.empty()
                     );
                     cursor = new DecompressingCursorWithPackedTail(new long[]{slice.slice().address()});
                     break;

@@ -220,21 +220,6 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void failOnMissingValuesForArrayProperty() {
-        var config = ScalePropertiesStreamConfigImpl.builder()
-            .nodeProperties(List.of("missingArray"))
-            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
-            .build();
-
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
-        var error = assertThrows(IllegalArgumentException.class, algo::compute);
-
-        assertThat(error.getMessage(), containsString(
-            "For scaling property `missingArray` expected array of length 2 but got length 0 for node 1"
-        ));
-    }
-
-    @Test
     void failOnNonExistentProperty() {
         var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("IMAGINARY_PROP"))
