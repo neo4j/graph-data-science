@@ -33,7 +33,6 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
@@ -214,11 +213,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
                 // TODO: we don't need to do the rest of the prepare for a node that isn't going to be used in the computation
                 vectorComputer.forEachRelationship(node);
+
+                if (sortVectors) {
+                    vectorComputer.sortTargetIds();
+                }
                 if (weighted) {
                     weights.set(node, vectorComputer.getWeights());
-                }
-                if (sortVectors) {
-                    Arrays.sort(vectorComputer.targetIds.buffer);
                 }
                 return vectorComputer.targetIds.buffer;
             }
