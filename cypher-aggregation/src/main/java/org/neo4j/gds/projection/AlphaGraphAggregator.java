@@ -53,7 +53,8 @@ public class AlphaGraphAggregator extends GraphAggregator {
                 input[1],
                 input[2],
                 dataConfig,
-                input[5]
+                input[5],
+                NoValue.NO_VALUE
             );
         } catch (Exception e) {
             throw new ProcedureException(
@@ -73,10 +74,10 @@ public class AlphaGraphAggregator extends GraphAggregator {
 
         var config = ((MapValue) relationshipConfig);
 
-        if (config.containsKey("properties") && !config.containsKey(RELATIONSHIP_PROPERTIES)) {
+        if (config.containsKey(ALPHA_RELATIONSHIP_PROPERTIES) && !config.containsKey(RELATIONSHIP_PROPERTIES)) {
             return config
-                .filter((key, value) -> !key.equals("properties"))
-                .updatedWith(RELATIONSHIP_PROPERTIES, config.get("properties"));
+                .filter((key, value) -> !key.equals(ALPHA_RELATIONSHIP_PROPERTIES))
+                .updatedWith(RELATIONSHIP_PROPERTIES, config.get(ALPHA_RELATIONSHIP_PROPERTIES));
         }
 
         return config;

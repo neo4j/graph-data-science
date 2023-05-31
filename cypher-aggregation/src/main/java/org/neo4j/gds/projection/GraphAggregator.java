@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.intellij.lang.annotations.PrintFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
@@ -41,10 +42,13 @@ import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -55,6 +59,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
     private static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
     private static final String TARGET_NODE_PROPERTIES = "targetNodeProperties";
     private static final String TARGET_NODE_LABELS = "targetNodeLabels";
+    static final String ALPHA_RELATIONSHIP_PROPERTIES = "properties";
     static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
     private static final String RELATIONSHIP_TYPE = "relationshipType";
 
@@ -92,9 +97,10 @@ abstract class GraphAggregator implements CompatUserAggregator {
         AnyValue sourceNode,
         AnyValue targetNode,
         AnyValue dataConfig,
-        AnyValue config
+        AnyValue config,
+        AnyValue migrationConfig
     ) {
-        this.configValidator.validateConfig(dataConfig);
+        this.configValidator.validateConfig(dataConfig, config, migrationConfig);
 
         var data = initGraphData(graphName, config);
 
@@ -281,19 +287,130 @@ abstract class GraphAggregator implements CompatUserAggregator {
             RELATIONSHIP_TYPE
         );
 
+        private static final Set<String> PROJECTION_CONFIG_KEYS = Set.copyOf(
+            GraphProjectFromCypherAggregationConfig.of("", "", MapValue.EMPTY).configKeys()
+        );
+
         private final AtomicBoolean validate = new AtomicBoolean(true);
 
-        void validateConfig(AnyValue dataConfig) {
-            if (dataConfig instanceof MapValue) {
+        void validateConfig(AnyValue dataConfig, AnyValue projectionConfig, AnyValue migrationConfig) {
+            if (dataConfig instanceof MapValue || projectionConfig instanceof MapValue) {
                 if (this.validate.get()) {
                     if (this.validate.getAndSet(false)) {
-                        ConfigKeyValidation.requireOnlyKeysFrom(
-                            DATA_CONFIG_KEYS,
-                            ((MapValue) dataConfig).keySet()
-                        );
+                        if (dataConfig instanceof MapValue) {
+                            validateDataConfig((MapValue) dataConfig, projectionConfig);
+                        }
+                        if (projectionConfig instanceof MapValue) {
+                            validateProjectionConfig((MapValue) projectionConfig, migrationConfig);
+                        }
                     }
                 }
             }
+        }
+
+        private void validateDataConfig(MapValue dataConfig, AnyValue projectionConfig) {
+            checkForNotMigratedConfigKeys(dataConfig);
+
+            // most map implementation create a new collection, unlike what most Java collections might do, so we cache it.
+            var dataConfigKeys = mapKeys(dataConfig);
+
+            checkForMergedOrSwappedOrForgottenConfig(projectionConfig, dataConfigKeys);
+
+            ConfigKeyValidation.requireOnlyKeysFrom(DATA_CONFIG_KEYS, dataConfigKeys);
+
+            checkForMutuallyRequiredKeys(dataConfig, SOURCE_NODE_LABELS, TARGET_NODE_LABELS);
+            checkForMutuallyRequiredKeys(dataConfig, TARGET_NODE_LABELS, SOURCE_NODE_LABELS);
+            checkForMutuallyRequiredKeys(dataConfig, SOURCE_NODE_PROPERTIES, TARGET_NODE_PROPERTIES);
+            checkForMutuallyRequiredKeys(dataConfig, TARGET_NODE_PROPERTIES, SOURCE_NODE_PROPERTIES);
+        }
+
+        private void validateProjectionConfig(MapValue projectionConfig, AnyValue migrationConfig) {
+            var containsRelationshipKeys = projectionConfig.containsKey(RELATIONSHIP_PROPERTIES)
+                || projectionConfig.containsKey(RELATIONSHIP_TYPE)
+                || projectionConfig.containsKey(ALPHA_RELATIONSHIP_PROPERTIES);
+
+            var configAsAlphaParameter = migrationConfig != NoValue.NO_VALUE;
+
+            if (containsRelationshipKeys || configAsAlphaParameter) {
+                throw error(
+                    "The parameters for `nodesConfig` and `relationshipsConfig` have been merged. " +
+                        "Update your query by merging the 4th and 5th parameter into one parameter."
+                );
+            }
+        }
+
+        private static void checkForNotMigratedConfigKeys(MapValue dataConfig) {
+            if (dataConfig.containsKey(ALPHA_RELATIONSHIP_PROPERTIES)) {
+                throw error(
+                    "The configuration key '%s' is now called '%s'.",
+                    ALPHA_RELATIONSHIP_PROPERTIES,
+                    RELATIONSHIP_PROPERTIES
+                );
+            }
+        }
+
+        private static void checkForMergedOrSwappedOrForgottenConfig(
+            AnyValue projectionConfig,
+            Collection<String> dataConfigKeys
+        ) {
+            if (dataConfigKeys.stream().anyMatch(PROJECTION_CONFIG_KEYS::contains)) {
+                checkForSwappedOrForgottenConfig(projectionConfig, dataConfigKeys);
+                checkForMergedConfig(dataConfigKeys);
+            }
+        }
+
+        private static void checkForSwappedOrForgottenConfig(
+            AnyValue projectionConfig,
+            Collection<String> dataConfigKeys
+        ) {
+            if (PROJECTION_CONFIG_KEYS.containsAll(dataConfigKeys)) {
+                if (projectionConfig == NoValue.NO_VALUE) {
+                    throw error(
+                        "The `dataConfig` configuration parameter is missing. " +
+                            "If you meant to provide an empty configuration for the 4th parameter, " +
+                            "you can pass an empty map: '{}'."
+                    );
+                } else {
+                    throw error(
+                        "The configuration parameters are provided in the wrong order. " +
+                            "Update your query by swapping the 4th and 5th parameter."
+                    );
+                }
+            }
+        }
+
+        private static void checkForMergedConfig(Collection<String> dataConfigKeys) {
+            if (dataConfigKeys.stream().anyMatch(DATA_CONFIG_KEYS::contains)) {
+                throw error(
+                    "The configuration parameters are merged and provided as one parameter. " +
+                        "Update your query by splitting the configuration into two parameters. " +
+                        "Refer to the documentation for details."
+                );
+            }
+        }
+
+        private static void checkForMutuallyRequiredKeys(MapValue dataConfig, String firstKey, String secondKey) {
+            if (dataConfig.containsKey(firstKey) && !dataConfig.containsKey(secondKey)) {
+                throw error(
+                    "The configuration key '%1$s' is missing, but '%2$s' is provided. " +
+                        "If you really meant to only provide `%2$s` with no value for `%1$s`, " +
+                        "you can set `%1$s` to `NULL`.",
+                    secondKey,
+                    firstKey
+                );
+            }
+        }
+
+        private static IllegalArgumentException error(@PrintFormat String message, Object... args) {
+            return new IllegalArgumentException(formatWithLocale(message, args));
+        }
+
+        private static Collection<String> mapKeys(MapValue map) {
+            var keys = map.keySet();
+            if (keys instanceof Collection) {
+                return (Collection<String>) keys;
+            }
+            return StreamSupport.stream(keys.spliterator(), false).collect(Collectors.toSet());
         }
     }
 }
