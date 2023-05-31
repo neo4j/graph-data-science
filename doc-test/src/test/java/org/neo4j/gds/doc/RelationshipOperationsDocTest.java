@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.beta.undirected.ToUndirectedProc;
+import org.neo4j.gds.undirected.ToUndirectedProc;
 import org.neo4j.gds.catalog.GraphDropRelationshipProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;

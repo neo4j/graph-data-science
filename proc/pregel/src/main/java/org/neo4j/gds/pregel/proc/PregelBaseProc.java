@@ -25,8 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.beta.indexInverse.InverseRelationshipsAlgorithmFactory;
-import org.neo4j.gds.beta.indexInverse.InverseRelationshipsConfigImpl;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -36,6 +34,8 @@ import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.indexInverse.InverseRelationshipsAlgorithmFactory;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
