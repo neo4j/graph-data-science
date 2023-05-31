@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -28,7 +28,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.centrality.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HarmonicCentralityStreamProc extends BaseProc {

@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.BaseProcTest;
-
-class HarmonicCentralityProcTest extends BaseProcTest {
-
-
+public class HarmonicCentralityProc {
+    static final String DESCRIPTION =
+        "Harmonic centrality is a way of detecting nodes that are " +
+        "able to spread information very efficiently through a graph.";
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -25,17 +25,13 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
-import org.neo4j.gds.impl.harmonic.HarmonicCentralityAlgorithmFactory;
-import org.neo4j.gds.impl.harmonic.HarmonicCentralityStreamConfig;
-import org.neo4j.gds.impl.harmonic.HarmonicResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.centrality.HarmonicCentralityProc.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
 public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<StreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {

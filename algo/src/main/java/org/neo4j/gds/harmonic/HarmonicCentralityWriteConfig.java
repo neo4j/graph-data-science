@@ -17,21 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.harmonic;
+package org.neo4j.gds.harmonic;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
-public interface HarmonicResult {
+@Configuration
+public interface HarmonicCentralityWriteConfig extends HarmonicCentralityBaseConfig, WritePropertyConfig {
 
-    HugeAtomicDoubleArray inverseFarness();
+    @Override
+    @Value.Default
+    default String writeProperty() {
+        return "centrality";
+    }
 
-    long nodeCount();
-
-    @Value.Derived
-    default double getCentralityScore(long nodeId) {
-        return inverseFarness().get(nodeId) / (double) (nodeCount() - 1);
+    static HarmonicCentralityWriteConfig of(CypherMapWrapper config) {
+        return new HarmonicCentralityWriteConfigImpl(config);
     }
 }

@@ -17,14 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.harmonic;
 
-public final class StreamResult {
-    public final long nodeId;
-    public final double centrality;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-    StreamResult(long nodeId, double centrality) {
-        this.nodeId = nodeId;
-        this.centrality = centrality;
-    }
+
+public interface HarmonicCentralityBaseConfig  extends AlgoBaseConfig
+{
 }

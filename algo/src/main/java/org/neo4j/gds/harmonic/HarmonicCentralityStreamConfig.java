@@ -17,11 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.harmonic;
+package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
+
+@Configuration
+public interface HarmonicCentralityStreamConfig extends HarmonicCentralityBaseConfig{
 
 
-public interface HarmonicCentralityBaseConfig  extends AlgoBaseConfig
-{
+    static HarmonicCentralityStreamConfig of(CypherMapWrapper config) {
+        return new HarmonicCentralityStreamConfigImpl(config);
+    }
 }
