@@ -20,5 +20,5 @@
 package org.neo4j.gds.catalog;
 
 public class GraphCatalogConstants {
-    static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
+    static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
 }
