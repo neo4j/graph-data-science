@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.spanningtree;
+package org.neo4j.gds.paths.kspanningtree;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
@@ -28,9 +28,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.spanningtree.KSpanningTree;
-import org.neo4j.gds.impl.spanningtree.KSpanningTreeAlgorithmFactory;
-import org.neo4j.gds.impl.spanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.kspanningtree.KSpanningTree;
+import org.neo4j.gds.kspanningtree.KSpanningTreeAlgorithmFactory;
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.stream.Stream;
 
