@@ -20,10 +20,6 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.StatsComputationResultConsumer;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -34,7 +30,7 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.beta.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.beta.closeness.stats", description = CLOSENESS_DESCRIPTION, executionMode = STATS)

@@ -17,27 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
-import org.assertj.core.data.Offset;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+class WassermanFaustCentralityComputer implements CentralityComputer {
 
-import static org.assertj.core.api.Assertions.assertThat;
+    private final long nodeCount;
 
-class WassermanFaustCentralityComputerTest {
-
-    @ParameterizedTest
-    @CsvSource({
-        "5, 5, 10, 0.5555",
-        "5, 5, 5, 1.25",
-        "0, 0, 0, 0",
-    })
-    void centrality(long farness, long componentSize, long nodeCount, double expectedScore) {
-        var centralityComputer = new WassermanFaustCentralityComputer(nodeCount);
-
-        assertThat(centralityComputer.centrality(farness, componentSize))
-            .isEqualTo(expectedScore, Offset.offset(0.01));
+    WassermanFaustCentralityComputer(long nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
+    @Override
+    public double centrality(long farness, long componentSize) {
+        if (farness == 0L) {
+            return 0.0D;
+        }
+
+        return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.0D));
+    }
 }

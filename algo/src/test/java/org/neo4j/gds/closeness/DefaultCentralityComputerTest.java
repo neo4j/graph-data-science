@@ -17,20 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityConfig extends AlgoBaseConfig {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Value.Default
-    default boolean useWassermanFaust() {
-        return false;
+class DefaultCentralityComputerTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "5, 5, 1.0",
+        "10, 5, 0.5",
+        "0, 0, 0",
+    })
+    void centrality(long farness, long componentSize, double expectedScore) {
+
+        var centralityComputer = new DefaultCentralityComputer();
+
+        assertThat(centralityComputer.centrality(farness, componentSize))
+            .isEqualTo(expectedScore, Offset.offset(0.01));
     }
 }

@@ -17,22 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
-class WassermanFaustCentralityComputer implements CentralityComputer {
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
-    private final long nodeCount;
-
-    WassermanFaustCentralityComputer(long nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    @Override
-    public double centrality(long farness, long componentSize) {
-        if (farness == 0L) {
-            return 0.0D;
-        }
-
-        return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.0D));
-    }
+@ValueClass
+public interface ClosenessCentralityResult {
+    HugeDoubleArray centralities();
 }

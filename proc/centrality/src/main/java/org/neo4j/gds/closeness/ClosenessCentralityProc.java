@@ -21,10 +21,6 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityConfig;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;

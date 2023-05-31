@@ -17,8 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.closeness;
+package org.neo4j.gds.closeness;
 
-interface CentralityComputer {
-    double centrality(long farness, long componentSize);
+
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+
+@Configuration
+public interface ClosenessCentralityMutateConfig extends ClosenessCentralityConfig, MutatePropertyConfig {
+
+    static ClosenessCentralityMutateConfig of(CypherMapWrapper config) {
+        return new ClosenessCentralityMutateConfigImpl(config);
+    }
 }
