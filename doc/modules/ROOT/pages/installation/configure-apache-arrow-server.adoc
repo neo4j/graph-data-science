@@ -10,18 +10,17 @@ GDS supports importing graphs and exporting properties via https://arrow.apache.
 This chapter is dedicated to configuring the Arrow Flight Server as part of the Neo4j and GDS installation.
 For using Arrow Flight with an Arrow client, please refer to our documentation for xref:graph-project-apache-arrow.adoc[projecting graphs] and xref:graph-catalog-apache-arrow-ops.adoc[streaming properties].
 
+The simplest way to use Arrow is through our https://neo4j.com/docs/graph-data-science-client/current/[Neo4j Graph Data Science Client], which uses Arrow by default if available.
+
 Arrow is bundled with GDS Enterprise Edition which must be xref:installation/installation-enterprise-edition.adoc[installed].
-
-[NOTE]
-====
-For link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS], Arrow is enabled by default, and you can check `CALL gds.debug.arrow()` for its configuration.
-
-The simplest way to use Arrow is through our https://neo4j.com/docs/graph-data-science-client/current/[Neo4j Graph Data Science Client].
-There Arrow will be used by default if available.
-====
 
 
 == Installation
+
+[NOTE]
+====
+Arrow is installed by default on link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS].
+====
 
 On a standalone Neo4j Server, Arrow needs to be explicitly enabled and configured.
 The Flight Server is disabled by default, to enable it, add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
@@ -44,6 +43,7 @@ The following additional settings are available:
 
 Note, that any change to the configuration requires a database restart.
 
+You can run `CALL gds.debug.arrow()` to check that Arrow is available.
 
 == Authentication
 
