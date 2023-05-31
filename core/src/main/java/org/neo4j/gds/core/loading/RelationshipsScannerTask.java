@@ -137,10 +137,14 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                 .map(imports -> imports.threadLocalImporter(idMap, scanner.bufferSize(), transaction))
                 .collect(Collectors.toList());
 
-            var compositeBuffer = CompositeRelationshipsBatchBuffer.of(importers
+            var relationshipBatchBuffers = importers
                 .stream()
                 .map(ThreadLocalSingleTypeRelationshipImporter::buffer)
-                .toArray(RelationshipsBatchBuffer[]::new));
+                .toArray(RelationshipsBatchBuffer[]::new);
+
+            var compositeBuffer = new CompositeRelationshipsBatchBufferBuilder()
+                .buffers(relationshipBatchBuffers)
+                .build();
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;

@@ -55,9 +55,15 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
         PartialIdMap idMap,
         int type,
         int capacity,
-        Optional<Boolean> skipDanglingRelationships
+        Optional<Boolean> skipDanglingRelationships,
+        Optional<Boolean> useCheckedBuffer
     ) {
-        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDanglingRelationships.orElse(true));
+        boolean skipDangling = skipDanglingRelationships.orElse(true);
+
+        if (useCheckedBuffer.orElse(false)) {
+            return new Checked(idMap, type, capacity, skipDangling);
+        }
+        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDangling);
     }
 
     private RelationshipsBatchBuffer(
@@ -108,6 +114,9 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
     public void add(long sourceId, long targetId, long relationshipReference, PropertyReference propertyReference) {
         int position = this.length;
         long[] buffer = this.buffer;
+        if (position == buffer.length) {
+            System.out.println("buffer.length = " + buffer.length + ", sourceId = " + sourceId);
+        }
         buffer[position] = sourceId;
         buffer[1 + position] = targetId;
         this.relationshipReferences[position >> 1] = relationshipReference;
@@ -165,7 +174,7 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
      * in the case where the number of records offered to this
      * buffer can exceed the configured batch size.
      */
-    private static final class Checked extends RelationshipsBatchBuffer {
+    static final class Checked extends RelationshipsBatchBuffer {
 
         private final long capacity;
 
