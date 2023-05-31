@@ -47,6 +47,7 @@ public final class PathFactory {
             long sourceNodeId = nodeIds[i];
             long targetNodeId = nodeIds[i + 1];
 
+
             var relationship = Neo4jProxy.virtualRelationship(
                 RelationshipIds.next(),
                 nodeLookup.getNodeById(sourceNodeId),
