@@ -145,7 +145,15 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             long allImportedRels = 0L;
             long allImportedWeights = 0L;
             boolean scanNextBatch = true;
-            while (compositeBuffer.scan(cursor, scanNextBatch).requiresFlush()) {
+            RecordsBatchBuffer.ScanState scanState;
+
+            while ((scanState = compositeBuffer.scan(cursor, scanNextBatch)).requiresFlush()) {
+                // We proceed to the next batch, iff the current batch is
+                // completely consumed. If not, we remain in the current
+                // batch, flush the buffers and consume until the batch is
+                // drained.
+                scanNextBatch = scanState.reserveNextBatch();
+
                 terminationFlag.assertRunning();
                 long imported = 0L;
                 for (ThreadLocalSingleTypeRelationshipImporter importer : importers) {

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
-public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+public class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
-    private final RelationshipsBatchBuffer[] buffers;
+    protected final RelationshipsBatchBuffer[] buffers;
 
     private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {
         super(0);
@@ -40,7 +40,6 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.offer(record);
         }
-        // TODO: probably something more sophisticated is required if we use partitioned type token index
         return true;
     }
 
@@ -48,6 +47,29 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
     public void reset() {
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.reset();
+        }
+    }
+
+    /**
+     * A version of a relationships batch buffer that checks the
+     * buffer length before inserting a new record. This is necessary
+     * in the case where the number of records offered to this
+     * buffer can exceed the configured batch size.
+     */
+    private static final class Checked extends CompositeRelationshipsBatchBuffer {
+
+        Checked(RelationshipsBatchBuffer... buffers) {
+            super(buffers);
+        }
+
+        @Override
+        public boolean offer(RelationshipReference record) {
+            for (RelationshipsBatchBuffer buffer : buffers) {
+                if (!buffer.offer(record)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

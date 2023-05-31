@@ -31,7 +31,7 @@ import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsL
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 
-public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
@@ -157,5 +157,29 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     public int[] spareInts() {
         return histogram;
+    }
+
+    /**
+     * A version of a relationships batch buffer that checks the
+     * buffer length before inserting a new record. This is necessary
+     * in the case where the number of records offered to this
+     * buffer can exceed the configured batch size.
+     */
+    private static final class Checked extends RelationshipsBatchBuffer {
+
+        private final long capacity;
+
+        private Checked(PartialIdMap idMap, int type, int capacity, boolean skipDanglingRelationships) {
+            super(idMap, type, capacity, skipDanglingRelationships);
+            this.capacity = Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity);
+        }
+
+        @Override
+        public boolean offer(RelationshipReference record) {
+            if (this.length < this.capacity) {
+                super.offer(record);
+            }
+            return !this.isFull();
+        }
     }
 }
