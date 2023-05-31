@@ -24,16 +24,12 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.conductance.Conductance;
-import org.neo4j.gds.impl.conductance.ConductanceFactory;
-import org.neo4j.gds.impl.conductance.ConductanceResult;
-import org.neo4j.gds.impl.conductance.ConductanceStreamConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.impl.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.conductance.stream", description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
 public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, ConductanceResult, ConductanceStreamConfig, Stream<StreamResult>, ConductanceFactory<ConductanceStreamConfig>> {

@@ -17,18 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.conductance;
+package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.collections.HugeSparseDoubleArray;
 
 @ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ConductanceStreamConfig extends ConductanceConfig {
+public interface ConductanceResult {
+    HugeSparseDoubleArray communityConductances();
 
-    static ConductanceStreamConfig of(CypherMapWrapper config) {
-        return new ConductanceStreamConfigImpl(config);
+    double globalAverageConductance();
+
+    static ConductanceResult of(
+        HugeSparseDoubleArray communityConductances,
+        double globalAverageConductance
+    ) {
+        return ImmutableConductanceResult
+            .builder()
+            .communityConductances(communityConductances)
+            .globalAverageConductance(globalAverageConductance)
+            .build();
     }
+
 }
