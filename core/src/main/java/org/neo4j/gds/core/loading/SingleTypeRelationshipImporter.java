@@ -130,12 +130,12 @@ public final class SingleTypeRelationshipImporter {
 
     @NotNull
     private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize) {
-        return new RelationshipsBatchBuffer(
-            idMap,
-            typeId,
-            bulkSize,
-            importMetaData.skipDanglingRelationships()
-        );
+        return new RelationshipsBatchBufferBuilder()
+            .idMap(idMap)
+            .type(typeId)
+            .capacity(bulkSize)
+            .skipDanglingRelationships(importMetaData.skipDanglingRelationships())
+            .build();
     }
 
     public AdjacencyListsWithProperties build() {

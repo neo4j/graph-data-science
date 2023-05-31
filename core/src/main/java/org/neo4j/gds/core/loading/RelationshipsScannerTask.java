@@ -156,6 +156,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                 progressTracker.logProgress(importedRels);
                 allImportedRels += importedRels;
                 allImportedWeights += importedWeights;
+                System.out.println("total = " + allImportedRels + " batch = " + importedRels);
             }
             relationshipsImported = allImportedRels;
             weightsImported = allImportedWeights;

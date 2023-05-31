@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.PropertyReference;
+
+import java.util.Optional;
 
 import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
@@ -33,7 +36,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
     // property references are stored individually.
-    public static final int ENTRIES_PER_RELATIONSHIP = 2;
+    static final int ENTRIES_PER_RELATIONSHIP = 2;
 
     private final PartialIdMap idMap;
     private final int type;
@@ -47,15 +50,17 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     private final PropertyReference[] propertyReferencesCopy;
     private final int[] histogram;
 
-    public RelationshipsBatchBuffer(
-        final PartialIdMap idMap,
-        final int type,
-        int capacity
+    @Builder.Factory
+    static RelationshipsBatchBuffer relationshipsBatchBuffer(
+        PartialIdMap idMap,
+        int type,
+        int capacity,
+        Optional<Boolean> skipDanglingRelationships
     ) {
-        this(idMap, type, capacity, true);
+        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDanglingRelationships.orElse(true));
     }
 
-    RelationshipsBatchBuffer(
+    private RelationshipsBatchBuffer(
         final PartialIdMap idMap,
         final int type,
         int capacity,

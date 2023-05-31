@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.huge.DirectIdMap;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,7 +29,12 @@ class RelationshipsBatchBufferTest {
 
     @Test
     void flushBufferWhenFull() {
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
+        var buffer = new RelationshipsBatchBufferBuilder()
+            .idMap(new DirectIdMap(2))
+            .type(-1)
+            .capacity(1)
+            .build();
+
         buffer.add(0, 1, -1, Neo4jProxy.noPropertyReference());
         assertTrue(buffer.isFull());
     }
