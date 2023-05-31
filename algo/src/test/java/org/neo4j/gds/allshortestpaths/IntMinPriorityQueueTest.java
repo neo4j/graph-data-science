@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.allshortestpaths;
 
-import io.qala.datagen.RandomShortApi;
 import org.assertj.core.api.Assertions;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.qala.datagen.RandomShortApi.integer;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,13 +40,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class IntMinPriorityQueueTest {
 
+    private Random rng;
+
+    @BeforeEach
+    void setup() {
+        rng = new Random();
+    }
+
     @Test
     void testIsEmpty() {
         final int capacity = integer(10, 20);
         final IntPriorityQueue queue = IntPriorityQueue.min(capacity);
         assertEquals(queue.size(), 0);
-        assertThatThrownBy(() -> queue.top()
-        ).hasMessageContaining("empty");
+        assertThatThrownBy(() -> queue.top()).hasMessageContaining("empty");
     }
 
     @Test
@@ -234,10 +240,22 @@ final class IntMinPriorityQueueTest {
         assertEquals(priorityQueue.findElementPosition(10), 0);
     }
 
-    private double exclusiveDouble(
-        final double exclusiveMin,
-        final double exclusiveMax
-    ) {
-        return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
+    private double exclusiveDouble(final double exclusiveMin, final double exclusiveMax) {
+        var origin = Math.nextUp(exclusiveMin);
+        var bound = exclusiveMax;
+        double randomDouble = rng.nextDouble();
+
+        randomDouble = randomDouble * (bound - origin) + origin;
+        if (randomDouble >= bound) {
+            randomDouble = Math.nextDown(bound);
+        }
+        return randomDouble;
+    }
+
+    private int integer(int min, int max) {
+        assert min <= max: "Really?";
+        var absoluteRange = max - min + 1; // +1 because upper bound inclusive
+        var randomInt = Math.abs(rng.nextInt(absoluteRange));
+        return randomInt + min;
     }
 }
