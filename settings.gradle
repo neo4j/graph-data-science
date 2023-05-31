@@ -187,9 +187,6 @@ project(':pregel-proc-generator').projectDir = file('pregel-proc-generator')
 include('proc')
 project(':proc').projectDir = file('proc')
 
-include('proc-beta')
-project(':proc-beta').projectDir = file('proc/beta')
-
 include('proc-catalog')
 project(':proc-catalog').projectDir = file('proc/catalog')
 
