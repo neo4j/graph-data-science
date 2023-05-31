@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.approxmaxkcut.config;
+package org.neo4j.gds.approxmaxkcut.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutatePropertyConfig {
+public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutConfig, CommunitySizeConfig {
 
-    static ApproxMaxKCutMutateConfig of(CypherMapWrapper config) {
-        return new ApproxMaxKCutMutateConfigImpl(config);
+    static ApproxMaxKCutStreamConfig of(CypherMapWrapper config) {
+        return new ApproxMaxKCutStreamConfigImpl(config);
     }
 }

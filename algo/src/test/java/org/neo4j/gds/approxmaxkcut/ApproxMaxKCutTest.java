@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.approxmaxkcut;
+package org.neo4j.gds.approxmaxkcut;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -37,7 +37,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.impl.approxmaxkcut.config.ImmutableApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Map;

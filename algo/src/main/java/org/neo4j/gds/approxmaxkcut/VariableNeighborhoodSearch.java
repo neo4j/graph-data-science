@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.approxmaxkcut;
+package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
-import org.neo4j.gds.impl.approxmaxkcut.localsearch.LocalSearch;
 
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicLongArray;

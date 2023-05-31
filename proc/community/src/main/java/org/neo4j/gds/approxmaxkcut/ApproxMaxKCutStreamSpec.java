@@ -22,21 +22,18 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutFactory;
-import org.neo4j.gds.impl.approxmaxkcut.MaxKCutResult;
-import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.maxkcut.stream", description = APPROX_MAX_K_CUT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ApproxMaxKCutStreamSpec implements AlgorithmSpec<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutStreamConfig, Stream<StreamResult>, ApproxMaxKCutFactory<ApproxMaxKCutStreamConfig>> {
