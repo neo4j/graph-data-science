@@ -30,6 +30,7 @@ import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,6 +62,7 @@ public interface WriteConfig extends ConcurrencyConfig {
      * export builders.
      */
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#parse")
+    @Configuration.ToMapValue(value="org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#toMap")
     Optional<ArrowConnectionInfo> arrowConnectionInfo();
 
     @Configuration.GraphStoreValidationCheck
@@ -113,6 +115,14 @@ public interface WriteConfig extends ConcurrencyConfig {
                 "Expected input to be of type `map`, but got `%s`",
                 input.getClass().getSimpleName()
             ));
+        }
+
+        static Map<String, Object> toMap(ArrowConnectionInfo info) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("hostname", info.hostname());
+            map.put("port", info.port());
+            map.put("useEncryption", info.useEncryption());
+            return map;
         }
     }
 }
