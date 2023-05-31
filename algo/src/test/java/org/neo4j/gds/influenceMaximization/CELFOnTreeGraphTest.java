@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.influenceMaximization;
+package org.neo4j.gds.influenceMaximization;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Offset;
@@ -30,7 +30,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.influenceMaximization.CELF;
 
 import static org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory.DEFAULT_BATCH_SIZE;
 
