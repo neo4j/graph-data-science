@@ -99,8 +99,8 @@ public final class L1Norm extends ScalarScaler {
         }
 
         @Override
-        void compute(long nodeId) {
-            sum += Math.abs(properties.doubleValue(nodeId));
+        void compute(double propertyValue) {
+            sum += Math.abs(propertyValue);
         }
 
         double sum() {
