@@ -17,10 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.shortestpaths;
+package org.neo4j.gds.paths.all;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
+import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
+import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -29,15 +34,11 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
-import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
-import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.shortestpaths.AllShortestPathsConstants.DESCRIPTION;
+import static org.neo4j.gds.paths.all.AllShortestPathsConstants.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.allShortestPaths.stream", description = DESCRIPTION, executionMode = STREAM)
 public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorithm, Stream<AllShortestPathsStreamResult>, AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, AlgorithmFactory<Graph, MSBFSASPAlgorithm, AllShortestPathsConfig>> {

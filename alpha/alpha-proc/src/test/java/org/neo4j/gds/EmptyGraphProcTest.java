@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.scc.SccStreamProc;
 import org.neo4j.gds.scc.SccWriteProc;
-import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
 import org.neo4j.gds.triangle.TriangleProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +36,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            AllShortestPathsProc.class,
             SccStreamProc.class,
             SccWriteProc.class,
             TriangleProc.class,
@@ -67,15 +65,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
-    }
-
-    @Test
-    void testAllShortestPathsStream() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.allShortestPaths")
-            .streamMode()
-            .yields();
-        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
     @Test
