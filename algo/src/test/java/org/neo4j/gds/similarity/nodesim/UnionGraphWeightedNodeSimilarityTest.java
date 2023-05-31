@@ -51,10 +51,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     @Test
     void shouldWorkWithUnionGraph(){
-        var config=NodeSimilarityStreamConfigImpl.builder().relationshipWeightProperty("w").concurrency(1).topN(1).build();
-        var nodeSimilarity=NodeSimilarity.create(graph,config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-        var result=nodeSimilarity.compute().streamResult().findFirst().get();
+
+        var config = NodeSimilarityStreamConfigImpl.builder()
+            .relationshipWeightProperty("w")
+            .concurrency(1)
+            .topN(1)
+            .build();
+        
+        var nodeSimilarity = NodeSimilarity.create(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var result = nodeSimilarity.compute().streamResult().findFirst().get();
+
         //input should be  (0 + 10 + 0)/ (5 + 10 + 8) = 10/23
-        assertThat(result.similarity).isCloseTo((10)/(23.0), Offset.offset(1E-5));
+        assertThat(result.similarity).isCloseTo((10) / (23.0), Offset.offset(1E-5));
     }
 }
