@@ -126,13 +126,6 @@ public final class Neo4jProxy {
         return IMPL.securityContext(username, authSubject, mode, databaseName);
     }
 
-    public static long getHighestPossibleIdInUse(
-        RecordStore<? extends AbstractBaseRecord> recordStore,
-        KernelTransaction kernelTransaction
-    ) {
-        return IMPL.getHighestPossibleIdInUse(recordStore, kernelTransaction);
-    }
-
     public static long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
         return IMPL.getHighId(recordStore);
     };

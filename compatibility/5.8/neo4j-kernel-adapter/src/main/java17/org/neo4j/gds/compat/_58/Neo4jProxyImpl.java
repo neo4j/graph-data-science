@@ -199,14 +199,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public long getHighestPossibleIdInUse(
-        RecordStore<? extends AbstractBaseRecord> recordStore,
-        KernelTransaction kernelTransaction
-    ) {
-        return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
-    }
-
-    @Override
     public long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
         return recordStore.getIdGenerator().getHighId();
     }

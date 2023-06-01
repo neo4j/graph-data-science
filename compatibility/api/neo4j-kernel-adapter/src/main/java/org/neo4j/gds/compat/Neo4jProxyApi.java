@@ -109,11 +109,6 @@ public interface Neo4jProxyApi {
         String databaseName
     );
 
-    long getHighestPossibleIdInUse(
-        RecordStore<? extends AbstractBaseRecord> recordStore,
-        KernelTransaction kernelTransaction
-    );
-
     long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore);
 
     List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
