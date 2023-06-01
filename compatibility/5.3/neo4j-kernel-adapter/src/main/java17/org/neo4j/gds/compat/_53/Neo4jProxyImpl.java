@@ -113,9 +113,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
-import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.query.TransactionalContext;
@@ -149,7 +147,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -818,11 +815,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             logService.getInternalLogProvider(),
             GraphDatabaseApiProxy.resolveDependency(databaseService, CursorContextFactory.class)
         );
-    }
-
-    @Override
-    public NamedDatabaseId randomDatabaseId() {
-        return new TestDatabaseIdRepository().getByName(UUID.randomUUID().toString()).get();
     }
 
     @Override

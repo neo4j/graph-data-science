@@ -72,7 +72,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
@@ -289,8 +288,6 @@ public interface Neo4jProxyApi {
         LogService logService,
         GraphDatabaseService databaseService
     );
-
-    NamedDatabaseId randomDatabaseId();
 
     ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor);
 
