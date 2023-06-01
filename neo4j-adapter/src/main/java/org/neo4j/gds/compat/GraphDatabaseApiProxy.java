@@ -118,14 +118,15 @@ public final class GraphDatabaseApiProxy {
         try {
             var clazz = Class.forName(
                 "com.neo4j.internal.freki.FrekiStorageEngineFactory",
-                false,
+                true,
                 dependencyResolver.getClass().getClassLoader()
             );
             var field = clazz.getField("NAME");
             if (field.getType() == String.class) {
                 isFrekiStorageEngineFactory = dependencyResolver
                     .resolveDependency(StorageEngineFactory.class)
-                    .name() == field.get(null);
+                    .name()
+                    .equals(field.get(null));
             }
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
         }
