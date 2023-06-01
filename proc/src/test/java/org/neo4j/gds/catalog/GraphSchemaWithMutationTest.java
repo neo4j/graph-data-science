@@ -27,8 +27,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.wcc.WccMutateProc;
 
+import java.util.Map;
+
 import static java.util.Collections.singletonList;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 class GraphSchemaWithMutationTest extends BaseProcTest {
 
@@ -53,23 +54,23 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
         String name = "name";
         runQuery(
             "CALL gds.graph.project($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
-            map("name", name)
+            Map.of("name", name)
         );
         runQuery(
             "CALL gds.wcc.mutate($name, {mutateProperty: 'baz'})",
-            map("name", name)
+            Map.of("name", name)
         );
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map("A", map(
+            Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of("A", Map.of(
                         "foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)",
                         "baz", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)"
                     )),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
+                    "relationships", Map.of("REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
                     "graphProperties",
-                    map()
+                    Map.of()
                 )
             )
         ));
@@ -82,15 +83,15 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
 
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             singletonList(
-                map(
+                Map.of(
                     "schema",
-                    map("nodes",
-                        map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    Map.of("nodes",
+                        Map.of("A", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                         "relationships",
-                        map("BOO", map("faz", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)"),
-                            "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
+                        Map.of("BOO", Map.of("faz", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)"),
+                            "REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
                         "graphProperties",
-                        map()
+                        Map.of()
                     )
                 )
             )

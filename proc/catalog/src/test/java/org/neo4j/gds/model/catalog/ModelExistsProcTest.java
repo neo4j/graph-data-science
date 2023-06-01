@@ -30,7 +30,6 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 @Neo4jModelCatalogExtension
 class ModelExistsProcTest extends ModelProcBaseTest {
@@ -62,7 +61,7 @@ class ModelExistsProcTest extends ModelProcBaseTest {
                 "modelName", existingModel
             ),
             singletonList(
-                map(
+                Map.of(
                     "modelName", existingModel,
                     "modelType", "testAlgo",
                     "exists", true
@@ -80,7 +79,7 @@ class ModelExistsProcTest extends ModelProcBaseTest {
             Map.of(
                 "modelName", bogusModel),
             singletonList(
-                map(
+                Map.of(
                     "modelName", bogusModel,
                     "modelType", "n/a",
                     "exists", false

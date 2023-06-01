@@ -32,11 +32,11 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Neo4jModelCatalogExtension
@@ -88,8 +88,8 @@ class ModelListProcTest extends ModelProcBaseTest {
                 query
             ),
             List.of(
-                map(
-                    "modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1"),
+                Map.of(
+                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
@@ -97,8 +97,8 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "creationTime", isA(ZonedDateTime.class),
                     "shared", false
                 ),
-                map(
-                    "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
+                Map.of(
+                    "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "loaded", true,
@@ -145,8 +145,8 @@ class ModelListProcTest extends ModelProcBaseTest {
         assertCypherResult(
             "CALL gds.beta.model.list('testModel2')",
             singletonList(
-                map(
-                    "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
+                Map.of(
+                    "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "graphSchema", EXPECTED_SCHEMA,
                     "loaded", true,
@@ -163,7 +163,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     void failOnEmptyModelName(String modelName) {
         assertError(
             "CALL gds.beta.model.list($modelName)",
-            map("modelName", modelName),
+            Map.of("modelName", modelName),
             "can not be null or blank"
         );
     }

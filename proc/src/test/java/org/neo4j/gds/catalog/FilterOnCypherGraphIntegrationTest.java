@@ -28,9 +28,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
@@ -69,7 +69,7 @@ class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
 
         runQuery(
             "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relQuery)",
-            map(
+            Map.of(
                 "graphName",
                 TEST_GRAPH,
                 "nodeQuery",

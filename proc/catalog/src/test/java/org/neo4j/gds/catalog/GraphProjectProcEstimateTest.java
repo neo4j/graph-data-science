@@ -40,7 +40,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class GraphProjectProcEstimateTest extends BaseProcTest {
@@ -75,16 +74,16 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
 
     @Test
     void estimateHeapPercentageForNativeProjection() {
-        Map<String, Object> relProjection = map(
+        Map<String, Object> relProjection = Map.of(
             "B",
-            map("type", "REL")
+            Map.of("type", "REL")
         );
         String query = "CALL gds.graph.project.estimate('*', $relProjection)";
         double expectedPercentage = BigDecimal.valueOf(303504)
             .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
             .doubleValue();
 
-        runQueryWithRowConsumer(query, map("relProjection", relProjection),
+        runQueryWithRowConsumer(query, Map.of("relProjection", relProjection),
             row -> {
                 assertEquals(295456, row.getNumber("bytesMax").longValue());
                 assertEquals(295456, row.getNumber("bytesMin").longValue());
@@ -96,9 +95,9 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
 
     @Test
     void virtualEstimateHeapPercentage(SoftAssertions softly) {
-        Map<String, Object> relProjection = map(
+        Map<String, Object> relProjection = Map.of(
             "B",
-            map("type", "REL")
+            Map.of("type", "REL")
         );
         String query = "CALL gds.graph.project.estimate('*', $relProjection, {nodeCount: 1000000})";
 
@@ -106,7 +105,7 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
             .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
             .doubleValue();
 
-        runQueryWithRowConsumer(query, map("relProjection", relProjection),
+        runQueryWithRowConsumer(query, Map.of("relProjection", relProjection),
             row -> {
                 softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(68686368);
                 softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(68686368);
@@ -118,13 +117,13 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
 
     @Test
     void computeMemoryEstimationForNativeProjectionWithProperties() {
-        Map<String, Object> relProjection = map(
+        Map<String, Object> relProjection = Map.of(
             "B",
-            map("type", "X", "properties", "weight")
+            Map.of("type", "X", "properties", "weight")
         );
         String query = "CALL gds.graph.project.estimate('*', $relProjection)";
 
-        runQueryWithRowConsumer(query, map("relProjection", relProjection),
+        runQueryWithRowConsumer(query, Map.of("relProjection", relProjection),
             row -> {
                 assertEquals(557808, row.getNumber("bytesMin").longValue());
                 assertEquals(557808, row.getNumber("bytesMax").longValue());
@@ -139,7 +138,7 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.project.cypher.estimate($nodeQuery, $relationshipQuery)";
         runQueryWithRowConsumer(
             query,
-            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            Map.of("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
                 assertEquals(295456, row.getNumber("bytesMin").longValue());
                 assertEquals(295456, row.getNumber("bytesMax").longValue());
@@ -155,7 +154,7 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.project.cypher.estimate($nodeQuery, $relationshipQuery)";
         runQueryWithRowConsumer(
             query,
-            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            Map.of("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
                 assertEquals(573968, row.getNumber("bytesMin").longValue());
                 assertEquals(573968, row.getNumber("bytesMax").longValue());
@@ -226,7 +225,7 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
             .withRelationshipType("Y")
             .yields("nodeCount", "relationshipCount", "graphName");
 
-        runQueryWithRowConsumer(query, map(), resultRow -> {
+        runQueryWithRowConsumer(query, Map.of(), resultRow -> {
                 assertEquals(12L, resultRow.getNumber("nodeCount"));
                 assertEquals(8L, resultRow.getNumber("relationshipCount"));
                 assertEquals(graphName, resultRow.getString("graphName"));

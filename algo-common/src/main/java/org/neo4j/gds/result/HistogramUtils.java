@@ -21,35 +21,36 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.AbstractHistogram;
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.compat.MapUtil;
 
 import java.util.Map;
+
+import static java.util.Map.entry;
 
 public final class HistogramUtils {
 
     private HistogramUtils() {}
 
     public static Map<String, Object> similaritySummary(DoubleHistogram histogram) {
-        return MapUtil.map(
-            "min", histogram.getMinValue(),
-            "max", histogram.getMaxValue(),
-            "mean", histogram.getMean(),
-            "stdDev", histogram.getStdDeviation(),
-            "p1", histogram.getValueAtPercentile(1),
-            "p5", histogram.getValueAtPercentile(5),
-            "p10", histogram.getValueAtPercentile(10),
-            "p25", histogram.getValueAtPercentile(25),
-            "p50", histogram.getValueAtPercentile(50),
-            "p75", histogram.getValueAtPercentile(75),
-            "p90", histogram.getValueAtPercentile(90),
-            "p95", histogram.getValueAtPercentile(95),
-            "p99", histogram.getValueAtPercentile(99),
-            "p100", histogram.getValueAtPercentile(100)
+        return Map.ofEntries(
+            entry("min", histogram.getMinValue()),
+            entry("max", histogram.getMaxValue()),
+            entry("mean", histogram.getMean()),
+            entry("stdDev", histogram.getStdDeviation()),
+            entry("p1", histogram.getValueAtPercentile(1)),
+            entry("p5", histogram.getValueAtPercentile(5)),
+            entry("p10", histogram.getValueAtPercentile(10)),
+            entry("p25", histogram.getValueAtPercentile(25)),
+            entry("p50", histogram.getValueAtPercentile(50)),
+            entry("p75", histogram.getValueAtPercentile(75)),
+            entry("p90", histogram.getValueAtPercentile(90)),
+            entry("p95", histogram.getValueAtPercentile(95)),
+            entry("p99", histogram.getValueAtPercentile(99)),
+            entry("p100", histogram.getValueAtPercentile(100))
         );
     }
 
     public static Map<String, Object> communitySummary(AbstractHistogram histogram) {
-        return MapUtil.map(
+        return Map.of(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
             "max", histogram.getMaxValue(),
@@ -63,7 +64,7 @@ public final class HistogramUtils {
     }
 
     static Map<String, Object> centralitySummary(DoubleHistogram histogram) {
-        return MapUtil.map(
+        return Map.of(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
             "max", histogram.getMaxValue(),

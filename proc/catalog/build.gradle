@@ -26,7 +26,6 @@ dependencies {
     implementation project(':io-core')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
-    implementation project(':neo4j-adapter')
     implementation project(':neo4j-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')

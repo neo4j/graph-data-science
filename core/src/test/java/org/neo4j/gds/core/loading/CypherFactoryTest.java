@@ -35,7 +35,6 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -71,7 +70,7 @@ class CypherFactoryTest extends BaseTest {
 
     @BeforeEach
     void setUp() {
-        runQuery(DB_CYPHER, MapUtil.map("count", COUNT));
+        runQuery(DB_CYPHER, Map.of("count", COUNT));
     }
 
     @Test
@@ -335,7 +334,7 @@ class CypherFactoryTest extends BaseTest {
             .databaseService(db)
             .nodeQuery("MATCH (n) WHERE n.id = $nodeProp RETURN id(n) AS id, n.id as nodeProp")
             .relationshipQuery("MATCH (n)-[]->(m) WHERE n.id = $nodeProp and m.id = $nodeProp RETURN id(n) AS source, id(m) AS target, $relProp as relProp")
-            .parameters(MapUtil.map("nodeProp", 42, "relProp", 21))
+            .parameters(Map.of("nodeProp", 42, "relProp", 21))
             .build();
 
         Graph graph = applyInTransaction(db, tx -> loader.graph());

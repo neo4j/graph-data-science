@@ -1,4 +1,4 @@
-org.neo4j.internal.helpers.collection.MapUtil @ Use the GDS MapUtil instead.
+org.neo4j.internal.helpers.collection.MapUtil @ Don't do it
 java.lang.Thread.Thread(java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.Pools.newThread to make sure that the new thread is properly named
 java.lang.Thread.Thread(java.lang.ThreadGroup, java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.Pools.newThread to make sure that the new thread is properly named
 org.neo4j.internal.batchimport.staging.ExecutionMonitor.Adapter @ Implement CompatExecutionMonitor and call Neo4jProxy.executionMonitor

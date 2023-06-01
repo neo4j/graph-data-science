@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 class PipelineExistsProcTest extends BaseProcTest {
 
@@ -62,7 +61,7 @@ class PipelineExistsProcTest extends BaseProcTest {
                 "pipelineName", pipeName
             ),
             singletonList(
-                map(
+                Map.of(
                     "pipelineName", pipeName,
                     "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE,
                     "exists", true
@@ -80,7 +79,7 @@ class PipelineExistsProcTest extends BaseProcTest {
             Map.of(
                 "pipelineName", bogusPipe),
             singletonList(
-                map(
+                Map.of(
                     "pipelineName", bogusPipe,
                     "pipelineType", "n/a",
                     "exists", false

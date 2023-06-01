@@ -41,7 +41,6 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
@@ -91,8 +90,6 @@ import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.getCypherAggregation;
-import static org.neo4j.gds.compat.MapUtil.genericMap;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -147,17 +144,17 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project($name, 'A', 'REL')",
-            map("name", graphName),
-            singletonList(map(
+            Map.of("name", graphName),
+            singletonList(Map.of(
                 "graphName", graphName,
-                NODE_PROJECTION_KEY, map(
-                    "A", map(
+                NODE_PROJECTION_KEY, Map.of(
+                    "A", Map.of(
                         LABEL_KEY, "A",
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    "REL", map(
+                RELATIONSHIP_PROJECTION_KEY, Map.of(
+                    "REL", Map.of(
                         TYPE_KEY, "REL",
                         ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
@@ -180,8 +177,8 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", graphName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
-            singletonList(map(
+            Map.of("name", graphName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            singletonList(Map.of(
                 "graphName", graphName,
                 NODE_QUERY_KEY, ALL_NODES_QUERY,
                 RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
@@ -226,8 +223,8 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery, {validateRelationships: false})",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
-            singletonList(map(
+            Map.of("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_QUERY_KEY, ALL_NODES_QUERY,
                 RELATIONSHIP_QUERY_KEY, relationshipQuery,
@@ -248,7 +245,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }, validateRelationships: false})",
-            map(
+            Map.of(
                 "name",
                 graphName,
                 "nodeQuery",
@@ -258,7 +255,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 "validateRelationships",
                 false
             ),
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", graphName,
                 NODE_QUERY_KEY, nodeQuery,
                 RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
@@ -292,7 +289,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         runQuery("CREATE (), (:B), (:C:D:E)");
         assertCypherResult(query, singletonList(
-            map("nodeCount", 5L)
+            Map.of("nodeCount", 5L)
         ));
 
         assertGraphExists("g");
@@ -304,7 +301,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
         assertCypherResult(query, singletonList(
-            map("relationshipCount", 3L)
+            Map.of("relationshipCount", 3L)
         ));
 
         assertGraphExists("g");
@@ -317,8 +314,8 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project($name, $nodeProjection, '*')",
-            map("name", name, "nodeProjection", nodeProjection),
-            singletonList(map(
+            Map.of("name", name, "nodeProjection", nodeProjection),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, desugaredNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
@@ -335,13 +332,13 @@ class GraphProjectProcTest extends BaseProcTest {
     @MethodSource(value = "nodeProperties")
     void nodeProjectionWithProperties(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
-        Map<String, Object> nodeProjection = map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, properties));
-        Map<String, Object> expectedNodeProjection = map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, expectedProperties));
+        Map<String, Object> nodeProjection = Map.of("B", Map.of(LABEL_KEY, "A", PROPERTIES_KEY, properties));
+        Map<String, Object> expectedNodeProjection = Map.of("B", Map.of(LABEL_KEY, "A", PROPERTIES_KEY, expectedProperties));
 
         assertCypherResult(
             "CALL gds.graph.project($name, $nodeProjection, '*')",
-            map("name", name, "nodeProjection", nodeProjection),
-            singletonList(map(
+            Map.of("name", name, "nodeProjection", nodeProjection),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, expectedNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
@@ -359,17 +356,17 @@ class GraphProjectProcTest extends BaseProcTest {
     void nodeQueryWithProperties() {
         String name = "g";
 
-        Map<String, Object> expectedProperties = map("age", map("property", "age", "defaultValue", Double.NaN));
+        Map<String, Object> expectedProperties = Map.of("age", Map.of("property", "age", "defaultValue", Double.NaN));
         String nodeQuery = "RETURN 0 AS id, 1 AS age";
         String relationshipQuery = "RETURN 0 AS source, 0 AS target";
 
         assertCypherResult(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name,
+            Map.of("name", name,
                 "nodeQuery", nodeQuery,
                 "relationshipQuery", relationshipQuery
             ),
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_QUERY_KEY, nodeQuery,
                 RELATIONSHIP_QUERY_KEY, relationshipQuery,
@@ -392,8 +389,8 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
-            singletonList(map(
+            Map.of("name", name, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_QUERY_KEY, nodeQuery,
                 RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
@@ -415,8 +412,8 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project($name, '*', $relProjection)",
-            map("name", name, "relProjection", relProjection),
-            singletonList(map(
+            Map.of("name", name, "relProjection", relProjection),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, desugaredRelProjection,
@@ -450,16 +447,14 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             graphCreate,
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map("B", genericMap(
-                    map(
-                        "type", "REL",
-                        ORIENTATION_KEY, orientation,
-                        INDEX_INVERSE_KEY, false,
-                        PROPERTIES_KEY, emptyMap()
-                    ),
+                RELATIONSHIP_PROJECTION_KEY, Map.of("B", Map.of(
+                    "type", "REL",
+                    ORIENTATION_KEY, orientation,
+                    INDEX_INVERSE_KEY, false,
+                    PROPERTIES_KEY, emptyMap(),
                     AGGREGATION_KEY,
                     Aggregation.DEFAULT.name()
                 )),
@@ -489,12 +484,12 @@ class GraphProjectProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(graphCreate,
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map(
+                RELATIONSHIP_PROJECTION_KEY, Map.of(
                     "B",
-                    map("type", "REL",
+                    Map.of("type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         INDEX_INVERSE_KEY, false,
@@ -519,8 +514,8 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
-            singletonList(map(
+            Map.of("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_QUERY_KEY, ALL_NODES_QUERY,
                 RELATIONSHIP_QUERY_KEY, relationshipQuery,
@@ -541,13 +536,13 @@ class GraphProjectProcTest extends BaseProcTest {
         String aggregation = aggregationParam.toString();
         String name = "g";
 
-        Map<String, Object> relationshipProjection = map("B", map(
+        Map<String, Object> relationshipProjection = Map.of("B", Map.of(
             "type", "REL",
             "aggregation", aggregation,
-            "properties", map("weight", emptyMap())
+            "properties", Map.of("weight", emptyMap())
         ));
 
-        Map<String, Object> relationshipProperties = map("foo", map(
+        Map<String, Object> relationshipProperties = Map.of("foo", Map.of(
             "property", "weight",
             "aggregation", Optional.of(aggregation)
                 .filter(a1 -> a1.equals("NONE"))
@@ -556,7 +551,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.project($name, '*', $relationshipProjection, { relationshipProperties: $relationshipProperties })",
-            map(
+            Map.of(
                 "name",
                 name,
                 "relationshipProjection",
@@ -564,22 +559,22 @@ class GraphProjectProcTest extends BaseProcTest {
                 "relationshipProperties",
                 relationshipProperties
             ),
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    "B", map(
+                RELATIONSHIP_PROJECTION_KEY, Map.of(
+                    "B", Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, aggregation,
                         INDEX_INVERSE_KEY, false,
-                        PROPERTIES_KEY, map(
-                            "weight", map(
+                        PROPERTIES_KEY, Map.of(
+                            "weight", Map.of(
                                 "property", "weight",
                                 AGGREGATION_KEY, aggregation,
                                 "defaultValue", null
                             ),
-                            "foo", map(
+                            "foo", Map.of(
                                 "property", "weight",
                                 AGGREGATION_KEY, Optional.of(aggregation)
                                     .filter(a -> a.equals("NONE"))
@@ -608,24 +603,24 @@ class GraphProjectProcTest extends BaseProcTest {
         String aggregation = aggregationParam.toString();
         String name = "g";
 
-        Map<String, Object> relationshipProjection = map("B", map(
+        Map<String, Object> relationshipProjection = Map.of("B", Map.of(
             "type", "REL",
             "aggregation", Aggregation.DEFAULT.name(),
-            "properties", map("weight", map("aggregation", aggregation))
+            "properties", Map.of("weight", Map.of("aggregation", aggregation))
         ));
 
         assertCypherResult(
             "CALL gds.graph.project($name, '*', $relationshipProjection)",
-            map("name", name, "relationshipProjection", relationshipProjection),
-            singletonList(map(
+            Map.of("name", name, "relationshipProjection", relationshipProjection),
+            singletonList(Map.of(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map("B", map(
+                RELATIONSHIP_PROJECTION_KEY, Map.of("B", Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         INDEX_INVERSE_KEY, false,
-                        PROPERTIES_KEY, map("weight", map(
+                        PROPERTIES_KEY, Map.of("weight", Map.of(
                                 "property", "weight",
                                 AGGREGATION_KEY, aggregation,
                                 "defaultValue", null
@@ -689,7 +684,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", cypher,
+            Map.of("name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", formatWithLocale(
                     "MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
@@ -724,20 +719,20 @@ class GraphProjectProcTest extends BaseProcTest {
     void defaultRelationshipProjectionProperty() {
         assertCypherResult(
             "CALL gds.graph.project('testGraph', '*', $relationshipProjection)",
-            singletonMap("relationshipProjection", map(
-                "REL", map("properties", map("weight", map("aggregation", "SINGLE"))
+            singletonMap("relationshipProjection", Map.of(
+                "REL", Map.of("properties", Map.of("weight", Map.of("aggregation", "SINGLE"))
                 ))),
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", "testGraph",
                 NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    "REL", map(
+                RELATIONSHIP_PROJECTION_KEY, Map.of(
+                    "REL", Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         INDEX_INVERSE_KEY, false,
-                        PROPERTIES_KEY, map(
-                            "weight", map(
+                        PROPERTIES_KEY, Map.of(
+                            "weight", Map.of(
                                 "property", "weight",
                                 AGGREGATION_KEY, "SINGLE",
                                 "defaultValue", null
@@ -755,16 +750,16 @@ class GraphProjectProcTest extends BaseProcTest {
     void defaultNodeProjectionProperty() {
         assertCypherResult(
             "CALL gds.graph.project('testGraph', $nodeProjection, '*')",
-            singletonMap("nodeProjection", map(
-                "A", map("properties", map("age", map("defaultValue", 1)))
+            singletonMap("nodeProjection", Map.of(
+                "A", Map.of("properties", Map.of("age", Map.of("defaultValue", 1)))
             )),
-            singletonList(map(
+            singletonList(Map.of(
                 "graphName", "testGraph",
-                NODE_PROJECTION_KEY, map(
-                    "A", map(
+                NODE_PROJECTION_KEY, Map.of(
+                    "A", Map.of(
                         "label", "A",
-                        "properties", map(
-                            "age", map(
+                        "properties", Map.of(
+                            "age", Map.of(
                                 "defaultValue", 1,
                                 "property", "age"
                             )
@@ -820,7 +815,7 @@ class GraphProjectProcTest extends BaseProcTest {
             applyOnProcedure(proc -> {
                 GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
                     "",
-                    CypherMapWrapper.create(MapUtil.map(
+                    CypherMapWrapper.create(Map.of(
                         NODE_PROJECTION_KEY, "*",
                         RELATIONSHIP_PROJECTION_KEY, "*"))
                 );
@@ -836,7 +831,7 @@ class GraphProjectProcTest extends BaseProcTest {
         applyOnProcedure(proc -> {
             GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
                 "",
-                CypherMapWrapper.create(MapUtil.map(
+                CypherMapWrapper.create(Map.of(
                     NODE_PROJECTION_KEY, "*",
                     RELATIONSHIP_PROJECTION_KEY, "*",
                     SUDO_KEY, true
@@ -851,7 +846,7 @@ class GraphProjectProcTest extends BaseProcTest {
         applyOnProcedure(proc -> {
             GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
                 "",
-                CypherMapWrapper.create(MapUtil.map(
+                CypherMapWrapper.create(Map.of(
                     NODE_QUERY_KEY, "MATCH (n) RETURN n",
                     RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
                     SUDO_KEY, true
@@ -867,7 +862,7 @@ class GraphProjectProcTest extends BaseProcTest {
             applyOnProcedure(proc -> {
                 GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
                     "",
-                    CypherMapWrapper.create(MapUtil.map(
+                    CypherMapWrapper.create(Map.of(
                         NODE_QUERY_KEY, "MATCH (n) RETURN n",
                         RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
                         "sudo", false
@@ -931,7 +926,7 @@ class GraphProjectProcTest extends BaseProcTest {
             .withNodeProperty(PropertyMapping.of("barProp", "bar", 19.84))
             .yields("nodeCount");
 
-        runQuery(query, map());
+        runQuery(query, Map.of());
 
         Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
         Graph expected = fromGdl("(:Node { fooProp: 42, barProp: 13.37D })" +
@@ -1250,7 +1245,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertError(
             graphCreate,
-            map("name", name),
+            Map.of("name", name),
             "Node properties not found: 'invalid'"
         );
 
@@ -1361,12 +1356,12 @@ class GraphProjectProcTest extends BaseProcTest {
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.project($graphName, {}, {})",
-            map("graphName", invalidName),
+            Map.of("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
             "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relationshipQuery)",
-            map("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            Map.of("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
 
@@ -1388,11 +1383,11 @@ class GraphProjectProcTest extends BaseProcTest {
     @Test
     void failsOnInvalidNeoLabel() {
         String name = "g";
-        Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
+        Map<String, Object> nodeProjection = Map.of("A", Map.of(LABEL_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.project($name, $nodeProjection, '*')",
-            map("name", name, "nodeProjection", nodeProjection),
+            Map.of("name", name, "nodeProjection", nodeProjection),
             "Invalid node projection, one or more labels not found: 'INVALID'"
         );
 
@@ -1413,33 +1408,33 @@ class GraphProjectProcTest extends BaseProcTest {
 
     @Test
     void failsOnInvalidAggregation() {
-        Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
+        Map<String, Object> relProjection = Map.of("A", Map.of(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.project('g', '*', $relProjection)",
-            map("relProjection", relProjection),
+            Map.of("relProjection", relProjection),
             "Aggregation `INVALID` is not supported."
         );
     }
 
     @Test
     void failsOnInvalidOrientation() {
-        Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
+        Map<String, Object> relProjection = Map.of("A", Map.of(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.project('g', '*', $relProjection)",
-            map("relProjection", relProjection),
+            Map.of("relProjection", relProjection),
             "Orientation `INVALID` is not supported."
         );
     }
 
     @Test
     void failsOnInvalidProjection() {
-        Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
+        Map<String, Object> relProjection = Map.of("A", Map.of(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.project('g', '*', $relProjection)",
-            map("relProjection", relProjection),
+            Map.of("relProjection", relProjection),
             "Orientation `INVALID` is not supported."
         );
     }
@@ -1447,16 +1442,16 @@ class GraphProjectProcTest extends BaseProcTest {
     @Test
     void failsOnExistingGraphName() {
         String name = "g";
-        runQuery("CALL gds.graph.project($name, '*', '*')", map("name", name));
+        runQuery("CALL gds.graph.project($name, '*', '*')", Map.of("name", name));
         assertError(
             "CALL gds.graph.project($name, '*', '*')",
-            map("name", name),
+            Map.of("name", name),
             formatWithLocale("A graph with name '%s' already exists.", name)
         );
 
         assertError(
             "CALL gds.graph.project.cypher($name, '*', '*')",
-            map("name", name),
+            Map.of("name", name),
             formatWithLocale("A graph with name '%s' already exists.", name)
         );
     }
@@ -1469,8 +1464,8 @@ class GraphProjectProcTest extends BaseProcTest {
             invalidName
         );
 
-        assertError("CALL gds.graph.project($name, '*', '*')", map("name", invalidName), expectedMessage);
-        assertError("CALL gds.graph.project.cypher($name, '*', '*')", map("name", invalidName), expectedMessage);
+        assertError("CALL gds.graph.project($name, '*', '*')", Map.of("name", invalidName), expectedMessage);
+        assertError("CALL gds.graph.project.cypher($name, '*', '*')", Map.of("name", invalidName), expectedMessage);
     }
 
 
@@ -1482,13 +1477,13 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertError(
             query,
-            map("relQuery", ALL_RELATIONSHIPS_QUERY, "nodeQuery", writeQueryNodes),
+            Map.of("relQuery", ALL_RELATIONSHIPS_QUERY, "nodeQuery", writeQueryNodes),
             "Query must be read only. Query: "
         );
 
         assertError(
             query,
-            map("nodeQuery", ALL_NODES_QUERY, "relQuery", writeQueryRelationships),
+            Map.of("nodeQuery", ALL_NODES_QUERY, "relQuery", writeQueryRelationships),
             "Query must be read only. Query: "
         );
     }
@@ -1548,7 +1543,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertError(
             graphCreateQuery,
-            map("name", name),
+            Map.of("name", name),
             "Invalid relationship projection, one or more relationship types not found: 'INVALID'"
         );
 
@@ -1562,11 +1557,11 @@ class GraphProjectProcTest extends BaseProcTest {
         assertThatThrownBy(() ->
             runQuery(
                 "CALL gds.graph.project($name, '*', $relProjection)",
-                map(
+                Map.of(
                     "name",
                     name,
                     "relProjection",
-                    map("CONNECTS", map("type", "REL", "orientation", "UNDIRECTED", "indexInverse", true))
+                    Map.of("CONNECTS", Map.of("type", "REL", "orientation", "UNDIRECTED", "indexInverse", true))
                 )
             )
         )
@@ -1622,17 +1617,17 @@ class GraphProjectProcTest extends BaseProcTest {
             Arguments.of(
                 "default neo label",
                 singletonMap("A", emptyMap()),
-                map("A", map(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
+                Map.of("A", Map.of(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
             ),
             Arguments.of(
                 "aliased node label",
-                map("B", map(LABEL_KEY, "A")),
-                map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
+                Map.of("B", Map.of(LABEL_KEY, "A")),
+                Map.of("B", Map.of(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
             ),
             Arguments.of(
                 "node projection as list",
                 singletonList("A"),
-                map("A", map(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
+                Map.of("A", Map.of(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
             )
         );
     }
@@ -1640,20 +1635,20 @@ class GraphProjectProcTest extends BaseProcTest {
     static Stream<Arguments> nodeProperties() {
         return Stream.of(
             Arguments.of(
-                map("age", map("property", "age")),
-                map("age", map("property", "age", "defaultValue", null))
+                Map.of("age", Map.of("property", "age")),
+                Map.of("age", Map.of("property", "age", "defaultValue", null))
             ),
             Arguments.of(
-                map("weight", map("property", "age", "defaultValue", 3D)),
-                map("weight", map("property", "age", "defaultValue", 3D))
+                Map.of("weight", Map.of("property", "age", "defaultValue", 3D)),
+                Map.of("weight", Map.of("property", "age", "defaultValue", 3D))
             ),
             Arguments.of(
                 singletonList("age"),
-                map("age", map("property", "age", "defaultValue", null))
+                Map.of("age", Map.of("property", "age", "defaultValue", null))
             ),
             Arguments.of(
-                map("weight", "age"),
-                map("weight", map("property", "age", "defaultValue", null))
+                Map.of("weight", "age"),
+                Map.of("weight", Map.of("property", "age", "defaultValue", null))
             )
         );
     }
@@ -1661,10 +1656,10 @@ class GraphProjectProcTest extends BaseProcTest {
     static Stream<Arguments> relationshipProperties() {
         return Stream.of(
             Arguments.of(
-                map("weight", map("property", "weight")),
-                map(
+                Map.of("weight", Map.of("property", "weight")),
+                Map.of(
                     "weight",
-                    map("property",
+                    Map.of("property",
                         "weight",
                         "defaultValue",
                         null,
@@ -1674,17 +1669,17 @@ class GraphProjectProcTest extends BaseProcTest {
                 )
             ),
             Arguments.of(
-                map("score", map("property", "weight", "defaultValue", 3D)),
-                map(
+                Map.of("score", Map.of("property", "weight", "defaultValue", 3D)),
+                Map.of(
                     "score",
-                    map("property", "weight", "defaultValue", 3D, AGGREGATION_KEY, "DEFAULT")
+                    Map.of("property", "weight", "defaultValue", 3D, AGGREGATION_KEY, "DEFAULT")
                 )
             ),
             Arguments.of(
                 singletonList("weight"),
-                map(
+                Map.of(
                     "weight",
-                    map("property",
+                    Map.of("property",
                         "weight",
                         "defaultValue",
                         null,
@@ -1694,10 +1689,10 @@ class GraphProjectProcTest extends BaseProcTest {
                 )
             ),
             Arguments.of(
-                map("score", "weight"),
-                map(
+                Map.of("score", "weight"),
+                Map.of(
                     "score",
-                    map("property",
+                    Map.of("property",
                         "weight",
                         "defaultValue",
                         null,
@@ -1714,9 +1709,9 @@ class GraphProjectProcTest extends BaseProcTest {
             Arguments.of(
                 "default neo type",
                 singletonMap("REL", emptyMap()),
-                map(
+                Map.of(
                     "REL",
-                    map(
+                    Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
@@ -1727,10 +1722,10 @@ class GraphProjectProcTest extends BaseProcTest {
             ),
             Arguments.of(
                 "aliased rel type",
-                map("CONNECTS", map("type", "REL")),
-                map(
+                Map.of("CONNECTS", Map.of("type", "REL")),
+                Map.of(
                     "CONNECTS",
-                    map(
+                    Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
@@ -1741,10 +1736,10 @@ class GraphProjectProcTest extends BaseProcTest {
             ),
             Arguments.of(
                 "inverse indexed rel type",
-                map("CONNECTS", map("type", "REL", "indexInverse", true)),
-                map(
+                Map.of("CONNECTS", Map.of("type", "REL", "indexInverse", true)),
+                Map.of(
                     "CONNECTS",
-                    map(
+                    Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
@@ -1755,13 +1750,13 @@ class GraphProjectProcTest extends BaseProcTest {
             ),
             Arguments.of(
                 "inverse indexed and non-index rel type",
-                map(
-                    "CONNECTS", map("type", "REL", "indexInverse", false),
-                    "CONNECTS_INDEXED", map("type", "REL", "indexInverse", true)
+                Map.of(
+                    "CONNECTS", Map.of("type", "REL", "indexInverse", false),
+                    "CONNECTS_INDEXED", Map.of("type", "REL", "indexInverse", true)
                 ),
-                map(
+                Map.of(
                     "CONNECTS",
-                    map(
+                    Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
@@ -1769,7 +1764,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         PROPERTIES_KEY, emptyMap()
                     ),
                     "CONNECTS_INDEXED",
-                    map(
+                    Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
@@ -1781,9 +1776,9 @@ class GraphProjectProcTest extends BaseProcTest {
             Arguments.of(
                 "rel projection as list",
                 singletonList("REL"),
-                map(
+                Map.of(
                     "REL",
-                    map(
+                    Map.of(
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",

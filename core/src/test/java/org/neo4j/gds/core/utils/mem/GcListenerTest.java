@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.logging.NullLog;
 
 import javax.management.Notification;
@@ -74,7 +73,7 @@ class GcListenerTest {
             actualFree,
             new String[]{"global"},
             "42",
-            testResultHandle("global", heapUsage)
+            testResultHandle(Map.of("global", heapUsage))
         );
 
         Notification notification = new Notification("42", "1337", 1337);
@@ -84,8 +83,7 @@ class GcListenerTest {
         assertEquals(expectedFree, actualFree.get());
     }
 
-    private MethodHandle testResultHandle(Object... usagePairs) {
-        Map<String, MemoryUsage> usages = MapUtil.genericMap(usagePairs);
+    private MethodHandle testResultHandle(Map<String, MemoryUsage> usages) {
         return dropArguments(
             constant(Map.class, usages),
             0,
@@ -107,10 +105,12 @@ class GcListenerTest {
             },
             "42",
             testResultHandle(
-                "usedWithMax", new MemoryUsage(0, 42, 42, 1337),
-                "usedWithoutMax", new MemoryUsage(0, 42, 42, -1),
-                "unusedWithMax", new MemoryUsage(0, 0, 42, 1337),
-                "unusedWithoutMax", new MemoryUsage(0, 0, 42, -1)
+                Map.of(
+                    "usedWithMax", new MemoryUsage(0, 42, 42, 1337),
+                    "usedWithoutMax", new MemoryUsage(0, 42, 42, -1),
+                    "unusedWithMax", new MemoryUsage(0, 0, 42, 1337),
+                    "unusedWithoutMax", new MemoryUsage(0, 0, 42, -1)
+                )
             )
         );
 

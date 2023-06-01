@@ -22,7 +22,6 @@ package org.neo4j.gds.functions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 
@@ -45,7 +44,7 @@ class AsNodeFuncTest extends BaseProcTest {
         String createNodeQuery = "CREATE (p:Person {name: 'Mark'}) RETURN p AS node";
         Node savedNode = (Node) runQuery(createNodeQuery, Result::next).get("node");
 
-        Map<String, Object> params = MapUtil.map("nodeId", savedNode.getId());
+        Map<String, Object> params = Map.of("nodeId", savedNode.getId());
         Map<String, Object> row = runQuery("RETURN gds.util.asNode($nodeId) AS node", params, Result::next);
 
         Node node = (Node) row.get("node");
@@ -67,7 +66,7 @@ class AsNodeFuncTest extends BaseProcTest {
         Node savedNode1 = (Node) savedRow.get("p1");
         Node savedNode2 = (Node) savedRow.get("p2");
 
-        Map<String, Object> params = MapUtil.map("nodeIds", Arrays.asList(savedNode1.getId(), savedNode2.getId()));
+        Map<String, Object> params = Map.of("nodeIds", Arrays.asList(savedNode1.getId(), savedNode2.getId()));
         Map<String, Object> row = runQuery("RETURN gds.util.asNodes($nodeIds) AS nodes", params, Result::next);
 
         List<Node> nodes = (List<Node>) row.get("nodes");

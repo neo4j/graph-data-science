@@ -33,7 +33,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -118,7 +117,7 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
         var query = "CALL gds.labelPropagation.stream.estimate('myGraph', {concurrency: 4})" +
                     " YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
 
-        assertCypherResult(query, List.of(MapUtil.map(
+        assertCypherResult(query, List.of(Map.of(
             "nodeCount", 12L,
             "relationshipCount", 10L,
             "bytesMin", 1640L,

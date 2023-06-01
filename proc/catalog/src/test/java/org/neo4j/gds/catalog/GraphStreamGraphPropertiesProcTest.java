@@ -36,6 +36,7 @@ import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -43,7 +44,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
@@ -78,10 +78,9 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
             DEFAULT_GRAPH_NAME
         );
 
-        assertCypherResult(
-            graphWriteQuery,
-            values.objects().map(property -> map("propertyValue", property)).collect(Collectors.toList())
-        );
+        var properties = new ArrayList<Map<String, Object>>();
+        values.objects().forEach(property -> properties.add(Map.of("propertyValue", property)));
+        assertCypherResult(graphWriteQuery, properties);
     }
 
     static Stream<Arguments> graphPropertyValues() {

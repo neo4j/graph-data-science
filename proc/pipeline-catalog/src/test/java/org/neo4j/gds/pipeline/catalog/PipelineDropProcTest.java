@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PipelineDropProcTest extends BaseProcTest {
@@ -66,7 +65,7 @@ class PipelineDropProcTest extends BaseProcTest {
             ),
             Map.of("pipelineName", pipeName),
             List.of(
-                map(
+                Map.of(
                     "pipelineInfo.splitConfig", Map.of(
                         "testFraction", 0.3,
                         "validationFolds", 3
@@ -84,7 +83,7 @@ class PipelineDropProcTest extends BaseProcTest {
         String pipelineName = "foo";
         assertError(
             "CALL gds.beta.pipeline.drop($pipelineName)",
-            map("pipelineName", pipelineName),
+            Map.of("pipelineName", pipelineName),
             formatWithLocale("Pipeline with name `%s` does not exist for user `%s`.", pipelineName, getUsername())
         );
     }

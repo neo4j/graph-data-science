@@ -49,7 +49,6 @@ import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -96,16 +95,16 @@ class GraphDropProcTest extends BaseProcTest {
                             .asInstanceOf(stringObjectMapAssertFactory())
                             .hasSize(10)
                             .containsEntry(
-                                "nodeProjection", map(
-                                    "A", map(
+                                "nodeProjection", Map.of(
+                                    "A", Map.of(
                                         "label", "A",
                                         "properties", emptyMap()
                                     )
                                 )
                             )
                             .containsEntry(
-                                "relationshipProjection", map(
-                                    "REL", map(
+                                "relationshipProjection", Map.of(
+                                    "REL", Map.of(
                                         "type", "REL",
                                         "orientation", "NATURAL",
                                         "aggregation", "DEFAULT",

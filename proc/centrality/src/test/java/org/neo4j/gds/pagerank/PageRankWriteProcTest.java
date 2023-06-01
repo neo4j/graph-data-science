@@ -26,7 +26,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.scaling.LogScaler;
 
@@ -117,7 +116,7 @@ class PageRankWriteProcTest extends BaseProcTest {
             .addPlaceholder("writeProperty", "writeProp")
             .yields("writeMillis", "configuration");
 
-        runQueryWithRowConsumer(query, MapUtil.map("writeProp", writeProperty),
+        runQueryWithRowConsumer(query, Map.of("writeProp", writeProperty),
             row -> {
                 assertUserInput(row, "writeProperty", writeProperty);
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");

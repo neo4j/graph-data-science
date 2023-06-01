@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
@@ -35,7 +34,6 @@ import org.neo4j.graphdb.Direction;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -250,7 +248,7 @@ class GdsCypherTest {
             arguments(Direction.BOTH, "'BOTH'"),
             arguments(Orientation.NATURAL, "'NATURAL'"),
             arguments(Arrays.asList("foo", 42, true), "['foo', 42, true]"),
-            arguments(MapUtil.map(new LinkedHashMap<>(), "foo", 42, "bar", true), "{foo: 42, bar: true}")
+            arguments(Map.of("foo", 42, "bar", true), "{foo: 42, bar: true}")
         );
     }
 

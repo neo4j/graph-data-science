@@ -33,7 +33,6 @@ import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.Is.isA;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Neo4jModelCatalogExtension
@@ -60,8 +59,8 @@ class ModelDropProcTest extends ModelProcBaseTest {
             dropQuery,
             Map.of("modelName", existingModel),
             singletonList(
-                map(
-                    "modelInfo", map("modelName", existingModel, "modelType", testModelType),
+                Map.of(
+                    "modelInfo", Map.of("modelName", existingModel, "modelType", testModelType),
                     "trainConfig", trainConfig.toMap(),
                     "loaded", true,
                     "stored", false,
@@ -78,7 +77,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
         String modelName = "foo";
         assertError(
             "CALL gds.beta.model.drop($modelName)",
-            map("modelName", modelName),
+            Map.of("modelName", modelName),
             formatWithLocale("Model with name `%s` does not exist.", modelName)
         );
     }

@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -76,7 +75,7 @@ class PipelineListProcTest extends BaseProcTest {
                 query
             ),
             List.of(
-                map(
+                Map.of(
                     "pipelineInfo.splitConfig", Map.of(
                         "negativeSamplingRatio", 1.0,
                         "testFraction", 0.1,
@@ -88,7 +87,7 @@ class PipelineListProcTest extends BaseProcTest {
                     "pipelineName", "lpPipe",
                     "pipelineType", LinkPredictionTrainingPipeline.PIPELINE_TYPE
                 ),
-                map(
+                Map.of(
                     "pipelineInfo.splitConfig", Map.of(
                         "testFraction", 0.8,
                         "validationFolds", 3
@@ -98,7 +97,7 @@ class PipelineListProcTest extends BaseProcTest {
                     "pipelineName", "ncPipe1",
                     "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
                 ),
-                map(
+                Map.of(
                     "pipelineInfo.splitConfig", Map.of(
                         "testFraction", 0.3,
                         "validationFolds", 3
@@ -141,7 +140,7 @@ class PipelineListProcTest extends BaseProcTest {
             "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType, creationTime " +
             "ORDER BY pipelineName",
             List.of(
-                map(
+                Map.of(
                     "pipelineInfo.splitConfig", Map.of(
                         "testFraction", 0.8,
                         "validationFolds", 3
@@ -163,7 +162,7 @@ class PipelineListProcTest extends BaseProcTest {
     void failOnEmptyPipeName(String pipeName) {
         assertError(
             "CALL gds.beta.pipeline.list($pipeName)",
-            map("pipeName", pipeName),
+            Map.of("pipeName", pipeName),
             "can not be null or blank"
         );
     }

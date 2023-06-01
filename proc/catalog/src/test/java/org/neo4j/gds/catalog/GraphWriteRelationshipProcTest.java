@@ -47,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.neo4j.gds.TestProcedureRunner.applyOnProcedure;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteRelationshipProcTest extends BaseProcTest {
@@ -120,7 +119,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             "RETURN type(r) AS relType, count(r) AS count";
 
         assertCypherResult(validationQuery, singletonList(
-            map("relType", "NEW_REL1", "count", 2L)
+            Map.of("relType", "NEW_REL1", "count", 2L)
         ));
     }
 
@@ -162,7 +161,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
         );
 
         assertCypherResult(validationQuery, singletonList(
-            map("relType", relType, "count", 2L, "sum", sum)
+            Map.of("relType", relType, "count", 2L, "sum", sum)
         ));
     }
 

@@ -41,7 +41,6 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
@@ -153,7 +152,7 @@ class WccStatsProcTest extends BaseProcTest {
             "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
-            "configuration", containsAllEntriesOf(MapUtil.map(
+            "configuration", containsAllEntriesOf(Map.of(
                 "consecutiveIds", false,
                 "threshold", 0D,
                 "seedProperty", null

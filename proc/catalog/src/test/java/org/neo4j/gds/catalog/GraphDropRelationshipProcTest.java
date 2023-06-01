@@ -34,8 +34,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.compat.MapUtil.map;
-
 class GraphDropRelationshipProcTest extends BaseProcTest {
 
     private final String DB_CYPHER =
@@ -43,7 +41,7 @@ class GraphDropRelationshipProcTest extends BaseProcTest {
         "       (:A)-[:T2 {p: 1}]->(:A) ";
 
     private final String graphName = "g";
-    private final Map<String, Object> params = map("graphName", this.graphName);
+    private final Map<String, Object> params = Map.of("graphName", this.graphName);
 
     GlobalUserLogStore userLogStore;
 
@@ -98,22 +96,22 @@ class GraphDropRelationshipProcTest extends BaseProcTest {
     @Test
     void shouldDeleteRelationshipType() {
         String query = "CALL gds.graph.relationships.drop('g', 'T1')";
-        assertCypherResult(query, Collections.singletonList(map(
+        assertCypherResult(query, Collections.singletonList(Map.of(
             "graphName", "g",
             "relationshipType", "T1",
             "deletedRelationships", 1L,
-            "deletedProperties", map())
+            "deletedProperties", Map.of())
         ));
     }
 
     @Test
     void shouldDeleteRelationshipTypeWithProperties() {
         String query = "CALL gds.graph.relationships.drop('g', 'T2')";
-        assertCypherResult(query, Collections.singletonList(map(
+        assertCypherResult(query, Collections.singletonList(Map.of(
             "graphName", "g",
             "relationshipType", "T2",
             "deletedRelationships", 1L,
-            "deletedProperties", map("p", 1L))
+            "deletedProperties", Map.of("p", 1L))
         ));
     }
 

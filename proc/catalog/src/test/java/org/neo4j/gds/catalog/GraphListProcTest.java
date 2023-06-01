@@ -39,9 +39,11 @@ import org.neo4j.gds.projection.CypherAggregation;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
@@ -55,7 +57,6 @@ import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.register;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -87,7 +88,7 @@ class GraphListProcTest extends BaseProcTest {
         var generateQuery = "CALL gds.beta.graph.generate($name, 500000, 5)";
         runQuery(
             generateQuery,
-            map("name", name)
+            Map.of("name", name)
         );
 
         assertFalse(graphIsCached());
@@ -112,81 +113,83 @@ class GraphListProcTest extends BaseProcTest {
         var generateQuery = "CALL gds.beta.graph.generate($name, 10, 5)";
         runQuery(
             generateQuery,
-            map("name", name)
+            Map.of("name", name)
         );
 
-        assertCypherResult("CALL gds.graph.list()", singletonList(
-            map(
-                "graphName", name,
-                "database", "neo4j",
-                "configuration", new Condition<>(config -> {
-                    assertThat(config)
+        var condition = new Condition<>(config -> {
+            assertThat(config)
+                .asInstanceOf(stringObjectMapAssertFactory())
+                .hasSize(12)
+                .containsEntry("nodeProjections", Map.of(
+                    "10_Nodes", Map.of(
+                        "label", "10_Nodes",
+                        "properties", emptyMap()
+                    )
+                ))
+                .containsEntry("relationshipProjections", Map.of(
+                    "REL", Map.of(
+                        "type", "REL",
+                        "orientation", "NATURAL",
+                        "aggregation", "NONE",
+                        "indexInverse", false,
+                        "properties", emptyMap()
+                    )
+                ))
+                .hasEntrySatisfying(
+                    "orientation",
+                    stringAssertConsumer(orientation -> orientation.isEqualTo("NATURAL"))
+                )
+                .hasEntrySatisfying(
+                    "relationshipProperty",
+                    relationshipProperty -> assertThat(relationshipProperty)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(12)
-                        .containsEntry("nodeProjections", map(
-                            "10_Nodes", map(
-                                "label", "10_Nodes",
-                                "properties", emptyMap()
-                            )
-                        ))
-                        .containsEntry("relationshipProjections", map(
-                            "REL", map(
-                                "type", "REL",
-                                "orientation", "NATURAL",
-                                "aggregation", "NONE",
-                                "indexInverse", false,
-                                "properties", emptyMap()
-                            )
-                        ))
-                        .hasEntrySatisfying(
-                            "orientation",
-                            stringAssertConsumer(orientation -> orientation.isEqualTo("NATURAL"))
-                        )
-                        .hasEntrySatisfying(
-                            "relationshipProperty",
-                            relationshipProperty -> assertThat(relationshipProperty)
-                                .asInstanceOf(stringObjectMapAssertFactory())
-                                .isEmpty()
-                        )
-                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
-                        .hasEntrySatisfying(
-                            "aggregation",
-                            stringAssertConsumer(aggregation -> aggregation.isEqualTo("NONE"))
-                        )
-                        .hasEntrySatisfying("allowSelfLoops", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
-                        .hasEntrySatisfying(
-                            "relationshipDistribution",
-                            stringAssertConsumer(relationshipDistribution -> relationshipDistribution.isEqualTo(
-                                "UNIFORM"))
-                        )
-                        .hasEntrySatisfying(
-                            "relationshipSeed",
-                            relationshipSeed -> assertThat(relationshipSeed).isNull()
-                        )
-                        .doesNotContainKeys(
-                            "readConcurrency",
-                            "username",
-                            "validateRelationships",
-                            "relationshipCount",
-                            "nodeCount"
-                        );
-                    return true;
-                }, "Assert generated `configuration` map"),
-                "schema", map(
-                    "nodes", map("__ALL__", map()),
-                    "relationships", map("REL", map()),
-                    "graphProperties", map()
-                ),
-                "schemaWithOrientation", map(
-                    "nodes", map("__ALL__", map()),
-                    "relationships", map("REL", map("direction", "DIRECTED", "properties", map())),
-                    "graphProperties", map()
-                ),
-                "nodeCount", 10L,
-                "relationshipCount", 50L,
-                "degreeDistribution", map(
+                        .isEmpty()
+                )
+                .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                .hasEntrySatisfying(
+                    "aggregation",
+                    stringAssertConsumer(aggregation -> aggregation.isEqualTo("NONE"))
+                )
+                .hasEntrySatisfying("allowSelfLoops", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
+                .hasEntrySatisfying(
+                    "relationshipDistribution",
+                    stringAssertConsumer(relationshipDistribution -> relationshipDistribution.isEqualTo(
+                        "UNIFORM"))
+                )
+                .hasEntrySatisfying(
+                    "relationshipSeed",
+                    relationshipSeed -> assertThat(relationshipSeed).isNull()
+                )
+                .doesNotContainKeys(
+                    "readConcurrency",
+                    "username",
+                    "validateRelationships",
+                    "relationshipCount",
+                    "nodeCount"
+                );
+            return true;
+        }, "Assert generated `configuration` map");
+
+        assertCypherResult("CALL gds.graph.list()", singletonList(
+            Map.ofEntries(
+                entry("graphName", name),
+                entry("database", "neo4j"),
+                entry("configuration", condition),
+                entry("schema", Map.of(
+                    "nodes", Map.of("__ALL__", Map.of()),
+                    "relationships", Map.of("REL", Map.of()),
+                    "graphProperties", Map.of()
+                )),
+                entry("schemaWithOrientation", Map.of(
+                    "nodes", Map.of("__ALL__", Map.of()),
+                    "relationships", Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of())),
+                    "graphProperties", Map.of()
+                )),
+                entry("nodeCount", 10L),
+                entry("relationshipCount", 50L),
+                entry("degreeDistribution", Map.of(
                     "min", 5L,
                     "mean", 5.0D,
                     "max", 5L,
@@ -196,12 +199,12 @@ class GraphListProcTest extends BaseProcTest {
                     "p95", 5L,
                     "p99", 5L,
                     "p999", 5L
-                ),
-                "creationTime", isA(ZonedDateTime.class),
-                "modificationTime", isA(ZonedDateTime.class),
-                "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class),
-                "density", new Condition<>(Double::isFinite, "a finite double")
+                )),
+                entry("creationTime", isA(ZonedDateTime.class)),
+                entry("modificationTime", isA(ZonedDateTime.class)),
+                entry("memoryUsage", instanceOf(String.class)),
+                entry("sizeInBytes", instanceOf(Long.class)),
+                entry("density", new Condition<>(Double::isFinite, "a finite double"))
             )
         ));
     }
@@ -211,15 +214,15 @@ class GraphListProcTest extends BaseProcTest {
         String name = "name";
         runQuery(
             "CALL gds.graph.project($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
-            map("name", name)
+            Map.of("name", name)
         );
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
-                    "graphProperties", map()
+            Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of("A", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships", Map.of("REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
+                    "graphProperties", Map.of()
                 )
             )
         ));
@@ -230,60 +233,62 @@ class GraphListProcTest extends BaseProcTest {
         String name = "name";
         runQuery(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY)
+            Map.of("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY)
         );
 
-        assertCypherResult("CALL gds.graph.list()", singletonList(
-            map(
-                "graphName", name,
-                "database", "neo4j",
-                "schema", map(
-                    "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map()),
-                    "graphProperties", map()
-                ),
-                "schemaWithOrientation", map(
-                    "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("direction", "DIRECTED", "properties", map())),
-                    "graphProperties", map()
-                ),
-                "configuration", new Condition<>(config -> {
-                    assertThat(config)
-                        .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(9)
-                        .hasEntrySatisfying(
-                            "relationshipQuery",
-                            stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
-                                ALL_RELATIONSHIPS_QUERY))
-                        )
-                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
-                        .hasEntrySatisfying(
-                            "validateRelationships",
-                            booleanAssertConsumer(AbstractBooleanAssert::isTrue)
-                        )
-                        .hasEntrySatisfying(
-                            "nodeQuery",
-                            stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo(ALL_NODES_QUERY))
-                        )
-                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
-                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
-                        .hasEntrySatisfying(
-                            "readConcurrency",
-                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
-                        )
-                        .hasEntrySatisfying("parameters", parameters -> assertThat(parameters)
-                            .asInstanceOf(InstanceOfAssertFactories.list(String.class)).isEmpty())
-                        .doesNotContainKeys(
-                            "username",
-                            GraphProjectConfig.NODE_COUNT_KEY,
-                            GraphProjectConfig.RELATIONSHIP_COUNT_KEY
-                        );
+        var condition = new Condition<>(config -> {
+            assertThat(config)
+                .asInstanceOf(stringObjectMapAssertFactory())
+                .hasSize(9)
+                .hasEntrySatisfying(
+                    "relationshipQuery",
+                    stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
+                        ALL_RELATIONSHIPS_QUERY))
+                )
+                .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                .hasEntrySatisfying(
+                    "validateRelationships",
+                    booleanAssertConsumer(AbstractBooleanAssert::isTrue)
+                )
+                .hasEntrySatisfying(
+                    "nodeQuery",
+                    stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo(ALL_NODES_QUERY))
+                )
+                .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
+                .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
+                .hasEntrySatisfying(
+                    "readConcurrency",
+                    intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                )
+                .hasEntrySatisfying("parameters", parameters -> assertThat(parameters)
+                    .asInstanceOf(InstanceOfAssertFactories.list(String.class)).isEmpty())
+                .doesNotContainKeys(
+                    "username",
+                    GraphProjectConfig.NODE_COUNT_KEY,
+                    GraphProjectConfig.RELATIONSHIP_COUNT_KEY
+                );
 
-                    return true;
-                }, "Assert Cypher `configuration` map"),
-                "nodeCount", 2L,
-                "relationshipCount", 1L,
-                "degreeDistribution", map(
+            return true;
+        }, "Assert Cypher `configuration` map");
+
+        assertCypherResult("CALL gds.graph.list()", singletonList(
+            Map.ofEntries(
+                entry("graphName", name),
+                entry("database", "neo4j"),
+                entry("schema", Map.of(
+                    "nodes", Map.of(ALL_NODES.name, Map.of()),
+                    "relationships", Map.of(ALL_RELATIONSHIPS.name, Map.of()),
+                    "graphProperties", Map.of()
+                )),
+                entry("schemaWithOrientation", Map.of(
+                    "nodes", Map.of(ALL_NODES.name, Map.of()),
+                    "relationships", Map.of(ALL_RELATIONSHIPS.name, Map.of("direction", "DIRECTED", "properties", Map.of())),
+                    "graphProperties", Map.of()
+                )),
+                entry("configuration", condition),
+                entry("nodeCount", 2L),
+                entry("relationshipCount", 1L),
+                entry("degreeDistribution", Map.of(
                     "min", 0L,
                     "mean", 0.5D,
                     "max", 1L,
@@ -293,12 +298,12 @@ class GraphListProcTest extends BaseProcTest {
                     "p95", 1L,
                     "p99", 1L,
                     "p999", 1L
-                ),
-                "creationTime", isA(ZonedDateTime.class),
-                "modificationTime", isA(ZonedDateTime.class),
-                "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class),
-                "density", new Condition<>(Double::isFinite, "a finite double")
+                )),
+                entry("creationTime", isA(ZonedDateTime.class)),
+                entry("modificationTime", isA(ZonedDateTime.class)),
+                entry("memoryUsage", instanceOf(String.class)),
+                entry("sizeInBytes", instanceOf(Long.class)),
+                entry("density", new Condition<>(Double::isFinite, "a finite double"))
             )
         ));
     }
@@ -307,35 +312,37 @@ class GraphListProcTest extends BaseProcTest {
     void listCypherAggregation() {
         runQuery("MATCH (n0)-->(n1) WITH gds.graph.project('g', n0, n1) AS g RETURN *");
 
-        assertCypherResult("CALL gds.graph.list()", singletonList(
-            map(
-                "graphName", "g",
-                "database", "neo4j",
-                "schema", map(
-                    "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map()),
-                    "graphProperties", map()
-                ),
-                "schemaWithOrientation", map(
-                    "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("properties", map(), "direction", Direction.DIRECTED.toString())),
-                    "graphProperties", map()
-                ),
-                "configuration", new Condition<>(config -> {
-                    assertThat(config)
-                        .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(5)
-                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
-                        .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull())
-                        .hasEntrySatisfying("undirectedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
-                        .hasEntrySatisfying("inverseIndexedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
-                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue));
+        var condition = new Condition<>(config -> {
+            assertThat(config)
+                .asInstanceOf(stringObjectMapAssertFactory())
+                .hasSize(5)
+                .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull())
+                .hasEntrySatisfying("undirectedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
+                .hasEntrySatisfying("inverseIndexedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
+                .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue));
 
-                    return true;
-                }, "Assert Cypher Aggregation `configuration` map"),
-                "nodeCount", 2L,
-                "relationshipCount", 1L,
-                "degreeDistribution", map(
+            return true;
+        }, "Assert Cypher Aggregation `configuration` map");
+
+        assertCypherResult("CALL gds.graph.list()", singletonList(
+            Map.ofEntries(
+                entry("graphName", "g"),
+                entry("database", "neo4j"),
+                entry("schema", Map.of(
+                    "nodes", Map.of(ALL_NODES.name, Map.of()),
+                    "relationships", Map.of(ALL_RELATIONSHIPS.name, Map.of()),
+                    "graphProperties", Map.of()
+                )),
+                entry("schemaWithOrientation", Map.of(
+                    "nodes", Map.of(ALL_NODES.name, Map.of()),
+                    "relationships", Map.of(ALL_RELATIONSHIPS.name, Map.of("properties", Map.of(), "direction", Direction.DIRECTED.toString())),
+                    "graphProperties", Map.of()
+                )),
+                entry("configuration", condition),
+                entry("nodeCount", 2L),
+                entry("relationshipCount", 1L),
+                entry("degreeDistribution", Map.of(
                     "min", 0L,
                     "mean", 0.5D,
                     "max", 1L,
@@ -345,12 +352,12 @@ class GraphListProcTest extends BaseProcTest {
                     "p95", 1L,
                     "p99", 1L,
                     "p999", 1L
-                ),
-                "creationTime", isA(ZonedDateTime.class),
-                "modificationTime", isA(ZonedDateTime.class),
-                "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class),
-                "density", new Condition<>(Double::isFinite, "a finite double")
+                )),
+                entry("creationTime", isA(ZonedDateTime.class)),
+                entry("modificationTime", isA(ZonedDateTime.class)),
+                entry("memoryUsage", instanceOf(String.class)),
+                entry("sizeInBytes", instanceOf(Long.class)),
+                entry("density", new Condition<>(Double::isFinite, "a finite double"))
             )
         ));
     }
@@ -360,7 +367,7 @@ class GraphListProcTest extends BaseProcTest {
         String name = "name";
         runQuery(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map(
+            Map.of(
                 "name",
                 name,
                 "nodeQuery",
@@ -371,11 +378,11 @@ class GraphListProcTest extends BaseProcTest {
         );
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
-                    "graphProperties", map()
+            Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of("A", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
+                    "relationships", Map.of("REL", Map.of("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
+                    "graphProperties", Map.of()
                 )
             )
         ));
@@ -386,7 +393,7 @@ class GraphListProcTest extends BaseProcTest {
         String name = "name";
         runQuery(
             "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
-            map(
+            Map.of(
                 "name", name,
                 "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo",
                 "relationshipQuery", "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar"
@@ -394,11 +401,11 @@ class GraphListProcTest extends BaseProcTest {
         );
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
-                    "graphProperties", map()
+            Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of(ALL_NODES.name, Map.of("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
+                    "relationships", Map.of(ALL_RELATIONSHIPS.name, Map.of("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
+                    "graphProperties", Map.of()
                 )
             )
         ));
@@ -412,11 +419,11 @@ class GraphListProcTest extends BaseProcTest {
         runQuery(loadQuery);
 
         assertCypherResult("CALL gds.graph.list() YIELD schema",
-            Collections.singletonList(map(
-                "schema", map(
-                    "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map()),
-                    "graphProperties", map()
+            Collections.singletonList(Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of(ALL_NODES.name, Map.of()),
+                    "relationships", Map.of(ALL_RELATIONSHIPS.name, Map.of()),
+                    "graphProperties", Map.of()
             )))
         );
     }
@@ -434,17 +441,17 @@ class GraphListProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.list() YIELD schema",
-            Collections.singletonList(map(
-                "schema", map(
-                    "nodes", map(
-                        "all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"),
-                        "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")
+            Collections.singletonList(Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of(
+                        "all", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"),
+                        "B", Map.of("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")
                     ),
-                    "relationships", map(
-                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")
+                    "relationships", Map.of(
+                        "all", Map.of("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
+                        "REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")
                     ),
-                    "graphProperties", map()
+                    "graphProperties", Map.of()
                 ))
             )
         );
@@ -462,13 +469,13 @@ class GraphListProcTest extends BaseProcTest {
         runQuery(loadQuery);
 
         assertCypherResult("CALL gds.graph.list() YIELD schema",
-            Collections.singletonList(map(
-                "schema", map(
-                    "nodes", map("all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships",  map(
-                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
-                    "graphProperties", map()
+            Collections.singletonList(Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of("all", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", Map.of("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships",  Map.of(
+                        "all", Map.of("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
+                        "REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
+                    "graphProperties", Map.of()
                 )))
         );
     }
@@ -485,14 +492,14 @@ class GraphListProcTest extends BaseProcTest {
         runQuery(loadQuery);
 
         assertCypherResult("CALL gds.graph.list() YIELD schema",
-            Collections.singletonList(map(
-                "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships",  map(
-                        "LIKES", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")
+            Collections.singletonList(Map.of(
+                "schema", Map.of(
+                    "nodes", Map.of("A", Map.of("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", Map.of("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships",  Map.of(
+                        "LIKES", Map.of("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
+                        "REL", Map.of("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")
                     ),
-                    "graphProperties", map()
+                    "graphProperties", Map.of()
                 )))
         );
     }

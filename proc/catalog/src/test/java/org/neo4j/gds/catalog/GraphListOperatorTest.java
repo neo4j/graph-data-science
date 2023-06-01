@@ -68,7 +68,6 @@ import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -356,32 +355,32 @@ class GraphListOperatorTest {
         assertThat(result.modificationTime).isInstanceOf(ZonedDateTime.class);
         assertThat(result.memoryUsage).isInstanceOf(String.class);
         assertThat(result.sizeInBytes).isInstanceOf(Long.class);
-        assertThat(result.schema).asInstanceOf(MAP).containsExactlyInAnyOrderEntriesOf(Map.of("nodes", map("A", map()),
-            "relationships", map("REL", map()),
-            "graphProperties", map()
+        assertThat(result.schema).asInstanceOf(MAP).containsExactlyInAnyOrderEntriesOf(Map.of("nodes", Map.of("A", Map.of()),
+            "relationships", Map.of("REL", Map.of()),
+            "graphProperties", Map.of()
         ));
         assertThat(result.schemaWithOrientation).asInstanceOf(MAP).containsExactlyInAnyOrderEntriesOf(Map.of(
             "nodes",
-            map("A", map()),
+            Map.of("A", Map.of()),
             "relationships",
-            map("REL", map("direction", "DIRECTED", "properties", map())),
+            Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of())),
             "graphProperties",
-            map()
+            Map.of()
         ));
         assertThat(result.configuration)
             .asInstanceOf(stringObjectMapAssertFactory())
             .hasSize(10)
             .containsEntry(
-                "nodeProjection", map(
-                    "A", map(
+                "nodeProjection", Map.of(
+                    "A", Map.of(
                         "label", "A",
                         "properties", emptyMap()
                     )
                 )
             )
             .containsEntry(
-                "relationshipProjection", map(
-                    "REL", map(
+                "relationshipProjection", Map.of(
+                    "REL", Map.of(
                         "type", "REL",
                         "orientation", "NATURAL",
                         "aggregation", "DEFAULT",

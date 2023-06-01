@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -125,7 +124,7 @@ class LouvainStatsProcTest extends BaseProcTest {
             "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
-            "configuration", containsAllEntriesOf(MapUtil.map(
+            "configuration", containsAllEntriesOf(Map.of(
                 "consecutiveIds", false,
                 "includeIntermediateCommunities", false,
                 "maxIterations", 10,

@@ -27,11 +27,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphExistsProcTest extends BaseProcTest {
@@ -53,13 +53,13 @@ class GraphExistsProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
     void shouldReportOnGraphExistenceProc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", graphNameToCreate));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", Map.of("name", graphNameToCreate));
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", graphNameToCheck),
+            Map.of("graphName", graphNameToCheck),
             singletonList(
-                map("graphName", graphNameToCheck, "exists", exists)
+                Map.of("graphName", graphNameToCheck, "exists", exists)
             )
         );
     }
@@ -67,13 +67,13 @@ class GraphExistsProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
     void shouldReportOnGraphExistenceFunc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", graphNameToCreate));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", Map.of("name", graphNameToCreate));
 
         assertCypherResult(
             "RETURN gds.graph.exists($graphName) AS exists",
-            map("graphName", graphNameToCheck),
+            Map.of("graphName", graphNameToCheck),
             singletonList(
-                map("exists", exists)
+                Map.of("exists", exists)
             )
         );
     }
@@ -83,12 +83,12 @@ class GraphExistsProcTest extends BaseProcTest {
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", invalidName),
+            Map.of("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
             "RETURN gds.graph.exists($graphName)",
-            map("graphName", invalidName),
+            Map.of("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }

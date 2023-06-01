@@ -26,7 +26,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -108,7 +107,7 @@ class LabelPropagationStatsProcTest extends BaseProcTest {
             "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
-            "configuration", containsAllEntriesOf(MapUtil.map(
+            "configuration", containsAllEntriesOf(Map.of(
                 "consecutiveIds", false,
                 "maxIterations", 10,
                 "seedProperty", null,

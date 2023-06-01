@@ -31,9 +31,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
+import java.util.Map;
+
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
@@ -102,7 +103,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.relationships.drop('testGraph2', 'SIM') YIELD deletedProperties",
-            singletonList(map("deletedProperties", map("foo", 2L)))
+            singletonList(Map.of("deletedProperties", Map.of("foo", 2L)))
         );
         Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH2).graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
@@ -114,7 +115,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.relationships.drop('testGraph', 'TYPE') YIELD deletedProperties",
-            singletonList(map("deletedProperties", map()))
+            singletonList(Map.of("deletedProperties", Map.of()))
         );
     }
 }

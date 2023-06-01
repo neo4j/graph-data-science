@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
@@ -147,15 +146,15 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         String graphStreamQuery = formatWithLocale(graphStreamQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 2D),
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 44D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 2D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 44D),
 
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 3D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 45D)
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 3D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 45D)
         ));
     }
 
@@ -172,10 +171,10 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D)
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D)
         ));
     }
 
@@ -191,13 +190,13 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 0D),
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 42D),
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 2D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 0D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 42D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 2D),
 
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 1D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 43D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 3D)
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 1D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 43D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 3D)
         ));
     }
 
@@ -226,7 +225,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeB, "relationshipType", "NEW_REL", "relationshipProperty", "newRelProp3", "propertyValue", 23D)
+            Map.of("source", nodeA, "target", nodeB, "relationshipType", "NEW_REL", "relationshipProperty", "newRelProp3", "propertyValue", 23D)
         ));
     }
 
@@ -260,8 +259,8 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "propertyValue", 0D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "propertyValue", 1D)
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "propertyValue", 0D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "propertyValue", 1D)
         ));
     }
 
@@ -277,8 +276,8 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "propertyValue", 42D),
-            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "propertyValue", 43D)
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "propertyValue", 42D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "propertyValue", 43D)
         ));
     }
 
@@ -308,7 +307,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", nodeA, "target", nodeB, "relationshipType", "NEW_REL", "propertyValue", 23D)
+            Map.of("source", nodeA, "target", nodeB, "relationshipType", "NEW_REL", "propertyValue", 23D)
         ));
     }
 

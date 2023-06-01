@@ -21,7 +21,6 @@ package org.neo4j.gds.catalog;
 
 import org.HdrHistogram.AtomicHistogram;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -50,7 +49,7 @@ public final class GraphInfoHelper {
             nodeId -> histogram.recordValue(graph.degree(nodeId))
         );
 
-        return MapUtil.map(
+        return Map.of(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
             "max", histogram.getMaxValue(),

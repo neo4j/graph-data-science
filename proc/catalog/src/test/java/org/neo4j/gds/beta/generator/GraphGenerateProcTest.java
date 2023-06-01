@@ -53,7 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_DISTRIBUTION_KEY;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
@@ -133,7 +132,7 @@ class GraphGenerateProcTest extends BaseProcTest {
             "  $avgDegree " +
             ")";
 
-        runQuery(generateQ, map("nodeCount", nodeCount, "avgDegree", avgDegree));
+        runQuery(generateQ, Map.of("nodeCount", nodeCount, "avgDegree", avgDegree));
 
         String estimateQ =
             "CALL gds.nodeSimilarity.stats.estimate( " +
@@ -284,7 +283,7 @@ class GraphGenerateProcTest extends BaseProcTest {
     void shouldBeSeedableGenerator() {
         long relationshipSeed = 4242L;
 
-        Map<String, Object> configMap = map("relationshipSeed", relationshipSeed);
+        Map<String, Object> configMap = Map.of("relationshipSeed", relationshipSeed);
 
         RandomGraphGeneratorConfig cfg = RandomGraphGeneratorConfig.of(getUsername(), "", 10, 5, create(configMap));
 
@@ -334,7 +333,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Missing `name`",
-            map(
+            Map.of(
                 "foobar", "baz"
             ),
             asList("`name`", "specified")
@@ -342,7 +341,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Missing `type`",
-            map(
+            Map.of(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop"
             ),
             asList("`type`", "specified")
@@ -350,7 +349,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Invalid type for `type`",
-            map(
+            Map.of(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                 RELATIONSHIP_PROPERTY_TYPE_KEY, "foobar"
             ),
@@ -359,7 +358,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Invalid type for `min`",
-            map(
+            Map.of(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                 RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
                 RELATIONSHIP_PROPERTY_MIN_KEY, "Zweiundvierzig"
@@ -369,7 +368,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Invalid type for `max`",
-            map(
+            Map.of(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                 RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
                 RELATIONSHIP_PROPERTY_MIN_KEY, 0.0,
@@ -380,7 +379,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Invalid type for `value`",
-            map(
+            Map.of(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                 RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
                 RELATIONSHIP_PROPERTY_VALUE_KEY, "Zweiundvierzig"
@@ -390,7 +389,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Null value for `value`",
-            map(
+            Map.of(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                 RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
                 RELATIONSHIP_PROPERTY_VALUE_KEY, null

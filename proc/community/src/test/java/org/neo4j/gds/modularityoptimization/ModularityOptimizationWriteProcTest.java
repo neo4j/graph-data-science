@@ -30,7 +30,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -264,7 +263,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     }
 
     private void assertWriteResult(long[]... expectedCommunities) {
-        Map<String, Object> nameMapping = MapUtil.map(
+        Map<String, Object> nameMapping = Map.of(
             "a", 0,
             "b", 1,
             "c", 2,

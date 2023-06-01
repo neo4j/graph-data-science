@@ -30,9 +30,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.wcc.WccMutateProc;
 
+import java.util.Map;
+
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
     private static final String DB_CYPHER =
@@ -73,7 +74,7 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.nodeProperties.drop('testGraph', ['componentId']) YIELD propertiesRemoved",
-            singletonList(map("propertiesRemoved", 4L))
+            singletonList(Map.of("propertiesRemoved", 4L))
         );
         Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "testGraph").graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);

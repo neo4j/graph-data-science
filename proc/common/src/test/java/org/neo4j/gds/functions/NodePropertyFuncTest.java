@@ -28,8 +28,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
-
-import static org.neo4j.gds.compat.MapUtil.map;
+import java.util.Map;
 
 class NodePropertyFuncTest  extends BaseProcTest {
 
@@ -63,21 +62,21 @@ class NodePropertyFuncTest  extends BaseProcTest {
     @Test
     void shouldReturnNodeProperty() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop') AS prop ORDER BY prop ASC";
-        assertCypherResult(query, Arrays.asList(map("prop", 42.0), map("prop", 84.0)));
+        assertCypherResult(query, Arrays.asList(Map.of("prop", 42.0), Map.of("prop", 84.0)));
     }
 
     @Test
     void shouldReturnNodePropertyForLabel() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop', 'A') AS prop ORDER BY prop ASC";
-        assertCypherResult(query, Arrays.asList(map("prop", 42.0), map("prop", null)));
+        assertCypherResult(query, Arrays.asList(Map.of("prop", 42.0), Map.of("prop", null)));
     }
 
     @Test
     void shouldReturnLongArrayProperty() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'longListProp') AS longListProp ORDER BY longListProp ASC";
         assertCypherResult(query, Arrays.asList(
-            map("longListProp", new long[] {1, 2}),
-            map("longListProp", new long[] {3, 4}))
+            Map.of("longListProp", new long[] {1, 2}),
+            Map.of("longListProp", new long[] {3, 4}))
         );
     }
 
@@ -85,8 +84,8 @@ class NodePropertyFuncTest  extends BaseProcTest {
     void shouldReturnDoubleArrayProperty() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'doubleListProp') AS doubleListProp ORDER BY doubleListProp ASC";
         assertCypherResult(query, Arrays.asList(
-            map("doubleListProp", new double[] {0.1, 2.7}),
-            map("doubleListProp", new double[] {0.3, 4.7}))
+            Map.of("doubleListProp", new double[] {0.1, 2.7}),
+            Map.of("doubleListProp", new double[] {0.3, 4.7}))
         );
     }
 

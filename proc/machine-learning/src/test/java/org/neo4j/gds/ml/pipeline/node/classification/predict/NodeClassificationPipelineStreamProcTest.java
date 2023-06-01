@@ -28,7 +28,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,30 +88,28 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
             .addParameter("modelName", MODEL_NAME)
             .yields();
 
-        assertCypherResult(query, List.of(
-            // Use MapUtil because Map.of doesn't like nulls
-            MapUtil.map(
-                "nodeId", idFunction.of("n1"),
-                "predictedClass", 1L,
-                "predictedProbabilities", null
-            ), MapUtil.map(
-                "nodeId", idFunction.of("n2"),
-                "predictedClass", 0L,
-                "predictedProbabilities", null
-            ), MapUtil.map(
-                "nodeId", idFunction.of("n3"),
-                "predictedClass", 0L,
-                "predictedProbabilities", null
-            ), MapUtil.map(
-                "nodeId", idFunction.of("n4"),
-                "predictedClass", 1L,
-                "predictedProbabilities", null
-            ), MapUtil.map(
-                "nodeId", idFunction.of("n5"),
-                "predictedClass", 1L,
-                "predictedProbabilities", null
-            )
-        ));
+        Map<String, Object> node1 = new HashMap<>();
+        node1.put("nodeId", idFunction.of("n1"));
+        node1.put("predictedClass", 1L);
+        node1.put("predictedProbabilities", null);
+        Map<String, Object> node2 = new HashMap<>();
+        node2.put("nodeId", idFunction.of("n2"));
+        node2.put("predictedClass", 0L);
+        node2.put("predictedProbabilities", null);
+        Map<String, Object> node3 = new HashMap<>();
+        node3.put("nodeId", idFunction.of("n3"));
+        node3.put("predictedClass", 0L);
+        node3.put("predictedProbabilities", null);
+        Map<String, Object> node4 = new HashMap<>();
+        node4.put("nodeId", idFunction.of("n4"));
+        node4.put("predictedClass", 1L);
+        node4.put("predictedProbabilities", null);
+        Map<String, Object> node5 = new HashMap<>();
+        node5.put("nodeId", idFunction.of("n5"));
+        node5.put("predictedClass", 1L);
+        node5.put("predictedProbabilities", null);
+
+        assertCypherResult(query, List.of(node1, node2, node3, node4, node5));
     }
 
     @Test
