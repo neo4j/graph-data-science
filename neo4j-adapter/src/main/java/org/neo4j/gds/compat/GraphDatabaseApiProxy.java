@@ -121,11 +121,11 @@ public final class GraphDatabaseApiProxy {
                 false,
                 dependencyResolver.getClass().getClassLoader()
             );
-            var field = clazz.getField("ID");
-            if (field.getType() == byte.class) {
+            var field = clazz.getField("NAME");
+            if (field.getType() == String.class) {
                 isFrekiStorageEngineFactory = dependencyResolver
                     .resolveDependency(StorageEngineFactory.class)
-                    .id() == field.getByte(null);
+                    .name() == field.get(null);
             }
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
         }
