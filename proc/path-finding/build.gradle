@@ -26,7 +26,6 @@ dependencies {
     implementation project(':executor')
     implementation project(':memory-usage')
 
-    implementation project(':neo4j-adapter')
     implementation project(':string-formatting')
 
     implementation project(':transaction')

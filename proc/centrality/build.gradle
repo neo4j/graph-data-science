@@ -19,7 +19,6 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':executor')
-    implementation project(':neo4j-adapter')
     implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':progress-tracking')

@@ -14,7 +14,6 @@ dependencies {
 
     implementation project(':procedure-facade')
 
-    testImplementation project(':neo4j-adapter')
     testImplementation project(':proc-test')
 }
 

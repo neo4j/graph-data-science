@@ -19,7 +19,6 @@ dependencies {
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':memory-usage')
-    implementation project(':neo4j-adapter')
     implementation project(':pregel')
     implementation project(':proc-common')
     implementation project(':proc-pregel')
