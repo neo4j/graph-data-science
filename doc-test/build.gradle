@@ -26,6 +26,7 @@ dependencies {
 
     testImplementation project(':cypher-aggregation')
     testImplementation project(':doc-test-tools')
+    testImplementation project(':graph-schema-api')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
     testImplementation project(':progress-tracking')

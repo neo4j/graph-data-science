@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.spanningtree.KSpanningWriteTreeProc;
+import org.neo4j.gds.paths.kspanningtree.KSpanningWriteTreeProc;
 
 import java.util.List;
 

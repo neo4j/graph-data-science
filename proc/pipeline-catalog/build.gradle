@@ -29,6 +29,7 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
 
+    testImplementation project(':neo4j-adapter')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':proc')

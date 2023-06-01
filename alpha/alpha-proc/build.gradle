@@ -42,9 +42,6 @@ dependencies {
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
-    api project(':alpha-algo')
-    api project(':storage-engine-adapter')
-
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

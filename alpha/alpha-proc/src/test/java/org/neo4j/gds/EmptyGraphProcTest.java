@@ -22,11 +22,8 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.centrality.HarmonicCentralityStreamProc;
-import org.neo4j.gds.centrality.HarmonicCentralityWriteProc;
 import org.neo4j.gds.scc.SccStreamProc;
 import org.neo4j.gds.scc.SccWriteProc;
-import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
 import org.neo4j.gds.triangle.TriangleProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,9 +36,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            AllShortestPathsProc.class,
-            HarmonicCentralityStreamProc.class,
-            HarmonicCentralityWriteProc.class,
             SccStreamProc.class,
             SccWriteProc.class,
             TriangleProc.class,
@@ -68,24 +62,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     void testSccWrite() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.scc")
-            .writeMode()
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
-    }
-
-    @Test
-    void testAllShortestPathsStream() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.allShortestPaths")
-            .streamMode()
-            .yields();
-        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
-    void testHarmonicCentralityWrite() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
