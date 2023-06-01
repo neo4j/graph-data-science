@@ -42,7 +42,8 @@ public class ProductGraphAggregator extends GraphAggregator {
                 input[1],
                 input[2],
                 input[3],
-                input[4]
+                input[4],
+                input[5]
             );
         } catch (Exception e) {
             throw new ProcedureException(

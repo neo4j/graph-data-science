@@ -176,7 +176,9 @@ class CypherAggregationTest extends BaseProcTest {
             "    data[1]," +
             "    {" +
             "        sourceNodeLabels: data[2]," +
+            "        targetNodeLabels: NULL," +
             "        sourceNodeProperties: data[3]," +
+            "        targetNodeProperties: NULL," +
             "        relationshipType: data[4]," +
             "        relationshipProperties: data[5]" +
             "    }" +
@@ -373,7 +375,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ValueSource(strings = {"labels(s)", "['A', 'B']"})
     void testNodeLabels(String labels) {
         runQuery("MATCH (s) WHERE s:A or s:B " +
-            "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + labels + " })");
+            "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + labels + ", targetNodeLabels: NULL })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
@@ -382,7 +384,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testEmptyNodeLabel() {
         runQuery("MATCH (s)" +
-            "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: labels(s) })");
+            "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: labels(s), targetNodeLabels: NULL })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(16);
@@ -393,7 +395,7 @@ class CypherAggregationTest extends BaseProcTest {
 
     @Test
     void testInvalidDirectLabelMapping() {
-        var query = "MATCH (s) RETURN gds.graph.project('g', s, null, { sourceNodeLabels: true })";
+        var query = "MATCH (s) RETURN gds.graph.project('g', s, null, { sourceNodeLabels: true, targetNodeLabels: NULL })";
         assertThatThrownBy(() -> runQuery(query))
             .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
@@ -404,7 +406,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ValueSource(strings = {
         "",
         ", {}",
-        ", { sourceNodeLabels: false }"
+        ", { sourceNodeLabels: false, targetNodeLabels: NULL }"
     })
     void testWithoutLabelInformation(String nodeConfig) {
         runQuery("MATCH (s)" +
@@ -418,7 +420,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ValueSource(strings = {"labels(s)[0]", "'A'"})
     void testSingleNodeLabel(String label) {
         runQuery("MATCH (s:A)" +
-            "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + label + " })");
+            "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + label + ", targetNodeLabels: NULL })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A");
@@ -427,7 +429,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testPropertiesOnEmptyNodes() {
         runQuery("MATCH (s)" +
-            "RETURN gds.graph.project('g', s, null, { sourceNodeProperties: s { .foo } })");
+            "RETURN gds.graph.project('g', s, null, { sourceNodeProperties: s { .foo }, targetNodeProperties: NULL })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         var graph = graphStore.getUnion();
@@ -445,7 +447,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testLabelsOnNodeWithoutLabel() {
         runQuery("UNWIND [[0, []], [1, ['Label']]] AS idAndLabels " +
             "WITH idAndLabels[0] AS id, idAndLabels[1] AS labels " +
-            "RETURN gds.graph.project('g', id, null, { sourceNodeLabels: labels })");
+            "RETURN gds.graph.project('g', id, null, { sourceNodeLabels: labels, targetNodeLabels: NULL })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         var graph = graphStore.getGraph(NodeLabel.of("Label"));
@@ -800,7 +802,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource({"42, Long", "13.37, Double"})
     void testInvalidLabel(String label, String type) {
-        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + label + " })"))
+        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + label + ", targetNodeLabels: NULL })"))
             .rootCause()
             .hasMessage(
                 "The value of `sourceNodeLabels` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `" + type + "`."
@@ -810,7 +812,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource({"42, Long", "13.37, Double", "true, Boolean", "\"A\", String"})
     void testInvalidProperties(String properties, String type) {
-        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.graph.project('g', s, null, { sourceNodeProperties: " + properties + " })"))
+        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.graph.project('g', s, null, { sourceNodeProperties: " + properties + ", targetNodeProperties: NULL })"))
             .rootCause()
             .hasMessage(
                 "The value of `sourceNodeProperties` must be a `Map of Property Values`, but was `" + type + "`."
@@ -869,4 +871,132 @@ class CypherAggregationTest extends BaseProcTest {
             );
     }
 
+    @Test
+    void testMigrationNoteForOldPropertiesKey() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {properties: 'bar'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The configuration key 'properties' is now called 'relationshipProperties'."
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "relationshipType: 'REL'",
+            "relationshipProperties: r { .prop }",
+            // does the validation also when the old key is present
+            "properties: r { .prop }",
+        }
+    )
+    void testSplitMapsValidation(String relationshipConfig) {
+        var query = "MATCH (s)-[r]-(t) RETURN gds.graph.project('g', s, null, {}, {" + relationshipConfig + "})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The parameters for `nodesConfig` and `relationshipsConfig` have been merged. " +
+                    "Update your query by merging the 4th and 5th parameter into one parameter."
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "readConcurrency: 2",
+            ""
+        }
+    )
+    void testSplitMapsConfigurationValidation(String configuration) {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {}, {}, {" + configuration + "})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The parameters for `nodesConfig` and `relationshipsConfig` have been merged. " +
+                    "Update your query by merging the 4th and 5th parameter into one parameter."
+            );
+    }
+
+    @Test
+    void testSwappedConfigurationMaps() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {readConcurrency: 2}, {relationshipType: 'REL'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The configuration parameters are provided in the wrong order. " +
+                    "Update your query by swapping the 4th and 5th parameter."
+            );
+    }
+
+    @Test
+    void testMergedConfigurationMaps() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {relationshipType: 'REL', readConcurrency: 2})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The configuration parameters are merged and provided as one parameter. " +
+                    "Update your query by splitting the configuration into two parameters. " +
+                    "Refer to the documentation for details."
+            );
+    }
+
+    @Test
+    void testMissingDataConfig() {
+        var query = "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {readConcurrency: 2})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "The `dataConfig` configuration parameter is missing. " +
+                    "If you meant to provide an empty configuration for the 4th parameter, " +
+                    "you can pass an empty map: '{}'."
+            );
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "sourceNodeLabels, labels(s), targetNodeLabels",
+            "sourceNodeProperties, s { .prop1 }, targetNodeProperties",
+            "targetNodeLabels, labels(t), sourceNodeLabels",
+            "targetNodeProperties, t { .prop1 }, sourceNodeProperties",
+        }
+    )
+    void testMissingSourceOrTargetNodeInformation(String presentKey, String value, String missingKey) {
+        var query = formatWithLocale(
+            "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {%s: %s})",
+            presentKey,
+            value
+        );
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                formatWithLocale(
+                    "The configuration key '%1$s' is missing, but '%2$s' is provided. " +
+                        "If you really meant to only provide `%2$s` with no value for `%1$s`, " +
+                        "you can set `%1$s` to `NULL`.",
+                    missingKey,
+                    presentKey
+                )
+            );
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "sourceNodeLabels, labels(s), targetNodeLabels",
+            "sourceNodeProperties, s { .prop1 }, targetNodeProperties",
+            "targetNodeLabels, labels(t), sourceNodeLabels",
+            "targetNodeProperties, t { .prop1 }, sourceNodeProperties",
+        }
+    )
+    void testExplicitlyMissingSourceOrTargetNodeInformation(String presentKey, String value, String missingKey) {
+        var query = formatWithLocale(
+            "MATCH (s)--(t) RETURN gds.graph.project('g', s, null, {%s: %s, %s: NULL})",
+            presentKey,
+            value,
+            missingKey
+        );
+        assertThatCode(() -> runQuery(query))
+            .doesNotThrowAnyException();
+    }
 }

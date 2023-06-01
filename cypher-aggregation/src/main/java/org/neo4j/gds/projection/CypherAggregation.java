@@ -67,7 +67,9 @@ public class CypherAggregation implements CompatUserAggregationFunction {
                 // @Name(value = "dataConfig", defaultValue = "null") AnyValue dataConfig
                 FieldSignature.inputField("dataConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
                 // @Name(value = "configuration", defaultValue = "null") AnyValue config
-                FieldSignature.inputField("configuration", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny))
+                FieldSignature.inputField("configuration", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
+                // @Name(value = "alphaMigrationConfig", defaultValue = "null") AnyValue alphaMigrationConfig
+                FieldSignature.inputField("alphaMigrationConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny))
             ),
             // output type: Map
             Neo4jTypes.NTMap,

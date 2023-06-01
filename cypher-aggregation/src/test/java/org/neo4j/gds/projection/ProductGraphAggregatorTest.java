@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
@@ -46,7 +47,8 @@ class ProductGraphAggregatorTest {
             Values.longValue(source),
             Values.longValue(target),
             MapValue.EMPTY,
-            MapValue.EMPTY
+            MapValue.EMPTY,
+            NoValue.NO_VALUE
         );
 
         var result = aggregator.buildGraph();
