@@ -114,9 +114,6 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
     public void add(long sourceId, long targetId, long relationshipReference, PropertyReference propertyReference) {
         int position = this.length;
         long[] buffer = this.buffer;
-        if (position == buffer.length) {
-            System.out.println("buffer.length = " + buffer.length + ", sourceId = " + sourceId);
-        }
         buffer[position] = sourceId;
         buffer[1 + position] = targetId;
         this.relationshipReferences[position >> 1] = relationshipReference;
