@@ -51,13 +51,6 @@ public interface StorageEngineProxyApi {
         }
     }
 
-//    InMemoryStorageEngineBuilder<? extends org.neo4j.gds.compat._51.InMemoryStorageEngineImpl> inMemoryStorageEngineBuilder(
-//        DatabaseLayout databaseLayout,
-//        TokenHolders tokenHolders
-//    );
-//
-//    CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
-
     CommandCreationContext inMemoryCommandCreationContext();
 
     void initRelationshipTraversalCursorForRelType(
