@@ -38,9 +38,11 @@ Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties
 == Syntax
 
 A Cypher aggregation is used in a query as an aggregation over the relationships that are being projected.
-It takes three mandatory arguments: `graphName`, `sourceNode` and `targetNode`.
-In addition, two optional parameters can be used to project node properties and labels (`nodesConfig`) or relationship properties and type (`relationshipConfig`).
-The optional `configuration` parameter can be used for general configuration of the projection such as `readConcurrency`.
+It takes two mandatory arguments: `graphName`, and `sourceNode`.
+The third parameter is `targetNode` and is usually provided.
+The parameter is optional and can be `null` to project an unconnected node.
+The next and fourth optional `dataConfig` parameter can be used to project node properties and labels as well as relationship properties and type.
+The last and fifth optional `configuration` parameter can be used for general configuration of the projection such as `readConcurrency`.
 
 [.graph-project-cypher-aggregation-syntax]
 --
@@ -50,8 +52,7 @@ RETURN gds.graph.project(
     graphName: String,
     sourceNode: Node or Integer,
     targetNode: Node or Integer,
-    nodesConfig: Map,
-    relationshipConfig: Map,
+    dataConfig: Map,
     configuration: Map
 ) YIELD
     graphName: String,
@@ -68,29 +69,21 @@ RETURN gds.graph.project(
 | graphName          | no       | The name under which the graph is stored in the catalog.
 | sourceNode         | no       | The source node of the relationship. Must not be null.
 | targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
-| <<graph-project-cypher-aggregation-syntax-nodesConfig, nodesConfig>>        | yes      | Properties and labels configuration for the source and target nodes.
-| <<graph-project-cypher-aggregation-syntax-relationshipConfig, relationshipConfig>> | yes      | Properties and type configuration for the relationship.
-| <<graph-project-cypher-aggregation-syntax-configuration, configuration>>      | yes      | Additional parameters to configure the projection.
+| <<graph-project-cypher-aggregation-syntax-dataConfig, dataConfig>>       | yes      | Properties and labels configuration for the source and target nodes as well as properties and type configuration for the relationship.
+| <<graph-project-cypher-aggregation-syntax-configuration, configuration>> | yes      | Additional parameters to configure the projection.
 |===
 
-[[graph-project-cypher-aggregation-syntax-nodesConfig]]
+[[graph-project-cypher-aggregation-syntax-dataConfig]]
 .Nodes configuration
 [opts="header",cols="1,1,1,4"]
 |===
-| Name                 | Type                     | Default | Description
-| sourceNodeProperties | Map                      | {}      | The properties of the source node.
-| targetNodeProperties | Map                      | {}      | The properties of the target node.
-| sourceNodeLabels     | List of String or String | []      | The label(s) of the source node.
-| targetNodeLabels     | List of String or String | []      | The label(s) of the source node.
-|===
-
-[[graph-project-cypher-aggregation-syntax-relationshipConfig]]
-.Relationship configuration
-[opts="header",cols="1,1,1,4"]
-|===
-| Name                 | Type          | Default | Description
-| properties           | Map           | {}      | The properties of the source node.
-| relationshipType     | String        | '*'     | The type of the relationship.
+| Name                   | Type                     | Default | Description
+| sourceNodeProperties   | Map                      | {}      | The properties of the source node.
+| targetNodeProperties   | Map                      | {}      | The properties of the target node.
+| sourceNodeLabels       | List of String or String | []      | The label(s) of the source node.
+| targetNodeLabels       | List of String or String | []      | The label(s) of the source node.
+| relationshipProperties | Map                      | {}      | The properties of the source node.
+| relationshipType       | String                   | '*'     | The type of the relationship.
 |===
 
 [[graph-project-cypher-aggregation-syntax-configuration]]
@@ -223,9 +216,8 @@ RETURN
 
 [NOTE]
 --
-The projected graph does not know that the IDs did not originate from an existing node.
-Any procedure that interacts with the underlying db (such as the `.write` procedures)
-will likely produce wrong results or trigger exceptions.
+The projected graph can no longer connect to projected nodes to existing nodes in the underlying database.
+As such, `.write` procedures cannot be executed on this graph.
 --
 
 
@@ -233,8 +225,8 @@ will likely produce wrong results or trigger exceptions.
 
 A multi-graph is a graph with multiple node labels and relationship types.
 
-To retain the label when we load multiple node labels, we can add a `sourceNodeLabels` key and a `targetNodeLabels` key to the fourth `nodesConfig` parameter.
--- To retain the type information when we load multiple relationship types, we can add a `relationshipType` key to the fifth `relationshipConfig` parameter.
+To retain the label when we load multiple node labels, we can add a `sourceNodeLabels` key and a `targetNodeLabels` key to the fourth `dataConfig` parameter.
+-- To retain the type information when we load multiple relationship types, we can add a `relationshipType` key to the fourth `dataConfig` parameter.
 
 [role=query-example]
 --
@@ -251,9 +243,7 @@ WITH gds.graph.project(
   target,
   {
     sourceNodeLabels: labels(source),
-    targetNodeLabels: labels(target)
-  },
-  {
+    targetNodeLabels: labels(target),
     relationshipType: type(r)
   }
 ) AS g
@@ -310,9 +300,7 @@ WHERE source:Book OR source:Person
 WITH gds.graph.project(
   'graphWithReverseRelationships',
   target,
-  source,
-  {},
-  {}
+  source
 ) as g
 RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -320,7 +308,7 @@ RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 .Results
 [opts="header", cols="1,1,1"]
 |===
-| graph                 | nodes  | rels
+| graph                           | nodes  | rels
 | "graphWithReverseRelationships" | 5      | 6
 |===
 --
@@ -341,7 +329,6 @@ WITH gds.graph.project(
   source,
   target,
   {},
-  {},
   {undirectedRelationshipTypes: ['*']}
 ) as g
 RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -350,7 +337,7 @@ RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 .Results
 [opts="header", cols="1,1,1"]
 |===
-| graph                 | nodes  | rels
+| graph                              | nodes  | rels
 | "graphWithUndirectedRelationships" | 5      | 12
 |===
 --
@@ -362,8 +349,8 @@ RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 To load node properties, we add a map of all properties for the source and target nodes.
 Thereby, we use the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_] function to specify the default value, if the node does not have the property.
 
-The properties for the source node are specified as `sourceNodeProperties` key in the fourth `nodesConfig` parameter.
-The properties for the target node are specified as `targetNodeProperties` key in the fourth `nodesConfig` parameter.
+The properties for the source node are specified as `sourceNodeProperties` key in the fourth `dataConfig` parameter.
+The properties for the target node are specified as `targetNodeProperties` key in the fourth `dataConfig` parameter.
 
 [role=query-example, group=cypher-aggregation-node-properties]
 --
@@ -425,8 +412,7 @@ We can see, that the price was projected with the Hobbit having the default pric
 [[cypher-aggregation-relationship-properties]]
 === Relationship properties
 
-Analogous to node properties, we can project relationship properties using the fifth parameter.
-If we only want to project relationship properties and not any node properties or labels, we must provide a `{}` value for the nodesConfig parameter.
+Analogous to node properties, we can project relationship properties using the fourth parameter.
 
 [role=query-example, group=cypher-aggregation-rel-properties]
 --
@@ -438,8 +424,7 @@ WITH gds.graph.project(
   'readWithProperties',
   source,
   target,
-  {},
-  { properties: r { .numberOfPages } }
+  { relationshipProperties: r { .numberOfPages } }
 ) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -499,7 +484,7 @@ Alternatively, we can aggregate the parallel relationship by using the https://n
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, count(r) AS numberOfReads
-WITH gds.graph.project('readCount', source, target, {}, { properties: { numberOfReads: numberOfReads } }) AS g
+WITH gds.graph.project('readCount', source, target, { relationshipProperties: { numberOfReads: numberOfReads } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -552,7 +537,7 @@ For graphs with relationship properties we can also use other aggregations docum
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, sum(r.numberOfPages) AS numberOfPages
-WITH gds.graph.project('readSums', source, target, {}, { properties: { numberOfPages: numberOfPages } }) AS g
+WITH gds.graph.project('readSums', source, target, { relationshipProperties: { numberOfPages: numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -606,7 +591,7 @@ The following examples will demonstrate how to filter out `READ` relationships i
 ----
 MATCH (source) OPTIONAL MATCH (source)-[r:READ]->(target)
 WHERE r.numberOfPages IS NOT NULL
-WITH gds.graph.project('existingNumberOfPages', source, target, {}, { properties: r { .numberOfPages } }) AS g
+WITH gds.graph.project('existingNumberOfPages', source, target, { relationshipProperties: r { .numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----

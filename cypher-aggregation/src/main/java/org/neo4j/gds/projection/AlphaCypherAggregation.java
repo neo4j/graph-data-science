@@ -46,7 +46,7 @@ import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValu
 public class AlphaCypherAggregation implements CompatUserAggregationFunction {
 
     // NOTE: keep in sync with `procedureSyntax`
-    private static final QualifiedName FUNCTION_NAME = new QualifiedName(
+    static final QualifiedName FUNCTION_NAME = new QualifiedName(
         new String[]{"gds", "alpha", "graph"},
         "project"
     );
@@ -111,7 +111,7 @@ public class AlphaCypherAggregation implements CompatUserAggregationFunction {
             ? WriteMode.NONE
             : WriteMode.LOCAL;
 
-        return new GraphAggregator(
+        return new AlphaGraphAggregator(
             DatabaseId.of(databaseService),
             username.username(),
             writeMode

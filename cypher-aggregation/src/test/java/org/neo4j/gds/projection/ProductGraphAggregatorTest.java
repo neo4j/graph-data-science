@@ -28,7 +28,7 @@ import org.neo4j.values.virtual.MapValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GraphAggregatorTest {
+class ProductGraphAggregatorTest {
 
     @Test
     void shouldImportHighNodeIds() {
@@ -36,7 +36,7 @@ class GraphAggregatorTest {
         var graphName = "graph";
         var databaseId = DatabaseId.random();
 
-        var aggregator = new GraphAggregator(databaseId, userName, WriteMode.LOCAL);
+        var aggregator = new ProductGraphAggregator(databaseId, userName, WriteMode.LOCAL);
 
         long source = 1L << 50;
         long target = (1L << 50) + 1;
@@ -45,7 +45,6 @@ class GraphAggregatorTest {
             Values.stringValue(graphName),
             Values.longValue(source),
             Values.longValue(target),
-            MapValue.EMPTY,
             MapValue.EMPTY,
             MapValue.EMPTY
         );
