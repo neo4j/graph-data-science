@@ -43,7 +43,7 @@ public class AlphaGraphAggregator extends GraphAggregator {
     @Override
     public void update(AnyValue[] input) throws ProcedureException {
         try {
-            var nodesConfig = input[3];
+            var nodesConfig = nodeConfigMap(input[3]);
             var relationshipsConfig = relationshipConfigMap(input[4]);
             AnyValue dataConfig = NoValue.NO_VALUE;
             dataConfig = mergeMaps(dataConfig, nodesConfig);
@@ -67,12 +67,36 @@ public class AlphaGraphAggregator extends GraphAggregator {
         }
     }
 
+    private static AnyValue nodeConfigMap(AnyValue nodeConfig) {
+        if (nodeConfig == NoValue.NO_VALUE) {
+            return NoValue.NO_VALUE;
+        }
+
+        var config = (MapValue) nodeConfig;
+
+        if (config.containsKey(SOURCE_NODE_LABELS) && !config.containsKey(TARGET_NODE_LABELS)) {
+            config = config.updatedWith(TARGET_NODE_LABELS, NoValue.NO_VALUE);
+        }
+        if (config.containsKey(TARGET_NODE_LABELS) && !config.containsKey(SOURCE_NODE_LABELS)) {
+            config = config.updatedWith(SOURCE_NODE_LABELS, NoValue.NO_VALUE);
+        }
+
+        if (config.containsKey(SOURCE_NODE_PROPERTIES) && !config.containsKey(TARGET_NODE_PROPERTIES)) {
+            config = config.updatedWith(TARGET_NODE_PROPERTIES, NoValue.NO_VALUE);
+        }
+        if (config.containsKey(TARGET_NODE_PROPERTIES) && !config.containsKey(SOURCE_NODE_PROPERTIES)) {
+            config = config.updatedWith(SOURCE_NODE_PROPERTIES, NoValue.NO_VALUE);
+        }
+
+        return config;
+    }
+
     private static AnyValue relationshipConfigMap(AnyValue relationshipConfig) {
         if (relationshipConfig == NoValue.NO_VALUE) {
             return NoValue.NO_VALUE;
         }
 
-        var config = ((MapValue) relationshipConfig);
+        var config = (MapValue) relationshipConfig;
 
         if (config.containsKey(ALPHA_RELATIONSHIP_PROPERTIES) && !config.containsKey(RELATIONSHIP_PROPERTIES)) {
             return config

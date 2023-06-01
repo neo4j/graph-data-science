@@ -799,6 +799,62 @@ class CypherAggregationTest extends BaseProcTest {
         TestSupport.assertGraphEquals(g1, g2);
     }
 
+    @Test
+    void testAlphaForwardingWithMissingTargetConfigKeys() {
+        runQuery(
+            "MATCH (s:B)-[r:REL]-(t:B) " +
+                "RETURN gds.alpha.graph.project('g1', s, t," +
+                "  { sourceNodeLabels: labels(s)," +
+                "    targetNodeProperties: t { .prop1 } }," +
+                "  NULL," +
+                "  {}" +
+                ");"
+        );
+
+        runQuery(
+            "MATCH (s:B)-[r:REL]-(t:B) " +
+                "RETURN gds.graph.project('g2', s, t," +
+                "  { sourceNodeLabels: labels(s), targetNodeLabels: NULL," +
+                "    sourceNodeProperties: NULL, targetNodeProperties: t { .prop1 } }" +
+                ");"
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g1")).isTrue();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g2")).isTrue();
+        var g1 = GraphStoreCatalog.get("", db.databaseName(), "g1").graphStore().getUnion();
+        var g2 = GraphStoreCatalog.get("", db.databaseName(), "g2").graphStore().getUnion();
+
+        TestSupport.assertGraphEquals(g1, g2);
+    }
+
+    @Test
+    void testAlphaForwardingWithMissingSourceConfigKeys() {
+        runQuery(
+            "MATCH (s:B)-[r:REL]-(t:B) " +
+                "RETURN gds.alpha.graph.project('g1', s, t," +
+                "  { targetNodeLabels: labels(s)," +
+                "    sourceNodeProperties: t { .prop1 } }," +
+                "  NULL," +
+                "  {}" +
+                ");"
+        );
+
+        runQuery(
+            "MATCH (s:B)-[r:REL]-(t:B) " +
+                "RETURN gds.graph.project('g2', s, t," +
+                "  { targetNodeLabels: labels(s), sourceNodeLabels: NULL," +
+                "    targetNodeProperties: NULL, sourceNodeProperties: t { .prop1 } }" +
+                ");"
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g1")).isTrue();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g2")).isTrue();
+        var g1 = GraphStoreCatalog.get("", db.databaseName(), "g1").graphStore().getUnion();
+        var g2 = GraphStoreCatalog.get("", db.databaseName(), "g2").graphStore().getUnion();
+
+        TestSupport.assertGraphEquals(g1, g2);
+    }
+
     @ParameterizedTest
     @CsvSource({"42, Long", "13.37, Double"})
     void testInvalidLabel(String label, String type) {

@@ -55,10 +55,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class GraphAggregator implements CompatUserAggregator {
 
-    private static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
-    private static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
-    private static final String TARGET_NODE_PROPERTIES = "targetNodeProperties";
-    private static final String TARGET_NODE_LABELS = "targetNodeLabels";
+    static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
+    static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
+    static final String TARGET_NODE_PROPERTIES = "targetNodeProperties";
+    static final String TARGET_NODE_LABELS = "targetNodeLabels";
     static final String ALPHA_RELATIONSHIP_PROPERTIES = "properties";
     static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
     private static final String RELATIONSHIP_TYPE = "relationshipType";
