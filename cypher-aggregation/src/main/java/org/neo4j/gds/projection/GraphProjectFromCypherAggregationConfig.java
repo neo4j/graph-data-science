@@ -37,8 +37,6 @@ import static org.neo4j.gds.Orientation.NATURAL;
 @Configuration
 public interface GraphProjectFromCypherAggregationConfig extends GraphProjectConfig {
 
-    String ORIENTATION = "orientation";
-
     @org.immutables.value.Value.Default
     @Configuration.Ignore
     default Orientation orientation() {
