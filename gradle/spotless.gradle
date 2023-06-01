@@ -5,6 +5,11 @@ allprojects { proj ->
         if (Boolean.parseBoolean(project.properties.get("enableSpotless"))) {
             proj.apply plugin: "com.diffplug.spotless"
             proj.spotless {
+
+                if (project.hasProperty("spotlessRatchet")) {
+                    ratchetFrom project.property("spotlessRatchet")
+                }
+
                 java {
                     removeUnusedImports()
 
