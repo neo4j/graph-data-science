@@ -34,6 +34,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -233,6 +234,9 @@ class GdsCypherTest {
     }
 
     static Stream<Arguments> testAdditionalProperties() {
+        var orderedMapBecauseAssertionIsStrict = new LinkedHashMap<>();
+        orderedMapBecauseAssertionIsStrict.put("foo", 42);
+        orderedMapBecauseAssertionIsStrict.put("bar", true);
         return Stream.of(
             arguments(true, "true"),
             arguments(false, "false"),
@@ -248,7 +252,7 @@ class GdsCypherTest {
             arguments(Direction.BOTH, "'BOTH'"),
             arguments(Orientation.NATURAL, "'NATURAL'"),
             arguments(Arrays.asList("foo", 42, true), "['foo', 42, true]"),
-            arguments(Map.of("foo", 42, "bar", true), "{foo: 42, bar: true}")
+            arguments(orderedMapBecauseAssertionIsStrict, "{foo: 42, bar: true}")
         );
     }
 
