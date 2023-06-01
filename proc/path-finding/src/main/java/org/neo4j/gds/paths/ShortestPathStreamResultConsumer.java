@@ -45,7 +45,8 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
 
         var shouldReturnPath = executionContext.callContext()
             .outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"))
+            && computationResult.graphStore().capabilities().canWriteToDatabase();
 
         var resultBuilder = new StreamResult.Builder(graph, executionContext.transaction().internalTransaction());
 
