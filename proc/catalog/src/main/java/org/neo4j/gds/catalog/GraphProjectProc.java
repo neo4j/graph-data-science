@@ -119,7 +119,10 @@ public class GraphProjectProc extends CatalogProc {
         return estimateGraph(config);
     }
 
-    @Procedure(name = "gds.graph.project.cypher", mode = READ)
+    @Procedure(
+        name = "gds.graph.project.cypher", mode = READ,
+        deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
+    )
     @Description(DESCRIPTION)
     public Stream<GraphProjectCypherResult> projectCypher(
         @Name(value = "graphName") String graphName,
