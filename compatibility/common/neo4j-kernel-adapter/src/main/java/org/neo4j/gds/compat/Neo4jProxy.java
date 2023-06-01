@@ -106,7 +106,7 @@ public final class Neo4jProxy {
         return IMPL.validateExternalDatabaseName(databaseName);
     }
 
-    public static AccessMode accessMode(CustomAccessMode customAccessMode) {
+    static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }
 
@@ -127,7 +127,7 @@ public final class Neo4jProxy {
 
     public static long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
         return IMPL.getHighId(recordStore);
-    };
+    }
 
     public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
