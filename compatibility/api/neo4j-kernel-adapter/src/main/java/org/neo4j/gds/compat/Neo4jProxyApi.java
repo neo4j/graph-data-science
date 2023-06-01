@@ -218,8 +218,6 @@ public interface Neo4jProxyApi {
 
     Object pageCacheMemoryValue(String value);
 
-    ExecutionMonitor invisibleExecutionMonitor();
-
     ProcedureSignature procedureSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,

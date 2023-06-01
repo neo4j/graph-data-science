@@ -306,10 +306,6 @@ public final class Neo4jProxy {
         return (T) IMPL.pageCacheMemoryValue(value);
     }
 
-    public static ExecutionMonitor invisibleExecutionMonitor() {
-        return IMPL.invisibleExecutionMonitor();
-    }
-
     public static ProcedureSignature procedureSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,

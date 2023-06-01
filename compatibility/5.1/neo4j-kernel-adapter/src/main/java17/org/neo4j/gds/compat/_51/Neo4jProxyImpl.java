@@ -595,11 +595,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public ExecutionMonitor invisibleExecutionMonitor() {
-        return ExecutionMonitor.INVISIBLE;
-    }
-
-    @Override
     public ProcedureSignature procedureSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,
