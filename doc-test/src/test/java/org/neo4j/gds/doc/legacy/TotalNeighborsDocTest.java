@@ -17,32 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.doc.legacy;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.linkprediction.LinkPredictionFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PreferentialAttachmentDocTest extends BaseProcTest {
+class TotalNeighborsDocTest extends BaseProcTest {
 
-    static final String DB_CYPHER = "CREATE " +
-                                    " (zhen:Person {name: 'Zhen'})," +
-                                    " (praveena:Person {name: 'Praveena'})," +
-                                    " (michael:Person {name: 'Michael'})," +
-                                    " (arya:Person {name: 'Arya'})," +
-                                    " (karin:Person {name: 'Karin'})," +
+    private static final String NL = System.lineSeparator();
 
-                                    " (zhen)-[:FRIENDS]->(arya)," +
-                                    " (zhen)-[:FRIENDS]->(praveena)," +
-                                    " (praveena)-[:WORKS_WITH]->(karin)," +
-                                    " (praveena)-[:FRIENDS]->(michael)," +
-                                    " (michael)-[:WORKS_WITH]->(karin)," +
-                                    " (arya)-[:FRIENDS]->(karin)";
-
-    String NL = System.lineSeparator();
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (zhen:Person {name: 'Zhen'})" +
+        ", (praveena:Person {name: 'Praveena'})" +
+        ", (michael:Person {name: 'Michael'})" +
+        ", (arya:Person {name: 'Arya'})" +
+        ", (karin:Person {name: 'Karin'})" +
+        ", (zhen)-[:FRIENDS]->(arya)" +
+        ", (zhen)-[:FRIENDS]->(praveena)" +
+        ", (praveena)-[:WORKS_WITH]->(karin)" +
+        ", (praveena)-[:FRIENDS]->(michael)" +
+        ", (michael)-[:WORKS_WITH]->(karin)" +
+        ", (arya)-[:FRIENDS]->(karin)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -55,12 +56,12 @@ class PreferentialAttachmentDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2) AS score";
+                       " RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score";
 
         String expectedString = "+-------+" + NL +
                                 "| score |" + NL +
                                 "+-------+" + NL +
-                                "| 6.0   |" + NL +
+                                "| 4.0   |" + NL +
                                 "+-------+" + NL +
                                 "1 row" + NL;
 
@@ -72,12 +73,12 @@ class PreferentialAttachmentDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
+                       " RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score";
 
         String expectedString = "+-------+" + NL +
                                 "| score |" + NL +
                                 "+-------+" + NL +
-                                "| 1.0   |" + NL +
+                                "| 2.0   |" + NL +
                                 "+-------+" + NL +
                                 "1 row" + NL;
 

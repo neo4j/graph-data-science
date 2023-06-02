@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.doc.legacy;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.linkprediction.LinkPredictionFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -113,4 +114,3 @@ class SameCommunityDocTest extends BaseProcTest {
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 }
-
