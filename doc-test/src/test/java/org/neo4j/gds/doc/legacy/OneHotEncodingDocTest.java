@@ -29,12 +29,11 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OneHotEncodingDocTest extends BaseProcTest {
+class OneHotEncodingDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
-    private static final String DB_CYPHER =
-        "CREATE" +
+    private static final String DB_CYPHER = "CREATE" +
         "  (french:Cuisine {name:'French'})" +
         ", (italian:Cuisine {name:'Italian'})" +
         ", (indian:Cuisine {name:'Indian'})" +
@@ -42,6 +41,7 @@ public class OneHotEncodingDocTest extends BaseProcTest {
         ", (praveena:Person {name: 'Praveena'})" +
         ", (michael:Person {name: 'Michael'})" +
         ", (arya:Person {name: 'Arya'})" +
+
         ", (praveena)-[:LIKES]->(indian)" +
         ", (zhen)-[:LIKES]->(french)" +
         ", (michael)-[:LIKES]->(french)" +

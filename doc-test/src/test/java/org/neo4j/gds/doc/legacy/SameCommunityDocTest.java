@@ -31,8 +31,7 @@ class SameCommunityDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
-    private static final String DB_CYPHER =
-        "CREATE" +
+    private static final String DB_CYPHER = "CREATE" +
         "  (zhen:Person {name: 'Zhen', community: 1})" +
         ", (praveena:Person {name: 'Praveena', community: 2})" +
         ", (michael:Person {name: 'Michael', community: 1})" +

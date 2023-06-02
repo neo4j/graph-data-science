@@ -31,13 +31,13 @@ class TotalNeighborsDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
-    private static final String DB_CYPHER =
-        "CREATE" +
+    private static final String DB_CYPHER = "CREATE" +
         "  (zhen:Person {name: 'Zhen'})" +
         ", (praveena:Person {name: 'Praveena'})" +
         ", (michael:Person {name: 'Michael'})" +
         ", (arya:Person {name: 'Arya'})" +
         ", (karin:Person {name: 'Karin'})" +
+
         ", (zhen)-[:FRIENDS]->(arya)" +
         ", (zhen)-[:FRIENDS]->(praveena)" +
         ", (praveena)-[:WORKS_WITH]->(karin)" +

@@ -29,21 +29,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PreferentialAttachmentDocTest extends BaseProcTest {
 
-    static final String DB_CYPHER = "CREATE " +
-                                    " (zhen:Person {name: 'Zhen'})," +
-                                    " (praveena:Person {name: 'Praveena'})," +
-                                    " (michael:Person {name: 'Michael'})," +
-                                    " (arya:Person {name: 'Arya'})," +
-                                    " (karin:Person {name: 'Karin'})," +
+    private static final String NL = System.lineSeparator();
 
-                                    " (zhen)-[:FRIENDS]->(arya)," +
-                                    " (zhen)-[:FRIENDS]->(praveena)," +
-                                    " (praveena)-[:WORKS_WITH]->(karin)," +
-                                    " (praveena)-[:FRIENDS]->(michael)," +
-                                    " (michael)-[:WORKS_WITH]->(karin)," +
-                                    " (arya)-[:FRIENDS]->(karin)";
+    private static final String DB_CYPHER = "CREATE " +
+        " (zhen:Person {name: 'Zhen'})," +
+        " (praveena:Person {name: 'Praveena'})," +
+        " (michael:Person {name: 'Michael'})," +
+        " (arya:Person {name: 'Arya'})," +
+        " (karin:Person {name: 'Karin'})," +
 
-    String NL = System.lineSeparator();
+        " (zhen)-[:FRIENDS]->(arya)," +
+        " (zhen)-[:FRIENDS]->(praveena)," +
+        " (praveena)-[:WORKS_WITH]->(karin)," +
+        " (praveena)-[:FRIENDS]->(michael)," +
+        " (michael)-[:WORKS_WITH]->(karin)," +
+        " (arya)-[:FRIENDS]->(karin)";
 
     @BeforeEach
     void setup() throws Exception {
