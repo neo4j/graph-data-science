@@ -27,6 +27,8 @@ dependencies {
     implementation project(':collections')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':io-core')
+    implementation project(':csv')
     implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':executor')
@@ -43,6 +45,7 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':transaction')
 
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
 
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
 

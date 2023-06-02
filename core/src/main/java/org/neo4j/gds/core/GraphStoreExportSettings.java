@@ -27,6 +27,7 @@ import org.neo4j.graphdb.config.Setting;
 import java.nio.file.Path;
 
 import static org.neo4j.configuration.SettingValueParsers.PATH;
+import static org.neo4j.configuration.SettingValueParsers.STRING;
 import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
 @ServiceProvider
@@ -36,6 +37,13 @@ public class GraphStoreExportSettings implements SettingsDeclaration {
     public static final Setting<Path> export_location_setting = newBuilder(
         "gds.export.location",
         PATH,
+        null
+    ).build();
+
+    @Description("Sets the bucket base path for uploading graphs, models and configs to a storage bucket.")
+    public static final Setting<String> storage_bucket_base_path = newBuilder(
+        "gds.export.bucketbasepath",
+        STRING,
         null
     ).build();
 }
