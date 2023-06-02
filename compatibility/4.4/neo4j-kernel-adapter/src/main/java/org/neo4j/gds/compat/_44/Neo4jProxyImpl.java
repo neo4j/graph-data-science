@@ -107,9 +107,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
-import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.query.TransactionalContext;
@@ -182,14 +180,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             ClientConnectionInfo.EMBEDDED_CONNECTION,
             databaseName
         );
-    }
-
-    @Override
-    public long getHighestPossibleIdInUse(
-        RecordStore<? extends AbstractBaseRecord> recordStore,
-        KernelTransaction kernelTransaction
-    ) {
-        return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
     }
 
     @Override
@@ -508,11 +498,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public ExecutionMonitor invisibleExecutionMonitor() {
-        return ExecutionMonitor.INVISIBLE;
-    }
-
-    @Override
     public ProcedureSignature procedureSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,
@@ -713,11 +698,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         GraphDatabaseService databaseService
     ) {
         return RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider());
-    }
-
-    @Override
-    public NamedDatabaseId randomDatabaseId() {
-        return TestDatabaseIdRepository.randomNamedDatabaseId();
     }
 
     @Override

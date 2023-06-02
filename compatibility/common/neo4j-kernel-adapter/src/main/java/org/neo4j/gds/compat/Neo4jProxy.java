@@ -72,7 +72,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
@@ -107,7 +106,7 @@ public final class Neo4jProxy {
         return IMPL.validateExternalDatabaseName(databaseName);
     }
 
-    public static AccessMode accessMode(CustomAccessMode customAccessMode) {
+    static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }
 
@@ -126,16 +125,9 @@ public final class Neo4jProxy {
         return IMPL.securityContext(username, authSubject, mode, databaseName);
     }
 
-    public static long getHighestPossibleIdInUse(
-        RecordStore<? extends AbstractBaseRecord> recordStore,
-        KernelTransaction kernelTransaction
-    ) {
-        return IMPL.getHighestPossibleIdInUse(recordStore, kernelTransaction);
-    }
-
     public static long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
         return IMPL.getHighId(recordStore);
-    };
+    }
 
     public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
@@ -313,10 +305,6 @@ public final class Neo4jProxy {
         return (T) IMPL.pageCacheMemoryValue(value);
     }
 
-    public static ExecutionMonitor invisibleExecutionMonitor() {
-        return IMPL.invisibleExecutionMonitor();
-    }
-
     public static ProcedureSignature procedureSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,
@@ -443,10 +431,6 @@ public final class Neo4jProxy {
         GraphDatabaseService databaseService
     ) {
         return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService, databaseService);
-    }
-
-    public static NamedDatabaseId randomDatabaseId() {
-        return IMPL.randomDatabaseId();
     }
 
     public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
