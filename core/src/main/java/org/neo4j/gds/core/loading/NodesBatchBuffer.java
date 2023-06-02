@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
