@@ -36,7 +36,7 @@ public enum Neo4jVersion {
     V_5_6,
     V_5_7,
     V_5_8,
-    V_Dev;
+    V_RC;
 
     @Override
     public String toString() {
@@ -59,15 +59,15 @@ public enum Neo4jVersion {
                 return "5.7";
             case V_5_8:
                 return "5.8";
-            case V_Dev:
-                return "dev";
+            case V_RC:
+                return "rc";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
     }
 
     public MajorMinorVersion semanticVersion() {
-        if (this == V_Dev) {
+        if (this == V_RC) {
             return ImmutableMajorMinorVersion.of(5, 9);
         }
 
@@ -147,8 +147,8 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_5_7;
             } else if (minorVersion == 8) {
                 return Neo4jVersion.V_5_8;
-            } else if (minorVersion > 8) {
-                return Neo4jVersion.V_Dev;
+            } else if (minorVersion == 9) {
+                return Neo4jVersion.V_RC;
             }
         }
 
