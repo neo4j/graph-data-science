@@ -80,8 +80,9 @@ public class NeighborsFinder {
     }
 
     private boolean noCommonNeighbors(Node node, RelationshipType relationshipType, Direction direction, Node node2) {
-        for (Relationship rel : loadRelationships((NodeEntity) node, relationshipType, direction)) {
-            if (rel.getOtherNode(node).equals(node2)) {
+        for (var iter = loadRelationships((NodeEntity) node, relationshipType, direction).iterator(); iter.hasNext();) {
+            if (iter.next().getOtherNode(node).equals(node2)) {
+                iter.forEachRemaining(__ -> {});
                 return false;
             }
         }

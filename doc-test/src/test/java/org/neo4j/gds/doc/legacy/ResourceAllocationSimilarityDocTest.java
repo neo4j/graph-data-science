@@ -17,44 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.doc.legacy;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
-
-import java.util.Map;
+import org.neo4j.gds.linkprediction.LinkPredictionFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ResourceAllocationSimilarityDocTest extends BaseProcTest {
 
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        builder.setConfigRaw(Map.of("unsupported.dbms.debug.track_cursor_close", "false"));
-        builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "false"));
-    }
+    private static final String NL = System.lineSeparator();
 
-    static final String DB_CYPHER = "CREATE " +
-                                    " (zhen:Person {name: 'Zhen'})," +
-                                    " (praveena:Person {name: 'Praveena'})," +
-                                    " (michael:Person {name: 'Michael'})," +
-                                    " (arya:Person {name: 'Arya'})," +
-                                    " (karin:Person {name: 'Karin'})," +
+    private static final String DB_CYPHER = "CREATE " +
+        " (zhen:Person {name: 'Zhen'})," +
+        " (praveena:Person {name: 'Praveena'})," +
+        " (michael:Person {name: 'Michael'})," +
+        " (arya:Person {name: 'Arya'})," +
+        " (karin:Person {name: 'Karin'})," +
 
-                                    " (zhen)-[:FRIENDS]->(arya)," +
-                                    " (zhen)-[:FRIENDS]->(praveena)," +
-                                    " (praveena)-[:WORKS_WITH]->(karin)," +
-                                    " (praveena)-[:FRIENDS]->(michael)," +
-                                    " (michael)-[:WORKS_WITH]->(karin)," +
-                                    " (arya)-[:FRIENDS]->(karin)";
-
-    String NL = System.lineSeparator();
+        " (zhen)-[:FRIENDS]->(arya)," +
+        " (zhen)-[:FRIENDS]->(praveena)," +
+        " (praveena)-[:WORKS_WITH]->(karin)," +
+        " (praveena)-[:FRIENDS]->(michael)," +
+        " (michael)-[:WORKS_WITH]->(karin)," +
+        " (arya)-[:FRIENDS]->(karin)";
 
     @BeforeEach
     void setup() throws Exception {

@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.linkprediction;
+package org.neo4j.gds.doc.legacy;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.linkprediction.LinkPredictionFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,13 +31,13 @@ class TotalNeighborsDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
-    private static final String DB_CYPHER =
-        "CREATE" +
+    private static final String DB_CYPHER = "CREATE" +
         "  (zhen:Person {name: 'Zhen'})" +
         ", (praveena:Person {name: 'Praveena'})" +
         ", (michael:Person {name: 'Michael'})" +
         ", (arya:Person {name: 'Arya'})" +
         ", (karin:Person {name: 'Karin'})" +
+
         ", (zhen)-[:FRIENDS]->(arya)" +
         ", (zhen)-[:FRIENDS]->(praveena)" +
         ", (praveena)-[:WORKS_WITH]->(karin)" +
@@ -84,4 +85,3 @@ class TotalNeighborsDocTest extends BaseProcTest {
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 }
-
