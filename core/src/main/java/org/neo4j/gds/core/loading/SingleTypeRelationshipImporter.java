@@ -103,7 +103,7 @@ public final class SingleTypeRelationshipImporter {
     ) {
         return new ThreadLocalSingleTypeRelationshipImporterBuilder()
             .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
+            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize, false))
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
             .build();
@@ -112,7 +112,8 @@ public final class SingleTypeRelationshipImporter {
     ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
         PartialIdMap idMap,
         int bulkSize,
-        KernelTransaction kernelTransaction
+        KernelTransaction kernelTransaction,
+        boolean useCheckedBuffers
     ) {
         var loadProperties = importMetaData.projection().properties().hasMappings();
 
@@ -122,20 +123,21 @@ public final class SingleTypeRelationshipImporter {
 
         return new ThreadLocalSingleTypeRelationshipImporterBuilder()
             .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
+            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize, useCheckedBuffers))
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
             .build();
     }
 
     @NotNull
-    private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize) {
-        return new RelationshipsBatchBuffer(
-            idMap,
-            typeId,
-            bulkSize,
-            importMetaData.skipDanglingRelationships()
-        );
+    private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize, boolean useCheckedBuffers) {
+        return new RelationshipsBatchBufferBuilder()
+            .idMap(idMap)
+            .type(typeId)
+            .capacity(bulkSize)
+            .skipDanglingRelationships(importMetaData.skipDanglingRelationships())
+            .useCheckedBuffer(useCheckedBuffers)
+            .build();
     }
 
     public AdjacencyListsWithProperties build() {

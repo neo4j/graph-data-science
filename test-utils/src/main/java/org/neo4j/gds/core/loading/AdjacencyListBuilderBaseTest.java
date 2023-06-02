@@ -180,7 +180,12 @@ public abstract class AdjacencyListBuilderBaseTest {
 
         DirectIdMap idMap = new DirectIdMap(nodeCount);
 
-        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, relationshipCount);
+        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+            .idMap(idMap)
+            .type(-1)
+            .capacity(relationshipCount)
+            .build();
+
         PropertyReader.Buffered propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);
 
         Map<Long, Long> sourceNodeToTargetNode = new HashMap<>();

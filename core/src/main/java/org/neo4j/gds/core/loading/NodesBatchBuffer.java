@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
@@ -52,13 +51,14 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         long highestPossibleNodeCount,
         Optional<LongSet> nodeLabelIds,
         Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> readProperty
+        Optional<Boolean> readProperty,
+        Optional<Boolean> useCheckedBuffer
     ) {
         LongSet labelIds = nodeLabelIds.orElseGet(LongHashSet::new);
         boolean hasLabelInfo = hasLabelInformation.orElse(false);
         boolean readProps = readProperty.orElse(false);
 
-        if (GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()) {
+        if (useCheckedBuffer.orElse(false)) {
             return new Checked(
                 // TODO: we probably wanna adjust the capacity here
                 capacity,
@@ -68,7 +68,6 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
                 readProps
             );
         }
-
         return new NodesBatchBuffer(capacity, highestPossibleNodeCount, labelIds, hasLabelInfo, readProps);
     }
 

@@ -38,6 +38,7 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.factory.DbmsInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -109,6 +110,28 @@ public final class GraphDatabaseApiProxy {
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {
         return cast(db).databaseId();
+    }
+
+    public static boolean isUsingFrekiStorageEngine(DependencyResolver dependencyResolver) {
+        boolean isFrekiStorageEngineFactory = false;
+
+        try {
+            var clazz = Class.forName(
+                "com.neo4j.internal.freki.FrekiStorageEngineFactory",
+                true,
+                dependencyResolver.getClass().getClassLoader()
+            );
+            var field = clazz.getField("NAME");
+            if (field.getType() == String.class) {
+                isFrekiStorageEngineFactory = dependencyResolver
+                    .resolveDependency(StorageEngineFactory.class)
+                    .name()
+                    .equals(field.get(null));
+            }
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
+        }
+
+        return isFrekiStorageEngineFactory;
     }
 
     @TestOnly

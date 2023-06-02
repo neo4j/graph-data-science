@@ -19,20 +19,31 @@
  */
 package org.neo4j.gds.core.loading;
 
-public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+import org.immutables.builder.Builder;
 
-    private final RelationshipsBatchBuffer[] buffers;
+import java.util.Optional;
+
+public class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+
+    protected final RelationshipsBatchBuffer[] buffers;
+
+    @Builder.Factory
+    static RecordsBatchBuffer<RelationshipReference> compositeRelationshipsBatchBuffer(
+        RelationshipsBatchBuffer[] buffers,
+        Optional<Boolean> useCheckedBuffer
+    ) {
+        if (buffers.length == 1) {
+            return buffers[0];
+        }
+        if (useCheckedBuffer.orElse(false)) {
+            return new Checked(buffers);
+        }
+        return new CompositeRelationshipsBatchBuffer(buffers);
+    }
 
     private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {
         super(0);
         this.buffers = buffers;
-    }
-
-    public static RecordsBatchBuffer<RelationshipReference> of(RelationshipsBatchBuffer... buffers) {
-        if (buffers.length == 1) {
-            return buffers[0];
-        }
-        return new CompositeRelationshipsBatchBuffer(buffers);
     }
 
     @Override
@@ -40,7 +51,6 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.offer(record);
         }
-        // TODO: probably something more sophisticated is required if we use partitioned type token index
         return true;
     }
 
@@ -48,6 +58,29 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
     public void reset() {
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.reset();
+        }
+    }
+
+    /**
+     * A version of a relationships batch buffer that checks the
+     * buffer length before inserting a new record. This is necessary
+     * in the case where the number of records offered to this
+     * buffer can exceed the configured batch size.
+     */
+    private static final class Checked extends CompositeRelationshipsBatchBuffer {
+
+        Checked(RelationshipsBatchBuffer... buffers) {
+            super(buffers);
+        }
+
+        @Override
+        public boolean offer(RelationshipReference record) {
+            for (RelationshipsBatchBuffer buffer : buffers) {
+                if (!buffer.offer(record)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

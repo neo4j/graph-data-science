@@ -20,16 +20,81 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.gds.core.huge.DirectIdMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RelationshipsBatchBufferTest {
 
     @Test
     void flushBufferWhenFull() {
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
+        var buffer = new RelationshipsBatchBufferBuilder()
+            .idMap(new DirectIdMap(2))
+            .type(-1)
+            .capacity(1)
+            .build();
+
         buffer.add(0, 1, -1, Neo4jProxy.noPropertyReference());
         assertTrue(buffer.isFull());
     }
+
+    @Test
+    void shouldNotThrowOnCheckedBuffer() {
+        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+            .idMap(new DirectIdMap(2))
+            .type(-1)
+            .capacity(2)
+            .useCheckedBuffer(true)
+            .build();
+
+        var testRelationship = ImmutableTestRelationship.builder()
+            .typeTokenId(0)
+            .relationshipId(0)
+            .sourceNodeReference(0)
+            .targetNodeReference(1)
+            .build();
+
+        assertThat(relationshipsBatchBuffer.offer(testRelationship)).isTrue();
+        assertThat(relationshipsBatchBuffer.offer(testRelationship)).isFalse();
+        assertThat(relationshipsBatchBuffer.offer(testRelationship)).isFalse();
+        assertThat(relationshipsBatchBuffer.isFull()).isTrue();
+    }
+
+    @Test
+    void shouldThrowOnUncheckedBuffer() {
+        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+            .idMap(new DirectIdMap(2))
+            .type(-1)
+            .capacity(2)
+            .useCheckedBuffer(false)
+            .build();
+
+        var testRelationship = ImmutableTestRelationship.builder()
+            .typeTokenId(0)
+            .relationshipId(0)
+            .sourceNodeReference(0)
+            .targetNodeReference(1)
+            .build();
+
+        assertThat(relationshipsBatchBuffer.offer(testRelationship)).isTrue();
+        assertThat(relationshipsBatchBuffer.offer(testRelationship)).isTrue();
+        assertThatThrownBy(() -> relationshipsBatchBuffer.offer(testRelationship)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
+        assertThat(relationshipsBatchBuffer.isFull()).isTrue();
+    }
+
+
+    @ValueClass
+    public interface TestRelationship extends RelationshipReference {
+
+        @Override
+        default PropertyReference propertiesReference() {
+            return Neo4jProxy.noPropertyReference();
+        }
+    }
+
 }

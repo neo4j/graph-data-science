@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.PropertyReference;
+
+import java.util.Optional;
 
 import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
@@ -28,12 +31,12 @@ import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsL
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 
-public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
     // property references are stored individually.
-    public static final int ENTRIES_PER_RELATIONSHIP = 2;
+    static final int ENTRIES_PER_RELATIONSHIP = 2;
 
     private final PartialIdMap idMap;
     private final int type;
@@ -47,15 +50,23 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     private final PropertyReference[] propertyReferencesCopy;
     private final int[] histogram;
 
-    public RelationshipsBatchBuffer(
-        final PartialIdMap idMap,
-        final int type,
-        int capacity
+    @Builder.Factory
+    static RelationshipsBatchBuffer relationshipsBatchBuffer(
+        PartialIdMap idMap,
+        int type,
+        int capacity,
+        Optional<Boolean> skipDanglingRelationships,
+        Optional<Boolean> useCheckedBuffer
     ) {
-        this(idMap, type, capacity, true);
+        boolean skipDangling = skipDanglingRelationships.orElse(true);
+
+        if (useCheckedBuffer.orElse(false)) {
+            return new Checked(idMap, type, capacity, skipDangling);
+        }
+        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDangling);
     }
 
-    RelationshipsBatchBuffer(
+    private RelationshipsBatchBuffer(
         final PartialIdMap idMap,
         final int type,
         int capacity,
@@ -152,5 +163,29 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     public int[] spareInts() {
         return histogram;
+    }
+
+    /**
+     * A version of a relationships batch buffer that checks the
+     * buffer length before inserting a new record. This is necessary
+     * in the case where the number of records offered to this
+     * buffer can exceed the configured batch size.
+     */
+    static final class Checked extends RelationshipsBatchBuffer {
+
+        private final long capacity;
+
+        private Checked(PartialIdMap idMap, int type, int capacity, boolean skipDanglingRelationships) {
+            super(idMap, type, capacity, skipDanglingRelationships);
+            this.capacity = Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity);
+        }
+
+        @Override
+        public boolean offer(RelationshipReference record) {
+            if (this.length < this.capacity) {
+                super.offer(record);
+            }
+            return !this.isFull();
+        }
     }
 }

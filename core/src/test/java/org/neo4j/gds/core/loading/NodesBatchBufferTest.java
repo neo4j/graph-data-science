@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NodesBatchBufferTest {
 
@@ -106,6 +107,37 @@ class NodesBatchBufferTest {
         assertThat(nodesBatchBuffer)
             .returns(2, RecordsBatchBuffer::length)
             .returns(new long[]{21, 42, 0}, RecordsBatchBuffer::batch);
+    }
+
+    @Test
+    void shouldNotThrowOnCheckedBuffer() {
+        var nodesBatchBuffer = new NodesBatchBufferBuilder()
+            .capacity(2)
+            .highestPossibleNodeCount(42)
+            .useCheckedBuffer(true)
+            .build();
+
+        assertThat(nodesBatchBuffer.offer(new TestNode(0))).isTrue();
+        assertThat(nodesBatchBuffer.offer(new TestNode(1))).isFalse();
+        assertThat(nodesBatchBuffer.offer(new TestNode(2))).isFalse();
+        assertThat(nodesBatchBuffer.isFull()).isTrue();
+    }
+
+    @Test
+    void shouldThrowOnUncheckedBuffer() {
+        var nodesBatchBuffer = new NodesBatchBufferBuilder()
+            .capacity(2)
+            .highestPossibleNodeCount(42)
+            .useCheckedBuffer(false)
+            .build();
+
+        assertThat(nodesBatchBuffer.offer(new TestNode(0))).isTrue();
+        assertThat(nodesBatchBuffer.offer(new TestNode(1))).isTrue();
+
+        assertThatThrownBy(() -> nodesBatchBuffer.offer(new TestNode(2)))
+            .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+
+        assertThat(nodesBatchBuffer.isFull()).isTrue();
     }
 
     private static final class TestNode implements NodeReference {
