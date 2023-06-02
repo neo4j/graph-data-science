@@ -28,6 +28,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 class NodePropertyFuncTest  extends BaseProcTest {
@@ -68,7 +69,9 @@ class NodePropertyFuncTest  extends BaseProcTest {
     @Test
     void shouldReturnNodePropertyForLabel() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop', 'A') AS prop ORDER BY prop ASC";
-        assertCypherResult(query, Arrays.asList(Map.of("prop", 42.0), Map.of("prop", null)));
+        var resultRecordWithNull = new HashMap<String, Object>();
+        resultRecordWithNull.put("prop", null);
+        assertCypherResult(query, Arrays.asList(Map.of("prop", 42.0), resultRecordWithNull));
     }
 
     @Test

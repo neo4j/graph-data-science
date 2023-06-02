@@ -29,6 +29,7 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +108,7 @@ class LabelPropagationStatsProcTest extends BaseProcTest {
             "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
-            "configuration", containsAllEntriesOf(Map.of(
+            "configuration", containsAllEntriesOf(mapWithNulls(
                 "consecutiveIds", false,
                 "maxIterations", 10,
                 "seedProperty", null,
@@ -134,5 +135,14 @@ class LabelPropagationStatsProcTest extends BaseProcTest {
             .yields("communityCount");
 
         assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
+    }
+
+    private static Map<String, Object> mapWithNulls(Object... objects) {
+        var map = new HashMap<String, Object>();
+        int i = 0;
+        while (i < objects.length) {
+            map.put((String) objects[i++], objects[i++]);
+        }
+        return map;
     }
 }

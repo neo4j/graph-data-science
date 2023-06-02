@@ -38,7 +38,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;

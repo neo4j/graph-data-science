@@ -30,7 +30,6 @@ import org.neo4j.gds.ImmutableNodeProjection;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.RelationshipProjections;
@@ -43,7 +42,6 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -56,19 +54,17 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
 import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
@@ -152,7 +148,7 @@ class WccStatsProcTest extends BaseProcTest {
             "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
-            "configuration", containsAllEntriesOf(Map.of(
+            "configuration", containsAllEntriesOf(mapWithNulls(
                 "consecutiveIds", false,
                 "threshold", 0D,
                 "seedProperty", null
@@ -274,18 +270,12 @@ class WccStatsProcTest extends BaseProcTest {
             .build();
     }
 
-    private GraphProjectFromStoreConfig withNameAndRelationshipProjections(
-        String graphName,
-        RelationshipProjections rels
-    ) {
-        return ImmutableGraphProjectFromStoreConfig.of(
-            TEST_USERNAME,
-            graphName,
-            NodeProjections.create(singletonMap(
-                ALL_NODES,
-                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-            )),
-            rels
-        );
+    private static Map<String, Object> mapWithNulls(Object... objects) {
+        var map = new HashMap<String, Object>();
+        int i = 0;
+        while (i < objects.length) {
+            map.put((String) objects[i++], objects[i++]);
+        }
+        return map;
     }
 }

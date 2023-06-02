@@ -389,7 +389,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             "Null value for `value`",
-            Map.of(
+            mapWithNulls(
                 RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                 RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
                 RELATIONSHIP_PROPERTY_VALUE_KEY, null
@@ -406,5 +406,14 @@ class GraphGenerateProcTest extends BaseProcTest {
             Arguments.of(100, 4, MemoryRange.of(29_688, 34_488)),
             Arguments.of(200, 4, MemoryRange.of(59_304, 68_904))
         );
+    }
+
+    private static Map<String, Object> mapWithNulls(Object... objects) {
+        var map = new HashMap<String, Object>();
+        int i = 0;
+        while (i < objects.length) {
+            map.put((String) objects[i++], objects[i++]);
+        }
+        return map;
     }
 }

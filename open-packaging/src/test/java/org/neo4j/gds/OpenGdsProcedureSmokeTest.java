@@ -24,10 +24,10 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.utils.TestProcedureAndFunctionScanner;
 import org.neo4j.graphdb.Result;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -606,9 +606,11 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     private List<String> listProcs(Object name) {
         String query = "CALL gds.list($name)";
+        var params = new HashMap<String, Object>();
+        params.put("name", name);
         return runQuery(
             query,
-            MapUtil.map("name", name),
+            params,
             result -> result.<String>columnAs("name")
                 .stream()
                 .sorted()

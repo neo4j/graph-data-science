@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -83,12 +84,12 @@ class GraphExistsProcTest extends BaseProcTest {
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.exists($graphName)",
-            Map.of("graphName", invalidName),
+            mapWithNulls("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
             "RETURN gds.graph.exists($graphName)",
-            Map.of("graphName", invalidName),
+            mapWithNulls("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
@@ -100,5 +101,14 @@ class GraphExistsProcTest extends BaseProcTest {
             arguments("graph", "graph1", false),
             arguments("g", "a", false)
         );
+    }
+
+    private static Map<String, Object> mapWithNulls(Object... objects) {
+        var map = new HashMap<String, Object>();
+        int i = 0;
+        while (i < objects.length) {
+            map.put((String) objects[i++], objects[i++]);
+        }
+        return map;
     }
 }

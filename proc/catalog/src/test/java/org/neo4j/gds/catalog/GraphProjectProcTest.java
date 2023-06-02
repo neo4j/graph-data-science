@@ -60,6 +60,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -569,12 +570,12 @@ class GraphProjectProcTest extends BaseProcTest {
                         AGGREGATION_KEY, aggregation,
                         INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, Map.of(
-                            "weight", Map.of(
+                            "weight", mapWithNulls(
                                 "property", "weight",
                                 AGGREGATION_KEY, aggregation,
                                 "defaultValue", null
                             ),
-                            "foo", Map.of(
+                            "foo", mapWithNulls(
                                 "property", "weight",
                                 AGGREGATION_KEY, Optional.of(aggregation)
                                     .filter(a -> a.equals("NONE"))
@@ -620,7 +621,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         INDEX_INVERSE_KEY, false,
-                        PROPERTIES_KEY, Map.of("weight", Map.of(
+                        PROPERTIES_KEY, Map.of("weight", mapWithNulls(
                                 "property", "weight",
                                 AGGREGATION_KEY, aggregation,
                                 "defaultValue", null
@@ -732,7 +733,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         AGGREGATION_KEY, "DEFAULT",
                         INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, Map.of(
-                            "weight", Map.of(
+                            "weight", mapWithNulls(
                                 "property", "weight",
                                 AGGREGATION_KEY, "SINGLE",
                                 "defaultValue", null
@@ -1356,12 +1357,12 @@ class GraphProjectProcTest extends BaseProcTest {
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.project($graphName, {}, {})",
-            Map.of("graphName", invalidName),
+            mapWithNulls("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
             "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relationshipQuery)",
-            Map.of("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            mapWithNulls("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
 
@@ -1636,7 +1637,7 @@ class GraphProjectProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 Map.of("age", Map.of("property", "age")),
-                Map.of("age", Map.of("property", "age", "defaultValue", null))
+                Map.of("age", mapWithNulls("property", "age", "defaultValue", null))
             ),
             Arguments.of(
                 Map.of("weight", Map.of("property", "age", "defaultValue", 3D)),
@@ -1644,11 +1645,11 @@ class GraphProjectProcTest extends BaseProcTest {
             ),
             Arguments.of(
                 singletonList("age"),
-                Map.of("age", Map.of("property", "age", "defaultValue", null))
+                Map.of("age", mapWithNulls("property", "age", "defaultValue", null))
             ),
             Arguments.of(
                 Map.of("weight", "age"),
-                Map.of("weight", Map.of("property", "age", "defaultValue", null))
+                Map.of("weight", mapWithNulls("property", "age", "defaultValue", null))
             )
         );
     }
@@ -1657,49 +1658,39 @@ class GraphProjectProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 Map.of("weight", Map.of("property", "weight")),
-                Map.of(
-                    "weight",
-                    Map.of("property",
-                        "weight",
-                        "defaultValue",
-                        null,
-                        AGGREGATION_KEY,
-                        "DEFAULT"
-                    )
-                )
+                Map.of("weight", mapWithNulls(
+                    "property", "weight",
+                    "defaultValue", null,
+                    AGGREGATION_KEY, "DEFAULT"
+                ))
             ),
             Arguments.of(
-                Map.of("score", Map.of("property", "weight", "defaultValue", 3D)),
-                Map.of(
-                    "score",
-                    Map.of("property", "weight", "defaultValue", 3D, AGGREGATION_KEY, "DEFAULT")
+                Map.of("score", Map.of(
+                    "property", "weight",
+                    "defaultValue", 3D
+                )),
+                Map.of("score", Map.of(
+                        "property", "weight",
+                        "defaultValue", 3D,
+                        AGGREGATION_KEY, "DEFAULT"
+                    )
                 )
             ),
             Arguments.of(
                 singletonList("weight"),
-                Map.of(
-                    "weight",
-                    Map.of("property",
-                        "weight",
-                        "defaultValue",
-                        null,
-                        AGGREGATION_KEY,
-                        "DEFAULT"
-                    )
-                )
+                Map.of("weight", mapWithNulls(
+                    "property", "weight",
+                    "defaultValue", null,
+                    AGGREGATION_KEY, "DEFAULT"
+                ))
             ),
             Arguments.of(
                 Map.of("score", "weight"),
-                Map.of(
-                    "score",
-                    Map.of("property",
-                        "weight",
-                        "defaultValue",
-                        null,
-                        AGGREGATION_KEY,
-                        "DEFAULT"
-                    )
-                )
+                Map.of("score", mapWithNulls(
+                    "property", "weight",
+                    "defaultValue", null,
+                    AGGREGATION_KEY, "DEFAULT"
+                ))
             )
         );
     }
@@ -1800,5 +1791,14 @@ class GraphProjectProcTest extends BaseProcTest {
 
     static Stream<String> invalidGraphNames() {
         return Stream.of("", "   ", "           ", "\r\n\t", null);
+    }
+
+    private static Map<String, Object> mapWithNulls(Object... objects) {
+        var map = new HashMap<String, Object>();
+        int i = 0;
+        while (i < objects.length) {
+            map.put((String) objects[i++], objects[i++]);
+        }
+        return map;
     }
 }
