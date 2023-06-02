@@ -24,10 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.linkprediction.LinkPredictionFunc;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,14 +44,6 @@ class AdamicAdarDocTest extends BaseProcTest {
         " (praveena)-[:FRIENDS]->(michael)," +
         " (michael)-[:WORKS_WITH]->(karin)," +
         " (arya)-[:FRIENDS]->(karin)";
-
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        builder.setConfigRaw(Map.of("unsupported.dbms.debug.track_cursor_close", "false"));
-        builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "false"));
-    }
 
     @BeforeEach
     void setup() throws Exception {
