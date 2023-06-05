@@ -85,7 +85,8 @@ public final class GraphFactory {
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
         Optional<Integer> concurrency,
-        Optional<PropertyState> propertyState
+        Optional<PropertyState> propertyState,
+        Optional<Byte> idMapBuilderType
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
@@ -97,11 +98,9 @@ public final class GraphFactory {
             ? Optional.of(maxOriginalId)
             : Optional.<Long>empty();
 
-        var idMapBuilder = idMapBehavior.create(
-            threadCount,
-            maybeMaxOriginalId,
-            nodeCount
-        );
+        var idMapBuilder = idMapBuilderType.isPresent()
+            ? idMapBehavior.create(idMapBuilderType.get(), threadCount, maybeMaxOriginalId, nodeCount)
+            : idMapBehavior.create(threadCount, maybeMaxOriginalId, nodeCount);
 
         boolean deduplicate = deduplicateIds.orElse(true);
 
