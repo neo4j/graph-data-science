@@ -114,7 +114,7 @@ public class TaskProgressTracker implements ProgressTracker {
             nestedTasks.add(task);
             try {
                 return task.nextSubtask();
-            } catch (RuntimeException e) {
+            } catch (IllegalStateException e) {
                 onError.accept(e);
             }
             return baseTask;
