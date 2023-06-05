@@ -113,8 +113,7 @@ public class TaskProgressTracker implements ProgressTracker {
         var nextTask = currentTask.map(task -> {
             nestedTasks.add(task);
             try {
-                var subTask = task.nextSubtask();
-                return subTask;
+                return task.nextSubtask();
             } catch (RuntimeException e) {
                 onError.accept(e);
             }
