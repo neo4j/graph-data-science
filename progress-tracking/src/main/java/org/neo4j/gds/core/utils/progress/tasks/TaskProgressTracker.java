@@ -34,6 +34,7 @@ import org.neo4j.logging.Log;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
@@ -52,7 +53,7 @@ public class TaskProgressTracker implements ProgressTracker {
     private long currentTotalSteps;
     private double progressLeftOvers;
 
-    private final Runnable onError;
+    private final Consumer<RuntimeException> onError;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
@@ -85,14 +86,14 @@ public class TaskProgressTracker implements ProgressTracker {
         this.nestedTasks = new Stack<>();
         this.userLogRegistry = userLogRegistryFactory.newInstance();
         if (GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.isEnabled()) {
-            this.onError = () -> {
-                throw new IllegalStateException("Tried to log progress, but there are no running tasks being tracked");
+            this.onError = error -> {
+                throw error;
             };
         } else {
             AtomicBoolean didLog = new AtomicBoolean(false);
-            this.onError = () -> {
+            this.onError = error -> {
                 if (!didLog.get()) {
-                    taskProgressLogger.logWarning(":: Tried to log progress, but there are no running tasks being tracked");
+                    taskProgressLogger.logWarning(String.format(":: %s", error.getMessage()));
                     didLog.set(true);
                 }
             };
@@ -110,7 +111,13 @@ public class TaskProgressTracker implements ProgressTracker {
         registerBaseTask();
         var nextTask = currentTask.map(task -> {
             nestedTasks.add(task);
-            return task.nextSubtask();
+            try {
+                var subTask = task.nextSubtask();
+                return subTask;
+            } catch (RuntimeException e) {
+                onError.accept(e);
+            }
+            return baseTask;
         }).orElse(baseTask);
         nextTask.start();
         taskProgressLogger.logBeginSubTask(nextTask, parentTask());
@@ -291,7 +298,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private void requireCurrentTask() {
         if (currentTask.isEmpty()) {
-            onError.run();
+            onError.accept(new IllegalStateException("Tried to log progress, but there are no running tasks being tracked"));
         }
     }
 
