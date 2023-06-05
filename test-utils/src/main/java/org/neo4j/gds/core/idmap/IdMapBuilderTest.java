@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.SplittableRandom;
-import java.util.function.LongFunction;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -111,7 +111,7 @@ public abstract class IdMapBuilderTest {
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
-        var idMapAndHighestId = buildFrom(originalIds, concurrency);
+        var idMapAndHighestId = buildFrom(originalIds.clone(), concurrency);
         var idMap = idMapAndHighestId.idMap();
         var highestOriginalId = idMapAndHighestId.highestOriginalId();
 
@@ -152,7 +152,7 @@ public abstract class IdMapBuilderTest {
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
-        var idMap = buildIdMapFrom(originalIds, concurrency);
+        var idMap = buildIdMapFrom(originalIds.clone(), concurrency);
         var mappedNodeIds = new long[originalIds.length];
         var actualNodeCount = idMap.nodeCount();
 
@@ -202,7 +202,7 @@ public abstract class IdMapBuilderTest {
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
-        var idMap = buildIdMapFrom(originalIds, concurrency);
+        var idMap = buildIdMapFrom(originalIds.clone(), concurrency);
         var actualOriginalIds = new long[originalIds.length];
         Arrays.fill(actualOriginalIds, -1);
 
@@ -271,12 +271,12 @@ public abstract class IdMapBuilderTest {
         var expectedLabels = new HashMap<Long, List<NodeLabel>>();
         var noLabel = List.of(NodeLabel.ALL_NODES);
 
-        var idMap = buildFromWithLabels(originalIds, concurrency, originalId -> {
+        var idMap = buildFromWithLabels(originalIds.clone(), concurrency, index -> {
             var labelCount = rng.nextInt(allLabels.length);
             var labels = labelCount > 0
                 ? Arrays.stream(allLabels).limit(labelCount).collect(Collectors.toList())
                 : noLabel;
-            expectedLabels.put(originalId, labels);
+            expectedLabels.put(originalIds[index], labels);
             return labels;
         }).idMap();
 
@@ -308,7 +308,7 @@ public abstract class IdMapBuilderTest {
     private IdMapAndHighestId buildFromWithLabels(
         long[] originalIds,
         int concurrency,
-        LongFunction<List<NodeLabel>> labelFn
+        IntFunction<List<NodeLabel>> labelFn
     ) {
         return buildFromWithLabels(originalIds, concurrency, Optional.ofNullable(labelFn));
     }
@@ -316,7 +316,7 @@ public abstract class IdMapBuilderTest {
     private IdMapAndHighestId buildFromWithLabels(
         long[] originalIds,
         int concurrency,
-        Optional<LongFunction<List<NodeLabel>>> labelFn
+        Optional<IntFunction<List<NodeLabel>>> labelFn
     ) {
         // number of ids we want to insert at once
         int batchLength = originalIds.length;
@@ -330,8 +330,9 @@ public abstract class IdMapBuilderTest {
 
         var labelInformationBuilder = labelFn.map(lFn -> {
             var multiLabelBuilder = LabelInformationBuilders.multiLabelWithCapacity(originalIds.length);
-            for (long originalNodeId : originalIds) {
-                lFn.apply(originalNodeId).forEach(label -> multiLabelBuilder.addNodeIdToLabel(label, originalNodeId));
+            for (int i = 0; i < originalIds.length; i++) {
+                long originalId = originalIds[i];
+                lFn.apply(i).forEach(label -> multiLabelBuilder.addNodeIdToLabel(label, originalId));
             }
             return multiLabelBuilder;
         }).orElseGet(LabelInformationBuilders::allNodes);
