@@ -41,6 +41,12 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     }
 
     @Override
+    public IdMapBuilder create(byte id, int concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
+        // We can only create array id maps in open GDS; no need to check the id.
+        return create(concurrency, maxOriginalId, nodeCount);
+    }
+
+    @Override
     public MemoryEstimation memoryEstimation() {
         return ArrayIdMap.memoryEstimation();
     }

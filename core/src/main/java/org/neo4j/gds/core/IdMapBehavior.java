@@ -31,5 +31,20 @@ public interface IdMapBehavior {
         Optional<Long> nodeCount
     );
 
+    /**
+     * Attempts to create an IdMapBuilder identified by the given id.
+     * <p>
+     * If the id is not recognized, we fall back to the default behavior
+     * using {@link #create(int, Optional, Optional)}.
+     *
+     * @param id the id of the IdMapBuilder to create
+     */
+    IdMapBuilder create(
+        byte id,
+        int concurrency,
+        Optional<Long> maxOriginalId,
+        Optional<Long> nodeCount
+    );
+
     MemoryEstimation memoryEstimation();
 }
