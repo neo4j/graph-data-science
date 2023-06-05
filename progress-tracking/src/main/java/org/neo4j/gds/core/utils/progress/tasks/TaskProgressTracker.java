@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -93,7 +94,7 @@ public class TaskProgressTracker implements ProgressTracker {
             AtomicBoolean didLog = new AtomicBoolean(false);
             this.onError = error -> {
                 if (!didLog.get()) {
-                    taskProgressLogger.logWarning(String.format(":: %s", error.getMessage()));
+                    taskProgressLogger.logWarning(String.format(Locale.US, ":: %s", error.getMessage()));
                     didLog.set(true);
                 }
             };
