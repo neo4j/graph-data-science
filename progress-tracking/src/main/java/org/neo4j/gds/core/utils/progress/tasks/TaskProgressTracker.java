@@ -86,7 +86,7 @@ public class TaskProgressTracker implements ProgressTracker {
         this.progressLeftOvers = 0;
         this.nestedTasks = new Stack<>();
         this.userLogRegistry = userLogRegistryFactory.newInstance();
-        if (GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.isEnabled()) {
+        if (GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.isEnabled()) {
             this.onError = error -> {
                 throw error;
             };
