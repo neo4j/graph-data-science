@@ -78,7 +78,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldThrowIfEndMoreTasksThanStartedAndFeatureToggleIsEnabled() {
-        GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.enableAndRun(() -> {
+        GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.enableAndRun(() -> {
             var task = Tasks.leaf("leaf");
             TaskProgressTracker progressTracker = progressTracker(task);
             progressTracker.beginSubTask();
@@ -91,7 +91,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldNotThrowIfEndMoreTasksThanStarted() {
-        GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.disableAndRun(() -> {
+        GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.disableAndRun(() -> {
             var task = Tasks.leaf("leaf");
             var log = Neo4jProxy.testLog();
             var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
