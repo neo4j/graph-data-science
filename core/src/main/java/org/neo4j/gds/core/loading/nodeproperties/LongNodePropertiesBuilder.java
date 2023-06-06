@@ -92,7 +92,7 @@ public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
     }
 
     @Override
-    public NodePropertyValues build(long size, IdMap idMap, long highestOriginalId) {
+    public NodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(
@@ -103,7 +103,6 @@ public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
         var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
-            var rootIdMap = idMap.rootIdMap();
 
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
@@ -112,7 +111,7 @@ public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = rootIdMap.toMappedNodeId(neoId);
+                    var mappedId = idMap.toMappedNodeId(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }
