@@ -25,7 +25,6 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 
 public final class HighLimitIdMapBuilder implements IdMapBuilder {
 
-    public static final String NAME = "highlimit";
     public static final byte ID = 3;
 
     private final ShardedLongLongMap.Builder intermediateIdMapBuilder;
