@@ -27,34 +27,37 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
 
     public static final byte ID = 3;
 
-    private final ShardedLongLongMap.BatchedBuilder intermediateIdMapBuilder;
-    private final IdMapBuilder internalIdMapBuilder;
+    private final ShardedLongLongMap.BatchedBuilder originalToIntermediateMapping;
+    private final IdMapBuilder intermediateToInternalMapping;
 
-    private final CloseableThreadLocal<BulkAdder> adders;
+    private final CloseableThreadLocal<BulkAdder> bulkAdders;
 
     public static HighLimitIdMapBuilder of(int concurrency, IdMapBuilder internalIdMapBuilder) {
         return new HighLimitIdMapBuilder(concurrency, internalIdMapBuilder);
     }
 
     private HighLimitIdMapBuilder(int concurrency, IdMapBuilder internalIdMapBuilder) {
-        this.intermediateIdMapBuilder = ShardedLongLongMap.batchedBuilder(concurrency, true);
-        this.internalIdMapBuilder = internalIdMapBuilder;
-        this.adders = CloseableThreadLocal.withInitial(this::newBulkAdder);
+        // We use a builder that overrides the node ids in the input batch with the
+        // generated intermediate node ids. This is necessary for downstream label
+        // and property processing.
+        this.originalToIntermediateMapping = ShardedLongLongMap.batchedBuilder(concurrency, true);
+        this.intermediateToInternalMapping = internalIdMapBuilder;
+        this.bulkAdders = CloseableThreadLocal.withInitial(this::newBulkAdder);
     }
 
     @Override
     public IdMapAllocator allocate(int batchLength) {
-        var internalAllocator = this.internalIdMapBuilder.allocate(batchLength);
-        var intermediateAllocator = this.intermediateIdMapBuilder.prepareBatch(batchLength);
-        var allocator = this.adders.get();
-        allocator.reset(batchLength, internalAllocator, intermediateAllocator);
-        return allocator;
+        var batch = this.originalToIntermediateMapping.prepareBatch(batchLength);
+        var internalAllocator = this.intermediateToInternalMapping.allocate(batchLength);
+        var bulkAdder = this.bulkAdders.get();
+        bulkAdder.reset(batchLength, internalAllocator, batch);
+        return bulkAdder;
     }
 
     @Override
     public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, int concurrency) {
-        var intermediateIdMap = this.intermediateIdMapBuilder.build();
-        var internalIdMap = this.internalIdMapBuilder.build(labelInformationBuilder, highestNodeId, concurrency);
+        var intermediateIdMap = this.originalToIntermediateMapping.build();
+        var internalIdMap = this.intermediateToInternalMapping.build(labelInformationBuilder, highestNodeId, concurrency);
 
         return new HighLimitIdMap(intermediateIdMap, internalIdMap);
     }
