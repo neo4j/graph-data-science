@@ -39,6 +39,11 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
+    public byte typeId() {
+        return originalToRootIdMap.typeId();
+    }
+
+    @Override
     public OptionalLong rootNodeCount() {
         return originalToRootIdMap.rootNodeCount();
     }

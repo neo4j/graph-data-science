@@ -40,6 +40,11 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
+    public byte typeId() {
+        return NO_TYPE;
+    }
+
+    @Override
     public long toMappedNodeId(long originalNodeId) {
         return originalNodeId;
     }

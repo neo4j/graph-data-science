@@ -394,6 +394,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public byte typeId() {
+        return idMap.typeId();
+    }
+
+    @Override
     public long toOriginalNodeId(long mappedNodeId) {
         return idMap.toOriginalNodeId(mappedNodeId);
     }

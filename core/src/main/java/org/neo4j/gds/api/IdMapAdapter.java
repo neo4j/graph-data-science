@@ -39,6 +39,11 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
+    public byte typeId() {
+        return idMap.typeId();
+    }
+
+    @Override
     public Collection<PrimitiveLongIterable> batchIterables(
         long batchSize
     ) {

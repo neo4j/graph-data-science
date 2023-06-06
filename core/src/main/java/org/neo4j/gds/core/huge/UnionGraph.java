@@ -151,6 +151,11 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public byte typeId() {
+        return first.typeId();
+    }
+
+    @Override
     public long toOriginalNodeId(long mappedNodeId) {
         return first.toOriginalNodeId(mappedNodeId);
     }
