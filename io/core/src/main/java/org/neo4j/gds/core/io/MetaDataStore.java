@@ -21,12 +21,14 @@ package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,9 +45,21 @@ public interface MetaDataStore {
             Function.identity(),
             graphStore::relationshipCount
         ));
+
+        var idMapTypeId = graphStore.nodes().typeId();
+
+        if (idMapTypeId == IdMap.NO_TYPE) {
+            throw new IllegalArgumentException(String.format(
+                Locale.US,
+                "Cannot write graph store with untyped id map. Got instance of `%s`",
+                graphStore.nodes()
+                    .getClass()
+                    .getSimpleName()));
+        }
+
         GraphInfo graphInfo = ImmutableGraphInfo.of(
             graphStore.databaseId(),
-            graphStore.idMapBuilderType(),
+            idMapTypeId,
             graphStore.nodeCount(),
             graphStore.nodes().highestOriginalId(),
             relTypeCounts,

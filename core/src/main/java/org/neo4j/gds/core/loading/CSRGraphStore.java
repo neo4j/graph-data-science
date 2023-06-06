@@ -150,11 +150,6 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public byte idMapBuilderType() {
-        return 0;
-    }
-
-    @Override
     public GraphSchema schema() {
         return schema;
     }

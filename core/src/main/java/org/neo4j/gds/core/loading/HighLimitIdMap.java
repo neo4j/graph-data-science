@@ -38,6 +38,11 @@ public class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
+    public byte typeId() {
+        return HighLimitIdMapBuilder.ID;
+    }
+
+    @Override
     public long toOriginalNodeId(long mappedNodeId) {
         return highToLowIdSpace.toOriginalNodeId(super.toOriginalNodeId(mappedNodeId));
     }
