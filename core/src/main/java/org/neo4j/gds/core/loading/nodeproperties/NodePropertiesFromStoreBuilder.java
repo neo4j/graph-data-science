@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseCollections;
+import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -90,7 +91,13 @@ public final class NodePropertiesFromStoreBuilder {
             }
         }
 
-        return innerBuilder.get().build(idMap.nodeCount(), idMap, idMap.highestOriginalId());
+        // For HighLimitIdMap, we need to use the rootIdMap to resolve intermediate
+        // node ids correctly. The rootIdMap in that case is the mapping between
+        // intermediate and mapped node ids. The imported property values are associated
+        // with the intermediate node ids.
+        var actualIdMap = (idMap instanceof HighLimitIdMap) ? idMap.rootIdMap() : idMap;
+
+        return innerBuilder.get().build(idMap.nodeCount(), actualIdMap, idMap.highestOriginalId());
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
