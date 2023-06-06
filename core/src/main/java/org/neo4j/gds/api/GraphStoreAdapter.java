@@ -55,6 +55,11 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
+    public byte idMapBuilderType() {
+        return graphStore.idMapBuilderType();
+    }
+
+    @Override
     public Capabilities capabilities() {
         return graphStore.capabilities();
     }

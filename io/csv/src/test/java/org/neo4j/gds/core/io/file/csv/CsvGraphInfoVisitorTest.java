@@ -39,7 +39,15 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
         var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"),RelationshipType.of("REL2"));
-        graphInfoVisitor.export(ImmutableGraphInfo.of(databaseId, 1337L, 19L, relationshipTypeCounts, inverseIndexedRelTypes));
+        var graphInfo = ImmutableGraphInfo.builder()
+            .databaseId(databaseId)
+            .idMapBuilderType((byte) 42)
+            .nodeCount(1337L)
+            .maxOriginalId(19L)
+            .relationshipTypeCounts(relationshipTypeCounts)
+            .inverseIndexedRelationshipTypes(inverseIndexedRelTypes)
+            .build();
+        graphInfoVisitor.export(graphInfo);
         graphInfoVisitor.close();
 
         assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
@@ -49,6 +57,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
                 defaultHeaderColumns(),
                 List.of(
                     databaseId.databaseName(),
+                    Byte.toString((byte) 42),
                     Long.toString(1337L),
                     Long.toString(19L),
                     CsvMapUtil.relationshipCountsToString(relationshipTypeCounts),
@@ -62,6 +71,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
     protected List<String> defaultHeaderColumns() {
         return List.of(
             CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+            CsvGraphInfoVisitor.ID_MAP_BUILDER_TYPE_COLUMN_NAME,
             CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
             CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
             CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,

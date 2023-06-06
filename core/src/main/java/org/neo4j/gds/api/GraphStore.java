@@ -47,6 +47,8 @@ public interface GraphStore {
 
     DatabaseId databaseId();
 
+    byte idMapBuilderType();
+
     GraphSchema schema();
 
     ZonedDateTime modificationTime();
