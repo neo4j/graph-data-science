@@ -18,7 +18,7 @@
 * xref:management-ops/index.adoc[]
 ** xref:management-ops/graph-catalog-ops.adoc[]
 *** xref:management-ops/projections/graph-project.adoc[]
-*** xref:management-ops/projections/graph-project-cypher.adoc[]
+*** xref:management-ops/projections/graph-project-cypher-legacy.adoc[]
 *** xref:management-ops/projections/graph-project-cypher-aggregation.adoc[]
 *** xref:graph-project-apache-arrow.adoc[]
 *** xref:management-ops/projections/graph-project-subgraph.adoc[]
