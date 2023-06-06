@@ -48,7 +48,11 @@ public final class ShardedLongLongMap {
     }
 
     public static BatchedBuilder batchedBuilder(int concurrency) {
-        return new BatchedBuilder(concurrency);
+        return batchedBuilder(concurrency, false);
+    }
+
+    public static BatchedBuilder batchedBuilder(int concurrency, boolean overrideIds) {
+        return new BatchedBuilder(concurrency, overrideIds);
     }
 
     private ShardedLongLongMap(
@@ -273,7 +277,7 @@ public final class ShardedLongLongMap {
         private final int shardShift;
         private final int shardMask;
 
-        BatchedBuilder(int concurrency) {
+        BatchedBuilder(int concurrency, boolean overrideIds) {
             this.nodeCount = new AtomicLong();
             int numberOfShards = numberOfShards(concurrency);
             this.shardShift = Long.SIZE - Integer.numberOfTrailingZeros(numberOfShards);
@@ -281,11 +285,16 @@ public final class ShardedLongLongMap {
             this.shards = IntStream.range(0, numberOfShards)
                 .mapToObj(__ -> new Shard())
                 .toArray(Shard[]::new);
-            this.batches = CloseableThreadLocal.withInitial(() -> new Batch(
-                this.shards,
-                this.shardShift,
-                this.shardMask
-            ));
+            this.batches = CloseableThreadLocal.withInitial(() -> {
+                if (overrideIds) {
+                    return new OverridingBatch(this.shards, this.shardShift, this.shardMask);
+                }
+                return new Batch(
+                    this.shards,
+                    this.shardShift,
+                    this.shardMask
+                );
+            });
         }
 
         public Batch prepareBatch(int nodeCount) {
@@ -316,7 +325,7 @@ public final class ShardedLongLongMap {
             );
         }
 
-        public static final class Batch implements IdMapAllocator {
+        public static class Batch implements IdMapAllocator {
 
             private final Shard[] shards;
             private final int shardShift;
@@ -356,6 +365,24 @@ public final class ShardedLongLongMap {
             void initBatch(long startId, int length) {
                 this.startId = startId;
                 this.length = length;
+            }
+        }
+
+        /**
+         * An allocator/batch that overrides the incoming node ids with the generated mapped ids.
+         */
+        private static final class OverridingBatch extends Batch {
+
+            private OverridingBatch(Shard[] shards, int shardShift, int shardMask) {
+                super(shards, shardShift, shardMask);
+            }
+
+            @Override
+            public void insert(long[] nodeIds) {
+                int length = allocatedSize();
+                for (int i = 0; i < length; i++) {
+                    nodeIds[i] = addNode(nodeIds[i]);
+                }
             }
         }
 

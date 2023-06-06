@@ -27,7 +27,7 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
 
     public static final byte ID = 3;
 
-    private final ShardedLongLongMap.Builder intermediateIdMapBuilder;
+    private final ShardedLongLongMap.BatchedBuilder intermediateIdMapBuilder;
     private final IdMapBuilder internalIdMapBuilder;
 
     private final CloseableThreadLocal<BulkAdder> adders;
@@ -37,8 +37,7 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
     }
 
     private HighLimitIdMapBuilder(int concurrency, IdMapBuilder internalIdMapBuilder) {
-        // TODO: we might want to use the batched builder
-        this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);
+        this.intermediateIdMapBuilder = ShardedLongLongMap.batchedBuilder(concurrency, true);
         this.internalIdMapBuilder = internalIdMapBuilder;
         this.adders = CloseableThreadLocal.withInitial(this::newBulkAdder);
     }
@@ -46,8 +45,9 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
     @Override
     public IdMapAllocator allocate(int batchLength) {
         var internalAllocator = this.internalIdMapBuilder.allocate(batchLength);
+        var intermediateAllocator = this.intermediateIdMapBuilder.prepareBatch(batchLength);
         var allocator = this.adders.get();
-        allocator.reset(batchLength, internalAllocator);
+        allocator.reset(batchLength, internalAllocator, intermediateAllocator);
         return allocator;
     }
 
@@ -60,22 +60,19 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
     }
 
     private BulkAdder newBulkAdder() {
-        return new BulkAdder(intermediateIdMapBuilder);
+        return new BulkAdder();
     }
 
     private static final class BulkAdder implements IdMapAllocator {
 
-        private final ShardedLongLongMap.Builder intermediateIdMapBuilder;
+        private IdMapAllocator intermediateAllocator;
         private IdMapAllocator internalAllocator;
         private int batchLength = 0;
 
-        private BulkAdder(ShardedLongLongMap.Builder intermediateIdMapBuilder) {
-            this.intermediateIdMapBuilder = intermediateIdMapBuilder;
-        }
-
-        private void reset(int batchLength, IdMapAllocator internalAllocator) {
+        private void reset(int batchLength, IdMapAllocator internalAllocator, IdMapAllocator intermediateAllocator) {
             this.batchLength = batchLength;
             this.internalAllocator = internalAllocator;
+            this.intermediateAllocator = intermediateAllocator;
         }
 
         @Override
@@ -85,18 +82,8 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
 
         @Override
         public void insert(long[] nodeIds) {
-            int length = this.batchLength;
-            var intermediateIdMapBuilder = this.intermediateIdMapBuilder;
-
-            // Replace the original nodeIds with the intermediate ones
-            // in the input buffer as this one is reused by the caller
-            // to insert node labels and property values.
-            for (int i = 0; i < length; i++) {
-                nodeIds[i] = intermediateIdMapBuilder.addNode(nodeIds[i]);
-            }
-
-            // Use intermediate ids for the internal id map builder.
-            internalAllocator.insert(nodeIds);
+            this.intermediateAllocator.insert(nodeIds);
+            this.internalAllocator.insert(nodeIds);
         }
     }
 }
