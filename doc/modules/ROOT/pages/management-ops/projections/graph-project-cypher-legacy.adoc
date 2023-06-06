@@ -1,4 +1,4 @@
-[[catalog-graph-project-cypher]]
+[[catalog-graph-project-cypher-legacy]]
 = Projecting graphs using Cypher (deprecated)
 :description: This section details projecting GDS graphs using legacy `Cypher` projections.
 
@@ -33,13 +33,13 @@ The xref:management-ops/node-properties.adoc#node-properties-supported[Node Prop
 Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Legacy Cypher projection.
 
 
-[[graph-project-cypher-syntax]]
+[[graph-project-cypher-legacy-syntax]]
 == Syntax
 
 A Legacy Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
-[.graph-project-cypher-syntax]
+[.graph-project-cypher-legacy-syntax]
 --
 [source, cypher, role=noplay]
 ----
@@ -487,7 +487,7 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-If we compare the results to the ones from xref:management-ops/projections/graph-project-cypher.adoc#cypher-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
+If we compare the results to the ones from xref:management-ops/projections/graph-project-cypher-legacy.adoc#cypher-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
 This functionality is only expressible with xref:management-ops/projections/graph-project.adoc[native projections] by projecting a xref:management-ops/projections/graph-project-subgraph.adoc[subgraph].
 
 [[cypher-projection-parameters]]

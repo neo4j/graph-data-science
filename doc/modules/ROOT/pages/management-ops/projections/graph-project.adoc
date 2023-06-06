@@ -493,7 +493,7 @@ YIELD
 
 To specify the orientation, we need to write the `relationshipProjection` with the extended Map-syntax.
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
-Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in xref:management-ops/projections/graph-project-cypher.adoc#graph-project-example-single-label-type[Simple graph].
+Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in xref:management-ops/projections/graph-project-cypher-legacy.adoc#graph-project-example-single-label-type[Simple graph].
 
 
 [[node-properties-example]]
@@ -778,7 +778,7 @@ We can see, that the two READ relationships between Florentin and the Hobbit sum
 As mentioned in the xref:management-ops/projections/graph-project.adoc#graph-project-native-syntax[syntax section], the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the xref:management-ops/projections/graph-project.adoc#node-projection-syntax[node projection].
 Note that even if the flag is set to `false` such a relationship will still not be projected but the loading process will not be aborted.
 
-We can simulate such a case with the xref:management-ops/projections/graph-project-cypher.adoc#graph-project-examples[graph present in the Neo4j database]:
+We can simulate such a case with the xref:management-ops/projections/graph-project-cypher-legacy.adoc#graph-project-examples[graph present in the Neo4j database]:
 
 --
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:
