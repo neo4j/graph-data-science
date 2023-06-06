@@ -627,7 +627,7 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in xref:management-ops/projections/graph-project-cypher-aggregation.adoc#node-properties-example[Node properties].
+We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in xref:management-ops/projections/graph-project-cypher-projection.adoc#node-properties-example[Node properties].
 
 
 === Parallel relationships

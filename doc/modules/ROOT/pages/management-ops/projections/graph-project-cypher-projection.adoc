@@ -1,4 +1,4 @@
-[[catalog-graph-project-cypher-aggregation]]
+[[catalog-graph-project-cypher-projection]]
 = Projecting graphs using Cypher
 :description: This section details projecting GDS graphs using `Cypher` projections.
 
@@ -34,7 +34,7 @@ This is important when a node can be a source node as well as a target node and 
 Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties`, `sourceNodeLabels` and `targetNodeLabels`.
 
 
-[[graph-project-cypher-aggregation-syntax]]
+[[graph-project-cypher-projection-syntax]]
 == Syntax
 
 A Cypher projection is used in a query as an aggregation over the relationships that are being projected.
@@ -44,7 +44,7 @@ The parameter is optional and can be `null` to project an unconnected node.
 The next and fourth optional `dataConfig` parameter can be used to project node properties and labels as well as relationship properties and type.
 The last and fifth optional `configuration` parameter can be used for general configuration of the projection such as `readConcurrency`.
 
-[.graph-project-cypher-aggregation-syntax]
+[.graph-project-cypher-projection-syntax]
 --
 [source, cypher, role=noplay]
 ----
@@ -69,11 +69,11 @@ RETURN gds.graph.project(
 | graphName          | no       | The name under which the graph is stored in the catalog.
 | sourceNode         | no       | The source node of the relationship. Must not be null.
 | targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
-| <<graph-project-cypher-aggregation-syntax-dataConfig, dataConfig>>       | yes      | Properties and labels configuration for the source and target nodes as well as properties and type configuration for the relationship.
-| <<graph-project-cypher-aggregation-syntax-configuration, configuration>> | yes      | Additional parameters to configure the projection.
+| <<graph-project-cypher-projection-syntax-dataConfig, dataConfig>>       | yes      | Properties and labels configuration for the source and target nodes as well as properties and type configuration for the relationship.
+| <<graph-project-cypher-projection-syntax-configuration, configuration>> | yes      | Additional parameters to configure the projection.
 |===
 
-[[graph-project-cypher-aggregation-syntax-dataConfig]]
+[[graph-project-cypher-projection-syntax-dataConfig]]
 .Nodes configuration
 [opts="header",cols="1,1,1,4"]
 |===
@@ -86,7 +86,7 @@ RETURN gds.graph.project(
 | relationshipType       | String                   | '*'     | The type of the relationship.
 |===
 
-[[graph-project-cypher-aggregation-syntax-configuration]]
+[[graph-project-cypher-projection-syntax-configuration]]
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
@@ -112,7 +112,7 @@ RETURN gds.graph.project(
 NOTE: To get information about a stored graph, such as its schema, one can use xref:graph-list.adoc[gds.graph.list].
 
 
-[[graph-project-cypher-aggregation-examples]]
+[[graph-project-cypher-projection-examples]]
 == Examples
 
 In order to demonstrate the GDS Cypher Aggregation we are going to create a small social network graph in Neo4j.
@@ -139,7 +139,7 @@ CREATE
 ----
 
 
-[[graph-project-cypher-aggregation-example-single-label-type]]
+[[graph-project-cypher-projection-example-single-label-type]]
 === Simple graph
 
 A simple graph is a graph with only one node label and relationship type, i.e., a monopartite graph.
@@ -465,7 +465,7 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref:management-ops/projections/graph-project-cypher-aggregation.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref:management-ops/projections/graph-project-cypher-projection.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
 
 
 === Parallel relationships
@@ -630,5 +630,5 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-If we compare the results to the ones from xref:management-ops/projections/graph-project-cypher-aggregation.adoc#cypher-aggregation-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
+If we compare the results to the ones from xref:management-ops/projections/graph-project-cypher-projection.adoc#cypher-aggregation-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
 This functionality is only expressible with xref:management-ops/projections/graph-project.adoc[native projections] by projecting a xref:management-ops/projections/graph-project-subgraph.adoc[subgraph].
