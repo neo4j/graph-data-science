@@ -1,10 +1,10 @@
 [[catalog-graph-project-cypher-aggregation]]
-= Projecting graphs using Cypher Aggregation
-:description: This section details projecting GDS graphs using `Cypher` aggregations.
+= Projecting graphs using Cypher
+:description: This section details projecting GDS graphs using `Cypher` projections.
 
 
-Using Cypher aggregations is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
-Cypher aggregations are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
+Using Cypher projection is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
+Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
 
 
 == Considerations
@@ -23,9 +23,9 @@ The projected graphs will reside in the catalog until either:
 
 === Node property support
 
-Cypher aggregations can only project a limited set of node property types from a Cypher query.
+Cypher projections can only project a limited set of node property types from a Cypher query.
 The xref:management-ops/node-properties.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
-Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Cypher aggregation.
+Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Cypher projection.
 
 === Selection of node properties and labels
 
@@ -37,7 +37,7 @@ Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties
 [[graph-project-cypher-aggregation-syntax]]
 == Syntax
 
-A Cypher aggregation is used in a query as an aggregation over the relationships that are being projected.
+A Cypher projection is used in a query as an aggregation over the relationships that are being projected.
 It takes two mandatory arguments: `graphName`, and `sourceNode`.
 The third parameter is `targetNode` and is usually provided.
 The parameter is optional and can be `null` to project an unconnected node.

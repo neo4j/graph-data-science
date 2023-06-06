@@ -147,9 +147,9 @@ LIMIT 10
 This query returned the top 10 pairs of nodes that are the furthest away from each other.
 F and E appear to be quite distant from the others.
 
-=== Using Cypher aggregation
+=== Using Cypher projection
 
-.The following will project and store an undirected graph using cypher aggregation:
+.The following will project and store an undirected graph using cypher projection:
 [source, cypher, role=noplay graph-project-query, group=cypher]
 ----
 MATCH (src:Loc)-[r:ROAD]->(trg:Loc)

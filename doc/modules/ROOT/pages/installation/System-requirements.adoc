@@ -61,7 +61,7 @@ However, setting a minimum page cache size is still important when projecting gr
 
 * For xref:management-ops/projections/graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
 * For xref:management-ops/projections/graph-project-cypher.adoc[Legacy Cypher projections], a higher page cache is required depending on the query complexity.
-* For xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher aggregation], a higher page cache is required depending on the query complexity.
+* For xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher projections], a higher page cache is required depending on the query complexity.
 * For xref:graph-project-apache-arrow.adoc[projections through Apache Arrow], the page cache is irrelevant.
 
 However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
