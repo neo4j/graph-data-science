@@ -33,7 +33,7 @@ public enum SyntaxMode {
     GRAPH_PROJECT("graph-project-syntax"),
     GRAPH_PROJECT_CYPHER("graph-project-cypher-syntax"),
     GRAPH_PROJECT_CYPHER_AGGREGATION(
-        "graph-project-cypher-aggregation-syntax",
+        "graph-project-cypher-projection-syntax",
         true,
         CustomProcedure.Namespace.AGGREGATION_FUNCTION
     ),
