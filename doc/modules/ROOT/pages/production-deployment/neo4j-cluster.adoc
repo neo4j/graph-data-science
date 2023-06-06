@@ -29,7 +29,7 @@ GDS has compute-intensive OLAP workloads that may disrupt the cluster operations
 
 [NOTE]
 ======
-Please refer to the https://neo4j.com/docs/operations-manual/current/clustering/[official Neo4j documentation] for details on how to setup Neo4j cluster.
+Please refer to the https://neo4j.com/docs/operations-manual/current/clustering/setup/analytics-cluster/[official Neo4j documentation] for details on how to setup Neo4j analytical cluster.
 Note that the link points to the latest Neo4j version documentation and the configuration settings may differ from earlier versions.
 ======
 
