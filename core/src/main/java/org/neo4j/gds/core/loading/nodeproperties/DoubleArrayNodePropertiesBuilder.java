@@ -60,7 +60,7 @@ public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuil
     }
 
     @Override
-    public DoubleArrayNodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId) {
+    public DoubleArrayNodePropertyValues build(long size, IdMap idMap, long highestOriginalId) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArrayArray.builder(
@@ -71,6 +71,7 @@ public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuil
 
         var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
+            var rootIdMap = idMap.rootIdMap();
 
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
@@ -79,7 +80,7 @@ public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuil
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = idMap.toMappedNodeId(neoId);
+                    var mappedId = rootIdMap.toMappedNodeId(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }

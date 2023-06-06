@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -84,7 +83,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
     }
 
     @Override
-    public DoubleNodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId) {
+    public DoubleNodePropertyValues build(long size, IdMap idMap, long highestOriginalId) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
@@ -95,6 +94,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
         var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
+            var rootIdMap = idMap.rootIdMap();
 
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
@@ -103,7 +103,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = idMap.toMappedNodeId(neoId);
+                    var mappedId = rootIdMap.toMappedNodeId(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading.nodeproperties;
 
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
@@ -31,5 +32,5 @@ public interface InnerNodePropertiesBuilder {
      * Builds the underlying node properties and performs a remapping
      * to the internal id space using the given id map.
      */
-    NodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId);
+    NodePropertyValues build(long size, IdMap idMap, long highestOriginalId);
 }
