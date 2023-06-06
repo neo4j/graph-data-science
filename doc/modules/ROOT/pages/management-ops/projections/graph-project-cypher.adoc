@@ -1,9 +1,9 @@
 [[catalog-graph-project-cypher]]
 = Projecting graphs using Cypher
-:description: This section details projecting GDS graphs using `Cypher` projections.
+:description: This section details projecting GDS graphs using legacy `Cypher` projections.
 
-Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
-Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
+Using Legacy Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
+Legacy Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
 
 
 == Considerations
@@ -22,15 +22,15 @@ The projected graphs will reside in the catalog until either:
 
 === Node property support
 
-Cypher projections can only project a limited set of node property types from a Cypher query.
+Legacy Cypher projections can only project a limited set of node property types from a Cypher query.
 The xref:management-ops/node-properties.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
-Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Cypher projection.
+Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Legacy Cypher projection.
 
 
 [[graph-project-cypher-syntax]]
 == Syntax
 
-A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
+A Legacy Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
 [.graph-project-cypher-syntax]
@@ -58,7 +58,7 @@ CALL gds.graph.project.cypher(
 | graphName         | no       | The name under which the graph is stored in the catalog.
 | nodeQuery         | no       | Cypher query to project nodes. The query result must contain an `id` column. Optionally, a `labels` column can be specified to represent node labels. Additional columns are interpreted as properties.
 | relationshipQuery | no       | Cypher query to project relationships. The query result must contain `source` and `target` columns. Optionally, a `type` column can be specified to represent relationship type. Additional columns are interpreted as properties.
-| configuration     | yes      | Additional parameters to configure the Cypher projection.
+| configuration     | yes      | Additional parameters to configure the Legacy Cypher projection.
 |===
 
 .Configuration
@@ -173,15 +173,15 @@ YIELD
 === Relationship orientation
 
 The native projection supports specifying an orientation per relationship type.
-The Cypher projection treats every relationship returned by the relationship query as if it were in `NATURAL` orientation and creates a directed relationship from the first provided id (source) to the second (target).
+The Legacy Cypher projection treats every relationship returned by the relationship query as if it were in `NATURAL` orientation and creates a directed relationship from the first provided id (source) to the second (target).
 Projecting in `REVERSE` orientation can be achieved by switching the order of ids in the RETURN clause such as `MATCH (n)-[r:KNOWS]->(m) RETURN id(m) AS source, id(n) AS target, type(r) AS type`.
 
-It not possible to project graphs in `UNDIRECTED` orientation when Cypher projections are used.
+It not possible to project graphs in `UNDIRECTED` orientation when Legacy Cypher projections are used.
 
 [NOTE]
 --
 Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
-These algorithms can not be used with a graph projected by a Cypher projection.
+These algorithms can not be used with a graph projected by a Legacy Cypher projection.
 --
 
 
@@ -222,7 +222,7 @@ RETURN graphName, nodes, rels
 --
 
 The projected `graphWithProperties` graph contains five nodes and six relationships.
-In a Cypher projection every node from the `nodeQuery` gets the same node properties, which means you can't have label-specific properties.
+In a Legacy Cypher projection every node from the `nodeQuery` gets the same node properties, which means you can't have label-specific properties.
 For instance in the example above the `Person` nodes will also get `ratings` and `price` properties, while `Book` nodes get the `age` property.
 
 Further, the `price` property has a default value of `5.0`.
