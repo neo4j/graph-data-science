@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseLongArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -62,7 +61,7 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
     }
 
     @Override
-    public LongArrayNodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId) {
+    public LongArrayNodePropertyValues build(long size, IdMap idMap, long highestOriginalId) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(
@@ -73,6 +72,7 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
         var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
+            var rootIdMap = idMap.rootIdMap();
 
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
@@ -81,7 +81,7 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = idMap.toMappedNodeId(neoId);
+                    var mappedId = rootIdMap.toMappedNodeId(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }
