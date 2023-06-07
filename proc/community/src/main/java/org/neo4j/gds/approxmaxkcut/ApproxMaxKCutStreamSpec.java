@@ -21,7 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
@@ -54,21 +55,23 @@ public class ApproxMaxKCutStreamSpec implements AlgorithmSpec<ApproxMaxKCut, Max
 
     @Override
     public ComputationResultConsumer<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) ->{
-                if (computationResult.isGraphEmpty()){
-                    return  Stream.empty();
-                }
-            var nodeProperties = CommunityProcCompanion.considerSizeFilter(
-                computationResult.config(),
-                computationResult.result()
-                    .map(MaxKCutResult::asNodeProperties)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-            );
-                var graph = computationResult.graph();
-
-                return LongStream.range(0,graph.nodeCount())
-                    .filter(nodeProperties::hasValue)
-                    .mapToObj( nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId),nodeProperties.longValue(nodeId)));
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var nodeProperties = CommunityProcCompanion.considerSizeFilter(
+                        computationResult.config(),
+                        result.asNodeProperties()
+                    );
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .filter(nodeProperties::hasValue)
+                        .mapToObj(nodeId -> new StreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            nodeProperties.longValue(nodeId)
+                        ));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.triangle.TriangleProc.DESCRIPTION;
 
@@ -50,14 +51,14 @@ public class TriangleStreamSpecification implements AlgorithmSpec<TriangleStream
 
     @Override
     public ComputationResultConsumer<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, Stream<TriangleStream.Result>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            var resultStream = computationResult.result().get();
-            executionContext.closeableResourceRegistry().register(resultStream);
-            return resultStream;
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    executionContext.closeableResourceRegistry().register(result);
+                    return result;
+                }).orElseGet(Stream::empty)
+        );
     }
 }

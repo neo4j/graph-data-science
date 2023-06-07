@@ -21,14 +21,12 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -58,27 +56,21 @@ public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelP
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            () -> {
-
-                return Optional.ofNullable(computationResult.result())
-                    .map(result -> {
-                        var graph = computationResult.graph();
-                        var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                            computationResult.config(),
-                            computationResult.result()
-                                .map(LabelPropagationResult::labels)
-                                .orElseGet(() -> HugeLongArray.newArray(0))
-                                .asNodeProperties()
-                        );
-                        return LongStream
-                            .range(IdMap.START_NODE_ID, graph.nodeCount())
-                            .filter(nodePropertyValues::hasValue)
-                            .mapToObj(nodeId -> new StreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                nodePropertyValues.longValue(nodeId)
-                            ));
-                    }).orElseGet(Stream::empty);
-            }
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var nodePropertyValues = CommunityProcCompanion.nodeProperties(
+                        computationResult.config(),
+                        result.labels().asNodeProperties()
+                    );
+                    return LongStream
+                        .range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .filter(nodePropertyValues::hasValue)
+                        .mapToObj(nodeId -> new StreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            nodePropertyValues.longValue(nodeId)
+                        ));
+                }).orElseGet(Stream::empty)
         );
     }
 }
