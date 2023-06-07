@@ -31,8 +31,6 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 public class CELF extends Algorithm<LongDoubleScatterMap> {
 
@@ -184,13 +182,5 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
-    }
-
-    public Stream<InfluenceMaximizationResult> resultStream() {
-        return LongStream.of(seedSetNodes.keys().toArray())
-            .mapToObj(node -> new InfluenceMaximizationResult(
-                graph.toOriginalNodeId(node),
-                seedSetNodes.getOrDefault(node, 0)
-            ));
     }
 }
