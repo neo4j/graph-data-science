@@ -195,7 +195,8 @@ RETURN graphName, nodes, rels
 |
 [source, cypher, role=noplay]
 ----
-MATCH (n:Person)-[r:KNOWS]->(m:Person)
+MATCH (n:Person)
+OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
 WITH gds.graph.project(
   'graphWithProperties',
   n,
@@ -234,7 +235,10 @@ RETURN graphName, nodes, rels
 |
 [source, cypher, role=noplay]
 ----
-MATCH (n:Person)-[r:KNOWS\|READ]->(m)
+MATCH (n)
+WHERE n:Person OR n:Book
+OPTIONAL MATCH (n)-[r:KNOWS\|READ]->(m)
+WHERE m:Person OR m:Book
 WITH gds.graph.project(
   'graphWithProperties',
   n,
