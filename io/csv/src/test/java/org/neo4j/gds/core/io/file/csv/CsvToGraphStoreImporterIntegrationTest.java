@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,9 +31,7 @@ import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfigImpl;
-import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
-import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
