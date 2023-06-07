@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-public class InfluenceMaximizationResult {
+public class StreamResult {
     public final long nodeId;
     public final double spread;
 
-    InfluenceMaximizationResult(long nodeId, double spread) {
+    StreamResult(long nodeId, double spread) {
         this.nodeId = nodeId;
         this.spread = spread;
     }
