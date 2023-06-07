@@ -86,7 +86,7 @@ public final class GraphFactory {
         Optional<Boolean> deduplicateIds,
         Optional<Integer> concurrency,
         Optional<PropertyState> propertyState,
-        Optional<Byte> idMapBuilderType
+        Optional<String> idMapBuilderType
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))

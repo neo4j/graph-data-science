@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public final class ArrayIdMapBuilder implements IdMapBuilder {
 
-    public static final byte ID = 0;
+    public static final String ID = "array";
 
     private final HugeLongArray array;
     private final long capacity;

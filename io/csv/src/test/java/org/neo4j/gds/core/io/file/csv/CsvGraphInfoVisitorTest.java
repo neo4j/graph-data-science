@@ -36,12 +36,13 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
     @Test
     void shouldExportGraphInfo() {
         DatabaseId databaseId = DatabaseId.random();
+        String idMapBuilderType = "custom";
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
         var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"),RelationshipType.of("REL2"));
         var graphInfo = ImmutableGraphInfo.builder()
             .databaseId(databaseId)
-            .idMapBuilderType((byte) 42)
+            .idMapBuilderType(idMapBuilderType)
             .nodeCount(1337L)
             .maxOriginalId(19L)
             .relationshipTypeCounts(relationshipTypeCounts)
@@ -57,7 +58,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
                 defaultHeaderColumns(),
                 List.of(
                     databaseId.databaseName(),
-                    Byte.toString((byte) 42),
+                    idMapBuilderType,
                     Long.toString(1337L),
                     Long.toString(19L),
                     CsvMapUtil.relationshipCountsToString(relationshipTypeCounts),

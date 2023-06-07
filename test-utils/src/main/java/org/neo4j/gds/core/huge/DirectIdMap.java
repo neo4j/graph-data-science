@@ -40,7 +40,7 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return NO_TYPE;
     }
 

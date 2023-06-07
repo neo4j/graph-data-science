@@ -38,7 +38,7 @@ public class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return HighLimitIdMapBuilder.ID;
     }
 

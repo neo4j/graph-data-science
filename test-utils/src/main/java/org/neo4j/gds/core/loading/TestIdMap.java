@@ -51,7 +51,7 @@ public final class TestIdMap extends LabeledIdMap {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return NO_TYPE;
     }
 

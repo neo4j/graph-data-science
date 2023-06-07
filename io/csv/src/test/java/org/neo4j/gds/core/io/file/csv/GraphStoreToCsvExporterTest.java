@@ -470,7 +470,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                 ),
                 List.of(
                     graphStore.databaseId().databaseName(),
-                    Byte.toString(graphStore.nodes().typeId()),
+                    graphStore.nodes().typeId(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(graphStore.nodes().highestOriginalId()),
                     CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 6L, RelationshipType.of("REL1"), 6L)),
