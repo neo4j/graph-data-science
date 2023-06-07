@@ -39,7 +39,7 @@ public class HighLimitIdMap extends IdMapAdapter {
 
     @Override
     public String typeId() {
-        return HighLimitIdMapBuilder.ID;
+        return HighLimitIdMapBuilder.ID + "-" + super.typeId();
     }
 
     @Override
@@ -74,6 +74,17 @@ public class HighLimitIdMap extends IdMapAdapter {
     public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return super.withFilteredLabels(nodeLabels, concurrency)
             .map(filteredIdMap -> new FilteredHighLimitIdMap(this.highToLowIdSpace, filteredIdMap));
+    }
+
+    public static boolean isHighLimitIdMap(String typeId) {
+        return typeId.startsWith(HighLimitIdMapBuilder.ID);
+    }
+
+    public static Optional<String> innerTypeId(String typeId) {
+        var separatorIndex = typeId.indexOf("-");
+        return isHighLimitIdMap(typeId) && separatorIndex > 0 && separatorIndex < typeId.length() - 1
+            ? Optional.of(typeId.substring(separatorIndex + 1))
+            : Optional.empty();
     }
 
     static final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdMap {
