@@ -1,6 +1,8 @@
 [[graph-creation]]
 = Graph Creation
 
+:page-aliases: management-ops/node-properties.adoc
+
 // TODO fill me with graph data model / limits in GDS and when to choose what guidance
 
 Named graphs can be created from a Neo4j database by using either of
@@ -25,3 +27,57 @@ xref:management-ops/graph-creation/graph-generation.adoc[Randomised graphs can b
 | xref:management-ops/graph-creation/graph-generation.adoc[gds.beta.graph.generate]                 | Creates a new random graph projection of the user-defined properties and dimensions.
 | xref:management-ops/graph-creation/graph-project-cypher-legacy.adoc[gds.graph.project.cypher]     | Adds a graph to the catalog using Legacy Cypher projection.
 |===
+
+== Graph data model
+
+// TODO fill intro, add relationship properties limits
+
+
+[[node-properties]]
+// tag::header[]
+== Node Properties
+:description: This section explains the currently supported node properties.
+// end::header[]
+
+
+The Neo4j Graph Data Science Library is capable of augmenting nodes with additional properties.
+These properties can be loaded from the database when the graph is projected.
+Many algorithms can also persist their result as one or more node properties when they are run using the `mutate` mode.
+
+[[node-properties-supported]]
+=== Supported types
+
+The Neo4j Graph Data Science library does not support all property types that are supported by the Neo4j database.
+Every supported type also defines a fallback value, which is used to indicate that the value of this property is not set.
+
+The following table lists the supported property types, as well as their corresponding fallback values.
+
+* `Long` - `Long.MIN_VALUE`
+* `Double` - `NaN`
+* `Long Array` - `null`
+* `Float Array` - `null`
+* `Double Array` - `null`
+
+
+=== Defining the type of a node property
+
+When creating a graph projection that specifies a set of node properties, the type of these properties is automatically determined using the first property value that is read by the loader for any specified property.
+All integral numerical types are interpreted as `Long` values, all floating point values are interpreted as `Double` values.
+Array values are explicitly defined by the type of the values that the array contains, i.e. a conversion of, for example, an `Integer Array` into a `Long Array` is not supported.
+Arrays with mixed content types are not supported.
+
+=== Automatic type conversion
+
+Most algorithms that are capable of using node properties require a specific property type.
+In cases of a mismatch between the type of the provided property and the required type, the library will try to convert the property value into the required type.
+
+The automatic conversion only happens when the conversion is loss-less.
+Hence, we check the following:
+
+* `Long` to `Double`: The Long value does not exceed the supported range of the Double type.
+* `Double` to `Long`: The Double value does not have any decimal places.
+* `Double[]` to `Float[]`: The Double values do not exceed the supported range of the Float type for any of the elements in the array.
+
+The algorithm computation will fail if any of these conditions are not satisfied for any node property value.
+
+NOTE: The automatic conversion is computationally more expensive and should therefore be avoided in performance critical applications.

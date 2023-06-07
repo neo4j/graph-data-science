@@ -1,5 +1,3 @@
-
-
 [[utility-functions]]
 = Utility functions
 :description: This section provides explanations and examples for each of the utility functions in the Neo4j Graph Data Science library.

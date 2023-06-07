@@ -40,7 +40,7 @@ Read more about that in xref:management-ops/administration.adoc[].
 == Graph creation
 
 // TODO what to put here now? (we have a subsection) maybe a small image which shows the life-cycle could be good enough?
-In the beginning, you need to create a graph.
+In the beginning, you need to xref:management-ops/graph-creation/index.adoc[create a graph].
 
 
 == Inspecting the graph catalog
@@ -93,3 +93,8 @@ In the beginning, you need to create a graph.
 | xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                                      | Removes node properties from a named graph.
 | xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop] | Deletes relationships of a given relationship type from a named graph.
 |===
+
+== Administration
+
+// TODO more text here?
+The GDS catalog offers xref:management-ops/administration.adoc[elevated access to administrator users].

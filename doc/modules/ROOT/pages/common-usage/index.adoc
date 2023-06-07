@@ -59,6 +59,6 @@ To get an overview of the status of the system you can use the xref:common-usage
 
 For more detail on the core operations in GDS, see the corresponding section:
 
-1. xref:management-ops/graph-catalog-ops.adoc[Graph Catalog]
+1. xref:management-ops/index.adoc[Graph management]
 2. xref:common-usage/projecting-graphs.adoc[Projecting graphs]
 3. xref:common-usage/running-algos.adoc[Running algorithms]

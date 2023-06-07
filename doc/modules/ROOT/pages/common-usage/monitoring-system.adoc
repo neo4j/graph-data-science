@@ -53,7 +53,7 @@ YIELD
 
 [NOTE]
 ====
-`freeHeap` is influenced by ongoing GDS procedures, graphs stored the xref:management-ops/graph-catalog-ops.adoc[Graph catalog] and the underlying Neo4j DBMS.
+`freeHeap` is influenced by ongoing GDS procedures, graphs stored in the xref:management-ops/index.adoc[Graph catalog] and the underlying Neo4j DBMS.
 Stored graphs can take up a significant amount of heap memory.
 To inspect the graphs in the graph catalog you can use the xref:graph-list.adoc[Graph list] procedure.
 ====

@@ -31,7 +31,7 @@ The projected graphs will reside in the catalog until either:
 === Node property support
 
 Legacy Cypher projections can only project a limited set of node property types from a Cypher query.
-The xref:management-ops/node-properties.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
+The xref:management-ops/graph-creation/index.adoc#node-properties-supported[Node Properties page] details which node property types are supported.
 Other types of node properties have to be transformed or encoded into one of the supported types in order to be projected using a Legacy Cypher projection.
 
 
