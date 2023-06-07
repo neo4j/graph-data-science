@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +32,11 @@ import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfigImpl;
+import org.neo4j.gds.core.loading.ArrayIdMap;
+import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
+import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -152,6 +157,23 @@ class CsvToGraphStoreImporterIntegrationTest {
         assertThat(importedGraphStore.capabilities())
             .usingRecursiveComparison()
             .isEqualTo(ImmutableStaticCapabilities.of(writeMode));
+    }
+
+    @ParameterizedTest
+    @ValueSource(bytes = {ArrayIdMapBuilder.ID, HighLimitIdMapBuilder.ID})
+    void shouldConsiderIdMapBuilderType(byte idMapBuilderType) {
+        var graphStore = GdlFactory.builder()
+            .gdlGraph("()-[]->()")
+            .idMapBuilderType(idMapBuilderType)
+            .build()
+            .build();
+
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(1), graphLocation).run();
+
+        var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run();
+
+        assertThat(userGraphStore.graphStore().nodes().typeId()).isEqualTo(idMapBuilderType);
     }
 
     private GraphStoreToFileExporterConfig exportConfig(int concurrency) {
