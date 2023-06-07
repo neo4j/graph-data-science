@@ -105,7 +105,7 @@ For every row returned by the first subquery, the operational database is then q
 In this mode of using GDS in a composite environment, the GDS operations are executed on the Fabric proxy server.
 The graph projections are then using the data stored on the shards to construct the in-memory graph.
 
-NOTE: Currently only xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher Aggregation] is supported for projecting in-memory graphs on a Composite database.
+NOTE: Currently only xref:management-ops/projections/graph-project-cypher-projection.adoc[Cypher projection] is supported for projecting in-memory graphs on a Composite database.
 
 Graph algorithms can then be executed on the composite database, similar to a single machine setup.
 This scenario is useful, if a graph that logically represents a single graph is distributed to different Composite shards.

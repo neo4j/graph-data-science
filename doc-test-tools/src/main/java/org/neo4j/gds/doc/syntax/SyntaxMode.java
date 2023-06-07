@@ -31,9 +31,9 @@ public enum SyntaxMode {
     GRAPH_DROP("graph-drop-syntax"),
     MODEL_DROP("model-drop-syntax"),
     GRAPH_PROJECT("graph-project-syntax"),
-    GRAPH_PROJECT_CYPHER("graph-project-cypher-syntax"),
+    GRAPH_PROJECT_CYPHER("graph-project-cypher-legacy-syntax"),
     GRAPH_PROJECT_CYPHER_AGGREGATION(
-        "graph-project-cypher-aggregation-syntax",
+        "graph-project-cypher-projection-syntax",
         true,
         CustomProcedure.Namespace.AGGREGATION_FUNCTION
     ),
