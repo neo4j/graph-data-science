@@ -98,9 +98,12 @@ public final class GraphFactory {
             ? Optional.of(maxOriginalId)
             : Optional.<Long>empty();
 
-        var idMapBuilder = idMapBuilderType.isPresent()
-            ? idMapBehavior.create(idMapBuilderType.get(), threadCount, maybeMaxOriginalId, nodeCount)
-            : idMapBehavior.create(threadCount, maybeMaxOriginalId, nodeCount);
+        var idMapBuilder = idMapBehavior.create(
+            idMapBuilderType.orElse(IdMap.NO_TYPE),
+            threadCount,
+            maybeMaxOriginalId,
+            nodeCount
+        );
 
         boolean deduplicate = deduplicateIds.orElse(true);
 
