@@ -30,22 +30,30 @@ xref:management-ops/graph-creation/graph-generation.adoc[Randomised graphs can b
 
 == Graph data model
 
-// TODO fill intro, add relationship properties limits
+// TODO better phrasing and maybe even just an image for illustration?
+GDS supports a subset of the property graph data model.
+Specifically, GDS supports the following:
+
+* Nodes
+** Labels
+** Properties
+* Relationships
+** Type
+** Properties
+** Directed and Undirected relationships
+** Multiple relationships between two nodes
+** Self relationships
 
 
 [[node-properties]]
-// tag::header[]
-== Node Properties
-:description: This section explains the currently supported node properties.
-// end::header[]
-
+=== Node Properties
 
 The Neo4j Graph Data Science Library is capable of augmenting nodes with additional properties.
 These properties can be loaded from the database when the graph is projected.
 Many algorithms can also persist their result as one or more node properties when they are run using the `mutate` mode.
 
 [[node-properties-supported]]
-=== Supported types
+==== Supported types
 
 The Neo4j Graph Data Science library does not support all property types that are supported by the Neo4j database.
 Every supported type also defines a fallback value, which is used to indicate that the value of this property is not set.
@@ -59,14 +67,14 @@ The following table lists the supported property types, as well as their corresp
 * `Double Array` - `null`
 
 
-=== Defining the type of a node property
+==== Defining the type of a node property
 
 When creating a graph projection that specifies a set of node properties, the type of these properties is automatically determined using the first property value that is read by the loader for any specified property.
 All integral numerical types are interpreted as `Long` values, all floating point values are interpreted as `Double` values.
 Array values are explicitly defined by the type of the values that the array contains, i.e. a conversion of, for example, an `Integer Array` into a `Long Array` is not supported.
 Arrays with mixed content types are not supported.
 
-=== Automatic type conversion
+==== Automatic type conversion
 
 Most algorithms that are capable of using node properties require a specific property type.
 In cases of a mismatch between the type of the provided property and the required type, the library will try to convert the property value into the required type.
@@ -81,3 +89,11 @@ Hence, we check the following:
 The algorithm computation will fail if any of these conditions are not satisfied for any node property value.
 
 NOTE: The automatic conversion is computationally more expensive and should therefore be avoided in performance critical applications.
+
+=== Relationship properties
+
+The Neo4j Graph Data Science library does not support all property types that are supported by the Neo4j database.
+Specifically, GDS only supports numeric relationship properties, i.e., `Long`, `Double`.
+Note that `Long` will be converted to `Double` during the projection.
+
+
