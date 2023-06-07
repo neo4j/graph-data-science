@@ -30,7 +30,6 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
-import java.util.Locale;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -40,7 +39,12 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
     private final NodesBuilder nodesBuilder;
 
-    public LazyIdMapBuilder(int concurrency, boolean hasLabelInformation, boolean hasProperties, PropertyState propertyState) {
+    public LazyIdMapBuilder(
+        int concurrency,
+        boolean hasLabelInformation,
+        boolean hasProperties,
+        PropertyState propertyState
+    ) {
         this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(concurrency)
@@ -57,7 +61,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     public long addNode(long nodeId, NodeLabelToken nodeLabels) {
-        checkPositiveId(nodeId);
+        LoadingExceptions.checkPositiveId(nodeId);
 
         long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
@@ -71,19 +75,6 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         return intermediateId;
     }
 
-    /**
-     * GDS has the general assumption of non-negative original node ids.
-     */
-    private static void checkPositiveId(long nodeId) {
-        if (nodeId < 0) {
-            throw new IllegalArgumentException(String.format(
-                Locale.US,
-                "GDS expects node ids to be positive. But got a negative id of `%d`.",
-                nodeId
-            ));
-        }
-    }
-
     public long addNodeWithProperties(
         long nodeId,
         PropertyValues properties,
@@ -91,7 +82,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     ) {
         long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
-        checkPositiveId(nodeId);
+        LoadingExceptions.checkPositiveId(nodeId);
 
         // deduplication
         if (intermediateId < 0) {
