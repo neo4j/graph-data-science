@@ -75,10 +75,7 @@ public class GraphStoreExportProc extends BaseProc {
                 validateGraphStore(graphStore, exportConfig);
 
                 var progressTracker = new TaskProgressTracker(
-                    ProgressTrackerExecutionMonitor.progressTask(
-                        graphStore.nodeCount(),
-                        graphStore.relationshipCount()
-                    ),
+                    ProgressTrackerExecutionMonitor.progressTask(),
                     executionContext().log(),
                     exportConfig.writeConcurrency(),
                     exportConfig.jobId(),
