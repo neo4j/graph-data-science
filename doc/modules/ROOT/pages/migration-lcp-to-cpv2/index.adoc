@@ -1,0 +1,465 @@
+[appendix]
+[[appendix-c]]
+= Migration from Legacy to new Cypher projection
+:description: If you have been using `gds.graph.project.cypher` projections, you can find the information you will need to migrate to using the new Cypher projection.
+
+
+== Who should read this guide
+
+This guide is intended for users who have been using the legacy Cypher projection `gds.graph.project.cypher`.
+Cypher projections are now done using the `gds.graph.project` aggregation function.
+We assume that most of the mentioned operations and concepts can be understood with little explanation.
+Thus we are intentionally brief in the examples and comparisons.
+Please see xref:management-ops/projections/graph-project-cypher-projection.adoc[the documentation for the Cypher projection] for more details.
+
+== Structural Changes
+
+The Legacy Cypher projection is a standalone procedure call where Cypher queries are passed as string arguments and executed by GDS.
+The new Cypher projection is an aggregation function that is called as part of a Cypher query.
+GDS is no longer responsible or in control of the execution of the Cypher queries.
+Migrating to the new Cypher projection requires changes of how the Cypher query is written as a whole.
+
+There are no longer separate queries for nodes and relationships.
+Instead, write one query that produces the source- and target node pairs and use `gds.graph.project` to aggregate into the graph catalog.
+Since the relationship query from the Legacy Cypher projection already required you to return the source- and target node pairs, it is a good starting point for the new query.
+Roughly speaking, the query has to be rewritten as follows:
+
+.Structural changes between the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  $graphName,
+  $nodeQuery,
+  $relationshipQuery,
+  $configuration
+)
+----
+|
+[source, cypher, role=noplay]
+----
+$relationshipQuery
+RETURN gds.graph.project(
+  $graphName,
+  sourceNode,
+  targetNode,
+  $dataConfig,
+  $configuration
+)
+----
+|===
+
+The query no longer needs to adhere to a certain structure and you can use any Cypher query that produces the source- and target node pairs.
+
+== Semantic Changes
+
+The Legacy Cypher projections has separate queries for nodes and relationships.
+The nodes query is executed first and defines all the nodes in the graph.
+The relationships query is executed second and the previously imported nodes act as a filter for the relationships.
+Only relationships between the previously imported nodes are imported into the graph.
+Any node that was imported as part of the node query, but does not appear in any of the relationships, results in a disconnected node in the graph.
+By default, all nodes are disconnected unless they also appear in a relationship.
+
+The new Cypher projection does not have separate queries for nodes and relationships.
+The node query is no longer needed and nodes are implicitly created from the source- and target node pairs.
+Disconnected nodes have to be explicitly created in the query by providing `NULL` in place of the target node.
+By default, all nodes are connected unless they are explicitly disconnected.
+
+Since the new Cypher projection is no longer in charge of executing the Cypher queries, the graph configuration can no longer return the node- and relationship queries.
+
+== Examples
+
+The following examples are based on the examples listed in the documentation for xref:management-ops/projections/graph-project-cypher-legacy.adoc[the Legacy Cypher projection] and xref:management-ops/projections/graph-project-cypher-projection.adoc[the new Cypher projection].
+
+=== Simple graph
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Simple graph projection with potentially disconnected nodes
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'persons',
+  'MATCH (n:Person) RETURN id(n) AS id',
+  'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target')
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)
+OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
+WITH gds.graph.project('persons', n, m) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS node, g.relationshipCount AS rels
+----
+2+| : Simple graph projection without disconnected nodes
+|
+Not applicable, Legacy Cypher projection cannot guarantee connected nodes.
+|
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)-[r:KNOWS]->(m:Person)
+WITH gds.graph.project('persons', n, m) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS node, g.relationshipCount AS rels
+----
+|===
+
+The direct translation requires the use of an `OPTIONAL MATCH` clause to create disconnected nodes in order to create an identical graph.
+This may not have been what you wanted originally, but was required since the Legacy Cypher projection could not guarantee connected nodes.
+By using what is equivalent to the `$relationshipQuery`, we now also get only connected nodes in the new Cypher projection.
+
+Another difference is that we pass the nodes directly to the new Cypher projection.
+The Legacy Cypher projection required us to pass the node ids.
+By passing the nodes directly, the Cypher projection knows that the source for the projection is a neo4j database and it enables the use of `.write` procedures.
+It is also possible to pass node ids instead of nodes `... gds.graph.project('persons', id(n), id(m))`, but this is only recommended if the source for the projection is not a neo4j database.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#graph-project-cypher-projection-arbitrary-source-and-target-id-values[Arbitrary source and target id values] for more details.
+
+=== Multi-graph
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Multi-graph projection
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'personsAndBooks',
+  'MATCH (n) WHERE n:Person OR n:Book RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:KNOWS\|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type')
+YIELD
+  graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipCount AS rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n)
+WHERE n:Person OR n:Book
+OPTIONAL MATCH (n)-[r:KNOWS\|READ]->(m)
+WHERE m:Person OR m:Book
+WITH gds.graph.project(
+  'personsAndBooks',
+  n,
+  m,
+  {
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    relationshipType: type(r)
+  }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS node, g.relationshipCount AS rels
+----
+|===
+
+Similar to the previous example, we have to use an `OPTIONAL MATCH` clause to create disconnected nodes in order to create an identical graph.
+The query can also look different depending on the actual graph schema and whether disconnected nodes are desired.
+
+Node labels and relationship types are passed as an additional configuration map to the new Cypher projection.
+Node labels need to be passed as `sourceNodeLabels` and `targetNodeLabels` and relationship types need to be passed as `relationshipType`.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#graph-project-cypher-projection-multi-graph[Multi-graph] for more details.
+
+=== Node properties
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Graph projection with node properties
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'graphWithProperties',
+  'MATCH (n:Person)
+   RETURN
+    id(n) AS id,
+    labels(n) AS labels,
+    n.age AS age',
+  'MATCH (n)-[r:KNOWS]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+YIELD
+  graphName, nodeCount AS nodes, relationshipCount AS rels
+RETURN graphName, nodes, rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)-[r:KNOWS]->(m:Person)
+WITH gds.graph.project(
+  'graphWithProperties',
+  n,
+  m,
+  {
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    sourceNodeProperties: n { .age },
+    targetNodeProperties: m { .age },
+    relationshipType: type(r)
+  }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS node, g.relationshipCount AS rels
+----
+2+| : Graph projection with optional node properties
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'graphWithProperties',
+  'MATCH (n)
+   WHERE n:Book OR n:Person
+   RETURN
+    id(n) AS id,
+    labels(n) AS labels,
+    coalesce(n.age, 18) AS age',
+    coalesce(n.price, 5.0) as price,
+    n.ratings as ratings',
+  'MATCH (n)-[r:KNOWS\|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+YIELD
+  graphName, nodeCount AS nodes, relationshipCount AS rels
+RETURN graphName, nodes, rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)-[r:KNOWS\|READ]->(m)
+WITH gds.graph.project(
+  'graphWithProperties',
+  n,
+  m,
+  {
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    sourceNodeProperties: n { age: coalesce(n.age, 18), price: coalesce(n.price, 5.0), .ratings },
+    targetNodeProperties: n { age: coalesce(n.age, 18), price: coalesce(n.price, 5.0), .ratings },
+    relationshipType: type(r)
+  }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS node, g.relationshipCount AS rels
+----
+|===
+
+Similar to the previous example, we pass the labels and properties in an additional map.
+We can use map projections as well as any other Cypher expression to create the properties.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#node-properties-example[Node properties] for more details.
+
+
+=== Relationship properties
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Graph projection with relationship properties
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'readWithProperties',
+  'MATCH (n) RETURN id(n) AS id',
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, r.numberOfPages AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n)-[r:READ]->(m)
+WITH gds.graph.project(
+  'readWithProperties',
+  n,
+  m,
+  { relationshipProperties: r { .numberOfPages } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+
+----
+|===
+
+Similar to the previous example, we pass properties in an additional map, here using the `relationshipProperties` key.
+We can use map projections as well as any other Cypher expression to create the properties.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#cypher-aggregation-relationship-properties[Relationship properties] for more details.
+
+
+=== Parallel Relationship
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Graph projection with parallel relationships
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'readCount',
+  'MATCH (n) RETURN id(n) AS id',
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) AS numberOfReads'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n)-[r:READ]->(m)
+WITH n, m, count(r) AS numberOfReads
+WITH gds.graph.project(
+  'readCount',
+  n,
+  m,
+  {
+    relationshipProperties: { numberOfReads: numberOfReads }
+  }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+2+| : Graph projection with parallel relationship and relationship properties
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'readSums',
+  'MATCH (n) RETURN id(n) AS id',
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, sum(r.numberOfPages) AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n)-[r:READ]->(m)
+WITH n, m, sum(r.numberOfPages) AS numberOfPages
+WITH gds.graph.project(
+  'readSums',
+  n,
+  m,
+  {
+    relationshipProperties: { numberOfPages: numberOfPages }
+  }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+|===
+
+Similar to Legacy Cypher projections, there is no mechanism to let GDS aggregate parallel relationships.
+Aggregations over parallel relationships are done in the query by any means that are appropriate for the graph schema and data.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#graph-project-cypher-projection-parallel-relationships[Parallel relationship] for more details.
+
+
+=== Projecting filtered graphs
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Graph projection with filtered graphs
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'existingNumberOfPages',
+  'MATCH (n) RETURN id(n) AS id',
+  'MATCH (n)-[r:READ]->(m)
+    WHERE r.numberOfPages IS NOT NULL
+    RETURN id(n) AS source, id(m) AS target, r.numberOfPages AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n) OPTIONAL MATCH (n)-[r:READ]->(m)
+WHERE r.numberOfPages IS NOT NULL
+WITH gds.graph.project('existingNumberOfPages', n, m, { relationshipProperties: r { .numberOfPages } }) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+
+----
+|===
+
+Similar to Legacy Cypher projections, we can apply any Cypher method of filtering the data before passing it on to the Cypher projection.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#graph-project-cypher-projection-filtered[Projecting filtered Neo4j graphs] for more details.
+
+
+=== Projecting undirected graphs
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Graph projection with undirected graphs
+|
+Not applicable, Legacy Cypher projection cannot project undirected graphs.
+|
+[source, cypher, role=noplay]
+----
+MATCH (n)-[r:KNOWS\|READ]->(m)
+WHERE n:Book OR n:Person
+WITH gds.graph.project(
+  'graphWithUndirectedRelationships',
+  source,
+  target,
+  {},
+  {undirectedRelationshipTypes: ['*']}
+) as g
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+|===
+
+The new Cypher projection can project undirected graphs.
+See xref:management-ops/projections/graph-project-cypher-projection.adoc#graph-project-cypher-projection-undirected-relationships[Undirected relationships] for more details.
+
+
+=== Memory estimation
+
+.Side-by-side comparison of the two Cypher projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+2+| : Memory estimation of projected graphs
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher.estimate(
+  'MATCH (n:Person) RETURN id(n) AS id',
+  'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target'
+) YIELD requiredMemory, bytesMin, bytesMax
+----
+|
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)-[r:KNOWS]-(m)
+WITH count(n) as nodeCount, count(r) as relationshipCount
+CALL gds.graph.project.estimate('*', '*', {
+  nodeCount: nodeCount,
+  relationshipCount: relationshipCount,
+})
+YIELD requiredMemory, bytesMin, bytesMax
+----
+|===
+
+Since the new Cypher projection is no longer a procedure, there is also no `.estimate` method.
+Instead, we can use xref:common-usage/memory-estimation.adoc#estimate-procedure-fictive-graph[the `gds.graph.project.estimate` procedure] to estimate the memory requirements of the graph projection.
