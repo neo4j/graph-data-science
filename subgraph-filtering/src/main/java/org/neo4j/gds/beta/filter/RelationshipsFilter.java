@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -42,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
@@ -106,11 +108,13 @@ public final class RelationshipsFilter {
 
         var propertyConfigs = propertyKeys
             .stream()
-            .map(propertyKey -> GraphFactory.PropertyConfig.of(
-                propertyKey,
-                Aggregation.NONE,
-                graphStore.relationshipPropertyValues(relType, propertyKey).defaultValue()
-            ))
+            .map(
+                propertyKey -> GraphFactory.PropertyConfig.of(
+                    propertyKey,
+                    Aggregation.NONE,
+                    graphStore.relationshipPropertyValues(relType, propertyKey).defaultValue()
+                )
+            )
             .collect(Collectors.toList());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -128,13 +132,23 @@ public final class RelationshipsFilter {
             .boxed()
             .collect(Collectors.toMap(propertyKeys::get, Function.identity()));
 
+        // computing the count is expected to be a lot cheaper than bad partitioning
+        var relevantRelationshipsCount = concurrency > 1
+            ? ParallelUtil.parallelStream(
+                LongStream.range(0, outputNodes.nodeCount()),
+                concurrency,
+                stream -> stream.map(
+                    id -> compositeIterator.degree(inputNodes.toMappedNodeId(outputNodes.toOriginalNodeId(id)))
+                ).sum()
+            )
+            : graphStore.relationshipCount(relType);
+
         var relationshipFilterTasks = PartitionUtils.degreePartition(
             outputNodes.nodeCount(),
-            graphStore.relationshipCount(relType),
-            compositeIterator::degree,
+            relevantRelationshipsCount,
+            nodeId -> compositeIterator.degree(inputNodes.toMappedNodeId(outputNodes.toOriginalNodeId(nodeId))),
             concurrency,
-            partition ->
-            new RelationshipFilterTask(
+            partition -> new RelationshipFilterTask(
                 partition,
                 relationshipExpr,
                 compositeIterator.concurrentCopy(),
@@ -155,7 +169,7 @@ public final class RelationshipsFilter {
             .executor(executorService)
             .run();
 
-       return relationshipsBuilder.build();
+        return relationshipsBuilder.build();
     }
 
     private RelationshipsFilter() {}
