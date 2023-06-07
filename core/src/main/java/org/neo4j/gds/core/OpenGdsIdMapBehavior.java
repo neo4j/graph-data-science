@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
+import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -44,16 +45,17 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public IdMapBuilder create(String id, int concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
-        switch (id.toLowerCase(Locale.US)) {
-            case ArrayIdMapBuilder.ID: {
-                return create(concurrency, maxOriginalId, nodeCount);
-            }
-            case HighLimitIdMapBuilder.ID: {
-                return HighLimitIdMapBuilder.of(concurrency, create(concurrency, maxOriginalId, nodeCount));
-            }
-            default:
-                return create(concurrency, maxOriginalId, nodeCount);
+        var idLowerCase = id.toLowerCase(Locale.US);
+        if (idLowerCase.equals(ArrayIdMapBuilder.ID)) {
+            return create(concurrency, maxOriginalId, nodeCount);
         }
+        if (HighLimitIdMap.isHighLimitIdMap(idLowerCase)) {
+            var innerBuilder = HighLimitIdMap.innerTypeId(idLowerCase)
+                .map(innerId -> create(innerId, concurrency, maxOriginalId, nodeCount))
+                .orElseGet(() -> create(concurrency, maxOriginalId, nodeCount));
+            return HighLimitIdMapBuilder.of(concurrency, innerBuilder);
+        }
+        return create(concurrency, maxOriginalId, nodeCount);
     }
 
     @Override
