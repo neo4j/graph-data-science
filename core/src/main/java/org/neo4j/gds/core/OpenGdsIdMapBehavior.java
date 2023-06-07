@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
+import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
@@ -42,8 +43,16 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public IdMapBuilder create(byte id, int concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
-        // We can only create array id maps in open GDS; no need to check the id.
-        return create(concurrency, maxOriginalId, nodeCount);
+        switch (id) {
+            case ArrayIdMapBuilder.ID: {
+                return create(concurrency, maxOriginalId, nodeCount);
+            }
+            case HighLimitIdMapBuilder.ID: {
+                return HighLimitIdMapBuilder.of(concurrency, create(concurrency, maxOriginalId, nodeCount));
+            }
+            default:
+                return create(concurrency, maxOriginalId, nodeCount);
+        }
     }
 
     @Override
