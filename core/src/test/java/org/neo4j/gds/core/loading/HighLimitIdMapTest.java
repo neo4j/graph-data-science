@@ -85,6 +85,7 @@ class HighLimitIdMapTest {
     void shouldReturnCorrectInnerTypeId() {
         assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID)).isEqualTo(Optional.empty());
         assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID + "-foobar")).isEqualTo(Optional.of("foobar"));
+        assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID + "-" + HighLimitIdMapBuilder.ID)).isEqualTo(Optional.empty());
         assertThat(HighLimitIdMap.innerTypeId("foobar")).isEqualTo(Optional.empty());
         assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID + "-")).isEqualTo(Optional.empty());
     }
