@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
@@ -60,22 +61,18 @@ public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageRe
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "GraphSage streaming failed",
             executionContext.log(),
-            () -> {
-                if (computationResult.result().isEmpty()) {
-                    return Stream.empty();
-                }
-                var graph = computationResult.graph();
-                var embeddings = computationResult.result().get().embeddings();
-
-                return LongStream.range(0, graph.nodeCount())
-                    .mapToObj(internalNodeId -> new StreamResult(
-                        graph.toOriginalNodeId(internalNodeId),
-                        embeddings.get(internalNodeId)
-                    ));
-            }
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var embeddings = result.embeddings();
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .mapToObj(internalNodeId -> new StreamResult(
+                            graph.toOriginalNodeId(internalNodeId),
+                            embeddings.get(internalNodeId)
+                        ));
+                }).orElseGet(Stream::empty)
         );
     }
-
 
     @Override
     public ValidationConfiguration<GraphSageStreamConfig> validationConfig(ExecutionContext executionContext) {
