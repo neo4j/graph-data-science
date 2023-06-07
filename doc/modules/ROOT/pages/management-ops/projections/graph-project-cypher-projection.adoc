@@ -1,6 +1,7 @@
 [[catalog-graph-project-cypher-projection]]
 = Projecting graphs using Cypher
 :description: This section details projecting GDS graphs using `Cypher` projections.
+:page-aliases: managments-ops/projections/graph-project-cypher-aggregation.adoc
 
 
 Using Cypher projection is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
