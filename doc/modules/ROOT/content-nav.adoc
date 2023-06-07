@@ -168,3 +168,4 @@
 *** xref:migration-gds-1-to-gds-2/migration-memory-estimation.adoc[]
 *** xref:migration-gds-1-to-gds-2/migration-algorithms.adoc[]
 *** xref:migration-gds-1-to-gds-2/migration-ml.adoc[]
+** xref:migration-lcp-to-cpv2/index.adoc[]
