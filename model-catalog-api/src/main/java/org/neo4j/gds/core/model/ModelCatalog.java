@@ -81,6 +81,11 @@ public interface ModelCatalog {
         }
 
         @Override
+        public void unregisterListener(ModelCatalogListener listener) {
+
+        }
+
+        @Override
         public void set(Model<?, ?, ?> model) {
 
         }
