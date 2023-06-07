@@ -119,7 +119,7 @@ By using what is equivalent to the `$relationshipQuery`, we now also get only co
 
 Another difference is that we pass the nodes directly to the new Cypher projection.
 The Legacy Cypher projection required us to pass the node ids.
-By passing the nodes directly, the Cypher projection knows that the source for the projection is a neo4j database and it enables the use of `.write` procedures.
+By passing the nodes directly, the Cypher projection knows that the source for the projection is a Neo4j database and it enables the use of `.write` procedures.
 It is also possible to pass node ids instead of nodes `... gds.graph.project('persons', id(n), id(m))`, but this is only recommended if the source for the projection is not a neo4j database.
 See xref:management-ops/projections/graph-project-cypher-projection.adoc#graph-project-cypher-projection-arbitrary-source-and-target-id-values[Arbitrary source and target id values] for more details.
 
