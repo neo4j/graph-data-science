@@ -1,5 +1,6 @@
 [[migration-algos-common]]
 = Common changes
+:page-aliases: appendix-b/migration-algos-common.adoc
 
 This section describes changes between version 1.x and 2.x that are common to all procedures.
 
