@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.IdMap;
@@ -82,9 +83,11 @@ public class HighLimitIdMap extends IdMapAdapter {
 
     public static Optional<String> innerTypeId(String typeId) {
         var separatorIndex = typeId.indexOf("-");
-        return isHighLimitIdMap(typeId) && separatorIndex > 0 && separatorIndex < typeId.length() - 1
-            ? Optional.of(typeId.substring(separatorIndex + 1))
-            : Optional.empty();
+        if (isHighLimitIdMap(typeId) && separatorIndex > 0 && separatorIndex < typeId.length() - 1) {
+            var substring = typeId.substring(separatorIndex + 1);
+            return substring.equals(HighLimitIdMapBuilder.ID) ? Optional.empty() : Optional.of(substring);
+        }
+        return Optional.empty();
     }
 
     static final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdMap {
