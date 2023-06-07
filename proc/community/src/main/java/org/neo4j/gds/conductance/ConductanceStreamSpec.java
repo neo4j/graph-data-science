@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
@@ -49,22 +50,20 @@ public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, Conduct
         return (username, configuration) -> ConductanceStreamConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<Conductance, ConductanceResult, ConductanceStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-            var result=computationResult.result().get();
-            var condunctances = result.communityConductances();
-
-            return LongStream
-                .range(0, condunctances.capacity())
-                .filter(c -> !Double.isNaN(condunctances.get(c)))
-                .mapToObj(c ->  new StreamResult(c, condunctances.get(c)));
-        };
-
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var condunctances = result.communityConductances();
+                    return LongStream
+                        .range(0, condunctances.capacity())
+                        .filter(c -> !Double.isNaN(condunctances.get(c)))
+                        .mapToObj(c -> new StreamResult(graph.toOriginalNodeId(c), condunctances.get(c)));
+                }).orElseGet(Stream::empty)
+        );
     }
-
 }

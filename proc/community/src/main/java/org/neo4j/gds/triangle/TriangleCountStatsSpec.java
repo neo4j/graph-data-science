@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)
@@ -50,21 +51,20 @@ public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangl
 
     @Override
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = new TriangleCountStatsResult.Builder();
-            computationResult.result()
-                .ifPresent(result ->
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var builder = new TriangleCountStatsResult.Builder();
+                    builder.withGlobalTriangleCount(result.globalTriangles());
                     builder
-                        .withGlobalTriangleCount(result.globalTriangles())
-                );
-
-            builder
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config());
-
-            return Stream.of(builder.build());
-        };
+                        .withPreProcessingMillis(computationResult.preProcessingMillis())
+                        .withComputeMillis(computationResult.computeMillis())
+                        .withNodeCount(computationResult.graph().nodeCount())
+                        .withConfig(computationResult.config());
+                    return Stream.of(builder.build());
+                }).orElseGet(Stream::empty)
+        );
     }
 }
