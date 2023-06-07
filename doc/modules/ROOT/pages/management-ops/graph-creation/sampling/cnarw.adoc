@@ -2,6 +2,7 @@
 [.beta]
 = Common Neighbour Aware Random Walk sampling
 :description: This section describes the Common Neighbour Aware Random Walk sampling algorithm in the Neo4j Graph Data Science library.
+:page-aliases: management-ops/projections/cnarw.adoc
 
 include::partial$/operations-reference/beta-note.adoc[]
 
@@ -34,11 +35,11 @@ The implementation of the algorithm is based on the following paper:
 
 === Relationship weights
 
-Same as in the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`] parameter in `RandomWalksWithRestarts` algorithm.
+Same as in the xref:management-ops/graph-creation/sampling/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`] parameter in `RandomWalksWithRestarts` algorithm.
 
 === Node label stratification
 
-Same as in the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] parameter in `RandomWalksWithRestarts` algorithm.
+Same as in the xref:management-ops/graph-creation/sampling/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] parameter in `RandomWalksWithRestarts` algorithm.
 
 == Syntax
 

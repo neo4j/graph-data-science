@@ -1,0 +1,11 @@
+= Sampling
+:description: This section details creating a new graph by sampling an existing graph within the Neo4j Graph Data Science library.
+
+// TODO this is a duplicate from the sampling doc pages
+Graph sampling algorithms are used to reduce the complexity of large and complex graphs while preserving their essential properties. They can help to speed up computation, reduce bias, and ensure privacy, making graph analysis more manageable and accurate. They are widely used in network analysis, machine learning, and social network analysis, among other applications.
+
+
+You can choose between different sampling methods.
+
+* xref:management-ops/graph-creation/sampling/rwr.adoc[Random walk with restart] - taking random walks from a set of start nodes.
+* xref:management-ops/graph-creation/sampling/cnarw.adoc[Common Neighbour Aware Random Walk] - avoids getting caught in local loops. This is especially useful for graphs with solid dense regions.

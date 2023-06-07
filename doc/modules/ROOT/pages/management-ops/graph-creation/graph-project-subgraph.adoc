@@ -1,7 +1,8 @@
 [[catalog-graph-project-subgraph]]
 [.beta]
-= Projecting a subgraph
+= Filtering
 :description: This section details how to project subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
+:page-aliases: management-ops/projections/graph-project-subgraph.adoc
 
 include::partial$/operations-reference/beta-note.adoc[]
 
@@ -264,7 +265,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 === Using query parameters
 
 Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
-As an example we can rewrite the xref:management-ops/projections/graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
+As an example we can rewrite the xref:management-ops/graph-creation/graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
 
 [role=query-example]
 --

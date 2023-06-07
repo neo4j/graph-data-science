@@ -1,7 +1,9 @@
 [.enterprise-edition.alpha]
 [[graph-project-apache-arrow]]
-= Projecting graphs using Apache Arrow
+= Apache Arrow projection
 :description: This chapter explains how to import data using Apache Arrow™ into the Graph Data Science library.
+:page-aliases: graph-project-apache-arrow.adoc
+
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -33,7 +35,7 @@ To initialize the import process, the client needs to execute a Flight action on
 The action type is called `CREATE_GRAPH` and the action body configures the import process.
 The server receives the action, creates the import process and acknowledges success.
 +
-See xref:graph-project-apache-arrow.adoc#arrow-initialize-import-process[Initializing the Import Process] for more details.
+See xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-initialize-import-process[Initializing the Import Process] for more details.
 +
 2. Send node records via an Arrow Flight stream
 +
@@ -41,7 +43,7 @@ In the second phase, the client sends record batches of nodes via `PUT` as a Fli
 Once all record batches are sent, the client needs to indicate that all nodes have been sent.
 This is done via sending another Flight action with type `NODE_LOAD_DONE`.
 +
-See xref:graph-project-apache-arrow.adoc#arrow-send-nodes[Sending node records via PUT as a Flight stream] for more details.
+See xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-send-nodes[Sending node records via PUT as a Flight stream] for more details.
 +
 3. Send relationship records via an Arrow Flight stream
 +
@@ -50,7 +52,7 @@ Once all record batches are sent, the client needs to indicate that the import p
 This is done via sending another Flight action with type `RELATIONSHIP_LOAD_DONE`.
 The server finalizes the construction of the in-memory graph and stores the graph in the graph catalog.
 +
-See xref:graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relationship records via PUT as a Flight stream] for more details.
+See xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relationship records via PUT as a Flight stream] for more details.
 
 
 [[arrow-initialize-import-process]]
@@ -246,7 +248,7 @@ The timeout can be configured via the `gds.arrow.abortion_timeout` setting, for 
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
-The xref:graph-project-apache-arrow.adoc#arrow-client-server-protocol[Client-Server protocol] can also be used to create a new Neo4j database instead of an in-memory graph.
+The xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-client-server-protocol[Client-Server protocol] can also be used to create a new Neo4j database instead of an in-memory graph.
 To initialize a database import process, we need to change the initial action type to `CREATE_DATABASE`.
 The action body is a JSON document containing the configuration for the import process:
 
@@ -274,7 +276,7 @@ The following table contains all settings for the database import.
 |===
 
 After sending the action to initialize the import process, the subsequent protocol is the same as for creating an in-memory graph.
-See xref:graph-project-apache-arrow.adoc#arrow-send-nodes[Sending node records via PUT as a Flight stream] and xref:graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relationship records via PUT as a Flight stream] for further details.
+See xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-send-nodes[Sending node records via PUT as a Flight stream] and xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relationship records via PUT as a Flight stream] for further details.
 
 
 === Supported node identifier types

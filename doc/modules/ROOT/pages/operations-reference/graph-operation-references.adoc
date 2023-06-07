@@ -8,7 +8,7 @@
 [opts=header,cols="1, 1"]
 |===
 |Description | Operation
-.5+<.^|xref:management-ops/projections/graph-project.adoc[Project Graph]
+.5+<.^|xref:management-ops/graph-creation/graph-project.adoc[Project Graph]
 | `gds.graph.project`
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher` (deprecated)
@@ -54,8 +54,8 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                | Operation
-|xref:management-ops/projections/graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph`
-|xref:management-ops/projections/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
+|xref:management-ops/graph-creation/graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph`
+|xref:management-ops/graph-creation/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
 .2+<.^|xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.beta.graph.export.csv`
 | `gds.beta.graph.export.csv.estimate`
@@ -76,8 +76,8 @@
 |Description                                       | Operation
 |Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop`
 |Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream`
-|xref:management-ops/projections/rwr.adoc[Sample a subgraph using random walk with restarts] | `gds.graph.sample.rwr`
-.2+<.^|xref:management-ops/projections/cnarw.adoc[Sample a subgraph using common neighbor aware random walks]
+|xref:management-ops/graph-creation/sampling/rwr.adoc[Sample a subgraph using random walk with restarts] | `gds.graph.sample.rwr`
+.2+<.^|xref:management-ops/graph-creation/sampling/cnarw.adoc[Sample a subgraph using common neighbor aware random walks]
 | `gds.graph.sample.cnarw`
 | `gds.graph.sample.cnarw.estimate`
 |xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[Add node labels to the in-memory graph]   | `gds.alpha.graph.nodeLabel.mutate`
