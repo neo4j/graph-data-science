@@ -1,5 +1,6 @@
 [[migration-graph-listing]]
 = Graph listing
+:page-aliases: appendix-b/migration-graph-listing.adoc
 
 .Changes in the YIELD fields
 [opts=header, cols="1,1"]
