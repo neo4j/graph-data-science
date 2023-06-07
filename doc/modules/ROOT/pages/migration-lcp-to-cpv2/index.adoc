@@ -6,7 +6,7 @@
 
 == Who should read this guide
 
-This guide is intended for users who have been using the legacy Cypher projection `gds.graph.project.cypher`.
+This guide is intended for users who have been using the Legacy Cypher projection xref:management-ops/projections/graph-project-cypher-legacy.adoc[`gds.graph.project.cypher`].
 Cypher projections are now done using the `gds.graph.project` aggregation function.
 We assume that most of the mentioned operations and concepts can be understood with little explanation.
 Thus we are intentionally brief in the examples and comparisons.
