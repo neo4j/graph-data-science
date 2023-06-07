@@ -40,8 +40,8 @@ Read more about that in xref:management-ops/administration.adoc[].
 Named graphs can be projected from a Neo4j database by using either of
 
 - a xref:management-ops/projections/graph-project.adoc[Native projection]
-- a xref:management-ops/projections/graph-project-cypher-legacy.adoc[Legacy Cypher projection]
-- or a xref:management-ops/projections/graph-project-cypher-projection.adoc[Cypher projection]
+- a xref:management-ops/projections/graph-project-cypher-projection.adoc[Cypher projection]
+- or a xref:management-ops/projections/graph-project-cypher-legacy.adoc[Legacy Cypher projection]
 
 But graphs can also be projected into the graph catalog from other sources.
 xref:management-ops/projections/graph-project-subgraph.adoc[Subgraph] and xref:management-ops/projections/rwr.adoc[Graph Sampling] projections allow projecting a new graph based off of an existing graph projection.
@@ -52,12 +52,12 @@ xref:management-ops/projections/graph-generation.adoc[Randomised graphs can be g
 |===
 | Name                                                                                           | Description
 | xref:management-ops/projections/graph-project.adoc[gds.graph.project]                          | Adds a graph to the catalog using Native projection.
-| xref:management-ops/projections/graph-project-cypher-legacy.adoc[gds.graph.project.cypher]     | Adds a graph to the catalog using Legacy Cypher projection.
-| xref:management-ops/projections/graph-project-cypher-projection.adoc[gds.graph.project]       | Adds a graph to the catalog using Cypher projection.
+| xref:management-ops/projections/graph-project-cypher-projection.adoc[gds.graph.project]        | Adds a graph to the catalog using Cypher projection.
 | xref:management-ops/projections/graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]   | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
 | xref:management-ops/projections/rwr.adoc[gds.graph.sample.rwr]                                 | Adds a graph to the catalog by sampling an existing graph using random walk with restarts.
 | xref:management-ops/projections/cnarw.adoc[gds.graph.sample.cnarw]                             | Adds a graph to the catalog by sampling an existing graph using Common Neighbour Aware Random Walk algorithm.
 | xref:management-ops/projections/graph-generation.adoc[gds.beta.graph.generate]                 | Creates a new random graph projection of the user-defined properties and dimensions.
+| xref:management-ops/projections/graph-project-cypher-legacy.adoc[gds.graph.project.cypher]     | Adds a graph to the catalog using Legacy Cypher projection.
 |===
 
 
