@@ -32,13 +32,28 @@ public final class LoadingExceptions {
         validateNodeIsLoaded(mappedId, neoId, "source");
     }
 
+    /**
+     * GDS has the general assumption of non-negative original node ids.
+     */
+    public static void checkPositiveId(long nodeId) {
+        if (nodeId < 0) {
+            throw new IllegalArgumentException(
+                String.format(
+                    Locale.US,
+                    "GDS expects node ids to be positive. But got a negative id of `%d`.",
+                    nodeId
+                )
+            );
+        }
+    }
+
     private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
         if (mappedId == -1) {
             throw new IllegalArgumentException(
                 String.format(
                     Locale.US,
                     "Failed to load a relationship because its %s-node with id %s is not part of the node query or projection. " +
-                    "To ignore the relationship, set the configuration parameter `validateRelationships` to false.",
+                        "To ignore the relationship, set the configuration parameter `validateRelationships` to false.",
                     side,
                     neoId
                 )
