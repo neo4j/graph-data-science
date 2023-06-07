@@ -25,9 +25,4 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 @FunctionalInterface
 public interface ComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, RESULT> {
     RESULT consume(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext);
-
-    static <ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig>
-    ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> identity() {
-        return (result, executionContext) -> result;
-    }
 }
