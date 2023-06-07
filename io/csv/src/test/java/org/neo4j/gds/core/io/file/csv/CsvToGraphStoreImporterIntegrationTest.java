@@ -170,7 +170,7 @@ class CsvToGraphStoreImporterIntegrationTest {
         var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
-        assertThat(userGraphStore.graphStore().nodes().typeId()).isEqualTo(idMapBuilderType);
+        assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
     }
 
     private GraphStoreToFileExporterConfig exportConfig(int concurrency) {

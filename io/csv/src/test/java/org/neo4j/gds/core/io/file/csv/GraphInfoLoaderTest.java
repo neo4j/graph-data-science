@@ -26,6 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -45,7 +46,7 @@ class GraphInfoLoaderTest {
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
             String.join(", ", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts", "inverseIndexedRelTypes","idMapBuilderType"),
-            String.join(", ", "my-database", "19", "1337", "REL;42", "REL;REL1", "1")
+            String.join(", ", "my-database", "19", "1337", "REL;42", "REL;REL1", ArrayIdMapBuilder.ID)
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -56,7 +57,7 @@ class GraphInfoLoaderTest {
         assertThat(graphInfo.databaseId()).isEqualTo(databaseId);
         assertThat(graphInfo.databaseId().databaseName()).isEqualTo("my-database");
 
-        assertThat(graphInfo.idMapBuilderType()).isEqualTo((byte) 1);
+        assertThat(graphInfo.idMapBuilderType()).isEqualTo(ArrayIdMapBuilder.ID);
 
         assertThat(graphInfo.nodeCount()).isEqualTo(19L);
         assertThat(graphInfo.maxOriginalId()).isEqualTo(1337L);

@@ -48,7 +48,7 @@ public interface MetaDataStore {
 
         var idMapTypeId = graphStore.nodes().typeId();
 
-        if (idMapTypeId == IdMap.NO_TYPE) {
+        if (idMapTypeId.equals(IdMap.NO_TYPE)) {
             throw new IllegalArgumentException(String.format(
                 Locale.US,
                 "Cannot write graph store with untyped id map. Got instance of `%s`",
