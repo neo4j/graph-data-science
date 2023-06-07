@@ -78,6 +78,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     private final GDLHandler gdlHandler;
     private final DatabaseId databaseId;
+    private final byte idMapBuilderType;
 
     public static GdlFactory of(String gdlGraph) {
         return builder().gdlGraph(gdlGraph).build();
@@ -95,7 +96,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<String> graphName,
         Optional<GraphProjectFromGdlConfig> graphProjectConfig,
         Optional<LongSupplier> nodeIdFunction,
-        Optional<Capabilities> graphCapabilities
+        Optional<Capabilities> graphCapabilities,
+        Optional<Byte> idMapBuilderType
     ) {
         var config = graphProjectConfig.orElseGet(() -> ImmutableGraphProjectFromGdlConfig.builder()
             .username(userName.orElse(Username.EMPTY_USERNAME.username()))
@@ -123,7 +125,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             config,
             graphDimensions,
             databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID),
-            capabilities
+            capabilities,
+            idMapBuilderType.orElse(IdMap.NO_TYPE)
         );
     }
 
@@ -132,7 +135,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         GraphProjectFromGdlConfig graphProjectConfig,
         GraphDimensions graphDimensions,
         DatabaseId databaseId,
-        Capabilities capabilities
+        Capabilities capabilities,
+        byte idMapBuilderType
     ) {
         super(
             graphProjectConfig,
@@ -142,6 +146,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         );
         this.gdlHandler = gdlHandler;
         this.databaseId = databaseId;
+        this.idMapBuilderType = idMapBuilderType;
     }
 
     public long nodeId(String variable) {
@@ -185,6 +190,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .hasProperties(true)
             .concurrency(1)
             .propertyState(graphProjectConfig.propertyState())
+            .idMapBuilderType(this.idMapBuilderType)
             .build();
 
         gdlHandler.getVertices().forEach(vertex -> {
