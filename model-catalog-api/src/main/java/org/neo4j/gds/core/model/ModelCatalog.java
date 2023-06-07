@@ -32,6 +32,8 @@ public interface ModelCatalog {
 
     void registerListener(ModelCatalogListener listener);
 
+    void unregisterListener(ModelCatalogListener listener);
+
     void set(Model<?, ?, ?> model);
 
     <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
@@ -75,6 +77,11 @@ public interface ModelCatalog {
     ModelCatalog EMPTY = new ModelCatalog() {
         @Override
         public void registerListener(ModelCatalogListener listener) {
+
+        }
+
+        @Override
+        public void unregisterListener(ModelCatalogListener listener) {
 
         }
 
