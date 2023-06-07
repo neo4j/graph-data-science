@@ -48,6 +48,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public byte typeId() {
+        return graph.typeId();
+    }
+
+    @Override
     public long relationshipCount() {
         return graph.relationshipCount();
     }

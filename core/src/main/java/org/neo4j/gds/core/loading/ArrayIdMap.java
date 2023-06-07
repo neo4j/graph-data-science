@@ -90,6 +90,11 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
+    public byte typeId() {
+        return ArrayIdMapBuilder.ID;
+    }
+
+    @Override
     public long toOriginalNodeId(long mappedNodeId) {
         return internalToOriginalIds.get(mappedNodeId);
     }

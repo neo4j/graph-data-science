@@ -156,6 +156,7 @@ public abstract class FileToGraphStoreImporter {
             .concurrency(concurrency)
             .nodeCount(fileInput.graphInfo().nodeCount())
             .deduplicateIds(false)
+            .idMapBuilderType(fileInput.graphInfo().idMapBuilderType())
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);

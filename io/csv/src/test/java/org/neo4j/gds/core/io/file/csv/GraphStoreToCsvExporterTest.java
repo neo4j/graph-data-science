@@ -462,6 +462,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             List.of(
                 List.of(
                     CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+                    CsvGraphInfoVisitor.ID_MAP_BUILDER_TYPE_COLUMN_NAME,
                     CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                     CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
                     CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
@@ -469,6 +470,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                 ),
                 List.of(
                     graphStore.databaseId().databaseName(),
+                    Byte.toString(graphStore.nodes().typeId()),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(graphStore.nodes().highestOriginalId()),
                     CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 6L, RelationshipType.of("REL1"), 6L)),

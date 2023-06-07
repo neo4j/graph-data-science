@@ -199,7 +199,12 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return Nodes.of(idMap, this.propertyMappingsByLabel, nodeProperties, PropertyState.PERSISTENT);
+        return Nodes.of(
+            idMap,
+            this.propertyMappingsByLabel,
+            nodeProperties,
+            PropertyState.PERSISTENT
+        );
     }
 
     private void importPropertiesFromIndex(

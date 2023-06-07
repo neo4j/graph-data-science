@@ -51,6 +51,11 @@ public final class TestIdMap extends LabeledIdMap {
     }
 
     @Override
+    public byte typeId() {
+        return NO_TYPE;
+    }
+
+    @Override
     public long toOriginalNodeId(long mappedNodeId) {
         return this.reverseMap.getOrDefault(mappedNodeId, NOT_FOUND);
     }

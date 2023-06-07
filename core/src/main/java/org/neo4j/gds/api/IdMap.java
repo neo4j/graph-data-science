@@ -44,6 +44,16 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     long NOT_FOUND = -1;
 
     /**
+     * Used for IdMap implementations that do not require a type definition.
+     */
+    byte NO_TYPE = -1;
+
+    /**
+     * A unique identifier for this type of IdMap.
+     */
+    byte typeId();
+
+    /**
      * Map original nodeId to mapped nodeId
      *
      * Returns org.neo4j.gds.api.IdMap#NOT_FOUND if the nodeId is not mapped.
