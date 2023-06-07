@@ -26,13 +26,16 @@ The graph generation is parameterized by three dimensions:
 
 [[graph-generation-syntax]]
 == Syntax
-
-.The following describes the API for running the algorithm
+[.include-with-graph-generate]
+====
+.The following describes the API for running the graph generation procedure
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, {
-  relationshipDistribution: String,
-  relationshipProperty: Map
+CALL gds.beta.graph.generate(
+    graphName: String,
+    nodeCount: Integer,
+    averageDegree: Integer,
+    configuration: Map
 })
 YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegree, relationshipDistribution, relationshipProperty
 ----
@@ -72,6 +75,7 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | relationshipDistribution  | String     | The probability distribution method used to connect generated nodes.
 | relationshipProperty      | String     | The configuration of the generated relationship property.
 |===
+====
 
 [[graph-generation-distribution]]
 == Relationship Distribution
