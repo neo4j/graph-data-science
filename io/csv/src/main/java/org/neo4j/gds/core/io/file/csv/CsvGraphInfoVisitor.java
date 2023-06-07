@@ -62,7 +62,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
         this.csvWriter.writeRow(
             graphInfo.databaseId().databaseName(),
-            Byte.toString(graphInfo.idMapBuilderType()),
+            graphInfo.idMapBuilderType(),
             Long.toString(graphInfo.nodeCount()),
             Long.toString(graphInfo.maxOriginalId()),
             CsvMapUtil.relationshipCountsToString(graphInfo.relationshipTypeCounts()),

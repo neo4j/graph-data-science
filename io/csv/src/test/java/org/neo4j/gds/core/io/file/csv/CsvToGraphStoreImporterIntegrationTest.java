@@ -157,8 +157,8 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(bytes = {ArrayIdMapBuilder.ID, HighLimitIdMapBuilder.ID})
-    void shouldConsiderIdMapBuilderType(byte idMapBuilderType) {
+    @ValueSource(strings = {ArrayIdMapBuilder.ID, HighLimitIdMapBuilder.ID})
+    void shouldConsiderIdMapBuilderType(String idMapBuilderType) {
         var graphStore = GdlFactory.builder()
             .gdlGraph("()-[]->()")
             .idMapBuilderType(idMapBuilderType)

@@ -29,7 +29,7 @@ import java.util.Map;
 @ValueClass
 public interface GraphInfo {
     DatabaseId databaseId();
-    byte idMapBuilderType();
+    String idMapBuilderType();
     long nodeCount();
     long maxOriginalId();
     Map<RelationshipType, Long> relationshipTypeCounts();

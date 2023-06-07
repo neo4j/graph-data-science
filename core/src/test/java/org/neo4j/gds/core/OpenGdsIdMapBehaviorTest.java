@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
 
@@ -36,15 +37,15 @@ class OpenGdsIdMapBehaviorTest {
         return Stream.of(
             Arguments.of(ArrayIdMapBuilder.ID, Optional.empty(), Optional.empty(), GrowingArrayIdMapBuilder.class),
             Arguments.of(ArrayIdMapBuilder.ID, Optional.empty(), Optional.of(42L), ArrayIdMapBuilder.class),
-            Arguments.of((byte) 42, Optional.empty(), Optional.empty(), GrowingArrayIdMapBuilder.class),
-            Arguments.of((byte) 42, Optional.empty(), Optional.of(42L), ArrayIdMapBuilder.class)
+            Arguments.of(IdMap.NO_TYPE, Optional.empty(), Optional.empty(), GrowingArrayIdMapBuilder.class),
+            Arguments.of(IdMap.NO_TYPE, Optional.empty(), Optional.of(42L), ArrayIdMapBuilder.class)
         );
     }
 
     @ParameterizedTest
     @MethodSource("idMapBuildersById")
     void shouldCreateIdMapBuilderById(
-        byte id,
+        String id,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
         Class<?> idMapBuilderClazz

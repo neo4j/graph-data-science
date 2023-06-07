@@ -90,7 +90,7 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return ArrayIdMapBuilder.ID;
     }
 

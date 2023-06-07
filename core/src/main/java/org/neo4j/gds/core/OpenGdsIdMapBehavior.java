@@ -26,6 +26,7 @@ import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
+import java.util.Locale;
 import java.util.Optional;
 
 public class OpenGdsIdMapBehavior implements IdMapBehavior {
@@ -42,8 +43,8 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     }
 
     @Override
-    public IdMapBuilder create(byte id, int concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
-        switch (id) {
+    public IdMapBuilder create(String id, int concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
+        switch (id.toLowerCase(Locale.US)) {
             case ArrayIdMapBuilder.ID: {
                 return create(concurrency, maxOriginalId, nodeCount);
             }

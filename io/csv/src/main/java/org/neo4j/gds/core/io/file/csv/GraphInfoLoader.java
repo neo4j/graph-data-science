@@ -87,7 +87,7 @@ public class GraphInfoLoader {
         String databaseName;
 
         @JsonProperty
-        byte idMapBuilderType = IdMap.NO_TYPE;
+        String idMapBuilderType = IdMap.NO_TYPE;
 
         @JsonProperty
         long nodeCount;
