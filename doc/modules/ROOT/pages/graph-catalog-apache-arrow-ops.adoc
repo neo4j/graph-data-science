@@ -215,7 +215,7 @@ To stream the topology of one or more relationship types, the client needs to en
 {
     graph_name: "my_graph",
     database_name: "database_name",
-    procedure_name: "gds.graph.relationshipProperties.stream",
+    procedure_name: "gds.beta.graph.relationships.stream",
     configuration: {
         relationship_types: "REL"
     }
@@ -244,3 +244,58 @@ The schema of the result records is identical to the corresponding procedure:
 Note, that the relationship type column stores the relationship type encoded as an integer.
 The corresponding string value needs to be retrieved from the corresponding dictionary value vector.
 That vector can be loaded from the dictionary provider using the encoding id of the type field.
+
+
+== Partitioning the data streams
+
+Some use-cases require the data streams to be partitioned.
+For example, if the data streams are consumed by a distributed system, the data streams need to be evenly distributed to the members of the distributed system.
+To support this use-case, the client can request the data streams to be partitioned by sending the stream request to the `FlightInfo` endpoint of the GDS Flight Server.
+The server will then return a number of endpoints, where each endpoint and it's accompanying ticket can be used to stream a partition of the data.
+The `concurrency` settings of the ticket can be used to control the number of partitions.
+
+For example, to stream the topology of one or more relationship types, the client needs to encode that information in the ticket as follows:
+
+----
+{
+    graph_name: "my_graph",
+    database_name: "database_name",
+    procedure_name: "gds.beta.graph.relationships.stream",
+    concurrency: 2,
+    configuration: {
+        relationship_types: "REL"
+    }
+}
+----
+
+This will create at most 2 partitions of the data streams.
+The server will answer with 2 tickets:
+
+----
+[
+    {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.beta.graph.relationships.stream",
+        concurrency: 4,
+        partition_offset: 0,
+        partition_size: 100,
+        configuration: {
+            relationship_types: "REL"
+        }
+    },
+    {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.beta.graph.relationships.stream",
+        partition_offset: 100,
+        partition_size: 100,
+        concurrency: 4,
+        configuration: {
+            relationship_types: "REL"
+        }
+    }
+]
+----
+
+Each of the tickets can now be used to request a partition data via the `GET` endpoint of the GDS Flight Server.
