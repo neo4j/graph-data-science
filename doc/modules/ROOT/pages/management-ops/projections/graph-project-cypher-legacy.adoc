@@ -2,7 +2,7 @@
 = Projecting graphs using Cypher (deprecated)
 :description: This section details projecting GDS graphs using legacy `Cypher` projections.
 
-[NOTE]
+[WARNING]
 --
 This page describes the Legacy Cypher projection, which is deprecated.
 The replacement is to use the new Cypher projection, which is described in xref:management-ops/projections/graph-project-cypher-projection.adoc[Projecting graphs using Cypher].
