@@ -29,6 +29,8 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.api.IdMap.NOT_FOUND;
@@ -66,6 +68,31 @@ class HighLimitIdMapTest {
 
         assertThat(highLimitIdMap.toMappedNodeId(1337)).isEqualTo(NOT_FOUND);
         assertThat(highLimitIdMap.containsOriginalId(1337)).isFalse();
+    }
+
+    @Test
+    void shouldReturnCorrectTypeIds() {
+        long[] nodes = LongStream.range(0, 42).toArray();
+        var builder = HighLimitIdMapBuilder.of(1, ArrayIdMapBuilder.of(nodes.length));
+        builder.allocate(nodes.length).insert(nodes);
+        var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, 1);
+
+        assertThat(idMap.typeId()).contains(HighLimitIdMapBuilder.ID).contains(ArrayIdMapBuilder.ID);
+        assertThat(HighLimitIdMap.innerTypeId(idMap.typeId()).get()).isEqualTo(ArrayIdMapBuilder.ID);
+    }
+
+    @Test
+    void shouldReturnCorrectInnerTypeId() {
+        assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID)).isEqualTo(Optional.empty());
+        assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID + "-foobar")).isEqualTo(Optional.of("foobar"));
+        assertThat(HighLimitIdMap.innerTypeId("foobar")).isEqualTo(Optional.empty());
+        assertThat(HighLimitIdMap.innerTypeId(HighLimitIdMapBuilder.ID + "-")).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    void shouldIdentifyHighLimitIdMaps() {
+        assertThat(HighLimitIdMap.isHighLimitIdMap(HighLimitIdMapBuilder.ID)).isTrue();
+        assertThat(HighLimitIdMap.isHighLimitIdMap("foobar")).isFalse();
     }
 
     @Nested
