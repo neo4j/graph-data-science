@@ -224,8 +224,8 @@ CALL gds.graph.project.cypher(
     id(n) AS id,
     labels(n) AS labels,
     coalesce(n.age, 18) AS age',
-    coalesce(n.price, 5.0) as price,
-    n.ratings as ratings',
+    coalesce(n.price, 5.0) AS price,
+    n.ratings AS ratings',
   'MATCH (n)-[r:KNOWS\|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
 )
 YIELD
@@ -428,7 +428,7 @@ WITH gds.graph.project(
   target,
   {},
   {undirectedRelationshipTypes: ['*']}
-) as g
+) AS g
 RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 |===
@@ -456,7 +456,7 @@ CALL gds.graph.project.cypher.estimate(
 [source, cypher, role=noplay]
 ----
 MATCH (n:Person)-[r:KNOWS]-(m)
-WITH count(n) as nodeCount, count(r) as relationshipCount
+WITH count(n) AS nodeCount, count(r) AS relationshipCount
 CALL gds.graph.project.estimate('*', '*', {
   nodeCount: nodeCount,
   relationshipCount: relationshipCount,
