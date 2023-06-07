@@ -82,8 +82,8 @@ With this it is possible to measure the memory consumption of projecting a graph
 | Name                                                        | Type                          | Default                | Optional | Description
 | xref:management-ops/projections/graph-project.adoc#node-projection-syntax[node projection]                 | String, List of String or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
 | xref:management-ops/projections/graph-project.adoc#relationship-projection-syntax[relationship projection] | String, List of String or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
-| nodeQuery                                                   | String                        | null                   | yes      | The Cypher query used to select the nodes for anonymous graph creation via a Cypher projection.
-| relationshipQuery                                           | String                        | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Cypher projection.
+| nodeQuery                                                   | String                        | null                   | yes      | The Cypher query used to select the nodes for anonymous graph creation via a Legacy Cypher projection.
+| relationshipQuery                                           | String                        | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Legacy Cypher projection.
 | nodeProperties                                              | String, List of String or Map | null                   | yes      | The node properties to project during anonymous graph creation.
 | relationshipProperties                                      | String, List of String or Map | null                   | yes      | The relationship properties to project during anonymous graph creation.
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer                       | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
@@ -153,7 +153,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | "593 KiB" | 607576   | 607576   | 100       | 1000
 |===
 
-The xref:management-ops/projections/graph-project-cypher.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
+The xref:management-ops/projections/graph-project-cypher-legacy.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
 [source, cypher, role=noplay]
