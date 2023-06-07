@@ -51,7 +51,6 @@ import java.nio.file.Files;
 import static org.neo4j.configuration.GraphDatabaseSettings.SYSTEM_DATABASE_NAME;
 import static org.neo4j.gds.core.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
 
 public final class GdsParallelBatchImporter {
 
@@ -177,10 +176,12 @@ public final class GdsParallelBatchImporter {
             if (startDatabase) {
                 var dbStartTimer = ProgressTimer.start();
                 if (createAndStartDatabase()) {
-                    log.info(formatWithLocale(
-                        "Database created and started after %s ms",
-                        dbStartTimer.stop().getDuration()
-                    ));
+                    log.info(
+                        formatWithLocale(
+                            "Database created and started after %s ms",
+                            dbStartTimer.stop().getDuration()
+                        )
+                    );
                 } else {
                     log.error("Unable to start database " + config.dbName());
                 }
@@ -201,22 +202,22 @@ public final class GdsParallelBatchImporter {
         var metaDataPath = databaseLayout.metadataStore();
         var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
         if (dbExists && !config.force()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The database [%s] already exists. The graph export procedure can only create new databases.",
-                config.dbName()
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "The database [%s] already exists. The graph export procedure can only create new databases.",
+                    config.dbName()
+                )
+            );
         }
     }
 
-    private LogService getLogService() {
-        return config.enableDebugLog()
-            ? logService
-            : NullLogService.getInstance();
-    }
+    private LogService getLogService() { return config.enableDebugLog()
+        ? logService
+        : NullLogService.getInstance(); }
 
     private Collector getCollector() {
         return config.useBadCollector()
-            ? Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE)
+            ? Collectors.badCollector(new LoggingOutputStream(log), 0)
             : Collector.EMPTY;
     }
 
