@@ -33,10 +33,7 @@ final class DegreeCentralityNodePropertyValues implements DoubleNodePropertyValu
             .orElseGet(() -> new DegreeCentralityNodePropertyValues(0, (nodeId) -> -1L));
     }
 
-    private DegreeCentralityNodePropertyValues(
-        long nodeCount,
-        DegreeCentrality.DegreeFunction degreeFunction
-    ) {
+    DegreeCentralityNodePropertyValues(long nodeCount, DegreeCentrality.DegreeFunction degreeFunction) {
         this.nodeCount = nodeCount;
         this.degreeFunction = degreeFunction;
     }

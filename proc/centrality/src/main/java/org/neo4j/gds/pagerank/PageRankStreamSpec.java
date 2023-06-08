@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -29,6 +30,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
 
@@ -52,19 +54,19 @@ public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, Page
 
     @Override
     public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-            var graph = computationResult.graph();
-            var scores = computationResult.result().get().scores();
-            return LongStream.range(0, graph.nodeCount()).mapToObj(nodeId -> {
-                return new CentralityStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    scores.get(nodeId)
-                );
-            });
-        };
-
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var scores = result.scores();
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .mapToObj(nodeId -> new CentralityStreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            scores.get(nodeId)
+                        ));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

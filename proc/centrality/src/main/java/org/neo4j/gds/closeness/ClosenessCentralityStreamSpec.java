@@ -21,7 +21,6 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -31,6 +30,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
@@ -54,26 +54,22 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
 
     @Override
     public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.empty();
-            }
-
-            var nodePropertyValues = computationResult.result()
-                .map(ClosenessCentralityResult::centralities)
-                .orElseGet(() -> HugeDoubleArray.newArray(0))
-                .asNodeProperties();
-            var graph = computationResult.graph();
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId ->
-                    new CentralityStreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        nodePropertyValues.doubleValue(nodeId)
-                    ));
-
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var nodePropertyValues = result.centralities().asNodeProperties();
+                    var graph = computationResult.graph();
+                    return LongStream
+                        .range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .filter(nodePropertyValues::hasValue)
+                        .mapToObj(nodeId ->
+                            new CentralityStreamResult(
+                                graph.toOriginalNodeId(nodeId),
+                                nodePropertyValues.doubleValue(nodeId)
+                            ));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

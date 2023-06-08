@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -52,7 +53,6 @@ public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
 
     @Override
     public ComputationResultConsumer<HashGNN, HashGNNResult, HashGNNStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "HashGNN streaming failed",
             executionContext.log(),
@@ -60,7 +60,7 @@ public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
                 .map(result -> {
                     var graph = computationResult.graph();
                     return LongStream
-                        .range(0, graph.nodeCount())
+                        .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(i -> new StreamResult(
                             graph.toOriginalNodeId(i),
                             result.embeddings().doubleArrayValue(i)

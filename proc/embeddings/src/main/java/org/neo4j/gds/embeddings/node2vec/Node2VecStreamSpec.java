@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.beta.node2vec.stream", description = Node2VecCompanion.DESCRIPTION, executionMode = STREAM)
@@ -50,7 +51,10 @@ public class Node2VecStreamSpec  implements AlgorithmSpec<Node2Vec, Node2VecMode
 
     @Override
     public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> computationResult.result()
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Node2Vec streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
             .map(result -> {
                 var graph = computationResult.graph();
                 var nodePropertyValues = new EmbeddingNodePropertyValues(result.embeddings());
@@ -61,7 +65,6 @@ public class Node2VecStreamSpec  implements AlgorithmSpec<Node2Vec, Node2VecMode
                         graph.toOriginalNodeId(nodeId),
                         nodePropertyValues.floatArrayValue(nodeId)
                     ));
-            })
-            .orElseGet(Stream::empty);
+            }).orElseGet(Stream::empty));
     }
 }

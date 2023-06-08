@@ -38,6 +38,10 @@ public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT
     @Nullable
     A algorithm();
 
+    /**
+     * Result is empty if no computation happened, which basically means the graph was empty.
+     * @return The result if computation happened.
+     */
     Optional<ALGO_RESULT> result();
 
     Graph graph();

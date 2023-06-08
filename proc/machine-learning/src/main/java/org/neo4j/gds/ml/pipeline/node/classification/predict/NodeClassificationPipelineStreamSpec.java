@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -62,33 +63,27 @@ public class NodeClassificationPipelineStreamSpec implements AlgorithmSpec<NodeC
 
     @Override
     public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) ->
-            runWithExceptionLogging(
-                "Result streaming failed",
-                executionContext.log(),
-                () -> {
-                    if (computationResult.result().isEmpty()) {
-                        return Stream.empty();
-                    }
-
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
                     var pipelineGraphFilter = computationResult.algorithm().nodePropertyStepFilter();
                     var graph = computationResult.graphStore().getGraph(pipelineGraphFilter.nodeLabels());
 
-                    var result = computationResult.result().get();
                     var predictedClasses = result.predictedClasses();
                     var predictedProbabilities = result.predictedProbabilities();
                     return LongStream
-                        .range(0, graph.nodeCount())
-                        .boxed()
-                        .map(nodeId ->
+                        .range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .mapToObj(nodeId ->
                             new NodeClassificationStreamResult(
                                 graph.toOriginalNodeId(nodeId),
                                 predictedClasses.get(nodeId),
                                 nodePropertiesAsList(predictedProbabilities, nodeId)
                             )
                         );
-                }
-            );
+                }).orElseGet(Stream::empty)
+        );
     }
 
     private static List<Double> nodePropertiesAsList(

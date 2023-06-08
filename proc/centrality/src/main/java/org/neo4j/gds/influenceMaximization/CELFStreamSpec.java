@@ -26,14 +26,15 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
-public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<InfluenceMaximizationResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
+public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<StreamResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
 
     @Override
     public String name() {
@@ -51,16 +52,20 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     }
 
     @Override
-    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            return Optional.ofNullable(computationResult.algorithm())
-                .map(CELF::resultStream)
-                .orElseGet(Stream::empty);
-        };
-
+    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    return LongStream.of(result.keys().toArray())
+                        .mapToObj(node -> new StreamResult(
+                            graph.toOriginalNodeId(node),
+                            result.getOrDefault(node, 0)
+                        ));
+                })
+                .orElseGet(Stream::empty)
+        );
     }
 }

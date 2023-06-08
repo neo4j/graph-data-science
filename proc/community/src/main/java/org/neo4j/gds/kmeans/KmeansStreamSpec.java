@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.kmeans.stream", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -51,26 +52,24 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
 
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            if(computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            var result = computationResult.result().get();
-            var communities = result.communities();
-            var distances = result.distanceFromCenter();
-            var silhuette = result.silhouette();
-            var graph = computationResult.graph();
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .mapToObj(nodeId -> new StreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    communities.get(nodeId),
-                    distances.get(nodeId),
-                    silhuette == null ? -1 : silhuette.get(nodeId)
-                ));
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var communities = result.communities();
+                    var distances = result.distanceFromCenter();
+                    var silhuette = result.silhouette();
+                    var graph = computationResult.graph();
+                    return LongStream
+                        .range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .mapToObj(nodeId -> new StreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            communities.get(nodeId),
+                            distances.get(nodeId),
+                            silhuette == null ? -1 : silhuette.get(nodeId)
+                        ));
+                }).orElseGet(Stream::empty)
+        );
     }
-
 }

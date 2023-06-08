@@ -37,6 +37,10 @@ final class FastRPCompanion {
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
     }
 
+    static NodePropertyValues nodeProperties(FastRP.FastRPResult result) {
+        return new EmbeddingNodePropertyValues(result.embeddings());
+    }
+
     private static class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
         private final HugeObjectArray<float[]> embeddings;
         private final long nodeCount;

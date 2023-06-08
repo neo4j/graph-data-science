@@ -55,9 +55,9 @@ public class KCoreDecompositionStreamSpec implements AlgorithmSpec<KCoreDecompos
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            ()  ->computationResult.result()
+            () -> computationResult.result()
                 .map(result -> {
-                    var coreValues=result.coreValues();
+                    var coreValues = result.coreValues();
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())

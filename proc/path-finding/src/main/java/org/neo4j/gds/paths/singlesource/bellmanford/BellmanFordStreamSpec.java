@@ -32,6 +32,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.bellmanFord.stream", description = BellmanFord.DESCRIPTION, executionMode = STREAM)
@@ -55,40 +56,37 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
     @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var shouldReturnPath = executionContext
+                        .returnColumns()
+                        .contains("route")
+                        && computationResult.graphStore().capabilities().canWriteToDatabase();
 
-            var graph = computationResult.graph();
+                    var containsNegativeCycle = result.containsNegativeCycle();
 
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
+                    var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup())
+                        .withIsCycle(containsNegativeCycle);
 
-            var shouldReturnPath = executionContext
-                .returnColumns()
-                .contains("route")
-                && computationResult.graphStore().capabilities().canWriteToDatabase();
+                    PathFindingResult algorithmResult;
+                    if (containsNegativeCycle) {
+                        algorithmResult = result.negativeCycles();
+                    } else {
+                        algorithmResult = result.shortestPaths();
+                    }
 
-            var result = computationResult.result().get();
-            var containsNegativeCycle = result.containsNegativeCycle();
+                    var resultStream = algorithmResult.mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
 
-            var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup())
-                .withIsCycle(containsNegativeCycle);
-
-            PathFindingResult algorithmResult;
-            if (containsNegativeCycle) {
-                algorithmResult = result.negativeCycles();
-            } else {
-                algorithmResult = result.shortestPaths();
-            }
-
-            var resultStream = algorithmResult.mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
-
-            // this is necessary in order to close the result stream which triggers
-            // the progress tracker to close its root task
-            executionContext.closeableResourceRegistry().register(resultStream);
-            return resultStream;
-
-        };
+                    // this is necessary in order to close the result stream which triggers
+                    // the progress tracker to close its root task
+                    executionContext.closeableResourceRegistry().register(resultStream);
+                    return resultStream;
+                }).orElseGet(Stream::empty)
+        );
     }
 
     @Override

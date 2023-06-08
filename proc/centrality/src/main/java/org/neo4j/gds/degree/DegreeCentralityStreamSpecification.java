@@ -27,7 +27,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -57,12 +56,11 @@ public class DegreeCentralityStreamSpecification implements AlgorithmSpec<Degree
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            ()  -> Optional.ofNullable(computationResult.result())
+            () -> computationResult.result()
                 .map(result -> {
-                    var nodePropertyValues = DegreeCentralityNodePropertyValues.from(computationResult);
                     var graph = computationResult.graph();
-                    return LongStream
-                        .range(IdMap.START_NODE_ID, graph.nodeCount())
+                    var nodePropertyValues = new DegreeCentralityNodePropertyValues(graph.nodeCount(), result);
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(nodePropertyValues::hasValue)
                         .mapToObj(nodeId ->
                             new CentralityStreamResult(
@@ -70,5 +68,6 @@ public class DegreeCentralityStreamSpecification implements AlgorithmSpec<Degree
                                 nodePropertyValues.doubleValue(nodeId)
                             ));
                 }).orElseGet(Stream::empty)
-        );    }
+        );
+    }
 }

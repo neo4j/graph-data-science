@@ -38,7 +38,7 @@ public class CELFStreamProc extends BaseProc {
 
     @Procedure(name = "gds.beta.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<InfluenceMaximizationResult> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

@@ -26,6 +26,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
+
 class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamResult>> {
 
     private final PathFactoryFacade pathFactoryFacade;
@@ -39,20 +41,20 @@ class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DF
         ComputationResult<DFS, HugeLongArray, DfsStreamConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        if (computationResult.result().isEmpty()) {
-            return Stream.empty();
-        }
-
-        return TraverseStreamComputationResultConsumer.consume(
-            computationResult.config().sourceNode(),
-            computationResult.result().get(),
-            computationResult.graph()::toOriginalNodeId,
-            computationResult.graph().isEmpty(),
-            DfsStreamResult::new,
-            executionContext.returnColumns().contains("path"),
-            pathFactoryFacade,
-            DfsStreamProc.NEXT,
-            executionContext.nodeLookup()
+        return runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> TraverseStreamComputationResultConsumer.consume(
+                    computationResult.config().sourceNode(),
+                    result,
+                    computationResult.graph()::toOriginalNodeId,
+                    DfsStreamResult::new,
+                    executionContext.returnColumns().contains("path"),
+                    pathFactoryFacade,
+                    DfsStreamProc.NEXT,
+                    executionContext.nodeLookup()
+                )).orElseGet(Stream::empty)
         );
     }
 }

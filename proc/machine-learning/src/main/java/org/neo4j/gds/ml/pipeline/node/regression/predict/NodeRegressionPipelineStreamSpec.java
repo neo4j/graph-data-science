@@ -76,8 +76,8 @@ public class NodeRegressionPipelineStreamSpec
             runWithExceptionLogging(
                 "Result streaming failed",
                 executionContext.log(),
-                () -> {
-                    return computationResult.result().map(result -> {
+                () -> computationResult.result()
+                    .map(result -> {
                         Graph graph = computationResult.graph();
                         NodePropertyValues nodePropertyValues = result.asNodeProperties();
                         return LongStream
@@ -87,8 +87,7 @@ public class NodeRegressionPipelineStreamSpec
                                 graph.toOriginalNodeId(nodeId),
                                 nodePropertyValues.doubleValue(nodeId)
                             ));
-                    }).orElseGet(Stream::empty);
-                }
+                    }).orElseGet(Stream::empty)
             );
     }
 }
