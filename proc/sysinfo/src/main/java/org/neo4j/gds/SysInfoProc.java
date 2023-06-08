@@ -167,7 +167,6 @@ public class SysInfoProc {
             ))
             .add(value("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
-            .add(value("featureShardedIdMap", GdsFeatureToggles.USE_SHARDED_ID_MAP.isEnabled()))
             .add(value(
                 "featureUncompressedAdjacencyList",
                 GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()

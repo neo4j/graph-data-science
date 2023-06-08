@@ -20,20 +20,6 @@ To switch to the more memory intensive implementation used in GDS Community Edit
 CALL gds.features.useBitIdMap(false)
 ----
 
-[.enterprise-edition]
-[[sharded-id-map-feature-toggle]]
-== ShardedIdMap Feature Toggle
-
-The xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[BitIdMap] is optimized for a low memory footprint when used together with a Neo4j database.
-However, its memory footprint is not optimal if the range of possible original node ids exceeds the node count significantly.
-In this situation the `ShardedIdMap` can be used to significantly reduce the required memory of the graph projection.
-To enable the sharded id map the following procedure call can be used:
-
-[source, cypher, role=noplay]
-----
-CALL gds.features.useShardedIdMap(true)
-----
-
 [[packed-adjacency-list-feature-toggle]]
 == Packed Adjacency List Toggle
 
