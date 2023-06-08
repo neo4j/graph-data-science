@@ -3,30 +3,18 @@
 
 :page-aliases: management-ops/node-properties.adoc
 
-// TODO fill me with graph data model / limits in GDS and when to choose what guidance
 
-Named graphs can be created from a Neo4j database by using either of
+You can create graphs from different data sources.
 
-- a xref:management-ops/graph-creation/graph-project.adoc[Native projection]
-- a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection]
-- or a xref:management-ops/graph-creation/graph-project-cypher-legacy.adoc[Legacy Cypher projection]
+* From a Neo4j database by using either of
+** xref:management-ops/graph-creation/graph-project.adoc[Native projection]
+** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection]
+* From external sources via an xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
+* From existing named graphs by either of
+** xref:management-ops/graph-creation/graph-project-subgraph.adoc[Filtering]
+** xref:management-ops/graph-creation/sampling/rwr.adoc[Sampling]
+* From xref:management-ops/graph-creation/graph-generation.adoc[Random data]
 
-But graphs can also be created into the graph catalog from other sources.
-xref:management-ops/graph-creation/graph-project-subgraph.adoc[Subgraph] and xref:management-ops/graph-creation/sampling/rwr.adoc[Graph Sampling] projections allow projecting a new graph based off of an existing graph projection.
-xref:management-ops/graph-creation/graph-generation.adoc[Randomised graphs can be generated], and graphs can be xref:graph-catalog-apache-arrow-ops.adoc[constructed from external data via an Apache Arrow connection].
-
-.Graph projections, adding additional graphs to the catalog:
-[opts=header,cols="1m,1"]
-|===
-| Name                                                                                           | Description
-| xref:management-ops/graph-creation/graph-project.adoc[gds.graph.project]                          | Adds a graph to the catalog using Native projection.
-| xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[gds.graph.project]        | Adds a graph to the catalog using Cypher projection.
-| xref:management-ops/graph-creation/graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]   | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
-| xref:management-ops/graph-creation/sampling/rwr.adoc[gds.graph.sample.rwr]                                 | Adds a graph to the catalog by .sampling an existing graph using random walk with restarts
-| xref:management-ops/graph-creation/sampling/cnarw.adoc[gds.graph.sample.cnarw]                             | Adds a graph to the catalog by sampling an existing graph using Common Neighbour Aware Random Walk algorithm.
-| xref:management-ops/graph-creation/graph-generation.adoc[gds.beta.graph.generate]                 | Creates a new random graph projection of the user-defined properties and dimensions.
-| xref:management-ops/graph-creation/graph-project-cypher-legacy.adoc[gds.graph.project.cypher]     | Adds a graph to the catalog using Legacy Cypher projection.
-|===
 
 == Graph data model
 
