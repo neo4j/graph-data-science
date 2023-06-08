@@ -1,8 +1,8 @@
 [[graph-catalog-ops]]
-= Graph Catalog
-:description: This section details the graph catalog operations available to manage named graph projections within the Neo4j Graph Data Science library.
+= Graph Management
+:description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 
-// TODO rewrite this page
+// TODO rewrite this page more - such as the source is not always Neo4j anymore (f.i. Arrow)
 
 
 Graph algorithms run on a graph data model which is a _projection_ of the Neo4j property graph data model.
@@ -32,7 +32,7 @@ See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph
 
 === Security
 
-Projecting, using, listing, and dropping named graphs are management operations bound to a specific database user.
+Creating, using, listing, and dropping named graphs are management operations bound to a specific database user.
 Graphs projected by a different database user are not accessible at any time, except for administrator users.
 Read more about that in xref:management-ops/administration.adoc[].
 
