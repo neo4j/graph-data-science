@@ -26,13 +26,16 @@ The graph generation is parameterized by three dimensions:
 
 [[graph-generation-syntax]]
 == Syntax
-
-.The following describes the API for running the algorithm
+[.include-with-graph-generate]
+====
+.The following describes the API for running the graph generation procedure
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, {
-  relationshipDistribution: String,
-  relationshipProperty: Map
+CALL gds.beta.graph.generate(
+    graphName: String,
+    nodeCount: Integer,
+    averageDegree: Integer,
+    configuration: Map
 })
 YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegree, relationshipDistribution, relationshipProperty
 ----
@@ -72,6 +75,7 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | relationshipDistribution  | String     | The probability distribution method used to connect generated nodes.
 | relationshipProperty      | String     | The configuration of the generated relationship property.
 |===
+====
 
 [[graph-generation-distribution]]
 == Relationship Distribution
@@ -112,3 +116,115 @@ Currently, there are two supported methods to generate relationship properties:
 
 * `FIXED` - Assigns a fixed value to every relationship. The `value` parameter must be set.
 * `RANDOM` - Assigns a random value between the lower (`min`) and upper (`max`) bound.
+
+[[graph-generation-example]]
+== Examples
+
+In the following we will demonstrate the usage of the random graph generation procedure.
+
+[[graph-generation-unweighted]]
+=== Generating unweighted graphs
+
+[role=query-example,group=unweighted]
+--
+.The following will produce a graph with unweighted relationships
+[source,cypher,role=noplay]
+----
+CALL gds.beta.graph.generate('graph',5,2, {relationshipSeed:19})
+YIELD name, nodes, relationships, relationshipDistribution
+----
+
+.Results
+[opts="header"]
+|===
+| name | nodes |  relationships | relationshipDistribution
+|  "graph"| 5     |     10 | "UNIFORM"
+|===
+--
+
+A new in-memory graph called `graph`  with `5` nodes and `10` relationships has been created and added to the graph catalog.
+We can examine its topology  with the `gds.beta.graph.relationships` procedure.
+
+[role=query-example,group=unweighted]
+--
+.The following will show the produced relationships
+[source,cypher,role=noplay]
+----
+CALL gds.beta.graph.relationships.stream('graph')
+YIELD sourceNodeId,targetNodeId
+RETURN  sourceNodeId as source, targetNodeId as target
+ORDER BY source ASC,target ASC
+----
+
+.Results
+[opts="header"]
+|===
+| source  |target
+| 0 | 1
+| 0 | 2
+| 1 | 0
+| 1 | 4
+| 2 | 1
+| 2 | 4
+| 3 | 0
+| 3 | 1
+| 4 | 0
+| 4 | 3
+|===
+--
+
+[[graph-generation-weighted]]
+=== Generating weighted graphs
+
+To generated graphs with weighted relationships we must specify the `relationshipProperty` parameter as discussed xref:graph-generation-relationship-property[above].
+
+[role=query-example,group=weighted]
+--
+.The following will produce a graph with weighted relationships
+[source,cypher,role=noplay]
+----
+CALL gds.beta.graph.generate('weightedGraph',5,2, {relationshipSeed:19,
+  relationshipProperty: {type: 'RANDOM', min: 5.0, max: 10.0, name: 'score'}})
+YIELD name, nodes, relationships, relationshipDistribution
+----
+
+.Results
+[opts="header"]
+|===
+|name|  nodes |  relationships | relationshipDistribution
+|  "weightedGraph"| 5     |     10 | "UNIFORM"
+|===
+--
+
+The produced graph, `weightedGraph`, has a property named `score`  containing a random value between 5.0 and 10.0 for each relationship.
+We can use `gds.graph.relationshipProperty.stream` to stream the  relationships of the graph along with their score values.
+
+[role=query-example,group=weighted]
+--
+.The following will show the produced relationships
+[source,cypher,role=noplay]
+----
+CALL gds.graph.relationshipProperty.stream('weightedGraph','score')
+YIELD sourceNodeId, targetNodeId, propertyValue
+RETURN  sourceNodeId as source, targetNodeId as target, propertyValue as score
+ORDER BY source ASC,target ASC, score
+----
+
+.Results
+[opts="header"]
+|===
+| source  |target | score
+| 0 | 1 | 6.258381821615686
+| 0 | 2 | 6.791408433596591
+| 1 | 4 | 8.747179900968224
+| 1 | 4 | 9.469695236791349
+| 2 | 0 | 7.061710127800056
+| 2 | 1 | 5.060444167785128
+| 3 | 1 | 6.308266834622538
+| 3 | 4 | 9.040323743901354
+| 4 | 1 | 7.939688205556302
+| 4 | 1 | 7.988277646384441
+|===
+--
+
+Notice that despite `graph` and `weightedGraph` having the same `relationshipSeed`, their actual topology differs.

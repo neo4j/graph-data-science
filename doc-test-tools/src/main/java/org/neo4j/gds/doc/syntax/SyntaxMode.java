@@ -73,8 +73,9 @@ public enum SyntaxMode {
     SYSTEM_MONITOR("system-monitor-syntax", false),
     SYS_INFO("debug-sysinfo-syntax", false),
     WRITE_NODE_LABEL("include-with-write-node-label", false),
-    MUTATE_NODE_LABEL("include-with-mutate-node-label", false),;
-
+    MUTATE_NODE_LABEL("include-with-mutate-node-label", false),
+    GRAPH_GENERATE("include-with-graph-generate"),;
+    
     private final String mode;
     public final boolean hasParameters;
     public final CustomProcedure.Namespace namespace;
