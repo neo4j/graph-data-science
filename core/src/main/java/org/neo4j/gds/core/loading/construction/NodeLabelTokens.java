@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -40,11 +41,13 @@ public final class NodeLabelTokens {
     public static @NotNull NodeLabelToken of(@Nullable Object nodeLabels) {
         var nodeLabelToken = ofNullable(nodeLabels);
         if (nodeLabelToken.isInvalid()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not represent a value of type[%s] as nodeLabels: %s",
-                nodeLabels != null ? nodeLabels.getClass() : "null",
-                nodeLabels
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Could not represent a value of type[%s] as nodeLabels: %s",
+                    nodeLabels != null ? nodeLabels.getClass() : "null",
+                    nodeLabels
+                )
+            );
         }
         return nodeLabelToken;
     }
@@ -106,6 +109,10 @@ public final class NodeLabelTokens {
         return new Array<>(nodeLabelStrings, NodeLabelTokens::labelOf);
     }
 
+    public static @NotNull NodeLabelToken ofStrings(List<NodeLabel> staticLabels, String... nodeLabelStrings) {
+        return new ArrayWithSatic<>(nodeLabelStrings, staticLabels, NodeLabelTokens::labelOf);
+    }
+
     static @NotNull NodeLabelToken ofNodeLabel(NodeLabel nodeLabel) {
         return new Singleton<>(nodeLabel, Function.identity());
     }
@@ -165,19 +172,13 @@ public final class NodeLabelTokens {
         INSTANCE;
 
         @Override
-        public boolean isMissing() {
-            return true;
-        }
+        public boolean isMissing() { return true; }
 
         @Override
-        public boolean isEmpty() {
-            return true;
-        }
+        public boolean isEmpty() { return true; }
 
         @Override
-        public boolean isInvalid() {
-            return false;
-        }
+        public boolean isInvalid() { return false; }
 
         @Override
         public int size() {
@@ -190,28 +191,20 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public String[] getStrings() {
-            return new String[0];
-        }
+        public String[] getStrings() { return new String[0]; }
     }
 
     private enum Invalid implements NodeLabelToken {
         INSTANCE;
 
         @Override
-        public boolean isMissing() {
-            return false;
-        }
+        public boolean isMissing() { return false; }
 
         @Override
-        public boolean isEmpty() {
-            return true;
-        }
+        public boolean isEmpty() { return true; }
 
         @Override
-        public boolean isInvalid() {
-            return true;
-        }
+        public boolean isInvalid() { return true; }
 
         @Override
         public int size() {
@@ -224,30 +217,22 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public String[] getStrings() {
-            return new String[0];
-        }
+        public String[] getStrings() { return new String[0]; }
     }
 
     private interface ValidNodeLabelToken extends NodeLabelToken {
         @Override
-        default boolean isMissing() {
-            return false;
-        }
+        default boolean isMissing() { return false; }
 
         @Override
-        default boolean isInvalid() {
-            return false;
-        }
+        default boolean isInvalid() { return false; }
     }
 
     private enum Empty implements ValidNodeLabelToken {
         INSTANCE;
 
         @Override
-        public boolean isEmpty() {
-            return true;
-        }
+        public boolean isEmpty() { return true; }
 
         @Override
         public int size() {
@@ -260,9 +245,7 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public String[] getStrings() {
-            return new String[0];
-        }
+        public String[] getStrings() { return new String[0]; }
     }
 
     private static final class Array<T> implements ValidNodeLabelToken {
@@ -276,9 +259,7 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public boolean isEmpty() {
-            return nodeLabels.length == 0;
-        }
+        public boolean isEmpty() { return nodeLabels.length == 0; }
 
         @Override
         public int size() {
@@ -309,6 +290,67 @@ public final class NodeLabelTokens {
         }
     }
 
+    private static final class ArrayWithSatic<T> implements ValidNodeLabelToken {
+        private final @NotNull T[] nodeLabels;
+
+        private final List<NodeLabel> staticLabels;
+
+        private final Function<T, NodeLabel> toNodeLabel;
+
+        private ArrayWithSatic(T[] nodeLabels, List<NodeLabel> staticLabels, Function<T, NodeLabel> toNodeLabel) {
+            this.nodeLabels = nodeLabels;
+            this.staticLabels = staticLabels;
+            this.toNodeLabel = toNodeLabel;
+        }
+
+        @Override
+        public boolean isEmpty() { return nodeLabels.length == 0 && staticLabels.isEmpty(); }
+
+        @Override
+        public int size() {
+            return nodeLabels.length + staticLabels.size();
+        }
+
+        @Override
+        public @NotNull NodeLabel get(int index) {
+            return index < nodeLabels.length
+                ? toNodeLabel.apply(nodeLabels[index])
+                : staticLabels.get(index - nodeLabels.length);
+        }
+
+        @Override
+        public String[] getStrings() {
+            return Stream.concat(
+                Arrays.stream(nodeLabels).map(toNodeLabel),
+                staticLabels.stream()
+            )
+                .map(NodeLabel::name)
+                .toArray(String[]::new);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ArrayWithSatic<?> that = (ArrayWithSatic<?>) o;
+
+            // Probably incorrect - comparing Object[] arrays with Arrays.equals
+            if (!Arrays.equals(nodeLabels, that.nodeLabels)) return false;
+            if (!Objects.equals(staticLabels, that.staticLabels))
+                return false;
+            return Objects.equals(toNodeLabel, that.toNodeLabel);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Arrays.hashCode(nodeLabels);
+            result = 31 * result + (staticLabels != null ? staticLabels.hashCode() : 0);
+            result = 31 * result + (toNodeLabel != null ? toNodeLabel.hashCode() : 0);
+            return result;
+        }
+    }
+
     private static final class JavaList<T> implements ValidNodeLabelToken {
         private final @NotNull List<T> nodeLabels;
 
@@ -320,9 +362,7 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public boolean isEmpty() {
-            return nodeLabels.isEmpty();
-        }
+        public boolean isEmpty() { return nodeLabels.isEmpty(); }
 
         @Override
         public int size() {
@@ -363,9 +403,7 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public boolean isEmpty() {
-            return sequence.isEmpty();
-        }
+        public boolean isEmpty() { return sequence.isEmpty(); }
 
         @Override
         public int size() {
@@ -407,9 +445,7 @@ public final class NodeLabelTokens {
         }
 
         @Override
-        public boolean isEmpty() {
-            return false;
-        }
+        public boolean isEmpty() { return false; }
 
         @Override
         public int size() {
@@ -424,7 +460,9 @@ public final class NodeLabelTokens {
 
         @Override
         public String[] getStrings() {
-            return new String[]{item.name};
+            return new String[]{
+                item.name
+            };
         }
 
         @Override
