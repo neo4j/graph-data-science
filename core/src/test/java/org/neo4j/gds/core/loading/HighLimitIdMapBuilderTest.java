@@ -26,6 +26,5 @@ public class HighLimitIdMapBuilderTest extends IdMapBuilderTest {
     @Override
     protected IdMapBuilder builder(long capacity, int concurrency) {
         return HighLimitIdMapBuilder.of(concurrency, ArrayIdMapBuilder.of(capacity));
-
     }
 }

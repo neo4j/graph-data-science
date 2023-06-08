@@ -394,7 +394,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return idMap.typeId();
     }
 

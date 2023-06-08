@@ -48,7 +48,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return graph.typeId();
     }
 

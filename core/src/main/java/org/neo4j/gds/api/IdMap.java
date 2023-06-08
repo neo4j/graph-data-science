@@ -46,12 +46,12 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     /**
      * Used for IdMap implementations that do not require a type definition.
      */
-    byte NO_TYPE = -1;
+    String NO_TYPE = "unsupported";
 
     /**
      * A unique identifier for this type of IdMap.
      */
-    byte typeId();
+    String typeId();
 
     /**
      * Map original nodeId to mapped nodeId

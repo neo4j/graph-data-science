@@ -39,7 +39,7 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return idMap.typeId();
     }
 

@@ -40,7 +40,7 @@ public interface IdMapBehavior {
      * @param id the id of the IdMapBuilder to create
      */
     IdMapBuilder create(
-        byte id,
+        String id,
         int concurrency,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount

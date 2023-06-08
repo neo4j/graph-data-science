@@ -78,7 +78,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     private final GDLHandler gdlHandler;
     private final DatabaseId databaseId;
-    private final byte idMapBuilderType;
+    private final String idMapBuilderType;
 
     public static GdlFactory of(String gdlGraph) {
         return builder().gdlGraph(gdlGraph).build();
@@ -97,7 +97,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<GraphProjectFromGdlConfig> graphProjectConfig,
         Optional<LongSupplier> nodeIdFunction,
         Optional<Capabilities> graphCapabilities,
-        Optional<Byte> idMapBuilderType
+        Optional<String> idMapBuilderType
     ) {
         var config = graphProjectConfig.orElseGet(() -> ImmutableGraphProjectFromGdlConfig.builder()
             .username(userName.orElse(Username.EMPTY_USERNAME.username()))
@@ -136,7 +136,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         GraphDimensions graphDimensions,
         DatabaseId databaseId,
         Capabilities capabilities,
-        byte idMapBuilderType
+        String idMapBuilderType
     ) {
         super(
             graphProjectConfig,

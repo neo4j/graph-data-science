@@ -39,7 +39,7 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public byte typeId() {
+    public String typeId() {
         return originalToRootIdMap.typeId();
     }
 
