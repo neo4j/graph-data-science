@@ -147,6 +147,22 @@ The server acknowledges the action by returning a JSON document including the na
 }
 ----
 
+[[arrow-send-nodes-common-labels]]
+=== Importing nodes with common labels
+
+In case all nodes of a single call to the `PUT` endpoint share the same labels, the labels can be specified as part of the import process metadata via the `common_labels` property:
+
+----
+{
+    name: "my_graph",
+    entity_type: "node",
+    common_labels: ["Pokemon"]
+}
+----
+
+If the common labels are the only labels present in a stream, the `labels` column can be omitted from the node record batches.
+In case that there are nodes with more labels than the common ones, it is still possible to include a `labels` column which contains the additional labels.
+
 [[arrow-send-relationships]]
 == Sending relationship records via PUT as a Flight stream
 
