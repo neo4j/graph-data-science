@@ -73,8 +73,7 @@ public final class ProgressTrackerExecutionMonitor implements CompatExecutionMon
     public void start(StageExecution execution) {
         progressTracker.logInfo(
             formatWithLocale(
-                "%s :: %s :: Start",
-                GraphStoreToDatabaseExporter.class.getSimpleName(),
+                "%s :: Start",
                 execution.getStageName()
             )
         );
@@ -84,8 +83,7 @@ public final class ProgressTrackerExecutionMonitor implements CompatExecutionMon
     public void end(StageExecution execution, long totalTimeMillis) {
         progressTracker.logInfo(
             formatWithLocale(
-                "%s :: %s :: Finished",
-                GraphStoreToDatabaseExporter.class.getSimpleName(),
+                "%s :: Finished",
                 execution.getStageName()
             )
         );
