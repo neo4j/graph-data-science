@@ -32,7 +32,6 @@ public enum GdsFeatureToggles {
     USE_PARALLEL_PROPERTY_VALUE_INDEX(false),
     USE_PARTITIONED_SCAN(false),
     USE_BIT_ID_MAP(true),
-    USE_SHARDED_ID_MAP(false),
     USE_UNCOMPRESSED_ADJACENCY_LIST(false),
     USE_PACKED_ADJACENCY_LIST(false),
     USE_REORDERED_ADJACENCY_LIST(false),

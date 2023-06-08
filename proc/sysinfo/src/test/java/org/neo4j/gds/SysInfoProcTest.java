@@ -300,7 +300,6 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("featureParallelPropertyValueIndex", GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled())
             .containsEntry("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled())
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())
-            .containsEntry("featureShardedIdMap", GdsFeatureToggles.USE_SHARDED_ID_MAP.isEnabled())
             .containsEntry("featureUncompressedAdjacencyList", GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled())
             .containsEntry("featurePackedAdjacencyList", GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled())
             .containsEntry("featureReorderedAdjacencyList", GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled())
