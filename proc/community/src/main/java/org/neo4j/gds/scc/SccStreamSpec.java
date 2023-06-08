@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scc.Scc.NOT_VALID;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
@@ -53,17 +54,17 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
 
     @Override
     public ComputationResultConsumer<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            HugeLongArray components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
-
-            if (graph.isEmpty()) {
-                return Stream.empty();
-            }
-
-            return LongStream.range(0, graph.nodeCount())
-                .filter(i -> components.get(i) != NOT_VALID)
-                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .filter(i -> components.get(i) != NOT_VALID)
+                        .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

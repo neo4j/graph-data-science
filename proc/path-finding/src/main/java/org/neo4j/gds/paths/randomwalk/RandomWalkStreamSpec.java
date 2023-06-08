@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 
@@ -60,31 +61,24 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
     @Override
     public ComputationResultConsumer<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            if (graph.isEmpty()) {
-                return Stream.empty();
-            }
-
-            var returnPath = executionContext
-                .returnColumns()
-                .contains("path");
-
+            var returnPath = executionContext.returnColumns().contains("path");
             Function<List<Long>, Path> pathCreator = returnPath
-                ? (List<Long> nodes) -> PathFactory.create(
-                executionContext.nodeLookup(),
-                nodes,
-                RelationshipType.withName("NEXT")
-            )
+                ? (List<Long> nodes) -> PathFactory.create(executionContext.nodeLookup(), nodes, RelationshipType.withName("NEXT"))
                 : (List<Long> nodes) -> null;
-
-            return computationResult.result()
-                .orElseGet(Stream::empty)
-                .map(nodes -> {
-                    var translatedNodes = translateInternalToNeoIds(nodes, graph);
-                    var path = pathCreator.apply(translatedNodes);
-
-                    return new StreamResult(translatedNodes, path);
-                });
+            return runWithExceptionLogging(
+                "Result streaming failed",
+                executionContext.log(),
+                () -> computationResult.result()
+                    .map(result -> {
+                        var graph = computationResult.graph();
+                        return result
+                            .map(nodes -> {
+                                var translatedNodes = translateInternalToNeoIds(nodes, graph);
+                                var path = pathCreator.apply(translatedNodes);
+                                return new StreamResult(translatedNodes, path);
+                            });
+                    }).orElseGet(Stream::empty)
+            );
         };
     }
 

@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 
@@ -62,19 +63,22 @@ public class LinkPredictionPipelineStreamSpec implements
 
     @Override
     public ComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            return computationResult.result().map(result -> {
-                var graphStore = computationResult.graphStore();
-                Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
-                var graph = graphStore.getGraph(labelFilter);
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graphStore = computationResult.graphStore();
+                    Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
+                    var graph = graphStore.getGraph(labelFilter);
 
-                return result.stream()
-                    .map(predictedLink -> new StreamResult(
-                        graph.toOriginalNodeId(predictedLink.sourceId()),
-                        graph.toOriginalNodeId(predictedLink.targetId()),
-                        predictedLink.probability()
-                    ));
-            }).orElseGet(Stream::empty);
-        };
+                    return result.stream()
+                        .map(predictedLink -> new StreamResult(
+                            graph.toOriginalNodeId(predictedLink.sourceId()),
+                            graph.toOriginalNodeId(predictedLink.targetId()),
+                            predictedLink.probability()
+                        ));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

@@ -25,7 +25,6 @@ import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -58,12 +57,11 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
 
     @Override
     public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>> computationResultConsumer() {
-        return (ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> computationResult, ExecutionContext executionContext) ->
-            runWithExceptionLogging("Result streaming failed", executionContext.log(), () -> {
-                    if (computationResult.isGraphEmpty()) {
-                        return Stream.empty();
-                    }
-
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
                     var graph = computationResult.graph();
                     var config = computationResult.config();
                     var nodePropertyValues = (NodePropertyValues) CommunityProcCompanion.considerSizeFilter(
@@ -79,7 +77,7 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
                             graph.toOriginalNodeId(nodeId),
                             nodePropertyValues.longValue(nodeId)
                         ));
-                }
-            );
+                }).orElseGet(Stream::empty)
+        );
     }
 }

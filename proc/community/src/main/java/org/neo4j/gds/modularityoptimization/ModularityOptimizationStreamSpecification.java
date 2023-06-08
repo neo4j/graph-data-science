@@ -21,10 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -57,33 +54,22 @@ public class ModularityOptimizationStreamSpecification implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig, Stream<ModularityOptimizationStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) ->
-            runWithExceptionLogging("Result streaming failed", executionContext.log(), () -> {
-                if (computationResult.isGraphEmpty()) {
-                    return Stream.empty();
-                }
-
-                var graph = computationResult.graph();
-                var config = computationResult.config();
-                var nodePropertyValues = nodeProperties(computationResult);
-                return LongStream
-                    .range(IdMap.START_NODE_ID, graph.nodeCount())
-                    .filter(nodePropertyValues::hasValue)
-                    .mapToObj(nodeId -> new ModularityOptimizationStreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        nodePropertyValues.longValue(nodeId)
-                    ));
-            });
-    }
-
-    private NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig> computationResult
-    ) {
-        return CommunityProcCompanion.nodeProperties(
-            computationResult.config(),
-            computationResult.result()
-                .map(ModularityOptimizationResult::asNodeProperties)
-                .orElse(EmptyLongNodePropertyValues.INSTANCE)
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var config = computationResult.config();
+                    var nodePropertyValues = CommunityProcCompanion.nodeProperties(config, result.asNodeProperties());
+                    return LongStream
+                        .range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .filter(nodePropertyValues::hasValue)
+                        .mapToObj(nodeId -> new ModularityOptimizationStreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            nodePropertyValues.longValue(nodeId)
+                        ));
+                }).orElseGet(Stream::empty)
         );
     }
 }

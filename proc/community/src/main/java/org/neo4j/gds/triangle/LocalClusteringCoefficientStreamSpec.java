@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 
@@ -50,19 +51,18 @@ public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<Loca
 
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig, Stream<LocalClusteringCoefficientStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of();
-            }
-
-            var graph = computationResult.graph();
-            var result = computationResult.result().get();
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new LocalClusteringCoefficientStreamResult(
-                    graph.toOriginalNodeId(i),
-                    result.localClusteringCoefficients().get(i)
-                ));
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    return LongStream.range(0, graph.nodeCount())
+                        .mapToObj(i -> new LocalClusteringCoefficientStreamResult(
+                            graph.toOriginalNodeId(i),
+                            result.localClusteringCoefficients().get(i)
+                        ));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

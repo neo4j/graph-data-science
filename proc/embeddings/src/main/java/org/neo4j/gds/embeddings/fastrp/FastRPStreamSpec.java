@@ -54,19 +54,18 @@ public class FastRPStreamSpec  implements AlgorithmSpec<FastRP, FastRP.FastRPRes
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            () -> {
-
-                if (computationResult.result().isEmpty()) {
-                    return Stream.empty();
-                }
-
-                var graph = computationResult.graph();
-                var nodePropertyValues = FastRPCompanion.nodeProperties(computationResult);
-                return LongStream
-                    .range(IdMap.START_NODE_ID, nodePropertyValues.nodeCount())
-                    .filter(nodePropertyValues::hasValue)
-                    .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), nodePropertyValues.floatArrayValue(nodeId)));
-            }
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var nodePropertyValues = FastRPCompanion.nodeProperties(result);
+                    return LongStream
+                        .range(IdMap.START_NODE_ID, nodePropertyValues.nodeCount())
+                        .filter(nodePropertyValues::hasValue)
+                        .mapToObj(nodeId -> new StreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            nodePropertyValues.floatArrayValue(nodeId)
+                        ));
+                }).orElseGet(Stream::empty)
         );
     }
 }

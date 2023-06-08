@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
@@ -50,15 +51,17 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
 
     @Override
     public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var modularityResult = computationResult.result()
-                .orElseGet(ModularityResult::empty);
-
-            var communityModularities = modularityResult.modularityScores();
-            return LongStream
-                .range(0, modularityResult.communityCount())
-                .mapToObj(communityModularities::get)
-                .map(StreamResult::from);
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var communityModularities = result.modularityScores();
+                    return LongStream
+                        .range(0, result.communityCount())
+                        .mapToObj(communityModularities::get)
+                        .map(StreamResult::from);
+                }).orElseGet(Stream::empty)
+        );
     }
 }
