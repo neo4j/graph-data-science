@@ -14,10 +14,10 @@
 | `gds.graph.project.cypher` (deprecated)
 | `gds.graph.project.cypher.estimate` (deprecated)
 | `gds.graph.project` (aggregation function)
-.2+<.^|xref:graph-exists.adoc[Check if a graph exists]
+.2+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
 | `gds.graph.exists`
 | `_gds.graph.exists_`
-|xref:graph-list.adoc[List graphs] | `gds.graph.list`
+|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[List graphs] | `gds.graph.list`
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
 | `gds.graph.nodeProperties.drop`
 | `gds.graph.removeNodeProperties` (deprecated)

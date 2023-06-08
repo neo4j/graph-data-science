@@ -45,14 +45,13 @@ In the beginning, you need to xref:management-ops/graph-creation/index.adoc[crea
 
 == Inspecting the graph catalog
 
-.Graph catalog inspection operations:
-[opts=header,cols="1m,1"]
-|===
-| Name                                     | Description
-| xref:graph-list.adoc[gds.graph.list]     | Prints information about graphs that are currently stored in the catalog.
-| xref:graph-exists.adoc[gds.graph.exists] | Checks if a named graph is stored in the catalog.
-| xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph] | Inspect the graph in the catalog using Cypher.
-|===
+// TODO similar to above this feels not useful to have as a section
+
+The graphs stored in the catalog are described  xref:management-ops/inspecting-the-graph-catalog.adoc[here].
+
+
+// Move this to a new section of inspecting a graph
+Further, you can use xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph] to inspect the graph in the catalog using Cypher.
 
 == Modifying the graph catalog
 

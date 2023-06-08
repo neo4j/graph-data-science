@@ -1,0 +1,12 @@
+[[catalog-graph-inspection]]
+= Inspecting the graph catalog
+:description: This section details how to inspect graph catalog of the Neo4j Graph Data Science library.
+:page-aliases: graph-list.adoc, graph-exists.adoc
+
+// TODO before we talked about naming this page `Listing all graphs`?
+
+The below procedures can be used to inspect the entries in the graph catalog.
+
+include::partial$management-ops/graph-catalog/graph-list.adoc[leveloffset=+1]
+
+include::partial$management-ops/graph-catalog/graph-exists.adoc[leveloffset=+1]

@@ -546,7 +546,7 @@ YIELD nodePropertiesWritten
 
 The returned result is similar to the `stats` example.
 Additionally, the graph 'persons' now has a node property `fastrp-embedding` which stores the node embedding for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[Listing graphs].
 
 
 [[algorithms-embeddings-fastrp-examples-write]]

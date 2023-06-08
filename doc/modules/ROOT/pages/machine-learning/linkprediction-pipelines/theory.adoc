@@ -58,7 +58,7 @@ The ratio of total probability mass of negative versus positive examples in the 
 Thus, both of these parameters can be adjusted in tandem to trade off evaluation accuracy with speed.
 
 The true class ratio is computed as `(q - r) / r`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
-Please note that the `relationshipCount` reported by the xref:graph-list.adoc[graph list] procedure is the _directed_ count of relationships summed over all existing relationship types.
+Please note that the `relationshipCount` reported by the xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[graph list] procedure is the _directed_ count of relationships summed over all existing relationship types.
 Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
 For example, this query will count the number of relationships of type `T` or `R`:
 

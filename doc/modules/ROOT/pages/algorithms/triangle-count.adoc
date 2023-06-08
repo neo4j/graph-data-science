@@ -415,7 +415,7 @@ YIELD globalTriangleCount, nodeCount
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `triangles` which stores the triangle count for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[Listing graphs].
 
 
 [[algorithms-triangle-count-examples-write]]
@@ -452,7 +452,7 @@ Additionally, each of the six nodes now has a new property `triangles` in the Ne
 The Triangle Count algorithm supports a `maxDegree` configuration parameter that can be used to exclude nodes from processing if their degree is greater than the configured value.
 This can be useful to speed up the computation when there are nodes with a very high degree (so-called super nodes) in the graph.
 Super nodes have a great impact on the performance of the Triangle Count algorithm.
-To learn about the degree distribution of your graph, see xref:graph-list.adoc[Listing graphs].
+To learn about the degree distribution of your graph, see xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[Listing graphs].
 
 The nodes excluded from the computation get assigned a triangle count of `-1`.
 
