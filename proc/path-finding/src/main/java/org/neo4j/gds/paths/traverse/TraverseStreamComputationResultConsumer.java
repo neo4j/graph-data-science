@@ -37,19 +37,14 @@ final class TraverseStreamComputationResultConsumer {
 
     static <T> Stream<T> consume(
         long sourceNodeId,
-        @Nullable HugeLongArray nodes,
+        HugeLongArray nodes,
         LongUnaryOperator toOriginalNodeId,
-        boolean graphIsEmpty,
         ConcreteResultTransformer<T> resultTransformer,
         boolean shouldReturnPath,
         PathFactoryFacade pathFactoryFacade,
         RelationshipType relationshipType,
         NodeLookup nodeLookup
     ) {
-        if (graphIsEmpty || null == nodes) {
-            return Stream.empty();
-        }
-
         var nodesArray = nodes.toArray();
         var nodeList = Arrays
             .stream(nodesArray)

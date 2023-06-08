@@ -54,7 +54,6 @@ class BfsStreamComputationResultConsumerTest {
 
     @Test
     void shouldNotComputePath() {
-        when(graphMock.isEmpty()).thenReturn(false);
         when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
         when(computationResultMock.graph()).thenReturn(graphMock);
@@ -83,7 +82,6 @@ class BfsStreamComputationResultConsumerTest {
 
     @Test
     void shouldComputePath() {
-        when(graphMock.isEmpty()).thenReturn(false);
         when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
         when(computationResultMock.graph()).thenReturn(graphMock);

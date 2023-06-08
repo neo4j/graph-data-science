@@ -49,46 +49,46 @@ public class PregelStreamComputationResultConsumer<
         return runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
-            () -> {
-                var result = computationResult.result();
-                if (result.isEmpty()) {
-                    return Stream.empty();
-                }
-                var nodeValues = result.get().nodeValues();
-                // TODO: reduce the inner iteration to what's visible upfront
-                // TODO: map the element to a property lookup function upfront
-                // for every node
-                return LongStream.range(IdMap.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
-                    // for every schema element
-                    Map<String, Object> values = nodeValues.schema().elements()
-                        .stream()
-                        // if its visible
-                        .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)
-                        // collect a String->Object map
-                        .collect(Collectors.toMap(
-                            // of the element's property key
-                            Element::propertyKey,
-                            // to a value
-                            element -> {
-                                // retrieved based on the elements property type
-                                switch (element.propertyType()) {
-                                    case LONG:
-                                        return nodeValues.longProperties(element.propertyKey()).get(nodeId);
-                                    case DOUBLE:
-                                        return nodeValues.doubleProperties(element.propertyKey()).get(nodeId);
-                                    case DOUBLE_ARRAY:
-                                        return nodeValues.doubleArrayProperties(element.propertyKey()).get(nodeId);
-                                    case LONG_ARRAY:
-                                        return nodeValues.longArrayProperties(element.propertyKey()).get(nodeId);
-                                    default:
-                                        throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
-                                }
-                            }
-                        ));
-                    return new PregelStreamResult(computationResult.graph().toOriginalNodeId(nodeId), values);
-                });
+            () -> computationResult.result()
+                .map(result -> {
+                    var nodeValues = result.nodeValues();
+                    // TODO: reduce the inner iteration to what's visible upfront
+                    // TODO: map the element to a property lookup function upfront
+                    // for every node
+                    return LongStream.range(IdMap.START_NODE_ID, computationResult.graph().nodeCount())
+                        .mapToObj(nodeId -> {
+                            // for every schema element
+                            Map<String, Object> values = nodeValues.schema().elements()
+                                .stream()
+                                // if its visible
+                                .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)
+                                // collect a String->Object map
+                                .collect(Collectors.toMap(
+                                    // of the element's property key
+                                    Element::propertyKey,
+                                    // to a value
+                                    element -> {
+                                        // retrieved based on the elements property type
+                                        switch (element.propertyType()) {
+                                            case LONG:
+                                                return nodeValues.longProperties(element.propertyKey()).get(nodeId);
+                                            case DOUBLE:
+                                                return nodeValues.doubleProperties(element.propertyKey()).get(nodeId);
+                                            case DOUBLE_ARRAY:
+                                                return nodeValues.doubleArrayProperties(element.propertyKey()).get(
+                                                    nodeId);
+                                            case LONG_ARRAY:
+                                                return nodeValues.longArrayProperties(element.propertyKey())
+                                                    .get(nodeId);
+                                            default:
+                                                throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
+                                        }
+                                    }
+                                ));
+                            return new PregelStreamResult(computationResult.graph().toOriginalNodeId(nodeId), values);
+                        });
 
-            }
+                }).orElseGet(Stream::empty)
         );
     }
 }

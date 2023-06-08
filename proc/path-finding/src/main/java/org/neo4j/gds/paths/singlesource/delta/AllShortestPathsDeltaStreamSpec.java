@@ -53,13 +53,12 @@ public class AllShortestPathsDeltaStreamSpec implements AlgorithmSpec<DeltaStepp
         return (username, configuration) -> AllShortestPathsDeltaStreamConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 
-@Override
+    @Override
     public boolean releaseProgressTask() {
         return false;
     }
