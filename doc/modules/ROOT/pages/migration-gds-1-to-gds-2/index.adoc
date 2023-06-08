@@ -2,6 +2,7 @@
 [[appendix-b]]
 = Migration from Graph Data Science library Version 1.x
 :description: If you have previously used Graph Data Science library version 1.x, you can find the information you will need to migrate to using version 2.x in this section.
+:page-aliases: appendix-b/index.adoc
 
 
 == Who should read this guide
@@ -17,10 +18,10 @@ In this section we will focus on side-by-side examples of operations using the s
 
 This section is divided into the following sub-sections:
 
-* xref:appendix-b/migration-algos-common.adoc[Common Changes]
-* xref:appendix-b/migration-graph-projection.adoc[Graph Projection]
-* xref:appendix-b/migration-graph-listing.adoc[Graph Listing]
-* xref:appendix-b/migration-graph-drop.adoc[Graph Drop]
-* xref:appendix-b/migration-memory-estimation.adoc[Memory Estimation]
-* xref:appendix-b/migration-algorithms.adoc[Algorithms]
-* xref:appendix-b/migration-ml.adoc[Machine Learning]
+* xref:migration-gds-1-to-gds-2/migration-algos-common.adoc[Common Changes]
+* xref:migration-gds-1-to-gds-2/migration-graph-projection.adoc[Graph Projection]
+* xref:migration-gds-1-to-gds-2/migration-graph-listing.adoc[Graph Listing]
+* xref:migration-gds-1-to-gds-2/migration-graph-drop.adoc[Graph Drop]
+* xref:migration-gds-1-to-gds-2/migration-memory-estimation.adoc[Memory Estimation]
+* xref:migration-gds-1-to-gds-2/migration-algorithms.adoc[Algorithms]
+* xref:migration-gds-1-to-gds-2/migration-ml.adoc[Machine Learning]

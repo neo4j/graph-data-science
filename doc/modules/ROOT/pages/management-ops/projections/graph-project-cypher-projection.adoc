@@ -158,7 +158,7 @@ RETURN
 ----
 
 .Results
-[opts="header", cols="1,1,1m"]
+[opts="header", cols="0,1,1m"]
 |===
 | graph     | nodes | rels
 | "persons" | 3     | 2
@@ -182,7 +182,7 @@ RETURN
 ----
 
 .Results
-[opts="header", cols="1,1,1m"]
+[opts="header",cols="1,1,1m"]
 |===
 | graph     | nodes | rels
 | "persons" | 5     | 2
@@ -190,6 +190,7 @@ RETURN
 --
 
 
+[[graph-project-cypher-projection-arbitrary-source-and-target-id-values]]
 === Arbitrary source and target ID values
 
 So far, the examples showed how to project a graph based on existing nodes.
@@ -198,7 +199,7 @@ It is also possible to pass INTEGER values directly.
 [role=query-example]
 --
 .Project arbitrary id values:
-[source, cypher, role=noplay]
+[source,cypher,role=noplay]
 ----
 UNWIND [ [42, 84], [13, 37], [19, 84] ] AS sourceAndTarget
 WITH sourceAndTarget[0] AS source, sourceAndTarget[1] AS target
@@ -222,6 +223,7 @@ As such, `.write` procedures cannot be executed on this graph.
 --
 
 
+[[graph-project-cypher-projection-multi-graph]]
 === Multi-graph
 
 A multi-graph is a graph with multiple node labels and relationship types.
@@ -314,6 +316,7 @@ RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 |===
 --
 
+[[graph-project-cypher-projection-undirected-relationships]]
 ==== Undirected relationships
 
 Relationships can be projected as undirected by specifying the `undirectedRelationshipTypes` parameter.
@@ -469,6 +472,7 @@ ORDER BY person ASC, numberOfPages DESC
 We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref:management-ops/projections/graph-project-cypher-projection.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
 
 
+[[graph-project-cypher-projection-parallel-relationships]]
 === Parallel relationships
 
 The Property Graph Model in Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
@@ -580,6 +584,7 @@ ORDER BY numberOfPages DESC, person
 We can see, that the two `READ` relationships between Florentin and the Hobbit sum up to `46` numberOfPages.
 
 
+[[graph-project-cypher-projection-filtered]]
 === Projecting filtered Neo4j graphs
 
 Cypher-projections allow us to specify the graph to project in a more fine-grained way.

@@ -1,5 +1,6 @@
 [[migration-graph-drop]]
 = Graph drop
+:page-aliases: appendix-b/migration-graph-drop.adoc
 
 .Changes in the YIELD fields
 [opts=header, cols="1,1"]
