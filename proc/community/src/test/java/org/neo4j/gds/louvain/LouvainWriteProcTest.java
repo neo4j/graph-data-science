@@ -32,7 +32,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -158,18 +158,18 @@ class LouvainWriteProcTest extends BaseProcTest {
                 .isGreaterThanOrEqualTo(0);
         });
 
-        List<Long> actualCommunities = new ArrayList<>();
+        Map<Long, Long> actualCommunities = new HashMap<>();
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) as id, n.myFancyCommunity as community", row -> {
-            long communityId = row.getNumber("community").longValue();
-            int nodeId = row.getNumber("id").intValue();
-            actualCommunities.add(nodeId, communityId);
+            long nodeId = row.getNumber("id").longValue();
+            actualCommunities.put(nodeId, row.getNumber("community").longValue());
         });
 
-        assertCommunities(actualCommunities, List.of(
-            List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
-            List.of(6L, 7L, 8L),
-            List.of(9L, 10L, 11L, 12L, 13L)
-        ));
+        assertCommunities(
+            actualCommunities,
+            idFunction.of("a", "b", "c", "d", "e", "f", "x"),
+            idFunction.of("g", "h", "i"),
+            idFunction.of("j", "k", "l", "m", "n")
+        );
     }
 
     @Test
@@ -207,18 +207,18 @@ class LouvainWriteProcTest extends BaseProcTest {
             }
         );
 
-        List<Long> actualCommunities = new ArrayList<>();
+        Map<Long, Long> actualCommunities = new HashMap<>();
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) as id, n.myFancyWriteProperty as community", row -> {
-            long communityId = row.getNumber("community").longValue();
-            int nodeId = row.getNumber("id").intValue();
-            actualCommunities.add(nodeId, communityId);
+            long nodeId = row.getNumber("id").longValue();
+            actualCommunities.put(nodeId, row.getNumber("community").longValue());
         });
 
-        assertCommunities(actualCommunities, List.of(
-            List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
-            List.of(6L, 7L, 8L),
-            List.of(9L, 10L, 11L, 12L, 13L)
-        ));
+        assertCommunities(
+            actualCommunities,
+            idFunction.of("a", "b", "c", "d", "e", "f", "x"),
+            idFunction.of("g", "h", "i"),
+            idFunction.of("j", "k", "l", "m", "n")
+        );
     }
 
 

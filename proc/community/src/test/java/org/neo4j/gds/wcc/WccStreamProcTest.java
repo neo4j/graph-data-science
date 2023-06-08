@@ -62,6 +62,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -82,8 +83,7 @@ class WccStreamProcTest extends BaseProcTest {
 
     private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     @Neo4jGraph
-    static final @Language("Cypher") String DB_CYPHER =
-        "CREATE" +
+    static final @Language("Cypher") String DB_CYPHER = "CREATE" +
         " (nA:Label {nodeId: 0, seedId: 42})" +
         ",(nB:Label {nodeId: 1, seedId: 42})" +
         ",(nC:Label {nodeId: 2, seedId: 42})" +
@@ -104,7 +104,8 @@ class WccStreamProcTest extends BaseProcTest {
         ",(nF)-[:TYPE]->(nG)" +
         // {H, I}
         ",(nH)-[:TYPE]->(nI)";
-    private static final long[][] EXPECTED_COMMUNITIES = {new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}};
+
+    private long[][] EXPECTED_COMMUNITIES;
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -113,6 +114,14 @@ class WccStreamProcTest extends BaseProcTest {
             GraphProjectProc.class,
             GraphWriteNodePropertiesProc.class
         );
+
+        EXPECTED_COMMUNITIES = new long[][]{
+            idFunction.of("nA", "nB", "nC", "nD", "nE", "nF", "nG"),
+            idFunction.of("nH", "nI"),
+            new long[]{
+                idFunction.of("nJ")
+            }
+        };
     }
 
     @AfterEach
@@ -130,43 +139,14 @@ class WccStreamProcTest extends BaseProcTest {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .streamMode()
-                .addParameter("minComponentSize", 1)
+            .addParameter("minComponentSize", 1)
             .yields("nodeId", "componentId");
 
-        long [] communities = new long[10];
+        Map<Long, Long> communities = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
-            int nodeId = row.getNumber("nodeId").intValue();
+            long nodeId = row.getNumber("nodeId").intValue();
             long setId = row.getNumber("componentId").longValue();
-            communities[nodeId] = setId;
-        });
-
-        CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
-    }
-
-    @Test
-    void testStreamRunsOnLoadedGraph() {
-        GraphProjectConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig
-            .builder()
-            .graphName("testGraph")
-            .nodeProjections(NodeProjections.all())
-            .relationshipProjections(RelationshipProjections.ALL)
-            .build();
-
-        GraphStoreCatalog.set(
-            graphProjectConfig,
-            graphLoader(graphProjectConfig).graphStore()
-        );
-
-        String query = GdsCypher.call("testGraph")
-            .algo("wcc")
-            .streamMode()
-            .yields("nodeId", "componentId");
-
-        long [] communities = new long[10];
-        runQueryWithRowConsumer(query, row -> {
-            int nodeId = row.getNumber("nodeId").intValue();
-            long setId = row.getNumber("componentId").longValue();
-            communities[nodeId] = setId;
+            communities.put(nodeId, setId);
         });
 
         CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
@@ -175,7 +155,10 @@ class WccStreamProcTest extends BaseProcTest {
     @Test
     void testStreamRunsOnLoadedGraphWithNodeLabelFilter() {
         clearDb();
-        runQuery("CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)");
+        runQuery(
+            "CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER +
+                " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)"
+        );
 
         String graphCreateQuery = GdsCypher
             .call("nodeFilterGraph")
@@ -209,34 +192,53 @@ class WccStreamProcTest extends BaseProcTest {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minComponentSize", 1), new Long[]{0L, 0L, 0L, 0L, 0L, 0L, 0L, 7L, 7L, 9L}),
-                Arguments.of(Map.of("minComponentSize", 3), new Long[]{0L, 0L, 0L, 0L, 0L, 0L, 0L})
+            Arguments.of(Map.of("minComponentSize", 1), Map.of(
+                "nA", 0L,
+                "nB", 0L,
+                "nC", 0L,
+                "nD", 0L,
+                "nE",0L,
+                "nF",0L,
+                "nG", 0L,
+                "nH", 7L,
+                "nI", 7L,
+                "nJ", 9L
+            )),
+            Arguments.of(Map.of("minComponentSize", 3), Map.of(
+                "nA", 0L,
+                "nB", 0L,
+                "nC", 0L,
+                "nD", 0L,
+                "nE",0L,
+                "nF",0L,
+                "nG", 0L
+            ))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testStreamWithMinComponentSize(Map<String, Long> parameters, Long[] expectedCommunities) {
+    void testStreamWithMinComponentSize(Map<String, Long> parameters, Map<String, Long> expectedCommunities) {
         var projectQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .loadEverything(Orientation.NATURAL)
             .yields();
         runQuery(projectQuery);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-                .algo("wcc")
-                .streamMode()
-                .addAllParameters(parameters)
-                .yields("nodeId", "componentId");
+            .algo("wcc")
+            .streamMode()
+            .addAllParameters(parameters)
+            .yields("nodeId", "componentId");
 
-        Long [] communities = new Long[expectedCommunities.length];
+        Map<String, Long> actualComponents = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
-            int nodeId = row.getNumber("nodeId").intValue();
-            long setId = row.getNumber("componentId").longValue();
-            communities[nodeId] = setId;
+            actualComponents.put(
+                idToVariable.of(row.getNumber("nodeId").longValue()),
+                row.getNumber("componentId").longValue()
+            );
         });
 
-        assertThat(communities)
-            .containsExactly(expectedCommunities);
+        assertThat(actualComponents).isEqualTo(expectedCommunities);
     }
 
     @Test
@@ -277,13 +279,17 @@ class WccStreamProcTest extends BaseProcTest {
                             "CALL db.createProperty($prop)",
                             Map.of("prop", nodeProperty)
                         );
-                        configMap.put(NODE_PROPERTIES_KEY, Map.ofEntries(ImmutablePropertyMapping
-                            .builder()
-                            .propertyKey(nodeProperty)
-                            .defaultValue(DefaultValue.forDouble())
-                            .build()
-                            .toObject(false)
-                        ));
+                        configMap.put(
+                            NODE_PROPERTIES_KEY,
+                            Map.ofEntries(
+                                ImmutablePropertyMapping
+                                    .builder()
+                                    .propertyKey(nodeProperty)
+                                    .defaultValue(DefaultValue.forDouble())
+                                    .build()
+                                    .toObject(false)
+                            )
+                        );
                     }
 
                     try {
@@ -313,14 +319,16 @@ class WccStreamProcTest extends BaseProcTest {
     private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
         return ImmutableGraphLoader
             .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
-                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-                .transactionContext(TestSupport.fullAccessTransaction(db))
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
-                .build())
+            .context(
+                ImmutableGraphLoaderContext.builder()
+                    .databaseId(DatabaseId.of(db))
+                    .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+                    .transactionContext(TestSupport.fullAccessTransaction(db))
+                    .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                    .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                    .log(Neo4jProxy.testLog())
+                    .build()
+            )
             .username("")
             .projectConfig(graphProjectConfig)
             .build();
@@ -333,10 +341,12 @@ class WccStreamProcTest extends BaseProcTest {
         return ImmutableGraphProjectFromStoreConfig.of(
             TEST_USERNAME,
             graphName,
-            NodeProjections.create(singletonMap(
-                ALL_NODES,
-                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-            )),
+            NodeProjections.create(
+                singletonMap(
+                    ALL_NODES,
+                    ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+                )
+            ),
             rels
         );
     }

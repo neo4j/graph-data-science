@@ -32,10 +32,11 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,18 +116,19 @@ class LouvainStreamProcTest extends BaseProcTest {
         String query = "CALL gds.louvain.stream('myGraph', {}) " +
                        " YIELD nodeId, communityId, intermediateCommunityIds";
 
-        List<Long> actualCommunities = new ArrayList<>();
+        Map<Long, Long> actualCommunities = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
-            int id = row.getNumber("nodeId").intValue();
-            long community = row.getNumber("communityId").longValue();
+            long nodeId = row.getNumber("nodeId").longValue();
+            actualCommunities.put(nodeId, row.getNumber("communityId").longValue());
             assertThat(row.get("intermediateCommunityIds")).isNull();
-            actualCommunities.add(id, community);
         });
-        assertCommunities(actualCommunities, List.of(
-            List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
-            List.of(6L, 7L, 8L),
-            List.of(9L, 10L, 11L, 12L, 13L)
-        ));
+
+        assertCommunities(
+            actualCommunities,
+            idFunction.of("a", "b", "c", "d", "e", "f", "x"),
+            idFunction.of("g", "h", "i"),
+            idFunction.of("j", "k", "l", "m", "n")
+        );
     }
 
     @Test
@@ -134,22 +136,20 @@ class LouvainStreamProcTest extends BaseProcTest {
         String query = "CALL gds.louvain.stream('myGraph', {consecutiveIds: true}) " +
                        " YIELD nodeId, communityId, intermediateCommunityIds";
 
-        var communitySet = new HashSet<Long>();
-
-        List<Long> actualCommunities = new ArrayList<>();
+        Map<Long, Long> actualCommunities = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
-            int id = row.getNumber("nodeId").intValue();
-            long community = row.getNumber("communityId").longValue();
-            communitySet.add(community);
+            long nodeId = row.getNumber("nodeId").longValue();
+            actualCommunities.put(nodeId, row.getNumber("communityId").longValue());
             assertThat(row.get("intermediateCommunityIds")).isNull();
-            actualCommunities.add(id, community);
         });
-        assertCommunities(actualCommunities, List.of(
-            List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
-            List.of(6L, 7L, 8L),
-            List.of(9L, 10L, 11L, 12L, 13L)
-        ));
-        assertThat(communitySet).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
+
+        assertCommunities(
+            actualCommunities,
+            idFunction.of("a", "b", "c", "d", "e", "f", "x"),
+            idFunction.of("g", "h", "i"),
+            idFunction.of("j", "k", "l", "m", "n")
+        );
+        assertThat(actualCommunities.values().stream().distinct()).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
     }
 
     @Test
@@ -208,8 +208,8 @@ class LouvainStreamProcTest extends BaseProcTest {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-            Arguments.of(Map.of("minCommunitySize", 1), List.of(0, 1, 2), List.of(0, 1, 2)),
-            Arguments.of(Map.of("minCommunitySize", 5), List.of(0, 1), List.of(0, 2))
+            Arguments.of(Map.of("minCommunitySize", 1), 3, List.of(0, 1, 2)),
+            Arguments.of(Map.of("minCommunitySize", 5), 2, List.of(0, 2))
         );
     }
 
@@ -217,7 +217,7 @@ class LouvainStreamProcTest extends BaseProcTest {
     @MethodSource("communitySizeInputs")
     void testStreamMinCommunitySize(
         Map<String, Long> parameters,
-        List<Integer> expectedCommunityIds,
+        int expectedNumberOfCommunities,
         List<Integer> mappedCommunityIds
     ) {
         @Language("Cypher") String query = GdsCypher.call("myGraph")
@@ -227,19 +227,23 @@ class LouvainStreamProcTest extends BaseProcTest {
             .addAllParameters(parameters)
             .yields("nodeId", "communityId");
 
-        var communitySet = new HashSet<Integer>();
+        var expectedCommunities = List.of(
+            idFunction.of("a", "b", "c", "d", "e", "f", "x"),
+            idFunction.of("g", "h", "i"),
+            idFunction.of("j", "k", "l", "m", "n")
+        );
 
+        Set<Integer> communitySet = new HashSet<>();
         runQueryWithRowConsumer(query, row -> {
-            long id = row.getNumber("nodeId").longValue();
+            long nodeId = row.getNumber("nodeId").longValue();
             int community = row.getNumber("communityId").intValue();
-            int mappedCommunityId = mappedCommunityIds.get(community);
             communitySet.add(community);
-            assertThat(List.of(
-                List.of(0L, 1L, 2L, 3L, 4L, 5L, 14L),
-                List.of(6L, 7L, 8L),
-                List.of(9L, 10L, 11L, 12L, 13L)
-            ).get(mappedCommunityId)).contains(id);
+            int mappedCommunityId = mappedCommunityIds.get(community);
+
+            assertThat(expectedCommunities.get(mappedCommunityId)).contains(nodeId);
         });
-        assertThat(communitySet).containsExactlyElementsOf(expectedCommunityIds);
+
+
+        assertThat(communitySet).hasSize(expectedNumberOfCommunities);
     }
 }

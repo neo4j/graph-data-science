@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -38,33 +39,33 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class LabelPropagationStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    public static final String DB_CYPHER =
-        "CREATE" +
+    public static final String DB_CYPHER = "CREATE" +
         "  (a:A {id: 0, seed: 42}) " +
         ", (b:B {id: 1, seed: 42}) " +
 
-        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+        ", (a)-[:X]->(c:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(d:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(e:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(f:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(g:A {id: 6,  weight: 8.0, seed: 2}) " +
 
-        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+        ", (b)-[:X]->(h:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(i:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(j:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(k:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(l:B {id: 11, weight: 8.0, seed: 2})";
 
     @BeforeEach
     void setup() throws Exception {
@@ -75,13 +76,13 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
         // Create explicit graphs with both projection variants
         runQuery(
             "CALL gds.graph.project(" +
-            "   'myGraph', " +
-            "   {" +
-            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
-            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
-            "   }, " +
-            "   '*'" +
-            ")"
+                "   'myGraph', " +
+                "   {" +
+                "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+                "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+                "   }, " +
+                "   '*'" +
+                ")"
         );
     }
 
@@ -93,17 +94,21 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
     @Test
     void testStream(SoftAssertions assertions) {
 
-        String query = GdsCypher.call("myGraph")
-            .algo("gds.labelPropagation")
-            .streamMode()
-            .yields();
+        String query = "CALL gds.labelPropagation.stream('myGraph') YIELD nodeId, communityId " +
+            "RETURN nodeId, communityId " +
+            "ORDER BY nodeId";
 
-        var expectedCommunities = List.of(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
+        var expectedCommunities = Stream.of("c", "h", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l")
+            .map(idFunction::of)
+            .collect(
+                Collectors.toList()
+            );
+
+        var rowIdx = new MutableInt();
         var rowCount = runQueryWithRowConsumer(query, row -> {
-            int nodeId = row.getNumber("nodeId").intValue();
             long communityId = row.getNumber("communityId").longValue();
 
-            assertions.assertThat(communityId).isEqualTo(expectedCommunities.get(nodeId));
+            assertions.assertThat(communityId).isEqualTo(expectedCommunities.get(rowIdx.getAndIncrement()));
         });
 
         assertThat(rowCount)
@@ -115,41 +120,102 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
     @Test
     void testEstimate() {
         var query = "CALL gds.labelPropagation.stream.estimate('myGraph', {concurrency: 4})" +
-                    " YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
+            " YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
 
-        assertCypherResult(query, List.of(Map.of(
-            "nodeCount", 12L,
-            "relationshipCount", 10L,
-            "bytesMin", 1640L,
-            "bytesMax", 2152L
-        )));
+        assertCypherResult(
+            query,
+            List.of(
+                Map.of(
+                    "nodeCount",
+                    12L,
+                    "relationshipCount",
+                    10L,
+                    "bytesMin",
+                    1640L,
+                    "bytesMax",
+                    2152L
+                )
+            )
+        );
     }
 
     // FIXME: this looks dodgy and unreadable...
     static Stream<Arguments> communitySizeInputs() {
+        // not using Map.of() as it has too many entries
+        var communities = new HashMap<>();
+
+        communities.putAll(
+            Map.of(
+                "a",
+                44L,
+                "b",
+                49L,
+                "c",
+                44L,
+                "d",
+                45L,
+                "e",
+                46L,
+                "f",
+                47L,
+                "g",
+                48L,
+                "h",
+                49L,
+                "i",
+                50L,
+                "j",
+                51L
+            )
+        );
+
+        communities.putAll(
+            Map.of(
+                "k",
+                52L,
+                "l",
+                53L
+            )
+        );
+
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), new Long[]{2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L}),
-                Arguments.of(Map.of("minCommunitySize", 2), new Long[]{2L, 7L, 2L, null, null, null, null, 7L, null, null, null, null})
+            Arguments.of(
+                Map.of("minCommunitySize", 1),
+                communities
+            ),
+            Arguments.of(
+                Map.of("minCommunitySize", 2),
+                Map.of(
+                    "a",
+                    44L,
+                    "b",
+                    49L,
+                    "c",
+                    44L,
+                    "h",
+                    49L
+                )
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testStreamMinCommunitySize(Map<String, Long> parameters, Long[] expectedCommunityIds) {
+    void testStreamMinCommunitySize(Map<String, Long> parameters, Map<String, Long> expectedCommunityIds) {
         String query = GdsCypher.call("myGraph")
-                .algo("gds.labelPropagation")
-                .streamMode()
-                .addAllParameters(parameters)
-                .yields();
+            .algo("gds.labelPropagation")
+            .streamMode()
+            .addAllParameters(parameters)
+            .yields();
 
-        Long[] actualCommunities = new Long[12];
+        Map<String, Long> actualCommunities = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
-            actualCommunities[id] = community;
+            actualCommunities.put(idToVariable.of(id), community);
         });
 
-        assertArrayEquals(actualCommunities, expectedCommunityIds);
+        assertThat(actualCommunities).isEqualTo(expectedCommunityIds);
     }
 
     @Nested
