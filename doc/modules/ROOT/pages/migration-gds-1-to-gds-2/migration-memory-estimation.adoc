@@ -1,5 +1,6 @@
 [[migration-memory-estimation]]
 = Memory estimation
+:page-aliases: appendix-b/migration-memory-estimation.adoc
 
 .Estimating memory for algorithms without loading the graph:
 [opts=header,cols="1a,1a"]

@@ -1,6 +1,7 @@
 [[migration-ml]]
 = Machine Learning
 :description: This section covers migration for Machine Learning algorithms in the Neo4j Graph Data Science library.
+:page-aliases: appendix-b/migration-ml.adoc
 
 
 include::partial$/migration/migration-algorithms-node-classification.adoc[leveloffset=+1]
