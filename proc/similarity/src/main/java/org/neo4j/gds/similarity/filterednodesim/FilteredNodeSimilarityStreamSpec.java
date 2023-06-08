@@ -31,6 +31,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.stream", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -59,19 +60,21 @@ public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            var similarityResultStream = computationResult.result()
-                .map(NodeSimilarityResult::streamResult)
-                .orElseGet(Stream::empty);
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var similarityResultStream = result.streamResult();
+                    return similarityResultStream.map(internalSimilarityResult -> {
+                        internalSimilarityResult.node1 = graph.toOriginalNodeId(internalSimilarityResult.node1);
+                        internalSimilarityResult.node2 = graph.toOriginalNodeId(internalSimilarityResult.node2);
 
-            return similarityResultStream.map(internalSimilarityResult -> {
-                internalSimilarityResult.node1 = graph.toOriginalNodeId(internalSimilarityResult.node1);
-                internalSimilarityResult.node2 = graph.toOriginalNodeId(internalSimilarityResult.node2);
-
-                return internalSimilarityResult;
-            });
-        };
+                        return internalSimilarityResult;
+                    });
+                }).orElseGet(Stream::empty)
+        );
     }
 
 }

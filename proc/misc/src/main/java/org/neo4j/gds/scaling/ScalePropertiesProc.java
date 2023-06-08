@@ -40,23 +40,38 @@ public final class ScalePropertiesProc {
             .map(ScaleProperties.Result::scaledProperties)
             .orElseGet(() -> HugeObjectArray.newArray(double[].class, 0));
 
-        return new DoubleArrayNodePropertyValues() {
-            @Override
-            public long nodeCount() {
-                return size;
-            }
+        return new ScaledNodePropertyValues(size, scaledProperties);
+    }
 
-            @Override
-            public double[] doubleArrayValue(long nodeId) {
-                return scaledProperties.get(nodeId);
-            }
-        };
+    static NodePropertyValues nodeProperties(long size, HugeObjectArray<double[]> scaledProperties) {
+        return new ScaledNodePropertyValues(size, scaledProperties);
     }
 
     static void validateLegacyScalers(ScalePropertiesBaseConfig config, boolean allowL1L2Scalers) {
         var specifiedScaler = config.scaler().type();
         if (!allowL1L2Scalers && (specifiedScaler.equals(L1Norm.TYPE) || specifiedScaler.equals(L2Norm.TYPE))) {
             ScalerFactory.throwForInvalidScaler(specifiedScaler);
+        }
+    }
+
+    static final class ScaledNodePropertyValues implements DoubleArrayNodePropertyValues {
+
+        private final long size;
+        private final HugeObjectArray<double[]> scaledProperties;
+
+        private ScaledNodePropertyValues(long size, HugeObjectArray<double[]> scaledProperties) {
+            this.size = size;
+            this.scaledProperties = scaledProperties;
+        }
+
+        @Override
+        public long nodeCount() {
+            return size;
+        }
+
+        @Override
+        public double[] doubleArrayValue(long nodeId) {
+            return scaledProperties.get(nodeId);
         }
     }
 }

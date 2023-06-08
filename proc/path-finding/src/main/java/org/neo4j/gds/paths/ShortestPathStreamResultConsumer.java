@@ -28,31 +28,34 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
+
 public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig> implements ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StreamResult>> {
 
     @Override
     public Stream<StreamResult> consume(
-        ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult, ExecutionContext executionContext
+        ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult,
+        ExecutionContext executionContext
     ) {
+        return runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var shouldReturnPath = executionContext.returnColumns().contains("path")
+                        && computationResult.graphStore().capabilities().canWriteToDatabase();
 
-        if (computationResult.result().isEmpty()) {
-            return Stream.empty();
-        }
+                    var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
 
-        var graph = computationResult.graph();
-        var shouldReturnPath = executionContext
-            .returnColumns()
-            .contains("path") && computationResult.graphStore().capabilities().canWriteToDatabase();
-        
-        var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
+                    var resultStream = result.mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
 
-        var resultStream = computationResult.result().get()
-            .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
+                    // this is necessary in order to close the result stream which triggers
+                    // the progress tracker to close its root task
+                    executionContext.closeableResourceRegistry().register(resultStream);
 
-        // this is necessary in order to close the result stream which triggers
-        // the progress tracker to close its root task
-        executionContext.closeableResourceRegistry().register(resultStream);
-
-        return resultStream;
+                    return resultStream;
+                }).orElseGet(Stream::empty)
+        );
     }
 }

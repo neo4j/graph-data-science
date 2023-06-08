@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -33,6 +33,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.beta.spanningTree.stream", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = STREAM)
@@ -55,24 +56,24 @@ public class SpanningTreeStreamSpec implements AlgorithmSpec<Prim, SpanningTree,
     }
 
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            var sourceNode = computationResult.config().sourceNode();
-            Graph graph = computationResult.graph();
-            SpanningTree spanningTree = computationResult.result().get();
-            return LongStream.range(0, graph.nodeCount())
-                .filter(nodeId -> spanningTree.parent(nodeId) >= 0 || sourceNode == graph.toOriginalNodeId(nodeId))
-                .mapToObj(nodeId -> new StreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    (sourceNode == graph.toOriginalNodeId(nodeId)) ?
-                        sourceNode :
-                        graph.toOriginalNodeId(spanningTree.parent(nodeId)),
-                    spanningTree.costToParent(nodeId)
-                ));
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var sourceNode = computationResult.config().sourceNode();
+                    var graph = computationResult.graph();
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .filter(nodeId -> result.parent(nodeId) >= 0 || sourceNode == graph.toOriginalNodeId(nodeId))
+                        .mapToObj(nodeId -> {
+                            var originalId = graph.toOriginalNodeId(nodeId);
+                            return new StreamResult(
+                                originalId,
+                                (sourceNode == originalId) ? sourceNode : graph.toOriginalNodeId(result.parent(nodeId)),
+                                result.costToParent(nodeId)
+                            );
+                        });
+                }).orElseGet(Stream::empty)
+        );
     }
 }

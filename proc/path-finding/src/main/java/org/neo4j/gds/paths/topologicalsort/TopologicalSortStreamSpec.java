@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.topologicalsort;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -33,6 +33,7 @@ import org.neo4j.gds.topologicalsort.TopologicalSortStreamConfig;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.alpha.topologicalSort.stream", description = TopologicalSortStreamProc.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
@@ -55,16 +56,18 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
 
     @Override
     public ComputationResultConsumer<TopologicalSort, TopologicalSortResult, TopologicalSortStreamConfig, Stream<TopologicalSortStreamResult>> computationResultConsumer() {
-        return (computationResult,  executionContext) ->
-        {
-            if (computationResult.result().isEmpty()) {
-                return Stream.empty();
-            }
-
-            Graph graph = computationResult.graph();
-            var topologicallySortedNodes = computationResult.result().get().value();
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> new TopologicalSortStreamResult(graph.toOriginalNodeId(topologicallySortedNodes.get(nodeId))));
-        };
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
+                .map(result -> {
+                    var graph = computationResult.graph();
+                    var topologicallySortedNodes = result.value();
+                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+                        .mapToObj(nodeId -> new TopologicalSortStreamResult(
+                            graph.toOriginalNodeId(topologicallySortedNodes.get(nodeId))
+                        ));
+                }).orElseGet(Stream::empty)
+        );
     }
 }

@@ -29,6 +29,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 
 @GdsCallable(name = "gds.nodeSimilarity.stream", description = NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -51,8 +52,10 @@ public class NodeSimilarityStreamSpecification implements AlgorithmSpec<NodeSimi
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            return computationResult.result()
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Result streaming failed",
+            executionContext.log(),
+            () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
 
@@ -62,7 +65,7 @@ public class NodeSimilarityStreamSpecification implements AlgorithmSpec<NodeSimi
                             similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
                             return similarityResult;
                         });
-                }).orElseGet(Stream::empty);
-        };
+                }).orElseGet(Stream::empty)
+        );
     }
 }
