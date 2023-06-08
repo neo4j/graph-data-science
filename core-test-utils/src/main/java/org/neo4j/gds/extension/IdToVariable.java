@@ -19,8 +19,14 @@
  */
 package org.neo4j.gds.extension;
 
+import java.util.Arrays;
+
 @FunctionalInterface
 public interface IdToVariable {
 
     String of(long id);
+
+    default String[] of(long... ids) {
+        return Arrays.stream(ids).mapToObj(this::of).toArray(String[]::new);
+    }
 }

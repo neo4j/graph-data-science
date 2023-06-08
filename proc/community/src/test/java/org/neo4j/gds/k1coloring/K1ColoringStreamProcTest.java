@@ -54,6 +54,8 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.extension.IdToVariable;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -84,6 +86,9 @@ class K1ColoringStreamProcTest extends BaseProcTest {
         ",(a)-[:REL]->(b)" +
         ",(a)-[:REL]->(c)";
 
+    @Inject
+    IdToVariable idToVariable;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -110,15 +115,15 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             .streamMode()
             .yields("nodeId", "color");
 
-        Map<Long, Long> coloringResult = new HashMap<>(4);
+        Map<String, Long> coloringResult = new HashMap<>(4);
         runQueryWithRowConsumer(yields, (row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long color = row.getNumber("color").longValue();
-            coloringResult.put(nodeId, color);
+            coloringResult.put(idToVariable.of(nodeId), color);
         });
 
-        assertNotEquals(coloringResult.get(0L), coloringResult.get(1L));
-        assertNotEquals(coloringResult.get(0L), coloringResult.get(2L));
+        assertNotEquals(coloringResult.get("a"), coloringResult.get("b"));
+        assertNotEquals(coloringResult.get("a"), coloringResult.get("c"));
     }
 
     @Test
@@ -140,34 +145,34 @@ class K1ColoringStreamProcTest extends BaseProcTest {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), Map.of(
-                        0L, 1L,
-                        1L, 0L,
-                        2L, 0L,
-                        3L, 0L
-                )),
-                Arguments.of(Map.of("minCommunitySize", 2), Map.of(
-                        1L, 0L,
-                        2L, 0L,
-                        3L, 0L
-                ))
+            Arguments.of(Map.of("minCommunitySize", 1), Map.of(
+                "a", 1L,
+                "b", 0L,
+                "c", 0L,
+                "d", 0L
+            )),
+            Arguments.of(Map.of("minCommunitySize", 2), Map.of(
+                "b", 0L,
+                "c", 0L,
+                "d", 0L
+            ))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testStreamingMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
+    void testStreamingMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         @Language("Cypher")
         String yields = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
                 .streamMode()
                 .addAllParameters(parameter)
                 .yields("nodeId", "color");
 
-        Map<Long, Long> coloringResult = new HashMap<>(4);
+        Map<String, Long> coloringResult = new HashMap<>(4);
         runQueryWithRowConsumer(yields, (row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long color = row.getNumber("color").longValue();
-            coloringResult.put(nodeId, color);
+            coloringResult.put(idToVariable.of(nodeId), color);
         });
 
         assertEquals(coloringResult, expectedResult);

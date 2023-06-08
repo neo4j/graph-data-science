@@ -30,8 +30,12 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.IdToVariable;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -47,8 +51,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
     private static final String GRAPH_NAME = "custom-graph";
 
     @Neo4jGraph
-    static final String DB_CYPHER =
-        "CREATE" +
+    static final String DB_CYPHER = "CREATE" +
         "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
         ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
         ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
@@ -62,6 +65,12 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
         ", (b)-[:TYPE {weight: 5.0}]->(d)" +
         ", (c)-[:TYPE {weight: 0.01}]->(e)" +
         ", (f)-[:TYPE {weight: 0.01}]->(d)";
+
+    @Inject
+    IdToVariable idToVariable;
+
+    @Inject
+    IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
@@ -91,13 +100,13 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
             .streamMode()
             .yields("nodeId", "communityId");
 
-        long[] communities = new long[6];
+        Map<Long, Long> communities = new HashMap<>(6);
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("communityId").longValue();
+            communities.put(nodeId, row.getNumber("communityId").longValue());
         });
 
-        assertCommunities(communities, new long[]{0, 1, 2, 4}, new long[]{3, 5});
+        assertCommunities(communities, idFunction.of("a", "b", "c", "e"), idFunction.of("d", "f"));
     }
 
     @Test
@@ -108,13 +117,13 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "communityId");
 
-        long[] communities = new long[6];
+        Map<Long, Long> communities = new HashMap<>(6);
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("communityId").longValue();
+            communities.put(nodeId, row.getNumber("communityId").longValue());
         });
 
-        assertCommunities(communities, new long[]{0, 4, 5}, new long[]{1, 2, 3});
+        assertCommunities(communities, idFunction.of("a", "e", "f"), idFunction.of("b", "c", "d"));
     }
 
     @Test
@@ -125,14 +134,14 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
             .addParameter("seedProperty", "seed1")
             .yields("nodeId", "communityId");
 
-        long[] communities = new long[6];
+        Map<Long, Long> communities = new HashMap<>(6);
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("communityId").longValue();
+            communities.put(nodeId, row.getNumber("communityId").longValue());
         });
 
-        assertCommunities(communities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
-        assertThat(communities).containsExactly(0L, 0L, 2L, 2L, 2L, 2L);
+        assertCommunities(communities, idFunction.of("a", "b"), idFunction.of("c",  "d", "e", "f"));
+        assertThat(communities.values()).containsExactly(0L, 0L, 2L, 2L, 2L, 2L);
     }
 
     @Test
@@ -154,10 +163,10 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), Set.of(5L, 4L)),
-                Arguments.of(Map.of("minCommunitySize", 3), Set.of(4L)),
-                Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), Set.of(0L, 1L)),
-                Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), Set.of(0L))
+            Arguments.of(Map.of("minCommunitySize", 1), Set.of(5L, 4L)),
+            Arguments.of(Map.of("minCommunitySize", 3), Set.of(4L)),
+            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), Set.of(0L, 1L)),
+            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), Set.of(0L))
         );
     }
 

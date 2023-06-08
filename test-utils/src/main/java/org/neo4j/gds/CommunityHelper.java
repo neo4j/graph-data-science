@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -33,6 +34,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class CommunityHelper {
 
     private CommunityHelper() {}
+
+    public static void assertCommunities(Map<Long, Long> actual, long[]... expectedCommunities) {
+        for (long[] expectedCommunity : expectedCommunities) {
+            assertThat(Arrays.stream(expectedCommunity).map(actual::get).distinct())
+                .withFailMessage("Expected %s to be in the same community. But actual communities are: %s", Arrays.toString(expectedCommunity), actual)
+                .hasSize(1);
+        }
+    }
 
     public static void assertCommunities(HugeLongArray communityData, long[]... communities) {
         assertCommunities(communityData.toArray(), communities);

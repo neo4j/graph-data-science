@@ -52,6 +52,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
+import org.neo4j.gds.extension.IdToVariable;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
@@ -82,6 +84,10 @@ class K1ColoringWriteProcTest extends BaseProcTest {
         ",(d)" +
         ",(a)-[:REL]->(b)" +
         ",(a)-[:REL]->(c)";
+
+    @Inject
+    IdToVariable idToVariable;
+
 
     @BeforeEach
     void setup() throws Exception {
@@ -121,15 +127,15 @@ class K1ColoringWriteProcTest extends BaseProcTest {
             assertTrue(row.getNumber("ranIterations").longValue() < 3);
         });
 
-        Map<Long, Long> coloringResult = new HashMap<>(4);
+        Map<String, Long> coloringResult = new HashMap<>(4);
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
             long nodeId = row.getNumber("id").longValue();
             long color = row.getNumber("color").longValue();
-            coloringResult.put(nodeId, color);
+            coloringResult.put(idToVariable.of(nodeId), color);
         });
 
-        assertNotEquals(coloringResult.get(0L), coloringResult.get(1L));
-        assertNotEquals(coloringResult.get(0L), coloringResult.get(2L));
+        assertNotEquals(coloringResult.get("a"), coloringResult.get("b"));
+        assertNotEquals(coloringResult.get("a"), coloringResult.get("c"));
     }
 
     @Test
@@ -153,22 +159,22 @@ class K1ColoringWriteProcTest extends BaseProcTest {
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
                 Arguments.of(Map.of("minCommunitySize", 1), Map.of(
-                        0L, 1L,
-                        1L, 0L,
-                        2L, 0L,
-                        3L, 0L
+                        "a", 1L,
+                        "b", 0L,
+                        "c", 0L,
+                        "d", 0L
                 )),
                 Arguments.of(Map.of("minCommunitySize", 2), Map.of(
-                        1L, 0L,
-                        2L, 0L,
-                        3L, 0L
+                        "b", 0L,
+                        "c", 0L,
+                        "d", 0L
                 ))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
+    void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         @Language("Cypher")
         String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
                 .writeMode()
@@ -183,7 +189,7 @@ class K1ColoringWriteProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
             long nodeId = row.getNumber("id").longValue();
-            assertEquals(expectedResult.get(nodeId), row.getNumber("color"));
+            assertEquals(expectedResult.get(idToVariable.of(nodeId)), row.getNumber("color"));
         });
     }
 
