@@ -174,21 +174,21 @@ class GraphSageStreamProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(streamQuery, List.of(
-            Map.of("nodeId", 0L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 1L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 2L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 3L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 4L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 5L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 6L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 7L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 8L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 9L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 10L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 11L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 12L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 13L, "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", 14L, "embedding", Matchers.iterableWithSize(1))
+            Map.of("nodeId", idFunction.of("a"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("b"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("c"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("d"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("e"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("f"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("g"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("h"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("i"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("j"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("k"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("l"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("m"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("n"), "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", idFunction.of("o"), "embedding", Matchers.iterableWithSize(1))
         ));
     }
 

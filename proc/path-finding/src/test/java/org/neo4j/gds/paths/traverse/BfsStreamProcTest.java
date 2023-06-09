@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -229,10 +230,12 @@ class BfsStreamProcTest extends BaseProcTest {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
-            .addParameter("sourceNode", 42)
+            .addParameter("sourceNode", 4242)
             .yields();
 
-        assertError(query, "Source node does not exist in the in-memory graph: `42`");
+        Assertions.setMaxStackTraceElementsDisplayed(100);
+
+        assertError(query, "Source node does not exist in the in-memory graph: `4242`");
     }
 
     @Test
@@ -242,9 +245,9 @@ class BfsStreamProcTest extends BaseProcTest {
             .algo("bfs")
             .streamMode()
             .addParameter("sourceNode", 0)
-            .addParameter("targetNodes", List.of(0, 42, 1))
+            .addParameter("targetNodes", List.of(idFunction.of("a"), 4242, idFunction.of("b")))
             .yields();
 
-        assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");
+        assertError(query, "Target nodes do not exist in the in-memory graph: ['4242']");
     }
 }

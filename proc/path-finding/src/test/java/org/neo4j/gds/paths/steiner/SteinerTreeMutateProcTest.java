@@ -130,8 +130,8 @@ class SteinerTreeMutateProcTest extends BaseProcTest {
         assertThat(mutatedGraph.relationshipCount()).isEqualTo(1L);
 
         var relationshipCounter = new LongAdder();
-        mutatedGraph.forEachRelationship(idFunction.of("a"), -1, (s, t, w) -> {
-            assertThat(t).isEqualTo(idFunction.of("b"));
+        mutatedGraph.forEachRelationship(mutatedGraph.toMappedNodeId(idFunction.of("a")), -1, (s, t, w) -> {
+            assertThat(t).isEqualTo(mutatedGraph.toMappedNodeId(idFunction.of("b")));
             assertThat(w).isEqualTo(5.4);
             relationshipCounter.increment();
             return true;
