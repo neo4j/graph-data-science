@@ -1,5 +1,4 @@
 [[algorithms-scale-properties]]
-[.beta]
 = Scale Properties
 :description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
 :page-aliases: alpha-algorithms/scale-properties
@@ -7,8 +6,6 @@
 :algorithm: Scale Properties
 :entity: node
 :result: scaled properties
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 
 [[algorithms-scale-properties-intro]]

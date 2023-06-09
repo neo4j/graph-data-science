@@ -189,6 +189,15 @@
 | `gds.randomWalk.stats.estimate`
 | `gds.randomWalk.stream`
 | `gds.randomWalk.stream.estimate`
+.8+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
+| `gds.scaleProperties.mutate`
+| `gds.scaleProperties.mutate.estimate`
+| `gds.scaleProperties.stream`
+| `gds.scaleProperties.stream.estimate`
+| `gds.scaleProperties.stats`
+| `gds.scaleProperties.stats.estimate`
+| `gds.scaleProperties.write`
+| `gds.scaleProperties.write.estimate`
 |===
 
 [[beta-tier]]
@@ -248,16 +257,6 @@
 | `gds.beta.influenceMaximization.celf.stream.estimate`
 | `gds.beta.influenceMaximization.celf.write`
 | `gds.beta.influenceMaximization.celf.write.estimate`
-.8+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
-| `gds.scaleProperties.mutate`
-| `gds.scaleProperties.mutate.estimate`
-| `gds.scaleProperties.stream`
-| `gds.scaleProperties.stream.estimate`
-| `gds.scaleProperties.stats`
-| `gds.scaleProperties.stats.estimate`
-| `gds.scaleProperties.write`
-| `gds.scaleProperties.write.estimate`
-
 |===
 
 [[alpha-tier]]
