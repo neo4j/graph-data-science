@@ -34,7 +34,7 @@ final class GraphProjectSubgraphDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/projections/graph-project-subgraph.adoc";
+        return "pages/management-ops/graph-creation/graph-project-subgraph.adoc";
     }
 
 }

@@ -21,17 +21,17 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-import static org.neo4j.gds.doc.syntax.SyntaxMode.GRAPH_EXISTS;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.PROJECT_SAMPLE;
 
-class GraphExistsSyntaxTest extends SyntaxTestBase {
+class CommonNeighbourAwareRandomWalkSampleDocTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(GRAPH_EXISTS));
+        return List.of(SyntaxModeMeta.of(PROJECT_SAMPLE));
     }
 
     @Override
     protected String adocFile() {
-        return "partials/management-ops/graph-catalog/graph-exists.adoc";
+        return "pages/management-ops/graph-creation/sampling/cnarw.adoc";
     }
 }

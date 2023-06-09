@@ -32,6 +32,6 @@ class GraphListSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/graph-list.adoc";
+        return "partials/management-ops/graph-catalog/graph-list.adoc";
     }
 }

@@ -42,6 +42,6 @@ class GraphGenerationDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/projections/graph-generation.adoc";
+        return "pages/management-ops/graph-creation/graph-generation.adoc";
     }
 }

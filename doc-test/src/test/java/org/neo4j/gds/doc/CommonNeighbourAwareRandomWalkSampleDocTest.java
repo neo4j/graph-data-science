@@ -36,7 +36,7 @@ final class CommonNeighbourAwareRandomWalkSampleDocTest extends SingleFileDocTes
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/projections/cnarw.adoc";
+        return "pages/management-ops/graph-creation/sampling/cnarw.adoc";
     }
 
 }
