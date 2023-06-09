@@ -5,6 +5,8 @@ description = 'Neo4j Graph Data Science :: Procedures :: Misc'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':procedure-collector')
+
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
