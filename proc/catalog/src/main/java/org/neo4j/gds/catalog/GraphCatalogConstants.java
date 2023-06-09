@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-public class GraphCatalogConstants {
+final class GraphCatalogConstants {
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
+
+    private GraphCatalogConstants() {}
 }
