@@ -58,7 +58,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         super(progressTracker);
         this.graph = graph;
         this.minMax = minMax;
-        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
+        this.startNodeId = startNodeId;
 
         this.k = k;
     }
