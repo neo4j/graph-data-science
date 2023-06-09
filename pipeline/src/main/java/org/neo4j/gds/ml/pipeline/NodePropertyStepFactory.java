@@ -100,6 +100,8 @@ public final class NodePropertyStepFactory {
 
         var gdsCallableDefinition = GdsCallableFinder
             .findByName(normalizedName)
+            // If this is thrown in a production setting, it may be that you just need to add `annotationProcessor project(':procedure-collector')`
+            // to the `build.gradle` file of the package containing your proc
             .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
                 "Could not find a procedure called %s",
                 normalizedName
