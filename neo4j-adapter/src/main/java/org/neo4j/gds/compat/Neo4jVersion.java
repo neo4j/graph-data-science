@@ -36,6 +36,7 @@ public enum Neo4jVersion {
     V_5_6,
     V_5_7,
     V_5_8,
+    V_5_9,
     V_Dev;
 
     @Override
@@ -59,6 +60,8 @@ public enum Neo4jVersion {
                 return "5.7";
             case V_5_8:
                 return "5.8";
+            case V_5_9:
+                return "5.9";
             case V_Dev:
                 return "dev";
             default:
@@ -68,7 +71,7 @@ public enum Neo4jVersion {
 
     public MajorMinorVersion semanticVersion() {
         if (this == V_Dev) {
-            return ImmutableMajorMinorVersion.of(5, 9);
+            return ImmutableMajorMinorVersion.of(5, 10);
         }
 
         String version = toString();
@@ -131,24 +134,29 @@ public enum Neo4jVersion {
         if (majorVersion == 4 && minorVersion == 4) {
             return Neo4jVersion.V_4_4;
         } else if (majorVersion == 5) {
-            if (minorVersion == 1) {
-                return Neo4jVersion.V_5_1;
-            } else if (minorVersion == 2) {
-                return Neo4jVersion.V_5_2;
-            } else if (minorVersion == 3) {
-                return Neo4jVersion.V_5_3;
-            } else if (minorVersion == 4) {
-                return Neo4jVersion.V_5_4;
-            } else if (minorVersion == 5) {
-                return Neo4jVersion.V_5_5;
-            } else if (minorVersion == 6) {
-                return Neo4jVersion.V_5_6;
-            } else if (minorVersion == 7) {
-                return Neo4jVersion.V_5_7;
-            } else if (minorVersion == 8) {
-                return Neo4jVersion.V_5_8;
-            } else if (minorVersion > 8) {
-                return Neo4jVersion.V_Dev;
+            switch (minorVersion) {
+                case 1:
+                    return Neo4jVersion.V_5_1;
+                case 2:
+                    return Neo4jVersion.V_5_2;
+                case 3:
+                    return Neo4jVersion.V_5_3;
+                case 4:
+                    return Neo4jVersion.V_5_4;
+                case 5:
+                    return Neo4jVersion.V_5_5;
+                case 6:
+                    return Neo4jVersion.V_5_6;
+                case 7:
+                    return Neo4jVersion.V_5_7;
+                case 8:
+                    return Neo4jVersion.V_5_8;
+                case 9:
+                    return Neo4jVersion.V_5_9;
+                default:
+                    if (minorVersion > 9) {
+                        return Neo4jVersion.V_Dev;
+                    }
             }
         }
 
