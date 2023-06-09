@@ -75,7 +75,7 @@ RETURN gds.graph.project(
 |===
 
 [[graph-project-cypher-projection-syntax-dataConfig]]
-.Nodes configuration
+.Data configuration
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                   | Type                     | Default | Description
