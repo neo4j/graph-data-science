@@ -41,9 +41,9 @@ public class GraphCreateCypherDbProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Creates a database from a GDS graph.";
 
-    @Procedure(name = "gds.alpha.create.cypherdb", mode = READ)
+    @Procedure(name = "gds.alpha.cypherdb.create", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<CreateCypherDbResult> createDb(
+    public Stream<CreateCypherDbResult> createInMemoryDatabase(
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName
     ) {
@@ -64,6 +64,15 @@ public class GraphCreateCypherDbProc extends CatalogProc {
         );
 
         return Stream.of(result);
+    }
+
+    @Procedure(name = "gds.alpha.create.cypherdb", mode = READ, deprecatedBy = "gds.alpha.cypherdb.create")
+    @Description(DESCRIPTION)
+    public Stream<CreateCypherDbResult> createDb(
+        @Name(value = "dbName") String dbName,
+        @Name(value = "graphName") String graphName
+    ) {
+        return createInMemoryDatabase(dbName, graphName);
     }
 
     @SuppressWarnings("unused")
