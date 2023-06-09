@@ -28,14 +28,14 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class KnnStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    public static final String DB_CYPHER =
-        "CREATE" +
+    public static final String DB_CYPHER = "CREATE" +
         "  (a { id: 1, knn: 1.0 } )" +
         ", (b { id: 2, knn: 2.0 } )" +
         ", (c { id: 3, knn: 5.0 } )" +
@@ -53,27 +53,31 @@ class KnnStreamProcTest extends BaseProcTest {
     void shouldStreamResults() {
         runQuery("CALL gds.graph.project('myGraph', {__ALL__: {label: '*', properties: 'knn'}}, 'IGNORE')");
 
-        var query =
-            "CALL gds.knn.stream($graph, {nodeProperties: ['knn'], topK: 1, randomSeed: 19, concurrency: 1})" +
+        var query = "CALL gds.knn.stream($graph, {nodeProperties: ['knn'], topK: 1, randomSeed: 19, concurrency: 1})" +
             " YIELD node1, node2, similarity" +
             " RETURN node1, node2, similarity" +
             " ORDER BY node1";
-        assertCypherResult(query, Map.of("graph", "myGraph"), List.of(
-            Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
-            Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),
-            Map.of("node1", 2L, "node2", 1L, "similarity", 0.25)
-        ));
+        assertCypherResult(
+            query,
+            Map.of("graph", "myGraph"),
+            List.of(
+                Map.of("node1", idFunction.of("a"), "node2", idFunction.of("b"), "similarity", 0.5),
+                Map.of("node1", idFunction.of("b"), "node2", idFunction.of("a"), "similarity", 0.5),
+                Map.of("node1", idFunction.of("c"), "node2", idFunction.of("b"), "similarity", 0.25)
+            )
+        );
     }
 
     @Test
     void shouldStreamWithFilteredNodes() {
-        String nodeCreateQuery =
-            "CREATE " +
-            "  (alice:Person {age: 24})" +
-            " ,(carol:Person {age: 24})" +
-            " ,(eve:Person {age: 67})" +
-            " ,(dave:Foo {age: 48})" +
-            " ,(bob:Foo {age: 48})";
+        clearDb();
+
+        String nodeCreateQuery = "CREATE " +
+            "  (alice:Person {name: 'alice', age: 24})" +
+            " ,(carol:Person {name: 'carol', age: 24})" +
+            " ,(eve:Person {name: 'eve', age: 67})" +
+            " ,(dave:Foo {name: 'dave', age: 48})" +
+            " ,(bob:Foo {name: 'bob', age: 48})";
 
         runQuery(nodeCreateQuery);
 
@@ -86,22 +90,29 @@ class KnnStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
+        var idMap = runQuery(
+            "Match (n:Foo) RETURN id(n) AS id, n.name AS name",
+            result -> result.stream().collect(Collectors.toMap(o -> ((String) o.get("name")), o -> ((Long) o.get("id"))))
+        );
+
         String algoQuery = GdsCypher.call("graph")
             .algo("gds.knn")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
             .yields("node1", "node2", "similarity");
-        assertCypherResult(algoQuery, List.of(
-            Map.of("node1", 6L, "node2", 7L, "similarity", 1.0),
-            Map.of("node1", 7L, "node2", 6L, "similarity", 1.0)
-        ));
+        assertCypherResult(
+            algoQuery,
+            List.of(
+                Map.of("node1", idMap.get("dave"), "node2", idMap.get("bob"), "similarity", 1.0),
+                Map.of("node1", idMap.get("bob"), "node2", idMap.get("dave"), "similarity", 1.0)
+            )
+        );
     }
 
     @Test
     void computeOverSparseNodeProperties() {
-        String nodeCreateQuery =
-            "CREATE " +
+        String nodeCreateQuery = "CREATE " +
             "  (alice:Person {grades: [24, 4]})" +
             " ,(eve:Person)" +
             " ,(bob:Foo {grades: [24, 4, 42]})";
@@ -109,7 +120,7 @@ class KnnStreamProcTest extends BaseProcTest {
         runQuery(nodeCreateQuery);
 
         String createQuery = "CALL gds.graph.project('graph', " +
-                             "'Person', '*', {nodeProperties: {grades: {defaultValue: [1, 1]}}})";
+            "'Person', '*', {nodeProperties: {grades: {defaultValue: [1, 1]}}})";
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")

@@ -53,7 +53,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityStreamProcTest extends BaseProcTest {
 
-    @Neo4jGraph
+    // FIXME the test assertions are hard-coded and annoying to adapt
+    @Neo4jGraph(offsetIds = false)
     public static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person {id: 0,  name: 'Alice'})" +
@@ -284,7 +285,7 @@ class NodeSimilarityStreamProcTest extends BaseProcTest {
     @TestInstance(value = TestInstance.Lifecycle.PER_METHOD)
     class NonConsecutiveIds extends BaseTest {
 
-        @Neo4jGraph
+        @Neo4jGraph(offsetIds = false)
         private static final String DB_CYPHER_NON_CONSECUTIVE =
             "CREATE (:IncrementIdSpace)" + DB_CYPHER;
 

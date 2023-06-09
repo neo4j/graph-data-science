@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class FilteredKnnStreamProcTest extends BaseProcTest {
 
@@ -71,21 +72,23 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
                        " ORDER BY node1";
 
         assertCypherResult(query, Map.of("graph", "filteredKnnGraph"), List.of(
-            Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
-            Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),
-            Map.of("node1", 2L, "node2", 1L, "similarity", 0.25)
+            Map.of("node1", idFunction.of("a"), "node2", idFunction.of("b"), "similarity", 0.5),
+            Map.of("node1", idFunction.of("b"), "node2", idFunction.of("a"), "similarity", 0.5),
+            Map.of("node1", idFunction.of("c"), "node2", idFunction.of("b"), "similarity", 0.25)
         ));
     }
 
     @Test
     void shouldStreamWithFilteredNodes() {
+        clearDb();
+
         String nodeCreateQuery =
             "CREATE " +
             "  (alice:Person {age: 24})" +
             " ,(carol:Person {age: 24})" +
             " ,(eve:Person {age: 67})" +
-            " ,(dave:Foo {age: 48})" +
-            " ,(bob:Foo {age: 48})";
+            " ,(dave:Foo {name: 'dave', age: 48})" +
+            " ,(bob:Foo {name: 'bob', age: 48})";
 
         runQuery(nodeCreateQuery);
 
@@ -98,6 +101,11 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
+        var idMap = runQuery(
+            "Match (n:Foo) RETURN id(n) AS id, n.name AS name",
+            result -> result.stream().collect(Collectors.toMap(o -> ((String) o.get("name")), o -> ((Long) o.get("id"))))
+        );
+
         String algoQuery = GdsCypher.call("graph")
             .algo("gds.alpha.knn.filtered")
             .streamMode()
@@ -105,22 +113,29 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
             .addParameter("nodeProperties", List.of("age"))
             .yields("node1", "node2", "similarity");
         assertCypherResult(algoQuery, List.of(
-            Map.of("node1", 6L, "node2", 7L, "similarity", 1.0),
-            Map.of("node1", 7L, "node2", 6L, "similarity", 1.0)
+            Map.of("node1", idMap.get("dave"), "node2", idMap.get("bob"), "similarity", 1.0),
+            Map.of("node1", idMap.get("bob"), "node2", idMap.get("dave"), "similarity", 1.0)
         ));
     }
 
     @Test
     void shouldEmploySourceNodeFilter() {
+        clearDb();
+
         String nodeCreateQuery =
             "CREATE " +
             "  (alice:Person {age: 24})" +
             " ,(carol:Person {age: 24})" +
             " ,(eve:Person {age: 67})" +
-            " ,(dave:Foo {age: 48})" +
-            " ,(bob:Foo {age: 48})";
+            " ,(dave:Foo {name: 'dave', age: 48})" +
+            " ,(bob:Foo {name: 'bob', age: 48})";
 
         runQuery(nodeCreateQuery);
+
+        var idMap = runQuery(
+            "Match (n:Foo) RETURN id(n) AS id, n.name AS name",
+            result -> result.stream().collect(Collectors.toMap(o -> ((String) o.get("name")), o -> ((Long) o.get("id"))))
+        );
 
         String createQuery = GdsCypher.call("graph")
             .graphProject()
@@ -136,23 +151,25 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
-            .addParameter("sourceNodeFilter", List.of(6L))
+            .addParameter("sourceNodeFilter", List.of(idMap.get("dave")))
             .yields("node1", "node2", "similarity");
 
         assertCypherResult(algoQuery, List.of(
-            Map.of("node1", 6L, "node2", 7L, "similarity", 1.0)
+            Map.of("node1", idMap.get("dave"), "node2", idMap.get("bob"), "similarity", 1.0)
         ));
     }
 
     @Test
     void shouldEmployTargetNodeFilter() {
+        clearDb();
+
         String nodeCreateQuery =
             "CREATE " +
             "  (alice:Person {age: 24})" +
             " ,(carol:Person {age: 24})" +
             " ,(eve:Person {age: 67})" +
-            " ,(dave:Foo {age: 48})" +
-            " ,(bob:Foo {age: 48})";
+            " ,(dave:Foo {name: 'dave', age: 48})" +
+            " ,(bob:Foo {name: 'bob', age: 48})";
 
         runQuery(nodeCreateQuery);
 
@@ -165,15 +182,20 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
+        var idMap = runQuery(
+            "Match (n:Foo) RETURN id(n) AS id, n.name AS name",
+            result -> result.stream().collect(Collectors.toMap(o -> ((String) o.get("name")), o -> ((Long) o.get("id"))))
+        );
+
         String algoQuery = GdsCypher.call("graph")
             .algo("gds.alpha.knn.filtered")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
-            .addParameter("targetNodeFilter", List.of(7L))
+            .addParameter("targetNodeFilter", List.of(idMap.get("bob")))
             .yields("node1", "node2", "similarity");
         assertCypherResult(algoQuery, List.of(
-            Map.of("node1", 6L, "node2", 7L, "similarity", 1.0)
+            Map.of("node1", idMap.get("dave"), "node2", idMap.get("bob"), "similarity", 1.0)
         ));
     }
 }
