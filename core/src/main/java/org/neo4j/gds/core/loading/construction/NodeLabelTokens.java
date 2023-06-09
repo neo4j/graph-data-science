@@ -110,7 +110,7 @@ public final class NodeLabelTokens {
     }
 
     public static @NotNull NodeLabelToken ofStrings(List<NodeLabel> staticLabels, String... nodeLabelStrings) {
-        return new ArrayWithSatic<>(nodeLabelStrings, staticLabels, NodeLabelTokens::labelOf);
+        return new ArrayWithStatic<>(nodeLabelStrings, staticLabels, NodeLabelTokens::labelOf);
     }
 
     static @NotNull NodeLabelToken ofNodeLabel(NodeLabel nodeLabel) {
@@ -290,14 +290,14 @@ public final class NodeLabelTokens {
         }
     }
 
-    private static final class ArrayWithSatic<T> implements ValidNodeLabelToken {
+    private static final class ArrayWithStatic<T> implements ValidNodeLabelToken {
         private final @NotNull T[] nodeLabels;
 
         private final List<NodeLabel> staticLabels;
 
         private final Function<T, NodeLabel> toNodeLabel;
 
-        private ArrayWithSatic(T[] nodeLabels, List<NodeLabel> staticLabels, Function<T, NodeLabel> toNodeLabel) {
+        private ArrayWithStatic(T[] nodeLabels, List<NodeLabel> staticLabels, Function<T, NodeLabel> toNodeLabel) {
             this.nodeLabels = nodeLabels;
             this.staticLabels = staticLabels;
             this.toNodeLabel = toNodeLabel;
@@ -333,7 +333,7 @@ public final class NodeLabelTokens {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            ArrayWithSatic<?> that = (ArrayWithSatic<?>) o;
+            ArrayWithStatic<?> that = (ArrayWithStatic<?>) o;
 
             // Probably incorrect - comparing Object[] arrays with Arrays.equals
             if (!Arrays.equals(nodeLabels, that.nodeLabels)) return false;
