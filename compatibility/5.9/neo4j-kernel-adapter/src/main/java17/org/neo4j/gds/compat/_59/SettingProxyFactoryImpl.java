@@ -39,6 +39,6 @@ public final class SettingProxyFactoryImpl implements SettingProxyFactory {
 
     @Override
     public String description() {
-        return "Neo4j Settings RC";
+        return "Neo4j Settings 5.9";
     }
 }
