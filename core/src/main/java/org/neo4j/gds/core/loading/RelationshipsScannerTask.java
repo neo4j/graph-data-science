@@ -49,7 +49,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             scanner,
             singleTypeRelationshipImporters,
             loadingContext.terminationFlag(),
-            GraphDatabaseApiProxy.isUsingFrekiStorageEngine(loadingContext.dependencyResolver())
+            GraphDatabaseApiProxy.isUsingBlockStorageEngine(loadingContext.dependencyResolver())
         );
     }
 

@@ -112,8 +112,8 @@ public final class GraphDatabaseApiProxy {
         return cast(db).databaseId();
     }
 
-    public static boolean isUsingFrekiStorageEngine(DependencyResolver dependencyResolver) {
-        boolean isFrekiStorageEngineFactory = false;
+    public static boolean isUsingBlockStorageEngine(DependencyResolver dependencyResolver) {
+        boolean isBlockStorageEngineFactory = false;
 
         try {
             var clazz = Class.forName(
@@ -123,7 +123,7 @@ public final class GraphDatabaseApiProxy {
             );
             var field = clazz.getField("NAME");
             if (field.getType() == String.class) {
-                isFrekiStorageEngineFactory = dependencyResolver
+                isBlockStorageEngineFactory = dependencyResolver
                     .resolveDependency(StorageEngineFactory.class)
                     .name()
                     .equals(field.get(null));
@@ -131,7 +131,7 @@ public final class GraphDatabaseApiProxy {
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
         }
 
-        return isFrekiStorageEngineFactory;
+        return isBlockStorageEngineFactory;
     }
 
     @TestOnly
