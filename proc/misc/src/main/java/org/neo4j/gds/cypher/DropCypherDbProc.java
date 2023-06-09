@@ -40,9 +40,9 @@ public class DropCypherDbProc extends BaseProc {
 
     private static final String DESCRIPTION = "Drop a database backed by an in-memory graph";
 
-    @Procedure(name = "gds.alpha.drop.cypherdb", mode = WRITE)
+    @Procedure(name = "gds.alpha.cypherdb.drop", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<DropCypherDbResult> dropDb(
+    public Stream<DropCypherDbResult> dropInMemoryDatabase(
         @Name(value = "dbName") String dbName
     ) {
         Preconditions.check();
@@ -62,6 +62,14 @@ public class DropCypherDbProc extends BaseProc {
         );
 
         return Stream.of(result);
+    }
+
+    @Procedure(name = "gds.alpha.drop.cypherdb", mode = WRITE, deprecatedBy = "gds.alpha.cypherdb.drop")
+    @Description(DESCRIPTION)
+    public Stream<DropCypherDbResult> dropDb(
+        @Name(value = "dbName") String dbName
+    ) {
+        return dropInMemoryDatabase(dbName);
     }
 
     private static void validateDatabaseName(String dbName, DatabaseManagementService dbms) {

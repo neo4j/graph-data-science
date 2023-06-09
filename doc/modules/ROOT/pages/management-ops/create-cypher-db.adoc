@@ -164,7 +164,7 @@ We can see that the returned ages correspond to the structure of the original gr
 As described above, in-memory GDS databases are impermanent and will be removed when the DBMS is shut down.
 If we need to drop the GDS database earlier, there are 2 ways to achieve this:
  1. Using an administrative cypher command against the system database (`DROP DATABASE <db-name>`)
- 2. Using the <<drop-cypher-db-procedure-syntax, `gds.alpha.drop.cypherdb`>> procedure
+ 2. Using the <<drop-cypher-db-procedure-syntax, `gds.alpha.cypherdb.drop`>> procedure
 
 [[drop-cypher-db-procedure-syntax]]
 === Drop database syntax
@@ -173,7 +173,7 @@ If we need to drop the GDS database earlier, there are 2 ways to achieve this:
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.drop.cypherdb(
+CALL gds.alpha.cypherdb.drop(
     dbName: String
 )
 YIELD
