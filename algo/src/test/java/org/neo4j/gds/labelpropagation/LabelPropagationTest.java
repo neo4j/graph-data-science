@@ -23,9 +23,12 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -41,7 +44,9 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,12 +55,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
+@ExtendWith(SoftAssertionsExtension.class)
 class LabelPropagationTest {
 
     private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(CypherMapWrapper.empty());
 
     // override idOffset for seedId to be actual neo4j ids
-    @GdlGraph(idOffset = 0)
+    @GdlGraph
     private static final String GRAPH =
         "CREATE" +
         "  (nAlice:User   {seedId: 2})" +
@@ -78,6 +84,9 @@ class LabelPropagationTest {
     @Inject
     private TestGraph graph;
 
+    @InjectSoftAssertions
+    SoftAssertions soft;
+
     @Test
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
@@ -88,12 +97,12 @@ class LabelPropagationTest {
         );
         assertArrayEquals(
             new long[]{
-                graph.toMappedNodeId("nBridget"),
-                graph.toMappedNodeId("nBridget"),
-                graph.toMappedNodeId("nDoug"),
-                graph.toMappedNodeId("nMark"),
-                graph.toMappedNodeId("nMark"),
-                graph.toMappedNodeId("nBridget")
+                graph.toOriginalNodeId("nBridget"),
+                graph.toOriginalNodeId("nBridget"),
+                graph.toOriginalNodeId("nDoug"),
+                graph.toOriginalNodeId("nMark"),
+                graph.toOriginalNodeId("nMark"),
+                graph.toOriginalNodeId("nBridget")
             },
             lp.compute().labels().toArray(),
             "Incorrect result assuming initial labels are neo4j id"
@@ -136,13 +145,13 @@ class LabelPropagationTest {
         testClustering(graph, 2);
     }
 
-    private void testClustering(Graph graph, int batchSize) {
+    private void testClustering(TestGraph graph, int batchSize) {
         for (int i = 0; i < 20; i++) {
             testLPClustering(graph, batchSize);
         }
     }
 
-    private void testLPClustering(Graph graph, int batchSize) {
+    private void testLPClustering(TestGraph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
             graph,
             DEFAULT_CONFIG,
@@ -159,13 +168,18 @@ class LabelPropagationTest {
         assertTrue(result.didConverge());
         assertTrue(2L <= result.ranIterations(), "expected at least 2 iterations, got " + result.ranIterations());
         assertEquals(2L, cluster.size());
+
+        var firstCommunity = Stream.of("nAlice", "nBridget", "nMichael")
+            .map(graph::toOriginalNodeId)
+            .collect(Collectors.toSet());
+
         for (IntObjectCursor<IntArrayList> cursor : cluster) {
             int[] ids = cursor.value.toArray();
             Arrays.sort(ids);
-            if (cursor.key == 0 || cursor.key == 1 || cursor.key == 5) {
-                assertArrayEquals(new int[]{0, 1, 5}, ids);
+            if (firstCommunity.contains((long) cursor.key)) {
+                soft.assertThat(ids).containsExactly(0, 1, 5);
             } else {
-                assertArrayEquals(new int[]{2, 3, 4}, ids);
+                soft.assertThat(ids).containsExactly(2, 3, 4);
             }
         }
     }
