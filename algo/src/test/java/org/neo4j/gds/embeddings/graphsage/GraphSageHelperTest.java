@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,7 +41,12 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.features.FeatureExtractionBaseTest;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,27 +56,35 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
+@ExtendWith(SoftAssertionsExtension.class)
 class GraphSageHelperTest {
 
-    @GdlGraph(idOffset = 0)
+    @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
     @Inject
-    private Graph graph;
+    private TestGraph graph;
+
+    @InjectSoftAssertions
+    private SoftAssertions soft;
 
     @ParameterizedTest(name = "{0}")
     @MethodSource({"parameters"})
-    void shouldInitializeFeaturesCorrectly(String name, GraphSageTrainConfig config, HugeObjectArray<double[]> expected) {
-        var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
+    void shouldInitializeFeaturesCorrectly(String name, GraphSageTrainConfig config, Map<String, double[]> expected) {
         var actual = config.isMultiLabel() ? GraphSageHelper.initializeMultiLabelFeatures(
             graph,
-            multiLabelFeatureExtractors
+            GraphSageHelper.multiLabelFeatureExtractors(graph, config)
         ) : GraphSageHelper.initializeSingleLabelFeatures(graph, config);
 
-        assertEquals(expected.size(), actual.size());
-        for(int i = 0; i < actual.size(); i++) {
-            assertThat(actual.get(i)).containsExactlyInAnyOrder(expected.get(i));
-        }
+        soft.assertThat(actual.size()).isEqualTo(expected.size());
+
+        expected.forEach((node, expectedFeatures) -> {
+            var actualFeatures = actual.get(graph.toMappedNodeId(node));
+            soft.assertThat(actualFeatures)
+                .withFailMessage(formatWithLocale("Node %s has unexpected features. Expected %s, but got %s.", node,
+                    Arrays.toString(expectedFeatures), Arrays.toString(actualFeatures)))
+                .containsExactly(expectedFeatures);
+        });
     }
 
     @Test
@@ -90,11 +107,19 @@ class GraphSageHelperTest {
     }
 
     static Stream<Arguments> parameters() {
-        var singleLabelProperties = HugeObjectArray.newArray(
-            double[].class,
-            20
-        );
-        singleLabelProperties.fill(new double[]{5.0});
+        var multiLabelFeatures = new HashMap<>();
+
+        for (int i = 0; i < 4; i++) {
+            multiLabelFeatures.put("n" + i, new double[]{2.0, 5.0, 1.0});
+        }
+
+        for (int i = 4; i < 13; i++) {
+            multiLabelFeatures.put("n" + i, new double[]{5.0, 5.0, 1.0});
+        }
+
+        for (int i = 13; i < 20; i++) {
+            multiLabelFeatures.put("n" + i, new double[]{5.0, 1.0});
+        }
 
         return Stream.of(
             Arguments.of(
@@ -104,7 +129,10 @@ class GraphSageHelperTest {
                     .featureProperties(List.of("dummyProp"))
                     .modelUser("")
                     .build(),
-                    singleLabelProperties
+                IntStream.range(0, 20).mapToObj(i -> "n" + i).collect(Collectors.toMap(
+                    s -> s,
+                    s -> new double[]{5.0}
+                ))
             ), Arguments.of(
                 "multi label",
                 GraphSageTrainConfigImpl.builder()
@@ -113,30 +141,7 @@ class GraphSageHelperTest {
                     .featureProperties(List.of("numEmployees", "rating", "numIngredients", "numPurchases"))
                     .projectedFeatureDimension(5)
                     .build(),
-                HugeObjectArray.of(
-                    new double[]{5.0, 2.0, 1.0},
-                    new double[]{5.0, 2.0, 1.0},
-                    new double[]{5.0, 2.0, 1.0},
-                    new double[]{5.0, 2.0, 1.0},
-
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-                    new double[]{5.0, 5.0, 1.0},
-
-                    new double[]{5.0, 1.0},
-                    new double[]{5.0, 1.0},
-                    new double[]{5.0, 1.0},
-                    new double[]{5.0, 1.0},
-                    new double[]{5.0, 1.0},
-                    new double[]{5.0, 1.0},
-                    new double[]{5.0, 1.0}
-                )
+                multiLabelFeatures
             )
         );
     }
