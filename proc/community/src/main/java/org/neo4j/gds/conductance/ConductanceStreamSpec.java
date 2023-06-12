@@ -57,12 +57,11 @@ public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, Conduct
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
-                    var graph = computationResult.graph();
                     var condunctances = result.communityConductances();
                     return LongStream
                         .range(0, condunctances.capacity())
-                        .filter(c -> !Double.isNaN(condunctances.get(c)))
-                        .mapToObj(c -> new StreamResult(graph.toOriginalNodeId(c), condunctances.get(c)));
+                        .filter(community -> !Double.isNaN(condunctances.get(community)))
+                        .mapToObj(community -> new StreamResult(community, condunctances.get(community)));
                 }).orElseGet(Stream::empty)
         );
     }

@@ -38,7 +38,7 @@ class ConductanceStreamProcTest extends BaseProcTest {
 
     static final String GRAPH_NAME = "myGraph";
 
-    @Neo4jGraph
+    @Neo4jGraph(offsetIds = true)
     @Language("Cypher")
     private static final String DB_CYPHER =
         "CREATE" +
