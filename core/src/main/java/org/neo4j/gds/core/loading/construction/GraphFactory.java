@@ -44,7 +44,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
-import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
 import org.neo4j.gds.core.loading.ImportSizing;
