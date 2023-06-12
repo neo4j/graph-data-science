@@ -73,6 +73,8 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                         .relationshipType(relationshipType)
                         .propertyConfigs(propertyConfigs)
                         .indexInverse(inverseIndexedRelationshipTypes.contains(relationshipType))
+                        // TODO Shouldnt we warn on dangling relationships?
+                        .skipDanglingRelationships(true)
                         .build();
                     relationshipBuilders.put(relationshipTypeString, relBuilder);
                     return RelationshipBuilderFromVisitor.of(
