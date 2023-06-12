@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 public class KernelTransactionService {
     private final Context context;

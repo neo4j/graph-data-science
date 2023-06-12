@@ -20,7 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class ProcedureTransactionService {
