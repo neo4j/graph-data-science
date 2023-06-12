@@ -62,12 +62,9 @@ public final class CompositeAdjacencyList implements AdjacencyList {
         );
     }
 
-    static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, IdMap filteredIdMap) {
-        assert filteredIdMap instanceof NodeFilteredGraph;
-        var adjacencyCursorWrapperFactory = (AdjacencyCursorWrapperFactory) cursor -> new NodeFilteredAdjacencyCursor(
-            cursor,
-            ((FilteredIdMap) filteredIdMap)
-        );
+    static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, FilteredIdMap filteredIdMap) {
+        var adjacencyCursorWrapperFactory = (AdjacencyCursorWrapperFactory) cursor -> new NodeFilteredAdjacencyCursor(cursor, filteredIdMap);
+
         var compositeAdjacencyCursorFactory = (CompositeAdjacencyCursorFactory) cursors -> {
             List<AdjacencyCursor> wrappedCursors = cursors
                 .stream()

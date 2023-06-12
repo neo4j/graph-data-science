@@ -338,10 +338,10 @@ public final class UnionGraph implements CSRGraph {
             .flatMap(Collection::stream)
             .map(Topology::adjacencyList)
             .collect(Collectors.toList());
-        if (isNodeFilteredGraph()) {
-            return CompositeAdjacencyList.withFilteredIdMap(adjacencies, first);
-        }
-        return CompositeAdjacencyList.of(adjacencies);
+
+        return first.asNodeFilteredGraph()
+            .map(graph -> CompositeAdjacencyList.withFilteredIdMap(adjacencies, graph))
+            .orElseGet(() -> CompositeAdjacencyList.of(adjacencies));
     }
 
     @Override
