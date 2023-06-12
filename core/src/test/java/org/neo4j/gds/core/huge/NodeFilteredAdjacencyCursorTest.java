@@ -22,6 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.api.FilteredIdMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +79,7 @@ class NodeFilteredAdjacencyCursorTest {
         assertThat(adjacencyCursor.advance(9L)).isEqualTo(AdjacencyCursor.NOT_FOUND);
     }
 
-    static class FilteredDirectIdMap extends DirectIdMap {
+    static class FilteredDirectIdMap extends DirectIdMap implements FilteredIdMap {
 
         private final LongPredicate nodeFilter;
 
@@ -90,6 +91,16 @@ class NodeFilteredAdjacencyCursorTest {
         @Override
         public boolean containsOriginalId(long originalNodeId) {
             return nodeFilter.test(originalNodeId);
+        }
+
+        @Override
+        public long toFilteredNodeId(long rootNodeId) {
+            return rootNodeId;
+        }
+
+        @Override
+        public boolean containsRootNodeId(long rootNodeId) {
+            return nodeFilter.test(rootNodeId);
         }
     }
 }

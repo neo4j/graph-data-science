@@ -22,18 +22,18 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.FilteredIdMap;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     private final AdjacencyCursor innerCursor;
-    private final IdMap idMap;
+    private final FilteredIdMap idMap;
 
     private long nextLongValue;
 
-    NodeFilteredAdjacencyCursor(AdjacencyCursor innerCursor, IdMap idMap) {
+    NodeFilteredAdjacencyCursor(AdjacencyCursor innerCursor, FilteredIdMap idMap) {
         this.innerCursor = innerCursor;
         this.idMap = idMap;
 
@@ -57,11 +57,11 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
     public boolean hasNextVLong() {
         if (innerCursor.hasNextVLong()) {
             var innerNextLong = innerCursor.peekVLong();
-            if (!idMap.containsOriginalId(innerNextLong)) {
+            if (!idMap.containsRootNodeId(innerNextLong)) {
                 innerCursor.nextVLong();
                 return hasNextVLong();
             }
-            this.nextLongValue = idMap.toMappedNodeId(innerNextLong);
+            this.nextLongValue = idMap.toFilteredNodeId(innerNextLong);
             return true;
         }
         return false;
