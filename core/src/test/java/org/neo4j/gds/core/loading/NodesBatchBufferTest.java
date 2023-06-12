@@ -30,46 +30,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class NodesBatchBufferTest {
 
     @Test
-    void shouldIgnoreNodesThatAreOutOfBoundsOnAdd() {
-        var nodesBatchBuffer = new NodesBatchBufferBuilder()
-            .capacity(3)
-            .highestPossibleNodeCount(43)
-            .build();
-
-        // within range
-        nodesBatchBuffer.add(21, Neo4jProxy.noPropertyReference(), new long[0]);
-        // end of range
-        nodesBatchBuffer.add(42, Neo4jProxy.noPropertyReference(), new long[0]);
-        // out of range
-        nodesBatchBuffer.add(84, Neo4jProxy.noPropertyReference(), new long[0]);
-
-        assertThat(nodesBatchBuffer)
-            .returns(2, RecordsBatchBuffer::length)
-            .returns(new long[]{21, 42, 0}, RecordsBatchBuffer::batch);
-    }
-
-    @Test
-    void shouldIgnoreNodesThatAreOutOfBoundsOnAddWithLabelInformation() {
-        var nodesBatchBuffer = new NodesBatchBufferBuilder()
-            .capacity(3)
-            .highestPossibleNodeCount(43)
-            .hasLabelInformation(true)
-            .nodeLabelIds(LongHashSet.from(0))
-            .build();
-
-        // within range
-        nodesBatchBuffer.add(21, Neo4jProxy.noPropertyReference(), new long[]{0});
-        // end of range
-        nodesBatchBuffer.add(42, Neo4jProxy.noPropertyReference(), new long[]{0});
-        // out of range
-        nodesBatchBuffer.add(84, Neo4jProxy.noPropertyReference(), new long[]{0});
-
-        assertThat(nodesBatchBuffer)
-            .returns(2, RecordsBatchBuffer::length)
-            .returns(new long[]{21, 42, 0}, RecordsBatchBuffer::batch);
-    }
-
-    @Test
     void shouldIgnoreNodesThatAreOutOfBoundsOnOffer() {
         var nodesBatchBuffer = new NodesBatchBufferBuilder()
             .capacity(3)

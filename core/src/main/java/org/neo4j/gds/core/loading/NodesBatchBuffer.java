@@ -120,10 +120,6 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     }
 
     public void add(long nodeId, PropertyReference propertyReference, long[] labels) {
-        if (nodeId >= this.highestPossibleNodeCount) {
-            return;
-        }
-
         int len = length++;
         buffer[len] = nodeId;
         if (properties != null) {
