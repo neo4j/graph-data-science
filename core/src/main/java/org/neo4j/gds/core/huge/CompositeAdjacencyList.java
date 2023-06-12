@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableMemoryInfo;
 
 import java.util.ArrayList;
