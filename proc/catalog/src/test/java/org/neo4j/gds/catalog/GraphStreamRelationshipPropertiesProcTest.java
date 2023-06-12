@@ -82,7 +82,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         super.configuration(builder);
         this.userLogStore = new GlobalUserLogStore();
         builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
-        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+        builder.addExtension(new UserLogRegistryExtension(__ -> userLogStore));
     }
 
     @BeforeEach

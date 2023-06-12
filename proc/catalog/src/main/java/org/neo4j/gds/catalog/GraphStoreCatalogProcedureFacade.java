@@ -21,8 +21,13 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.logging.Log;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * The top layer for the Neo4j integration side:
@@ -46,19 +51,56 @@ import java.util.function.Function;
  */
 public class GraphStoreCatalogProcedureFacade {
     // services
-    private final UsernameService usernameService;
     private final DatabaseIdService databaseIdService;
+    private final GraphDatabaseService graphDatabaseService;
+    private final KernelTransactionService kernelTransactionService;
+
+    /**
+     * OK finding:
+     * For graph project we use the Neo4j Log class directly. As in log.info stylee calls
+     * What we _can_ do is, resolve a log at the top (extension) using Neo4jProxy.getUserLog(logService, xxx);
+     * xxx is some marker for GDS
+     * We then pass that down and control the thing _without_ context injected anything
+     * that's step 1, step 2 is go and yank out the Neo4j Log entirely and replace it with a GDSLog with same api
+     * step 3 we can evolve that api as we see fit as long as it maps to Neo4j log for that integration
+     * UH THAT"S IT!!!!! we won;t use the Neo4j Log for Arrow innit!!!
+     * I am a master of software.
+     *
+     * @deprecated replace with Neo4j Log, then GDS Log
+     */
+    @Deprecated
+    private final Log log;
+    private final ProcedureTransactionService procedureTransactionService;
+    private final SecurityContext securityContext;
+    private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final UserLogServices userLogServices;
+    private final UsernameService usernameService;
 
     // business facade
     private final GraphStoreCatalogBusinessFacade businessFacade;
 
     public GraphStoreCatalogProcedureFacade(
-        UsernameService usernameService,
         DatabaseIdService databaseIdService,
+        GraphDatabaseService graphDatabaseService,
+        KernelTransactionService kernelTransactionService,
+        Log log,
+        ProcedureTransactionService procedureTransactionService,
+        SecurityContext securityContext,
+        TaskRegistryFactoryService taskRegistryFactoryService,
+        UserLogServices userLogServices,
+        UsernameService usernameService,
         GraphStoreCatalogBusinessFacade businessFacade
     ) {
-        this.usernameService = usernameService;
         this.databaseIdService = databaseIdService;
+        this.graphDatabaseService = graphDatabaseService;
+        this.kernelTransactionService = kernelTransactionService;
+        this.log = log;
+        this.procedureTransactionService = procedureTransactionService;
+        this.securityContext = securityContext;
+        this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.userLogServices = userLogServices;
+        this.usernameService = usernameService;
+
         this.businessFacade = businessFacade;
     }
 
@@ -90,11 +132,20 @@ public class GraphStoreCatalogProcedureFacade {
     }
 
     /**
+     * Huh, we never did jobId filtering...
+     */
+    public Stream<UserLogEntry> queryUserLog(String jobId) {
+        var userLogStore = userLogServices.getUserLogStore(databaseId());
+
+        return userLogStore.query(username());
+    }
+
+    /**
      * We need to obtain the username at this point in time so that we can send it down stream to business logic.
      * The username is specific to the procedure call.
      */
     private String username() {
-        return usernameService.getUsername();
+        return usernameService.getUsername(securityContext);
     }
 
     /**
@@ -102,6 +153,6 @@ public class GraphStoreCatalogProcedureFacade {
      * The database id is specific to the procedure call and/ or timing (note to self, figure out which it is).
      */
     private DatabaseId databaseId() {
-        return databaseIdService.getDatabaseId();
+        return databaseIdService.getDatabaseId(graphDatabaseService);
     }
 }
