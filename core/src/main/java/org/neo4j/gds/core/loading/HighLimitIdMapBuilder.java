@@ -57,7 +57,8 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
     @Override
     public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, int concurrency) {
         var intermediateIdMap = this.originalToIntermediateMapping.build();
-        var internalIdMap = this.intermediateToInternalMapping.build(labelInformationBuilder, highestNodeId, concurrency);
+        var highestIntermediateId = intermediateIdMap.size() - 1;
+        var internalIdMap = this.intermediateToInternalMapping.build(labelInformationBuilder, highestIntermediateId, concurrency);
 
         return new HighLimitIdMap(intermediateIdMap, internalIdMap);
     }
