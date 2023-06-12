@@ -11,6 +11,106 @@
 [opts=header,cols="1, 2"]
 |===
 | Algorithm name | Operation
+.8+<.^| xref:algorithms/delta-single-source.adoc[All Shortest Paths Delta-Stepping]
+| `gds.allShortestPaths.delta.stream`
+| `gds.allShortestPaths.delta.stream.estimate`
+| `gds.allShortestPaths.delta.write`
+| `gds.allShortestPaths.delta.write.estimate`
+| `gds.allShortestPaths.delta.mutate`
+| `gds.allShortestPaths.delta.mutate.estimate`
+| `gds.allShortestPaths.delta.stats`
+| `gds.allShortestPaths.delta.stats.estimate`
+.6+<.^| xref:algorithms/dijkstra-single-source.adoc[All Shortest Paths Dijkstra]
+| `gds.allShortestPaths.dijkstra.stream`
+| `gds.allShortestPaths.dijkstra.stream.estimate`
+| `gds.allShortestPaths.dijkstra.write`
+| `gds.allShortestPaths.dijkstra.write.estimate`
+| `gds.allShortestPaths.dijkstra.mutate`
+| `gds.allShortestPaths.dijkstra.mutate.estimate`
+.8+<.^|xref:algorithms/article-rank.adoc[ArticleRank]
+| `gds.articleRank.mutate`
+| `gds.articleRank.mutate.estimate`
+| `gds.articleRank.write`
+| `gds.articleRank.write.estimate`
+| `gds.articleRank.stream`
+| `gds.articleRank.stream.estimate`
+| `gds.articleRank.stats`
+| `gds.articleRank.stats.estimate`
+.8+<.^| xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford]
+| `gds.bellmanFord.mutate`
+| `gds.bellmanFord.mutate.estimate`
+| `gds.bellmanFord.stats`
+| `gds.bellmanFord.stats.estimate`
+| `gds.bellmanFord.stream`
+| `gds.bellmanFord.stream.estimate`
+| `gds.bellmanFord.write`
+| `gds.bellmanFord.write.estimate`
+.8+<.^| xref:algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-syntax[Betweenness Centrality]
+| `gds.betweenness.stream`
+| `gds.betweenness.stream.estimate`
+| `gds.betweenness.stats`
+| `gds.betweenness.stats.estimate`
+| `gds.betweenness.mutate`
+| `gds.betweenness.mutate.estimate`
+| `gds.betweenness.write`
+| `gds.betweenness.write.estimate`
+.6+<.^|xref:algorithms/bfs.adoc[Breadth First Search]
+| `gds.bfs.mutate`
+| `gds.bfs.mutate.estimate`
+| `gds.bfs.stream`
+| `gds.bfs.stream.estimate`
+| `gds.bfs.stats`
+| `gds.bfs.stats.estimate`
+.8+<.^| xref:algorithms/degree-centrality.adoc[Degree Centrality]
+| `gds.degree.mutate`
+| `gds.degree.mutate.estimate`
+| `gds.degree.stats`
+| `gds.degree.stats.estimate`
+| `gds.degree.stream`
+| `gds.degree.stream.estimate`
+| `gds.degree.write`
+| `gds.degree.write.estimate`
+.4+<.^|xref:algorithms/dfs.adoc[Depth First Search]
+| `gds.dfs.mutate`
+| `gds.dfs.mutate.estimate`
+| `gds.dfs.stream`
+| `gds.dfs.stream.estimate`
+.8+<.^|xref:algorithms/eigenvector-centrality.adoc[Eigenvector]
+| `gds.eigenvector.mutate`
+| `gds.eigenvector.mutate.estimate`
+| `gds.eigenvector.write`
+| `gds.eigenvector.write.estimate`
+| `gds.eigenvector.stream`
+| `gds.eigenvector.stream.estimate`
+| `gds.eigenvector.stats`
+| `gds.eigenvector.stats.estimate`
+.8+<.^| xref:machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
+| `gds.fastRP.mutate`
+| `gds.fastRP.mutate.estimate`
+| `gds.fastRP.stats`
+| `gds.fastRP.stats.estimate`
+| `gds.fastRP.stream`
+| `gds.fastRP.stream.estimate`
+| `gds.fastRP.write`
+| `gds.fastRP.write.estimate`
+.8+<.^| xref:algorithms/k-core.adoc[K-Core Decomposition]
+| `gds.kcore.stats`
+| `gds.kcore.stats.estimate`
+| `gds.kcore.stream`
+| `gds.kcore.stream.estimate`
+| `gds.kcore.mutate`
+| `gds.kcore.mutate.estimate`
+| `gds.kcore.write`
+| `gds.kcore.write.estimate`
+.8+<.^|xref:algorithms/knn.adoc[K-Nearest Neighbors]
+| `gds.knn.mutate`
+| `gds.knn.mutate.estimate`
+| `gds.knn.stats`
+| `gds.knn.stats.estimate`
+| `gds.knn.stream`
+| `gds.knn.stream.estimate`
+| `gds.knn.write`
+| `gds.knn.write.estimate`
 .8+<.^|xref:algorithms/label-propagation.adoc#algorithms-label-propagation-syntax[Label Propagation]
 | `gds.labelPropagation.mutate`
 | `gds.labelPropagation.mutate.estimate`
@@ -20,6 +120,15 @@
 | `gds.labelPropagation.stream.estimate`
 | `gds.labelPropagation.stats`
 | `gds.labelPropagation.stats.estimate`
+.8+<.^| xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-syntax[Local Clustering Coefficient]
+| `gds.localClusteringCoefficient.stream`
+| `gds.localClusteringCoefficient.stream.estimate`
+| `gds.localClusteringCoefficient.stats`
+| `gds.localClusteringCoefficient.stats.estimate`
+| `gds.localClusteringCoefficient.write`
+| `gds.localClusteringCoefficient.write.estimate`
+| `gds.localClusteringCoefficient.mutate`
+| `gds.localClusteringCoefficient.mutate.estimate`
 .8+<.^|xref:algorithms/louvain.adoc#algorithms-louvain-syntax[Louvain]
 | `gds.louvain.mutate`
 | `gds.louvain.mutate.estimate`
@@ -47,143 +156,6 @@
 | `gds.pageRank.stream.estimate`
 | `gds.pageRank.stats`
 | `gds.pageRank.stats.estimate`
-.8+<.^|xref:algorithms/wcc.adoc#algorithms-wcc-syntax[Weakly Connected Components]
-| `gds.wcc.mutate`
-| `gds.wcc.mutate.estimate`
-| `gds.wcc.write`
-| `gds.wcc.write.estimate`
-| `gds.wcc.stream`
-| `gds.wcc.stream.estimate`
-| `gds.wcc.stats`
-| `gds.wcc.stats.estimate`
-.8+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-syntax[Triangle Count]
-| `gds.triangleCount.stream`
-| `gds.triangleCount.stream.estimate`
-| `gds.triangleCount.stats`
-| `gds.triangleCount.stats.estimate`
-| `gds.triangleCount.write`
-| `gds.triangleCount.write.estimate`
-| `gds.triangleCount.mutate`
-| `gds.triangleCount.mutate.estimate`
-.8+<.^| xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-syntax[Local Clustering Coefficient]
-| `gds.localClusteringCoefficient.stream`
-| `gds.localClusteringCoefficient.stream.estimate`
-| `gds.localClusteringCoefficient.stats`
-| `gds.localClusteringCoefficient.stats.estimate`
-| `gds.localClusteringCoefficient.write`
-| `gds.localClusteringCoefficient.write.estimate`
-| `gds.localClusteringCoefficient.mutate`
-| `gds.localClusteringCoefficient.mutate.estimate`
-.8+<.^| xref:algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-syntax[Betweenness Centrality]
-| `gds.betweenness.stream`
-| `gds.betweenness.stream.estimate`
-| `gds.betweenness.stats`
-| `gds.betweenness.stats.estimate`
-| `gds.betweenness.mutate`
-| `gds.betweenness.mutate.estimate`
-| `gds.betweenness.write`
-| `gds.betweenness.write.estimate`
-.8+<.^| xref:machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
-| `gds.fastRP.mutate`
-| `gds.fastRP.mutate.estimate`
-| `gds.fastRP.stats`
-| `gds.fastRP.stats.estimate`
-| `gds.fastRP.stream`
-| `gds.fastRP.stream.estimate`
-| `gds.fastRP.write`
-| `gds.fastRP.write.estimate`
-.8+<.^| xref:algorithms/degree-centrality.adoc[Degree Centrality]
-| `gds.degree.mutate`
-| `gds.degree.mutate.estimate`
-| `gds.degree.stats`
-| `gds.degree.stats.estimate`
-| `gds.degree.stream`
-| `gds.degree.stream.estimate`
-| `gds.degree.write`
-| `gds.degree.write.estimate`
-.8+<.^|xref:algorithms/article-rank.adoc[ArticleRank]
-| `gds.articleRank.mutate`
-| `gds.articleRank.mutate.estimate`
-| `gds.articleRank.write`
-| `gds.articleRank.write.estimate`
-| `gds.articleRank.stream`
-| `gds.articleRank.stream.estimate`
-| `gds.articleRank.stats`
-| `gds.articleRank.stats.estimate`
-.8+<.^|xref:algorithms/eigenvector-centrality.adoc[Eigenvector]
-| `gds.eigenvector.mutate`
-| `gds.eigenvector.mutate.estimate`
-| `gds.eigenvector.write`
-| `gds.eigenvector.write.estimate`
-| `gds.eigenvector.stream`
-| `gds.eigenvector.stream.estimate`
-| `gds.eigenvector.stats`
-| `gds.eigenvector.stats.estimate`
-.8+<.^| xref:algorithms/delta-single-source.adoc[All Shortest Paths Delta-Stepping]
-| `gds.allShortestPaths.delta.stream`
-| `gds.allShortestPaths.delta.stream.estimate`
-| `gds.allShortestPaths.delta.write`
-| `gds.allShortestPaths.delta.write.estimate`
-| `gds.allShortestPaths.delta.mutate`
-| `gds.allShortestPaths.delta.mutate.estimate`
-| `gds.allShortestPaths.delta.stats`
-| `gds.allShortestPaths.delta.stats.estimate`
-.6+<.^| xref:algorithms/dijkstra-source-target.adoc[Shortest Path Dijkstra]
-| `gds.shortestPath.dijkstra.stream`
-| `gds.shortestPath.dijkstra.stream.estimate`
-| `gds.shortestPath.dijkstra.write`
-| `gds.shortestPath.dijkstra.write.estimate`
-| `gds.shortestPath.dijkstra.mutate`
-| `gds.shortestPath.dijkstra.mutate.estimate`
-.6+<.^| xref:algorithms/dijkstra-single-source.adoc[All Shortest Paths Dijkstra]
-| `gds.allShortestPaths.dijkstra.stream`
-| `gds.allShortestPaths.dijkstra.stream.estimate`
-| `gds.allShortestPaths.dijkstra.write`
-| `gds.allShortestPaths.dijkstra.write.estimate`
-| `gds.allShortestPaths.dijkstra.mutate`
-| `gds.allShortestPaths.dijkstra.mutate.estimate`
-.6+<.^| xref:algorithms/yens.adoc[Shortest Paths Yens]
-| `gds.shortestPath.yens.stream`
-| `gds.shortestPath.yens.stream.estimate`
-| `gds.shortestPath.yens.write`
-| `gds.shortestPath.yens.write.estimate`
-| `gds.shortestPath.yens.mutate`
-| `gds.shortestPath.yens.mutate.estimate`
-.6+<.^| xref:algorithms/astar.adoc[Shortest Path AStar]
-| `gds.shortestPath.astar.stream`
-| `gds.shortestPath.astar.stream.estimate`
-| `gds.shortestPath.astar.write`
-| `gds.shortestPath.astar.write.estimate`
-| `gds.shortestPath.astar.mutate`
-| `gds.shortestPath.astar.mutate.estimate`
-.6+<.^|xref:algorithms/similarity-functions.adoc[Similarity functions]
-| `gds.similarity.cosine`
-| `gds.similarity.euclidean`
-| `gds.similarity.euclideanDistance`
-| `gds.similarity.jaccard`
-| `gds.similarity.overlap`
-| `gds.similarity.pearson`
-.8+<.^|xref:algorithms/knn.adoc[K-Nearest Neighbors]
-| `gds.knn.mutate`
-| `gds.knn.mutate.estimate`
-| `gds.knn.stats`
-| `gds.knn.stats.estimate`
-| `gds.knn.stream`
-| `gds.knn.stream.estimate`
-| `gds.knn.write`
-| `gds.knn.write.estimate`
-.6+<.^|xref:algorithms/bfs.adoc[BFS]
-| `gds.bfs.mutate`
-| `gds.bfs.mutate.estimate`
-| `gds.bfs.stream`
-| `gds.bfs.stream.estimate`
-| `gds.bfs.stats`
-| `gds.bfs.stats.estimate`
-.4+<.^|xref:algorithms/dfs.adoc[Depth First Search]
-| `gds.dfs.mutate`
-| `gds.dfs.mutate.estimate`
-| `gds.dfs.stream`
-| `gds.dfs.stream.estimate`
 .4+<.^|xref:algorithms/random-walk.adoc[Random Walk]
 | `gds.randomWalk.stats`
 | `gds.randomWalk.stats.estimate`
@@ -198,6 +170,52 @@
 | `gds.scaleProperties.stats.estimate`
 | `gds.scaleProperties.write`
 | `gds.scaleProperties.write.estimate`
+.6+<.^| xref:algorithms/astar.adoc[Shortest Path AStar]
+| `gds.shortestPath.astar.stream`
+| `gds.shortestPath.astar.stream.estimate`
+| `gds.shortestPath.astar.write`
+| `gds.shortestPath.astar.write.estimate`
+| `gds.shortestPath.astar.mutate`
+| `gds.shortestPath.astar.mutate.estimate`
+.6+<.^| xref:algorithms/dijkstra-source-target.adoc[Shortest Path Dijkstra]
+| `gds.shortestPath.dijkstra.stream`
+| `gds.shortestPath.dijkstra.stream.estimate`
+| `gds.shortestPath.dijkstra.write`
+| `gds.shortestPath.dijkstra.write.estimate`
+| `gds.shortestPath.dijkstra.mutate`
+| `gds.shortestPath.dijkstra.mutate.estimate`
+.6+<.^| xref:algorithms/yens.adoc[Shortest Paths Yens]
+| `gds.shortestPath.yens.stream`
+| `gds.shortestPath.yens.stream.estimate`
+| `gds.shortestPath.yens.write`
+| `gds.shortestPath.yens.write.estimate`
+| `gds.shortestPath.yens.mutate`
+| `gds.shortestPath.yens.mutate.estimate`
+.6+<.^|xref:algorithms/similarity-functions.adoc[Similarity functions]
+| `_gds.similarity.cosine_`
+| `_gds.similarity.euclidean_`
+| `_gds.similarity.euclideanDistance_`
+| `_gds.similarity.jaccard_`
+| `_gds.similarity.overlap_`
+| `_gds.similarity.pearson_`
+.8+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-syntax[Triangle Count]
+| `gds.triangleCount.stream`
+| `gds.triangleCount.stream.estimate`
+| `gds.triangleCount.stats`
+| `gds.triangleCount.stats.estimate`
+| `gds.triangleCount.write`
+| `gds.triangleCount.write.estimate`
+| `gds.triangleCount.mutate`
+| `gds.triangleCount.mutate.estimate`
+.8+<.^|xref:algorithms/wcc.adoc#algorithms-wcc-syntax[Weakly Connected Components]
+| `gds.wcc.mutate`
+| `gds.wcc.mutate.estimate`
+| `gds.wcc.write`
+| `gds.wcc.write.estimate`
+| `gds.wcc.stream`
+| `gds.wcc.stream.estimate`
+| `gds.wcc.stats`
+| `gds.wcc.stats.estimate`
 |===
 
 [[beta-tier]]
@@ -225,6 +243,20 @@
 | `gds.beta.graphSage.write.estimate`
 | `gds.beta.graphSage.train`
 | `gds.beta.graphSage.train.estimate`
+.4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
+| `gds.beta.hashgnn.mutate`
+| `gds.beta.hashgnn.mutate.estimate`
+| `gds.beta.hashgnn.stream`
+| `gds.beta.hashgnn.stream.estimate`
+.8+<.^| xref:algorithms/celf.adoc[Influence Maximization - CELF]
+| `gds.beta.influenceMaximization.celf.mutate`
+| `gds.beta.influenceMaximization.celf.mutate.estimate`
+| `gds.beta.influenceMaximization.celf.stats`
+| `gds.beta.influenceMaximization.celf.stats.estimate`
+| `gds.beta.influenceMaximization.celf.stream`
+| `gds.beta.influenceMaximization.celf.stream.estimate`
+| `gds.beta.influenceMaximization.celf.write`
+| `gds.beta.influenceMaximization.celf.write.estimate`
 .8+<.^|xref:algorithms/k1coloring.adoc[K1Coloring]
 | `gds.beta.k1coloring.mutate`
 | `gds.beta.k1coloring.mutate.estimate`
@@ -234,6 +266,29 @@
 | `gds.beta.k1coloring.stream.estimate`
 | `gds.beta.k1coloring.write`
 | `gds.beta.k1coloring.write.estimate`
+.8+<.^| xref:algorithms/kmeans.adoc[Kmeans]
+| `gds.beta.kmeans.mutate`
+| `gds.beta.kmeans.mutate.estimate`
+| `gds.beta.kmeans.stats`
+| `gds.beta.kmeans.stats.estimate`
+| `gds.beta.kmeans.stream`
+| `gds.beta.kmeans.stream.estimate`
+| `gds.beta.kmeans.write`
+| `gds.beta.kmeans.write.estimate`
+.8+<.^| xref:algorithms/leiden.adoc[Leiden]
+| `gds.beta.leiden.mutate`
+| `gds.beta.leiden.mutate.estimate`
+| `gds.beta.leiden.stats`
+| `gds.beta.leiden.stats.estimate`
+| `gds.beta.leiden.stream`
+| `gds.beta.leiden.stream.estimate`
+| `gds.beta.leiden.write`
+| `gds.beta.leiden.write.estimate`
+.4+<.^| xref:algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
+| `gds.beta.steinerTree.mutate`
+| `gds.beta.steinerTree.stats`
+| `gds.beta.steinerTree.stream`
+| `gds.beta.steinerTree.write`
 .6+<.^| xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
 | `gds.beta.modularityOptimization.mutate`
 | `gds.beta.modularityOptimization.mutate.estimate`
@@ -248,15 +303,15 @@
 | `gds.beta.node2vec.stream.estimate`
 | `gds.beta.node2vec.write`
 | `gds.beta.node2vec.write.estimate`
-.8+<.^| xref:algorithms/celf.adoc[Influence Maximization - CELF]
-| `gds.beta.influenceMaximization.celf.mutate`
-| `gds.beta.influenceMaximization.celf.mutate.estimate`
-| `gds.beta.influenceMaximization.celf.stats`
-| `gds.beta.influenceMaximization.celf.stats.estimate`
-| `gds.beta.influenceMaximization.celf.stream`
-| `gds.beta.influenceMaximization.celf.stream.estimate`
-| `gds.beta.influenceMaximization.celf.write`
-| `gds.beta.influenceMaximization.celf.write.estimate`
+.8+<.^|xref:algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
+| `gds.beta.spanningTree.mutate`
+| `gds.beta.spanningTree.mutate.estimate`
+| `gds.beta.spanningTree.stats`
+| `gds.beta.spanningTree.stats.estimate`
+| `gds.beta.spanningTree.stream`
+| `gds.beta.spanningTree.stream.estimate`
+| `gds.beta.spanningTree.write`
+| `gds.beta.spanningTree.write.estimate`
 |===
 
 [[alpha-tier]]
@@ -268,6 +323,7 @@
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
+| xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `_gds.alpha.linkprediction.adamicAdar_`
 .1+<.^|xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
 | `gds.alpha.allShortestPaths.stream`
 .4+<.^|xref:algorithms/alpha/approx-max-k-cut.adoc[Approximate Maximum k-cut]
@@ -275,6 +331,23 @@
 | `gds.alpha.maxkcut.mutate.estimate`
 | `gds.alpha.maxkcut.stream`
 | `gds.alpha.maxkcut.stream.estimate`
+| xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `_gds.alpha.linkprediction.commonNeighbors_`
+.1+<.^| xref:algorithms/alpha/conductance.adoc[Conductance]
+| `gds.alpha.conductance.stream`
+.4+<.^| xref:algorithms/alpha/filtered-knn.adoc[Filtered KNN]
+| `gds.alpha.knn.filtered.mutate`
+| `gds.alpha.knn.filtered.stats`
+| `gds.alpha.knn.filtered.stream`
+| `gds.alpha.knn.filtered.write`
+.8+<.^| xref:algorithms/alpha/filtered-node-similarity.adoc[Filtered NodeSimilarity]
+| `gds.alpha.nodeSimilarity.filtered.mutate`
+| `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
+| `gds.alpha.nodeSimilarity.filtered.stats`
+| `gds.alpha.nodeSimilarity.filtered.stats.estimate`
+| `gds.alpha.nodeSimilarity.filtered.stream`
+| `gds.alpha.nodeSimilarity.filtered.stream.estimate`
+| `gds.alpha.nodeSimilarity.filtered.write`
+| `gds.alpha.nodeSimilarity.filtered.write.estimate`
 .2+<.^|xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
@@ -287,9 +360,11 @@
 | `gds.alpha.hits.stream.estimate`
 | `gds.alpha.hits.write`
 | `gds.alpha.hits.write.estimate`
-.2+<.^|xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
-| `gds.alpha.scc.stream`
-| `gds.alpha.scc.write`
+.1+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
+| `gds.alpha.kSpanningTree.write`
+| xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `_gds.alpha.linkprediction.preferentialAttachment_`
+| xref:alpha-algorithms/resource-allocation.adoc[Resource Allocation] | `_gds.alpha.linkprediction.resourceAllocation_`
+| xref:alpha-algorithms/same-community.adoc[Same Community] | `_gds.alpha.linkprediction.sameCommunity_`
 .8+<.^|xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
 | `gds.alpha.sllpa.mutate`
 | `gds.alpha.sllpa.mutate.estimate`
@@ -299,93 +374,18 @@
 | `gds.alpha.sllpa.stream.estimate`
 | `gds.alpha.sllpa.write`
 | `gds.alpha.sllpa.write.estimate`
-.8+<.^|xref:algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
-| `gds.beta.spanningTree.mutate`
-| `gds.beta.spanningTree.mutate.estimate`
-| `gds.beta.spanningTree.stats`
-| `gds.beta.spanningTree.stats.estimate`
-| `gds.beta.spanningTree.stream`
-| `gds.beta.spanningTree.stream.estimate`
-| `gds.beta.spanningTree.write`
-| `gds.beta.spanningTree.write.estimate`
-.1+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
-| `gds.alpha.kSpanningTree.write`
-| xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `_gds.alpha.linkprediction.adamicAdar_`
-| xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `_gds.alpha.linkprediction.commonNeighbors_`
-| xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `_gds.alpha.linkprediction.preferentialAttachment_`
-| xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `_gds.alpha.linkprediction.resourceAllocation_`
-| xref:alpha-algorithms/same-community.adoc[Same Community] | `_gds.alpha.linkprediction.sameCommunity_`
-| xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `_gds.alpha.linkprediction.totalNeighbors_`
 .1+<.^| xref:alpha-algorithms/split-relationships.adoc[Split Relationships]
 | `gds.alpha.ml.splitRelationships.mutate`
+.2+<.^|xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
+| `gds.alpha.scc.stream`
+| `gds.alpha.scc.write`
 .1+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangle Listing]
 | `gds.alpha.triangles`
-.1+<.^| xref:algorithms/alpha/conductance.adoc[Conductance]
-| `gds.alpha.conductance.stream`
-.4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
-| `gds.beta.hashgnn.mutate`
-| `gds.beta.hashgnn.mutate.estimate`
-| `gds.beta.hashgnn.stream`
-| `gds.beta.hashgnn.stream.estimate`
-.8+<.^| xref:algorithms/kmeans.adoc[Kmeans]
-| `gds.beta.kmeans.mutate`
-| `gds.beta.kmeans.mutate.estimate`
-| `gds.beta.kmeans.stats`
-| `gds.beta.kmeans.stats.estimate`
-| `gds.beta.kmeans.stream`
-| `gds.beta.kmeans.stream.estimate`
-| `gds.beta.kmeans.write`
-| `gds.beta.kmeans.write.estimate`
-.4+<.^| xref:algorithms/alpha/filtered-knn.adoc[Filtered KNN]
-| `gds.alpha.knn.filtered.mutate`
-| `gds.alpha.knn.filtered.stats`
-| `gds.alpha.knn.filtered.stream`
-| `gds.alpha.knn.filtered.write`
-.8+<.^| xref:algorithms/leiden.adoc[Leiden]
-| `gds.beta.leiden.mutate`
-| `gds.beta.leiden.mutate.estimate`
-| `gds.beta.leiden.stats`
-| `gds.beta.leiden.stats.estimate`
-| `gds.beta.leiden.stream`
-| `gds.beta.leiden.stream.estimate`
-| `gds.beta.leiden.write`
-| `gds.beta.leiden.write.estimate`
-.8+<.^| xref:algorithms/alpha/filtered-node-similarity.adoc[Filtered NodeSimilarity]
-| `gds.alpha.nodeSimilarity.filtered.mutate`
-| `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
-| `gds.alpha.nodeSimilarity.filtered.stats`
-| `gds.alpha.nodeSimilarity.filtered.stats.estimate`
-| `gds.alpha.nodeSimilarity.filtered.stream`
-| `gds.alpha.nodeSimilarity.filtered.stream.estimate`
-| `gds.alpha.nodeSimilarity.filtered.write`
-| `gds.alpha.nodeSimilarity.filtered.write.estimate`
+| xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `_gds.alpha.linkprediction.totalNeighbors_`
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.4+<.^| xref:algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
-| `gds.beta.steinerTree.mutate`
-| `gds.beta.steinerTree.stats`
-| `gds.beta.steinerTree.stream`
-| `gds.beta.steinerTree.write`
-.8+<.^| xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford]
-| `gds.bellmanFord.mutate`
-| `gds.bellmanFord.mutate.estimate`
-| `gds.bellmanFord.stats`
-| `gds.bellmanFord.stats.estimate`
-| `gds.bellmanFord.stream`
-| `gds.bellmanFord.stream.estimate`
-| `gds.bellmanFord.write`
-| `gds.bellmanFord.write.estimate`
 .2+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
 | `gds.alpha.scaleProperties.mutate` (deprecated)
 | `gds.alpha.scaleProperties.stream` (deprecated)
-.8+<.^| xref:algorithms/k-core.adoc[K-Core Decomposition]
-| `gds.kcore.stats`
-| `gds.kcore.stats.estimate`
-| `gds.kcore.stream`
-| `gds.kcore.stream.estimate`
-| `gds.kcore.mutate`
-| `gds.kcore.mutate.estimate`
-| `gds.kcore.write`
-| `gds.kcore.write.estimate`
 |===
