@@ -78,6 +78,7 @@ public final class NodesBuilder {
 
     NodesBuilder(
         long maxOriginalId,
+        long maxIntermediateId,
         int concurrency,
         NodesBuilderContext nodesBuilderContext,
         IdMapBuilder idMapBuilder,
@@ -93,7 +94,7 @@ public final class NodesBuilder {
         this.propertyStates = propertyStates;
         this.labelInformationBuilder = !hasLabelInformation
             ? LabelInformationBuilders.allNodes()
-            : LabelInformationBuilders.multiLabelWithCapacity(maxOriginalId + 1);
+            : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
 
         this.importedNodes = new LongAdder();
         this.nodeImporter = new NodeImporterBuilder()

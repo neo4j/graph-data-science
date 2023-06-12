@@ -43,6 +43,8 @@ import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
+import org.neo4j.gds.core.loading.HighLimitIdMap;
+import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
 import org.neo4j.gds.core.loading.ImportSizing;
@@ -98,36 +100,60 @@ public final class GraphFactory {
             ? Optional.of(maxOriginalId)
             : Optional.<Long>empty();
 
+        var idMapType = idMapBuilderType.orElse(IdMap.NO_TYPE);
         var idMapBuilder = idMapBehavior.create(
-            idMapBuilderType.orElse(IdMap.NO_TYPE),
+            idMapType,
             threadCount,
             maybeMaxOriginalId,
             nodeCount
         );
 
         boolean deduplicate = deduplicateIds.orElse(true);
+        long maxIntermediateId = maxOriginalId;
 
-        return nodeSchema.map(schema -> fromSchema(
-            maxOriginalId,
-            idMapBuilder,
-            threadCount,
-            schema,
-            labelInformation,
-            deduplicate
-        )).orElseGet(() -> new NodesBuilder(
-            maxOriginalId,
-            threadCount,
-            NodesBuilderContext.lazy(threadCount),
-            idMapBuilder,
-            labelInformation,
-            hasProperties.orElse(false),
-            deduplicate,
-            __ -> propertyState.orElse(PropertyState.PERSISTENT)
-        ));
+        if (HighLimitIdMap.isHighLimitIdMap(idMapType)) {
+            // If the requested id map is high limit, we need to make sure that
+            // internal data structures are sized accordingly. Using the highest
+            // original id will potentially fail due to size limitations.
+            if (nodeCount.isPresent()) {
+                maxIntermediateId = nodeCount.get() - 1;
+            } else {
+                throw new IllegalArgumentException("Cannot use high limit id map without node count.");
+            }
+            if (deduplicate) {
+                // We internally use HABS for deduplication, which is being initialized
+                // with max original id. This is fine for all id maps except high limit,
+                // where original ids can exceed the supported HABS range.
+                throw new IllegalArgumentException("Cannot use high limit id map with deduplication.");
+            }
+        }
+
+        return nodeSchema.isPresent()
+            ? fromSchema(
+                maxOriginalId,
+                maxIntermediateId,
+                idMapBuilder,
+                threadCount,
+                nodeSchema.get(),
+                labelInformation,
+                deduplicate
+            )
+            : new NodesBuilder(
+                maxOriginalId,
+                maxIntermediateId,
+                threadCount,
+                NodesBuilderContext.lazy(threadCount),
+                idMapBuilder,
+                labelInformation,
+                hasProperties.orElse(false),
+                deduplicate,
+                __ -> propertyState.orElse(PropertyState.PERSISTENT)
+            );
     }
 
     private static NodesBuilder fromSchema(
         long maxOriginalId,
+        long maxIntermediateId,
         IdMapBuilder idMapBuilder,
         int concurrency,
         NodeSchema nodeSchema,
@@ -136,6 +162,7 @@ public final class GraphFactory {
     ) {
         return new NodesBuilder(
             maxOriginalId,
+            maxIntermediateId,
             concurrency,
             NodesBuilderContext.fixed(nodeSchema, concurrency),
             idMapBuilder,
