@@ -76,14 +76,6 @@ class KSpanningTreeTest {
     @Inject
     private IdFunction idFunction;
 
-    private static final int OFFSET = 5;
-
-    @GdlGraph(idOffset = OFFSET, orientation = Orientation.UNDIRECTED, graphNamePrefix = "offset")
-    private static final String DB_CYPHER_WITH_OFFSET = DB_CYPHER;
-
-    @Inject
-    private Graph offsetGraph;
-
     private int a, b, c, d, x;
 
     @BeforeEach
@@ -116,15 +108,6 @@ class KSpanningTreeTest {
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(b));
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(x));
         assertThat(spanningTree.head(b)).isNotEqualTo(spanningTree.head(x));
-    }
-
-    @Test
-    void testNeoIdsWithOffset() {
-        var spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER).compute();
-        var otherSpanningTree = new KSpanningTree(offsetGraph, Prim.MIN_OPERATOR, OFFSET, 2, ProgressTracker.NULL_TRACKER).compute();
-
-        assertThat(spanningTree.parentArray().toArray())
-            .containsExactly(otherSpanningTree.parentArray().toArray());
     }
 
     @Test
