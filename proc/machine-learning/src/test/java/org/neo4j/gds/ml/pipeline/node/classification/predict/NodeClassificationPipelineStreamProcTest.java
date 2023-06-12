@@ -31,7 +31,6 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -54,9 +53,6 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
     @Inject
     private ModelCatalog modelCatalog;
-
-    @Inject
-    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
@@ -127,23 +123,23 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(
             Map.of(
-                "nodeId", 0L,
+                "nodeId", idFunction.of("n1"),
                 "predictedClass", 1L,
                 "predictedProbabilities", List.of(0.01208086561, 0.98791913438)
             ), Map.of(
-                "nodeId", 1L,
+                "nodeId", idFunction.of("n2"),
                 "predictedClass", 0L,
                 "predictedProbabilities", List.of(0.99980260171, 1.9739828E-4)
             ), Map.of(
-                "nodeId", 2L,
+                "nodeId", idFunction.of("n3"),
                 "predictedClass", 0L,
                 "predictedProbabilities", List.of(0.93267947552, 0.06732052447)
             ), Map.of(
-                "nodeId", 3L,
+                "nodeId", idFunction.of("n4"),
                 "predictedClass", 1L,
                 "predictedProbabilities", List.of(0.00352611947, 0.99647388052)
             ), Map.of(
-                "nodeId", 4L,
+                "nodeId", idFunction.of("n5"),
                 "predictedClass", 1L,
                 "predictedProbabilities", List.of(0.47557912663, 0.52442087336)
             )

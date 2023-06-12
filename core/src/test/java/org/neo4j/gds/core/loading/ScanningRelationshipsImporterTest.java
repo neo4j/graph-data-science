@@ -43,8 +43,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -56,16 +54,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ScanningRelationshipsImporterTest extends BaseTest {
 
-    @Neo4jGraph
+    // This unit test assumes no offsets
+    @Neo4jGraph(offsetIds = false)
     public static final String DB = "CREATE " +
                                     "(a)-[:R { p: 1.0 }]->(b)," +
                                     "(a)-[:R { p: 2.0 }]->(c)," +
                                     "(a)-[:R { p: 3.0 }]->(d)," +
                                     "(b)-[:R { p: 4.0 }]->(c)," +
                                     "(c)-[:R { p: 5.0 }]->(a)";
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void shouldLoadInverseRelationships() {
@@ -114,10 +110,10 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         assertThat(degree("c", adjacencyList)).isEqualTo(2); // (a)-->(c),(b)-->(c)
         assertThat(degree("d", adjacencyList)).isEqualTo(1); // (a)-->(d)
 
-        assertThat(targets("a", adjacencyList)).isEqualTo(nodeIds("c"));         // (c)-->(a)
-        assertThat(targets("b", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(b)
-        assertThat(targets("c", adjacencyList)).isEqualTo(nodeIds("a", "b"));    // (a)-->(c),(b)-->(c)
-        assertThat(targets("d", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(d)
+        assertThat(targets("a", adjacencyList)).isEqualTo(idFunction.of(new String[]{"c"}));         // (c)-->(a)
+        assertThat(targets("b", adjacencyList)).isEqualTo(idFunction.of(new String[]{"a"}));         // (a)-->(b)
+        assertThat(targets("c", adjacencyList)).isEqualTo(idFunction.of("a","b"));    // (a)-->(c),(b)-->(c)
+        assertThat(targets("d", adjacencyList)).isEqualTo(idFunction.of(new String[]{"a"}));         // (a)-->(d)
 
         assertThat(properties("a", propertyList, adjacencyList::degree)).containsExactly(5.0);       // (c)-[5.0]->(a)
         assertThat(properties("b", propertyList, adjacencyList::degree)).containsExactly(1.0);       // (a)-[1.0]->(b)
@@ -140,14 +136,6 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         LongToIntFunction degreeFn
     ) {
         return AdjacencyTestUtils.properties(idFunction.of(nodeVariable), adjacencyProperties, degreeFn);
-    }
-
-    private long[] nodeIds(String... nodeVariables) {
-        var nodeIds = new long[nodeVariables.length];
-        for (int i = 0; i < nodeVariables.length; i++) {
-            nodeIds[i] = idFunction.of(nodeVariables[i]);
-        }
-        return nodeIds;
     }
 
     private GraphLoaderContext graphLoaderContext() {

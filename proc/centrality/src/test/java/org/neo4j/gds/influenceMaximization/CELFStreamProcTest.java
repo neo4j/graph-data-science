@@ -124,7 +124,7 @@ class CELFStreamProcTest extends BaseProcTest {
         var resultRowCount = runQueryWithRowConsumer(cypher, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double spread = row.getNumber("spread").doubleValue();
-            assertThat(nodeId).isBetween(0L, 10L);
+            assertThat(nodeId).isBetween(idFunction.of("a"), idFunction.of("j"));
             assertThat(spread).isGreaterThanOrEqualTo(0d);
         });
 

@@ -31,7 +31,6 @@ import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.values.storable.Values;
 
@@ -54,8 +53,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
                                     ", (a)-[:REL { prop1: 42.0, prop2: 12.0 }]->(b)" +
                                     ", (a)-[:REL { prop1: 13.37, prop2: 4.2 }]->(c)";
 
-    @Inject
-    IdFunction idFunction;
+    IdFunction mappedIdFunction;
 
     AbstractInMemoryRelationshipTraversalCursor relationshipCursor;
 
@@ -77,6 +75,8 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     protected void onSetup() {
         var graphStore = new CypherGraphStore(this.graphStore);
         graphStore.initialize(tokenHolders);
+
+        this.mappedIdFunction = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
         this.relationshipCursor = StorageEngineProxy.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 
@@ -86,16 +86,16 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         StorageEngineProxy.initRelationshipTraversalCursorForRelType(
             relationshipCursor,
-            idFunction.of("a"),
+            mappedIdFunction.of("a"),
             relTypeToken
         );
 
         assertThat(relationshipCursor.next()).isTrue();
-        assertThat(relationshipCursor.sourceNodeReference()).isEqualTo(idFunction.of("a"));
+        assertThat(relationshipCursor.sourceNodeReference()).isEqualTo(mappedIdFunction.of("a"));
 
         var results = new HashSet<>();
-        results.add(idFunction.of("b"));
-        results.add(idFunction.of("c"));
+        results.add(mappedIdFunction.of("b"));
+        results.add(mappedIdFunction.of("c"));
         assertThat(relationshipCursor.targetNodeReference()).isIn(results);
         results.remove(relationshipCursor.targetNodeReference());
 
@@ -111,7 +111,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         StorageEngineProxy.initRelationshipTraversalCursorForRelType(
             relationshipCursor,
-            idFunction.of("a"),
+            mappedIdFunction.of("a"),
             relTypeToken
         );
 
@@ -131,7 +131,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         StorageEngineProxy.initRelationshipTraversalCursorForRelType(
             relationshipCursor,
-            idFunction.of("a"),
+            mappedIdFunction.of("a"),
             relTypeToken
         );
 
@@ -161,7 +161,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         StorageEngineProxy.initRelationshipTraversalCursorForRelType(
             relationshipCursor,
-            idFunction.of("a"),
+            mappedIdFunction.of("a"),
             relTypeToken
         );
 

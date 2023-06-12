@@ -29,6 +29,7 @@ import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -101,6 +102,11 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
             List.of(Map.of("nodeCount", 2 * nodeCount))
         );
         var labelOffset = nodeLabel.equals("N") ? 0 : nodeCount;
+
+        IdFunction idFunction = nodeLabel.equals("N")
+            ? (id) -> this.idFunction.of("n" + id)
+            : (id) -> this.idFunction.of("m" + id);
+
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
             " modelName: 'model'," +
@@ -115,9 +121,9 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
             " ORDER BY probability DESC, node1",
             Map.of("nodeLabel", nodeLabel, "topN", 3, "concurrency", concurrency),
             List.of(
-                Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .49750002083312506),
-                Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926959),
-                Map.of("node1", 0L + labelOffset, "node2", 1L + labelOffset, "probability", .11506673204554985)
+                Map.of("node1", idFunction.of("0"), "node2", idFunction.of("4"), "probability", .49750002083312506),
+                Map.of("node1", idFunction.of("1"), "node2", idFunction.of("4"), "probability", .11815697780926959),
+                Map.of("node1", idFunction.of("0"), "node2", idFunction.of("1"), "probability", .11506673204554985)
             )
         );
     }
@@ -160,11 +166,11 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
             " ORDER BY probability DESC, node1",
             Map.of("topK", 1, "concurrency", 1),
             List.of(
-                Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
-                Map.of("node1", 4L, "node2", 0L, "probability", .49750002083312506),
-                Map.of("node1", 1L, "node2", 4L, "probability", .11815697780926959),
-                Map.of("node1", 3L, "node2", 0L, "probability", .002472623156634657),
-                Map.of("node1", 2L, "node2", 0L, "probability", 2.0547103309365156E-4)
+                Map.of("node1", idFunction.of("n0"), "node2", idFunction.of("n4"), "probability", .49750002083312506),
+                Map.of("node1", idFunction.of("n4"), "node2", idFunction.of("n0"), "probability", .49750002083312506),
+                Map.of("node1", idFunction.of("n1"), "node2", idFunction.of("n4"), "probability", .11815697780926959),
+                Map.of("node1", idFunction.of("n3"), "node2", idFunction.of("n0"), "probability", .002472623156634657),
+                Map.of("node1", idFunction.of("n2"), "node2", idFunction.of("n0"), "probability", 2.0547103309365156E-4)
             )
         );
     }

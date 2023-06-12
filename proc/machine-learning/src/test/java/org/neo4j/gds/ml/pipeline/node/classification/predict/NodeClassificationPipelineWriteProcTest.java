@@ -146,7 +146,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
             var predictedProbabilitiesPropertyCount = tx.getAllNodes().stream().filter(n -> n.hasProperty("probabilities")).count();
             assertThat(predictedProbabilitiesPropertyCount).isEqualTo(5L);
 
-            double[] probabilities = (double[]) tx.getNodeById(0).getProperty("probabilities");
+            double[] probabilities = (double[]) tx.getNodeById(idFunction.of("n1")).getProperty("probabilities");
             assertThat(probabilities).containsExactly(new double[] {0.012080865612605783, 0.9879191343873942}, Offset.offset(1e-6));
         }
     }
