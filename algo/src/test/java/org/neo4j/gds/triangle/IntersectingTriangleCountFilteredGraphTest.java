@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
 
-    @Neo4jGraph(offsetIds = false)
+    @Neo4jGraph
     static final String DB_CYPHER = "CREATE " +
                                     "  (a1:A)" +
                                     ", (a2:A)" +

@@ -22,6 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableMemoryInfo;
 
@@ -65,7 +66,7 @@ public final class CompositeAdjacencyList implements AdjacencyList {
         assert filteredIdMap instanceof NodeFilteredGraph;
         var adjacencyCursorWrapperFactory = (AdjacencyCursorWrapperFactory) cursor -> new NodeFilteredAdjacencyCursor(
             cursor,
-            filteredIdMap
+            ((FilteredIdMap) filteredIdMap)
         );
         var compositeAdjacencyCursorFactory = (CompositeAdjacencyCursorFactory) cursors -> {
             List<AdjacencyCursor> wrappedCursors = cursors
