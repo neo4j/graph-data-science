@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LocalTaskRegistryFactory implements TaskRegistryFactory {
@@ -45,5 +47,15 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
             });
 
         return new TaskRegistry(username, taskStore, jobId);
+    }
+
+    /**
+     * We use this in TaskRegistryFactoryServiceTest to see if the taskStore is shared.
+     * <p>
+     * This is a design smell, and we ought to change things, but I am loath to side questing right now.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

@@ -30,6 +30,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated rename to PerDatabaseTaskStore so as not to confuse everyone
+ */
+@Deprecated
 public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
 
     private final Map<String, Map<JobId, Task>> registeredTasks;

@@ -43,7 +43,7 @@ public class Task {
     private MemoryRange estimatedMemoryRangeInBytes = MemoryRange.empty();
     private int maxConcurrency = UNKNOWN_CONCURRENCY;
 
-    Task(String description, List<Task> subTasks) {
+    public Task(String description, List<Task> subTasks) {
         this.description = description;
         this.subTasks = subTasks;
         this.status = Status.PENDING;
