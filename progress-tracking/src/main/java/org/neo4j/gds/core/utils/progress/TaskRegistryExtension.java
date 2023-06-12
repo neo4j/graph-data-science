@@ -53,9 +53,9 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
     public Lifecycle newInstance(ExtensionContext context, TaskRegistryExtension.Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
+        String databaseName = dependencies.graphDatabaseService().databaseName();
         if (enabled) {
             // Use the centrally managed task stores
-            String databaseName = dependencies.graphDatabaseService().databaseName();
             GlobalTaskStore globalTaskStore = TaskStoreHolder.getTaskStore(databaseName);
 
             registry.registerComponent(TaskStore.class, ctx -> globalTaskStore, true);
@@ -69,7 +69,21 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
             context.dependencySatisfier().satisfyDependency(EmptyTaskRegistryFactory.INSTANCE);
             context.dependencySatisfier().satisfyDependency(EmptyTaskStore.INSTANCE);
         }
-        return new LifecycleAdapter();
+
+        /*
+         * Here we remember to cleanse the shared state.
+         * We need to retain this functionality when this extension goes away.
+         * Or perhaps this extension needs to persist because how else to get notified on the database removed event?
+         * It can still exist even if it stops registering components.
+         * We want the _access_ to go via centralised management in Procedure Facade.
+         * We shall solve this later.
+         */
+        return new LifecycleAdapter() {
+            @Override
+            public void shutdown() throws Exception {
+                TaskStoreHolder.purge(databaseName);
+            }
+        };
     }
 
     interface Dependencies {

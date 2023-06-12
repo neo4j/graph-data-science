@@ -65,4 +65,8 @@ public final class TaskStoreHolder {
 
         return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new GlobalTaskStore());
     }
+
+    static void purge(String databaseName) {
+        TASK_STORES.remove(databaseName);
+    }
 }
