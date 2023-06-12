@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
 
-    @Neo4jGraph
+    @Neo4jGraph(offsetIds = false)
     static final String DB_CYPHER = "CREATE " +
                                     "  (a1:A)" +
                                     ", (a2:A)" +
@@ -77,6 +77,7 @@ class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
             List.of(RelationshipType.of("R1"), RelationshipType.of("R2")),
             Optional.empty()
         );
+
         var config = ImmutableTriangleCountBaseConfig.builder().build();
         var triangleCount = IntersectingTriangleCount.create(graph, config, Pools.DEFAULT);
         var triangleCountResult = triangleCount.compute();
