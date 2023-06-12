@@ -38,7 +38,7 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "graph";
 
-    @Neo4jGraph
+    @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE (a:Node {name:'a'})\n" +
         "CREATE (b:Node {name:'b'})\n" +
