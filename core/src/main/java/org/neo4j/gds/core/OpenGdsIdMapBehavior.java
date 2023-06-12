@@ -50,11 +50,16 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
             return create(concurrency, maxOriginalId, nodeCount);
         }
         if (HighLimitIdMap.isHighLimitIdMap(idLowerCase)) {
+            // We do not pass in the highest original id to the nested id map builder
+            // since initializing a HighLimitIdMap is typically a situation where the
+            // external ids may exceed the storage capabilities of the nested id map.
+            // Instead, we _know_ that the highest original id for the nested id map
+            // will be nodeCount - 1 as this is what the HighLimitIdMap guarantees.
+            var maxIntermediateId = nodeCount.map(nc -> nc - 1);
             var innerBuilder = HighLimitIdMap.innerTypeId(idLowerCase)
-                .map(innerId -> create(innerId, concurrency, maxOriginalId, nodeCount))
-                .orElseGet(() -> create(concurrency, maxOriginalId, nodeCount));
-            return HighLimitIdMapBuilder.of(concurrency, innerBuilder);
-        }
+                .map(innerId -> create(innerId, concurrency, maxIntermediateId, nodeCount))
+                .orElseGet(() -> create(concurrency, maxIntermediateId, nodeCount));
+            return HighLimitIdMapBuilder.of(concurrency, innerBuilder);        }
         return create(concurrency, maxOriginalId, nodeCount);
     }
 
