@@ -22,14 +22,11 @@ package org.neo4j.gds.catalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+/**
+ * Database id is request scoped
+ */
 public class DatabaseIdService {
-    private final GraphDatabaseService databaseService;
-
-    public DatabaseIdService(GraphDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
-
-    public DatabaseId getDatabaseId() {
+    public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
         return DatabaseId.of(databaseService);
     }
 }
