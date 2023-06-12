@@ -31,11 +31,6 @@ public class ProcedureTransactionService {
     }
 
     public Transaction getProcedureTransaction() {
-        try {
-            return context.transaction();
-        } catch (ProcedureException e) {
-            // This should never happen and the API makes us write this scaffolding
-            throw new IllegalStateException("Unable to obtain kernel transaction", e);
-        }
+        throw new UnsupportedOperationException("TODO: do it in a version-agnostic manner");
     }
 }

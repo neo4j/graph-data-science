@@ -32,14 +32,6 @@ public class KernelTransactionService {
     }
 
     public KernelTransaction getKernelTransaction() {
-        try {
-            //noinspection resource
-            var itx = (InternalTransaction) context.transaction();
-
-            return itx.kernelTransaction();
-        } catch (ProcedureException e) {
-            // This should never happen and the API makes us write this scaffolding
-            throw new IllegalStateException("Unable to obtain kernel transaction", e);
-        }
+        throw new UnsupportedOperationException("TODO: do it in a version-agnostic manner");
     }
 }
