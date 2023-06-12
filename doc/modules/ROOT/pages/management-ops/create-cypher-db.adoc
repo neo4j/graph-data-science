@@ -12,7 +12,7 @@ NOTE: This feature requires Neo4j Enterprise Edition.
 Exploring projected graphs after loading them and potentially executing algorithms in mutate mode can be tricky in the Neo4j Graph Data Science library.
 A natural way to achieve this in the Neo4j database is to use Cypher queries.
 Cypher queries allow for example to get a hold of which properties are present on a node among many other things.
-Executing Cypher queries on a projected graph can be achieved by leveraging the `gds.alpha.cypherdb.create` procedure.
+Executing Cypher queries on a projected graph can be achieved by leveraging the `gds.cypherdb.create` procedure.
 This procedure will create a new impermanent database which you can switch to.
 That database will then use data from the projected graph as compared to the store files for usual Neo4j databases.
 
@@ -20,7 +20,7 @@ That database will then use data from the projected graph as compared to the sto
 [[create-cypher-db-limitations]]
 == Limitations
 
-Although it is possible to execute arbitrary Cypher queries on the database created by the `gds.alpha.cypherdb.create` procedure, not every aspect of Cypher is implemented yet.
+Although it is possible to execute arbitrary Cypher queries on the database created by the `gds.cypherdb.create` procedure, not every aspect of Cypher is implemented yet.
 Some known limitations are listed below:
 
 * Some writes will fail
@@ -35,7 +35,7 @@ Some known limitations are listed below:
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.cypherdb.create(
+CALL gds.cypherdb.create(
     dbName: String
     graphName: String
 )
@@ -110,7 +110,7 @@ With a named graph loaded into the Neo4j Graph Data Science library, we can proc
 .Create a new database `gdsdb` using our `social_network` graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.cypherdb.create(
+CALL gds.cypherdb.create(
   'gdsdb',
   'social_network'
 )
@@ -164,7 +164,7 @@ We can see that the returned ages correspond to the structure of the original gr
 As described above, in-memory GDS databases are impermanent and will be removed when the DBMS is shut down.
 If we need to drop the GDS database earlier, there are 2 ways to achieve this:
  1. Using an administrative cypher command against the system database (`DROP DATABASE <db-name>`)
- 2. Using the <<drop-cypher-db-procedure-syntax, `gds.alpha.cypherdb.drop`>> procedure
+ 2. Using the <<drop-cypher-db-procedure-syntax, `gds.cypherdb.drop`>> procedure
 
 [[drop-cypher-db-procedure-syntax]]
 === Drop database syntax
@@ -173,7 +173,7 @@ If we need to drop the GDS database earlier, there are 2 ways to achieve this:
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.cypherdb.drop(
+CALL gds.cypherdb.drop(
     dbName: String
 )
 YIELD
