@@ -95,7 +95,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<String> userName,
         Optional<String> graphName,
         Optional<GraphProjectFromGdlConfig> graphProjectConfig,
-        Optional<Long> highestNodeId,
         Optional<LongSupplier> nodeIdFunction,
         Optional<Capabilities> graphCapabilities,
         Optional<String> idMapBuilderType
@@ -116,7 +115,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .setDefaultEdgeLabel(RelationshipType.ALL_RELATIONSHIPS.name)
             .buildFromString(config.gdlGraph());
 
-        var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler, highestNodeId);
+        var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler);
 
         // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
         var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(WriteMode.LOCAL));
@@ -187,6 +186,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     private Nodes loadNodes() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
+            .nodeCount(gdlHandler.getVertices().size())
             .hasLabelInformation(true)
             .hasProperties(true)
             .deduplicateIds(false)
@@ -383,14 +383,14 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     private static final class GraphDimensionsGdlReader {
 
-        static GraphDimensions of(GDLHandler gdlHandler, Optional<Long> highestNodeId) {
+        static GraphDimensions of(GDLHandler gdlHandler) {
             var nodeCount = gdlHandler.getVertices().size();
-            var highestId = highestNodeId.orElseGet(() -> gdlHandler
+            var highestId = gdlHandler
                 .getVertices()
                 .stream()
                 .map(Vertex::getId)
                 .max(Long::compareTo)
-                .orElse((long) nodeCount));
+                .orElse((long) nodeCount - 1);
             var relCount = gdlHandler.getEdges().size();
 
             var nodePropertyDimensions = new HashMap<String, Optional<Integer>>();
