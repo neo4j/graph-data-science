@@ -90,7 +90,9 @@ public final class MutateResult extends StandardMutateResult {
                 return;
             }
 
-            histogram.recordValue(value);
+            //HISTOGRAM_PRECISION_DEFAULT hence numberOfSignificantValueDigits is 1E-5, so it can't separate 0 and 1E-5
+            //Therefore we can floor at 1E-6 and smaller probabilities between 0 and 1E-6 is unnecessary.
+            if (value >= 1E-6) histogram.recordValue(value); else histogram.recordValue(1E-6);
         }
 
         Builder withSamplingStats(Map<String, Object> samplingStats) {
