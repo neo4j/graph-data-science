@@ -1,0 +1,14 @@
+= Updating a graph
+
+* Nodes
+** Mutate node labels
+** Delete node labels
+** delete property
+* Relationships
+** Index inverse
+** ToUndirected
+** delete type
+
+* also deletion of properties and so on?
+
+* mention mutate modes in algorithms as another way

@@ -1,0 +1,140 @@
+[[graph-relationships-to-undirected]]
+= Convert directed relationships to undirected
+:description: This section details the converting directed relationships to undirected in the Neo4j Graph Data Science library.
+
+// FIXME add intro here
+
+== Syntax
+
+[.include-with-convert-to-undirected]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.toUndirected(
+    graphName: String,
+    configuration: Map
+)
+YIELD
+    inputRelationships: Integer,
+    relationshipsWritten: Integer,
+    mutateMillis: Integer,
+    postProcessingMillis: Integer,
+    preProcessingMillis: Integer,
+    computeMillis: Integer,
+    configuration: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                       | Optional | Description
+| graphName              | String                     | no       | The name under which the graph is stored in the catalog.
+| configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,6"]
+|===
+| Name                   | Type                  | Default | Optional | Description
+| relationshipType       | String                | n/a     | no       | The relationship type to make undirected.
+| mutateRelationshipType | String                | n/a     | no       | The relationship type to be added to the graph.
+| aggregation            | Map or String         | n/a     | no       | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`. Using map allows specifying aggregations per relationship property. By default we will use the existing aggregation used during the initial projection.
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,7"]
+|===
+| Name                   | Type      | Description
+| inputRelationships     | Integer   | The number of relationships that were processed.
+| relationshipsWritten   | Integer   | The number of relationships that were added.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+== Examples
+
+In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.
+
+image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bob:Person {name: 'Bob'}),
+  (carol:Person {name: 'Carol'}),
+  (dave:Person {name: 'Dave'}),
+  (eve:Person {name: 'Eve'}),
+  (guitar:Instrument {name: 'Guitar'}),
+  (synth:Instrument {name: 'Synthesizer'}),
+  (bongos:Instrument {name: 'Bongos'}),
+  (trumpet:Instrument {name: 'Trumpet'}),
+
+  (alice)-[:LIKES { score: 5 }]->(guitar),
+  (alice)-[:LIKES { score: 4 }]->(synth),
+  (alice)-[:LIKES { score: 3}]->(bongos),
+  (bob)-[:LIKES { score: 4 }]->(guitar),
+  (bob)-[:LIKES { score: 5 }]->(synth),
+  (carol)-[:LIKES { score: 2 }]->(bongos),
+  (dave)-[:LIKES { score: 3 }]->(guitar),
+  (dave)-[:LIKES { score: 1 }]->(synth),
+  (dave)-[:LIKES { score: 5 }]->(bongos)
+----
+
+.Project the graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'personsAndInstruments',
+  ['Person', 'Instrument'],         // <1>
+  {
+    LIKES: {
+      type: 'LIKES',                // <2>
+      properties: ['strength', 'score'] // <3>
+      }
+    }
+  }
+)
+----
+<1> Project node labels `Person` and `Instrument`.
+<2> Project relationship type `LIKES`.
+<3> Project property `score` of relationship type `LIKES` .
+
+
+[[catalog-graph-relationship-to-undirected-example]]
+=== Convert to undirected
+
+Some algorithms such as Triangle Count and Link Prediction expect undirected relationships. The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.
+
+[role=query-example]
+--
+.Convert relationships from directed to undirected:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.toUndirected(
+  'personsAndInstruments',                                          // <1>
+  {relationshipType: 'LIKES', mutateRelationshipType: 'INTERACTS'}  // <2>
+)
+YIELD
+  inputRelationships, relationshipsWritten
+----
+<1> The name of the projected graph.
+<2> A map that includes the relationship type to make undirected and the relationship type to be added to the graph.
+
+.Results
+[opts="header"]
+|===
+| inputRelationships      | relationshipsWritten
+| 9                       | 18
+|===
+--
+
+Here is an illustration of how the example graph looks in Neo4j after executing the example above.
+
+image::example-graphs/convert_relationships_graph.svg[Visualization of the example graph after converting the relationships to undirected,align="center"]
