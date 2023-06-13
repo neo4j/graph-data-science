@@ -45,6 +45,6 @@ public class TaskStoreService {
         if (!progressTrackingEnabled) return EmptyTaskStore.INSTANCE;
 
         return TaskStoreHolder.getTaskStore(databaseId.databaseName());
-        // return taskStores.computeIfAbsent(databaseId.databaseName(), __ -> new GlobalTaskStore());
+        // return taskStores.computeIfAbsent(databaseId.databaseName(), __ -> new PerDatabaseTaskStore());
     }
 }

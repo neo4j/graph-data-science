@@ -19,28 +19,15 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-/**
- * @deprecated rename to PerDatabaseTaskStore so as not to confuse everyone
- */
-@Deprecated
-public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
-
-    private final Map<String, Map<JobId, Task>> registeredTasks;
-
-    public GlobalTaskStore() {
-        this.registeredTasks = new ConcurrentHashMap<>();
-    }
+public class PerDatabaseTaskStore implements TaskStore {
+    private final Map<String, Map<JobId, Task>> registeredTasks = new ConcurrentHashMap<>();
 
     @Override
     public void store(String username, JobId jobId, Task task) {
@@ -90,12 +77,6 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
                 .map(task -> ImmutableUserTask.of(username, jobId, task));
         }
         return Optional.empty();
-    }
-
-    @Override
-    public TaskRegistryFactory apply(Context context) throws ProcedureException {
-        var username = Neo4jProxy.username(context.securityContext().subject());
-        return new LocalTaskRegistryFactory(username, this);
     }
 
     @Override

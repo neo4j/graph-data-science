@@ -51,7 +51,7 @@ public final class TaskStoreHolder {
      * @deprecated we eliminate this as soon as possible
      */
     @Deprecated
-    private static final Map<String, GlobalTaskStore> TASK_STORES = new ConcurrentHashMap<>();
+    private static final Map<String, TaskStore> TASK_STORES = new ConcurrentHashMap<>();
 
     private TaskStoreHolder() {}
 
@@ -60,10 +60,10 @@ public final class TaskStoreHolder {
      * Not using DatabaseId directly, because that would mead to some awful dependencies.
      * And we will eliminate this in due course.
      */
-    static GlobalTaskStore getTaskStore(String databaseName) {
+    static TaskStore getTaskStore(String databaseName) {
         String normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
 
-        return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new GlobalTaskStore());
+        return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseTaskStore());
     }
 
     static void purge(String databaseName) {

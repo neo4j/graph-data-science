@@ -50,7 +50,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
@@ -195,7 +195,7 @@ class GraphProjectProcTest extends BaseProcTest {
     @Test
     void testNativeProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
-            var taskStore = new GlobalTaskStore();
+            var taskStore = new PerDatabaseTaskStore();
             proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
 
             proc.project("myGraph", "*", "*", Map.of());
@@ -207,7 +207,7 @@ class GraphProjectProcTest extends BaseProcTest {
     @Test
     void testCypherProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
-            var taskStore = new GlobalTaskStore();
+            var taskStore = new PerDatabaseTaskStore();
             proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
 
             proc.projectCypher("myGraph", ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY, Map.of());

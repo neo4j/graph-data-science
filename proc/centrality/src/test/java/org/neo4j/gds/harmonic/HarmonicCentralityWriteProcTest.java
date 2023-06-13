@@ -28,7 +28,7 @@ import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -109,7 +109,7 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
     @Test
     void testProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityWriteProc.class, proc -> {
-            var taskStore = new GlobalTaskStore();
+            var taskStore = new PerDatabaseTaskStore();
 
             proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(
                 getUsername(),

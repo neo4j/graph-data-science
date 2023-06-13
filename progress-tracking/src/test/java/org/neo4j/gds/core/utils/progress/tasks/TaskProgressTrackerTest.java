@@ -25,7 +25,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -224,7 +224,7 @@ class TaskProgressTrackerTest {
     void shouldRegisterBaseTaskOnBaseTaskStart() {
         var task = Tasks.leaf("root");
 
-        var taskStore = new GlobalTaskStore();
+        var taskStore = new PerDatabaseTaskStore();
         var taskRegistry = new TaskRegistry("", taskStore);
         var progressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, jobId -> taskRegistry);
 

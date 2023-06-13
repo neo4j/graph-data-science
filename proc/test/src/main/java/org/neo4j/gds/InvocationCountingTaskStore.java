@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @TestOnly
-public class InvocationCountingTaskStore extends GlobalTaskStore {
+public class InvocationCountingTaskStore extends PerDatabaseTaskStore {
     public int registerTaskInvocations;
     public int removeTaskInvocations;
     public Set<JobId> seenJobIds = new HashSet<>();

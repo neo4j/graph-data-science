@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -46,7 +46,7 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
     private final List<Optional<Progress>> progressHistory = new ArrayList<>();
 
     public InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId) {
-        this(baseTask, userName, jobId, new GlobalTaskStore(), Neo4jProxy.testLog());
+        this(baseTask, userName, jobId, new PerDatabaseTaskStore(), Neo4jProxy.testLog());
     }
 
     private InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId, TaskStore taskStore, TestLog log) {

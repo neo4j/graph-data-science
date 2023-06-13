@@ -33,7 +33,7 @@ class LocalTaskRegistryFactoryTest {
 
     @BeforeEach
     void setup() {
-        this.taskStore = new GlobalTaskStore();
+        this.taskStore = new PerDatabaseTaskStore();
         this.taskRegistryFactory = new LocalTaskRegistryFactory("", taskStore);
     }
 

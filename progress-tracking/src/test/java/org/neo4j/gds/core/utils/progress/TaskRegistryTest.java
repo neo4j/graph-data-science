@@ -29,45 +29,45 @@ class TaskRegistryTest {
 
     @Test
     void shouldStoreIncomingTasks() {
-        var globalTaskStore = new GlobalTaskStore();
-        var taskRegistry1 = new TaskRegistry("", globalTaskStore);
+        var taskStore = new PerDatabaseTaskStore();
+        var taskRegistry1 = new TaskRegistry("", taskStore);
 
-        assertThat(globalTaskStore.isEmpty()).isTrue();
+        assertThat(taskStore.isEmpty()).isTrue();
 
         var task1 = Tasks.leaf("task1");
         taskRegistry1.registerTask(task1);
 
-        assertThat(globalTaskStore.query("").map(UserTask::task)).contains(task1);
-        assertThat(globalTaskStore.isEmpty()).isFalse();
+        assertThat(taskStore.query("").map(UserTask::task)).contains(task1);
+        assertThat(taskStore.isEmpty()).isFalse();
 
-        var taskRegistry2 = new TaskRegistry("", globalTaskStore);
+        var taskRegistry2 = new TaskRegistry("", taskStore);
         var task2 = Tasks.leaf("task2");
         taskRegistry2.registerTask(task2);
 
-        assertThat(globalTaskStore.query("").map(UserTask::task)).contains(task1, task2);
-        assertThat(globalTaskStore.isEmpty()).isFalse();
+        assertThat(taskStore.query("").map(UserTask::task)).contains(task1, task2);
+        assertThat(taskStore.isEmpty()).isFalse();
     }
 
     @Test
     void shouldRemoveStoredTasks() {
-        var globalTaskStore = new GlobalTaskStore();
-        var taskRegistry = new TaskRegistry("", globalTaskStore);
+        var taskStore = new PerDatabaseTaskStore();
+        var taskRegistry = new TaskRegistry("", taskStore);
 
         var task = Tasks.leaf("task");
         taskRegistry.registerTask(task);
 
-        assertThat(globalTaskStore.isEmpty()).isFalse();
+        assertThat(taskStore.isEmpty()).isFalse();
 
-        var jobId = globalTaskStore.query("").map(UserTask::jobId).iterator().next();
-        globalTaskStore.remove("", jobId);
+        var jobId = taskStore.query("").map(UserTask::jobId).iterator().next();
+        taskStore.remove("", jobId);
 
-        assertThat(globalTaskStore.isEmpty()).isTrue();
+        assertThat(taskStore.isEmpty()).isTrue();
     }
 
     @Test
     void shouldDetectAlreadyRegisteredTasks() {
-        var globalTaskStore = new GlobalTaskStore();
-        var taskRegistry = new TaskRegistry("", globalTaskStore);
+        var taskStore = new PerDatabaseTaskStore();
+        var taskRegistry = new TaskRegistry("", taskStore);
 
         var task = Tasks.leaf("task");
 

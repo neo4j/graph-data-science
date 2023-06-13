@@ -25,11 +25,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-class GlobalTaskStoreTest {
+class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldBeIdempotentOnRemove() {
-        var taskStore = new GlobalTaskStore();
+        var taskStore = new PerDatabaseTaskStore();
         var jobId = new JobId();
         taskStore.store("", jobId, Tasks.leaf("leaf"));
         taskStore.remove("", jobId);
@@ -38,14 +38,14 @@ class GlobalTaskStoreTest {
 
     @Test
     void shouldReturnEmptyResultWhenStoreIsEmpty() {
-        assertThat(new GlobalTaskStore().query(""))
+        assertThat(new PerDatabaseTaskStore().query(""))
             .isNotNull()
             .isEmpty();
     }
 
     @Test
     void shouldCountAcrossUsers() {
-        var taskStore = new GlobalTaskStore();
+        var taskStore = new PerDatabaseTaskStore();
         taskStore.store("a", new JobId(), Tasks.leaf("v"));
 
         assertThat(taskStore.taskCount()).isEqualTo(1);
@@ -61,7 +61,7 @@ class GlobalTaskStoreTest {
 
     @Test
     void shouldQueryByUser() {
-        var taskStore = new GlobalTaskStore();
+        var taskStore = new PerDatabaseTaskStore();
         taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
         taskStore.store("alice", new JobId("666"), Tasks.leaf("leaf"));
         taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
@@ -77,7 +77,7 @@ class GlobalTaskStoreTest {
 
     @Test
     void shouldQueryMultipleUsers() {
-        var taskStore = new GlobalTaskStore();
+        var taskStore = new PerDatabaseTaskStore();
         taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
         taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
 

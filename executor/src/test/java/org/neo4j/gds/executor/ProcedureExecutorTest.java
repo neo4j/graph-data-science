@@ -33,7 +33,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -140,7 +140,7 @@ class ProcedureExecutorTest {
             .build();
     }
 
-    private static class InvocationCountingTaskStore extends GlobalTaskStore {
+    private static class InvocationCountingTaskStore extends PerDatabaseTaskStore {
         int registerTaskInvocations;
         Set<JobId> seenJobIds = new HashSet<>();
 

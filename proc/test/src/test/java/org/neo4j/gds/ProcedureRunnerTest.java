@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.test.TestProc;
@@ -84,7 +84,7 @@ class ProcedureRunnerTest extends BaseTest {
             var username = Username.of("foo");
             TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
                 username.username(),
-                new GlobalTaskStore(),
+                new PerDatabaseTaskStore(),
                 jobId
             );
             ProcedureRunner.applyOnProcedure(

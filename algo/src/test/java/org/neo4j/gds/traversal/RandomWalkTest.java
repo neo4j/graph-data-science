@@ -36,7 +36,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -483,7 +483,7 @@ class RandomWalkTest {
 
             var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
             var log = Neo4jProxy.testLog();
-            var taskStore = new GlobalTaskStore();
+            var taskStore = new PerDatabaseTaskStore();
 
             var pt = new TestProgressTracker(
                 fact.progressTask(graph, config),
@@ -523,7 +523,7 @@ class RandomWalkTest {
         void shouldLeaveNoTasksBehind() {
             var config = ImmutableRandomWalkStreamConfig.builder().build();
             var factory = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
-            var taskStore = new GlobalTaskStore();
+            var taskStore = new PerDatabaseTaskStore();
             var progressTracker = new TaskProgressTracker(
                 factory.progressTask(
                     graph,
@@ -543,7 +543,7 @@ class RandomWalkTest {
             assertThat(taskStore.isEmpty()).isTrue();
         }
 
-        private void awaitEmptyTaskStore(GlobalTaskStore taskStore) {
+        private void awaitEmptyTaskStore(PerDatabaseTaskStore taskStore) {
             // there is a race condition between the thread consuming the result,
             // and the thread scheduled to end the last subtask
             long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestTaskStore extends GlobalTaskStore {
+public class TestTaskStore extends PerDatabaseTaskStore {
 
     private Map<JobId, String> tasks = new HashMap<>();
     private List<String> tasksSeen = new ArrayList<>();
