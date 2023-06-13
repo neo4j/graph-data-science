@@ -51,7 +51,7 @@ public final class UserLogStoreHolder {
      * @deprecated we eliminate this as soon as possible
      */
     @Deprecated
-    private static final Map<String, GlobalUserLogStore> USER_LOG_STORES = new ConcurrentHashMap<>();
+    private static final Map<String, UserLogStore> USER_LOG_STORES = new ConcurrentHashMap<>();
 
     private UserLogStoreHolder() {}
 
@@ -60,9 +60,9 @@ public final class UserLogStoreHolder {
      * Not using DatabaseId directly, because that would mead to some awful dependencies.
      * And we will eliminate this in due course.
      */
-    public static GlobalUserLogStore getUserLogStore(String databaseName) {
+    public static UserLogStore getUserLogStore(String databaseName) {
         String normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
 
-        return USER_LOG_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new GlobalUserLogStore());
+        return USER_LOG_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseUserLogStore());
     }
 }

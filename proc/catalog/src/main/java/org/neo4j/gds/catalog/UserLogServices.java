@@ -48,7 +48,7 @@ public class UserLogServices {
         String databaseName = databaseId.databaseName();
 
         return UserLogStoreHolder.getUserLogStore(databaseName);
-        // return stores.computeIfAbsent(databaseId, __ -> new GlobalUserLogStore());
+        // return stores.computeIfAbsent(databaseId, __ -> new PerDatabaseUserLogStore());
     }
 
     public UserLogRegistryFactory getUserLogRegistryFactory(DatabaseId databaseId, String username) {

@@ -37,7 +37,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.PerDatabaseUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -68,7 +68,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         ", (a)-[:REL2 { relProp1: 2.0, relProp2: 44.0}]->(a)" +
         ", (b)-[:REL2 { relProp1: 3.0, relProp2: 45.0}]->(b)";
 
-    GlobalUserLogStore userLogStore;
+    PerDatabaseUserLogStore userLogStore;
 
     @Inject
     IdFunction idFunction;
@@ -80,7 +80,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        this.userLogStore = new GlobalUserLogStore();
+        this.userLogStore = new PerDatabaseUserLogStore();
         builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
         builder.addExtension(new UserLogRegistryExtension(__ -> userLogStore));
     }

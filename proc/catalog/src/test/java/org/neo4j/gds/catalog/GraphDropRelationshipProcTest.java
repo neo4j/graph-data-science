@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.PerDatabaseUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -43,13 +43,13 @@ class GraphDropRelationshipProcTest extends BaseProcTest {
     private final String graphName = "g";
     private final Map<String, Object> params = Map.of("graphName", this.graphName);
 
-    GlobalUserLogStore userLogStore;
+    PerDatabaseUserLogStore userLogStore;
 
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        this.userLogStore = new GlobalUserLogStore();
+        this.userLogStore = new PerDatabaseUserLogStore();
         builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
         builder.addExtension(new UserLogRegistryExtension(__ -> userLogStore));
     }

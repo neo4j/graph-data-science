@@ -37,7 +37,7 @@ import java.util.function.Function;
 @ServiceProvider
 public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryExtension.Dependencies> {
 
-    private final Function<String, GlobalUserLogStore> userLogStoreSupplier;
+    private final Function<String, UserLogStore> userLogStoreSupplier;
 
     public UserLogRegistryExtension() {
         super(ExtensionType.DATABASE, "gds.warnings.registry");
@@ -45,7 +45,7 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
     }
 
     @TestOnly
-    public UserLogRegistryExtension(Function<String, GlobalUserLogStore> userLogStoreSupplier) {
+    public UserLogRegistryExtension(Function<String, UserLogStore> userLogStoreSupplier) {
         super(ExtensionType.DATABASE, "gds.warnings.registry");
         this.userLogStoreSupplier = userLogStoreSupplier;
     }
@@ -57,11 +57,12 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
         if (enabled) {
             // use the centrally managed user log stores
             String databaseName = dependencies.graphDatabaseService().databaseName();
-            var globalWarningStore = userLogStoreSupplier.apply(databaseName);
+            var userLogStore = userLogStoreSupplier.apply(databaseName);
+            var userLogRegistryFactoryProvider = new UserLogRegistryFactoryProvider(userLogStore);
 
-            registry.registerComponent(UserLogStore.class, ctx -> globalWarningStore, true);
-            registry.registerComponent(UserLogRegistryFactory.class, globalWarningStore, true);
-            context.dependencySatisfier().satisfyDependency(globalWarningStore);
+            registry.registerComponent(UserLogStore.class, ctx -> userLogStore, true);
+            registry.registerComponent(UserLogRegistryFactory.class, userLogRegistryFactoryProvider, true);
+            context.dependencySatisfier().satisfyDependency(userLogStore);
         } else {
             registry.registerComponent(UserLogRegistryFactory.class, ctx -> EmptyUserLogRegistryFactory.INSTANCE, true);
             registry.registerComponent(UserLogStore.class, ctx -> EmptyUserLogStore.INSTANCE, true);

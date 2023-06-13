@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
-import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,22 +32,21 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-/**
- * @deprecated Rename as these are per database only
- */
-@Deprecated
-public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
+public class PerDatabaseUserLogStore implements UserLogStore {
     public static final int MOST_RECENT = 100;
 
     private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
-    public GlobalUserLogStore() {
+    public PerDatabaseUserLogStore() {
         this.registeredMessages = new ConcurrentHashMap<>();
     }
 
     public Stream<UserLogEntry> query(String username) {
         if (registeredMessages.containsKey(username)) {
-            return registeredMessages.get(username).entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToUserLog);
+            return registeredMessages.get(username)
+                .entrySet()
+                .stream()
+                .flatMap(PerDatabaseUserLogStore::fromEntryToUserLog);
         }
         return Stream.empty();
     }
@@ -104,11 +99,4 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
             }
         }
     }
-
-    @Override
-    public UserLogRegistryFactory apply(Context context) throws ProcedureException {
-        var username = Neo4jProxy.username(context.securityContext().subject());
-        return new LocalUserLogRegistryFactory(username, this);
-    }
-
 }
