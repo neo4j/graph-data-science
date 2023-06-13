@@ -42,7 +42,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class SelectionStrategyTest {
 
     // override idOffset to work with previous randomSeed
-    @GdlGraph(idOffset = 0)
+    @GdlGraph
     private static final String DB_GDL =
         "(a)-->(b)" +
         "(a)-->(c)" +
@@ -96,9 +96,9 @@ class SelectionStrategyTest {
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
 
         Assertions.assertThat(LongStream.range(0, 3).map(__ -> selectionStrategy.next())).containsExactly(
+            graph.toMappedNodeId("k"),
             graph.toMappedNodeId("a"),
-            graph.toMappedNodeId("b"),
-            graph.toMappedNodeId("f")
+            graph.toMappedNodeId("b")
         );
     }
 

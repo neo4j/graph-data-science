@@ -66,15 +66,15 @@ class ModularityOptimizationWithoutOrientationTest {
         new String[]{"d", "f"}
     };
 
-    @GdlGraph(idOffset = 0)
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {seed1:  1,  seed2: 21})" +
+        "  (a:Node {seed1:  1,  seed2: 2121})" +
         ", (b:Node {seed1: 5})" +
-        ", (c:Node {seed1:  2,  seed2: 42})" +
-        ", (d:Node {seed1:  3,  seed2: 33})" +
-        ", (e:Node {seed1:  2,  seed2: 42})" +
-        ", (f:Node {seed1:  3,  seed2: 33})" +
+        ", (c:Node {seed1:  2,  seed2: 4242})" +
+        ", (d:Node {seed1:  3,  seed2: 3333})" +
+        ", (e:Node {seed1:  2,  seed2: 4242})" +
+        ", (f:Node {seed1:  3,  seed2: 3333})" +
 
         ", (a)-[:TYPE_OUT {weight: 0.01}]->(b)" +
         ", (a)-[:TYPE_OUT {weight: 5.0}]->(e)" +
@@ -145,8 +145,16 @@ class ModularityOptimizationWithoutOrientationTest {
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
         assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
-        assertTrue(actualCommunities[0] == 43 && actualCommunities[2] == 42 && actualCommunities[3] == 33);
-        assertTrue(pmo.ranIterations() <= 3);
+
+        assertThat(actualCommunities)
+            // this is a new color based on the largest seed value and the original id
+            .matches(communities -> communities[0] == 5580L)
+            .matches(communities -> communities[1] == 5580L)
+            // these are the seed communities
+            .matches(communities -> communities[2] == 4242)
+            .matches(communities -> communities[3] == 3333);
+
+        assertThat(pmo.ranIterations()).isLessThanOrEqualTo(3);
     }
 
     @Test
