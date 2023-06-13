@@ -492,7 +492,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.kcore.mutate",
         "gds.kcore.mutate.estimate",
         "gds.kcore.write",
-        "gds.kcore.write.estimate"
+        "gds.kcore.write.estimate",
+
+        "gds.version"
     );
 
     private static final List<String> FUNCTIONS = asList(
@@ -562,7 +564,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 407;
+        int expectedCount = 408;
         assertEquals(
             expectedCount,
             returnedRows,

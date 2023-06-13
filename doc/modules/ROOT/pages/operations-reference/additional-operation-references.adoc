@@ -6,6 +6,7 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                                     | Operation
+| GDS Version                                                     | `_gds.version_`
 | xref:installation/neo4j-server.adoc#neo4j-server-verify[List all operations in GDS]        | `_gds.list_`
 | xref:common-usage/logging.adoc#logging-progress-logging[List logged progress]              | `gds.beta.listProgress`
 | xref:common-usage/logging.adoc#logging-user-warnings[List warnings]              |       `gds.alpha.userLog`

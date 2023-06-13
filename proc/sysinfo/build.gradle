@@ -31,6 +31,8 @@ dependencies {
     testImplementation project(':edition-api')
     testImplementation project(':test-utils')
     testImplementation project(':test-graph-loaders')
+
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
 }
 
 // configure the keys that will be written to the info.properties file
