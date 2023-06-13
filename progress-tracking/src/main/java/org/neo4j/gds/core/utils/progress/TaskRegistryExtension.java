@@ -80,7 +80,7 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
          */
         return new LifecycleAdapter() {
             @Override
-            public void shutdown() throws Exception {
+            public void shutdown() {
                 TaskStoreHolder.purge(databaseName);
             }
         };
