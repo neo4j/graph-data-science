@@ -26,6 +26,8 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.function.Function;
 
+import static org.neo4j.gds.catalog.GraphCatalogConstants.EXISTS_DESCRIPTION;
+
 public class GraphExistsFunc {
     @SuppressWarnings("WeakerAccess")
     @Context
@@ -33,7 +35,7 @@ public class GraphExistsFunc {
 
     @SuppressWarnings("unused")
     @UserFunction("gds.graph.exists")
-    @Description(GraphCatalogConstants.DESCRIPTION)
+    @Description(EXISTS_DESCRIPTION)
     public boolean existsFunctionButBetter(@Name(value = "graphName") String graphName) {
         return facade.graphExists(graphName, Function.identity());
     }

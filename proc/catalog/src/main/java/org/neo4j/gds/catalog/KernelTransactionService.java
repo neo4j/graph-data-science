@@ -19,8 +19,17 @@
  */
 package org.neo4j.gds.catalog;
 
-final class GraphCatalogConstants {
-    static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.procedure.Context;
 
-    private GraphCatalogConstants() {}
+public class KernelTransactionService {
+    private final Context context;
+
+    public KernelTransactionService(Context context) {
+        this.context = context;
+    }
+
+    public KernelTransaction getKernelTransaction() {
+        throw new UnsupportedOperationException("TODO: do it in a version-agnostic manner");
+    }
 }

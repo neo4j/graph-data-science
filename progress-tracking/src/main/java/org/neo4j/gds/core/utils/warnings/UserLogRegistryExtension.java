@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -31,20 +32,20 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 @ServiceProvider
 public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryExtension.Dependencies> {
 
-    private final Supplier<GlobalUserLogStore> userLogStoreSupplier;
+    private final Function<String, GlobalUserLogStore> userLogStoreSupplier;
 
     public UserLogRegistryExtension() {
         super(ExtensionType.DATABASE, "gds.warnings.registry");
-        this.userLogStoreSupplier = GlobalUserLogStore::new;
+        this.userLogStoreSupplier = UserLogStoreHolder::getUserLogStore;
     }
 
     @TestOnly
-    public UserLogRegistryExtension(Supplier<GlobalUserLogStore> userLogStoreSupplier) {
+    public UserLogRegistryExtension(Function<String, GlobalUserLogStore> userLogStoreSupplier) {
         super(ExtensionType.DATABASE, "gds.warnings.registry");
         this.userLogStoreSupplier = userLogStoreSupplier;
     }
@@ -54,7 +55,10 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
-            var globalWarningStore = userLogStoreSupplier.get();
+            // use the centrally managed user log stores
+            String databaseName = dependencies.graphDatabaseService().databaseName();
+            var globalWarningStore = userLogStoreSupplier.apply(databaseName);
+
             registry.registerComponent(UserLogStore.class, ctx -> globalWarningStore, true);
             registry.registerComponent(UserLogRegistryFactory.class, globalWarningStore, true);
             context.dependencySatisfier().satisfyDependency(globalWarningStore);
@@ -74,5 +78,7 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
         LogService logService();
 
         GlobalProcedures globalProceduresRegistry();
+
+        GraphDatabaseService graphDatabaseService();
     }
 }

@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LocalTaskRegistryFactory implements TaskRegistryFactory {
@@ -45,5 +48,24 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
             });
 
         return new TaskRegistry(username, taskStore, jobId);
+    }
+
+    /**
+     * We use this in TaskRegistryFactoryServiceTest to see if the taskStore is shared.
+     * <p>
+     * This is a design smell, and we ought to change things, but I am loath to side questing right now.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    /**
+     * This is to make spotbugs happy.
+     * We only use these in tests btw, so I think it makes sense to use those Apache Commons tools
+     */
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

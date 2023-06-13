@@ -17,21 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.catalog;
 
-import java.util.List;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.api.procedure.Context;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public class ProcedureTransactionService {
+    private final Context context;
 
-final class TaskRegistryExtensionDisabledTest extends BaseTaskRegistryExtensionTest {
-
-    @Override
-    boolean featureEnabled() {
-        return false;
+    public ProcedureTransactionService(Context context) {
+        this.context = context;
     }
 
-    @Override
-    void assertResult(List<String> result) {
-        assertThat(result).isEmpty();
+    public Transaction getProcedureTransaction() {
+        throw new UnsupportedOperationException("TODO: do it in a version-agnostic manner");
     }
 }

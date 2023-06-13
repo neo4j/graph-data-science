@@ -22,7 +22,15 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.gds.core.utils.warnings.UserLogStore;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,19 +38,74 @@ import static org.mockito.Mockito.when;
 class GraphStoreCatalogProcedureFacadeTest {
     @Test
     void shouldStackOffNeo4jThings() {
-        var usernameService = mock(UsernameService.class);
         var databaseIdService = mock(DatabaseIdService.class);
+        var graphDatabaseService = mock(GraphDatabaseService.class);
+        var securityContext = mock(SecurityContext.class);
+        var usernameService = mock(UsernameService.class);
         var businessFacade = mock(GraphStoreCatalogBusinessFacade.class);
         var procedureFacade = new GraphStoreCatalogProcedureFacade(
-            usernameService,
             databaseIdService,
+            graphDatabaseService,
+            null,
+            null,
+            null,
+            securityContext,
+            null,
+            null,
+            usernameService,
             businessFacade
         );
 
-        when(usernameService.getUsername()).thenReturn("someUser");
-        when(databaseIdService.getDatabaseId()).thenReturn(DatabaseId.from("someDatabase"));
+        when(usernameService.getUsername(securityContext)).thenReturn("someUser");
+        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("someDatabase"));
         procedureFacade.graphExists("someGraph");
 
         verify(businessFacade).graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph");
+    }
+
+    /**
+     * This is a lot of dependency mocking, sure; but that is the nature of this facade, it interacts with Neo4j's
+     * integration points and distills domain concepts: database and user. It then uses those to interact with domain
+     * services, the user log in this case.
+     * <p>
+     * How many of these will we need to gain confidence?
+     * Might we engineer some reuse or commonality out so that we can test this once but have it apply across the board?
+     * Sure! That's just us engineering.
+     */
+    @Test
+    void shouldQueryUserLog() {
+        var databaseIdService = mock(DatabaseIdService.class);
+        var graphDatabaseService = mock(GraphDatabaseService.class);
+        var userLogServices = mock(UserLogServices.class);
+        var usernameService = mock(UsernameService.class);
+        var businessFacade = mock(GraphStoreCatalogBusinessFacade.class);
+        var securityContext = mock(SecurityContext.class);
+        var procedureFacade = new GraphStoreCatalogProcedureFacade(
+            databaseIdService,
+            graphDatabaseService,
+            null,
+            null,
+            null,
+            securityContext,
+            null,
+            userLogServices,
+            usernameService,
+            businessFacade
+        );
+
+        var databaseId = DatabaseId.from("some database");
+        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
+        var userLogStore = mock(UserLogStore.class);
+        when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);
+        when(usernameService.getUsername(securityContext)).thenReturn("some user");
+        var expectedWarnings = Stream.of(
+            new UserLogEntry(new LeafTask("lt", 42), "going once"),
+            new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
+            new UserLogEntry(new LeafTask("lt", 23), "gone!")
+        );
+        when(userLogStore.query("some user")).thenReturn(expectedWarnings);
+        var actualWarnings = procedureFacade.queryUserLog(null);
+
+        assertThat(actualWarnings).isSameAs(expectedWarnings);
     }
 }

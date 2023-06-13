@@ -26,6 +26,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogConstants.EXISTS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphExistsProc {
@@ -38,7 +39,7 @@ public class GraphExistsProc {
      */
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.exists", mode = READ)
-    @Description(GraphCatalogConstants.DESCRIPTION)
+    @Description(EXISTS_DESCRIPTION)
     public Stream<GraphExistsResult> existsBetter(@Name(value = "graphName") String graphName) {
         return facade.graphExists(graphName, b -> Stream.of(new GraphExistsResult(graphName, b)));
     }

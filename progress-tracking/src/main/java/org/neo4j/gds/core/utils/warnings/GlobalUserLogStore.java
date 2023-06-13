@@ -36,6 +36,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated Rename as these are per database only
+ */
+@Deprecated
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
     public static final int MOST_RECENT = 100;
 
@@ -108,5 +112,3 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
     }
 
 }
-
-

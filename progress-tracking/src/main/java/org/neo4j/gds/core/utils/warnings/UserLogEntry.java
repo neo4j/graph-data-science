@@ -31,7 +31,7 @@ public class UserLogEntry {
     public String message;
     public LocalTimeValue timeStarted;
 
-    UserLogEntry(Task task, String message) {
+    public UserLogEntry(Task task, String message) {
         this.taskName = task.description();
         this.message = message;
         this.timeStarted = LocalTimeValue.localTime(LocalTime.ofInstant(
@@ -49,6 +49,4 @@ public class UserLogEntry {
     }
 
     public LocalTimeValue getTimeStarted() {return timeStarted;}
-    
-
 }
