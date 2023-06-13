@@ -20,6 +20,7 @@ This configuration entry is necessary because the GDS library accesses low-level
 ----
 dbms.security.procedures.allowlist=gds.*
 ----
+You can find more information on allow listing in the link:https://neo4j.com/docs/operations-manual/current/security/securing-extensions/#allow-listing[Operations Manual].
 +
 
 5. Restart the Neo4j Server.
