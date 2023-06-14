@@ -19,9 +19,8 @@ You can create graphs from different data sources.
 
 == Graph data model
 
-// TODO better phrasing and maybe even just an image for illustration?
-A graph consists of nodes and relationships.
-The following describes the information that can be associated with nodes and relationships.
+// TODO maybe even just an image for illustration?
+The following describes the information that can be associated to the graphs nodes and relationships.
 
 
 === Nodes
@@ -30,7 +29,9 @@ The following describes the information that can be associated with nodes and re
 
 A node can have zero or more labels.
 Labels are represented as Strings.
+The label can be used to filter the graph on usage, for example, to only run an algorithm on a subset of the nodes by specifying the xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels] parameter.
 
+If an algorithm can distinguish between different relationship types, this is indicated by the xref:introduction.adoc#introduction-algorithms-heterogeneous-nodes[Heterogeneous relationships trait] in its documentation.
 
 [[node-properties]]
 ==== Node Properties
@@ -84,13 +85,19 @@ NOTE: The automatic conversion is computationally more expensive and should ther
 
 === Relationships
 
-// talk about
-** Multiple relationships between two nodes
-** Self relationships
+Relationships in GDS can be either directed or undirected.
+Also, we supported to have multiple relationships between two nodes as well as self loops.
+Whether you should create directed or undirected relationships depends on the semantics of the relationship as well as algorithm you want to run.
 
 ==== Type
 
 A relationship has a type, which is represented as a String.
+The type can be used to filter the graph on usage, for example, to only run an algorithm on a subset of the relationships by specifying the xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] parameter.
+If an algorithm can distinguish between different relationship types, this is indicated by the xref:introduction.adoc#introduction-algorithms-heterogeneous-rels[Heterogeneous relationships trait] in its documentation.
+
+==== Direction
+
+If an algorithm supports directed or undirected relationships can be seen by the xref:introduction.adoc#introduction-algorithms-undirected[Undirected trait] and xref:introduction.adoc#introduction-algorithms-directed[Directed trait] in its documentation.
 
 ==== Properties
 
@@ -98,9 +105,6 @@ The Neo4j Graph Data Science library does not support all property types that ar
 Specifically, GDS only supports numeric relationship properties, i.e., `Long`, `Double`.
 Note that `Long` will be converted to `Double` during the projection.
 
-
-==== Direction
-
-// tODO link to algorithm trait as well
+If an algorithm supports relationship properties can be seen by the xref:introduction.adoc#introduction-algorithms-weighted[Weighted relationships trait] in its documentation.
 
 
