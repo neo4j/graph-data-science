@@ -63,17 +63,6 @@ final class LocalClusteringCoefficientCompanion {
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient());
     }
 
-    static <CONFIG extends LocalClusteringCoefficientBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-                return List.of(
-                    new WarnOnGraphsWithParallelRelationships<>(log)
-                );
-            }
-        };
-    }
-
     abstract static class ResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
 
         double averageClusteringCoefficient = 0;
