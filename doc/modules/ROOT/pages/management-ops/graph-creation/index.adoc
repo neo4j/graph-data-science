@@ -1,12 +1,13 @@
 [[graph-creation]]
 = Graph Creation
-
 :page-aliases: management-ops/node-properties.adoc
 
 
 You can create graphs from different data sources.
 
 * From a Neo4j database by using either of
+// TODO explain why to use which
+
 ** xref:management-ops/graph-creation/graph-project.adoc[Native projection]
 ** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection]
 * From external sources via an xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
@@ -19,50 +20,53 @@ You can create graphs from different data sources.
 == Graph data model
 
 // TODO better phrasing and maybe even just an image for illustration?
-GDS supports a subset of the property graph data model.
-Specifically, GDS supports the following:
+A graph consists of nodes and relationships.
+The following describes the information that can be associated with nodes and relationships.
 
-* Nodes
-** Labels
-** Properties
-* Relationships
-** Type
-** Properties
-** Directed and Undirected relationships
-** Multiple relationships between two nodes
-** Self relationships
+
+=== Nodes
+
+==== Labels
+
+A node can have zero or more labels.
+Labels are represented as Strings.
 
 
 [[node-properties]]
-=== Node Properties
+==== Node Properties
 
 The Neo4j Graph Data Science Library is capable of augmenting nodes with additional properties.
 These properties can be loaded from the database when the graph is projected.
 Many algorithms can also persist their result as one or more node properties when they are run using the `mutate` mode.
 
 [[node-properties-supported]]
-==== Supported types
+===== Supported types
 
 The Neo4j Graph Data Science library does not support all property types that are supported by the Neo4j database.
 Every supported type also defines a fallback value, which is used to indicate that the value of this property is not set.
 
 The following table lists the supported property types, as well as their corresponding fallback values.
 
-* `Long` - `Long.MIN_VALUE`
-* `Double` - `NaN`
-* `Long Array` - `null`
-* `Float Array` - `null`
-* `Double Array` - `null`
+.Types
+[opts="header",cols="1,1,1,1"]
+|===
+| Java Type      | Cypher Type | Precision | Fallback value
+| Long      | Integer     | 64 bit signed | `Long.MIN_VALUE` footnote:min-value[Value of -2^63]
+| Double    | Float        | 64 bit signed | `Double.NaN`
+| List of Long | List of Integer | -   | `null`
+| List of Double | List of Float | -   | `null`
+| List of Float | -    | `null`
+|===
 
 
-==== Defining the type of a node property
+===== Defining the type of a node property
 
 When creating a graph projection that specifies a set of node properties, the type of these properties is automatically determined using the first property value that is read by the loader for any specified property.
 All integral numerical types are interpreted as `Long` values, all floating point values are interpreted as `Double` values.
-Array values are explicitly defined by the type of the values that the array contains, i.e. a conversion of, for example, an `Integer Array` into a `Long Array` is not supported.
-Arrays with mixed content types are not supported.
+List values are explicitly defined by the type of the values that the array contains, for example converting a `List of Integer` into a `List of Long` is not supported.
+Lists with mixed content types are not supported.
 
-==== Automatic type conversion
+===== Automatic type conversion
 
 Most algorithms that are capable of using node properties require a specific property type.
 In cases of a mismatch between the type of the provided property and the required type, the library will try to convert the property value into the required type.
@@ -78,10 +82,25 @@ The algorithm computation will fail if any of these conditions are not satisfied
 
 NOTE: The automatic conversion is computationally more expensive and should therefore be avoided in performance critical applications.
 
-=== Relationship properties
+=== Relationships
+
+// talk about
+** Multiple relationships between two nodes
+** Self relationships
+
+==== Type
+
+A relationship has a type, which is represented as a String.
+
+==== Properties
 
 The Neo4j Graph Data Science library does not support all property types that are supported by the Neo4j database.
 Specifically, GDS only supports numeric relationship properties, i.e., `Long`, `Double`.
 Note that `Long` will be converted to `Double` during the projection.
+
+
+==== Direction
+
+// tODO link to algorithm trait as well
 
 
