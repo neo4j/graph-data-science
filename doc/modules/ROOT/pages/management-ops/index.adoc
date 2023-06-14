@@ -2,24 +2,14 @@
 = Graph Management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 
-// TODO rewrite this page more - such as the source is not always Neo4j anymore (f.i. Arrow)
+// TODO is it okay to leave out Neo4j here
+A _graph_ in GDS can be seen as an in-memory object containing only analytically relevant, potentially aggregated, topological and property information.
+Graphs are stored using compressed data structures optimized for topology and property lookup operations.
 
+The graph catalog manages multiple graphs.
+A graph can be used many times in the analytical workflow by using its name as a reference.
 
-Graph algorithms run on a graph data model which is a _projection_ of the Neo4j property graph data model.
-A graph projection can be seen as a materialized view of the graph stored in a Neo4j database, containing only analytically relevant, potentially aggregated, topological and property information.
-Graph projections are stored entirely in-memory using compressed data structures optimized for topology and property lookup operations.
-
-The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
-Using its name, a graph projection can be used many times in the analytical workflow.
-
-After usage, named graphs can be removed from the catalog to free up main memory.
-This chapter details all available graph catalog operations.
-
-
-== Considerations
-
-
-=== Lifecycle
+After usage, graphs can be removed from the catalog to free up main memory.
 
 
 [NOTE]
@@ -29,31 +19,18 @@ When Neo4j is restarted, graphs stored in the catalog are lost.
 See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph projections.
 ====
 
+== Lifecycle
 
-=== Security
-
-Creating, using, listing, and dropping named graphs are management operations bound to a specific database user.
-Graphs projected by a different database user are not accessible at any time, except for administrator users.
-Read more about that in xref:management-ops/administration.adoc[].
-
-
-== Graph creation
+// TODO - reuse image from common usage but greying out the other components
 
 // TODO what to put here now? (we have a subsection) maybe a small image which shows the life-cycle could be good enough?
-In the beginning, you need to xref:management-ops/graph-creation/index.adoc[create a graph].
+To start with, you need to xref:management-ops/graph-creation/index.adoc[create a graph].
 
+You can then xref:management-ops/inspecting-the-graph-catalog.adoc[check the content] of the graph catalog.
+// TODO move to the general `inspect a graph section`
+Further, you can inspect xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph] a single graph in the catalog using Cypher.
 
-== Inspecting the graph catalog
-
-// TODO similar to above this feels not useful to have as a section
-
-The graphs stored in the catalog are described  xref:management-ops/inspecting-the-graph-catalog.adoc[here].
-
-
-// Move this to a new section of inspecting a graph
-Further, you can use xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph] to inspect the graph in the catalog using Cypher.
-
-== Modifying the graph catalog
+=== Modifying the graph catalog
 
 .Graph catalog update operations:
 [opts=header,cols="1m,1"]
@@ -64,7 +41,7 @@ Further, you can use xref:management-ops/create-cypher-db.adoc[Cypher on GDS gra
 |===
 
 
-== Exporting from the graph catalog
+=== Exporting from the graph catalog
 
 .Graph catalog export operations:
 [opts=header,cols="1m,1"]
@@ -82,7 +59,7 @@ Further, you can use xref:management-ops/create-cypher-db.adoc[Cypher on GDS gra
 |===
 
 
-== Removing from the graph catalog
+=== Removing from the graph catalog
 
 .Graph catalog removal operations:
 [opts=header,cols="1m,1"]
@@ -95,5 +72,6 @@ Further, you can use xref:management-ops/create-cypher-db.adoc[Cypher on GDS gra
 
 == Administration
 
-// TODO more text here?
-The GDS catalog offers xref:management-ops/administration.adoc[elevated access to administrator users].
+Creating, using, listing, and dropping named graphs are management operations bound to a specific database user.
+Graphs projected by a different database user are not accessible at any time, except for administrator users.
+Read more about that in xref:management-ops/administration.adoc[].
