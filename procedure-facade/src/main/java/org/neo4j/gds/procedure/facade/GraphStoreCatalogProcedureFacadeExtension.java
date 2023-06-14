@@ -32,12 +32,12 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
-import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 
 @SuppressWarnings("unused")
@@ -49,11 +49,14 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
 
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
-        // we shall replace this Neo4j Log with a GDS Log down the line
-        var log = Neo4jProxy.getUserLog(dependencies.logService(), getClass());
-        log.info("Building GDS application");
+        // We stack off the Neo4j's log and have our own
+        // In terms of migration, this is good enough. We do not need state management,
+        // and we can migrate in vertical chunks.
+        var neo4jUserLog = Neo4jProxy.getUserLog(dependencies.logService(), getClass());
+        Log gdsLog = new LogAdapter(neo4jUserLog);
+        gdsLog.info("Building GDS application");
 
-        setupProcedureFacade(dependencies, log);
+        setupProcedureFacade(dependencies, gdsLog);
 
         return new LifecycleAdapter();
     }

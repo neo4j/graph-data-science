@@ -34,7 +34,7 @@ import org.neo4j.gds.core.loading.PreconditionsService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 /**
  * So here we set up the entire application with all it's services.

@@ -24,7 +24,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -54,21 +54,6 @@ public class GraphStoreCatalogProcedureFacade {
     private final DatabaseIdService databaseIdService;
     private final GraphDatabaseService graphDatabaseService;
     private final KernelTransactionService kernelTransactionService;
-
-    /**
-     * OK finding:
-     * For graph project we use the Neo4j Log class directly. As in log.info stylee calls
-     * What we _can_ do is, resolve a log at the top (extension) using Neo4jProxy.getUserLog(logService, xxx);
-     * xxx is some marker for GDS
-     * We then pass that down and control the thing _without_ context injected anything
-     * that's step 1, step 2 is go and yank out the Neo4j Log entirely and replace it with a GDSLog with same api
-     * step 3 we can evolve that api as we see fit as long as it maps to Neo4j log for that integration
-     * UH THAT"S IT!!!!! we won;t use the Neo4j Log for Arrow innit!!!
-     * I am a master of software.
-     *
-     * @deprecated replace with Neo4j Log, then GDS Log
-     */
-    @Deprecated
     private final Log log;
     private final ProcedureTransactionService procedureTransactionService;
     private final SecurityContext securityContext;

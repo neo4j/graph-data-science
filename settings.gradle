@@ -100,6 +100,9 @@ project(':io-core').projectDir = file('io/core')
 include('licensing')
 project(':licensing').projectDir = file('licensing')
 
+include('logging')
+project(':logging').projectDir = file('logging')
+
 include('proc-machine-learning')
 project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 

@@ -22,5 +22,6 @@ dependencies {
     implementation project(':executor') // Preconditions
     implementation project(':neo4j-kernel-adapter') // Neo4jProxy
     implementation project(':proc-catalog') // this is where the (catalog) procedures facade lives
-    implementation project(':progress-tracking') // this is where progress tracking lives
+    implementation project(':progress-tracking')
+    implementation project(':logging')
 }
