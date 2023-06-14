@@ -28,13 +28,11 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
