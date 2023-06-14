@@ -1,7 +1,7 @@
 [[catalog-graph-project-cypher-legacy]]
 = Cypher projection (deprecated)
 :description: This section details projecting GDS graphs using legacy `Cypher` projections.
-:page-aliases: managments-ops/projections/graph-project-cypher.adoc, managments-ops/projections/graph-project-cypher-legacy.adoc
+:page-aliases: management-ops/projections/graph-project-cypher.adoc, management-ops/projections/graph-project-cypher-legacy.adoc
 
 [WARNING]
 --
