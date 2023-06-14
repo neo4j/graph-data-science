@@ -28,13 +28,11 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
@@ -61,17 +59,6 @@ final class LocalClusteringCoefficientCompanion {
 
         return procResultBuilder
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient());
-    }
-
-    static <CONFIG extends LocalClusteringCoefficientBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-                return List.of(
-                    new WarnOnGraphsWithParallelRelationships<>(log)
-                );
-            }
-        };
     }
 
     abstract static class ResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
