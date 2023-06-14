@@ -1,0 +1,135 @@
+= Adding node labels
+
+// FIXME add intro
+
+== Syntax
+
+[.include-with-mutate-node-label]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.nodeLabel.mutate(
+    graphName: String,
+    nodeLabel: String,
+    configuration: Map
+)
+YIELD
+    mutateMillis: Integer,
+    graphName: String,
+    nodeLabel: String,
+    nodeLabelsWritten: Integer,
+    nodeCount: Integer,
+    configuration: Map
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name           | Type                       | Optional | Description
+| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
+| nodeLabel      | String                     | no       | The node label to write back.
+| configuration  | Map                        | yes      | Additional parameters to configure writeNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default           | Description
+| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-project-subgraph.adoc[Projecting a subgraph].
+| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
+| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name              | Type                     | Description
+| mutateMillis      | Integer                  | Milliseconds for writing result data back to the in-memory graph.
+| nodeLabel         | String                   | The name of the label that was added to the in-memory graph.
+| nodeLabelsWritten | Integer                  | Number of node labels written.
+| graphName         | String                   | The name of a graph stored in the catalog.
+| nodeCount         | Integer                  | The total number of nodes in the graph.
+| configuration     | Map                      | The configuration used to run the procedure.
+|===
+======
+
+== Example
+
+In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20 }),
+  (hobbit:Book { name: 'The Hobbit', numberOfPages: 310 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (adam)-[:READ]->(hobbit)
+----
+
+.Project the small social network graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'socialGraph',
+  {
+    Person: {properties: "age"},
+    Book: {}
+  },
+  ['KNOWS', 'READ']
+)
+----
+
+.Compute the Degree Centrality in our social graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
+----
+
+
+To mutate the in-memory graph by adding a new node label for nodes with score higher than `0`, we use the following query:
+
+[role=query-example, group=mutate-label]
+--
+.Add the `Reader` node label to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.nodeLabel.mutate('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+YIELD graphName, nodeLabel, nodeLabelsWritten, nodeCount
+----
+
+.Results
+[opts="header"]
+|===
+| graphName     | nodeLabel | nodeLabelsWritten | nodeCount
+| "socialGraph" | "Reader"  | 2                 | 4
+|===
+--
+
+As we can see from the result there were two nodes that matched the specified filter and they received the node label `Reader`.
+We can inspect the result by streaming back the `score` property of the `Reader` node label, we can do that using the following query:
+
+[role=query-example, group=mutate-label]
+--
+.Stream the `score` property for `Reader` nodes:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score', ['Reader'])
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+|===
+--
+
+We can see that `Veselin` has not been labelled as a `Reader` because the `score` property for that node is `0`.

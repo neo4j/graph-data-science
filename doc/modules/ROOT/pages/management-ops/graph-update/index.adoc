@@ -5,7 +5,7 @@
 ** Delete node labels
 ** delete property
 * Relationships
-** Index inverse
+** Index inverse (not documented yet)
 ** ToUndirected
 ** delete type
 

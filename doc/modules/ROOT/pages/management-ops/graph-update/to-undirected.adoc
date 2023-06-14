@@ -56,9 +56,11 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 |===
 ======
 
-== Examples
+== Example
 
 In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.
+
+// FIXME simplify example
 
 image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
 
@@ -106,9 +108,6 @@ CALL gds.graph.project(
 <2> Project relationship type `LIKES`.
 <3> Project property `score` of relationship type `LIKES` .
 
-
-[[catalog-graph-relationship-to-undirected-example]]
-=== Convert to undirected
 
 Some algorithms such as Triangle Count and Link Prediction expect undirected relationships. The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.
 
