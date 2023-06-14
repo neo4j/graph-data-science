@@ -9,7 +9,7 @@ You can create graphs from different data sources.
 // TODO explain why to use which
 
 ** xref:management-ops/graph-creation/graph-project.adoc[Native projection]
-** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection]
+** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] for more complex projections
 * From external sources via an xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
 * From existing named graphs by either of
 ** xref:management-ops/graph-creation/graph-project-subgraph.adoc[Filtering]
