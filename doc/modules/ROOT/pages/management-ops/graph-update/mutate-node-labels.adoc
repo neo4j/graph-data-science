@@ -53,6 +53,7 @@ YIELD
 |===
 ======
 
+[[catalog-graph-mutate-node-label-example]]
 == Example
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.

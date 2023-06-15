@@ -1,0 +1,5 @@
+= Inspecting a single graph
+
+* stream modes
+* cypher on GDS
+* arrow operations?

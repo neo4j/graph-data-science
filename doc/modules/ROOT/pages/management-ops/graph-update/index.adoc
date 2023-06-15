@@ -1,5 +1,13 @@
 = Updating a graph
 
+// fIXME these parts were just copied
+The graphs in the Neo4j Graph Data Science Library support properties for nodes.
+We provide multiple operations to work with the stored node-properties in projected graphs.
+Node properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
+
+The Neo4j Graph Data Science Library provides multiple operations to work with relationships and their properties stored in a projected graphs.
+Relationship properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
+
 * Nodes
 ** Mutate node labels
 ** Delete node labels

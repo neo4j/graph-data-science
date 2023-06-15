@@ -56,6 +56,7 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 |===
 ======
 
+[[catalog-graph-relationship-to-undirected-example]]
 == Example
 
 In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.

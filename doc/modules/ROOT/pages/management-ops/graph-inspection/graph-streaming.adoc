@@ -1,26 +1,255 @@
-[[graph-catalog-relationship-ops]]
-= Relationship operations
-:description: This section details the operations available over relationships and relationship properties stored in projected graphs within the Neo4j Graph Data Science library.
+= Streaming the graph
+
+To inspect the graph you can use the following procedures to stream parts of the graph through Cypher.
+
+== Nodes
+
+To inspect stored values, the `gds.graph.nodeProperties.stream` procedure can be used.
+This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
+
+=== Syntax
+
+.Syntax descriptions of the different streaming options over nodes
+[.tabbed-example, caption=]
+====
+[.include-with-stream-single-property]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream(
+    graphName: String,
+    nodeProperties: String,
+    nodeLabels: String or List of Strings,
+    configuration: Map
+)
+YIELD
+    nodeId: Integer,
+    propertyValue: Integer or Float or List of Integer or List of Float
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name           | Type                       | Optional | Description
+| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
+| nodeProperties | String                     | no       | The node property in the graph to stream.
+| nodeLabels     | String or List of Strings  | yes      | The node labels to stream the node properties for graph.
+| configuration  | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default | Description
+| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name            | Type                                                 | Description
+|nodeId           | Integer                                              | The id of the node.
+.^|propertyValue    a|
+* Integer
+* Float
+* List of Integer
+* List of Float  .^| The stored property value.
+|===
+======
+
+[.include-with-stream]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperties.stream(
+    graphName: String,
+    nodeProperties: String or List of Strings,
+    nodeLabels: String or List of Strings,
+    configuration: Map
+)
+YIELD
+    nodeId: Integer,
+    nodeProperty: String,
+    propertyValue: Integer or Float or List of Integer or List of Float
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name           | Type                       | Optional | Description
+| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
+| nodeProperties | String or List of Strings  | no       | The node properties in the graph to stream.
+| nodeLabels     | String or List of Strings  | yes      | The node labels to stream the node properties for graph.
+| configuration  | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default | Description
+| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name            | Type                                                 | Description
+|nodeId           | Integer                                              | The id of the node.
+|nodeProperty     | String                                               | The name of the node property.
+.^|propertyValue    a|
+* Integer
+* Float
+* List of Integer
+* List of Float  .^| The stored property value.
+|===
+======
+====
+
+[[streaming-nodes-examples]]
+=== Examples
+
+In order to demonstrate the GDS capabilities of streaming node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20 }),
+  (hobbit:Book { name: 'The Hobbit', numberOfPages: 310 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (adam)-[:READ]->(hobbit)
+----
+
+.Project the small social network graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'socialGraph',
+  {
+    Person: {properties: "age"},
+    Book: {}
+  },
+  ['KNOWS', 'READ']
+)
+----
+
+.Compute the Degree Centrality in our social graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
+----
+
+We can stream node properties stored in a named in-memory graph back to the user.
+This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
+This is similar to what an algorithm `stream` execution mode does, but allows more fine-grained control over the operations.
 
 
-The Neo4j Graph Data Science Library provides multiple operations to work with relationships and their properties stored in a projected graphs.
-Relationship properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
+
+[[catalog-graph-stream-single-node-property-example]]
+==== Single property
+
+In the following, we stream the previously computed scores `score`.
+
+[role=query-example]
+--
+.Stream the `score` node property:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header"]
+|===
+| name         | score
+| "Florentin"  | 2.0
+| "Adam"       | 1.0
+| "Veselin"    | 0.0
+| "The Hobbit" | 0.0
+|===
+--
+
+NOTE: The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
+
+[[catalog-graph-stream-node-labels-example]]
+==== NodeLabels
+
+The procedure can be configured to stream just the properties for specific node labels.
+
+[role=query-example]
+--
+.Stream the `score` property for `Person` nodes:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score', ['Person'])
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+| "Veselin"   | 0.0
+|===
+--
+
+It is required, that all specified node labels have the node property.
+
+[[catalog-graph-stream-node-properties-example]]
+==== Multiple Properties
+
+We can also stream several properties at once.
+
+[role=query-example]
+--
+.Stream multiple node properties:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperties.stream('socialGraph', ['score', 'age'])
+YIELD nodeId, nodeProperty, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, nodeProperty, propertyValue
+ORDER BY name, nodeProperty
+----
+
+.Results
+[opts="header"]
+|===
+| name         | nodeProperty  | propertyValue
+| "Adam"       | "age"         | 18
+| "Adam"       | "score"       | 1.0
+| "Florentin"  | "age"         | 16
+| "Florentin"  | "score"       | 2.0
+| "Veselin"    | "age"         | 20
+| "Veselin"    | "score"       | 0.0
+|===
+--
+
+[NOTE]
+====
+When streaming multiple node properties, the name of each property is included in the result.
+This adds with some overhead, as each property name must be repeated for each node in the result, but is necessary in order to distinguish properties.
+====
+
+
+== Relationships
 
 To inspect the relationship topology only, the `gds.beta.graph.relationships.stream` procedure can be used.
 To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
-To persist relationship types in a Neo4j database, we can use `gds.graph.relationship.write`.
-Similar to streaming relationship topologies or properties, it is also possible to write back to Neo4j.
-This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
-By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
+=== Syntax
 
-We can also remove relationships from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally added relationship types.
-
-== Syntax
-
-.Syntax descriptions of the different operations over relationship types
+.Syntax descriptions of the different streaming options over relationships
 [.tabbed-example, caption=]
 ====
 
@@ -164,103 +393,10 @@ a|
 .^| The stored property value.
 |===
 ======
-
-[.include-with-write]
-======
-[source, cypher, role=noplay]
-----
-CALL gds.graph.relationship.write(
-    graphName: String,
-    relationshipType: String,
-    relationshipProperty: String,
-    configuration: Map
-)
-YIELD
-  writeMillis: Integer,
-  graphName: String,
-  relationshipType: String,
-  relationshipsWritten: Integer,
-  relationshipProperty: String,
-  propertiesWritten: Integer
-----
-
-.Parameters
-[opts="header",cols="1,3,1,5"]
-|===
-| Name                  | Type    | Optional | Description
-| graphName             | String  | no       | The name under which the graph is stored in the catalog.
-| relationshipType      | String  | no       | The relationship type in the graph to write back.
-| relationshipProperty  | String  | yes      | The relationship property to write back.
-| configuration         | Map     | yes      | Additional parameters to configure writeRelationship.
-|===
-
-.Configuration
-[opts="header",cols="1,1,1,7"]
-|===
-| Name                   | Type                  | Default           | Description
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`. Note, this procedure is always running single-threaded.
-| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the relationship properties. Note, this procedure is always running single-threaded.
-|===
-
-.Results
-[opts="header",cols="2,3,5"]
-|===
-| Name                  | Type                     | Description
-| writeMillis           | Integer                  | Milliseconds for writing result data back to Neo4j.
-| graphName             | String                   | The name of a graph stored in the catalog.
-| relationshipType      | String                   | The type of the relationship that was written.
-| relationshipsWritten  | Integer                  | Number relationships written.
-| relationshipProperty  | String                   | The name of the relationship property that was written.
-| propertiesWritten     | Integer                  | Number relationships properties written.
-|===
-======
-
-[.include-with-write-multiple-properties]
-======
-[source, cypher, role=noplay]
-----
-CALL gds.graph.relationshipProperties.write(
-    graphName: String,
-    relationshipType: String,
-    relationshipProperties: List of String,
-    configuration: Map
-)
-YIELD
-  writeMillis: Integer,
-  graphName: String,
-  relationshipType: String,
-  relationshipsWritten: Integer,
-  relationshipProperties: List of String,
-  propertiesWritten: Integer
-----
-
-.Parameters
-[opts="header",cols="1,3,1,5"]
-|===
-| Name                      | Type    | Optional | Description
-| graphName                 | String  | no       | The name under which the graph is stored in the catalog.
-| relationshipType          | String  | no       | The relationship type in the graph to write back.
-| relationshipProperties    | String  | yes      | The relationship properties to write back.
-| configuration             | Map     | yes      | Additional parameters to configure the procedure.
-|===
-
-
-.Results
-[opts="header",cols="2,3,5"]
-|===
-| Name                      | Type                     | Description
-| writeMillis               | Integer                  | Milliseconds for writing result data back to Neo4j.
-| graphName                 | String                   | The name of a graph stored in the catalog.
-| relationshipType          | String                   | The type of the relationship that was written.
-| relationshipsWritten      | Integer                  | Number relationships written.
-| relationshipProperties    | String                   | The name of the relationship properties that were written.
-| propertiesWritten         | Integer                  | Number relationships properties written.
-|===
-======
 ====
 
 
-== Examples
+=== Examples
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
@@ -329,9 +465,6 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 <1> Run NodeSimilarity in `mutate` mode on `personsAndInstruments` projected graph.
 <2> The algorithm will add relationships of type `SIMILAR` to the projected graph.
 <3> The algorithm will add relationship property `score` for each added relationship.
-
-
-=== Stream
 
 
 [[catalog-graph-stream-relationship-topology-example]]
@@ -621,160 +754,73 @@ ORDER BY source ASC, target ASC
 
 NOTE: The properties we want to stream must exist for each specified relationship type.
 
-[[catalog-graph-write-relationship-example]]
-=== Write
+// FIXME is this the right place? (streaming seems like the best place)
+[[utility-functions-catalog]]
+== Utility functions
 
-We can write relationships stored in a named in-memory graph back to Neo4j.
-This can be used to write algorithm results (for example from xref:algorithms/node-similarity.adoc[Node Similarity]) or relationships that have been aggregated during graph creation.
+Utility functions allow accessing specific nodes of in-memory graphs directly from a Cypher query.
 
-The relationships to write are specified by a relationship type.
+.Catalog Functions
+[opts=header,cols="1m,1"]
+|===
+| Name                  | Description
+| gds.util.nodeProperty | Allows accessing a node property stored in a named graph.
+|===
 
-NOTE: Relationships are always written using a single thread.
 
-==== Relationship type
+=== Syntax
+
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                                               | Description
+| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING, nodeLabel: STRING?) | Named graph in the catalog, Neo4j node id, node property key and optional node label present in the named-graph.
+|===
+
+If a node label is given, the property value for the corresponding projection and the given node is returned.
+If no label or `'*'` is given, the property value is retrieved and returned from an arbitrary projection that contains the given propertyKey.
+If the property value is missing for the given node, `null` is returned.
+
+
+=== Examples
+
+We use the `socialGraph` with the property `score` introduced xref:management-ops/graph-inspection/graph-streaming.adoc#streaming-nodes-examples[above].
 
 [role=query-example]
 --
-.Write relationships to Neo4j:
+.Access a property node property for Florentin:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.relationship.write(
-  'personsAndInstruments',        // <1>
-  'SIMILAR'                       // <2>
-)
-YIELD
-  graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
+MATCH (florentin:Person {name: 'Florentin'})
+RETURN
+  florentin.name AS name,
+  gds.util.nodeProperty('socialGraph', id(florentin), 'score') AS score
 ----
-<1> The name of the projected graph.
-<2> The relationship type we want to write back to the Neo4j database.
 
 .Results
-[opts="header"]
+[opts="header",cols="2"]
 |===
-| graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
-| "personsAndInstruments" | "SIMILAR"        | null                 | 10                   | 0
+| name        | score
+| "Florentin" | 2.0
 |===
 --
 
-By default, no relationship properties will be written, as it can be seen from the results, the `relationshipProperty` value is `null` and `propertiesWritten` are `0`.
-
-Here is an illustration of how the example graph looks in Neo4j after executing the example above.
-
-image::example-graphs/write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
-
-The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
-The relationships in this example are undirected because we used xref:algorithms/node-similarity.adoc[Node Similarity] to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
-
-
-==== Relationship type with property
-
-To write relationship properties, these have to be explicitly specified.
+We can also specifically return the `score` property from the `Person` projection in case other projections also have a `score` property as follows.
 
 [role=query-example]
 --
-.Write relationships and their properties to Neo4j:
+.Access a property node property from Person for Florentin:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.relationship.write(
-  'personsAndInstruments',          // <1>
-  'SIMILAR',                        // <2>
-  'score'                           // <3>
-)
-YIELD
-  graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
+MATCH (florentin:Person {name: 'Florentin'})
+RETURN
+  florentin.name AS name,
+  gds.util.nodeProperty('socialGraph', id(florentin), 'score', 'Person') AS score
 ----
-<1> The name of the projected graph.
-<2> The relationship type we want to write back to the Neo4j database.
-<3> The property name of the relationship we want to write back to the Neo4j database.
 
 .Results
-[opts="header"]
+[opts="header",cols="2"]
 |===
-| graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
-| "personsAndInstruments" | "SIMILAR"        | "score"              | 10                   | 10
-|===
---
-
-
-==== Relationship type with multiple properties
-
-In order to demonstrate writing relationships with multiple properties back to Neo4j we will create a small graph in the database first.
-
-image::example-graphs/write-relationship-properties.svg[Visualization of the example graph,align="center"]
-
-
-.The following Cypher statement will create the graph for this example in the Neo4j database:
-[source, cypher, role=noplay setup-query]
-----
-CREATE
-  (alice:Buyer {name: 'Alice'}),
-  (instrumentSeller:Seller {name: 'Instrument Seller'}),
-  (bob:Buyer {name: 'Bob'}),
-  (carol:Buyer {name: 'Carol'}),
-  (alice)-[:PAYS { amount: 1.0}]->(instrumentSeller),
-  (alice)-[:PAYS { amount: 2.0}]->(instrumentSeller),
-  (alice)-[:PAYS { amount: 3.0}]->(instrumentSeller),
-  (alice)-[:PAYS { amount: 4.0}]->(instrumentSeller),
-  (alice)-[:PAYS { amount: 5.0}]->(instrumentSeller),
-  (alice)-[:PAYS { amount: 6.0}]->(instrumentSeller),
-
-  (bob)-[:PAYS { amount: 3.0}]->(instrumentSeller),
-  (bob)-[:PAYS { amount: 4.0}]->(instrumentSeller),
-  (carol)-[:PAYS { amount: 5.0}]->(bob),
-  (carol)-[:PAYS { amount: 6.0}]->(bob)
-----
-
-.Project the graph:
-[source, cypher, role=noplay graph-project-query]
-----
-CALL gds.graph.project(
-  'aggregatedGraph',
-  ['Buyer', 'Seller'],                                                          // <1>
-  {
-    PAID: {                                                                     // <2>
-      type: 'PAYS',                                                             // <3>
-      properties: {
-        totalAmount: { property: 'amount', aggregation: 'SUM' },                // <4>
-        numberOfPayments: { property: 'amount', aggregation: 'COUNT' }          // <5>
-      }
-    }
-  }
-)
-----
-<1> Project node labels `Buyer` and `Seller`.
-<2> Project relationship type `PAID` to the in-memory graph.
-<3> Use relationship type `PAYS` from the Neo4j database graph.
-<4> Project property `totalAmount` of relationship type `PAYS` using `SUM` aggregation.
-<5> Project property `numberOfPayments` of relationship type `PAYS` using `COUNT` aggregation.
-
-As we can see the Neo4j graph contains some parallel relationships.
-We use GDS projection to condense these into single relationships between the nodes.
-In this example we want to track how many times someone paid someone and what is the total amount of all payments.
-
-To write relationship properties, these have to be explicitly specified.
-
-[role=query-example]
---
-.Write relationships and their properties to Neo4j:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.relationshipProperties.write(
-  'aggregatedGraph',                    // <1>
-  'PAID',                               // <2>
-  ['totalAmount', 'numberOfPayments'],  // <3>
-  {}
-)
-YIELD
-  graphName, relationshipType, relationshipProperties, relationshipsWritten, propertiesWritten
-----
-<1> The name of the projected graph.
-<2> The relationship type we want to write back to the Neo4j database.
-<3> The property names of the relationship we want to write back to the Neo4j database.
-
-.Results
-[opts="header"]
-|===
-| graphName          | relationshipType | relationshipProperties              | relationshipsWritten | propertiesWritten
-| "aggregatedGraph"  | "PAID"           | [totalAmount, numberOfPayments]     | 3                    | 6
+| name        | score
+| "Florentin" | 2.0
 |===
 --

@@ -1,7 +1,13 @@
 = Dropping parts of the graph
-
+// fIXME move to seperate section
 // TODO tabbed or have different sections?
 * reasons - freeing up memory, removing mutated algorithms results
+
+We can also remove relationships from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally added relationship types.
+
+We can also remove node properties from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally added node properties.
 
 
 == Syntax

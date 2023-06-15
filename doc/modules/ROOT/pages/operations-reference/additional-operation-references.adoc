@@ -21,13 +21,13 @@
 | `gds.util.infinity` label:function[Function]
 | `gds.util.isFinite` label:function[Function]
 | `gds.util.isInfinite` label:function[Function]
-| xref:graph-catalog-node-ops.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `gds.util.nodeProperty` label:function[Function]
+| xref:management-ops/graph-inspection/graph-streaming.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `gds.util.nodeProperty` label:function[Function]
 | xref:alpha-algorithms/one-hot-encoding.adoc[One Hot Encoding] | `gds.alpha.ml.oneHotEncoding` label:function[Function]
 | xref:common-usage/debug-sysinfo.adoc[Status of the system]                                   | `gds.debug.sysInfo` label:procedure[Procedure]
 | xref:installation/configure-apache-arrow-server.adoc[Monitoring]                              | `gds.debug.arrow` label:procedure[Procedure]
 | xref:management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.ephemeral.database.create` label:procedure[Procedure]
-| xref:management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb` label:procedure[Procedure] (deprecated)
-| xref:management-ops/create-cypher-db.adoc#drop-ephemeral-db[Drop an impermanent database backed by a projected graph] | `gds.ephemeral.database.drop` label:procedure[Procedure]
+| xref:management-ops/graph-inspection/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb` label:procedure[Procedure] (deprecated)
+| xref:management-ops/graph-inspection/create-cypher-db.adoc#drop-ephemeral-db[Drop an impermanent database backed by a projected graph] | `gds.ephemeral.database.drop` label:procedure[Procedure]
 | xref:management-ops/create-cypher-db.adoc#drop-ephemeral-db[Drop an impermanent database backed by a projected graph] | `gds.alpha.drop.cypherdb`  label:procedure[Procedure](deprecated)
 | xref:common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor` label:procedure[Procedure]
 | xref:management-ops/backup-restore.adoc[Back-up graphs and models to disk]             | `gds.alpha.backup` label:procedure[Procedure]
