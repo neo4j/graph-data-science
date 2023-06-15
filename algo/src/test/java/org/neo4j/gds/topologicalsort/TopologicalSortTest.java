@@ -22,6 +22,7 @@ package org.neo4j.gds.topologicalsort;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -69,6 +70,17 @@ class TopologicalSortTest {
         assertEquals(0, second);
         assertEquals(2, third);
         assertEquals(1, fourth);
+
+        HugeAtomicLongArray longestPaths = result.longestPathDistances();
+        long firstLongestPathDistance = longestPaths.get(0);
+        long secondLongestPathDistance = longestPaths.get(1);
+        long thirdLongestPathDistance = longestPaths.get(2);
+        long fourthLongestPathDistance = longestPaths.get(3);
+
+        assertEquals(1, firstLongestPathDistance);
+        assertEquals(3, secondLongestPathDistance);
+        assertEquals(2, thirdLongestPathDistance);
+        assertEquals(0, fourthLongestPathDistance);
     }
 
     @GdlGraph(graphNamePrefix = "allCycle")

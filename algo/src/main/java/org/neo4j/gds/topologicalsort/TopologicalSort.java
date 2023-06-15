@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
@@ -45,6 +46,8 @@ import java.util.concurrent.ForkJoinTask;
  *  (A)-->(B)<-->(C)-->(D)
  * Only A will be returned by the topological sort because it is the only node that is not part of a cycle or reachable
  * from a cycle.
+ *
+ * This algorithm is also capable of calculating the longest path for each node (unless it is ignored during sorting).
  */
 public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     // Contains the sorted nodes, which is the array we iterate on during the run
@@ -55,6 +58,8 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final long nodeCount;
     private final int concurrency;
 
+    // Saves the maximal distance from a source node, which is the longest path in DAG
+    private final Optional<HugeAtomicLongArray> longestPathDistances;
 
     protected TopologicalSort(
         Graph graph,
@@ -65,8 +70,9 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = config.concurrency();
-        this.result = new TopologicalSortResult(nodeCount);
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(config.concurrency()));
+        this.longestPathDistances = Optional.of(HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(config.concurrency())));
+        this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
     }
 
     @Override
@@ -104,7 +110,13 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 result.addNode(nodeId);
-                tasks.add(new TraversalTask(null, nodeId, graph.concurrentCopy(), result, inDegrees));
+                tasks.add(new TraversalTask(null,
+                    nodeId,
+                    graph.concurrentCopy(),
+                    result,
+                    inDegrees,
+                    longestPathDistances.get()
+                ));
             }
         });
 
@@ -122,18 +134,24 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         private final Graph graph;
         private final TopologicalSortResult result;
         private final HugeAtomicLongArray inDegrees;
+        private final HugeAtomicLongArray longestPathDistances;
 
-        TraversalTask(@Nullable TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees) {
+        TraversalTask(@Nullable TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees,
+            HugeAtomicLongArray longestPathDistances
+        ) {
             super(parent);
             this.sourceId = sourceId;
             this.graph = graph;
             this.result = result;
             this.inDegrees = inDegrees;
+            this.longestPathDistances = longestPathDistances;
         }
 
         @Override
         public void compute() {
             graph.forEachRelationship(sourceId, (source, target) -> {
+                longestPathTraverse(source, target);
+
                 long prevDegree = inDegrees.getAndAdd(target, -1);
                 // if the previous degree was 1, this node is now a source
                 if (prevDegree == 1) {
@@ -144,7 +162,8 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                         target,
                         graph.concurrentCopy(),
                         result,
-                        inDegrees
+                        inDegrees,
+                        longestPathDistances
                     );
                     traversalTask.fork();
                 }
@@ -152,6 +171,20 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             });
 
             propagateCompletion();
+        }
+
+        void longestPathTraverse(long source, long target) {
+            var longestPaths = longestPathDistances;
+            // the source distance will never change anymore, but the target distance might
+            var potentialDistance  = longestPaths.get(source) + 1;
+            var currentTargetDistance = longestPaths.get(target);
+            while(potentialDistance > currentTargetDistance) {
+                var witnessValue = longestPaths.compareAndExchange(target, currentTargetDistance, potentialDistance);
+                if(currentTargetDistance == witnessValue) {
+                    break;
+                }
+                currentTargetDistance = witnessValue;
+            }
         }
     }
 }
