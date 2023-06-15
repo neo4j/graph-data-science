@@ -200,7 +200,7 @@ class ShortestPathYensStreamProcTest extends BaseProcTest {
             assertCypherResult(query, expected);
         });
     }
-
+    
     @AfterEach
     void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();

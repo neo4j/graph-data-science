@@ -22,6 +22,7 @@ package org.neo4j.gds.paths;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,6 +55,33 @@ class ShortestPathConfigTest {
         assertThat(config.sourceNode()).isEqualTo(42L);
         assertThat(config.targetNode()).isEqualTo(1337L);
     }
+
+    @Test
+    void shouldNotAllowNegativeSourceNode() {
+
+        var config = ShortestPathYensStreamConfigImpl.builder()
+            .k(1)
+            .sourceNode(-1337)
+            .targetNode(0);
+
+        assertThatThrownBy(() -> config.build())
+            .hasMessageContaining("Negative node ids are not supported for the field `sourceNode`");
+
+    }
+
+    @Test
+    void shouldNotAllowNegativeTargetNode() {
+
+        var config = ShortestPathYensStreamConfigImpl.builder()
+            .k(1)
+            .sourceNode(0)
+            .targetNode(-1337);
+
+        assertThatThrownBy(() -> config.build())
+            .hasMessageContaining("Negative node ids are not supported for the field `targetNode`");
+
+    }
+
 
     @Test
     void shouldThrowErrorOnUnsupportedType() {
