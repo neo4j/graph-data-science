@@ -27,7 +27,7 @@ It can be applied to heterogenous graphs, however the algorithm will not calcula
 
 For more information on this algorithm, see:
 
-* http://leonidzhukov.net/hse/2014/socialnetworks/papers/freeman79-centrality.pdf[Linton C. Freeman: Centrality in Social Networks Conceptual Clarification, 1979.^]
+* https://www.cin.ufpe.br/%7Erbcp/taia/Freeman1979-centrality.pdf[Linton C. Freeman: Centrality in Social Networks Conceptual Clarification, 1979.^]
 
 
 [[algorithms-degree-centrality-usecase]]
