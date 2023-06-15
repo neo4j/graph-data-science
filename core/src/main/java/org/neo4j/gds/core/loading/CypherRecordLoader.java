@@ -62,7 +62,7 @@ abstract class CypherRecordLoader<R> {
     final GraphLoaderContext loadingContext;
 
     private final long recordCount;
-    private final String loadQuery;
+    protected final String loadQuery;
     private final QueryExecutionEngine executionEngine;
     private final TransactionalContextFactory contextFactory;
 

@@ -23,8 +23,16 @@ import org.neo4j.graphdb.QueryStatistics;
 import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.values.AnyValue;
 
+import java.util.Optional;
+
 class ResultCountingSubscriber implements QuerySubscriber {
     private long rows = 0;
+    private Optional<Throwable> error = Optional.empty();
+
+    Optional<Throwable> error()
+    {
+        return error;
+    }
 
     public long rows() {
         return rows;
@@ -53,7 +61,7 @@ class ResultCountingSubscriber implements QuerySubscriber {
 
     @Override
     public void onError(Throwable throwable) {
-
+        this.error = Optional.of(throwable);
     }
 
     @Override

@@ -21,8 +21,10 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
+import java.util.Locale;
 import java.util.Set;
 
 class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
@@ -45,6 +47,20 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
         var subscriber = new ResultCountingSubscriber();
         CypherLoadingUtils.consume(runLoadingQuery(tx, subscriber));
+
+        if (subscriber.error().isPresent()) {
+            Throwable cause = subscriber.error().get();
+            if (cause instanceof AuthorizationViolationException) {
+                throw new IllegalArgumentException(String.format(
+                    Locale.US,
+                    "Query must be read only. Query: [%s]",
+                    this.loadQuery
+                ));
+            }
+
+            throw new RuntimeException(cause);
+        }
+
         return new BatchLoadResult(subscriber.rows(), -1L);
     }
 
