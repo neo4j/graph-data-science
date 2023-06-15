@@ -17,27 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.doc;
+
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.undirected.ToUndirectedProc;
 
 import java.util.List;
 
-class GraphCatalogRelationshipOperationsSyntaxTest extends SyntaxTestBase {
+final class ToUndirectedDocTest extends SingleFileDocTestBase {
 
     @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
+    protected List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
-            SyntaxModeMeta.of(SyntaxMode.STREAM_TOPOLOGY),
-            SyntaxModeMeta.of(SyntaxMode.STREAM_MULTIPLE_PROPERTIES),
-            SyntaxModeMeta.of(SyntaxMode.CONVERT_TO_UNDIRECTED),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE_RELATIONSHIP_PROPERTIES),
-            SyntaxModeMeta.of(SyntaxMode.DELETE_RELATIONSHIPS)
+            GraphProjectProc.class,
+            ToUndirectedProc.class
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/graph-catalog-relationship-ops.adoc";
+        return "pages/management-ops/graph-update/to-undirected.adoc";
     }
+
 }

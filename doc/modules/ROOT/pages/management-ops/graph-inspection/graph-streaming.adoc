@@ -111,7 +111,7 @@ YIELD
 In order to demonstrate the GDS capabilities of streaming node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query]
+[source, cypher, role=noplay setup-query, group=nodes]
 ----
 CREATE
   (florentin:Person { name: 'Florentin', age: 16 }),
@@ -124,7 +124,7 @@ CREATE
 ----
 
 .Project the small social network graph:
-[source, cypher, role=noplay graph-project-query]
+[source, cypher, role=noplay graph-project-query, group=nodes]
 ----
 CALL gds.graph.project(
   'socialGraph',
@@ -137,7 +137,7 @@ CALL gds.graph.project(
 ----
 
 .Compute the Degree Centrality in our social graph:
-[source, cypher, role=noplay graph-project-query]
+[source, cypher, role=noplay graph-project-query, group=nodes]
 ----
 CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
 ----
@@ -153,7 +153,7 @@ This is similar to what an algorithm `stream` execution mode does, but allows mo
 
 In the following, we stream the previously computed scores `score`.
 
-[role=query-example]
+[role=query-example, group=nodes]
 --
 .Stream the `score` node property:
 [source, cypher, role=noplay]
@@ -182,7 +182,7 @@ NOTE: The above example requires all given properties to be present on at least 
 
 The procedure can be configured to stream just the properties for specific node labels.
 
-[role=query-example]
+[role=query-example, group=nodes]
 --
 .Stream the `score` property for `Person` nodes:
 [source, cypher, role=noplay]
@@ -210,7 +210,7 @@ It is required, that all specified node labels have the node property.
 
 We can also stream several properties at once.
 
-[role=query-example]
+[role=query-example, group=nodes]
 --
 .Stream multiple node properties:
 [source, cypher, role=noplay]
@@ -403,7 +403,7 @@ In order to demonstrate the GDS capabilities over node properties, we are going 
 image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query]
+[source, cypher, role=noplay setup-query, group=rels]
 ----
 CREATE
   (alice:Person {name: 'Alice'}),
@@ -428,7 +428,7 @@ CREATE
 ----
 
 .Project the graph:
-[source, cypher, role=noplay graph-project-query]
+[source, cypher, role=noplay graph-project-query, group=rels]
 ----
 CALL gds.graph.project(
   'personsAndInstruments',
@@ -473,10 +473,10 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 The most basic case for streaming relationship information from a named graph is streaming its topology.
 In this example below we stream relationship topology for all relationship types, represented by source, target and relationship type.
 
-[role=query-example]
+[role=query-example, group=rels]
 --
 .Stream all relationships:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay ]
 ----
 CALL gds.beta.graph.relationships.stream(
   'personsAndInstruments'                  // <1>
@@ -519,7 +519,7 @@ As we can see from the results, we get two relationship types (`SIMILAR` and `LI
 We can further on filter the relationship types we want to stream.
 This can be achieved by passing a second argument to the procedure as demonstrated in the next example.
 
-[role=query-example]
+[role=query-example, group=rels]
 --
 .Stream a single relationship for specific relationship type:
 [source, cypher, role=noplay]
@@ -561,7 +561,7 @@ ORDER BY source ASC, target ASC
 The most basic case for streaming relationship properties from a named graph is a single property.
 In the example below we stream the relationship property `score`.
 
-[role=query-example]
+[role=query-example, group=rels]
 --
 .Stream a single relationship property:
 [source, cypher, role=noplay]
@@ -611,7 +611,7 @@ We can further on filter the relationship types we want to stream, this is demon
 [role=query-example]
 --
 .Stream a single relationship property for specific relationship type:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay, group=rels]
 ----
 CALL gds.graph.relationshipProperty.stream(
   'personsAndInstruments',                  // <1>
@@ -650,7 +650,7 @@ ORDER BY source ASC, target ASC
 
 It is also possible to stream multiple relationship properties.
 
-[role=query-example]
+[role=query-example, group=rels]
 --
 .Stream multiple relationship properties:
 [source, cypher, role=noplay]
@@ -700,7 +700,7 @@ ORDER BY source ASC, target ASC
 
 Similar to the multiple relationship properties we can stream properties for multiple relationship types.
 
-[role=query-example]
+[role=query-example, group=rels]
 --
 .Stream relationship properties of a multiple relationship projections:
 [source, cypher, role=noplay]
@@ -785,7 +785,7 @@ If the property value is missing for the given node, `null` is returned.
 
 We use the `socialGraph` with the property `score` introduced xref:management-ops/graph-inspection/graph-streaming.adoc#streaming-nodes-examples[above].
 
-[role=query-example]
+[role=query-example, group=nodes]
 --
 .Access a property node property for Florentin:
 [source, cypher, role=noplay]
@@ -806,7 +806,7 @@ RETURN
 
 We can also specifically return the `score` property from the `Person` projection in case other projections also have a `score` property as follows.
 
-[role=query-example]
+[role=query-example, group=nodes]
 --
 .Access a property node property from Person for Florentin:
 [source, cypher, role=noplay]

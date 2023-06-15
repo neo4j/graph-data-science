@@ -389,6 +389,7 @@ In order to demonstrate the GDS capabilities over node properties, we are going 
 
 image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
 
+// FIXME adjust graph to above
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----

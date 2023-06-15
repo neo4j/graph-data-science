@@ -99,8 +99,7 @@ CALL gds.graph.project(
   {
     LIKES: {
       type: 'LIKES',                // <2>
-      properties: ['strength', 'score'] // <3>
-      }
+      properties: 'score' // <3>
     }
   }
 )

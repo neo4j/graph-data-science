@@ -129,7 +129,11 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             String operatorHandle = docQuery.operator();
             super.runQuery(operatorHandle, docQuery.query());
         } else {
-            super.runQuery(docQuery.query());
+            try {
+                super.runQuery(docQuery.query());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to run query: " + docQuery.query(), e);
+            }
         }
     }
 

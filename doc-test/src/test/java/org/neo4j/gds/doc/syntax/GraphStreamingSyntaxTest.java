@@ -21,22 +21,20 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-class GraphCatalogNodeOperationsSyntaxTest extends SyntaxTestBase {
+class GraphStreamingSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE_NODE_LABEL),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE_NODE_LABEL),
-            SyntaxModeMeta.of(SyntaxMode.REMOVE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY, 2),
+            SyntaxModeMeta.of(SyntaxMode.STREAM_TOPOLOGY),
+            SyntaxModeMeta.of(SyntaxMode.STREAM_MULTIPLE_PROPERTIES),
+            SyntaxModeMeta.of(SyntaxMode.STREAM)
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/graph-catalog-node-ops.adoc";
+        return "pages/management-ops/graph-inspection/graph-streaming.adoc";
     }
 }

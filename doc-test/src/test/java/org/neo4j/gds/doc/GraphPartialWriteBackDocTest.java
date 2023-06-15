@@ -19,42 +19,36 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.undirected.ToUndirectedProc;
-import org.neo4j.gds.catalog.GraphDropRelationshipProc;
+import org.neo4j.gds.catalog.GraphMutateNodeLabelProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipsProc;
+import org.neo4j.gds.catalog.GraphWriteNodeLabelProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipPropertiesProc;
-import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
 import java.util.List;
 
-final class RelationshipOperationsDocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
-    }
+final class GraphPartialWriteBackDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
             GraphProjectProc.class,
+            DegreeCentralityMutateProc.class,
             NodeSimilarityMutateProc.class,
-            GraphStreamRelationshipsProc.class,
-            GraphStreamRelationshipPropertiesProc.class,
-            ToUndirectedProc.class,
+            GraphWriteNodePropertiesProc.class,
+            GraphWriteNodeLabelProc.class,
+            GraphMutateNodeLabelProc.class,
             GraphWriteRelationshipProc.class,
-            GraphWriteRelationshipPropertiesProc.class,
-            GraphDropRelationshipProc.class
+            GraphWriteRelationshipPropertiesProc.class
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/graph-catalog-relationship-ops.adoc";
+        return "pages/management-ops/graph-write-to-neo4j/partial-write-back.adoc";
     }
 
 }
