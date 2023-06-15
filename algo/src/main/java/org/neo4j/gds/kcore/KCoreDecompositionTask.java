@@ -80,11 +80,13 @@ class KCoreDecompositionTask implements Runnable {
     public void run() {
         if (phase == KCoreDecompositionPhase.SCAN) {
             scan();
-            phase = KCoreDecompositionPhase.ACT;
         } else {
             act();
-            phase = KCoreDecompositionPhase.SCAN;
         }
+    }
+
+    void setPhase(KCoreDecompositionPhase phase) {
+        this.phase = phase;
     }
 
     private void scan() {
