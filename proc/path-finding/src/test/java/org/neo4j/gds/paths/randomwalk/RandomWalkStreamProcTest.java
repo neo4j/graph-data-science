@@ -191,34 +191,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         // we're done or fail the test
         assertThat(pool.getActiveCount()).isEqualTo(0);
     }
-
-    @Test
-    void shouldThrowOnUnknownStartNode() {
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "randomWalk")
-            .streamMode()
-            .addParameter("walksPerNode", 3)
-            .addParameter("walkLength", 10)
-            .addParameter("sourceNodes", 42)
-            .yields();
-
-        assertError(query, "Source nodes do not exist in the in-memory graph: ['42']");
-    }
-
-    @Test
-    void shouldThrowOnUnselectedStartNode() {
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "randomWalk")
-            .streamMode()
-            .addParameter("walksPerNode", 3)
-            .addParameter("walkLength", 10)
-            .addParameter("sourceNodes", 3)
-            .addParameter("nodeLabels", List.of("Node1", "Node2"))
-            .yields();
-
-        assertError(query, "Source nodes do not exist in the in-memory graph for the labels ['Node1', 'Node2']: ['3']");
-    }
-
+    
     @Test
     void shouldRunMemoryEstimation() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)

@@ -45,7 +45,7 @@ public interface SourceNodesConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateNodes(graphStore, sourceNodes(), selectedLabels, "Source");
+        validateNodes(graphStore, sourceNodes(), selectedLabels, "sourceNodes");
     }
 
 }

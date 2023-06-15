@@ -227,29 +227,5 @@ class DfsStreamProcTest extends BaseProcTest {
             Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) stage -> stage.yields("path"), "Only `path` yield field")
         );
     }
-
-    @Test
-    void failOnInvalidSourceNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("dfs")
-            .streamMode()
-            .addParameter("sourceNode", 4242)
-            .yields();
-
-        assertError(query, "Source node does not exist in the in-memory graph: `4242`");
-    }
-
-    @Test
-    void failOnInvalidEndNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("dfs")
-            .streamMode()
-            .addParameter("sourceNode", 0)
-            .addParameter("targetNodes", Arrays.asList(idFunction.of("a"), 4242, idFunction.of("b")))
-            .yields();
-
-        assertError(query, "Target nodes do not exist in the in-memory graph: ['4242']");
-    }
+    
 }

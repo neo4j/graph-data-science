@@ -51,6 +51,6 @@ public interface TargetNodesConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateNodes(graphStore, targetNodes(), selectedLabels, "Target");
+        validateNodes(graphStore, targetNodes(), selectedLabels, "targetNodes");
     }
 }

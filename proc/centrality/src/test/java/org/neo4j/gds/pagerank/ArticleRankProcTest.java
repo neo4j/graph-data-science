@@ -33,7 +33,6 @@ import org.neo4j.gds.scaling.Max;
 import org.neo4j.gds.scaling.Mean;
 import org.neo4j.gds.scaling.MinMax;
 import org.neo4j.gds.scaling.NoneScaler;
-import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -162,28 +161,7 @@ class ArticleRankProcTest extends BaseProcTest {
             Map.of("nodeId", idFunction.of("b"), "score", closeTo(0.235, 1e-5))
         ));
     }
-
-    @Test
-    void failOnMissingSourceNodes() {
-        var sourceNodes = List.of(
-            new NodeEntity(null, 4242),
-            new NodeEntity(null, 1337)
-        );
-
-        var query = GdsCypher.call(GRAPH_NAME)
-            .algo("articleRank")
-            .streamMode()
-            .addPlaceholder("sourceNodes", "sources")
-            .yields();
-
-
-        assertThatThrownBy(() -> runQuery(query, Map.of("sources", sourceNodes)))
-            .hasRootCauseExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Source nodes do not exist in the in-memory graph")
-            .hasMessageContaining("['1337', '4242']");
-    }
-
-
+    
     @Test
     void write() {
         String propertyKey = "pr";

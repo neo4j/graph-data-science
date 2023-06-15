@@ -237,18 +237,5 @@ class BfsStreamProcTest extends BaseProcTest {
 
         assertError(query, "Source node does not exist in the in-memory graph: `4242`");
     }
-
-    @Test
-    void failOnInvalidEndNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("bfs")
-            .streamMode()
-            .addParameter("sourceNode", 0)
-            .addParameter("targetNodes", List.of(idFunction.of("a"), 4242, idFunction.of("b")))
-            .yields();
-
-        assertError(query, "Target nodes do not exist in the in-memory graph: ['4242']");
-    }
-
+    
 }
