@@ -29,7 +29,15 @@ public interface NodeConfig {
         if (input instanceof Node) {
             return ((Node) input).getId();
         } else if (input instanceof Number) {
-            return ((Number) input).longValue();
+            var number = ((Number) input).longValue();
+            if (number < 0) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Negative node ids are not supported for the field `%s`",
+                    field,
+                    input.getClass().getSimpleName()
+                ));
+            }
+            return number;
         }
 
         throw new IllegalArgumentException(formatWithLocale(

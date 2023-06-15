@@ -247,4 +247,5 @@ class BfsStreamProcTest extends BaseProcTest {
 
         assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");
     }
+
 }
