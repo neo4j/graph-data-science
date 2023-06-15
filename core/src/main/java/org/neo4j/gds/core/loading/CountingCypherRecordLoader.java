@@ -48,9 +48,8 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
         var subscriber = new ResultCountingSubscriber();
         CypherLoadingUtils.consume(runLoadingQuery(tx, subscriber));
 
-        if (subscriber.error().isPresent()) {
-            Throwable cause = subscriber.error().get();
-            if (cause instanceof AuthorizationViolationException) {
+        subscriber.error().ifPresent(e -> {
+            if (e instanceof AuthorizationViolationException) {
                 throw new IllegalArgumentException(String.format(
                     Locale.US,
                     "Query must be read only. Query: [%s]",
@@ -58,8 +57,8 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
                 ));
             }
 
-            throw new RuntimeException(cause);
-        }
+            throw new RuntimeException(e);
+        });
 
         return new BatchLoadResult(subscriber.rows(), -1L);
     }
