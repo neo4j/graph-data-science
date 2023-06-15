@@ -35,9 +35,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public final class QueryRunner {
@@ -201,6 +203,15 @@ public final class QueryRunner {
                 }
             }
         });
+    }
+
+    public static void runFailingQuery(GraphDatabaseService db, String query, Map<String, Object> queryParameters, Consumer<Throwable> exceptionConsumer) {
+        try {
+            QueryRunner.runQueryWithResultConsumer(db, query, queryParameters, Result::resultAsString);
+            fail(formatWithLocale("Expected an exception to be thrown by query:\n%s", query));
+        } catch (Throwable e) {
+            exceptionConsumer.accept(e);
+        }
     }
 
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username, String databaseName) {
