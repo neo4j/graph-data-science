@@ -40,6 +40,17 @@ final class ConfigNodesValidations {
         String nodeDescription
     ) {
         if (!neoNodesToValidate.isEmpty()) {
+
+            for (var neoNode : neoNodesToValidate) {
+
+                if (neoNode < 0) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Negative node ids are not supported for the field `%s`",
+                        nodeDescription
+                    ));
+                }
+            }
+
             var missingNodes = neoNodesToValidate
                 .stream()
                 .filter(targetNode -> labelFilteredGraphNotContainsNode(
@@ -58,6 +69,7 @@ final class ConfigNodesValidations {
                     StringJoining.join(missingNodes)
                 ));
             }
+
         }
     }
 

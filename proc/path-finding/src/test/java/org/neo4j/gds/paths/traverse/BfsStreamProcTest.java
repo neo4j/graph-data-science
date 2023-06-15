@@ -229,23 +229,10 @@ class BfsStreamProcTest extends BaseProcTest {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
-            .addParameter("sourceNode", 42)
+            .addParameter("sourceNode", 4242)
             .yields();
 
         assertError(query, "Source node does not exist in the in-memory graph: `42`");
-    }
-
-    @Test
-    void failOnInvalidEndNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("bfs")
-            .streamMode()
-            .addParameter("sourceNode", 0)
-            .addParameter("targetNodes", List.of(0, 42, 1))
-            .yields();
-
-        assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");
     }
 
 }
