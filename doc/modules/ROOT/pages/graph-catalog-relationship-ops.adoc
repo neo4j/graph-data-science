@@ -257,40 +257,6 @@ YIELD
 | propertiesWritten         | Integer                  | Number relationships properties written.
 |===
 ======
-
-[.include-with-delete-relationships]
-======
-[source, cypher, role=noplay]
-----
-CALL gds.graph.relationships.drop(
-    graphName: String,
-    relationshipType: String
-)
-YIELD
-  graphName: String,
-  relationshipType: String,
-  deletedRelationships: Integer,
-  deletedProperties: Map
-----
-
-.Parameters
-[opts="header",cols="1,3,1,5"]
-|===
-| Name             | Type    | Optional | Description
-| graphName        | String  | no       | The name under which the graph is stored in the catalog.
-| relationshipType | String  | no       | The relationship type in the graph to remove.
-|===
-
-.Results
-[opts="header",cols="2,3,5"]
-|===
-| Name                 | Type       | Description
-| graphName            | String     | The name of a graph stored in the catalog.
-| relationshipType     | String     | The type of the removed relationships.
-| deletedRelationships | Integer    | Number of removed relationships from the in-memory graph.
-| deletedProperties    | Integer    | Map where the key is the name of the relationship property, and the value is the number of removed properties under that name.
-|===
-======
 ====
 
 
@@ -810,41 +776,5 @@ YIELD
 |===
 | graphName          | relationshipType | relationshipProperties              | relationshipsWritten | propertiesWritten
 | "aggregatedGraph"  | "PAID"           | [totalAmount, numberOfPayments]     | 3                    | 6
-|===
---
-
-
-[[catalog-graph-delete-rel-type]]
-=== Delete
-
-We can delete all relationships of a given type from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally added relationship types.
-
-[NOTE]
-====
-Deleting relationships of a given type is only possible if it is not the last relationship type present in the graph.
-If we still want to delete these relationships we need to xref:graph-drop.adoc[drop the graph] instead.
-====
-
-[role=query-example]
---
-.Delete all relationships of type `SIMILAR` from a named graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.relationships.drop(
-  'personsAndInstruments',            // <1>
-  'SIMILAR'                           // <2>
-)
-YIELD
-  graphName, relationshipType, deletedRelationships, deletedProperties
-----
-<1> The name of the projected graph.
-<2> The relationship type we want to delete from the projected graph.
-
-.Results
-[opts="header"]
-|===
-| graphName               | relationshipType | deletedRelationships | deletedProperties
-| "personsAndInstruments" | "SIMILAR"        | 10                   | {score=10}
 |===
 --

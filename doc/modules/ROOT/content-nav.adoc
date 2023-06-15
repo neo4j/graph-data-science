@@ -30,6 +30,7 @@
 ** xref:management-ops/graph-update/index.adoc[]
 *** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/mutate-node-labels.adoc[]
+*** xref:management-ops/graph-update/dropping-parts.adoc[]
 ** xref:graph-drop.adoc[]
 ** xref:graph-catalog-node-ops.adoc[]
 ** xref:graph-catalog-relationship-ops.adoc[]
