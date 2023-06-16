@@ -3,12 +3,7 @@
 // TODO tabbed or have different sections?
 * reasons - freeing up memory, removing mutated algorithms results
 
-We can also remove relationships from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally added relationship types.
-
-We can also remove node properties from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally added node properties.
-
+Dropping parts of the graph is useful to free up memory or remove previously mutated algorithms results.
 
 == Syntax
 
@@ -35,8 +30,8 @@ YIELD
 |===
 | Name           | Type                       | Optional | Description
 | graphName      | String                     | no       | The name under which the graph is stored in the catalog.
-| nodeProperties | String or List of Strings  | no       | The node properties in the graph to remove.
-| configuration  | Map                        | yes      | Additional parameters to configure removeNodeProperties.
+| nodeProperties | String or List of Strings  | no       | The node properties in the graph to drop.
+| configuration  | Map                        | yes      | Additional parameters to configure.
 |===
 
 .Configuration
@@ -50,9 +45,9 @@ YIELD
 [opts="header",cols="2,3,5"]
 |===
 | Name              | Type                     | Description
-| propertiesRemoved | Integer                  | Number of properties removed.
+| propertiesRemoved | Integer                  | Number of properties dropped.
 | graphName         | String                   | The name of a graph stored in the catalog.
-| nodeProperties    | String or List of String | The removed node properties.
+| nodeProperties    | String or List of String | The dropped node properties.
 |===
 ======
 
@@ -76,7 +71,7 @@ YIELD
 |===
 | Name             | Type    | Optional | Description
 | graphName        | String  | no       | The name under which the graph is stored in the catalog.
-| relationshipType | String  | no       | The relationship type in the graph to remove.
+| relationshipType | String  | no       | The relationship type in the graph to drop.
 |===
 
 .Results
@@ -84,9 +79,9 @@ YIELD
 |===
 | Name                 | Type       | Description
 | graphName            | String     | The name of a graph stored in the catalog.
-| relationshipType     | String     | The type of the removed relationships.
-| deletedRelationships | Integer    | Number of removed relationships from the in-memory graph.
-| deletedProperties    | Integer    | Map where the key is the name of the relationship property, and the value is the number of removed properties under that name.
+| relationshipType     | String     | The type of the dropped relationships.
+| deletedRelationships | Integer    | Number of dropped relationships from the in-memory graph.
+| deletedProperties    | Integer    | Map where the key is the name of the relationship property, and the value is the number of dropped properties under that name.
 |===
 ======
 ====
@@ -128,12 +123,12 @@ CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
 ----
 
 [[catalog-graph-remove-node-properties-example]]
-=== Remove node properties
+=== Dropping node properties
 
 
 [role=query-example]
 --
-.Remove the `score` property from all projected nodes in the `socialGraph`:
+.Drop the `score` property from all projected nodes in the `socialGraph`:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.nodeProperties.drop('socialGraph', ['score'])
@@ -154,20 +149,20 @@ The above example requires all given properties to be present on _at least one_ 
 --
 
 [[catalog-graph-delete-rel-type]]
-=== Delete relationships of a given type
+=== Drop relationships of a given type
 
-We can delete all relationships of a given type from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally added relationship types.
+We can drop all relationships of a given type from a named graph in the catalog.
+This is useful to free up main memory or to drop accidentally added relationship types.
 
 [NOTE]
 ====
 Deleting relationships of a given type is only possible if it is not the last relationship type present in the graph.
-If we still want to delete these relationships we need to xref:graph-drop.adoc[drop the graph] instead.
+If we still want to drop these relationships we need to xref:graph-drop.adoc[drop the graph] instead.
 ====
 
 [role=query-example]
 --
-.Delete all relationships of type `SIMILAR` from a named graph:
+.Drop all relationships of type `SIMILAR` from a named graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.relationships.drop(
