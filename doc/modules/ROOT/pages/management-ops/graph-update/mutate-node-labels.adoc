@@ -1,6 +1,7 @@
 = Adding node labels
 
-// FIXME add intro
+Adding node labels to the graph after the creation can be used to create labels based on f.i. algorithm results.
+As with existing labels, they allow filtering the graph on following operations.
 
 == Syntax
 

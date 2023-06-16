@@ -1,5 +1,6 @@
 [[graph-catalog-export-ops]]
 = Export operations
+:page-aliases: graph-catalog-export-ops
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 

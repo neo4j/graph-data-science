@@ -32,6 +32,6 @@ class GraphDropSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/graph-drop.adoc";
+        return "pages/management-ops/graph-drop.adoc";
     }
 }

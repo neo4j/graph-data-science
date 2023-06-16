@@ -1,5 +1,11 @@
 = Inspecting a single graph
 
-* stream modes
-* cypher on GDS
-* arrow operations?
+Inspecting a graph can be useful to validate the graph creation worked as intended but also to understand updates to the graph such as through graph algorithms.
+
+GDS offers multiple ways to inspect the contents of a graph:
+
+* xref:management-ops/graph-inspection/graph-streaming.adoc[Streaming parts such as node properties]
+* xref:management-ops/graph-inspection/create-cypher-db.adoc[Running Cypher against a GDS graph]
+* xref:management-ops/graph-inspection/graph-catalog-apache-arrow-ops.adoc[Streaming via Apache Arrow]
+
+// TODO should we have the streaming arrow here? In the end its mostly interesting for export and not pure inspection.

@@ -1,6 +1,7 @@
 [[catalog-graph-drop]]
 = Removing graphs
 :description: This section details how to remove graphs stored in the graph catalog of the Neo4j Graph Data Science library.
+:page-aliases: graph-drop
 
 
 To free up memory, we can remove unused graphs.

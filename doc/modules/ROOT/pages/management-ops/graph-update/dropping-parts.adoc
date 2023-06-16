@@ -1,7 +1,5 @@
 = Dropping parts of the graph
-// fIXME move to seperate section
 // TODO tabbed or have different sections?
-* reasons - freeing up memory, removing mutated algorithms results
 
 Dropping parts of the graph is useful to free up memory or remove previously mutated algorithms results.
 
@@ -157,7 +155,7 @@ This is useful to free up main memory or to drop accidentally added relationship
 [NOTE]
 ====
 Deleting relationships of a given type is only possible if it is not the last relationship type present in the graph.
-If we still want to drop these relationships we need to xref:graph-drop.adoc[drop the graph] instead.
+If we still want to drop these relationships we need to xref:management-ops/graph-drop.adoc[drop the graph] instead.
 ====
 
 [role=query-example]

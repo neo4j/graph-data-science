@@ -3,7 +3,7 @@
 :description: This section details how to get graph information from the graph catalog of the Neo4j Graph Data Science library.
 :page-aliases: graph-list.adoc, graph-exists.adoc
 
-The below procedures can be used to get information on the graphs in the graph catalog.
+The below operations can be used to get information on the graphs in the graph catalog.
 
 include::partial$management-ops/graph-catalog/graph-list.adoc[leveloffset=+1]
 

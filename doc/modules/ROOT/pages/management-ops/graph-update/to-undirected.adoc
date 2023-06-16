@@ -2,7 +2,8 @@
 = Convert directed relationships to undirected
 :description: This section details the converting directed relationships to undirected in the Neo4j Graph Data Science library.
 
-// FIXME add intro here
+In GDS, some algorithms such as Triangle Count and Link Prediction expect undirected relationships. This procedure converts directed relationships to undirected and outputs the result as a new relationship type.
+This can be useful to convert relationships produced by algorithms such as path algorithms.
 
 == Syntax
 
@@ -109,7 +110,7 @@ CALL gds.graph.project(
 <3> Project property `score` of relationship type `LIKES` .
 
 
-Some algorithms such as Triangle Count and Link Prediction expect undirected relationships. The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.
+The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.
 
 [role=query-example]
 --

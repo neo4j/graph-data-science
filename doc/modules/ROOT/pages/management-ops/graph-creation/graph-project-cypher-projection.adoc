@@ -16,7 +16,7 @@ Cypher projections are primarily recommended for the development phase (see xref
 --
 The projected graphs will reside in the catalog until either:
 
-- the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
+- the graph is dropped using xref:management-ops/graph-drop.adoc[gds.graph.drop]
 - the Neo4j database from which the graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
 --
