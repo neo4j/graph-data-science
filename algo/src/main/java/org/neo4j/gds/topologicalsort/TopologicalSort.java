@@ -70,8 +70,10 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = config.concurrency();
-        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(config.concurrency()));
-        this.longestPathDistances = Optional.of(HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(config.concurrency())));
+        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
+        this.longestPathDistances = config.longestPathDistance()
+            ? Optional.of(HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency)))
+            : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
     }
 
@@ -115,7 +117,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                     graph.concurrentCopy(),
                     result,
                     inDegrees,
-                    longestPathDistances.get()
+                    longestPathDistances
                 ));
             }
         });
@@ -134,10 +136,10 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         private final Graph graph;
         private final TopologicalSortResult result;
         private final HugeAtomicLongArray inDegrees;
-        private final HugeAtomicLongArray longestPathDistances;
+        private final Optional<HugeAtomicLongArray> longestPathDistances;
 
         TraversalTask(@Nullable TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees,
-            HugeAtomicLongArray longestPathDistances
+            Optional<HugeAtomicLongArray> longestPathDistances
         ) {
             super(parent);
             this.sourceId = sourceId;
@@ -150,7 +152,9 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         @Override
         public void compute() {
             graph.forEachRelationship(sourceId, (source, target) -> {
-                longestPathTraverse(source, target);
+                if (longestPathDistances.isPresent()) {
+                    longestPathTraverse(source, target);
+                }
 
                 long prevDegree = inDegrees.getAndAdd(target, -1);
                 // if the previous degree was 1, this node is now a source
@@ -174,7 +178,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         }
 
         void longestPathTraverse(long source, long target) {
-            var longestPaths = longestPathDistances;
+            var longestPaths = longestPathDistances.get();
             // the source distance will never change anymore, but the target distance might
             var potentialDistance  = longestPaths.get(source) + 1;
             var currentTargetDistance = longestPaths.get(target);
