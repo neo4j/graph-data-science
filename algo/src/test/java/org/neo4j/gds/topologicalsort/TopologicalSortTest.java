@@ -20,22 +20,30 @@
 package org.neo4j.gds.topologicalsort;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class TopologicalSortTest {
@@ -356,5 +364,26 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSortFactory<>().build(graph, BASIC_CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         assertEquals(1000_000, result.size());
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var tsFactory = new TopologicalSortFactory<>();
+        var progressTask = tsFactory.progressTask(lastGraph, BASIC_CONFIG);
+        var log = Neo4jProxy.testLog();
+        var testTracker = new TestProgressTracker(
+            progressTask,
+            log,
+            BASIC_CONFIG.concurrency(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        TopologicalSort ts = tsFactory.build(lastGraph, BASIC_CONFIG, testTracker);
+        ts.compute();
+
+        String taskName = tsFactory.taskName();
+
+        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
+        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
     }
 }

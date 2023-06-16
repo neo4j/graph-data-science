@@ -89,23 +89,30 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     }
 
     private void initializeInDegrees() {
+        this.progressTracker.beginSubTask("Initialization");
         try (var concurrentCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
             ParallelUtil.parallelForEachNode(
                 graph.nodeCount(),
                 concurrency,
                 terminationFlag,
-                nodeId -> concurrentCopy.get().forEachRelationship(
-                        nodeId,
-                        (source, target) -> {
-                            inDegrees.getAndAdd(target,1L);
-                            return true;
-                        }
-                    )
+                nodeId -> {
+                    concurrentCopy.get().forEachRelationship(
+                            nodeId,
+                            (source, target) -> {
+                                inDegrees.getAndAdd(target, 1L);
+                                return true;
+                            }
+                        );
+                    progressTracker.logProgress();
+                }
             );
         }
+        this.progressTracker.endSubTask("Initialization");
     }
 
     private void traverse() {
+        this.progressTracker.beginSubTask("Traversal");
+
         ForkJoinPool forkJoinPool = Pools.createForkJoinPool(concurrency);
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
@@ -120,6 +127,8 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                     longestPathDistances
                 ));
             }
+            // Might not reach 100% if there are cycles in the graph
+            progressTracker.logProgress();
         });
 
         for (ForkJoinTask<Void> task : tasks) {
@@ -129,6 +138,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         // calling join makes sure the pool waits for all the tasks to complete before shutting down
         tasks.forEach(ForkJoinTask::join);
         forkJoinPool.shutdown();
+        this.progressTracker.endSubTask("Traversal");
     }
 
     private static final class TraversalTask extends CountedCompleter<Void> {
