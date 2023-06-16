@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.canonization.CanonicalAdjacencyMatrix.canonicalize;
+import static org.neo4j.gds.canonization.CanonicalAdjacencyMatrix.canonicalizeWithoutWeights;
 
 class CanonicalAdjacencyMatrixTest {
 
@@ -106,7 +107,8 @@ class CanonicalAdjacencyMatrixTest {
     @Test
     void testRespectNodeSchema() {
         Graph g1 = fromGdl("(a:A {aV:1.0}), (b:B {bV:2.0}), (c:V {cV:3.0})");
-        Graph g2 = fromGdl("(a:A {aV:1.0, bV:NaN, cV:NaN}), (b:B {aV:NaN, bV:2.0, cV:NaN}), (c:V {aV:NaN, bV:NaN, cV:3.0})");
+        Graph g2 = fromGdl(
+            "(a:A {aV:1.0, bV:NaN, cV:NaN}), (b:B {aV:NaN, bV:2.0, cV:NaN}), (c:V {aV:NaN, bV:NaN, cV:3.0})");
         assertNotEquals(canonicalize(g1), canonicalize(g2));
     }
 
@@ -115,5 +117,20 @@ class CanonicalAdjacencyMatrixTest {
         Graph g1 = fromGdl("(a)-[:REL1]->(b)");
         Graph g2 = fromGdl("(a)-[:REL2]->(b)");
         assertNotEquals(canonicalize(g1), canonicalize(g2));
+    }
+
+
+    @Test
+    void testRespectUnweightedRelationshipSchemaOnEquality() {
+        Graph g1 = fromGdl("(a)-[:REL1{w: 10}]->(b)");
+        Graph g2 = fromGdl("(a)-[:REL1{w: 20}]->(b)");
+        assertEquals(canonicalizeWithoutWeights(g1), canonicalizeWithoutWeights(g2));
+    }
+
+    @Test
+    void testRespectUnweightedRelationshipSchemaOnInequality() {
+        Graph g1 = fromGdl("(a)-[:REL2{w: 10}]->(b)");
+        Graph g2 = fromGdl("(a)-[:REL1{w: 10}]->(b)");
+        assertNotEquals(canonicalizeWithoutWeights(g1), canonicalizeWithoutWeights(g2));
     }
 }

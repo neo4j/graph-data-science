@@ -694,6 +694,30 @@ class RandomGraphGeneratorTest {
         var adjacencyMatrixTwo = CanonicalAdjacencyMatrix.canonicalize(graphTwo);
 
         assertThat(adjacencyMatrixOne).isNotEqualTo(adjacencyMatrixTwo);
+    }
 
+    @Test
+    void shouldGenerateSameTopologyOnWeightedGraphsWithFixedSeed() {
+        var weightedGraph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(0)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("foo", 1.0, 10.0))
+            .build()
+            .generate();
+
+        var unweightedGraph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(0)
+            .build()
+            .generate();
+
+        var adjacencyMatrixOne = CanonicalAdjacencyMatrix.canonicalizeWithoutWeights(weightedGraph);
+        var adjacencyMatrixTwo = CanonicalAdjacencyMatrix.canonicalize(unweightedGraph);
+
+        assertThat(adjacencyMatrixOne).isEqualTo(adjacencyMatrixTwo);
     }
 }

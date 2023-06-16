@@ -39,8 +39,8 @@ public final class CanonicalAdjacencyMatrix {
 
     private CanonicalAdjacencyMatrix() {}
 
-    public static String canonicalize(Graph g) {
-        // canonical nodes
+    private static Map<Long, String> canonizeLabels(Graph g) {
+
         Map<Long, String> canonicalLabels = new HashMap<>();
         g.forEachNode(nodeId -> {
             String sortedLabels = g
@@ -91,7 +91,8 @@ public final class CanonicalAdjacencyMatrix {
                 .sorted()
                 .collect(Collectors.joining(", "));
 
-            String canonicalNode = formatWithLocale("(%s%s)",
+            String canonicalNode = formatWithLocale(
+                "(%s%s)",
                 sortedLabels.isEmpty() ? "" : formatWithLocale(":%s", sortedLabels),
                 sortedProperties.isEmpty() ? "" : formatWithLocale(" { %s }", sortedProperties)
             );
@@ -99,24 +100,94 @@ public final class CanonicalAdjacencyMatrix {
             canonicalLabels.put(nodeId, canonicalNode);
             return true;
         });
+        return canonicalLabels;
+    }
+
+    public static String canonicalize(Graph g) {
+        // canonical nodes
+        var canonicalLabels = canonizeLabels(g);
 
         Map<Long, List<String>> outAdjacencies = new HashMap<>();
         Map<Long, List<String>> inAdjacencies = new HashMap<>();
         for (RelationshipType relationshipType : g.schema().relationshipSchema().availableTypes()) {
             g.forEachNode(nodeId -> {
                 g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
-                    outAdjacencies.compute(
+                    consumeRelationship(canonicalLabels,
+                        outAdjacencies,
+                        inAdjacencies,
+                        relationshipType,
                         sourceId,
-                        canonicalRelationship(canonicalLabels.get(targetId), relationshipType.name(), propertyValue, "()-[:%s w: %f]->%s"));
-                    inAdjacencies.compute(
                         targetId,
-                        canonicalRelationship(canonicalLabels.get(sourceId), relationshipType.name(), propertyValue, "()<-[:%s w: %f]-%s"));
+                        propertyValue);
                     return true;
                 });
                 return true;
             });
         }
 
+        return returnCanonicalRepresentation(canonicalLabels, outAdjacencies, inAdjacencies);
+
+    }
+
+    private static void consumeRelationship(
+        Map<Long, String> canonicalLabels,
+        Map<Long, List<String>> outAdjacencies,
+        Map<Long, List<String>> inAdjacencies,
+        RelationshipType relationshipType,
+        long sourceId,
+        long targetId,
+        double weight
+    ) {
+        outAdjacencies.compute(
+            sourceId,
+            canonicalRelationship(
+                canonicalLabels.get(targetId),
+                relationshipType.name(),
+                weight,
+                "()-[:%s w: %f]->%s"
+            )
+        );
+        inAdjacencies.compute(
+            targetId,
+            canonicalRelationship(
+                canonicalLabels.get(sourceId),
+                relationshipType.name(),
+                weight,
+                "()<-[:%s w: %f]-%s"
+            )
+        );
+    }
+
+    public static String canonicalizeWithoutWeights(Graph g) {
+        // canonical nodes
+        var canonicalLabels = canonizeLabels(g);
+
+        Map<Long, List<String>> outAdjacencies = new HashMap<>();
+        Map<Long, List<String>> inAdjacencies = new HashMap<>();
+        for (RelationshipType relationshipType : g.schema().relationshipSchema().availableTypes()) {
+            g.forEachNode(nodeId -> {
+                g.forEachRelationship(nodeId, (sourceId, targetId) -> {
+                    consumeRelationship(canonicalLabels,
+                        outAdjacencies,
+                        inAdjacencies,
+                        relationshipType,
+                        sourceId,
+                        targetId,
+                        1.0);
+                    return true;
+                });
+                return true;
+            });
+        }
+
+        return returnCanonicalRepresentation(canonicalLabels, outAdjacencies, inAdjacencies);
+    }
+
+    private static String returnCanonicalRepresentation(
+        Map<Long, String> canonicalLabels,
+        Map<Long, List<String>> outAdjacencies,
+        Map<Long, List<String>> inAdjacencies
+    ) {
         Map<Long, String> canonicalOutAdjacencies = canonicalAdjacencies(outAdjacencies);
         Map<Long, String> canonicalInAdjacencies = canonicalAdjacencies(inAdjacencies);
 
@@ -126,7 +197,8 @@ public final class CanonicalAdjacencyMatrix {
                 "%s => out: %s in: %s",
                 entry.getValue(),
                 canonicalOutAdjacencies.getOrDefault(entry.getKey(), ""),
-                canonicalInAdjacencies.getOrDefault(entry.getKey(), "")))
+                canonicalInAdjacencies.getOrDefault(entry.getKey(), "")
+            ))
             .sorted()
             .collect(Collectors.joining(System.lineSeparator()));
     }
@@ -140,6 +212,7 @@ public final class CanonicalAdjacencyMatrix {
                 entry -> join(entry.getValue(), ", ")
             ));
     }
+
 
     private static BiFunction<Long, List<String>, List<String>> canonicalRelationship(
         String canonicalNodeLabel,
