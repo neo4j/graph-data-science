@@ -82,7 +82,7 @@ public final class RandomGraphGenerator {
         long averageDegree,
         RelationshipType relationshipType,
         RelationshipDistribution relationshipDistribution,
-        @Nullable Long seed,
+        long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
         Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers,
         Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
@@ -104,7 +104,7 @@ public final class RandomGraphGenerator {
         this.allowSelfLoops = allowSelfLoops;
         this.forceDag = forceDag;
         this.random = new Random();
-        long actualSeed = seed != null ? seed : 1;
+        long actualSeed = seed;
         this.random.setSeed(actualSeed);
         this.randomDagMapping = generateRandomMapping(actualSeed);
         this.inverseIndex = inverseIndex;
