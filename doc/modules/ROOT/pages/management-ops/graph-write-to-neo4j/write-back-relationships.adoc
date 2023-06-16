@@ -1,281 +1,11 @@
-= Writing back to an existing database
-
-== Nodes
-
-To persist the values in a Neo4j database, we can use `gds.graph.nodeProperties.write`.
-Similar to streaming node properties, it is also possible to write those back to Neo4j.
-This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
-
-=== Syntax
-
-.Syntax descriptions of the different operations over node properties
-[.tabbed-example, caption = ]
-====
-
-[.include-with-write-properties]
-======
-[source, cypher, role=noplay]
-----
-CALL gds.graph.nodeProperties.write(
-    graphName: String,
-    nodeProperties: String or Map of Strings or List of Strings and/or Maps of Strings,
-    nodeLabels: String or List of Strings,
-    configuration: Map
-)
-YIELD
-    writeMillis: Integer,
-    propertiesWritten: Integer,
-    graphName: String,
-    nodeProperties: String or List of String
-----
-
-.Parameters
-[opts="header",cols="1,3,1,5"]
-|===
-| Name           | Type                       | Optional | Description
-| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
-| nodeProperties | String, Map of Strings, or List of Strings and/or Maps of Strings | no       | The node properties in the graph to write back. To write back properties with new custom names, store them as entries inside maps in the form:  `nodeProperty: 'renamedProperty'`.
-| nodeLabels     | String or List of Strings  | yes      | The node labels to write back their node properties.
-| configuration  | Map                        | yes      | Additional parameters to configure writeNodeProperties.
-|===
-
-.Configuration
-[opts="header",cols="1,1,1,7"]
-|===
-| Name                   | Type                  | Default           | Description
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
-| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
-|===
-
-.Results
-[opts="header",cols="2,3,5"]
-|===
-| Name              | Type                     | Description
-| writeMillis       | Integer                  | Milliseconds for writing result data back to Neo4j.
-| propertiesWritten | Integer                  | Number of properties written.
-| graphName         | String                   | The name of a graph stored in the catalog.
-| nodeProperties    | String or List of String | The written node properties.
-|===
-======
-
-[.include-with-write-node-label]
-======
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.graph.nodeLabel.write(
-    graphName: String,
-    nodeLabel: String,
-    configuration: Map
-)
-YIELD
-    writeMillis: Integer,
-    nodeLabelsWritten: Integer,
-    nodeLabel: String,
-    graphName: String,
-    nodeCount: Integer,
-    configuration: Map
-----
-
-.Parameters
-[opts="header",cols="1,3,1,5"]
-|===
-| Name           | Type                       | Optional | Description
-| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
-| nodeLabel      | String                     | no       | The node label to write back.
-| configuration  | Map                        | yes      | Additional parameters to configure writeNodeProperties.
-|===
-
-.Configuration
-[opts="header",cols="1,1,1,7"]
-|===
-| Name                   | Type                  | Default           | Description
-| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-project-subgraph.adoc[Projecting a subgraph].
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure.
-|===
-
-.Results
-[opts="header",cols="2,3,5"]
-|===
-| Name              | Type                     | Description
-| writeMillis       | Integer                  | Milliseconds for writing result data back to Neo4j.
-| nodeLabelsWritten | Integer                  | Number of node labels written.
-| graphName         | String                   | The name of a graph stored in the catalog.
-| nodeLabel         | String                   | The written node label.
-| nodeCount         | Integer                  | The total number of nodes in the graph.
-| configuration     | Map                      | The configuration used to run the procedure.
-|===
-======
-====
-
-
-=== Examples
-
-In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
-
-.The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query]
-----
-CREATE
-  (florentin:Person { name: 'Florentin', age: 16 }),
-  (adam:Person { name: 'Adam', age: 18 }),
-  (veselin:Person { name: 'Veselin', age: 20 }),
-  (hobbit:Book { name: 'The Hobbit', numberOfPages: 310 }),
-  (florentin)-[:KNOWS { since: 2010 }]->(adam),
-  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
-  (adam)-[:READ]->(hobbit)
-----
-
-.Project the small social network graph:
-[source, cypher, role=noplay graph-project-query]
-----
-CALL gds.graph.project(
-  'socialGraph',
-  {
-    Person: {properties: "age"},
-    Book: {}
-  },
-  ['KNOWS', 'READ']
-)
-----
-
-.Compute the Degree Centrality in our social graph:
-[source, cypher, role=noplay graph-project-query]
-----
-CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
-----
-
-[[catalog-graph-write-node-properties-example]]
-==== Write node properties
-
-To write the 'score' property for all node labels in the social graph, we use the following query:
-
-[role=query-example]
---
-.Write the `score` property back to Neo4j:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.nodeProperties.write('socialGraph', ['score'])
-YIELD propertiesWritten
-----
-
-.Results
-[opts="header"]
-|===
-| propertiesWritten
-| 4
-|===
---
-
-The above example requires the `score` property to be present on _at least one_ projected node label, and the properties will be written for all such labels.
-
-=====  Renaming properties when writing back
-
-It is possible to rename node properties and write them back to the database under a custom name.
-For this, you can use a map where each entry is a tuple `{nodeProperty: 'renamedProperty'}` i.e., the key corresponds to an existing node property in the in-memory graph and the value corresponds to the name to be written back to the database.
-
-For convenience, a map may hold more than one entries.
-The `nodeProperties` configuration parameter accepts both strings and maps and any combination of the two inside a list.
-This can be helpful when we only want to rename a handful of properties.
-
-[role=query-example]
---
-.Write the `age` and `score` properties back to Neo4j with a new name for `score`:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.nodeProperties.write('socialGraph', ['age', {score: 'writtenScore'}])
-YIELD nodeProperties
-----
-
-.Results
-[opts="header"]
-|===
-| nodeProperties
-| [age, writtenScore]
-|===
---
-
-In the above example, we write  `age` back to the database with its default name whereas we renamed  `score` to `writtenScore` by using a map.
-
-
-==== NodeLabels
-
-The procedure can be configured to write just the properties for some specific node labels.
-In the following example, we will only write back the scores of the `Person` nodes.
-
-[role=query-example]
---
-.Write node properties of a specific projected node label to Neo4j:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.nodeProperties.write('socialGraph', ['score'], ['Person'])
-YIELD propertiesWritten
-----
-
-.Results
-[opts="header"]
-|===
-| propertiesWritten
-| 3
-|===
---
-
-[NOTE]
---
-If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
---
-
-
-[[catalog-graph-write-node-label-example]]
-=== Write Node Label
-
-To write a new node label to the database for nodes with score higher than `0`, we use the following query:
-
-[role=query-example, group=write-label]
---
-.Write the `Reader` node label back to Neo4j:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
-YIELD graphName, nodeCount, nodeLabel, nodeLabelsWritten
-----
-
-.Results
-[opts="header"]
-|===
-| graphName     | nodeCount | nodeLabel | nodeLabelsWritten
-| "socialGraph" | 4         | "Reader"  | 2
-|===
---
-
-[role=query-example, group=write-label]
---
-.Query the `Reader` node label:
-[source, cypher, role=noplay]
-----
-MATCH (n:Reader) RETURN n.name AS name, labels(n) AS labels
-ORDER BY name ASC
-----
-
-.Results
-[opts="header"]
-|===
-| name       | labels
-| "Adam"       | [Person, Reader]
-| "Florentin"  | [Person, Reader]
-|===
---
-
-As we can see from the database `Veselin` who has `score: 0.0` is not a `Reader`.
-
-
-== Relationships
+= Writing back relationships
 
 To persist relationship types in a Neo4j database, we can use `gds.graph.relationship.write`.
 Similar to streaming relationship topologies or properties, it is also possible to write back to Neo4j.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
 
-=== Syntax
+== Syntax
 
 .Syntax descriptions of the different operations over relationship types
 [.tabbed-example, caption=]
@@ -375,7 +105,7 @@ YIELD
 ======
 ====
 
-=== Examples
+== Examples
 // FIXME wording?
 
 We can write relationships stored in a named in-memory graph back to Neo4j.
@@ -455,7 +185,7 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 <3> The algorithm will add relationship property `score` for each added relationship.
 
 [[catalog-graph-write-relationship-example]]
-==== Relationship type
+=== Relationship type
 
 [role=query-example]
 --
@@ -490,7 +220,7 @@ The `SIMILAR` relationships have been added to the underlying database and can b
 The relationships in this example are undirected because we used xref:algorithms/node-similarity.adoc[Node Similarity] to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
 
 
-==== Relationship type with property
+=== Relationship type with property
 
 To write relationship properties, these have to be explicitly specified.
 

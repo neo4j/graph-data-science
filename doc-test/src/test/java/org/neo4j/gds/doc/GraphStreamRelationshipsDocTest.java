@@ -20,25 +20,20 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipsProc;
-import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
 import java.util.List;
 
-final class GraphStreamingDocTest extends SingleFileDocTestBase {
+final class GraphStreamRelationshipsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
             GraphProjectProc.class,
             NodeSimilarityMutateProc.class,
-            DegreeCentralityMutateProc.class,
-            GraphStreamNodePropertiesProc.class,
             GraphStreamRelationshipsProc.class,
             GraphStreamRelationshipPropertiesProc.class
         );
@@ -47,16 +42,13 @@ final class GraphStreamingDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> functions() {
         return List.of(
-            NodePropertyFunc.class,
             AsNodeFunc.class
         );
     }
 
-    // FIXME the setup queries are not executed per group but only at the beginning of the test
-    // this is a problem as the nodes and rels graph both has nodes ... we should try to use the same graph
     @Override
     protected String adocFile() {
-        return "pages/management-ops/graph-inspection/graph-streaming.adoc";
+        return "pages/management-ops/graph-inspection/graph-stream-relationships.adoc";
     }
 
 }

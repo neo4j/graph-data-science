@@ -51,6 +51,7 @@ public enum SyntaxMode {
     REMOVE_NODE_PROPERTY("include-with-remove-node-property"),
     REMOVE_RELATIONSHIP_TYPE("include-with-remove-relationship-type"),
     WRITE_RELATIONSHIP_PROPERTIES("include-with-write-multiple-properties"),
+    WRITE_NODE_PROPERTIES("include-with-write-node-properties"),
     GRAPH_LIST("graph-list-syntax"),
     MODEL_LIST("model-list-syntax"),
     MODEL_PUBLISH("model-publish-syntax"),

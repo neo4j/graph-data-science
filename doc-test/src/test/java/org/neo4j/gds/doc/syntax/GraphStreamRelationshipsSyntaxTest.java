@@ -21,19 +21,19 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-class GraphPartialWriteBackSyntaxTest extends SyntaxTestBase {
+class GraphStreamRelationshipsSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.WRITE, 2),
-            SyntaxModeMeta.of(SyntaxMode.WRITE_RELATIONSHIP_PROPERTIES),
-            SyntaxModeMeta.of(SyntaxMode.WRITE_NODE_LABEL)
+            SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
+            SyntaxModeMeta.of(SyntaxMode.STREAM_TOPOLOGY),
+            SyntaxModeMeta.of(SyntaxMode.STREAM_MULTIPLE_PROPERTIES)
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/graph-write-to-neo4j/partial-write-back.adoc";
+        return "pages/management-ops/graph-inspection/graph-stream-relationships.adoc";
     }
 }

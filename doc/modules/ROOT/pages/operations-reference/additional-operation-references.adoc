@@ -21,7 +21,7 @@
 | `gds.util.infinity` label:function[Function]
 | `gds.util.isFinite` label:function[Function]
 | `gds.util.isInfinite` label:function[Function]
-| xref:management-ops/graph-inspection/graph-streaming.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `gds.util.nodeProperty` label:function[Function]
+| xref:management-ops/graph-inspection/graph-stream-nodes.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `gds.util.nodeProperty` label:function[Function]
 | xref:alpha-algorithms/one-hot-encoding.adoc[One Hot Encoding] | `gds.alpha.ml.oneHotEncoding` label:function[Function]
 | xref:common-usage/debug-sysinfo.adoc[Status of the system]                                   | `gds.debug.sysInfo` label:procedure[Procedure]
 | xref:installation/configure-apache-arrow-server.adoc[Monitoring]                              | `gds.debug.arrow` label:procedure[Procedure]
