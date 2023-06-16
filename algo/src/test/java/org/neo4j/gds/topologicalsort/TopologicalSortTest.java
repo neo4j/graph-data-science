@@ -35,11 +35,14 @@ import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
     private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder().concurrency(4)
         .longestPathDistance(true)
+        .build();
+    private static TopologicalSortBaseConfig BASIC_CONFIG = new TopologicalSortStreamConfigImpl.Builder().concurrency(4)
         .build();
 
     @GdlGraph(graphNamePrefix = "basic")
@@ -61,7 +64,7 @@ class TopologicalSortTest {
     void shouldSortRight() {
         TopologicalSort ts = new TopologicalSort(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.value();
+        HugeLongArray nodes = result.sortedNodes();
 
         long first = nodes.get(0);
         long second = nodes.get(1);
@@ -73,11 +76,11 @@ class TopologicalSortTest {
         assertEquals(2, third);
         assertEquals(1, fourth);
 
-        HugeAtomicLongArray longestPaths = result.longestPathDistances();
-        long firstLongestPathDistance = longestPaths.get(0);
-        long secondLongestPathDistance = longestPaths.get(1);
-        long thirdLongestPathDistance = longestPaths.get(2);
-        long fourthLongestPathDistance = longestPaths.get(3);
+        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
+        long firstLongestPathDistance = longestPathsDistances.get(0);
+        long secondLongestPathDistance = longestPathsDistances.get(1);
+        long thirdLongestPathDistance = longestPathsDistances.get(2);
+        long fourthLongestPathDistance = longestPathsDistances.get(3);
 
         assertEquals(1, firstLongestPathDistance);
         assertEquals(3, secondLongestPathDistance);
@@ -102,11 +105,19 @@ class TopologicalSortTest {
 
     @Test
     void allCycleShouldGiveEmptySorting() {
-        TopologicalSort ts = new TopologicalSort(allCycleGraph, CONFIG, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(allCycleGraph, BASIC_CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.value();
+        HugeLongArray nodes = result.sortedNodes();
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void shouldNotAllocateArraysOnBasicConfig() {
+        TopologicalSort ts = new TopologicalSort(allCycleGraph, BASIC_CONFIG, ProgressTracker.NULL_TRACKER);
+        TopologicalSortResult result = ts.compute();
+
+        assertTrue(result.longestPathDistances().isEmpty());
     }
 
     @GdlGraph(graphNamePrefix = "selfLoop")
@@ -126,13 +137,20 @@ class TopologicalSortTest {
     void ShouldExcludeSelfLoops() {
         TopologicalSort ts = new TopologicalSort(selfLoopGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.value();
+        HugeLongArray nodes = result.sortedNodes();
+        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
 
         long first = nodes.get(0);
         assertEquals(1, result.size());
         assertEquals(0, first);
+
+        // Note: paths of ignored nodes are not calculated, and can have any value (unimportant implementation detail)
+        long firstLongestPathDistance = longestPathsDistances.get(0);
+        assertEquals(0, firstLongestPathDistance);
     }
 
+    // This graph looks like an asterisk. nodes 0-9 are at the outermost layer, they point to nodes 20-29 in the middle
+    // layer, and everyone points to node 100 in the center.
     @GdlGraph(graphNamePrefix = "last", idOffset = 20)
     private static final String lastQuery =
         "CREATE" +
@@ -198,11 +216,56 @@ class TopologicalSortTest {
         long nodeCount = lastGraph.nodeCount();
         TopologicalSort ts = new TopologicalSort(lastGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.value();
+        HugeLongArray nodes = result.sortedNodes();
+        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
 
         assertEquals(nodeCount, result.size());
         long last = nodes.get(nodeCount - 1);
         assertEquals(lastGraph.toMappedNodeId("n100"), last);
+
+        long n0distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n0"));
+        long n1distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n1"));
+        long n2distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n2"));
+        long n3distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n3"));
+        long n4distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n4"));
+        long n5distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n5"));
+        long n6distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n6"));
+        long n7distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n7"));
+        long n8distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n8"));
+        long n9distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n9"));
+        long n20distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n20"));
+        long n21distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n21"));
+        long n22distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n22"));
+        long n23distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n23"));
+        long n24distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n24"));
+        long n25distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n25"));
+        long n26distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n26"));
+        long n27distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n27"));
+        long n28distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n28"));
+        long n29distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n29"));
+        long n100distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n100"));
+
+        assertEquals(0, n0distance);
+        assertEquals(0, n1distance);
+        assertEquals(0, n2distance);
+        assertEquals(0, n3distance);
+        assertEquals(0, n4distance);
+        assertEquals(0, n5distance);
+        assertEquals(0, n6distance);
+        assertEquals(0, n7distance);
+        assertEquals(0, n8distance);
+        assertEquals(0, n9distance);
+        assertEquals(1, n20distance);
+        assertEquals(1, n21distance);
+        assertEquals(1, n22distance);
+        assertEquals(1, n23distance);
+        assertEquals(1, n24distance);
+        assertEquals(1, n25distance);
+        assertEquals(1, n26distance);
+        assertEquals(1, n27distance);
+        assertEquals(1, n28distance);
+        assertEquals(1, n29distance);
+        assertEquals(2, n100distance);
     }
 
     @GdlGraph(graphNamePrefix = "cycles")
@@ -238,7 +301,8 @@ class TopologicalSortTest {
     void shouldNotIncludeCycles() {
         TopologicalSort ts = new TopologicalSort(cyclesGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.value();
+        HugeLongArray nodes = result.sortedNodes();
+        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
 
         long first = nodes.get(0);
         long second = nodes.get(1);
@@ -250,6 +314,14 @@ class TopologicalSortTest {
         );
         assertEquals(3, result.size());
         assertThat(third).isEqualTo(cyclesGraph.toMappedNodeId("n6"));
+
+        long n6distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n6"));
+        long n7distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n7"));
+        long n8distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n8"));
+
+        assertEquals(1, n6distance);
+        assertEquals(0, n7distance);
+        assertEquals(0, n8distance);
     }
 
     @Test
@@ -265,7 +337,7 @@ class TopologicalSortTest {
             .build()
             .generate();
 
-        TopologicalSort ts = new TopologicalSort(graph, CONFIG, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(graph, BASIC_CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         assertEquals(100, result.size());
     }
@@ -281,7 +353,7 @@ class TopologicalSortTest {
             .build()
             .generate();
 
-        TopologicalSort ts = new TopologicalSortFactory<>().build(graph, CONFIG, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSortFactory<>().build(graph, BASIC_CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         assertEquals(1000_000, result.size());
     }

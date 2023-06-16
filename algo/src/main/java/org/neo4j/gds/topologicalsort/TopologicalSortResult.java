@@ -38,12 +38,12 @@ public class TopologicalSortResult {
         this.longestPathDistances = longestPathDistances;
     }
 
-    public HugeLongArray value() {
+    public HugeLongArray sortedNodes() {
         return sortedNodes;
     }
 
-    public HugeAtomicLongArray longestPathDistances() {
-        return longestPathDistances.get();
+    public Optional<HugeAtomicLongArray> longestPathDistances() {
+        return longestPathDistances;
     }
 
     public long size() {
