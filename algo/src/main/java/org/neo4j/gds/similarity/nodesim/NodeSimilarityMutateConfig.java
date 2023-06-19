@@ -21,14 +21,15 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
+public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig,
+    MutateNodePropertyConfig, MutateRelationshipConfig {
 
     static NodeSimilarityMutateConfig of(CypherMapWrapper userInput) {
         NodeSimilarityMutateConfig config = new NodeSimilarityMutateConfigImpl(userInput);

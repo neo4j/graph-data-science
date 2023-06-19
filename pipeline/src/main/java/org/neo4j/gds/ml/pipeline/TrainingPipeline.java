@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+import static org.neo4j.gds.config.MutateNodePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> implements Pipeline<FEATURE_STEP> {

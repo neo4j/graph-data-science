@@ -82,7 +82,7 @@ import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+import static org.neo4j.gds.config.MutateNodePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.TestNodePropertyStepWithFixedEstimation;
 import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.FEATURE_INPUT;
 import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.TEST;

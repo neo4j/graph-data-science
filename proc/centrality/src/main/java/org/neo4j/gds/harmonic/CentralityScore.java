@@ -21,7 +21,7 @@ package org.neo4j.gds.harmonic;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
@@ -114,7 +114,9 @@ class CentralityScore {
                     preProcessingMillis,
                     computeMillis,
                     writeMillis,
-                    config instanceof MutatePropertyConfig ? ((MutatePropertyConfig) config).mutateProperty() : "",
+                    config instanceof MutateNodePropertyConfig
+                        ? ((MutateNodePropertyConfig) config).mutateProperty()
+                        : "",
                     centralityHistogram
                 );
             }
