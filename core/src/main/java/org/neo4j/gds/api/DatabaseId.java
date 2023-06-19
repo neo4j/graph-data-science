@@ -80,4 +80,19 @@ public final class DatabaseId {
     private DatabaseId(String databaseName) {
         this.databaseName = databaseName;
     }
+
+    /**
+     * Microtypes ftw! They sit there and attract behaviour.
+     * Like this behaviour: you have the current database as an incoming parameter (this object),
+     * but optionally you override it with this new name - but only if it is null or blank
+     * @return this database id or the override if appropriate
+     */
+    public DatabaseId orOverride(String optionalDatabaseName) {
+        if (optionalDatabaseName == null) return this;
+
+        var trimmedDatabaseName = optionalDatabaseName.trim();
+        if (trimmedDatabaseName.isBlank()) return this;
+
+        return DatabaseId.from(trimmedDatabaseName);
+    }
 }
