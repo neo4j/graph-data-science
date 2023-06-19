@@ -24,7 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 
 public interface TopologicalSortBaseConfig extends AlgoBaseConfig {
     @Value.Default
-    default boolean longestPathDistance() {
+    default boolean computeLongestPathDistances() {
         return false;
     }
 }

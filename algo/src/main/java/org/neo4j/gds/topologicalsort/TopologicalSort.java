@@ -71,7 +71,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.nodeCount = graph.nodeCount();
         this.concurrency = config.concurrency();
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
-        this.longestPathDistances = config.longestPathDistance()
+        this.longestPathDistances = config.computeLongestPathDistances()
             ? Optional.of(HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
