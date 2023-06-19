@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
@@ -29,8 +30,10 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
  * we have to keep having security context as a parameter.
  * Once we only use it in procedure facade we can switch to using constructor injection and hide security context.
  */
-public class UsernameService {
-    public String getUsername(SecurityContext securityContext) {
-        return Neo4jProxy.username(securityContext.subject());
+public class UserServices {
+    public User getUser(SecurityContext securityContext) {
+        String username = Neo4jProxy.username(securityContext.subject());
+        boolean isAdmin = securityContext.roles().contains("admin");
+        return new User(username, isAdmin);
     }
 }

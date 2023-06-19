@@ -25,7 +25,7 @@ public class User {
     private final String username;
     private final boolean isAdmin;
 
-    User(String username, boolean isAdmin) {
+    public User(String username, boolean isAdmin) {
         this.username = username;
         this.isAdmin = isAdmin;
     }
