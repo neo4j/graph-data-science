@@ -215,4 +215,37 @@ class KCoreDecompositionTest {
         }
 
     }
+
+    @GdlExtension
+    @Nested
+    class K4Graph {
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a:node)," +
+                "  (b:node)," +
+                "  (c:node)," +
+                "  (d:node)," +
+
+                "(a)-[:R]->(b)," +
+                "(a)-[:R]->(c)," +
+                "(a)-[:R]->(d)," +
+                "(b)-[:R]->(c)," +
+                "(b)-[:R]->(d)," +
+                "(c)-[:R]->(d)";
+
+
+        @Inject
+        TestGraph graph;
+
+        @Test
+        void shouldAdvanceScanningDegreeCorrectly() {
+            var kcore = new KCoreDecomposition(graph, 1, ProgressTracker.NULL_TRACKER, 1).compute();
+            assertThat(kcore.degeneracy()).isEqualTo(3);
+            var coreValues = kcore.coreValues();
+
+            assertThat(coreValues.toArray()).isEqualTo(new int[]{3, 3, 3, 3});
+
+        }
+    }
 }
