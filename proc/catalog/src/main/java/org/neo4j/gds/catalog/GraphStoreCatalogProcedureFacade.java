@@ -126,16 +126,35 @@ public class GraphStoreCatalogProcedureFacade {
         return userLogStore.query(user().getUsername());
     }
 
-    private User user() {
-        return userServices.getUser(securityContext);
-    }
-
     /**
-     * We need to obtain the username at this point in time so that we can send it down stream to business logic.
-     * The username is specific to the procedure call.
+     * @param failIfMissing enable validation that graphs exist before dropping them
+     * @param databaseName  optional override
+     * @param username      optional override
+     * @throws IllegalArgumentException if a database name was null or blank or not a String
      */
-    private String username() {
-        return usernameService.getUsername(securityContext);
+    public Stream<GraphInfo> dropGraph(
+        Object graphNameOrListOfGraphNames,
+        boolean failIfMissing,
+        String databaseName,
+        String username
+    ) throws IllegalArgumentException {
+        var databaseId = databaseId();
+        var user = user();
+
+        var results = businessFacade.dropGraph(
+            graphNameOrListOfGraphNames,
+            failIfMissing,
+            databaseName,
+            username,
+            databaseId,
+            user
+        );
+
+        // make this injectable so easy ot test?
+        return results.stream().map(gswc -> GraphInfo.withoutMemoryUsage(
+            gswc.config(),
+            gswc.graphStore()
+        ));
     }
 
     /**
@@ -144,5 +163,9 @@ public class GraphStoreCatalogProcedureFacade {
      */
     private DatabaseId databaseId() {
         return databaseIdService.getDatabaseId(graphDatabaseService);
+    }
+
+    private User user() {
+        return userServices.getUser(securityContext);
     }
 }

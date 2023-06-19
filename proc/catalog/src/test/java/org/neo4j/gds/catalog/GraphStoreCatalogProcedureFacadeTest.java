@@ -63,11 +63,11 @@ class GraphStoreCatalogProcedureFacadeTest {
             businessFacade
         );
 
-        when(usernameService.getUser(securityContext).getUsername()).thenReturn("someUser");
-        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("someDatabase"));
-        procedureFacade.graphExists("someGraph");
+        when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
+        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("current database"));
+        procedureFacade.graphExists("some graph");
 
-        verify(businessFacade).graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph");
+        verify(businessFacade).graphExists("current user", DatabaseId.from("current database"), "some graph");
     }
 
     /**
@@ -100,17 +100,17 @@ class GraphStoreCatalogProcedureFacadeTest {
             businessFacade
         );
 
-        var databaseId = DatabaseId.from("some database");
+        var databaseId = DatabaseId.from("current database");
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
         var userLogStore = mock(UserLogStore.class);
         when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);
-        when(usernameService.getUser(securityContext).getUsername()).thenReturn("some user");
+        when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        when(userLogStore.query("some user")).thenReturn(expectedWarnings);
+        when(userLogStore.query("current user")).thenReturn(expectedWarnings);
         var actualWarnings = procedureFacade.queryUserLog(null);
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);
