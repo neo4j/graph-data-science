@@ -22,6 +22,10 @@ package org.neo4j.gds.topologicalsort;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+
+import java.util.List;
 
 public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> extends GraphAlgorithmFactory<TopologicalSort, CONFIG> {
     @Override
@@ -36,5 +40,13 @@ public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> ex
     @Override
     public String taskName() {
         return "TopologicalSort";
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
+        var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
+
+        return Tasks.task("TopologicalSort", List.of(initializationTask, traversalTask));
     }
 }

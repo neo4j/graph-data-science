@@ -19,8 +19,12 @@
  */
 package org.neo4j.gds.topologicalsort;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 public interface TopologicalSortBaseConfig extends AlgoBaseConfig {
-
+    @Value.Default
+    default boolean computeLongestPathDistances() {
+        return false;
+    }
 }
