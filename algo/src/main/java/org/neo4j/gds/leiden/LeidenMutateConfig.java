@@ -20,11 +20,11 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface LeidenMutateConfig extends LeidenBaseConfig, MutatePropertyConfig {
+public interface LeidenMutateConfig extends LeidenBaseConfig, MutateNodePropertyConfig {
 
     static LeidenMutateConfig of(CypherMapWrapper userInput) {
         return new LeidenMutateConfigImpl(userInput);

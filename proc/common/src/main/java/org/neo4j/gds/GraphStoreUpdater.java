@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -39,14 +39,14 @@ import java.util.stream.Collectors;
 public final class GraphStoreUpdater {
     private GraphStoreUpdater() {}
 
-    public static <ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> void UpdateGraphStore(
+    public static <ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutateNodePropertyConfig> void UpdateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext,
         final List<NodeProperty> nodePropertyList
     ) {
         var graph = computationResult.graph();
-        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
+        MutateNodePropertyConfig mutatePropertyConfig = computationResult.config();
 
         var maybeTranslatedProperties = graph
             .asNodeFilteredGraph()

@@ -21,13 +21,13 @@ package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface BetweennessCentralityMutateConfig extends BetweennessCentralityBaseConfig, MutatePropertyConfig {
+public interface BetweennessCentralityMutateConfig extends BetweennessCentralityBaseConfig, MutateNodePropertyConfig {
 
     static BetweennessCentralityMutateConfig of(CypherMapWrapper config) {
         return new BetweennessCentralityMutateConfigImpl(config);

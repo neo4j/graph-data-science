@@ -21,17 +21,19 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface TestMutateConfig extends TestConfig, MutatePropertyConfig {
+public interface TestMutateConfig extends TestConfig, MutateNodePropertyConfig {
 
     default boolean throwOnEstimate() {
         return false;
-    };
+    }
+
+    ;
 
     static TestMutateConfig of(CypherMapWrapper config) {
         return new TestMutateConfigImpl(config);

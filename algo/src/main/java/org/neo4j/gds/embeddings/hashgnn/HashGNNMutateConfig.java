@@ -20,11 +20,11 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface HashGNNMutateConfig extends HashGNNConfig, MutatePropertyConfig {
+public interface HashGNNMutateConfig extends HashGNNConfig, MutateNodePropertyConfig {
 
     static HashGNNMutateConfig of(CypherMapWrapper config) {
         return new HashGNNMutateConfigImpl(config);

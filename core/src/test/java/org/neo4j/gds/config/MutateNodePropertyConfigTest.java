@@ -27,19 +27,23 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class MutatePropertyConfigTest {
+class MutateNodePropertyConfigTest {
 
     @Test
     void testMutateFailsOnExistingToken() {
         var graphStore = GdlFactory.of("(a {foo: 42})").build();
-        MutatePropertyConfig config = TestMutatePropertyConfigImpl.builder().mutateProperty("foo").build();
+        MutateNodePropertyConfig config = TestMutatePropertyConfigImpl.builder().mutateProperty("foo").build();
 
-        assertThatThrownBy(() -> config.validateMutateProperty(graphStore, config.nodeLabelIdentifiers(graphStore), List.of()))
+        assertThatThrownBy(() -> config.validateMutateProperty(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            List.of()
+        ))
             .hasMessageContaining("Node property `foo` already exists in the in-memory graph.");
     }
 
     @Configuration
-    interface TestMutatePropertyConfig extends AlgoBaseConfig, MutatePropertyConfig {
+    interface TestMutatePropertyConfig extends AlgoBaseConfig, MutateNodePropertyConfig {
     }
 }
 
