@@ -232,7 +232,7 @@ class BfsStreamProcTest extends BaseProcTest {
             .addParameter("sourceNode", 4242)
             .yields();
 
-        assertError(query, "Source node does not exist in the in-memory graph: `42`");
+        assertError(query, "Source node does not exist in the in-memory graph: `4242");
     }
 
 }
