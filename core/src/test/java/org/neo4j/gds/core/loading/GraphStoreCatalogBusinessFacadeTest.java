@@ -35,8 +35,9 @@ class GraphStoreCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new GraphStoreCatalogBusinessFacade(
             mock(PreconditionsService.class),
-            mock(GraphNameValidationService.class),
-            service
+            new GraphNameValidationService(),
+            service,
+            null
         );
 
         when(service.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph")).thenReturn(true);
@@ -51,7 +52,8 @@ class GraphStoreCatalogBusinessFacadeTest {
         var facade = new GraphStoreCatalogBusinessFacade(
             mock(PreconditionsService.class),
             mock(GraphNameValidationService.class),
-            service
+            service,
+            null
         );
 
         when(service.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph")).thenReturn(false);
@@ -66,31 +68,29 @@ class GraphStoreCatalogBusinessFacadeTest {
         var facade = new GraphStoreCatalogBusinessFacade(
             preconditionsService,
             null,
+            null,
             null
         );
 
-        doThrow(new IllegalStateException("call blocked because reasons")).when(preconditionsService)
-            .checkPreconditions();
+        doThrow(new IllegalStateException("call blocked because reasons"))
+            .when(preconditionsService).checkPreconditions();
         assertThatThrownBy(
             () -> facade.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph")
         ).hasMessage("call blocked because reasons");
     }
 
     @Test
-    void shouldValidateInputName() {
+    void shouldValidateInputGraphName() {
         var service = mock(GraphStoreCatalogService.class);
-        var graphNameValidationService = mock(GraphNameValidationService.class);
         var facade = new GraphStoreCatalogBusinessFacade(
             mock(PreconditionsService.class),
-            graphNameValidationService,
-            service
+            new GraphNameValidationService(),
+            service,
+            null
         );
 
-        doThrow(new IllegalStateException("'some blank graph name' is considered blank"))
-            .when(graphNameValidationService)
-            .ensureIsNotBlank("some blank graph name");
         assertThatThrownBy(
-            () -> facade.graphExists("someUser", DatabaseId.from("someDatabase"), "some blank graph name")
-        ).hasMessage("'some blank graph name' is considered blank");
+            () -> facade.graphExists("someUser", DatabaseId.from("someDatabase"), "   ")
+        ).hasMessage("`graphName` can not be null or blank, but it was `   `");
     }
 }
