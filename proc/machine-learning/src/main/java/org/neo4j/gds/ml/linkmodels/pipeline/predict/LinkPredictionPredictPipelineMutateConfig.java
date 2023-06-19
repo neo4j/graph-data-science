@@ -21,15 +21,15 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictionPredictPipelineBaseConfig,
     MutateRelationshipConfig,
-    MutateNodePropertyConfig {
+    MutateRelationshipPropertyConfig {
     @Value.Default
     @Override
     default String mutateProperty() {

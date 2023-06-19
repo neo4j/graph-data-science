@@ -21,15 +21,15 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface SpanningTreeMutateConfig extends SpanningTreeBaseConfig,
-    MutateNodePropertyConfig, MutateRelationshipConfig {
+    MutateRelationshipPropertyConfig, MutateRelationshipConfig {
 
     static SpanningTreeMutateConfig of(CypherMapWrapper userInput) {
         return new SpanningTreeMutateConfigImpl(userInput);

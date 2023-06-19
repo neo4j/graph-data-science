@@ -32,9 +32,7 @@ public interface TestMutateConfig extends TestConfig, MutateNodePropertyConfig {
     default boolean throwOnEstimate() {
         return false;
     }
-
-    ;
-
+    
     static TestMutateConfig of(CypherMapWrapper config) {
         return new TestMutateConfigImpl(config);
     }
