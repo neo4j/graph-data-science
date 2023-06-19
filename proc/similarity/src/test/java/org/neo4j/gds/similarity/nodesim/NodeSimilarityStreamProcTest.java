@@ -367,7 +367,7 @@ class NodeSimilarityStreamProcTest extends BaseProcTest {
             .yields("node1", "node2", "similarity");
 
         var filteredNodes = runQuery(
-            "MATCH (n:Foo|Bar) RETURN id(n) AS id",
+            "MATCH (n) WHERE n:Foo OR n:Bar RETURN id(n) AS id",
             result -> result.stream().map(i -> (long) i.get("id")).collect(Collectors.toSet())
         );
 
