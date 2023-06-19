@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -337,7 +338,7 @@ class NodeSimilarityStreamProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 10})
     void shouldStreamWithFilteredNodes(int topN) {
-        runQuery("MATCH (n) DETACH DELETE n");
+        clearDb();
         String graphCreateQuery =
             "CREATE (alice:Person)" +
             ", (carol:Person)" +
@@ -365,12 +366,17 @@ class NodeSimilarityStreamProcTest extends BaseProcTest {
             .addParameter("topN", topN)
             .yields("node1", "node2", "similarity");
 
+        var filteredNodes = runQuery(
+            "MATCH (n:Foo|Bar) RETURN id(n) AS id",
+            result -> result.stream().map(i -> (long) i.get("id")).collect(Collectors.toSet())
+        );
+
         var rowCount = runQueryWithRowConsumer(algoQuery, row -> {
-            assertThat(row.getNumber("node1")).isIn(11L, 12L);
-            assertThat(row.getNumber("node2")).isIn(11L, 12L);
+            assertThat(row.getNumber("node1")).isIn(filteredNodes);
+            assertThat(row.getNumber("node2")).isIn(filteredNodes);
             assertThat(row.getNumber("similarity")).isEqualTo(1.0);
         });
 
-        assertThat(rowCount).isEqualTo(2l);
+        assertThat(rowCount).isEqualTo(2L);
     }
 }
