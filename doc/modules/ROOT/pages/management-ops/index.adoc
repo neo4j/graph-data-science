@@ -52,56 +52,8 @@ xref:management-ops/inspecting-the-graph-catalog.adoc[backup and restore].
 
 After usage, graphs can be xref:management-ops/inspecting-the-graph-catalog.adoc[removed from the catalog] to free up main memory.
 
-// TODO [nvitucci] remove following
-
+// TODO [nvitucci] maybe not here
 // TODO - reuse image from common usage but greying out the other components
-
-// TODO what to put here now? (we have a subsection) maybe a small image which shows the life-cycle could be good enough?
-To start with, you need to xref:management-ops/graph-creation/index.adoc[create a graph].
-
-You can then xref:management-ops/inspecting-the-graph-catalog.adoc[check the content] of the graph catalog.
-// TODO move to the general `inspect a graph section`
-Further, you can inspect xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph] a single graph in the catalog using Cypher.
-
-=== Modifying the graph catalog
-
-.Graph catalog update operations:
-[opts=header,cols="1m,1"]
-|===
-| Name                                     | Description
-| xref:graph-catalog-node-ops.adoc[gds.alpha.graph.nodeLabel.mutate] | Computes and adds a new node label to the graph.
-| xref:graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.toUndirected] | Converts relationship of a given type in a graph from directed to undirected.
-|===
-
-
-=== Exporting from the graph catalog
-
-.Graph catalog export operations:
-[opts=header,cols="1m,1"]
-|===
-| Name                                                                                   | Description
-| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperty.stream]                        | Streams a single node property stored in a named graph.
-| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                      | Streams node properties stored in a named graph.
-| xref:graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.stream]          | Streams relationship topologies stored in a named graph.
-| xref:graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperty.stream]        | Streams a single relationship property stored in a named graph.
-| xref:graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperties.stream]      | Streams relationship properties stored in a named graph.
-| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.write]                       | Writes node properties stored in a named graph to Neo4j.
-| xref:graph-catalog-relationship-ops.adoc[gds.graph.relationship.write]                 | Writes relationships stored in a named graph to Neo4j.
-| xref:graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]     | Exports a named graph into a new offline Neo4j database.
-| xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv] | Exports a named graph into CSV files.
-|===
-
-
-=== Removing from the graph catalog
-
-.Graph catalog removal operations:
-[opts=header,cols="1m,1"]
-|===
-| Name                                                                                                 | Description
-| xref:graph-drop.adoc[gds.graph.drop]                                                                 | Drops a named graph from the catalog.
-| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                                      | Removes node properties from a named graph.
-| xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop] | Deletes relationships of a given relationship type from a named graph.
-|===
 
 == Administration
 
