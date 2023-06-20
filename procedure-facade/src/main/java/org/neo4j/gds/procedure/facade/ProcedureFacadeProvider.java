@@ -26,15 +26,16 @@ import org.neo4j.gds.catalog.KernelTransactionService;
 import org.neo4j.gds.catalog.ProcedureTransactionService;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
 import org.neo4j.gds.catalog.UserLogServices;
-import org.neo4j.gds.catalog.UsernameService;
+import org.neo4j.gds.catalog.UserServices;
+import org.neo4j.gds.core.loading.DropGraphService;
 import org.neo4j.gds.core.loading.GraphNameValidationService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.PreconditionsService;
 import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.gds.logging.Log;
 
 /**
  * So here we set up the entire application with all it's services.
@@ -46,20 +47,20 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
     private final DatabaseIdService databaseIdService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
-    private final UsernameService usernameService;
+    private final UserServices userServices;
 
     ProcedureFacadeProvider(
         Log log,
         DatabaseIdService databaseIdService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
-        UsernameService usernameService
+        UserServices userServices
     ) {
         this.log = log;
         this.databaseIdService = databaseIdService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
-        this.usernameService = usernameService;
+        this.userServices = userServices;
     }
 
     /**
@@ -74,10 +75,12 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
         // GDS Business Facade
         var preconditionsService = createPreconditionsService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         var businessFacade = new GraphStoreCatalogBusinessFacade(
             preconditionsService,
             new GraphNameValidationService(),
-            new GraphStoreCatalogService()
+            graphStoreCatalogService,
+            new DropGraphService(graphStoreCatalogService)
         );
 
         return new GraphStoreCatalogProcedureFacade(
@@ -89,7 +92,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             context.securityContext(),
             taskRegistryFactoryService,
             userLogServices,
-            usernameService,
+            userServices,
             businessFacade
         );
     }

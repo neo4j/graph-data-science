@@ -20,11 +20,12 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.gds.logging.Log;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -59,7 +60,7 @@ public class GraphStoreCatalogProcedureFacade {
     private final SecurityContext securityContext;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
-    private final UsernameService usernameService;
+    private final UserServices userServices;
 
     // business facade
     private final GraphStoreCatalogBusinessFacade businessFacade;
@@ -73,7 +74,7 @@ public class GraphStoreCatalogProcedureFacade {
         SecurityContext securityContext,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
-        UsernameService usernameService,
+        UserServices userServices,
         GraphStoreCatalogBusinessFacade businessFacade
     ) {
         this.databaseIdService = databaseIdService;
@@ -84,7 +85,7 @@ public class GraphStoreCatalogProcedureFacade {
         this.securityContext = securityContext;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
-        this.usernameService = usernameService;
+        this.userServices = userServices;
 
         this.businessFacade = businessFacade;
     }
@@ -109,7 +110,7 @@ public class GraphStoreCatalogProcedureFacade {
 
     boolean graphExists(String graphName) {
         // stripping off Neo4j bits
-        String username = username();
+        String username = user().getUsername();
         DatabaseId databaseId = databaseId();
 
         // no static access! we want to be able to test this stuff
@@ -122,15 +123,38 @@ public class GraphStoreCatalogProcedureFacade {
     public Stream<UserLogEntry> queryUserLog(String jobId) {
         var userLogStore = userLogServices.getUserLogStore(databaseId());
 
-        return userLogStore.query(username());
+        return userLogStore.query(user().getUsername());
     }
 
     /**
-     * We need to obtain the username at this point in time so that we can send it down stream to business logic.
-     * The username is specific to the procedure call.
+     * @param failIfMissing enable validation that graphs exist before dropping them
+     * @param databaseName  optional override
+     * @param username      optional override
+     * @throws IllegalArgumentException if a database name was null or blank or not a String
      */
-    private String username() {
-        return usernameService.getUsername(securityContext);
+    public Stream<GraphInfo> dropGraph(
+        Object graphNameOrListOfGraphNames,
+        boolean failIfMissing,
+        String databaseName,
+        String username
+    ) throws IllegalArgumentException {
+        var databaseId = databaseId();
+        var user = user();
+
+        var results = businessFacade.dropGraph(
+            graphNameOrListOfGraphNames,
+            failIfMissing,
+            databaseName,
+            username,
+            databaseId,
+            user
+        );
+
+        // make this injectable so easy ot test?
+        return results.stream().map(gswc -> GraphInfo.withoutMemoryUsage(
+            gswc.config(),
+            gswc.graphStore()
+        ));
     }
 
     /**
@@ -139,5 +163,9 @@ public class GraphStoreCatalogProcedureFacade {
      */
     private DatabaseId databaseId() {
         return databaseIdService.getDatabaseId(graphDatabaseService);
+    }
+
+    private User user() {
+        return userServices.getUser(securityContext);
     }
 }

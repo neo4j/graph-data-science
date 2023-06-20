@@ -20,6 +20,10 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
@@ -47,23 +51,51 @@ public class GraphStoreCatalogBusinessFacade {
 
     // business logic
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final DropGraphService dropGraphService;
 
     public GraphStoreCatalogBusinessFacade(
         PreconditionsService preconditionsService,
         GraphNameValidationService graphNameValidationService,
-        GraphStoreCatalogService graphStoreCatalogService
+        GraphStoreCatalogService graphStoreCatalogService,
+        DropGraphService dropGraphService
     ) {
         this.preconditionsService = preconditionsService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.dropGraphService = dropGraphService;
     }
 
     public boolean graphExists(String username, DatabaseId databaseId, String graphName) {
         checkPreconditions();
 
-        validateGraphNameNotBlank(graphName);
+        var validatedGraphName = graphNameValidationService.validate(graphName);
 
-        return graphStoreCatalogService.graphExists(username, databaseId, graphName);
+        return graphStoreCatalogService.graphExists(username, databaseId, validatedGraphName);
+    }
+
+    /**
+     * @param failIfMissing enable validation that graphs exist before dropping them
+     * @param databaseName  optional override
+     * @param username      optional override
+     * @throws IllegalArgumentException if a database name was null or blank or not a String
+     */
+    public List<GraphStoreWithConfig> dropGraph(
+        Object graphNameOrListOfGraphNames,
+        boolean failIfMissing,
+        String databaseName,
+        String username,
+        DatabaseId currentDatabase,
+        User operator
+    ) {
+        checkPreconditions();
+
+        // general parameter consolidation
+        // we imagine any new endpoints will follow the exact same parameter lists I guess, for now
+        List<String> validatedGraphNames = parseGraphNameOrListOfGraphNames(graphNameOrListOfGraphNames);
+        DatabaseId databaseId = currentDatabase.orOverride(databaseName);
+        Optional<String> usernameOverride = User.parseUsernameOverride(username);
+
+        return dropGraphService.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
     }
 
     private void checkPreconditions() {
@@ -71,9 +103,9 @@ public class GraphStoreCatalogBusinessFacade {
     }
 
     /**
-     * A hook for validating graph name, could broaden later
+     * I wonder if other endpoint will also deliver an Object type to parse in this layer - we shall see
      */
-    private void validateGraphNameNotBlank(String graphName) {
-        graphNameValidationService.ensureIsNotBlank(graphName);
+    private List<String> parseGraphNameOrListOfGraphNames(Object graphNameOrListOfGraphNames) {
+        return graphNameValidationService.validateSingleOrList(graphNameOrListOfGraphNames);
     }
 }

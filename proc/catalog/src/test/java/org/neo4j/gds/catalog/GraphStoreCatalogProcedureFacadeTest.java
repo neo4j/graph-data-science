@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
@@ -41,7 +42,7 @@ class GraphStoreCatalogProcedureFacadeTest {
         var databaseIdService = mock(DatabaseIdService.class);
         var graphDatabaseService = mock(GraphDatabaseService.class);
         var securityContext = mock(SecurityContext.class);
-        var usernameService = mock(UsernameService.class);
+        var usernameService = mock(UserServices.class);
         var businessFacade = mock(GraphStoreCatalogBusinessFacade.class);
         var procedureFacade = new GraphStoreCatalogProcedureFacade(
             databaseIdService,
@@ -56,11 +57,11 @@ class GraphStoreCatalogProcedureFacadeTest {
             businessFacade
         );
 
-        when(usernameService.getUsername(securityContext)).thenReturn("someUser");
-        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("someDatabase"));
-        procedureFacade.graphExists("someGraph");
+        when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
+        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("current database"));
+        procedureFacade.graphExists("some graph");
 
-        verify(businessFacade).graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph");
+        verify(businessFacade).graphExists("current user", DatabaseId.from("current database"), "some graph");
     }
 
     /**
@@ -77,7 +78,7 @@ class GraphStoreCatalogProcedureFacadeTest {
         var databaseIdService = mock(DatabaseIdService.class);
         var graphDatabaseService = mock(GraphDatabaseService.class);
         var userLogServices = mock(UserLogServices.class);
-        var usernameService = mock(UsernameService.class);
+        var usernameService = mock(UserServices.class);
         var businessFacade = mock(GraphStoreCatalogBusinessFacade.class);
         var securityContext = mock(SecurityContext.class);
         var procedureFacade = new GraphStoreCatalogProcedureFacade(
@@ -93,17 +94,17 @@ class GraphStoreCatalogProcedureFacadeTest {
             businessFacade
         );
 
-        var databaseId = DatabaseId.from("some database");
+        var databaseId = DatabaseId.from("current database");
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
         var userLogStore = mock(UserLogStore.class);
         when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);
-        when(usernameService.getUsername(securityContext)).thenReturn("some user");
+        when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        when(userLogStore.query("some user")).thenReturn(expectedWarnings);
+        when(userLogStore.query("current user")).thenReturn(expectedWarnings);
         var actualWarnings = procedureFacade.queryUserLog(null);
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);

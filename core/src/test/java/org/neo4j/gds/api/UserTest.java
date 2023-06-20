@@ -17,20 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.api;
 
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.junit.jupiter.api.Test;
 
-/**
- * An abstraction that allows us to stack off Neo4j concerns cleanly.
- * <p>
- * As long as username service is used for procedure facade _and_ legacy services,
- * we have to keep having security context as a parameter.
- * Once we only use it in procedure facade we can switch to using constructor injection and hide security context.
- */
-public class UsernameService {
-    public String getUsername(SecurityContext securityContext) {
-        return Neo4jProxy.username(securityContext.subject());
+import static org.assertj.core.api.Assertions.assertThat;
+
+class UserTest {
+    @Test
+    void shouldParseUsernameOverride() {
+        assertThat(User.parseUsernameOverride("a proper username")).hasValue("a proper username");
+        assertThat(User.parseUsernameOverride("   a padded username   ")).hasValue("a padded username");
+
+        assertThat(User.parseUsernameOverride(null)).isEmpty();
+        assertThat(User.parseUsernameOverride("")).isEmpty();
+        assertThat(User.parseUsernameOverride("   ")).isEmpty();
     }
 }

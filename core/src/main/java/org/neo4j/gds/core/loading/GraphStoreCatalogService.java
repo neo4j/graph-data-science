@@ -21,13 +21,36 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.DatabaseId;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * One day the graph catalog won't be a static thing, it'll instead be a dependency you inject here. One day.
  * <p>
  * For now this service helps us engineer some other things.
+ * Calls are mostly 1-1, but we can do some handy and _simple_ adapting, to make calling code easier to test,
+ * without having to write separate tests for this class.
  */
 public class GraphStoreCatalogService {
     public boolean graphExists(String username, DatabaseId databaseId, String graphName) {
         return GraphStoreCatalog.exists(username, databaseId, graphName);
+    }
+
+    public GraphStoreWithConfig removeGraph(
+        CatalogRequest request,
+        String graphName,
+        boolean shouldFailIfMissing
+    ) {
+        var result = new AtomicReference<GraphStoreWithConfig>();
+        GraphStoreCatalog.remove(
+            request,
+            graphName,
+            result::set,
+            shouldFailIfMissing
+        );
+        return result.get();
+    }
+
+    public GraphStoreWithConfig get(CatalogRequest catalogRequest, String graphName) {
+        return GraphStoreCatalog.get(catalogRequest, graphName);
     }
 }

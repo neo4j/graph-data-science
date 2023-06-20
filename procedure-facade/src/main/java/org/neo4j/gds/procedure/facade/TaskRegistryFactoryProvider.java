@@ -23,7 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
-import org.neo4j.gds.catalog.UsernameService;
+import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -34,23 +34,23 @@ import org.neo4j.kernel.api.procedure.Context;
 @Deprecated
 public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
     private final DatabaseIdService databaseIdService;
-    private final UsernameService usernameService;
+    private final UserServices userServices;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
 
     public TaskRegistryFactoryProvider(
         DatabaseIdService databaseIdService,
-        UsernameService usernameService,
+        UserServices userServices,
         TaskRegistryFactoryService taskRegistryFactoryService
     ) {
         this.databaseIdService = databaseIdService;
-        this.usernameService = usernameService;
+        this.userServices = userServices;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
     }
 
     @Override
     public TaskRegistryFactory apply(Context context) {
         DatabaseId databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
-        String username = usernameService.getUsername(context.securityContext());
+        String username = userServices.getUser(context.securityContext()).getUsername();
 
         return taskRegistryFactoryService.getTaskRegistryFactory(databaseId, username);
     }

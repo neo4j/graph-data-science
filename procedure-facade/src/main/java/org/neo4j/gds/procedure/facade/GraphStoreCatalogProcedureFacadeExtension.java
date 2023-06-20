@@ -25,7 +25,7 @@ import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
 import org.neo4j.gds.catalog.UserLogServices;
-import org.neo4j.gds.catalog.UsernameService;
+import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -73,7 +73,7 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         var taskStoreService = new TaskStoreService(progressTrackingEnabled);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
         var userLogServices = new UserLogServices();
-        var usernameService = new UsernameService();
+        var usernameService = new UserServices();
 
         /*
          * Now we can register the facade

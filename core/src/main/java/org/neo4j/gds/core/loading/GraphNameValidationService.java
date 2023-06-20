@@ -21,14 +21,79 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.CypherMapAccess;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 /**
- * I'm not loving this tiny service; but I am loving it more than a static method on an unrelated class.
- * <p>
  * GraphName ought to be a micro type. That would strengthen our domain model. And we could then create a guard,
  * where it could only get constructed in a known good state - i.e. not blank.
  */
 public class GraphNameValidationService {
-    public void ensureIsNotBlank(String graphName) {
-        CypherMapAccess.failOnBlank("graphName", graphName);
+    /**
+     * Validates that the input graph name is
+     * - not null
+     * - not blank
+     * Furthermore, the graph name is trimmed for downstream consumption.
+     */
+    public String validate(String graphName) {
+        return CypherMapAccess.failOnBlank("graphName", graphName).trim();
+    }
+
+    /**
+     * Validates that the input graph name or list of graph names are
+     * - not null
+     * - not blank
+     * Furthermore, the graph name(s) are trimmed and put into a List for downstream consumption.
+     */
+    public List<String> validateSingleOrList(Object graphNameOrListOfGraphNames) {
+        if (graphNameOrListOfGraphNames == null) {
+            validate(null);
+
+            throw new IllegalStateException("Yeah that thing above should have thrown an exception");
+        }
+
+        if (graphNameOrListOfGraphNames instanceof String) {
+            return List.of(validate((String) graphNameOrListOfGraphNames));
+        }
+
+        if (graphNameOrListOfGraphNames instanceof Collection<?>) {
+            var listOfGraphNames = (Collection<?>) graphNameOrListOfGraphNames;
+
+            var validatedGraphNames = new LinkedList<String>();
+            int index = 0;
+            for (Object graphName : listOfGraphNames) {
+                var validatedGraphName = validateSingleFromList(graphName, index);
+                validatedGraphNames.add(validatedGraphName);
+                index++;
+            }
+            return validatedGraphNames;
+        }
+
+        throw typeMismatch(graphNameOrListOfGraphNames, -1);
+    }
+
+    private String validateSingleFromList(Object graphName, int index) {
+        if (graphName == null) {
+            validate(null);
+
+            throw new IllegalStateException("Yeah that thing above should have thrown an exception");
+        }
+
+        if (graphName instanceof String) return validate((String) graphName);
+
+        throw typeMismatch(graphName, index);
+    }
+
+    private IllegalArgumentException typeMismatch(Object invalid, int index) {
+        String errorMessage = formatWithLocale(
+            "Type mismatch%s: expected String but was %s.",
+            index >= 0 ? (" at index " + index) : "",
+            invalid == null ? "null" : invalid.getClass().getSimpleName()
+        );
+
+        return new IllegalArgumentException(errorMessage);
     }
 }

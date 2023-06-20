@@ -23,7 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.UserLogServices;
-import org.neo4j.gds.catalog.UsernameService;
+import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -34,23 +34,23 @@ import org.neo4j.kernel.api.procedure.Context;
 @Deprecated
 public class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
     private final DatabaseIdService databaseIdService;
-    private final UsernameService usernameService;
+    private final UserServices userServices;
     private final UserLogServices userLogServices;
 
     public UserLogRegistryFactoryProvider(
         DatabaseIdService databaseIdService,
-        UsernameService usernameService,
+        UserServices userServices,
         UserLogServices userLogServices
     ) {
         this.databaseIdService = databaseIdService;
-        this.usernameService = usernameService;
+        this.userServices = userServices;
         this.userLogServices = userLogServices;
     }
 
     @Override
     public UserLogRegistryFactory apply(Context context) {
         DatabaseId databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
-        String username = usernameService.getUsername(context.securityContext());
+        String username = userServices.getUser(context.securityContext()).getUsername();
 
         return userLogServices.getUserLogRegistryFactory(databaseId, username);
     }
