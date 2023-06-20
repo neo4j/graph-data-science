@@ -21,23 +21,17 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
