@@ -1,5 +1,5 @@
 [[graph-catalog-ops]]
-= Graph Management
+= Graph management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 
 // TODO is it okay to leave out Neo4j here

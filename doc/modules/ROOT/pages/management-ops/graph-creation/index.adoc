@@ -1,5 +1,5 @@
 [[graph-creation]]
-= Graph Creation
+= Graph creation
 :page-aliases: management-ops/node-properties.adoc
 
 
