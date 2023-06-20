@@ -49,6 +49,12 @@ public class GraphNameValidationService {
      * Furthermore, the graph name(s) are trimmed and put into a List for downstream consumption.
      */
     public List<String> validateSingleOrList(Object graphNameOrListOfGraphNames) {
+        if (graphNameOrListOfGraphNames == null) {
+            validate(null);
+
+            throw new IllegalStateException("Yeah that thing above should have thrown an exception");
+        }
+
         if (graphNameOrListOfGraphNames instanceof String) {
             return List.of(validate((String) graphNameOrListOfGraphNames));
         }
@@ -70,6 +76,12 @@ public class GraphNameValidationService {
     }
 
     private String validateSingleFromList(Object graphName, int index) {
+        if (graphName == null) {
+            validate(null);
+
+            throw new IllegalStateException("Yeah that thing above should have thrown an exception");
+        }
+
         if (graphName instanceof String) return validate((String) graphName);
 
         throw typeMismatch(graphName, index);

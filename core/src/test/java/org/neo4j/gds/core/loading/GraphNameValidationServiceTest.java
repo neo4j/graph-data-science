@@ -20,8 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +44,10 @@ class GraphNameValidationServiceTest {
     void shouldEnsureGraphNamesValid() {
         var graphNameValidationService = new GraphNameValidationService();
 
-        var validatedGraphNames = graphNameValidationService.validateSingleOrList(List.of("a graph name", "another graph name"));
+        var validatedGraphNames = graphNameValidationService.validateSingleOrList(List.of(
+            "a graph name",
+            "another graph name"
+        ));
 
         assertThat(validatedGraphNames).containsExactly("a graph name", "another graph name");
     }
@@ -82,6 +88,23 @@ class GraphNameValidationServiceTest {
         }
     }
 
+    // something found in another test
+    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
+    @MethodSource("invalidGraphNames")
+    void shouldCatchInvalidGraphNames(String graphName) {
+        var service = new GraphNameValidationService();
+
+        try {
+            service.validateSingleOrList(graphName);
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).isEqualTo("`graphName` can not be null or blank, but it was `" + graphName + "`");
+        }
+    }
+
+    private static Stream<String> invalidGraphNames() {
+        return Stream.of("", "   ", "           ", "\r\n\t", null);
+    }
+
     @Test
     void shouldFailValidationWhenGraphNameNotStringOrListOfString() {
         var graphNameValidationService = new GraphNameValidationService();
@@ -101,25 +124,15 @@ class GraphNameValidationServiceTest {
         }
     }
 
-    /**
-     * If not here then it would fail later anyway
-     */
     @Test
-    void shouldFailOnNulls() {
+    void shouldFailOnNullElements() {
         var graphNameValidationService = new GraphNameValidationService();
-
-        try {
-            graphNameValidationService.validateSingleOrList(null);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("Type mismatch: expected String but was null.");
-        }
 
         try {
             graphNameValidationService.validateSingleOrList(asList("a graph name", null, "another graph name"));
             fail();
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("Type mismatch at index 1: expected String but was null.");
+            assertThat(e.getMessage()).isEqualTo("`graphName` can not be null or blank, but it was `null`");
         }
     }
 }
