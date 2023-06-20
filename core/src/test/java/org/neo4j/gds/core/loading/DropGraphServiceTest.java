@@ -30,11 +30,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class DropGraphServiceTest {
     @Test
-    void shouldDropGraph() {
+    void shouldDropGraphs() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
 
@@ -55,17 +57,18 @@ class DropGraphServiceTest {
     }
 
     @Test
-    void shouldValidateGraphsExist() {
+    void shouldValidateGraphsExistBeforeRemovingAnyOhAndListThemAllInOneGo() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
 
         var request = CatalogRequest.of("some user", DatabaseId.from("some database"));
-        when(graphStoreCatalogService.get(request, "foo")).thenThrow(new NoSuchElementException("aha!"));
-        when(graphStoreCatalogService.get(request, "bar")).thenReturn(mock(GraphStoreWithConfig.class));
-        when(graphStoreCatalogService.get(request, "baz")).thenThrow(new NoSuchElementException("aha!"));
+        when(graphStoreCatalogService.get(request, "foo")).thenReturn(mock(GraphStoreWithConfig.class));
+        when(graphStoreCatalogService.get(request, "bar")).thenThrow(new NoSuchElementException("aha!"));
+        when(graphStoreCatalogService.get(request, "baz")).thenReturn(mock(GraphStoreWithConfig.class));
+        when(graphStoreCatalogService.get(request, "quux")).thenThrow(new NoSuchElementException("another!"));
         try {
             dropGraphService.compute(
-                List.of("foo", "bar", "baz"),
+                List.of("foo", "bar", "baz", "quux"),
                 true,
                 DatabaseId.from("some database"),
                 new User("some user", false),
@@ -73,7 +76,56 @@ class DropGraphServiceTest {
             );
             fail();
         } catch (NoSuchElementException e) {
-            assertThat(e.getMessage()).isEqualTo("The graphs `foo`, and `baz` do not exist on database `some database`.");
+            assertThat(e.getMessage()).isEqualTo(
+                "The graphs `bar`, and `quux` do not exist on database `some database`.");
+        }
+
+        verify(graphStoreCatalogService).get(request, "foo");
+        verify(graphStoreCatalogService).get(request, "bar");
+        verify(graphStoreCatalogService).get(request, "baz");
+        verify(graphStoreCatalogService).get(request, "quux");
+        verifyNoMoreInteractions(graphStoreCatalogService);
+    }
+
+    @Test
+    void shouldRespectFailIfMissingFlag() {
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var dropGraphService = new DropGraphService(graphStoreCatalogService);
+
+        var request = CatalogRequest.of("some user", DatabaseId.from("some database"));
+        var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
+        when(graphStoreCatalogService.removeGraph(request, "foo", false)).thenReturn(graphStoreWithConfig1);
+        when(graphStoreCatalogService.removeGraph(request, "bar", false)).thenReturn(null);
+        when(graphStoreCatalogService.removeGraph(request, "baz", false)).thenReturn(graphStoreWithConfig2);
+        when(graphStoreCatalogService.removeGraph(request, "quux", false)).thenReturn(null);
+        var results = dropGraphService.compute(
+            List.of("foo", "bar", "baz", "quux"),
+            false,
+            DatabaseId.from("some database"),
+            new User("some user", false),
+            Optional.empty()
+        );
+
+        assertThat(results).containsExactly(graphStoreWithConfig1, graphStoreWithConfig2);
+    }
+
+    @Test
+    void shouldNotAllowUsernameOverrideForNonAdmins() {
+        var service = new DropGraphService(null);
+
+        try {
+            service.compute(
+                List.of("some graph"),
+                false,
+                DatabaseId.from("some database"),
+                new User("some user", false),
+                Optional.of("some other user")
+            );
+
+            fail();
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage()).isEqualTo("Cannot override the username as a non-admin");
         }
     }
 }

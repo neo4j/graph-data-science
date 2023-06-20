@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 
@@ -29,6 +28,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Domain logic for gds.graph.drop
+ */
 public class DropGraphService {
     private final GraphStoreCatalogService graphStoreCatalogService;
 
@@ -36,6 +38,13 @@ public class DropGraphService {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
+    /**
+     * Notice that if you instruct to _not_ fail if missing, and something _is_ missing,
+     * no error nor result are reported for that missing thing.
+     *
+     * @param shouldFailIfMissing If true, do an initial check that all graphs exist, fail otherwise
+     * @return metadata for the graphs that were removed
+     */
     List<GraphStoreWithConfig> compute(
         Iterable<String> graphNames,
         boolean shouldFailIfMissing,
@@ -53,24 +62,6 @@ public class DropGraphService {
         if (shouldFailIfMissing) validateGraphsExist(request, graphNames);
 
         return dropGraphs(request, graphNames, shouldFailIfMissing);
-    }
-
-    @NotNull
-    private List<GraphStoreWithConfig> dropGraphs(
-        CatalogRequest request,
-        Iterable<String> graphNames,
-        boolean shouldFailIfMissing
-    ) {
-        var results = new LinkedList<GraphStoreWithConfig>();
-        for (String graphName : graphNames) {
-            var result = graphStoreCatalogService.removeGraph(
-                request,
-                graphName,
-                shouldFailIfMissing
-            );
-            results.add(result);
-        }
-        return results;
     }
 
     private void validateGraphsExist(CatalogRequest request, Iterable<String> graphNames) {
@@ -113,5 +104,22 @@ public class DropGraphService {
             exception.addSuppressed(missingGraph.getRight());
         }
         return exception;
+    }
+
+    private List<GraphStoreWithConfig> dropGraphs(
+        CatalogRequest request,
+        Iterable<String> graphNames,
+        boolean shouldFailIfMissing
+    ) {
+        var results = new LinkedList<GraphStoreWithConfig>();
+        for (String graphName : graphNames) {
+            var result = graphStoreCatalogService.removeGraph(
+                request,
+                graphName,
+                shouldFailIfMissing
+            );
+            if (result != null) results.add(result);
+        }
+        return results;
     }
 }
