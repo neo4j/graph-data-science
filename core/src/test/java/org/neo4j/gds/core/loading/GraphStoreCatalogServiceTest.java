@@ -48,6 +48,7 @@ class GraphStoreCatalogServiceTest {
     @Test
     void shouldDropGraphFromCatalog() {
         var configuration = GraphProjectFromStoreConfig.emptyWithName("some user", "some graph");
+        // we _could_ write a stub for GraphStore; this is good enough for now tho
         var graphStore = mock(GraphStore.class);
         when(graphStore.databaseId()).thenReturn(DatabaseId.from("some database"));
         GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
