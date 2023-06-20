@@ -3,11 +3,10 @@
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 
 // TODO is it okay to leave out Neo4j here
-A _graph_ in GDS can be seen as an in-memory object containing only analytically relevant, potentially aggregated, topological and property information.
+A _graph_ in GDS is an in-memory structure containing _nodes_ connected by _relationships_. Both nodes and relationships can hold numerical attributes (_properties_).
 Graphs are stored using compressed data structures optimized for topology and property lookup operations.
 
-The graph catalog manages multiple graphs.
-A graph can be used many times in the analytical workflow by using its name as a reference.
+Each graph has a name that can be used as a reference for management operations, or in analytical workflows that require the same graph to be processed several times. These references are stored in the _graph catalog_.
 
 After usage, graphs can be removed from the catalog to free up main memory.
 
