@@ -706,6 +706,19 @@
         <Bug pattern="CC_CYCLOMATIC_COMPLEXITY"/>
     </Match>
 
+    <!-- This rule did find enums with more than one value -->
+    <Match>
+        <Bug pattern="ENMI_ONE_ENUM_VALUE"/>
+    </Match>
+
+    <Match>
+        <Bug pattern="ENMI_NULL_ENUM_VALUE"/>
+    </Match>
+
+    <Match>
+        <Bug pattern="SPP_PASSING_THIS_AS_PARM"/>
+    </Match>
+
     <!--
         Match for specific rules in specific classes
     -->

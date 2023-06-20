@@ -20,7 +20,7 @@ if (shouldSpotbugs) {
                 excludeFilter = file("$publicDir/etc/spotbugs/spotbugs-exclude.xml")
 
                 dependencies {
-                    spotbugsPlugins group: 'com.mebigfatguy.sb-contrib', name: 'sb-contrib', version: ver.'sb-contrib'
+                    spotbugsPlugins(group: 'com.mebigfatguy.sb-contrib', name: 'sb-contrib', version: ver.'sb-contrib') { transitive = false }
                 }
             }
 
