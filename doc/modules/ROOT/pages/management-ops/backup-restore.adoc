@@ -1,7 +1,7 @@
 [.enterprise-edition]
 [.alpha]
 [[backup-restore]]
-= Backup and Restore
+= Backup and restore
 :description: This section explains how to back up and restore graphs and models in the Neo4j Graph Data Science library.
 
 

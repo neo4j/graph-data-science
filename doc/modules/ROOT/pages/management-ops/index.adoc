@@ -2,13 +2,10 @@
 = Graph management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 
-// TODO is it okay to leave out Neo4j here
 A _graph_ in GDS is an in-memory structure containing _nodes_ connected by _relationships_. Both nodes and relationships can hold numerical attributes (_properties_).
 Graphs are stored using compressed data structures optimized for topology and property lookup operations.
 
 Each graph has a name that can be used as a reference for management operations, or in analytical workflows that require the same graph to be processed several times. These references are stored in the _graph catalog_.
-
-After usage, graphs can be removed from the catalog to free up main memory.
 
 
 [NOTE]
@@ -18,7 +15,44 @@ When Neo4j is restarted, graphs stored in the catalog are lost.
 See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph projections.
 ====
 
-== Lifecycle
+:sectnums!:
+
+== Graph lifecycle
+
+=== Creating
+
+A graph can be created in multiple ways, depending on where the source data is in a Neo4j database, an external source, or an existing GDS graph.
+You can read the xref:management-ops/graph-creation/index.adoc[graph creation] section for more details.
+
+=== Checking
+
+If you create multiple graphs, you can xref:management-ops/inspecting-the-graph-catalog.adoc[inspect the graph catalog] to verify that all the graphs (or a specific graph) have been successfully created.
+
+Once created, a graph can be inspected using xref:management-ops/create-cypher-db.adoc[Cypher queries].
+
+=== Updating
+
+xref:graph-catalog-node-ops.adoc[nodes] section
+
+xref:graph-catalog-relationship-ops.adoc[relationships] section
+
+=== Exporting
+
+At any point, a graph can be exported to a Neo4j database or to a CSV file. The xref:graph-catalog-export-ops.adoc[graph creation] section covers both the export methods.
+
+You can also efficiently export a graph as a data stream using xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
+
+=== Backup / restore
+
+// TODO [nvitucci]: complete
+
+xref:management-ops/inspecting-the-graph-catalog.adoc[backup and restore].
+
+=== Deleting
+
+After usage, graphs can be xref:management-ops/inspecting-the-graph-catalog.adoc[removed from the catalog] to free up main memory.
+
+// TODO [nvitucci] remove following
 
 // TODO - reuse image from common usage but greying out the other components
 
