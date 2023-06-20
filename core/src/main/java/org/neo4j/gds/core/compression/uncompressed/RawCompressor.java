@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.compression.uncompressed;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
@@ -40,8 +39,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import java.util.Arrays;
 import java.util.function.LongSupplier;
 
-import static org.neo4j.gds.core.compression.common.AdjacencyCompression.findPosition;
-
 public final class RawCompressor implements AdjacencyCompressor {
 
     public static AdjacencyCompressorFactory factory(
@@ -52,8 +49,10 @@ public final class RawCompressor implements AdjacencyCompressor {
         boolean noAggregation,
         MemoryTracker memoryTracker
     ) {
-        @SuppressWarnings("unchecked")
-        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
+        @SuppressWarnings(
+            "unchecked"
+        ) AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings
+            .numberOfMappings()];
         Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(
@@ -158,7 +157,7 @@ public final class RawCompressor implements AdjacencyCompressor {
     }
 
     @Override
-    public int compress(long nodeId, long[] targets, long[][][] properties, int degree) {
+    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
         if (properties != null) {
             return withProperties(
                 nodeId,
@@ -168,7 +167,9 @@ public final class RawCompressor implements AdjacencyCompressor {
             );
         } else {
             return withoutProperties(
-                nodeId, targets, degree
+                nodeId,
+                targets,
+                degree
             );
         }
     }
@@ -222,32 +223,21 @@ public final class RawCompressor implements AdjacencyCompressor {
     private int aggregateWithProperties(
         long[] values,
         int length,
-        long[][][] unsortedProperties,
+        long[][] unsortedProperties,
         long[][] sortedProperties,
         Aggregation[] aggregations
     ) {
         int[] order = IndirectSort.mergesort(0, length, new AscendingLongComparator(values));
 
+        long[] outValues = new long[length];
+
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
 
-
-        int[] chunkLengths = new int[unsortedProperties[0].length];
-        int totalChunkLength = 0;
-        for (int i = 0; i < unsortedProperties[0].length; i++) {
-            totalChunkLength += unsortedProperties[0][i].length;
-            chunkLengths[i] = totalChunkLength;
-        }
-
-        var pageIndex = new MutableInt();
-        var indexInPage = new MutableInt();
-        findPosition(chunkLengths, firstSortIdx, pageIndex, indexInPage);
-
-        long[] outValues = new long[length];
         outValues[0] = value;
         for (int i = 0; i < unsortedProperties.length; i++) {
-            sortedProperties[i][0] = unsortedProperties[i][pageIndex.intValue()][indexInPage.intValue()];
+            sortedProperties[i][0] = unsortedProperties[i][firstSortIdx];
         }
 
         int in = 1, out = 1;
@@ -255,10 +245,9 @@ public final class RawCompressor implements AdjacencyCompressor {
         if (this.noAggregation) {
             for (; in < length; ++in) {
                 int sortIdx = order[in];
-                findPosition(chunkLengths, sortIdx, pageIndex, indexInPage);
 
                 for (int i = 0; i < unsortedProperties.length; i++) {
-                    sortedProperties[i][out] = unsortedProperties[i][pageIndex.intValue()][indexInPage.intValue()];
+                    sortedProperties[i][out] = unsortedProperties[i][sortIdx];
                 }
 
                 outValues[out++] = values[sortIdx];
@@ -266,13 +255,12 @@ public final class RawCompressor implements AdjacencyCompressor {
         } else {
             for (; in < length; ++in) {
                 int sortIdx = order[in];
-                findPosition(chunkLengths, sortIdx, pageIndex, indexInPage);
                 delta = values[sortIdx] - value;
                 value = values[sortIdx];
 
                 if (delta > 0L) {
                     for (int i = 0; i < unsortedProperties.length; i++) {
-                        sortedProperties[i][out] = unsortedProperties[i][pageIndex.intValue()][indexInPage.intValue()];
+                        sortedProperties[i][out] = unsortedProperties[i][sortIdx];
                     }
                     outValues[out++] = value;
                 } else {
@@ -281,7 +269,7 @@ public final class RawCompressor implements AdjacencyCompressor {
                         int existingIdx = out - 1;
                         long[] outProperty = sortedProperties[i];
                         double existingProperty = Double.longBitsToDouble(outProperty[existingIdx]);
-                        double newProperty = Double.longBitsToDouble(unsortedProperties[i][pageIndex.intValue()][indexInPage.intValue()]);
+                        double newProperty = Double.longBitsToDouble(unsortedProperties[i][sortIdx]);
                         newProperty = aggregation.merge(existingProperty, newProperty);
                         outProperty[existingIdx] = Double.doubleToLongBits(newProperty);
                     }
@@ -290,6 +278,9 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
 
         System.arraycopy(outValues, 0, values, 0, out);
+        for (int i = 0; i < sortedProperties.length; i++) {
+            System.arraycopy(sortedProperties[i], 0, unsortedProperties[i], 0, out);
+        }
 
         return out;
 
@@ -298,7 +289,7 @@ public final class RawCompressor implements AdjacencyCompressor {
     private int withProperties(
         long nodeId,
         long[] targets,
-        long[][][] unsortedProperties,
+        long[][] unsortedProperties,
         int degree
     ) {
         long[][] sortedProperties = new long[unsortedProperties.length][degree];

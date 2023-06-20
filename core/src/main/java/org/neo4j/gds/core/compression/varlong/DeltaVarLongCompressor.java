@@ -49,8 +49,10 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         boolean noAggregation,
         MemoryTracker memoryTracker
     ) {
-        @SuppressWarnings("unchecked")
-        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
+        @SuppressWarnings(
+            "unchecked"
+        ) AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings
+            .numberOfMappings()];
         Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(
@@ -157,7 +159,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     @Override
-    public int compress(long nodeId, long[] targets, long[][][] properties, int degree) {
+    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
         if (properties != null) {
             return applyVariableDeltaEncodingWithProperties(
                 nodeId,
@@ -210,7 +212,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private int applyVariableDeltaEncodingWithProperties(
         long nodeId,
         long[] targets,
-        long[][][] unsortedProperties,
+        long[][] unsortedProperties,
         int degree
     ) {
         // buffer contains uncompressed, unsorted target list

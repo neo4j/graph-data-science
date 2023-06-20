@@ -50,7 +50,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
         boolean noAggregation,
         MemoryTracker memoryTracker
     ) {
-        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
+        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings
+            .numberOfMappings()];
         Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(
@@ -171,7 +172,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     }
 
     @Override
-    public int compress(long nodeId, long[] targets, long[][][] properties, int degree) {
+    public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
         if (properties != null) {
             return packWithProperties(
                 nodeId,
@@ -191,7 +192,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private int packWithProperties(
         long nodeId,
         long[] targets,
-        long[][][] unsortedProperties,
+        long[][] unsortedProperties,
         int degree
     ) {
         long[][] sortedProperties = new long[unsortedProperties.length][degree];
