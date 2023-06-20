@@ -20,11 +20,11 @@
 package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface KCoreDecompositionMutateConfig extends KCoreDecompositionBaseConfig, MutatePropertyConfig {
+public interface KCoreDecompositionMutateConfig extends KCoreDecompositionBaseConfig, MutateNodePropertyConfig {
 
     static KCoreDecompositionMutateConfig of(CypherMapWrapper userInput) {
         return new KCoreDecompositionMutateConfigImpl(userInput);

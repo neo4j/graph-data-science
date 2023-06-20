@@ -25,21 +25,25 @@ import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-class MutatePropertyConfigTest {
+class MutateRelationshipPropertyConfigTest {
 
     @Test
     void testMutateFailsOnExistingToken() {
         var graphStore = GdlFactory.of("(a {foo: 42})").build();
-        MutatePropertyConfig config = TestMutatePropertyConfigImpl.builder().mutateProperty("foo").build();
+        TestMutateRelationshipPropertyConfig config = TestMutateRelationshipPropertyConfigImpl.builder().mutateProperty("foo").build();
 
-        assertThatThrownBy(() -> config.validateMutateProperty(graphStore, config.nodeLabelIdentifiers(graphStore), List.of()))
-            .hasMessageContaining("Node property `foo` already exists in the in-memory graph.");
+        assertThatNoException().isThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            List.of()
+        ));
+
     }
 
     @Configuration
-    interface TestMutatePropertyConfig extends AlgoBaseConfig, MutatePropertyConfig {
+    interface TestMutateRelationshipPropertyConfig extends AlgoBaseConfig, MutateRelationshipPropertyConfig {
+        
     }
 }
-

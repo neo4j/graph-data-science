@@ -21,11 +21,11 @@ package org.neo4j.gds.closeness;
 
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface ClosenessCentralityMutateConfig extends ClosenessCentralityConfig, MutatePropertyConfig {
+public interface ClosenessCentralityMutateConfig extends ClosenessCentralityConfig, MutateNodePropertyConfig {
 
     static ClosenessCentralityMutateConfig of(CypherMapWrapper config) {
         return new ClosenessCentralityMutateConfigImpl(config);

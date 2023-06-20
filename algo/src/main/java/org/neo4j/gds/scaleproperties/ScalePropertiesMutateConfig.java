@@ -20,12 +20,12 @@
 package org.neo4j.gds.scaleproperties;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutatePropertyConfig {
+public interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutateNodePropertyConfig {
 
     static ScalePropertiesMutateConfig of(CypherMapWrapper userInput) {
         return new ScalePropertiesMutateConfigImpl(userInput);

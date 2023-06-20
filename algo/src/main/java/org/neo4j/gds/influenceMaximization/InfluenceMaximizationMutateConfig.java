@@ -20,11 +20,11 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface InfluenceMaximizationMutateConfig extends InfluenceMaximizationBaseConfig, MutatePropertyConfig {
+public interface InfluenceMaximizationMutateConfig extends InfluenceMaximizationBaseConfig, MutateNodePropertyConfig {
 
     static InfluenceMaximizationMutateConfig of(CypherMapWrapper userInput) {
         return new InfluenceMaximizationMutateConfigImpl(userInput);
