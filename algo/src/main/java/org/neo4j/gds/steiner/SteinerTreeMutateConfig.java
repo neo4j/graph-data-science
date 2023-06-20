@@ -21,14 +21,16 @@ package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface SteinerTreeMutateConfig extends SteinerTreeBaseConfig, MutateRelationshipConfig, MutatePropertyConfig {
+public interface SteinerTreeMutateConfig extends SteinerTreeBaseConfig,
+    MutateRelationshipConfig,
+    MutateRelationshipPropertyConfig {
 
     static SteinerTreeMutateConfig of(CypherMapWrapper userInput) {
         return new SteinerTreeMutateConfigImpl(userInput);

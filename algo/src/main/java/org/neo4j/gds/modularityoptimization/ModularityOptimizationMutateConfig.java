@@ -21,13 +21,13 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ModularityOptimizationMutateConfig extends ModularityOptimizationConfig, MutatePropertyConfig {
+public interface ModularityOptimizationMutateConfig extends ModularityOptimizationConfig, MutateNodePropertyConfig {
 
     static ModularityOptimizationMutateConfig of(CypherMapWrapper userInput) {
         return new ModularityOptimizationMutateConfigImpl(userInput);

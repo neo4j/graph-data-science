@@ -31,7 +31,7 @@ import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface MutatePropertyConfig extends MutateConfig {
+public interface MutateNodePropertyConfig extends MutateConfig {
 
     String MUTATE_PROPERTY_KEY = "mutateProperty";
 

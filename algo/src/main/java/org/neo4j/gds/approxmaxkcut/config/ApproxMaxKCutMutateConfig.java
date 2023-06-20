@@ -21,13 +21,13 @@ package org.neo4j.gds.approxmaxkcut.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutatePropertyConfig {
+public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutateNodePropertyConfig {
 
     static ApproxMaxKCutMutateConfig of(CypherMapWrapper config) {
         return new ApproxMaxKCutMutateConfigImpl(config);

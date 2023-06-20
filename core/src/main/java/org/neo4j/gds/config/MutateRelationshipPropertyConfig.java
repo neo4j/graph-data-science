@@ -17,23 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.config;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig,
-    MutateRelationshipPropertyConfig, MutateRelationshipConfig {
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
-    static NodeSimilarityMutateConfig of(CypherMapWrapper userInput) {
-        NodeSimilarityMutateConfig config = new NodeSimilarityMutateConfigImpl(userInput);
-        config.validate();
-        return config;
+public interface MutateRelationshipPropertyConfig extends MutateConfig {
+
+    String MUTATE_PROPERTY_KEY = "mutateProperty";
+
+    @Configuration.ConvertWith(method = "validateProperty")
+    @Configuration.Key(MUTATE_PROPERTY_KEY)
+    String mutateProperty();
+
+    static @Nullable String validateProperty(String input) {
+        return validateNoWhiteCharacter(emptyToNull(input), "mutateProperty");
     }
+
 }

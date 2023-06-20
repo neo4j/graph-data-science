@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
@@ -33,7 +33,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineMutateConfig extends NodeClassificationPredictPipelineMutateOrWriteConfig, MutatePropertyConfig {
+public interface NodeClassificationPredictPipelineMutateConfig extends
+    NodeClassificationPredictPipelineMutateOrWriteConfig,
+    MutateNodePropertyConfig {
     static NodeClassificationPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPredictPipelineMutateConfigImpl(username, config);
     }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 
 /**
  * A generics adaptation interface?
@@ -27,6 +27,6 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 public interface MutateNodePropertyListFunction<
         ALGO extends Algorithm<ALGO_RESULT>,
         ALGO_RESULT,
-        CONFIG extends MutatePropertyConfig
+    CONFIG extends MutateNodePropertyConfig
     > extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {
 }
