@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ScalarScaler implements Scaler {
 
@@ -72,13 +71,13 @@ public abstract class ScalarScaler implements Scaler {
         private final Partition partition;
         private final NodePropertyValues properties;
         private final ProgressTracker progressTracker;
-        private final AtomicLong nodeCountOmittingMissingProperties;
+        private long nodeCountOmittingMissingProperties;
 
         AggregatesComputer(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
             this.partition = partition;
             this.properties = property;
             this.progressTracker = progressTracker;
-            this.nodeCountOmittingMissingProperties = new AtomicLong();
+            this.nodeCountOmittingMissingProperties = 0L;
         }
 
         abstract void compute(double propertyValue);
@@ -89,7 +88,7 @@ public abstract class ScalarScaler implements Scaler {
             for (long nodeId = partition.startNode(); nodeId < end; nodeId++) {
                 var propertyValue = properties.doubleValue(nodeId);
                 if (!Double.isNaN(propertyValue)) {
-                    nodeCountOmittingMissingProperties.incrementAndGet();
+                    ++nodeCountOmittingMissingProperties;
                     compute(propertyValue);
                 }
             }
@@ -97,7 +96,7 @@ public abstract class ScalarScaler implements Scaler {
         }
 
         long nodeCountOmittingMissingValues() {
-            return nodeCountOmittingMissingProperties.get();
+            return nodeCountOmittingMissingProperties;
         }
     }
 }
