@@ -41,9 +41,8 @@ For complex use cases where an expressive query language is needed, you can run 
 === Update
 
 In-memory graphs are usually updated by algorithms running in `mutate` mode, which add new properties to nodes or relationships.
-Besides, you can update xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[node labels] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-relationship-to-undirected-example[convert relationships] from directed to undirected.
 
-You can also remove xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[relationships of a given type].
+Besides, you can xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[update node labels] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-relationship-to-undirected-example[convert relationships] from directed to undirected. You can also _remove_ xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[relationships of a given type].
 
 === Write
 
@@ -53,7 +52,7 @@ In addition to exporting a whole graph, you can write xref:graph-catalog-node-op
 
 === Backup and restore
 
-You can backup a graph so that you can restore it after dropping it by mistake, or after a database restart. See the xref:management-ops/backup-restore.adoc[] section for examples.
+You can backup a graph so that it can be restored after dropping it by mistake, or after a database restart. See the xref:management-ops/backup-restore.adoc[] section for examples.
 
 === Access control
 
