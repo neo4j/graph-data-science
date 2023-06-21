@@ -23,7 +23,7 @@ The algorithm supports weighted graphs with positive relationship weights.
 The Dijkstra Single-Source algorithm computes the shortest paths between a source node and all nodes reachable from that node.
 To compute the shortest path between a source and a target node, xref:algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
 
-The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
+The GDS implementation is based on the https://citeseerx.ist.psu.edu/doc_view/pid/6855bd86e3d6d4278fac61a4924417fd3e0f9643[original description] and uses a binary heap as priority queue.
 The implementation is also used for the xref:algorithms/astar.adoc[A*] and xref:algorithms/yens.adoc[Yen's] algorithms, as well as xref:algorithms/betweenness-centrality.adoc[weighted Betweenness Centrality].
 The algorithm implementation is executed using a single thread.
 You can consider xref:algorithms/delta-single-source.adoc[Delta-Stepping] for an efficient parallel shortest path algorithm instead.
