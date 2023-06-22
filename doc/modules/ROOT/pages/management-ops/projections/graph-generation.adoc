@@ -88,13 +88,6 @@ Currently there are three supported methods:
 * `POWER_LAW` - Distributes the incoming relationships using a power law distribution. The out degree is based on a normal distribution.
 
 
-[[graph-generation-seed]]
-== Relationship Seed
-
-The `relationshipSeed` parameter allows, to generate graphs with the same relationships, if they have no property.
-Currently the `relationshipProperty` is not seeded, therefore the generated graphs can differ in their property values.
-Hence generated graphs based on the same `relationshipSeed` are not identical.
-
 [[graph-generation-relationship-property]]
 == Relationship Property
 
@@ -116,6 +109,13 @@ Currently, there are two supported methods to generate relationship properties:
 
 * `FIXED` - Assigns a fixed value to every relationship. The `value` parameter must be set.
 * `RANDOM` - Assigns a random value between the lower (`min`) and upper (`max`) bound.
+
+[[graph-generation-seed]]
+== Relationship Seed
+
+The `relationshipSeed` parameter allows the user to specify the seed used to generate the random graph manually.
+When specified, the procedure will produce the same relationships between nodes regardless of whether the generated graph is going to be created as weighted or unweighted.
+This can be helpful if one wants to examine the behavior or performance of an algorithm under weight conditions.
 
 [[graph-generation-example]]
 == Examples
@@ -214,17 +214,17 @@ ORDER BY source ASC,target ASC, score
 [opts="header"]
 |===
 | source  |target | score
-| 0 | 1 | 6.258381821615686
-| 0 | 2 | 6.791408433596591
-| 1 | 4 | 8.747179900968224
-| 1 | 4 | 9.469695236791349
-| 2 | 0 | 7.061710127800056
-| 2 | 1 | 5.060444167785128
-| 3 | 1 | 6.308266834622538
-| 3 | 4 | 9.040323743901354
-| 4 | 1 | 7.939688205556302
-| 4 | 1 | 7.988277646384441
+| 0 | 1 | 6.791408433596591
+| 0 | 2 | 8.662453313014902
+| 1 | 0 | 6.258381821615686
+| 1 | 4 | 9.711806397654765
+| 2 | 1 | 9.469695236791349
+| 2 | 4 | 6.519823445755963
+| 3 | 0 | 8.747179900968224
+| 3 | 1 | 7.752117836610726
+| 4 | 0 | 8.614858979680758
+| 4 | 3 | 5.060444167785128
 |===
 --
 
-Notice that despite `graph` and `weightedGraph` having the same `relationshipSeed`, their actual topology differs.
+Notice that despite as `graph` and `weightedGraph` have been created with the same `seed` their relationship topology is equivalent.
