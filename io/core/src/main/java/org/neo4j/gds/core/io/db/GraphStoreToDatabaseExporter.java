@@ -23,13 +23,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
 
@@ -65,11 +63,10 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         ProgressTracker progressTracker
     ) {
         super(graphStore, config, neoNodeProperties);
-        var executionMonitor = ProgressTrackerExecutionMonitor.of(
+        var executionMonitor = new ProgressTrackerExecutionMonitor(
+            graphStore,
             progressTracker,
-            ClockService.clock(),
-            config.executionMonitorCheckMillis(),
-            TimeUnit.MILLISECONDS
+            config.toBatchImporterConfig()
         );
         this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, config, log, executionMonitor);
     }

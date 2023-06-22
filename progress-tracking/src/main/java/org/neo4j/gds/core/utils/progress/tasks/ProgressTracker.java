@@ -55,7 +55,6 @@ public interface ProgressTracker {
 
     // prefer setting volume via factory method for leaves
     // to make root progress available from the start
-    @Deprecated
     void setVolume(long volume);
 
     /**
