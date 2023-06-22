@@ -15,7 +15,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 == Introduction
 
-Graph sampling algorithms are used to reduce the complexity of large and complex graphs while preserving their essential properties. They can help to speed up computation, reduce bias, and ensure privacy, making graph analysis more manageable and accurate. They are widely used in network analysis, machine learning, and social network analysis, among other applications.
+Graph sampling algorithms can be used to reduce the size of large and complex graphs while preserving structural properties.
+This can help to reduce bias, and ensure privacy, and making graph analysis more scalable.
+Sampling algorithms are widely used in machine learning, social network analysis, and many other applications.
 
 The Common Neighbour Aware Random Walk (CNARW) is a graph sampling technique that involves optimizing the selection of the next-hop node.
 It takes into account the number of common neighbours between the current node and the next-hop candidates.

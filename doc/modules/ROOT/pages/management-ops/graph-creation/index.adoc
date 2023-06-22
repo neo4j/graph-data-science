@@ -6,8 +6,6 @@
 You can create graphs from different data sources.
 
 * From a Neo4j database by using either of
-// TODO explain why to use which
-
 ** xref:management-ops/graph-creation/graph-project.adoc[Native projection]
 ** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] for more complex projections
 * From external sources via an xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
@@ -15,6 +13,8 @@ You can create graphs from different data sources.
 ** xref:management-ops/graph-creation/graph-project-subgraph.adoc[Filtering]
 ** xref:management-ops/graph-creation/sampling/rwr.adoc[Sampling]
 * From xref:management-ops/graph-creation/graph-generation.adoc[Random data]
+
+Furthermore, the Python client provides several convenient methods to create graphs, for example from link:https://neo4j.com/docs/graph-data-science-client/current/graph-object/#construct[Pandas DataFrames] or some link:https://neo4j.com/docs/graph-data-science-client/current/common-datasets/[well-known datasets].
 
 
 == Graph data model
