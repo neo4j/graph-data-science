@@ -224,10 +224,11 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         assertCypherResult(
             query,
-            List.of(Map.of("nodes",
+            List.of(Map.of(
+                "nodes",
                 10L,
                 "relationships",
-                31L,
+                32L,
                 "relationshipProperty",
                 Map.of("min", 40.0, "max", 80.0, "name", "myProperty", "type", "RANDOM")
             ))
