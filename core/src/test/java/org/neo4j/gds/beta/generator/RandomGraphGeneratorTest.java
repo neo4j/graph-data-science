@@ -26,13 +26,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
@@ -53,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.api.schema.Direction.DIRECTED;
 import static org.neo4j.gds.api.schema.Direction.UNDIRECTED;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -438,7 +439,7 @@ class RandomGraphGeneratorTest {
         HugeGraph graph1 = randomGraphGenerator.generate();
         HugeGraph graph2 = otherRandomGenerator.generate();
 
-        TestSupport.assertGraphEquals(graph1, graph2);
+        assertGraphEquals(graph1, graph2);
     }
 
     @Test
@@ -670,5 +671,53 @@ class RandomGraphGeneratorTest {
             .averageDegree(2)
             .build()
             .generate()).hasMessageContaining("inverse");
+    }
+
+    @Test
+    void shouldGenerateDifferentGraphsOnCall() {
+
+        var graphOne = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .build()
+            .generate();
+
+        var graphTwo = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .build()
+            .generate();
+
+        var adjacencyMatrixOne = CanonicalAdjacencyMatrix.canonicalize(graphOne);
+        var adjacencyMatrixTwo = CanonicalAdjacencyMatrix.canonicalize(graphTwo);
+
+        assertThat(adjacencyMatrixOne).isNotEqualTo(adjacencyMatrixTwo);
+    }
+
+    @Test
+    void shouldGenerateSameTopologyOnWeightedGraphsWithFixedSeed() {
+        var weightedGraph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(0)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("foo", 1.0, 10.0))
+            .build()
+            .generate();
+
+        var unweightedGraph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(0)
+            .build()
+            .generate();
+
+        var adjacencyMatrixOne = CanonicalAdjacencyMatrix.canonicalizeWithoutWeights(weightedGraph);
+        var adjacencyMatrixTwo = CanonicalAdjacencyMatrix.canonicalize(unweightedGraph);
+
+        assertThat(adjacencyMatrixOne).isEqualTo(adjacencyMatrixTwo);
     }
 }

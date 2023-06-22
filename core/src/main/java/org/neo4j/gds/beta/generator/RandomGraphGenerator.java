@@ -64,6 +64,8 @@ public final class RandomGraphGenerator {
     private final long nodeCount;
     private final long averageDegree;
     private final Random random;
+    private final Random propertyValueRandom;
+
     private final RelationshipType relationshipType;
     private final RelationshipDistribution relationshipDistribution;
     private final Aggregation aggregation;
@@ -82,7 +84,7 @@ public final class RandomGraphGenerator {
         long averageDegree,
         RelationshipType relationshipType,
         RelationshipDistribution relationshipDistribution,
-        @Nullable Long seed,
+        long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
         Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers,
         Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
@@ -103,10 +105,9 @@ public final class RandomGraphGenerator {
         this.direction = direction;
         this.allowSelfLoops = allowSelfLoops;
         this.forceDag = forceDag;
-        this.random = new Random();
-        long actualSeed = seed != null ? seed : 1;
-        this.random.setSeed(actualSeed);
-        this.randomDagMapping = generateRandomMapping(actualSeed);
+        this.random = new Random(seed);
+        this.propertyValueRandom = new Random(seed);
+        this.randomDagMapping = generateRandomMapping(seed);
         this.inverseIndex = inverseIndex;
     }
 
@@ -204,7 +205,7 @@ public final class RandomGraphGenerator {
                     }
                 }
                 assert (targetId < nodeCount);
-                relationshipPropertyProducer.setProperty(nodeId, property, 0, random);
+                relationshipPropertyProducer.setProperty(nodeId, property, 0, propertyValueRandom);
                 if (forceDag) {
                     addDagRelationship(relationshipsImporter, nodeId, targetId, property);
                 }

@@ -35,7 +35,7 @@ public class RandomGraphGeneratorBuilder {
     private long nodeCount;
     private long averageDegree;
     private RelationshipDistribution relationshipDistribution;
-    private long seed = 0L;
+    private long seed = System.currentTimeMillis();
     private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers = new HashMap<>();
     private Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer = Optional.empty();
