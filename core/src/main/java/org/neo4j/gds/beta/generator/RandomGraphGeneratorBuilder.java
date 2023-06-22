@@ -29,14 +29,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
 public class RandomGraphGeneratorBuilder {
     private long nodeCount;
     private long averageDegree;
     private RelationshipDistribution relationshipDistribution;
-    private long seed = 0L;
+    private long seed = System.currentTimeMillis();
     private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers = new HashMap<>();
     private Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer = Optional.empty();
@@ -46,7 +45,6 @@ public class RandomGraphGeneratorBuilder {
     private RelationshipType relationshipType = RelationshipType.of("REL");
     private boolean forceDag = false;
     private boolean inverseIndex = false;
-    private boolean specifiedSeed = false;
 
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
@@ -71,7 +69,6 @@ public class RandomGraphGeneratorBuilder {
 
     public RandomGraphGeneratorBuilder seed(long seed) {
         this.seed = seed;
-        this.specifiedSeed = true;
         return this;
     }
 
@@ -160,10 +157,6 @@ public class RandomGraphGeneratorBuilder {
         }
         if (inverseIndex && direction == Direction.UNDIRECTED) {
             throw new IllegalArgumentException("Cannot use the inverse index feature with undirected graphs");
-        }
-        if (!specifiedSeed) {
-            Random random = new Random(System.currentTimeMillis());
-            seed(random.nextLong());
         }
     }
 }
