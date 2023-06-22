@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.compression.common;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
@@ -31,7 +29,6 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static java.lang.Double.doubleToLongBits;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -55,7 +52,9 @@ class AdjacencyCompressionTest {
 
         AdjacencyCompression.applyDeltaEncoding(
             data,
-            new long[][][]{new long[][]{unsortedProperties[0]}, new long[][]{unsortedProperties[1]}},
+            new long[][]{
+                unsortedProperties[0], unsortedProperties[1]
+            },
             sortedProperties,
             aggregations,
             false
@@ -78,25 +77,6 @@ class AdjacencyCompressionTest {
         assertEquals(4L, data.buffer[1]);
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        {
-            "0, 0, 0",
-            "9, 0, 9",
-            "10, 1, 0",
-            "41, 1, 31",
-            "42, 2, 0",
-        }
-    )
-    void findPosition(int position, int expectedPageIndex, int expectedIndexInPage) {
-        int[] lengths = {10, 42, 1337};
-        var pageIndex = new MutableInt();
-        var indexInPage = new MutableInt();
-        AdjacencyCompression.findPosition(lengths, position, pageIndex, indexInPage);
-        assertThat(pageIndex.getValue()).isEqualTo(expectedPageIndex);
-        assertThat(indexInPage.getValue()).isEqualTo(expectedIndexInPage);
-    }
-
     static Stream<Arguments> aggregationsWithResults() {
         return Stream.of(
             Arguments.of(
@@ -106,7 +86,13 @@ class AdjacencyCompressionTest {
                     Aggregation.COUNT,
                     Aggregation.COUNT
                 },
-                new double[][]{{4d, 2d}, {2d, 1d}},
+                new double[][]{
+                    {
+                        4d, 2d
+                    }, {
+                        2d, 1d
+                    }
+                },
                 "COUNT"
             ),
             Arguments.of(
@@ -116,7 +102,13 @@ class AdjacencyCompressionTest {
                     Aggregation.SUM,
                     Aggregation.SUM
                 },
-                new double[][]{{16d, 8d}, {27d, 14d}},
+                new double[][]{
+                    {
+                        16d, 8d
+                    }, {
+                        27d, 14d
+                    }
+                },
                 "SUM"
             ),
             Arguments.of(
@@ -126,7 +118,13 @@ class AdjacencyCompressionTest {
                     Aggregation.MIN,
                     Aggregation.MIN
                 },
-                new double[][]{{2d, 3d}, {4d, 6d}},
+                new double[][]{
+                    {
+                        2d, 3d
+                    }, {
+                        4d, 6d
+                    }
+                },
                 "MIN"
             ),
             Arguments.of(
@@ -136,50 +134,62 @@ class AdjacencyCompressionTest {
                     Aggregation.MAX,
                     Aggregation.MAX
                 },
-                new double[][]{{5d, 5d}, {8d, 8d}},
+                new double[][]{
+                    {
+                        5d, 5d
+                    }, {
+                        8d, 8d
+                    }
+                },
                 "MAX"
             )
         );
     }
 
     private static long[][] weights() {
-        return new long[][]{{
-            doubleToLongBits(2),
-            doubleToLongBits(4),
-            doubleToLongBits(3),
-            doubleToLongBits(5),
-            doubleToLongBits(5),
-            doubleToLongBits(5)
-        }, {
-            doubleToLongBits(4),
-            doubleToLongBits(7),
-            doubleToLongBits(6),
-            doubleToLongBits(8),
-            doubleToLongBits(8),
-            doubleToLongBits(8)
-        }};
+        return new long[][]{
+            {
+                doubleToLongBits(2),
+                doubleToLongBits(4),
+                doubleToLongBits(3),
+                doubleToLongBits(5),
+                doubleToLongBits(5),
+                doubleToLongBits(5)
+            }, {
+                doubleToLongBits(4),
+                doubleToLongBits(7),
+                doubleToLongBits(6),
+                doubleToLongBits(8),
+                doubleToLongBits(8),
+                doubleToLongBits(8)
+            }
+        };
     }
 
     private static long[][] countWeights() {
-        return new long[][]{{
-            doubleToLongBits(1.0),
-            doubleToLongBits(1.0),
-            doubleToLongBits(1.0),
-            doubleToLongBits(1.0),
-            doubleToLongBits(1.0),
-            doubleToLongBits(1.0)
-        }, {
-            doubleToLongBits(1.0),
-            doubleToLongBits(0.0),
-            doubleToLongBits(1.0),
-            doubleToLongBits(0.0),
-            doubleToLongBits(1.0),
-            doubleToLongBits(0.0)
-        }};
+        return new long[][]{
+            {
+                doubleToLongBits(1.0),
+                doubleToLongBits(1.0),
+                doubleToLongBits(1.0),
+                doubleToLongBits(1.0),
+                doubleToLongBits(1.0),
+                doubleToLongBits(1.0)
+            }, {
+                doubleToLongBits(1.0),
+                doubleToLongBits(0.0),
+                doubleToLongBits(1.0),
+                doubleToLongBits(0.0),
+                doubleToLongBits(1.0),
+                doubleToLongBits(0.0)
+            }
+        };
     }
 
     private static long[] values() {
-        return new long[]{1, 1, 5, 5, 1, 1};
+        return new long[]{
+            1, 1, 5, 5, 1, 1
+        };
     }
 
 }
