@@ -502,7 +502,7 @@ class CommonNeighbourAwareRandomWalkTest {
             result2 = cnarw.compute(naturalUnionGraph, ProgressTracker.NULL_TRACKER);
         }
 
-        assertThat(!result1.isEmpty());
+        assertThat(result1.isEmpty()).isFalse();
         assertEquals(result1.size(), result2.size());
         for (int i = 0; i < result1.size(); i++) {
             assertEquals(result1.get(i), result2.get(i));
