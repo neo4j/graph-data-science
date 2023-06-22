@@ -37,20 +37,20 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphCreateCypherDbProc extends CatalogProc {
+public class GraphCreateEphemeralDatabaseProc extends CatalogProc {
 
-    private static final String DESCRIPTION = "Creates a database from a GDS graph.";
+    private static final String DESCRIPTION = "Creates an ephemeral database from a GDS graph.";
 
-    @Procedure(name = "gds.cypherdb.create", mode = READ)
+    @Procedure(name = "gds.ephemeral.database.create", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<CreateCypherDbResult> createInMemoryDatabase(
+    public Stream<CreateEphemeralDbResult> createInMemoryDatabase(
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName
     ) {
         Preconditions.check();
         validateGraphName(graphName);
 
-        CreateCypherDbResult result = runWithExceptionLogging(
+        CreateEphemeralDbResult result = runWithExceptionLogging(
             "In-memory Cypher database creation failed",
             () -> {
                 validateNeo4jEnterpriseEdition(databaseService);
@@ -59,16 +59,16 @@ public class GraphCreateCypherDbProc extends CatalogProc {
                     InMemoryDatabaseCreator.createDatabase(databaseService, username(), graphName, dbName);
                 }
 
-                return new CreateCypherDbResult(dbName, graphName, createMillis.getValue());
+                return new CreateEphemeralDbResult(dbName, graphName, createMillis.getValue());
             }
         );
 
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.alpha.create.cypherdb", mode = READ, deprecatedBy = "gds.cypherdb.create")
+    @Procedure(name = "gds.alpha.create.cypherdb", mode = READ, deprecatedBy = "gds.ephemeral.database.create")
     @Description(DESCRIPTION)
-    public Stream<CreateCypherDbResult> createDb(
+    public Stream<CreateEphemeralDbResult> createDb(
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName
     ) {
@@ -76,12 +76,12 @@ public class GraphCreateCypherDbProc extends CatalogProc {
     }
 
     @SuppressWarnings("unused")
-    public static class CreateCypherDbResult {
+    public static class CreateEphemeralDbResult {
         public final String dbName;
         public final String graphName;
         public final long createMillis;
 
-        public CreateCypherDbResult(String dbName, String graphName, long createMillis) {
+        public CreateEphemeralDbResult(String dbName, String graphName, long createMillis) {
             this.dbName = dbName;
             this.graphName = graphName;
             this.createMillis = createMillis;

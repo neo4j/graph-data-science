@@ -52,9 +52,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.sample.cnarw",
         "gds.graph.sample.cnarw.estimate",
 
-        "gds.cypherdb.create",
+        "gds.ephemeral.database.create",
         "gds.alpha.create.cypherdb",
-        "gds.cypherdb.drop",
+        "gds.ephemeral.database.drop",
         "gds.alpha.drop.cypherdb",
 
         "gds.alpha.allShortestPaths.stream",

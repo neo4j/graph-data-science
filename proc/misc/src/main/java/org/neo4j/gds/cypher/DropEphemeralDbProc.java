@@ -36,37 +36,37 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class DropCypherDbProc extends BaseProc {
+public class DropEphemeralDbProc extends BaseProc {
 
-    private static final String DESCRIPTION = "Drop a database backed by an in-memory graph";
+    private static final String DESCRIPTION = "Drop an ephemeral database backed by an in-memory graph";
 
-    @Procedure(name = "gds.cypherdb.drop", mode = WRITE)
+    @Procedure(name = "gds.ephemeral.database.drop", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<DropCypherDbResult> dropInMemoryDatabase(
+    public Stream<DropEphemeralDbResult> dropInMemoryDatabase(
         @Name(value = "dbName") String dbName
     ) {
         Preconditions.check();
 
-        DropCypherDbResult result = runWithExceptionLogging(
+        DropEphemeralDbResult result = runWithExceptionLogging(
             "Drop in-memory Cypher database failed",
             () -> {
-                GraphCreateCypherDbProc.validateNeo4jEnterpriseEdition(databaseService);
+                GraphCreateEphemeralDatabaseProc.validateNeo4jEnterpriseEdition(databaseService);
                 var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
                 validateDatabaseName(dbName, dbms);
                 var dropMillis = new MutableLong(0);
                 try (var ignored = ProgressTimer.start(dropMillis::setValue)) {
                     dbms.dropDatabase(dbName);
                 }
-                return new DropCypherDbResult(dbName, dropMillis.getValue());
+                return new DropEphemeralDbResult(dbName, dropMillis.getValue());
             }
         );
 
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.alpha.drop.cypherdb", mode = WRITE, deprecatedBy = "gds.cypherdb.drop")
+    @Procedure(name = "gds.alpha.drop.cypherdb", mode = WRITE, deprecatedBy = "gds.ephemeral.database.drop")
     @Description(DESCRIPTION)
-    public Stream<DropCypherDbResult> dropDb(
+    public Stream<DropEphemeralDbResult> dropDb(
         @Name(value = "dbName") String dbName
     ) {
         return dropInMemoryDatabase(dbName);
@@ -86,11 +86,11 @@ public class DropCypherDbProc extends BaseProc {
         }
     }
 
-    public static class DropCypherDbResult {
+    public static class DropEphemeralDbResult {
         public final String dbName;
         public final long dropMillis;
 
-        public DropCypherDbResult(String dbName, long dropMillis) {
+        public DropEphemeralDbResult(String dbName, long dropMillis) {
             this.dbName = dbName;
             this.dropMillis = dropMillis;
         }
