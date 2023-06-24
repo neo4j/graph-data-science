@@ -190,11 +190,11 @@ We therefore have high confidence in our approach.
 
 Using the information we derived that the `Person` nodes named "Annie" and "Matt" are similar, we can make product recommendations for each of them.
 Since they are similar, we can assume that products purchased by only one of the people may be of interest to buy also for the other person not already buying the product.
-By this principle we can derive product recommendations for the `Person` named "Matt" using a simple Cypher query.
+By this principle we can derive product recommendations for the `Person` named "Annie" using a simple Cypher query.
 
 [role=query-example, group=fastrp-knn]
 --
-.Product recommendations for `Person` node with name "Matt":
+.Product recommendations for `Person` node with name "Annie":
 [source, cypher, role=noplay , group=fastrp-knn]
 ----
 MATCH (:Person {name: "Annie"})-->(p1:Product)
@@ -212,7 +212,7 @@ RETURN p2.name as recommendation
 |===
 --
 
-Indeed, "Kale" is the one product that the `Person` named "Annie" buys that is also not purchased by the `Person` named "Matt".
+Indeed, "Kale" is the one product that the `Person` named "Matt" buys that is also not purchased by the `Person` named "Annie".
 
 
 == Conclusion
