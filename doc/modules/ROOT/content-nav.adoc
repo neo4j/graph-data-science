@@ -33,12 +33,13 @@
 *** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/mutate-node-labels.adoc[]
 *** xref:management-ops/graph-update/dropping-parts.adoc[]
-** Reading graphs
-*** xref:management-ops/graph-inspection/graph-stream-nodes.adoc[]
-*** xref:management-ops/graph-inspection/graph-stream-relationships.adoc[]
-*** xref:management-ops/graph-inspection/create-cypher-db.adoc[]
-*** xref:management-ops/graph-inspection/graph-catalog-apache-arrow-ops.adoc[]
-** Writing graphs
+*** xref:management-ops/graph-reads/create-cypher-db.adoc[]
+** Reading from graphs
+*** xref:management-ops/graph-reads/graph-stream-nodes.adoc[]
+*** xref:management-ops/graph-reads/graph-stream-relationships.adoc[]
+*** xref:management-ops/graph-reads/create-cypher-db.adoc[]
+*** xref:management-ops/graph-reads/graph-catalog-apache-arrow-ops.adoc[]
+** Writing from graphs
 *** xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[]
 *** xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc[]
 ** xref:management-ops/graph-catalog-export-ops.adoc[]

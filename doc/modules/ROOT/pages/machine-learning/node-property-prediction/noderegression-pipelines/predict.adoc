@@ -165,4 +165,4 @@ CALL gds.alpha.pipeline.nodeRegression.predict.mutate('myGraph', {
 --
 
 The output tells us that we added a property for each of the `UnknownHouse` nodes.
-To use this property, we can run another algorithm using the `predictedPrice` property, or inspect it using xref:management-ops/graph-inspection/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[`gds.graph.nodeProperty.stream`].
+To use this property, we can run another algorithm using the `predictedPrice` property, or inspect it using xref:management-ops/graph-reads/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[`gds.graph.nodeProperty.stream`].

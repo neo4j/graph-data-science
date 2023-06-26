@@ -282,7 +282,7 @@ The total cost is represented by the `cutCost` column here.
 This is the value we want to be as high as possible.
 Additionally, the graph 'myGraph' now has a node property `community` which stores the community to which each node belongs.
 
-To inspect which community each node belongs to we can xref:management-ops/graph-inspection/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[stream node properties].
+To inspect which community each node belongs to we can xref:management-ops/graph-reads/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[stream node properties].
 
 [role=query-example]
 --
@@ -351,7 +351,7 @@ YIELD cutCost, nodePropertiesWritten
 
 Since the `value` properties on our `TRANSACTION` relationships were all at least `1.0` and several of a larger value it's not surprising that we obtain a cut with a larger cost in the weighted case.
 
-Let us now xref:management-ops/graph-inspection/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[stream node properties] to once again inspect the node community distribution.
+Let us now xref:management-ops/graph-reads/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[stream node properties] to once again inspect the node community distribution.
 
 [role=query-example]
 --

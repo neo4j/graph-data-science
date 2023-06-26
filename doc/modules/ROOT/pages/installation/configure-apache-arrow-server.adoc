@@ -8,7 +8,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 GDS supports importing graphs and exporting properties via https://arrow.apache.org/[Apache Arrow Flight].
 This chapter is dedicated to configuring the Arrow Flight Server as part of the Neo4j and GDS installation.
-For using Arrow Flight with an Arrow client, please refer to our documentation for xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[projecting graphs] and xref:management-ops/graph-inspection/graph-catalog-apache-arrow-ops.adoc[streaming properties].
+For using Arrow Flight with an Arrow client, please refer to our documentation for xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[projecting graphs] and xref:management-ops/graph-reads/graph-catalog-apache-arrow-ops.adoc[streaming properties].
 
 The simplest way to use Arrow is through our https://neo4j.com/docs/graph-data-science-client/current/[Neo4j Graph Data Science Client], which uses Arrow by default if available.
 
