@@ -24,6 +24,7 @@ import org.neo4j.gds.core.CypherMapAccess;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -36,10 +37,24 @@ public class GraphNameValidationService {
      * Validates that the input graph name is
      * - not null
      * - not blank
-     * Furthermore, the graph name is trimmed for downstream consumption.
+     *
+     * @return trimmed graph name for downstream consumption.
+     * @throws IllegalArgumentException if graph name is null or blank
      */
     public String validate(String graphName) {
         return CypherMapAccess.failOnBlank("graphName", graphName).trim();
+    }
+
+    /**
+     * Validates that the input graph name is not blank. Blank is the worst!
+     *
+     * @return @{@link java.util.Optional#empty()} if graph name was null; trimmed graph name otherwise
+     * @throws IllegalArgumentException if graph name is blank
+     */
+    public Optional<String> validatePossibleNull(String graphName) {
+        if (graphName == null) return Optional.empty();
+
+        return Optional.of(validate(graphName));
     }
 
     /**

@@ -135,4 +135,16 @@ class GraphNameValidationServiceTest {
             assertThat(e.getMessage()).isEqualTo("`graphName` can not be null or blank, but it was `null`");
         }
     }
+
+    @Test
+    void shouldValidateNulls() {
+        var service = new GraphNameValidationService();
+
+        assertThat(service.validatePossibleNull("some graph"))
+            .isPresent()
+            .hasValue("some graph");
+
+        assertThat(service.validatePossibleNull(null))
+            .isEmpty();
+    }
 }
