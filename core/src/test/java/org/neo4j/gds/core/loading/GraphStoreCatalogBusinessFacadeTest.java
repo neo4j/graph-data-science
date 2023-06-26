@@ -37,6 +37,7 @@ class GraphStoreCatalogBusinessFacadeTest {
             mock(PreconditionsService.class),
             new GraphNameValidationService(),
             service,
+            null,
             null
         );
 
@@ -53,6 +54,7 @@ class GraphStoreCatalogBusinessFacadeTest {
             mock(PreconditionsService.class),
             mock(GraphNameValidationService.class),
             service,
+            null,
             null
         );
 
@@ -67,6 +69,7 @@ class GraphStoreCatalogBusinessFacadeTest {
         var preconditionsService = mock(PreconditionsService.class);
         var facade = new GraphStoreCatalogBusinessFacade(
             preconditionsService,
+            null,
             null,
             null,
             null
@@ -86,6 +89,7 @@ class GraphStoreCatalogBusinessFacadeTest {
             mock(PreconditionsService.class),
             new GraphNameValidationService(),
             service,
+            null,
             null
         );
 

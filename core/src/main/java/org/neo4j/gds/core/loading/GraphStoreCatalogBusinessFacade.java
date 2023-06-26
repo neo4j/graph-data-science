@@ -52,17 +52,20 @@ public class GraphStoreCatalogBusinessFacade {
     // business logic
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final DropGraphService dropGraphService;
+    private final ListGraphService listGraphService;
 
     public GraphStoreCatalogBusinessFacade(
         PreconditionsService preconditionsService,
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
-        DropGraphService dropGraphService
+        DropGraphService dropGraphService,
+        ListGraphService listGraphService
     ) {
         this.preconditionsService = preconditionsService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.dropGraphService = dropGraphService;
+        this.listGraphService = listGraphService;
     }
 
     public boolean graphExists(String username, DatabaseId databaseId, String graphName) {
@@ -96,6 +99,14 @@ public class GraphStoreCatalogBusinessFacade {
         Optional<String> usernameOverride = User.parseUsernameOverride(username);
 
         return dropGraphService.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
+    }
+
+    public List<GraphStoreWithConfig> listGraphs(User user, String graphName) {
+        checkPreconditions();
+
+        Optional<String> validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
+
+        return listGraphService.list(user, validatedGraphName);
     }
 
     private void checkPreconditions() {
