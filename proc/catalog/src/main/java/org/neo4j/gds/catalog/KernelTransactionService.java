@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 public class KernelTransactionService {
     private final Context context;
@@ -30,6 +32,8 @@ public class KernelTransactionService {
     }
 
     public KernelTransaction getKernelTransaction() {
-        throw new UnsupportedOperationException("TODO: do it in a version-agnostic manner");
+        Transaction transaction = context.graphDatabaseAPI().beginTx();
+        InternalTransaction it = (InternalTransaction) transaction;
+        return it.kernelTransaction();
     }
 }
