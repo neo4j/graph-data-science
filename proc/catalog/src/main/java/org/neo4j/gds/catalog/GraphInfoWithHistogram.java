@@ -22,11 +22,8 @@ package org.neo4j.gds.catalog;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Map;
-import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class GraphInfoWithHistogram extends GraphInfo {
@@ -53,38 +50,19 @@ public class GraphInfoWithHistogram extends GraphInfo {
         this.degreeDistribution = degreeDistribution;
     }
 
+    /**
+     * @param degreeDistribution null implies not including it
+     * @param computeGraphSize   selects what kind of GraphInfo to create
+     */
     static GraphInfoWithHistogram of(
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
-        boolean computeHistogram,
-        boolean computeGraphSize,
-        TerminationFlag terminationFlag
+        Map<String, Object> degreeDistribution,
+        boolean computeGraphSize
     ) {
         var graphInfo = computeGraphSize
             ? GraphInfo.withMemoryUsage(graphProjectConfig, graphStore)
             : GraphInfo.withoutMemoryUsage(graphProjectConfig, graphStore);
-
-        Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
-            graphProjectConfig.username(),
-            graphStore.databaseId(),
-            graphProjectConfig.graphName()
-        );
-
-        var degreeDistribution = maybeDegreeDistribution.orElseGet(() -> {
-            if (computeHistogram) {
-                var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion(), terminationFlag);
-                // Cache the computed degree distribution in the Catalog
-                GraphStoreCatalog.setDegreeDistribution(
-                    graphProjectConfig.username(),
-                    graphStore.databaseId(),
-                    graphProjectConfig.graphName(),
-                    newHistogram
-                );
-                return newHistogram;
-            } else {
-                return null;
-            }
-        });
 
         return new GraphInfoWithHistogram(graphInfo, degreeDistribution);
     }

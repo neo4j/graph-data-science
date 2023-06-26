@@ -26,6 +26,7 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import org.neo4j.gds.core.loading.DegreeDistribution;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
 
@@ -34,9 +35,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.neo4j.gds.catalog.GraphInfoHelper.density;
-
-@SuppressWarnings("unused")
 public class GraphInfo {
 
     public final String graphName;
@@ -73,7 +71,7 @@ public class GraphInfo {
         this.sizeInBytes = sizeInBytes;
         this.nodeCount = nodeCount;
         this.relationshipCount = relationshipCount;
-        this.density = density(nodeCount, relationshipCount);
+        this.density = DegreeDistribution.density(nodeCount, relationshipCount);
         this.creationTime = creationTime;
         this.modificationTime = modificationTime;
         this.schema = schema;
