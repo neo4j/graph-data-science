@@ -20,7 +20,6 @@
 package org.neo4j.gds.topologicalsort;
 
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Optional;
