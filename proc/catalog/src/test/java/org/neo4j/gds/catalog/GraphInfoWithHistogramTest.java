@@ -29,7 +29,6 @@ import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class GraphInfoWithHistogramTest {
     @Test
