@@ -36,7 +36,7 @@ public final class UserInputAsStringOrListOfString {
     public static List<String> parse(Object userInput, String configurationKey) {
         if (userInput instanceof Iterable) {
             var result = new ArrayList<String>();
-            for (Object item : (Iterable) userInput) {
+            for (Object item : (Iterable<?>) userInput) {
                 result.add(parseOne(item, configurationKey));
             }
             return result;
