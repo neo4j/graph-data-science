@@ -63,8 +63,6 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     // Saves the maximal distance from a source node, which is the longest path in DAG
     private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
-    private final boolean isWeighted;
-
     protected TopologicalSort(
         Graph graph,
         TopologicalSortBaseConfig config,
@@ -79,7 +77,6 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
-        this.isWeighted = config.hasRelationshipWeightProperty();
     }
 
     @Override
@@ -129,8 +126,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                     graph.concurrentCopy(),
                     result,
                     inDegrees,
-                    longestPathDistances,
-                    isWeighted
+                    longestPathDistances
                 ));
             }
             // Might not reach 100% if there are cycles in the graph
@@ -153,7 +149,6 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         private final TopologicalSortResult result;
         private final HugeAtomicLongArray inDegrees;
         private final Optional<HugeAtomicDoubleArray> longestPathDistances;
-        private final boolean isWeighted;
 
         TraversalTask(
             @Nullable TraversalTask parent,
@@ -161,8 +156,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             Graph graph,
             TopologicalSortResult result,
             HugeAtomicLongArray inDegrees,
-            Optional<HugeAtomicDoubleArray> longestPathDistances,
-            boolean isWeighted
+            Optional<HugeAtomicDoubleArray> longestPathDistances
         ) {
             super(parent);
             this.sourceId = sourceId;
@@ -170,14 +164,13 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             this.result = result;
             this.inDegrees = inDegrees;
             this.longestPathDistances = longestPathDistances;
-            this.isWeighted = isWeighted;
         }
 
         @Override
         public void compute() {
-            graph.forEachRelationship(sourceId, (source, target) -> {
+            graph.forEachRelationship(sourceId, 1.0, (source, target, weight) -> {
                 if (longestPathDistances.isPresent()) {
-                    longestPathTraverse(source, target);
+                    longestPathTraverse(source, target, weight);
                 }
 
                 long prevDegree = inDegrees.getAndAdd(target, -1);
@@ -191,8 +184,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                         graph.concurrentCopy(),
                         result,
                         inDegrees,
-                        longestPathDistances,
-                        isWeighted
+                        longestPathDistances
                     );
                     traversalTask.fork();
                 }
@@ -202,13 +194,10 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             propagateCompletion();
         }
 
-        void longestPathTraverse(long source, long target) {
+        void longestPathTraverse(long source, long target, double weight) {
             var longestPaths = longestPathDistances.get();
             // the source distance will never change anymore, but the target distance might
-            var potentialDistance = longestPaths.get(source) +
-                (isWeighted
-                    ? graph.relationshipProperty(source, target)
-                    : 1.0);
+            var potentialDistance = longestPaths.get(source) + weight;
             var currentTargetDistance = longestPaths.get(target);
             while(potentialDistance > currentTargetDistance) {
                 var witnessValue = longestPaths.compareAndExchange(target, currentTargetDistance, potentialDistance);
