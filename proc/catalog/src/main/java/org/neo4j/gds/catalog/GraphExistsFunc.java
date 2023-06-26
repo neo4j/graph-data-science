@@ -26,7 +26,7 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.function.Function;
 
-import static org.neo4j.gds.catalog.GraphCatalogConstants.EXISTS_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.EXISTS_DESCRIPTION;
 
 public class GraphExistsFunc {
     @SuppressWarnings("WeakerAccess")

@@ -26,7 +26,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.GraphCatalogConstants.EXISTS_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.EXISTS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphExistsProc {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-final class GraphCatalogConstants {
+final class GraphCatalogProcedureConstants {
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
     static final String DROP_DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
 
