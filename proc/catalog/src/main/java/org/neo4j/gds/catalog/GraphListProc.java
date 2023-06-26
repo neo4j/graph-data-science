@@ -19,26 +19,34 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.LIST_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.NO_VALUE_PLACEHOLDER;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphListProc extends BaseProc {
+public class GraphListProc {
+    @Context
+    public GraphStoreCatalogProcedureFacade facade;
 
-    private static final String DESCRIPTION = "Lists information about named graphs stored in the catalog.";
+    public GraphListProc() {
+
+    }
+
+    GraphListProc(GraphStoreCatalogProcedureFacade facade) {
+        this.facade = facade;
+    }
 
     @Procedure(name = "gds.graph.list", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<GraphInfoWithHistogram> list(
-        @Name(value = "graphName", defaultValue = GraphListOperator.NO_VALUE) String graphName
+    @Description(LIST_DESCRIPTION)
+    public Stream<GraphInfoWithHistogram> listGraphs(
+        @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName
     ) {
-        Preconditions.check();
-        return GraphListOperator.list(graphName, executionContext());
+        return facade.listGraphs(graphName);
     }
 }
