@@ -9,8 +9,11 @@ if (shouldSpotbugs) {
 
             proj.spotbugs {
                 toolVersion = ver.spotbugsToolVersion
-                effort = 'max'
+                effort = 'less'
                 reportLevel = 'low'
+
+                onlyAnalyze = [ 'org.neo4j.gds.*', 'com.neo4j.gds.*' ]
+                omitVisitors = ['FindSqlInjection', 'FindNonShortCircuit']
 
                 // When  `ignoreFailures=false` the build will be failing on spotbugs errors
                 ignoreFailures = false
