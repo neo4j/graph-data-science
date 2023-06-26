@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -29,11 +31,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Port of GraphListOperator
- */
 public class ListGraphService {
-    public List<GraphStoreWithConfig> list(User user, Optional<String> graphName) {
+    public List<Pair<GraphStoreWithConfig, Map<String, Object>>> list(
+        User user,
+        Optional<String> graphName,
+        boolean includeDegreeDistribution,
+        TerminationFlag terminationFlag
+    ) {
         var graphEntries = user.isAdmin()
             ? listAll()
             : listForUser(user);
@@ -43,7 +47,45 @@ public class ListGraphService {
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName.get()));
         }
 
-        return graphEntries.map(e -> GraphStoreWithConfig.of(e.getValue(), e.getKey())).collect(Collectors.toList());
+        return graphEntries.map(e ->
+        {
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(e.getValue(), e.getKey());
+            Map<String, Object> degreeDistribution = getOrCreateDegreeDistribution(
+                includeDegreeDistribution,
+                graphStoreWithConfig,
+                terminationFlag
+            );
+            return Pair.of(graphStoreWithConfig, degreeDistribution);
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * This is get if cached; create if does not exist; or return null depending on the flag
+     */
+    private Map<String, Object> getOrCreateDegreeDistribution(
+        boolean includeDegreeDistribution,
+        GraphStoreWithConfig graphStoreWithConfig,
+        TerminationFlag terminationFlag
+    ) {
+        if (!includeDegreeDistribution) return null;
+
+        Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
+            graphStoreWithConfig.config().username(),
+            graphStoreWithConfig.graphStore().databaseId(),
+            graphStoreWithConfig.config().graphName()
+        );
+
+        return maybeDegreeDistribution.orElseGet(() -> {
+            var histogram = DegreeDistribution.compute(graphStoreWithConfig.graphStore().getUnion(), terminationFlag);
+            // Cache the computed degree distribution in the Catalog
+            GraphStoreCatalog.setDegreeDistribution(
+                graphStoreWithConfig.config().username(),
+                graphStoreWithConfig.graphStore().databaseId(),
+                graphStoreWithConfig.config().graphName(),
+                histogram
+            );
+            return histogram;
+        });
     }
 
     private static Stream<Map.Entry<GraphProjectConfig, GraphStore>> listAll() {
