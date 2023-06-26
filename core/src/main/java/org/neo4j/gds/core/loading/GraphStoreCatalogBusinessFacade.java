@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -101,12 +104,17 @@ public class GraphStoreCatalogBusinessFacade {
         return dropGraphService.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
     }
 
-    public List<GraphStoreWithConfig> listGraphs(User user, String graphName) {
+    public List<Pair<GraphStoreWithConfig, Map<String, Object>>> listGraphs(
+        User user,
+        String graphName,
+        boolean includeDegreeDistribution,
+        TerminationFlag terminationFlag
+    ) {
         checkPreconditions();
 
         Optional<String> validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
 
-        return listGraphService.list(user, validatedGraphName);
+        return listGraphService.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
     }
 
     private void checkPreconditions() {
