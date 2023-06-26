@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.TransactionTerminationMonitor;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -56,6 +59,7 @@ public class GraphStoreCatalogProcedureFacade {
     private final GraphDatabaseService graphDatabaseService;
     private final KernelTransactionService kernelTransactionService;
     private final Log log;
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final ProcedureTransactionService procedureTransactionService;
     private final SecurityContext securityContext;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
@@ -70,6 +74,7 @@ public class GraphStoreCatalogProcedureFacade {
         GraphDatabaseService graphDatabaseService,
         KernelTransactionService kernelTransactionService,
         Log log,
+        ProcedureReturnColumns procedureReturnColumns,
         ProcedureTransactionService procedureTransactionService,
         SecurityContext securityContext,
         TaskRegistryFactoryService taskRegistryFactoryService,
@@ -81,6 +86,7 @@ public class GraphStoreCatalogProcedureFacade {
         this.graphDatabaseService = graphDatabaseService;
         this.kernelTransactionService = kernelTransactionService;
         this.log = log;
+        this.procedureReturnColumns = procedureReturnColumns;
         this.procedureTransactionService = procedureTransactionService;
         this.securityContext = securityContext;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
@@ -150,11 +156,39 @@ public class GraphStoreCatalogProcedureFacade {
             user
         );
 
-        // make this injectable so easy ot test?
+        // we convert here from domain type to Neo4j display type
         return results.stream().map(gswc -> GraphInfo.withoutMemoryUsage(
             gswc.config(),
             gswc.graphStore()
         ));
+    }
+
+    public Stream<GraphInfoWithHistogram> listGraphs(String graphName) {
+        graphName = validateValue(graphName);
+
+        var user = user();
+        var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
+
+        var results = businessFacade.listGraphs(user, graphName, displayDegreeDistribution, terminationFlag());
+
+        // we convert here from domain type to Neo4j display type
+        boolean computeGraphSize = procedureReturnColumns.contains("memoryUsage")
+            || procedureReturnColumns.contains("sizeInBytes");
+        return results.stream().map(p -> GraphInfoWithHistogram.of(
+            p.getLeft().config(),
+            p.getLeft().graphStore(),
+            p.getRight(),
+            computeGraphSize
+        ));
+    }
+
+    /**
+     * We have to potentially unstack the placeholder
+     */
+    private String validateValue(String graphName) {
+        if (GraphCatalogProcedureConstants.NO_VALUE_PLACEHOLDER.equals(graphName)) return null;
+
+        return graphName;
     }
 
     /**
@@ -167,5 +201,11 @@ public class GraphStoreCatalogProcedureFacade {
 
     private User user() {
         return userServices.getUser(securityContext);
+    }
+
+    private TerminationFlag terminationFlag() {
+        var kernelTransaction = kernelTransactionService.getKernelTransaction();
+        var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
+        return TerminationFlag.wrap(terminationMonitor);
     }
 }

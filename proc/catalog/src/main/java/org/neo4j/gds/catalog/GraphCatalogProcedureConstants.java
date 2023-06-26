@@ -23,5 +23,12 @@ final class GraphCatalogProcedureConstants {
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
     static final String DROP_DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
 
-    private GraphCatalogConstants() {}
+    /**
+     * This exists because procedures need default values sometimes.
+     * For example, CALL gds.graph.list() would fail otherwise,
+     * the user would have to do something silly like CALL gds.graph.list("")
+     */
+    static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
+
+    private GraphCatalogProcedureConstants() {}
 }

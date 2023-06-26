@@ -20,6 +20,7 @@ dependencies {
     // the necessary GDS things for the extension to construct the application
     implementation project(':core') // this is where the business facade lives (currently)
     implementation project(':executor') // Preconditions
+    implementation project(':neo4j-api') // ProcedureReturnColumns
     implementation project(':neo4j-kernel-adapter') // Neo4jProxy
     implementation project(':proc-catalog') // this is where the (catalog) procedures facade lives
     implementation project(':progress-tracking')

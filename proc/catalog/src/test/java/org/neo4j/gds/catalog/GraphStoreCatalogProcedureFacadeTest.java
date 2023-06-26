@@ -50,6 +50,7 @@ class GraphStoreCatalogProcedureFacadeTest {
             null,
             null,
             null,
+            null,
             securityContext,
             null,
             null,
@@ -84,6 +85,7 @@ class GraphStoreCatalogProcedureFacadeTest {
         var procedureFacade = new GraphStoreCatalogProcedureFacade(
             databaseIdService,
             graphDatabaseService,
+            null,
             null,
             null,
             null,

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
@@ -31,6 +32,7 @@ import org.neo4j.gds.core.loading.DropGraphService;
 import org.neo4j.gds.core.loading.GraphNameValidationService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.ListGraphService;
 import org.neo4j.gds.core.loading.PreconditionsService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
@@ -72,15 +74,23 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         // Neo4j's services, all encapsulated so that they can be resolved late
         var kernelTransactionService = new KernelTransactionService(context);
         var procedureTransactionService = new ProcedureTransactionService(context);
+        var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
-        // GDS Business Facade
-        var preconditionsService = createPreconditionsService();
+        // GDS services
         var graphStoreCatalogService = new GraphStoreCatalogService();
+
+        var dropGraphService = new DropGraphService(graphStoreCatalogService);
+        var graphNameValidationService = new GraphNameValidationService();
+        var listGraphService = new ListGraphService();
+        var preconditionsService = createPreconditionsService();
+
+        // GDS business facade
         var businessFacade = new GraphStoreCatalogBusinessFacade(
             preconditionsService,
-            new GraphNameValidationService(),
+            graphNameValidationService,
             graphStoreCatalogService,
-            new DropGraphService(graphStoreCatalogService)
+            dropGraphService,
+            listGraphService
         );
 
         return new GraphStoreCatalogProcedureFacade(
@@ -88,6 +98,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             context.graphDatabaseAPI(),
             kernelTransactionService,
             log,
+            procedureReturnColumns,
             procedureTransactionService,
             context.securityContext(),
             taskRegistryFactoryService,
