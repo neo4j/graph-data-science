@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,24 +36,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
-class GraphInfoHelperTest {
-
+class DegreeDistributionTest {
+    @SuppressWarnings("unused")
     @GdlGraph
     private static final String GRAPH =
         "CREATE" +
-        "  (a)-->(b)" +
-        ", (a)-->(c)" +
-        ", (a)-->(d)" +
-        ", (b)-->(c)" +
-        ", (b)-->(d)" +
-        ", (c)-->(d)";
+            "  (a)-->(b)" +
+            ", (a)-->(c)" +
+            ", (a)-->(d)" +
+            ", (b)-->(c)" +
+            ", (b)-->(d)" +
+            ", (c)-->(d)";
 
+    @SuppressWarnings("unused")
     @Inject
     private Graph graph;
 
     @Test
     void degreeDistribution() {
-        var actual = GraphInfoHelper.degreeDistribution(graph, TerminationFlag.RUNNING_TRUE);
+        var actual = DegreeDistribution.compute(graph, TerminationFlag.RUNNING_TRUE);
         var expected = Map.of(
             "min", 0L,
             "max", 3L,
@@ -71,12 +72,12 @@ class GraphInfoHelperTest {
     @ParameterizedTest
     @MethodSource("densitySource")
     void density(long nodeCount, long relationshipCount, double expectedDensity) {
-        assertEquals(expectedDensity, GraphInfoHelper.density(nodeCount, relationshipCount));
+        assertEquals(expectedDensity, DegreeDistribution.density(nodeCount, relationshipCount));
     }
 
     @Test
     void graphBasedDensity() {
-        assertEquals(GraphInfoHelper.density(graph), 0.5);
+        assertEquals(DegreeDistribution.density(graph), 0.5);
     }
 
     private static Stream<Arguments> densitySource() {

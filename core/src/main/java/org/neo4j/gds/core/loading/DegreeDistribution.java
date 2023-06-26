@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.loading;
 
 import org.HdrHistogram.AtomicHistogram;
 import org.neo4j.gds.api.Graph;
@@ -27,8 +27,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Map;
 
-public final class GraphInfoHelper {
-
+public final class DegreeDistribution {
     /**
      * Needs to be at least 2 due to some requirement from the AtomicHistogram.
      *
@@ -36,9 +35,9 @@ public final class GraphInfoHelper {
      */
     private static final int PRECISION = 5;
 
-    private GraphInfoHelper() {}
+    private DegreeDistribution() {}
 
-    public static Map<String, Object> degreeDistribution(Graph graph, TerminationFlag terminationFlag) {
+    public static Map<String, Object> compute(Graph graph, TerminationFlag terminationFlag) {
         long maximumDegree = Math.max(2, graph.relationshipCount());
         AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
 
@@ -69,5 +68,6 @@ public final class GraphInfoHelper {
     public static double density(Graph graph) {
         return density(graph.nodeCount(), graph.relationshipCount());
     }
+
 
 }
