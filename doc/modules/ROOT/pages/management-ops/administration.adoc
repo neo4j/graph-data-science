@@ -1,6 +1,6 @@
 [.enterprise-edition]
 [[administration]]
-= Administration
+= Access control
 :description: This section explains administration capabilities in the Neo4j Graph Data Science library.
 
 

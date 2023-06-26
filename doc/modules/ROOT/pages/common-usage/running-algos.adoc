@@ -45,7 +45,7 @@ This execution mode is especially useful in three scenarios:
 
 * Algorithms can depend on the results of previous algorithms without the need to write to Neo4j.
 * Algorithm results can be written altogether (see xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-properties-example[write node properties] and xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc#catalog-graph-write-relationship-example[write relationships]).
-* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see xref:management-ops/graph-inspection/index.adoc[]).
+* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see xref:management-ops/index.adoc#_read[Reading graphs]]).
 
 A statistical summary of the computation is returned similar to the `stats` mode.
 Mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.

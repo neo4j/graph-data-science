@@ -34,7 +34,7 @@ You can also xref:management-ops/inspecting-the-graph-catalog.adoc[drop] a graph
 
 === Read
 
-The properties stored in the nodes and relationships of a graph can be retrieved using the `stream` methods on xref:graph-catalog-node-ops.adoc#catalog-graph-examples-stream[nodes properties] and xref:graph-catalog-relationship-ops.adoc#_stream[relationship properties] respectively. In the Enterprise Edition, similar operations can be performed more efficiently using xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
+The properties stored in the nodes and relationships of a graph can be retrieved using the `stream` methods on xref:management-ops/graph-inspection/graph-stream-nodes.adoc[nodes] and xref:management-ops/graph-inspection/graph-stream-relationships.adoc[relationships] respectively. In the Enterprise Edition, similar operations can be performed more efficiently using xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
 
 For complex use cases where an expressive query language is needed, you can run xref:management-ops/create-cypher-db.adoc[Cypher queries] on a graph.
 
@@ -42,11 +42,11 @@ For complex use cases where an expressive query language is needed, you can run 
 
 In-memory graphs are usually updated by algorithms running in `mutate` mode, which add new properties to nodes or relationships.
 
-Besides, you can xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[update node labels] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-relationship-to-undirected-example[convert relationships] from directed to undirected. You can also _remove_ xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[relationships of a given type].
+Besides, you can xref:management-ops/graph-update/mutate-node-labels.adoc[update node labels] and xref:management-ops/graph-update/to-undirected.adoc#catalog-graph-relationship-to-undirected-example[convert relationships] from directed to undirected. You can also _remove_ xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-delete-rel-type[relationships of a given type].
 
 === Write
 
-In addition to exporting a whole graph, you can write xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[node properties], xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-label-example[node labels], and xref:graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[relationships] back to Neo4j.
+In addition to exporting a whole graph, you can write xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-properties-example[node properties], xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-label-example[node labels], and xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc#catalog-graph-write-relationship-example[relationships] back to Neo4j.
 
 == Administration
 

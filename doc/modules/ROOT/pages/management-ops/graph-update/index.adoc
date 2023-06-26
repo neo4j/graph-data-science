@@ -1,7 +1,0 @@
-= Updating a graph
-
-After a graph was created, in GDS can be updated in several ways.
-
-First of we support multiple operations the graph node properties can be added when using the `mutate` mode of our xref:algorithms/index.adoc[].
-
-Also, there are several operations to xref:management-ops/graph-update/dropping-parts.adoc[drop parts] of the graph, xref:management-ops/graph-update/mutate-node-labels.adoc[adding node labels] and xref:management-ops/graph-update/to-undirected.adoc[converting to relationships to undirected].
