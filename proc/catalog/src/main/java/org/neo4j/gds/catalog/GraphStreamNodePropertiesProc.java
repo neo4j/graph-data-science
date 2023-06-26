@@ -33,9 +33,11 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -93,7 +95,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             configuration,
             List.of(nodeProperty),
             nodeLabels,
-            (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId, propertyValue)
+            (nodeId, propertyName, propertyValue, nodeLabelList) -> new PropertyResult(nodeId, propertyValue, nodeLabelList)
         );
     }
 
@@ -111,7 +113,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             configuration,
             List.of(nodeProperty),
             nodeLabels,
-            (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId, propertyValue),
+            (nodeId, propertyName, propertyValue, nodeLabelList) -> new PropertyResult(nodeId, propertyValue, nodeLabelList),
             Optional.of(deprecationWarning)
         );
     }
@@ -173,6 +175,10 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
         deprecationWarning.ifPresent(taskProgressTracker::logWarning);
 
+        Function<Long, List<String>> nodeLabelsFn = config.listNodeLabels()
+            ? nodeId -> subGraph.nodeLabels(nodeId).stream().map(NodeLabel::name).collect(Collectors.toList())
+            : nodeId -> Collections.emptyList();
+
         var resultStream = LongStream
             .range(0, subGraph.nodeCount())
             .boxed()
@@ -184,7 +190,8 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
                     return producer.produce(
                         originalId,
                         usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
-                        propertyKeyAndValues.getValue().getObject(nodeId)
+                        propertyKeyAndValues.getValue().getObject(nodeId),
+                        nodeLabelsFn.apply(nodeId)
                     );
                 });
             })
@@ -201,11 +208,13 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         public final long nodeId;
         public final String nodeProperty;
         public final Object propertyValue;
+        public final List<String> nodeLabels;
 
-        PropertiesResult(long nodeId, String nodeProperty, Object propertyValue) {
+        PropertiesResult(long nodeId, String nodeProperty, Object propertyValue, List<String> nodeLabels) {
             this.nodeId = nodeId;
             this.nodeProperty = nodeProperty;
             this.propertyValue = propertyValue;
+            this.nodeLabels = nodeLabels;
         }
     }
 
@@ -213,15 +222,17 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     public static class PropertyResult {
         public final long nodeId;
         public final Object propertyValue;
+        public final List<String> nodeLabels;
 
-        PropertyResult(long nodeId, Object propertyValue) {
+        PropertyResult(long nodeId, Object propertyValue, List<String> nodeLabels) {
             this.nodeId = nodeId;
             this.propertyValue = propertyValue;
+            this.nodeLabels = nodeLabels;
         }
     }
 
     interface ResultProducer<R> {
-        R produce(long nodeId, String propertyName, Object propertyValue);
+        R produce(long nodeId, String propertyName, Object propertyValue, List<String> nodeLabels);
     }
 
 }

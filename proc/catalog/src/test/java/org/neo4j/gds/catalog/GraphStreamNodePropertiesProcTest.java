@@ -44,6 +44,8 @@ import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -128,32 +130,32 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         "CALL gds.graph.nodeProperties.stream(" +
         "   '%s', " +
         "   ['newNodeProp1', 'newNodeProp2']" +
-        ") YIELD nodeId, nodeProperty, propertyValue " +
-        "RETURN nodeId AS id, nodeProperty, propertyValue",
+        ") YIELD nodeId, nodeProperty, propertyValue, nodeLabels " +
+        "RETURN nodeId AS id, nodeProperty, propertyValue, nodeLabels",
         // explicit PROJECT_ALL
         "CALL gds.graph.nodeProperties.stream(" +
         "   '%s', " +
         "   ['newNodeProp1', 'newNodeProp2'], " +
         "   ['*']" +
-        ") YIELD nodeId, nodeProperty, propertyValue " +
-        "RETURN nodeId AS id, nodeProperty, propertyValue"
+        ") YIELD nodeId, nodeProperty, propertyValue, nodeLabels " +
+        "RETURN nodeId AS id, nodeProperty, propertyValue, nodeLabels"
     })
     void streamLoadedNodeProperties(String graphWriteQueryTemplate) {
         String graphWriteQuery = formatWithLocale(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
         assertCypherResult(graphWriteQuery, asList(
-            Map.of("id", idFunction.of("a"), "nodeProperty", "newNodeProp1", "propertyValue", 0D),
-            Map.of("id", idFunction.of("a"), "nodeProperty", "newNodeProp2", "propertyValue", 42L),
-            Map.of("id", idFunction.of("b"), "nodeProperty", "newNodeProp1", "propertyValue", 1D),
-            Map.of("id", idFunction.of("b"), "nodeProperty", "newNodeProp2", "propertyValue", 43L),
-            Map.of("id", idFunction.of("c"), "nodeProperty", "newNodeProp1", "propertyValue", 2D),
-            Map.of("id", idFunction.of("c"), "nodeProperty", "newNodeProp2", "propertyValue", 44L),
-            Map.of("id", idFunction.of("d"), "nodeProperty", "newNodeProp1", "propertyValue", 3D),
-            Map.of("id", idFunction.of("d"), "nodeProperty", "newNodeProp2", "propertyValue", 45L),
-            Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp1", "propertyValue", 4D),
-            Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp2", "propertyValue", 46L),
-            Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp1", "propertyValue", 5D),
-            Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp2", "propertyValue", 47L)
+            Map.of("id", idFunction.of("a"), "nodeProperty", "newNodeProp1", "propertyValue", 0D, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("a"), "nodeProperty", "newNodeProp2", "propertyValue", 42L, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("b"), "nodeProperty", "newNodeProp1", "propertyValue", 1D, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("b"), "nodeProperty", "newNodeProp2", "propertyValue", 43L, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("c"), "nodeProperty", "newNodeProp1", "propertyValue", 2D, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("c"), "nodeProperty", "newNodeProp2", "propertyValue", 44L, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("d"), "nodeProperty", "newNodeProp1", "propertyValue", 3D, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("d"), "nodeProperty", "newNodeProp2", "propertyValue", 45L, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp1", "propertyValue", 4D, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp2", "propertyValue", 46L, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp1", "propertyValue", 5D, "nodeLabels", Collections.emptyList()),
+            Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp2", "propertyValue", 47L, "nodeLabels", Collections.emptyList())
         ));
     }
 
@@ -237,6 +239,23 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
             Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp3", "propertyValue", 4L),
             Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp3", "propertyValue", 5L)
         ));
+    }
+
+    @Test
+    void shouldListLabelsIfConfigIsSet() {
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.stream($graph, 'newNodeProp1', ['*'], {listNodeLabels: true}) " +
+                " YIELD nodeId, nodeProperty, propertyValue, nodeLabels " +
+                " RETURN nodeId AS id, nodeProperty, propertyValue, nodeLabels",
+            Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            asList(
+                Map.of("id", idFunction.of("a"), "nodeProperty", "newNodeProp1", "propertyValue", 0D, "nodeLabels", List.of("A")),
+                Map.of("id", idFunction.of("b"), "nodeProperty", "newNodeProp1", "propertyValue", 1D, "nodeLabels", List.of("A")),
+                Map.of("id", idFunction.of("c"), "nodeProperty", "newNodeProp1", "propertyValue", 2D, "nodeLabels", List.of("A")),
+                Map.of("id", idFunction.of("d"), "nodeProperty", "newNodeProp1", "propertyValue", 3D, "nodeLabels", List.of("B")),
+                Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp1", "propertyValue", 4D, "nodeLabels", List.of("B")),
+                Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp1", "propertyValue", 5D, "nodeLabels", List.of("B"))
+            ));
     }
 
     @Test
