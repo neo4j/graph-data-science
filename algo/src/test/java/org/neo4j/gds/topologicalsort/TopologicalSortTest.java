@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -43,10 +42,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
-    private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder().concurrency(4)
+    private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
+        .concurrency(4)
         .computeLongestPathDistances(true)
         .build();
-    private static TopologicalSortBaseConfig BASIC_CONFIG = new TopologicalSortStreamConfigImpl.Builder().concurrency(4)
+    private static TopologicalSortBaseConfig BASIC_CONFIG = new TopologicalSortStreamConfigImpl.Builder()
+        .concurrency(4)
         .build();
 
     @GdlGraph(graphNamePrefix = "basic")
@@ -80,11 +81,11 @@ class TopologicalSortTest {
         assertEquals(2, third);
         assertEquals(1, fourth);
 
-        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
-        long firstLongestPathDistance = longestPathsDistances.get(0);
-        long secondLongestPathDistance = longestPathsDistances.get(1);
-        long thirdLongestPathDistance = longestPathsDistances.get(2);
-        long fourthLongestPathDistance = longestPathsDistances.get(3);
+        var longestPathsDistances = result.longestPathDistances().get();
+        var firstLongestPathDistance = longestPathsDistances.get(0);
+        var secondLongestPathDistance = longestPathsDistances.get(1);
+        var thirdLongestPathDistance = longestPathsDistances.get(2);
+        var fourthLongestPathDistance = longestPathsDistances.get(3);
 
         assertEquals(1, firstLongestPathDistance);
         assertEquals(3, secondLongestPathDistance);
@@ -142,14 +143,14 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(selfLoopGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
-        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.longestPathDistances().get();
 
         long first = nodes.get(0);
         assertEquals(1, result.size());
         assertEquals(0, first);
 
         // Note: paths of ignored nodes are not calculated, and can have any value (unimportant implementation detail)
-        long firstLongestPathDistance = longestPathsDistances.get(0);
+        var firstLongestPathDistance = longestPathsDistances.get(0);
         assertEquals(0, firstLongestPathDistance);
     }
 
@@ -221,33 +222,33 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(lastGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
-        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.longestPathDistances().get();
 
         assertEquals(nodeCount, result.size());
         long last = nodes.get(nodeCount - 1);
         assertEquals(lastGraph.toMappedNodeId("n100"), last);
 
-        long n0distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n0"));
-        long n1distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n1"));
-        long n2distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n2"));
-        long n3distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n3"));
-        long n4distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n4"));
-        long n5distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n5"));
-        long n6distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n6"));
-        long n7distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n7"));
-        long n8distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n8"));
-        long n9distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n9"));
-        long n20distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n20"));
-        long n21distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n21"));
-        long n22distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n22"));
-        long n23distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n23"));
-        long n24distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n24"));
-        long n25distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n25"));
-        long n26distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n26"));
-        long n27distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n27"));
-        long n28distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n28"));
-        long n29distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n29"));
-        long n100distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n100"));
+        var n0distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n0"));
+        var n1distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n1"));
+        var n2distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n2"));
+        var n3distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n3"));
+        var n4distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n4"));
+        var n5distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n5"));
+        var n6distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n6"));
+        var n7distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n7"));
+        var n8distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n8"));
+        var n9distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n9"));
+        var n20distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n20"));
+        var n21distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n21"));
+        var n22distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n22"));
+        var n23distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n23"));
+        var n24distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n24"));
+        var n25distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n25"));
+        var n26distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n26"));
+        var n27distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n27"));
+        var n28distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n28"));
+        var n29distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n29"));
+        var n100distance = longestPathsDistances.get(lastGraph.toMappedNodeId("n100"));
 
         assertEquals(0, n0distance);
         assertEquals(0, n1distance);
@@ -306,7 +307,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(cyclesGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
-        HugeAtomicLongArray longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.longestPathDistances().get();
 
         long first = nodes.get(0);
         long second = nodes.get(1);
@@ -319,9 +320,9 @@ class TopologicalSortTest {
         assertEquals(3, result.size());
         assertThat(third).isEqualTo(cyclesGraph.toMappedNodeId("n6"));
 
-        long n6distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n6"));
-        long n7distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n7"));
-        long n8distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n8"));
+        var n6distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n6"));
+        var n7distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n7"));
+        var n8distance = longestPathsDistances.get(cyclesGraph.toMappedNodeId("n8"));
 
         assertEquals(1, n6distance);
         assertEquals(0, n7distance);

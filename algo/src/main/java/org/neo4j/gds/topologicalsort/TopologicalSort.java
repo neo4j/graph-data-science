@@ -22,11 +22,13 @@ package org.neo4j.gds.topologicalsort;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -59,7 +61,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final int concurrency;
 
     // Saves the maximal distance from a source node, which is the longest path in DAG
-    private final Optional<HugeAtomicLongArray> longestPathDistances;
+    private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
     protected TopologicalSort(
         Graph graph,
@@ -72,7 +74,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.concurrency = config.concurrency();
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
         this.longestPathDistances = config.computeLongestPathDistances()
-            ? Optional.of(HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency)))
+            ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
     }
@@ -146,10 +148,15 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         private final Graph graph;
         private final TopologicalSortResult result;
         private final HugeAtomicLongArray inDegrees;
-        private final Optional<HugeAtomicLongArray> longestPathDistances;
+        private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
-        TraversalTask(@Nullable TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees,
-            Optional<HugeAtomicLongArray> longestPathDistances
+        TraversalTask(
+            @Nullable TraversalTask parent,
+            long sourceId,
+            Graph graph,
+            TopologicalSortResult result,
+            HugeAtomicLongArray inDegrees,
+            Optional<HugeAtomicDoubleArray> longestPathDistances
         ) {
             super(parent);
             this.sourceId = sourceId;
@@ -161,9 +168,9 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
         @Override
         public void compute() {
-            graph.forEachRelationship(sourceId, (source, target) -> {
+            graph.forEachRelationship(sourceId, 1.0, (source, target, weight) -> {
                 if (longestPathDistances.isPresent()) {
-                    longestPathTraverse(source, target);
+                    longestPathTraverse(source, target, weight);
                 }
 
                 long prevDegree = inDegrees.getAndAdd(target, -1);
@@ -187,10 +194,10 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             propagateCompletion();
         }
 
-        void longestPathTraverse(long source, long target) {
+        void longestPathTraverse(long source, long target, double weight) {
             var longestPaths = longestPathDistances.get();
             // the source distance will never change anymore, but the target distance might
-            var potentialDistance  = longestPaths.get(source) + 1;
+            var potentialDistance = longestPaths.get(source) + weight;
             var currentTargetDistance = longestPaths.get(target);
             while(potentialDistance > currentTargetDistance) {
                 var witnessValue = longestPaths.compareAndExchange(target, currentTargetDistance, potentialDistance);

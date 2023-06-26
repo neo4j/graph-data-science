@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.topologicalsort;
 
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Optional;
@@ -31,9 +31,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TopologicalSortResult {
     private final HugeLongArray sortedNodes;
     private final AtomicLong addIndex = new AtomicLong(0);
-    private final Optional<HugeAtomicLongArray> longestPathDistances;
+    private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
-    TopologicalSortResult(long nodeCount, Optional<HugeAtomicLongArray> longestPathDistances) {
+    TopologicalSortResult(long nodeCount, Optional<HugeAtomicDoubleArray> longestPathDistances) {
         this.sortedNodes = HugeLongArray.newArray(nodeCount);
         this.longestPathDistances = longestPathDistances;
     }
@@ -42,7 +42,7 @@ public class TopologicalSortResult {
         return sortedNodes;
     }
 
-    public Optional<HugeAtomicLongArray> longestPathDistances() {
+    public Optional<HugeAtomicDoubleArray> longestPathDistances() {
         return longestPathDistances;
     }
 
