@@ -6,11 +6,12 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                                     | Operation
-| GDS Version                                                     | `_gds.version_`
-| xref:installation/neo4j-server.adoc#neo4j-server-verify[List all operations in GDS]        | `_gds.list_`
+| GDS Version                                                     | `gds.version`
+| xref:installation/index.adoc#_verifying_the_installation[List all operations in GDS]        | `gds.list`
 | xref:common-usage/logging.adoc#logging-progress-logging[List logged progress]              | `gds.beta.listProgress`
 | xref:common-usage/logging.adoc#logging-user-warnings[List warnings]              |       `gds.alpha.userLog`
 | xref:management-ops/utility-functions.adoc[The version of the installed GDS]         | `_gds.version_`
+| xref:installation/index.adoc#_verifying_the_installation[The license state of the installed GDS]         | `gds.license.state`
 .2+<.^| xref:management-ops/utility-functions.adoc#utility-functions-node-path[Node id functions]
 | `_gds.util.asNode_`
 | `_gds.util.asNodes_`

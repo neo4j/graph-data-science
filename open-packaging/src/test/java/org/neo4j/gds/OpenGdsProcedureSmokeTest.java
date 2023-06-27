@@ -407,6 +407,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.labelPropagation.write",
         "gds.labelPropagation.write.estimate",
 
+        "gds.license.state",
+
         "gds.louvain.mutate",
         "gds.louvain.mutate.estimate",
         "gds.louvain.stats",

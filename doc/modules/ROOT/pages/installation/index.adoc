@@ -53,11 +53,11 @@ To list all available procedures, call the `gds.list()` procedure:
 CALL gds.list();
 ----
 
-If you have installed GDS EE, call the `gds.debug.sysInfo()` procedure and check that the returned `gdsEdition` value is `Licensed`:
+If you have installed GDS EE, call the `gds.license.state()` procedure and check that the returned `isLicensed` value is `true`:
 
 [source, cypher, role=noplay]
 ----
-CALL gds.debug.sysInfo();
+CALL gds.license.state();
 ----
 
 == Additional configuration
