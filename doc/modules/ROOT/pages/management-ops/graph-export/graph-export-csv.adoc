@@ -1,11 +1,12 @@
 [[catalog-graph-export-csv]]
 [.beta]
-= Export a named graph to CSV
+= Export to CSV
 
+include::partial$/common-usage/not-on-aurads-note.adoc[]
 include::partial$/operations-reference/beta-note.adoc[]
 
-We can export projected graphs stored in the graph catalog to a set of CSV files.
-All nodes, relationships and properties present in a projected graph are exported.
+We can export graphs stored in the graph catalog to a set of CSV files.
+All nodes, relationships and properties present in a graph are exported.
 This includes data that has been projected with `gds.graph.project` and data that has been added by running algorithms in `mutate` mode.
 The location of the exported CSV files can be configured via the configuration parameter `gds.export.location` in the `neo4j.conf`.
 All files will be stored in a subfolder using the specified export name.

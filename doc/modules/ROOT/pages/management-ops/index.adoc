@@ -2,7 +2,7 @@
 = Graph management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 // aliases for old pages which were split into multiple and have no 1:1 redirect
-:page-aliases: graph-catalog-node-ops,graph-catalog-relationship-ops
+:page-aliases: graph-catalog-node-ops,graph-catalog-relationship-ops, graph-catalog-export-ops, management-ops/graph-catalog-export-ops
 
 A _graph_ in GDS is an in-memory structure containing _nodes_ connected by _relationships_. Both nodes and relationships can hold numerical attributes (_properties_).
 Graphs are stored using compressed data structures optimized for topology and property lookup operations.
@@ -26,7 +26,6 @@ You can xref:management-ops/graph-creation/index.adoc[create] a graph in multipl
 Once it has been created, a reference to the graph is stored in the graph catalog.
 You can xref:management-ops/inspecting-the-graph-catalog.adoc[get information on graphs] to verify that the graph has been successfully created, and to retrieve a list of all the graphs in memory.
 
-At any point, you can xref:graph-catalog-export-ops.adoc[export] a graph to a Neo4j database or to a CSV file.
 You can also xref:management-ops/inspecting-the-graph-catalog.adoc[drop] a graph from the catalog when it is not longer useful.
 
 // TODO [nvitucci] maybe not here
@@ -36,7 +35,7 @@ You can also xref:management-ops/inspecting-the-graph-catalog.adoc[drop] a graph
 
 === Read
 
-The properties stored in the nodes and relationships of a graph can be retrieved using the `stream` methods on xref:management-ops/graph-reads/graph-stream-nodes.adoc[nodes] and xref:management-ops/graph-reads/graph-stream-relationships.adoc[relationships] respectively. In the Enterprise Edition, similar operations can be performed more efficiently using xref:graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
+The properties stored in the nodes and relationships of a graph can be retrieved using the `stream` methods on xref:management-ops/graph-reads/graph-stream-nodes.adoc[nodes] and xref:management-ops/graph-reads/graph-stream-relationships.adoc[relationships] respectively. In the Enterprise Edition, similar operations can be performed more efficiently using xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
 
 For complex use cases where an expressive query language is needed, you can run xref:management-ops/create-cypher-db.adoc[Cypher queries] on a graph.
 
@@ -49,9 +48,14 @@ It is also supported to update parts of the graph through xref:management-ops/gr
 You can also drop xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-delete-rel-type[relationships of a given type].
 
 
-=== Write
+=== Write to Neo4j
 
-In addition to exporting a whole graph, you can write xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-properties-example[node properties], xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-label-example[node labels], and xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc#catalog-graph-write-relationship-example[relationships] back to Neo4j.
+To persist the computations, you can write xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-properties-example[node properties], xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc#catalog-graph-write-node-label-example[node labels], and xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc#catalog-graph-write-relationship-example[relationships] back to Neo4j.
+
+=== Export
+
+To save or use the graph outside of Neo4j, you can export the graph using  xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow] or to disk as xref:management-ops/graph-export/graph-export-csv.adoc[Csv].
+
 
 == Administration
 

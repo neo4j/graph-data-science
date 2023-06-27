@@ -63,7 +63,7 @@ CALL gds.license.state();
 == Additional configuration
 
 In order to make use of certain features of the GDS library, additional configuration may be necessary.
-For example, exporting graphs xref:management-ops/graph-catalog-export-ops.adoc#catalog-graph-export-csv[to CSV files] requires the configuration parameter `gds.export.location` to be set to the folder in which exported graphs are to be stored.
+For example, exporting graphs xref:management-ops/graph-export/graph-export-csv.adoc#catalog-graph-export-csv[to CSV files] requires the configuration parameter `gds.export.location` to be set to the folder in which exported graphs are to be stored.
 
 You can find the list of all the configuration options xref:production-deployment/configuration-settings.adoc[here].
 Refer to the <<_installation_methods,installation methods>> for details on how to edit a Neo4j database configuration depending on the Neo4j deployment.

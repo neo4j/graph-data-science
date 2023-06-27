@@ -33,7 +33,6 @@
 *** xref:management-ops/graph-reads/graph-stream-nodes.adoc[]
 *** xref:management-ops/graph-reads/graph-stream-relationships.adoc[]
 *** xref:management-ops/graph-reads/create-cypher-db.adoc[]
-*** xref:management-ops/graph-reads/graph-catalog-apache-arrow-ops.adoc[]
 ** Updating graphs
 *** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/mutate-node-labels.adoc[]
@@ -42,7 +41,10 @@
 ** Write back to Neo4j
 *** xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[]
 *** xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc[]
-** xref:management-ops/graph-catalog-export-ops.adoc[]
+*** xref:management-ops/graph-write-to-neo4j/write-back-whole-graph.adoc[]
+** Export
+*** xref:management-ops/graph-export/graph-export-csv.adoc[]
+*** xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[]
 ** xref:management-ops/utility-functions.adoc[]
 ** Administration
 *** xref:management-ops/administration.adoc[]

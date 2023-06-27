@@ -8,7 +8,7 @@ You can create graphs from different data sources.
 * From a Neo4j database by using either of
 ** xref:management-ops/graph-creation/graph-project.adoc[Native projection]
 ** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] for more complex projections
-* From external sources via an xref:management-ops/graph-reads/graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
+* From external sources via an xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
 * From existing named graphs by either of
 ** xref:management-ops/graph-creation/graph-project-subgraph.adoc[Filtering]
 ** xref:management-ops/graph-creation/sampling/rwr.adoc[Sampling]

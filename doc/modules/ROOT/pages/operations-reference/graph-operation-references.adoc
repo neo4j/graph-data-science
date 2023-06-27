@@ -44,7 +44,7 @@
 .2+<.^|xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j]
 | `gds.graph.relationship.write` label:procedure[Procedure]
 | `gds.graph.writeRelationship` label:procedure[Procedure]
-|xref:management-ops/graph-catalog-export-ops.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export` label:procedure[Procedure]
+|xref:management-ops/graph-write-to-neo4j/write-back-whole-graph.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export` label:procedure[Procedure]
 |===
 
 == Beta Tier
@@ -56,7 +56,7 @@
 |Description                                | Operation
 |xref:management-ops/graph-creation/graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph` label:procedure[Procedure]
 |xref:management-ops/graph-creation/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate` label:procedure[Procedure]
-.2+<.^|xref:management-ops/graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
+.2+<.^|xref:management-ops/graph-export/graph-export-csv.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.beta.graph.export.csv` label:procedure[Procedure]
 | `gds.beta.graph.export.csv.estimate` label:procedure[Procedure]
 |xref:management-ops/graph-reads/graph-stream-relationships.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.beta.graph.relationships.stream` label:procedure[Procedure]

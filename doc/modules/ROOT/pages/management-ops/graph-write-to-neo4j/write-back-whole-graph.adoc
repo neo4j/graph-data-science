@@ -1,5 +1,7 @@
 [[catalog-graph-export-database]]
-= Create Neo4j databases from projected graphs
+= Create Neo4j databases from graphs
+
+include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 We can create new Neo4j databases from projected graphs stored in the graph catalog.
 All nodes, relationships and properties present in the projected graph are written to a new Neo4j database.
@@ -122,3 +124,4 @@ So we could for instance define a default value for our `myproperty`.
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
 ----
+

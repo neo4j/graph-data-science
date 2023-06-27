@@ -1,10 +1,8 @@
 [.enterprise-edition]
 [[graph-catalog-apache-arrow-ops]]
-= Apache Arrow operations
+= Export using Apache Arrow
 :description: This chapter explains how to export data using Apache Arrow™ in the Graph Data Science library.
 :page-aliases: graph-catalog-apache-arrow-ops
-
-// TODO add a link to the python client and also maybe rephrase a bit?
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
