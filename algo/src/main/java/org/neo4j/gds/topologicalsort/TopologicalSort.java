@@ -38,7 +38,6 @@ import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.function.LongFunction;
-import java.util.function.Supplier;
 
 /*
  * Topological sort algorithm.
