@@ -1,6 +1,8 @@
 [[graph-catalog-ops]]
 = Graph management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
+// aliases for old pages which were split into multiple and have no 1:1 redirect
+:page-aliases: graph-catalog-node-ops,graph-catalog-relationship-ops
 
 A _graph_ in GDS is an in-memory structure containing _nodes_ connected by _relationships_. Both nodes and relationships can hold numerical attributes (_properties_).
 Graphs are stored using compressed data structures optimized for topology and property lookup operations.
@@ -42,7 +44,10 @@ For complex use cases where an expressive query language is needed, you can run 
 
 In-memory graphs are usually updated by algorithms running in `mutate` mode, which add new properties to nodes or relationships.
 
-Besides, you can xref:management-ops/graph-update/mutate-node-labels.adoc[update node labels] and xref:management-ops/graph-update/to-undirected.adoc#catalog-graph-relationship-to-undirected-example[convert relationships] from directed to undirected. You can also _remove_ xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-delete-rel-type[relationships of a given type].
+Besides, you can xref:management-ops/graph-update/mutate-node-labels.adoc[update node labels], xref:management-ops/graph-update/to-undirected.adoc#catalog-graph-relationship-to-undirected-example[convert relationships] from directed to undirected.
+It is also supported to update parts of the graph through xref:management-ops/graph-reads/create-cypher-db.adoc[cypher queries].
+You can also drop xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-delete-rel-type[relationships of a given type].
+
 
 === Write
 

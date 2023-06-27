@@ -1,4 +1,4 @@
-= Writing node properties and labels to Neo4j
+= Writing node properties and labels
 
 
 To persist the values in a Neo4j database, we can use `gds.graph.nodeProperties.write`.
