@@ -33,6 +33,6 @@ class GraphListDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "partials/management-ops/graph-catalog/graph-list.adoc";
+        return "pages/management-ops/graph-list.adoc";
     }
 }

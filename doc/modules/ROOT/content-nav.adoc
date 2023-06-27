@@ -26,7 +26,7 @@
 **** xref:management-ops/graph-creation/sampling/rwr.adoc[]
 **** xref:management-ops/graph-creation/sampling/cnarw.adoc[]
 *** xref:management-ops/graph-creation/graph-generation.adoc[]
-** Catalog Operations
+** Catalog operations
 *** xref:management-ops/graph-drop.adoc[]
 *** xref:management-ops/graph-list.adoc[]
 *** xref:management-ops/graph-exists.adoc[]

@@ -33,6 +33,6 @@ class GraphExportToCsvSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "partials/management-ops/graph-catalog/graph-export-csv.adoc";
+        return "pages/management-ops/graph-export/graph-export-csv.adoc";
     }
 }

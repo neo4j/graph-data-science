@@ -32,6 +32,6 @@ class GraphExistsSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "partials/management-ops/graph-catalog/graph-exists.adoc";
+        return "pages/management-ops/graph-exists.adoc";
     }
 }
