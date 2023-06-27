@@ -24,9 +24,9 @@ See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph
 You can xref:management-ops/graph-creation/index.adoc[create] a graph in multiple ways, depending on whether the source data is in a Neo4j database, an external source, an existing GDS graph, or random data.
 
 Once it has been created, a reference to the graph is stored in the graph catalog.
-You can xref:management-ops/inspecting-the-graph-catalog.adoc[get information on graphs] to verify that the graph has been successfully created, and to retrieve a list of all the graphs in memory.
+You can xref:management-ops/graph-list.adoc[get information on graphs] to verify that the graph has been successfully created, and to retrieve a list of all the graphs in memory.
 
-You can also xref:management-ops/inspecting-the-graph-catalog.adoc[drop] a graph from the catalog when it is not longer useful.
+You can also xref:management-ops/graph-drop.adoc[drop] a graph from the catalog when it is not longer useful.
 
 // TODO [nvitucci] maybe not here
 // TODO - reuse image from common usage but greying out the other components

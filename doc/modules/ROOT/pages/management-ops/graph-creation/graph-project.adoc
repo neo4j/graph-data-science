@@ -35,7 +35,7 @@ Other types of node properties have to be transformed or encoded into one of the
 A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
 In addition, the optional `configuration` parameter allows us to further configure the graph creation.
 
-NOTE: To get information about a previously projected graph, such as its schema, one can use xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[gds.graph.list].
+NOTE: To get information about a previously projected graph, such as its schema, one can use xref:management-ops/graph-list.adoc[gds.graph.list].
 
 [.graph-project-syntax]
 --

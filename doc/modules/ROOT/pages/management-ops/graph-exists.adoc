@@ -1,5 +1,6 @@
 [[catalog-graph-exists]]
 = Check if a graph exists
+:page-aliases: graph-exists
 
 We can check if a graph is stored in the catalog by looking up its name.
 

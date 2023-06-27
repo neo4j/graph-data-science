@@ -417,7 +417,7 @@ YIELD communityCount, ranIterations, didConverge
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `community` which stores the community ID for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/graph-list.adoc[Listing graphs].
 
 
 [[algorithms-label-propagation-examples-write]]

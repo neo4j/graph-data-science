@@ -682,7 +682,7 @@ YIELD nodePropertiesWritten
 --
 
 The graph 'persons' now has a node property `hashgnn-embedding` which stores the node embedding for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/inspecting-the-graph-catalog.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/graph-list.adoc[Listing graphs].
 
 
 [[algorithms-embeddings-hashgnn-virtual-example]]

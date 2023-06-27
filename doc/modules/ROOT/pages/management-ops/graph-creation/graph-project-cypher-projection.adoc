@@ -110,7 +110,7 @@ RETURN gds.graph.project(
 |===
 --
 
-NOTE: To get information about a stored graph, such as its schema, one can use xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[gds.graph.list].
+NOTE: To get information about a stored graph, such as its schema, one can use xref:management-ops/graph-list.adoc[gds.graph.list].
 
 
 [[graph-project-cypher-projection-examples]]

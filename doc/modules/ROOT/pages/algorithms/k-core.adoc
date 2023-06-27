@@ -382,7 +382,7 @@ RETURN degeneracy , nodePropertiesWritten
 
 The returned result is the same as in the `stats` example.
 Additionally, the in-memory graph now has a node property `coreValue` which stores the core value of each node.
-To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[Listing graphs in the catalog].
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/graph-list.adoc[Listing graphs in the catalog].
 
 
 [[algorithms-k-core-examples-write]]

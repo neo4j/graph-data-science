@@ -427,7 +427,7 @@ CALL gds.scaleProperties.mutate('myGraph', {
 
 The result shows that there are now eight new node properties in the in-memory graph.
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
-To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[Listing graphs in the catalog].
+To find out how to inspect the new schema of the in-memory graph, see xref:management-ops/graph-list.adoc[Listing graphs in the catalog].
 
 
 === Stats

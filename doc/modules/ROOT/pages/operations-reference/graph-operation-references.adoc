@@ -14,10 +14,10 @@
 | `gds.graph.project.cypher` label:procedure[Procedure] label:deprecated[Deprecated]
 | `gds.graph.project.cypher.estimate` label:procedure[Procedure] label:deprecated[Deprecated]
 | `gds.graph.project` label:function[Function] (aggregation function)
-.2+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
+.2+<.^|xref:management-ops/graph-exists.adoc[Check if a graph exists]
 | `gds.graph.exists` label:procedure[Procedure]
 | `gds.graph.exists` label:function[Function]
-|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[List graphs] | `gds.graph.list` label:procedure[Procedure]
+|xref:management-ops/graph-list.adoc[[List graphs] | `gds.graph.list` label:procedure[Procedure]
 .2+<.^|xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
 | `gds.graph.nodeProperties.drop` label:procedure[Procedure]
 | `gds.graph.removeNodeProperties` label:procedure[Procedure] label:deprecated[Deprecated]

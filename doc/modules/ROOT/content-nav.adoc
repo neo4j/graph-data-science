@@ -28,7 +28,8 @@
 *** xref:management-ops/graph-creation/graph-generation.adoc[]
 ** Catalog Operations
 *** xref:management-ops/graph-drop.adoc[]
-*** xref:management-ops/inspecting-the-graph-catalog.adoc[]
+*** xref:management-ops/graph-list.adoc[]
+*** xref:management-ops/graph-exists.adoc[]
 ** Reading from graphs
 *** xref:management-ops/graph-reads/graph-stream-nodes.adoc[]
 *** xref:management-ops/graph-reads/graph-stream-relationships.adoc[]
