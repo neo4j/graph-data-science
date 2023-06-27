@@ -48,7 +48,7 @@ final class GraphStreamNodesDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/graph-inspection/graph-stream-nodes.adoc";
+        return "pages/management-ops/graph-reads/graph-stream-nodes.adoc";
     }
 
 }

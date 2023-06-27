@@ -34,6 +34,6 @@ class GraphStreamRelationshipsSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/graph-inspection/graph-stream-relationships.adoc";
+        return "pages/management-ops/graph-reads/graph-stream-relationships.adoc";
     }
 }
