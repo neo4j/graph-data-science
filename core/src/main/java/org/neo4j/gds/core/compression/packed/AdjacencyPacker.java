@@ -334,7 +334,7 @@ public final class AdjacencyPacker {
         if (hasTail) {
             int bits = bitsNeeded(values, offset, tailLength);
             memoryTracker.recordHeaderBits(bits);
-            bytes += BitUtil.ceilDiv((long) bits * tailLength, Long.BYTES);
+            bytes += bytesNeeded(bits, tailLength);
             header[blockIdx] = (byte) bits;
         }
 
@@ -414,5 +414,9 @@ public final class AdjacencyPacker {
 
     private static int bytesNeeded(int bits) {
         return BitUtil.ceilDiv(AdjacencyPacking.BLOCK_SIZE * bits, Byte.SIZE);
+    }
+
+    private static int bytesNeeded(int bits, int length) {
+        return BitUtil.ceilDiv(length * bits, Byte.SIZE);
     }
 }
