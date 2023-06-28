@@ -165,6 +165,7 @@ public final class AdjacencyPacker {
 
         Address address = slice.slice();
         long ptr = address.address() + slice.offset();
+        long initialPtr = ptr;
 
         // write header
         UnsafeUtil.copyMemory(header, BYTE_ARRAY_BASE_OFFSET, null, ptr, headerSize);
@@ -176,6 +177,9 @@ public final class AdjacencyPacker {
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
+
+        if (ptr > initialPtr + allocationSize)
+            throw new AssertionError("Written more bytes than allocated. ptr=" + ptr + ", initialPtr=" + initialPtr + ", allocationSize=" + allocationSize);
 
         return adjacencyOffset;
     }
@@ -330,7 +334,7 @@ public final class AdjacencyPacker {
         if (hasTail) {
             int bits = bitsNeeded(values, offset, tailLength);
             memoryTracker.recordHeaderBits(bits);
-            bytes += BitUtil.ceilDiv((long) bits * tailLength, Long.BYTES);
+            bytes += bytesNeeded(bits, tailLength);
             header[blockIdx] = (byte) bits;
         }
 
@@ -370,6 +374,7 @@ public final class AdjacencyPacker {
 
         Address address = slice.slice();
         long ptr = address.address() + slice.offset();
+        long initialPtr = ptr;
 
         // write header
         UnsafeUtil.copyMemory(header, BYTE_ARRAY_BASE_OFFSET, null, ptr, headerSize);
@@ -389,8 +394,12 @@ public final class AdjacencyPacker {
         // tail packing
         if (hasTail) {
             byte bits = header[header.length - 1];
-            AdjacencyPacking.loopPack(bits, values, in, tailLength, ptr);
+            ptr = AdjacencyPacking.loopPack(bits, values, in, tailLength, ptr);
         }
+
+        if (ptr > initialPtr + allocationSize)
+            throw new AssertionError("Written more bytes than allocated. ptr=" + ptr + ", initialPtr=" + initialPtr + ", allocationSize=" + allocationSize);
+
 
         return adjacencyOffset;
     }
@@ -405,5 +414,9 @@ public final class AdjacencyPacker {
 
     private static int bytesNeeded(int bits) {
         return BitUtil.ceilDiv(AdjacencyPacking.BLOCK_SIZE * bits, Byte.SIZE);
+    }
+
+    private static int bytesNeeded(int bits, int length) {
+        return BitUtil.ceilDiv(length * bits, Byte.SIZE);
     }
 }
