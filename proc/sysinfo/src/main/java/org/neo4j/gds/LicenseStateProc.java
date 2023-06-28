@@ -26,8 +26,6 @@ import org.neo4j.procedure.Procedure;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-// don't extend BaseProc and only inject GraphDatabaseService so that
-// we can run this procedure even if unrestricted=gds.* had not been configured
 public class LicenseStateProc {
 
     @Context
