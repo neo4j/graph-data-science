@@ -101,7 +101,7 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
     }
 
     /**
-     * Ensuring the @{@link java.util.HashSet} never needs to resize
+     * Ensuring the {@link java.util.HashSet} never needs to resize
      */
     @NotNull
     private static Set<Pair<Double, Long>> prepareSeedSet(int k) {

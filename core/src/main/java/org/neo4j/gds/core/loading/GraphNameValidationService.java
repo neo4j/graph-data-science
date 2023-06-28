@@ -48,7 +48,7 @@ public class GraphNameValidationService {
     /**
      * Validates that the input graph name is not blank. Blank is the worst!
      *
-     * @return @{@link java.util.Optional#empty()} if graph name was null; trimmed graph name otherwise
+     * @return {@link java.util.Optional#empty()} if graph name was null; trimmed graph name otherwise
      * @throws IllegalArgumentException if graph name is blank
      */
     public Optional<String> validatePossibleNull(String graphName) {
