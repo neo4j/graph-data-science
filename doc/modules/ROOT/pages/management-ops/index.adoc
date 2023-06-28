@@ -54,6 +54,7 @@ To persist the computations, you can write xref:management-ops/graph-write-to-ne
 
 === Export
 
+A whole graph can be exported by creating a xref:management-ops/graph-export/export-db.adoc[new Neo4j database].
 To save or use the graph outside of Neo4j, you can export the graph using  xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow] or to disk as xref:management-ops/graph-export/graph-export-csv.adoc[Csv].
 
 

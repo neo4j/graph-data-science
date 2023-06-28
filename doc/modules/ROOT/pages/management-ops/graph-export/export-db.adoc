@@ -1,5 +1,5 @@
 [[catalog-graph-export-database]]
-= Create Neo4j databases from graphs
+= Export to a new Neo4j database
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 

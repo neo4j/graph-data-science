@@ -39,11 +39,11 @@
 *** xref:management-ops/graph-update/mutate-node-labels.adoc[]
 *** xref:management-ops/graph-update/dropping-parts.adoc[]
 *** xref:management-ops/graph-reads/create-cypher-db.adoc[]
-** Write back to Neo4j
+** Writing back to Neo4j
 *** xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[]
 *** xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc[]
-*** xref:management-ops/graph-write-to-neo4j/write-back-whole-graph.adoc[]
-** Export
+** Exporting graphs
+*** xref:management-ops/graph-export/export-db.adoc[]
 *** xref:management-ops/graph-export/graph-export-csv.adoc[]
 *** xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[]
 ** xref:management-ops/utility-functions.adoc[]

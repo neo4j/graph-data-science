@@ -44,7 +44,7 @@
 .2+<.^|xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j]
 | `gds.graph.relationship.write` label:procedure[Procedure]
 | `gds.graph.writeRelationship` label:procedure[Procedure]
-|xref:management-ops/graph-write-to-neo4j/write-back-whole-graph.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export` label:procedure[Procedure]
+|xref:management-ops/graph-export/export-db.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export` label:procedure[Procedure]
 |===
 
 == Beta Tier
