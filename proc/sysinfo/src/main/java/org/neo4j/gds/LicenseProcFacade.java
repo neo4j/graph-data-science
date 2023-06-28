@@ -25,16 +25,15 @@ import java.util.Optional;
 
 public final class LicenseProcFacade {
 
-    private LicenseProcFacade() {}
-
-    static LicenseStateProc.LicenseStateResult createFromState(LicenseState state) {
-        return new LicenseStateProc.LicenseStateResult(
-            state.isLicensed(),
-            state.visit(ADD_EDITION_INFO.INSTANCE)
-        );
+    private LicenseProcFacade() {
     }
 
-    private enum ADD_EDITION_INFO implements LicenseState.Visitor<String> {
+    static LicenseStateProc.LicenseStateResult createFromState(LicenseState state) {
+        String details = state.visit(StateDetailsExtractor.INSTANCE);
+        return new LicenseStateProc.LicenseStateResult(state.isLicensed(), details);
+    }
+
+    private enum StateDetailsExtractor implements LicenseState.Visitor<String> {
         INSTANCE;
 
         @Override
@@ -53,7 +52,8 @@ public final class LicenseProcFacade {
             String errorMessage,
             Optional<ZonedDateTime> expirationTime
         ) {
-            Optional<String> expatriationDate = expirationTime.map(expiration -> " Expiration date at " + licensed(name, expiration));
+            Optional<String> expatriationDate = expirationTime
+                .map(expiration -> " Expiration date at " + licensed(name, expiration));
 
             return "License error: " + errorMessage + expatriationDate.orElse("");
         }
