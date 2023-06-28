@@ -12585,10 +12585,8 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        if (shift != 0) {
-            UnsafeUtil.putLong(packedPtr, word);
-            packedPtr += 8;
-        }
+        UnsafeUtil.putLong(packedPtr, word);
+        packedPtr += 8;
         return packedPtr;
     }
 }

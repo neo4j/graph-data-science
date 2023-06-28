@@ -816,11 +816,15 @@ mod java {
                             BinOp::Add,
                         ));
 
-                        statements.push(Stmt::If {
-                            cond: Expr::bin(Expr::Ident(SHIFT), BinOp::Neq, Expr::Literal(0)),
-                            then: Box::new(Stmt::Block(then)),
-                            ells: None,
-                        });
+                        if method.bits == 64 {
+                            statements.extend(then);
+                        } else {
+                            statements.push(Stmt::If {
+                                cond: Expr::bin(Expr::Ident(SHIFT), BinOp::Neq, Expr::Literal(0)),
+                                then: Box::new(Stmt::Block(then)),
+                                ells: None,
+                            });
+                        }
                     }
                     Inst::UnpackLoop => {
                         // PIN[offset + i + OFF]
