@@ -160,7 +160,7 @@ class AdjacencyPackerTest {
     @Test
     void loopPack64Test() {
         int bits = 64;
-        long upperBound = (1L << bits) - 1;
+        long upperBound = -1L;
         long[] data = LongStream.concat(LongStream.rangeClosed(0, 42), LongStream.of(upperBound)).toArray();
         int length = data.length;
         int requiredBytes = BitUtil.ceilDiv(length * bits, Byte.SIZE);
