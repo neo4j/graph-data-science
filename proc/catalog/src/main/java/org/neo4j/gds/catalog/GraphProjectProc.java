@@ -20,8 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
@@ -31,6 +29,8 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.GraphProjectNativeResult;
+import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -310,97 +310,6 @@ public class GraphProjectProc extends CatalogProc {
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 
-    @SuppressWarnings("unused")
-    public static class GraphProjectResult {
-        public final String graphName;
-        public final long nodeCount;
-        public final long relationshipCount;
-        public final long projectMillis;
-
-        GraphProjectResult(
-            String graphName,
-            long nodeCount,
-            long relationshipCount,
-            long projectMillis
-        ) {
-            this.graphName = graphName;
-            this.nodeCount = nodeCount;
-            this.relationshipCount = relationshipCount;
-            this.projectMillis = projectMillis;
-        }
-
-        protected abstract static class Builder {
-            final String graphName;
-            long nodeCount;
-            long relationshipCount;
-            long projectMillis;
-
-            Builder(GraphProjectConfig config) {
-                this.graphName = config.graphName();
-            }
-
-            Builder withNodeCount(long nodeCount) {
-                this.nodeCount = nodeCount;
-                return this;
-            }
-
-            Builder withRelationshipCount(long relationshipCount) {
-                this.relationshipCount = relationshipCount;
-                return this;
-            }
-
-            Builder withProjectMillis(long projectMillis) {
-                this.projectMillis = projectMillis;
-                return this;
-            }
-
-            abstract GraphProjectResult build();
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class GraphProjectNativeResult extends GraphProjectResult {
-
-        public final Map<String, Object> nodeProjection;
-        public final Map<String, Object> relationshipProjection;
-
-        GraphProjectNativeResult(
-            String graphName,
-            Map<String, Object> nodeProjection,
-            Map<String, Object> relationshipProjection,
-            long nodeCount,
-            long relationshipCount,
-            long projectMillis
-        ) {
-            super(graphName, nodeCount, relationshipCount, projectMillis);
-            this.nodeProjection = nodeProjection;
-            this.relationshipProjection = relationshipProjection;
-        }
-
-        protected static final class Builder extends GraphProjectResult.Builder {
-            private final NodeProjections nodeProjections;
-            private final RelationshipProjections relationshipProjections;
-
-            Builder(GraphProjectFromStoreConfig config) {
-                super(config);
-                this.nodeProjections = config.nodeProjections();
-                this.relationshipProjections = config.relationshipProjections();
-            }
-
-            GraphProjectNativeResult build() {
-                return new GraphProjectNativeResult(
-                    graphName,
-                    nodeProjections.toObject(),
-                    relationshipProjections.toObject(),
-                    nodeCount,
-                    relationshipCount,
-                    projectMillis
-                );
-            }
-        }
-    }
-
-    @SuppressWarnings("unused")
     public static class GraphProjectCypherResult extends GraphProjectResult {
         public final String nodeQuery;
         public final String relationshipQuery;
@@ -428,7 +337,7 @@ public class GraphProjectProc extends CatalogProc {
                 this.relationshipQuery = config.relationshipQuery();
             }
 
-            GraphProjectCypherResult build() {
+            public GraphProjectCypherResult build() {
                 return new GraphProjectCypherResult(
                     graphName,
                     nodeQuery,
@@ -441,7 +350,6 @@ public class GraphProjectProc extends CatalogProc {
         }
     }
 
-    @SuppressWarnings("unused")
     public static class GraphProjectSubgraphResult extends GraphProjectResult {
         public final String fromGraphName;
         public final String nodeFilter;
