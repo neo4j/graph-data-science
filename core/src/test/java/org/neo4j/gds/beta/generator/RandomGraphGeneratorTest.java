@@ -92,6 +92,7 @@ class RandomGraphGeneratorTest {
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(42)
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
