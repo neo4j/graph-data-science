@@ -571,7 +571,7 @@ fn single_pack(bits: u32, offset: u32) -> Inst {
 }
 
 mod java {
-    use std::io::Write;
+    use std::{collections::HashSet, io::Write};
 
     use super::*;
     use gen_java::*;
@@ -1196,7 +1196,7 @@ mod java {
         }
     }
 
-    fn gen_class(class: Class) -> ClassDef {
+    fn gen_class(class: Class) -> (ClassDef, Vec<String>) {
         fn gen_assert(bs: u32) -> Stmt {
             Stmt::Assert {
                 assertion: Expr::bin(Expr::Ident(BITS), BinOp::Lte, Expr::Literal(bs)),
@@ -1207,6 +1207,8 @@ mod java {
                 )),
             }
         }
+
+        let mut imports = HashSet::new();
 
         let mut members = vec![
             Member::Method(MethodDef {
@@ -1238,6 +1240,8 @@ mod java {
         ];
 
         if !class.packers.is_empty() {
+            imports.insert("org.neo4j.internal.unsafe.UnsafeUtil");
+
             members.extend([
                 Member::Method(MethodDef {
                     documentation: None,
@@ -1296,6 +1300,8 @@ mod java {
         }
 
         if !class.unpackers.is_empty() {
+            imports.insert("org.neo4j.internal.unsafe.UnsafeUtil");
+
             members.extend([
                 Member::Method(MethodDef {
                     documentation: None,
@@ -1354,6 +1360,8 @@ mod java {
         }
 
         if !class.loop_packers.is_empty() {
+            imports.insert("org.neo4j.internal.unsafe.UnsafeUtil");
+
             members.extend([
                 Member::Method(MethodDef {
                     documentation: None,
@@ -1417,6 +1425,9 @@ mod java {
         }
 
         if !class.loop_unpackers.is_empty() {
+            imports.insert("org.neo4j.internal.unsafe.UnsafeUtil");
+            imports.insert("org.neo4j.gds.mem.BitUtil");
+
             members.extend([
                 Member::Method(MethodDef {
                     documentation: None,
@@ -1492,18 +1503,22 @@ mod java {
 
         let doc = class.documentation.join("\n");
 
-        ClassDef {
+        let class = ClassDef {
             documentation: Some(doc),
             annotations: Vec::new(),
             modifiers: "public final",
             typ: "class",
             name: class.name,
             members,
-        }
+        };
+
+        let imports = imports.into_iter().map(String::from).collect();
+
+        (class, imports)
     }
 
     fn gen_file(file: File) -> FileDef {
-        let class = gen_class(file.class);
+        let (class, imports) = gen_class(file.class);
         let mut file = FileDef::new(
             r#"
 Copyright (c) "Neo4j"
@@ -1525,10 +1540,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "#,
             file.package,
-            vec![
-                "org.neo4j.internal.unsafe.UnsafeUtil".into(),
-                "org.neo4j.gds.mem.BitUtil".into(),
-            ],
+            imports,
             class,
         );
 
