@@ -1512,7 +1512,8 @@ mod java {
             members,
         };
 
-        let imports = imports.into_iter().map(String::from).collect();
+        let mut imports = imports.into_iter().map(String::from).collect::<Vec<_>>();
+        imports.sort_unstable();
 
         (class, imports)
     }
