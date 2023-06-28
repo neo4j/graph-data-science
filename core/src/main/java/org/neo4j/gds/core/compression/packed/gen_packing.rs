@@ -804,19 +804,23 @@ mod java {
                         });
                     }
                     Inst::PackLoopRemainder => {
-                        let mut if_body = vec![];
-
-                        if_body.push(Stmt::Expr(Expr::Call(Call::new(
+                        let mut then = vec![];
+                        then.push(Stmt::Expr(Expr::Call(Call::new(
                             Expr::Ident("UnsafeUtil"),
                             "putLong",
                             vec![Arg::new(Expr::Ident(PW)), Arg::new(Expr::Ident(WORD))],
                         ))));
-                        if_body.push(Stmt::assign_op(
+                        then.push(Stmt::assign_op(
                             Expr::Ident(PW),
                             Expr::Literal(8),
                             BinOp::Add,
                         ));
-                        statements.extend(if_body);
+
+                        statements.push(Stmt::If {
+                            cond: Expr::bin(Expr::Ident(SHIFT), BinOp::Neq, Expr::Literal(0)),
+                            then: Box::new(Stmt::Block(then)),
+                            ells: None,
+                        });
                     }
                     Inst::UnpackLoop => {
                         // PIN[offset + i + OFF]

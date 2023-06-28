@@ -10884,8 +10884,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -10909,8 +10911,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -10934,8 +10938,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -10959,8 +10965,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -10984,8 +10992,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11009,8 +11019,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11034,8 +11046,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11059,8 +11073,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11084,8 +11100,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11109,8 +11127,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11134,8 +11154,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11159,8 +11181,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11184,8 +11208,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11209,8 +11235,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11234,8 +11262,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11259,8 +11289,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11284,8 +11316,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11309,8 +11343,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11334,8 +11370,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11359,8 +11397,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11384,8 +11424,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11409,8 +11451,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11434,8 +11478,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11459,8 +11505,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11484,8 +11532,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11509,8 +11559,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11534,8 +11586,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11559,8 +11613,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11584,8 +11640,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11609,8 +11667,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11634,8 +11694,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11659,8 +11721,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11684,8 +11748,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11709,8 +11775,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11734,8 +11802,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11759,8 +11829,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11784,8 +11856,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11809,8 +11883,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11834,8 +11910,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11859,8 +11937,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11884,8 +11964,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11909,8 +11991,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11934,8 +12018,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11959,8 +12045,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -11984,8 +12072,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12009,8 +12099,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12034,8 +12126,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12059,8 +12153,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12084,8 +12180,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12109,8 +12207,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12134,8 +12234,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12159,8 +12261,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12184,8 +12288,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12209,8 +12315,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12234,8 +12342,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12259,8 +12369,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12284,8 +12396,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12309,8 +12423,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12334,8 +12450,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12359,8 +12477,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12384,8 +12504,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12409,8 +12531,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12434,8 +12558,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 
@@ -12459,8 +12585,10 @@ public final class AdjacencyPacking {
                 shift -= 64;
             }
         }
-        UnsafeUtil.putLong(packedPtr, word);
-        packedPtr += 8;
+        if (shift != 0) {
+            UnsafeUtil.putLong(packedPtr, word);
+            packedPtr += 8;
+        }
         return packedPtr;
     }
 }
