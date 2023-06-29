@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.VerifyThatModelCanBeStored;
-import org.neo4j.gds.compat.ProxyUtil;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -52,7 +52,7 @@ public class NodeClassificationPipelineTrainSpec implements AlgorithmSpec<NodeCl
 
     @Override
     public NodeClassificationTrainPipelineAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
-        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext, ProxyUtil.GDS_VERSION_INFO.gdsVersion());
+        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext, GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion());
     }
 
     @Override

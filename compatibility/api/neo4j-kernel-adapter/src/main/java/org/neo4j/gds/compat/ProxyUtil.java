@@ -25,8 +25,6 @@ import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.logging.Log;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -147,7 +145,7 @@ public final class ProxyUtil {
             .<FACTORY, PROXY>builder()
             .factoryType(factoryClass)
             .neo4jVersion(NEO4J_VERSION_INFO)
-            .gdsVersion(GDS_VERSION_INFO)
+            .gdsVersion(GdsVersionInfoProvider.GDS_VERSION_INFO)
             .javaInfo(JAVA_INFO);
 
         try {
@@ -193,72 +191,6 @@ public final class ProxyUtil {
                 )
                 .build();
         }
-    }
-
-    public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
-
-    private static GdsVersionInfo loadGdsVersion() {
-        var builder = ImmutableGdsVersionInfo.builder();
-        try {
-            // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
-            // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
-            // on every build and having it at the top of the dependency graph would cause a lot of recompilation.
-            // Let's do a bit of class loading and reflection to get the version.
-            var lookup = MethodHandles.lookup();
-
-            var buildInfoPropertiesClass = Class.forName("org.neo4j.gds.BuildInfoProperties");
-
-            // equivalent to: BuildInfoProperties.get()
-            var buildInfoPropertiesHandle = lookup.findStatic(
-                buildInfoPropertiesClass,
-                "get",
-                MethodType.methodType(buildInfoPropertiesClass)
-            );
-
-            // equivalent to: buildInfoProperties.gdsVersion()
-            var gdsVersionHandle = lookup.findVirtual(
-                buildInfoPropertiesClass,
-                "gdsVersion",
-                MethodType.methodType(String.class)
-            );
-
-            // var buildInfoProperties = BuildInfoProperties.get()
-            var buildInfoProperties = buildInfoPropertiesHandle.invoke();
-            // var gdsVersion = buildInfoProperties.gdsVersion()
-            var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
-
-            return builder
-                .gdsVersion(String.valueOf(gdsVersion))
-                .build();
-        } catch (ClassNotFoundException e) {
-            builder.error(ImmutableErrorInfo.builder()
-                .logLevel(LogLevel.DEBUG)
-                .message(
-                    "Could not determine GDS version, BuildInfoProperties is missing. " +
-                    "This is likely due to not running GDS as a plugin, " +
-                    "for example when running tests or using GDS as a Java module dependency."
-                )
-                .reason(e)
-                .build()
-            );
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            builder.error(ImmutableErrorInfo.builder()
-                .logLevel(LogLevel.WARN)
-                .message(
-                    "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.")
-                .reason(e)
-                .build()
-            );
-        } catch (Throwable e) {
-            builder.error(ImmutableErrorInfo.builder()
-                .logLevel(LogLevel.WARN)
-                .message("Could not determine GDS version, the according methods on BuildInfoProperties failed.")
-                .reason(e)
-                .build()
-            );
-        }
-
-        return builder.gdsVersion("Unknown").build();
     }
 
     private static final JavaInfo JAVA_INFO = loadJavaInfo();
