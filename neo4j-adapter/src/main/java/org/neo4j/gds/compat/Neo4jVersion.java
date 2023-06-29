@@ -39,6 +39,8 @@ public enum Neo4jVersion {
     V_5_9,
     V_Dev;
 
+    private static final int MINOR_DEV_VERSION = 10;
+
     @Override
     public String toString() {
         switch (this) {
@@ -71,7 +73,7 @@ public enum Neo4jVersion {
 
     public MajorMinorVersion semanticVersion() {
         if (this == V_Dev) {
-            return ImmutableMajorMinorVersion.of(5, 10);
+            return ImmutableMajorMinorVersion.of(5, MINOR_DEV_VERSION);
         }
 
         String version = toString();
@@ -154,7 +156,7 @@ public enum Neo4jVersion {
                 case 9:
                     return Neo4jVersion.V_5_9;
                 default:
-                    if (minorVersion > 9) {
+                    if (minorVersion > MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_Dev;
                     }
             }
