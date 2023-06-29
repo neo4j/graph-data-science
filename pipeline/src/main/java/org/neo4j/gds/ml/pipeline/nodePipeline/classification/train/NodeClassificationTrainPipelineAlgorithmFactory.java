@@ -86,8 +86,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
             pipeline,
             graphStore,
             configuration,
-            progressTracker,
-            gdsVersion
+            progressTracker
         );
     }
 

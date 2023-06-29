@@ -37,9 +37,8 @@ public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
         NodeClassificationTrainingPipeline pipeline,
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig config,
-        ProgressTracker progressTracker,
-        String gdsVersion
+        ProgressTracker progressTracker
     ) {
-        super(pipelineTrainer, pipeline, new NodeClassificationToModelConverter(pipeline, config, gdsVersion), graphStore, config, progressTracker);
+        super(pipelineTrainer, pipeline, new NodeClassificationToModelConverter(pipeline, config), graphStore, config, progressTracker);
     }
 }

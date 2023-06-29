@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
@@ -29,16 +30,13 @@ public class NodeClassificationToModelConverter implements ResultToModelConverte
     private final NodeClassificationTrainingPipeline pipeline;
     private final NodeClassificationPipelineTrainConfig config;
 
-    private final String gdsVersion;
 
     public NodeClassificationToModelConverter(
         NodeClassificationTrainingPipeline pipeline,
-        NodeClassificationPipelineTrainConfig config,
-        String gdsVersion
+        NodeClassificationPipelineTrainConfig config
     ) {
         this.pipeline = pipeline;
         this.config = config;
-        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -46,7 +44,7 @@ public class NodeClassificationToModelConverter implements ResultToModelConverte
         NodeClassificationTrainResult result, GraphSchema originalSchema
     ) {
         var catalogModel = Model.of(
-            gdsVersion,
+            GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion(),
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             originalSchema,
             result.classifier().data(),

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -59,15 +60,12 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     private final Set<RelationshipType> availableRelationshipTypesForNodeProperty;
 
-    private final String gdsVersion;
-
     public LinkPredictionTrainPipelineExecutor(
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        ProgressTracker progressTracker,
-        String gdsVersion
+        ProgressTracker progressTracker
     ) {
         super(
             pipeline,
@@ -76,7 +74,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             graphStore,
             progressTracker
         );
-        this.gdsVersion = gdsVersion;
 
         this.availableRelationshipTypesForNodeProperty = graphStore.relationshipTypes()
             .stream()
@@ -196,7 +193,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         ).compute();
 
         var model = Model.of(
-            gdsVersion,
+            GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion(),
             MODEL_TYPE,
             schemaBeforeSteps,
             trainResult.classifier().data(),

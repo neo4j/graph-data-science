@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 
 class NodeRegressionToModelConverterTest {
 
@@ -111,7 +110,7 @@ class NodeRegressionToModelConverterTest {
 
         var trainResult = ImmutableNodeRegressionTrainResult.of(regressor, trainStats);
 
-        var converter = new NodeRegressionToModelConverter(pipeline, config, testGdsVersion);
+        var converter = new NodeRegressionToModelConverter(pipeline, config);
 
         var result = converter.toModel(trainResult, graphStore.schema());
 

@@ -217,8 +217,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
-                    gdsVersion
+                    ProgressTracker.NULL_TRACKER
                 ).compute();
 
                 var actualModel = result.model();
@@ -263,8 +262,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     trainConfig,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
-                    gdsVersion
+                    ProgressTracker.NULL_TRACKER
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -297,8 +295,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     linkPredictionTrainConfig,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
-                    gdsVersion
+                    ProgressTracker.NULL_TRACKER
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -341,8 +338,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     linkPredictionTrainConfig,
                     caller.executionContext(),
                     invalidGraphStore,
-                    ProgressTracker.NULL_TRACKER,
-                    gdsVersion
+                    ProgressTracker.NULL_TRACKER
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -401,8 +397,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    progressTracker,
-                    gdsVersion
+                    progressTracker
                 ).compute();
 
                 assertThat(progressTracker.log().getMessages(TestLog.WARN))
@@ -573,8 +568,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
-                    gdsVersion
+                    ProgressTracker.NULL_TRACKER
                 ).compute();
             }))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -587,8 +581,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
-                    gdsVersion
+                    ProgressTracker.NULL_TRACKER
                 ).compute();
             }))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -700,8 +693,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
-                gdsVersion
+                ProgressTracker.NULL_TRACKER
             ).compute();
 
             // mainly a smoke test
@@ -742,8 +734,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
-                gdsVersion
+                ProgressTracker.NULL_TRACKER
             ).generateDatasetSplitGraphFilters();
 
             assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
@@ -799,8 +790,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 trainConfig,
                 ExecutionContext.EMPTY,
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
-                gdsVersion
+                ProgressTracker.NULL_TRACKER
             );
 
             assertThatThrownBy(executor::compute)
