@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.VerifyThatModelCanBeStored;
-import org.neo4j.gds.compat.ProxyUtil;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -53,7 +53,7 @@ public class LinkPredictionPipelineTrainSpec implements AlgorithmSpec<
 
     @Override
     public LinkPredictionTrainPipelineAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
-        var gdsVersion = ProxyUtil.GDS_VERSION_INFO.gdsVersion();
+        var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
         return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext, gdsVersion);
     }
 
