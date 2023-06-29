@@ -156,7 +156,7 @@ public enum Neo4jVersion {
                 case 9:
                     return Neo4jVersion.V_5_9;
                 default:
-                    if (minorVersion > MINOR_DEV_VERSION) {
+                    if (minorVersion >= MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_Dev;
                     }
             }
