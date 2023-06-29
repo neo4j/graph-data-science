@@ -521,7 +521,7 @@ CALL gds.graph.project(
 _Step 4_
 
 
-[role=query-example, group=seeding]
+[role=query-example, group=seeding, no-result=true]
 --
 .The following will run the algorithm in `stream` mode using `seedProperty`:
 [source, cypher, role=noplay]
