@@ -19,16 +19,27 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.gds.annotation.ValueClass;
+
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Optional;
 
 public final class GdsVersionInfoProvider {
 
     private GdsVersionInfoProvider() {}
 
-    public static final ProxyUtil.GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
+    @ValueClass
+    public interface GdsVersionInfo {
 
-    private static ProxyUtil.GdsVersionInfo loadGdsVersion() {
+        String gdsVersion();
+
+        Optional<ProxyUtil.ErrorInfo> error();
+    }
+
+    public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
+
+    private static GdsVersionInfo loadGdsVersion() {
         var builder = ImmutableGdsVersionInfo.builder();
         try {
             // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,

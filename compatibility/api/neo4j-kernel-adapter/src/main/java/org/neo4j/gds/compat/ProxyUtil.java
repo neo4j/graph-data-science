@@ -231,7 +231,7 @@ public final class ProxyUtil {
 
         Neo4jVersionInfo neo4jVersion();
 
-        GdsVersionInfo gdsVersion();
+        GdsVersionInfoProvider.GdsVersionInfo gdsVersion();
 
         JavaInfo javaInfo();
 
@@ -265,14 +265,6 @@ public final class ProxyUtil {
     public interface Neo4jVersionInfo {
 
         Neo4jVersion neo4jVersion();
-
-        Optional<ErrorInfo> error();
-    }
-
-    @ValueClass
-    public interface GdsVersionInfo {
-
-        String gdsVersion();
 
         Optional<ErrorInfo> error();
     }
