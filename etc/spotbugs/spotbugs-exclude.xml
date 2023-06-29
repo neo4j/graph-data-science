@@ -29,6 +29,17 @@
         </Not>
     </Match>
 
+    <Match>
+        <!--
+            SeededRandom is used only in tests,
+            and we don't particularly care about that rule there
+        -->
+        <Class name="~.*\.*SeededRandom" />
+        <Not>
+            <Bug code="DMI_RANDOM_USED_ONLY_ONCE" />
+        </Not>
+    </Match>
+
     <!-- Exclude bugs in all benchmark classes -->
     <Match>
         <Or>
@@ -61,63 +72,6 @@
         For more details on the issues:
         https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html
     -->
-
-    <!-- High priority report -->
-    <!-- Class defines field that masks a superclass field -->
-    <Match>
-        <Bug pattern="MF_CLASS_MASKS_FIELD" />
-    </Match>
-
-    <!-- Write to static field from instance method -->
-    <Match>
-        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />
-    </Match>
-
-    <!-- Superclass uses subclass during initialization -->
-    <Match>
-        <Bug pattern="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION" />
-    </Match>
-
-    <!-- Field isn't final but should be -->
-    <Match>
-        <Bug pattern="MS_SHOULD_BE_FINAL" />
-    </Match>
-
-    <!-- Reliance on default encoding -->
-    <Match>
-        <Bug pattern="DM_DEFAULT_ENCODING" />
-    </Match>
-
-    <!-- Explicit garbage collection; extremely dubious except in benchmarking code -->
-    <Match>
-        <Bug pattern="DM_GC" />
-    </Match>
-
-    <!-- Dead store to local variable -->
-    <Match>
-        <Bug pattern="DLS_DEAD_LOCAL_STORE" />
-    </Match>
-
-    <!-- Random object created and used only once -->
-    <Match>
-        <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE" />
-    </Match>
-
-    <!-- Possible null pointer dereference -->
-    <Match>
-        <Bug pattern="NP_NULL_ON_SOME_PATH"/>
-    </Match>
-
-    <!-- Possible null pointer dereference due to return value of called method -->
-    <Match>
-        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
-    </Match>
-
-    <!-- Parameter must be non-null but is marked as nullable -->
-    <Match>
-        <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
-    </Match>
-    <!-- /High priority report -->
 
     <!-- Medium priority report -->
     <!-- Method uses the same code for two branches -->
