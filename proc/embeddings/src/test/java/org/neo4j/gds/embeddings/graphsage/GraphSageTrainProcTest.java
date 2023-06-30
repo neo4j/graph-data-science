@@ -33,6 +33,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -167,7 +168,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
             .isEqualTo(1);
 
         var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
-        assertThat(model.gdsVersion()).isEqualTo("Unknown");
+        assertThat(model.gdsVersion()).isEqualTo(GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion());
 
         assertThat(model.name()).isEqualTo(modelName);
         assertThat(model.algoType()).isEqualTo(GraphSage.MODEL_TYPE);
