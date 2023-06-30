@@ -30,7 +30,7 @@ import org.neo4j.gds.topologicalsort.TopologicalSortFactory;
 import org.neo4j.gds.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.topologicalsort.TopologicalSortStreamConfig;
 
-import java.util.function.LongToDoubleFunction;
+import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -64,9 +64,9 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
                 .map(result -> {
                     var graph = computationResult.graph();
                     var distances = result.longestPathDistances().orElse(null);
-                    LongToDoubleFunction distanceFunction = distances != null
+                    LongFunction<Double> distanceFunction = distances != null
                     ? (nodeId) -> distances.get(nodeId)
-                    : (nodeId) ->  -1.0;
+                    : (nodeId) ->  null;
                     var topologicallySortedNodes = result.sortedNodes();
 
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
@@ -74,7 +74,7 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
                             var mappedNodeId = topologicallySortedNodes.get(index);
                             return new TopologicalSortStreamResult(
                                 graph.toOriginalNodeId(mappedNodeId),
-                                distanceFunction.applyAsDouble(mappedNodeId)
+                                distanceFunction.apply(mappedNodeId)
                             );
                         });
                 }).orElseGet(Stream::empty)
