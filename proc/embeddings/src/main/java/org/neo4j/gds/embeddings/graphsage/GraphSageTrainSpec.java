@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
@@ -50,8 +49,7 @@ public class GraphSageTrainSpec implements AlgorithmSpec<
 
     @Override
     public GraphSageTrainAlgorithmFactory algorithmFactory(ExecutionContext executionContext) {
-        var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
-        return new GraphSageTrainAlgorithmFactory(gdsVersion);
+        return new GraphSageTrainAlgorithmFactory();
     }
 
     @Override

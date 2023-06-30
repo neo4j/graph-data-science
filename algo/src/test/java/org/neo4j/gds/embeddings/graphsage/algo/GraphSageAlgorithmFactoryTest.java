@@ -62,7 +62,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
@@ -391,7 +390,7 @@ class GraphSageAlgorithmFactoryTest {
                 "projectedFeatureDimension", 42
             ))
         );
-        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory(testGdsVersion)
+        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
             .build(
                 GdlGraphs.EMPTY,
                 multiLabelConfig,
@@ -407,7 +406,7 @@ class GraphSageAlgorithmFactoryTest {
                 "featureProperties", List.of("a")
             ))
         );
-        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory(testGdsVersion)
+        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
             .build(
                 GdlGraphs.EMPTY,
                 singleLabelConfig,

@@ -56,7 +56,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -381,7 +380,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .add(expectedResidentMemory)
             .add(MemoryRange.of(40L)); // For GraphSage.class
 
-        var actualEstimation = new GraphSageTrainAlgorithmFactory(testGdsVersion)
+        var actualEstimation = new GraphSageTrainAlgorithmFactory()
             .memoryEstimation(config)
             .estimate(graphDimensions, concurrency);
 
@@ -406,7 +405,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             ? builder.projectedFeatureDimension(SOME_REASONABLE_VALUE).build()
             : builder.build();
 
-        var actualEstimation = new GraphSageTrainAlgorithmFactory(testGdsVersion)
+        var actualEstimation = new GraphSageTrainAlgorithmFactory()
             .memoryEstimation(config)
             .estimate(GraphDimensions.of(1337), 42);
 
@@ -474,7 +473,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .maxIterations(2)
             .build();
 
-        var factory = new GraphSageTrainAlgorithmFactory(testGdsVersion);
+        var factory = new GraphSageTrainAlgorithmFactory();
 
         var progressTracker = new InspectableTestProgressTracker(
             factory.progressTask(graph, config),

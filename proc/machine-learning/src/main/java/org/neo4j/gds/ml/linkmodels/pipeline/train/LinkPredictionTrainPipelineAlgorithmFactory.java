@@ -62,8 +62,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             trainConfig,
             executionContext,
             graphStore,
-            progressTracker,
-            gdsVersion
+            progressTracker
         );
     }
 

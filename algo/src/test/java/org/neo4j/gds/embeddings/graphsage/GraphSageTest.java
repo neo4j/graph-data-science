@@ -218,7 +218,7 @@ class GraphSageTest {
             .relationshipWeightProperty("weight")
             .build();
 
-        var graphSageTrain = new GraphSageTrainAlgorithmFactory(testGdsVersion).build(
+        var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
             graph,
             trainConfig,
             ProgressTracker.NULL_TRACKER

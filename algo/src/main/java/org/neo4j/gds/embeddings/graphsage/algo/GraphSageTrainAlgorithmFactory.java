@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -40,11 +41,9 @@ import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPro
 
 public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
 
-    private final String gdsVersion;
 
-    public GraphSageTrainAlgorithmFactory(String gdsVersion) {
+    public GraphSageTrainAlgorithmFactory() {
         super();
-        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -59,6 +58,8 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         ProgressTracker progressTracker
     ) {
         var executorService = Pools.DEFAULT;
+        var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
+
         if(configuration.hasRelationshipWeightProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
