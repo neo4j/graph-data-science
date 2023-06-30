@@ -29,6 +29,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -40,7 +41,25 @@ class SysInfoProcLicensesTest {
     void testExpiredLicense() throws IOException {
         var pastTime = ZonedDateTime.of(1337, 4, 2, 13, 37, 42, 0, ZoneOffset.UTC);
         var proc = new SysInfoProc();
-        proc.licenseState = new TestLicenseStates.ExpiredLicenseState(pastTime);
+        proc.licenseState = new LicenseState() {
+
+            @Override
+            public <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter) {
+                return visitor.invalid(
+                    "TestExpired",
+                    "License expires a long time ago.",
+                    Optional.of(pastTime),
+                    parameter
+                );
+            }
+
+            @Override
+            public String toString() {
+                return "ExpiredLicenseState{" +
+                    "pastTime=" + pastTime +
+                    '}';
+            }
+        };
 
         proc.version().forEach(dv -> {
             switch (dv.key) {
@@ -64,7 +83,22 @@ class SysInfoProcLicensesTest {
     @Test
     void testOtherInvalidLicense() throws IOException {
         var proc = new SysInfoProc();
-        proc.licenseState = new TestLicenseStates.Invalid();
+        proc.licenseState = new LicenseState() {
+            @Override
+            public <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter) {
+                return visitor.invalid(
+                    "TestInvalid",
+                    "License invalid for some reason.",
+                    Optional.empty(),
+                    parameter
+                );
+            }
+
+            @Override
+            public String toString() {
+                return "Invalid";
+            }
+        };
 
         proc.version().forEach(dv -> {
             switch (dv.key) {
@@ -89,7 +123,22 @@ class SysInfoProcLicensesTest {
     void testValidLicense() throws IOException {
         var futureTime = ZonedDateTime.of(4242, 2, 1, 13, 37, 42, 0, ZoneOffset.UTC);
         var proc = new SysInfoProc();
-        proc.licenseState = new TestLicenseStates.Valid(futureTime);
+        ZonedDateTime futureTime1 = futureTime;
+        proc.licenseState = new LicenseState() {
+            private final ZonedDateTime futureTime = futureTime1;
+
+            @Override
+            public <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter) {
+                return visitor.licensed("TestValid", futureTime, parameter);
+            }
+
+            @Override
+            public String toString() {
+                return "Valid{" +
+                    "futureTime=" + futureTime +
+                    '}';
+            }
+        };
 
         proc.version().forEach(dv -> {
             switch (dv.key) {
@@ -111,7 +160,17 @@ class SysInfoProcLicensesTest {
     @Test
     void testUnlicensed() throws IOException {
         var proc = new SysInfoProc();
-        proc.licenseState = new TestLicenseStates.Unlicensed();
+        proc.licenseState = new LicenseState() {
+            @Override
+            public <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter) {
+                return visitor.unlicensed("TestUnlicensed", parameter);
+            }
+
+            @Override
+            public String toString() {
+                return "Unlicensed";
+            }
+        };
 
         proc.version().forEach(dv -> {
             switch (dv.key) {
@@ -135,7 +194,24 @@ class SysInfoProcLicensesTest {
 
         private final ZonedDateTime pastTime = ZonedDateTime.of(1337, 4, 2, 13, 37, 42, 0, ZoneOffset.UTC);
 
-        private final LicenseState testLicenseState = new TestLicenseStates.ExpiredLicenseState(pastTime);
+        private final LicenseState testLicenseState = new LicenseState() {
+            @Override
+            public <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter) {
+                return visitor.invalid(
+                    "TestExpired",
+                    "License expires a long time ago.",
+                    Optional.of(pastTime),
+                    parameter
+                );
+            }
+
+            @Override
+            public String toString() {
+                return "ExpiredLicenseState{" +
+                    "pastTime=" + pastTime +
+                    '}';
+            }
+        };
 
         @Override
         @ExtensionCallback
