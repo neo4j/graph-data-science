@@ -14,8 +14,9 @@
 | `gds.graph.project.cypher` (deprecated)
 | `gds.graph.project.cypher.estimate` (deprecated)
 | `gds.graph.project` (aggregation function)
-.1+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
-| `gds.graph.exists`footnote:function[Available as a link:https://neo4j.com/docs/cypher-manual/current/functions/[Cypher function] too, so it can be used in `RETURN` and `WHERE` statements as well.]
+.2+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
+| `gds.graph.exists` label:procedure[Procedure]
+| `gds.graph.exists` label:function[Function]
 |xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[List graphs] | `gds.graph.list`
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
 | `gds.graph.nodeProperties.drop`
