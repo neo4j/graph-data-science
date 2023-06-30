@@ -59,6 +59,14 @@ public final class MemoryUsage {
     public static final int BYTES_OBJECT_REF;
 
     /**
+     * The maximum size of array to allocate (unless necessary).
+     * Some VMs reserve some header words in an array.
+     * Attempts to allocate larger arrays may result in
+     * OutOfMemoryError: Requested array size exceeds VM limit
+     */
+    public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    /**
      * Number of bytes to represent an array header (no content, but with alignments).
      */
     public static final int BYTES_ARRAY_HEADER;
