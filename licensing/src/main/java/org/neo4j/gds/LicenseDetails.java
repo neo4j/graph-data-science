@@ -23,14 +23,26 @@ import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Optional;
 
-public final class LicenseProcFacade {
+public final class LicenseDetails {
+    private final boolean isLicensed;
+    private final String details;
 
-    private LicenseProcFacade() {
+    private LicenseDetails(boolean isLicensed, String details) {
+        this.isLicensed = isLicensed;
+        this.details = details;
     }
 
-    static LicenseStateProc.LicenseStateResult createFromState(LicenseState state) {
-        String details = state.visit(StateDetailsExtractor.INSTANCE);
-        return new LicenseStateProc.LicenseStateResult(state.isLicensed(), details);
+    static LicenseDetails from(LicenseState licenseState) {
+        String details = licenseState.visit(StateDetailsExtractor.INSTANCE);
+        return new LicenseDetails(licenseState.isLicensed(), details);
+    }
+
+    String details() {
+        return details;
+    }
+
+    boolean isLicensed() {
+        return isLicensed;
     }
 
     private enum StateDetailsExtractor implements LicenseState.Visitor<String> {

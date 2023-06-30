@@ -19,20 +19,13 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Procedure;
+public class LicensingBusinessFacade {
 
-import java.util.stream.Stream;
+    private final LicensingService licensingService;
 
-public class LicenseStateProc {
+    public LicensingBusinessFacade(LicensingService licensingService) {this.licensingService = licensingService;}
 
-    @Context
-    public SysInfoProcFacade facade;
-
-    @Procedure("gds.license.state")
-    @Description("Returns details about the license state")
-    public Stream<SysInfoProcFacade.LicenseStateResult> licenseState() {
-        return Stream.of(facade.licenseStateResult());
+    public LicenseDetails licenseDetails() {
+        return LicenseDetails.from(licensingService.get());
     }
 }

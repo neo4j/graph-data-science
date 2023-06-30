@@ -30,9 +30,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LicenseStateProcFacadeTest {
+class LicenseDetailsTest {
 
-    public static Stream<Arguments> allLicenses() {
+    static Stream<Arguments> allLicenses() {
 
         return Stream.of(
             Arguments.of(new TestLicenseStates.Unlicensed(), false, "No valid GDS license specified."),
@@ -52,10 +52,9 @@ class LicenseStateProcFacadeTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("allLicenses")
-    void licensed(LicenseState state, boolean expected, String expectedReason) {
-        assertThat(LicenseProcFacade.createFromState(state))
-            .satisfies(res -> assertThat(res.isLicensed).isEqualTo(expected))
-            .satisfies(res -> assertThat(res.details).isEqualTo(expectedReason));
+    void licenceDetailsParsing(LicenseState state, boolean expected, String expectedReason) {
+        assertThat(LicenseDetails.from(state))
+            .satisfies(res -> assertThat(res.isLicensed()).isEqualTo(expected))
+            .satisfies(res -> assertThat(res.details()).isEqualTo(expectedReason));
     }
-
 }
