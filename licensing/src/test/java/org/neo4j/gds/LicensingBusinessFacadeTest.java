@@ -36,7 +36,7 @@ class LicensingBusinessFacadeTest {
         when(licensingServiceMock.get()).thenReturn(new TestLicenseStates.Unlicensed());
         LicenseDetails licenseDetails = licensingBusinessFacade.licenseDetails();
 
-        assertThat(licenseDetails.isLicensed()).isTrue();
+        assertThat(licenseDetails.isLicensed()).isFalse();
         assertThat(licenseDetails.details()).isEqualTo("No valid GDS license specified.");
     }
 
