@@ -48,7 +48,7 @@
 
 == Beta Tier
 
-.List of all beta graph operations in the GDS library. Functions are written in _italic_.
+.List of all beta graph operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
@@ -68,7 +68,7 @@
 
 == Alpha Tier
 
-.List of all alpha graph operations in the GDS library. Functions are written in _italic_.
+.List of all alpha graph operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
