@@ -32,13 +32,4 @@ public final class SysInfoProcFacade {
         return new LicenseStateResult(licenseDetails.isLicensed(), licenseDetails.details());
     }
 
-    public static final class LicenseStateResult {
-        public final boolean isLicensed;
-        public final String details;
-
-        LicenseStateResult(boolean isLicensed, String details) {this.isLicensed = isLicensed;
-            this.details = details;
-        }
-    }
-
 }

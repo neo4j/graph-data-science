@@ -20,27 +20,24 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-@ExtendWith(MockitoExtension.class)
 class LicensingBusinessFacadeTest {
 
     @Test
-    void test(@Mock LicensingService licensingServiceMock) {
+    void test() {
+        LicensingService licensingServiceMock = mock(LicensingService.class);
+        var licensingBusinessFacade = new LicensingBusinessFacade(licensingServiceMock);
+
         when(licensingServiceMock.get()).thenReturn(new TestLicenseStates.Unlicensed());
+        LicenseDetails licenseDetails = licensingBusinessFacade.licenseDetails();
 
-
-        LicenseDetails licenseDetails = new LicensingBusinessFacade(licensingServiceMock).licenseDetails();
-
-        assertThat(licenseDetails)
-            .matches(details -> !details.isLicensed())
-            .matches(details -> details.details().equals("No valid GDS license specified."), "details were: " + licenseDetails.details());
+        assertThat(licenseDetails.isLicensed()).isTrue();
+        assertThat(licenseDetails.details()).isEqualTo("No valid GDS license specified.");
     }
 
 }

@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Optional;
@@ -35,6 +37,11 @@ public final class LicenseDetails {
     static LicenseDetails from(LicenseState licenseState) {
         String details = licenseState.visit(StateDetailsExtractor.INSTANCE);
         return new LicenseDetails(licenseState.isLicensed(), details);
+    }
+
+    @TestOnly
+    static LicenseDetails from(boolean isLicensed, String details) {
+        return new LicenseDetails(isLicensed, details);
     }
 
     String details() {

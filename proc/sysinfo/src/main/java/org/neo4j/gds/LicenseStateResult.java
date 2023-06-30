@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Procedure;
+public final class LicenseStateResult {
+    public final boolean isLicensed;
+    public final String details;
 
-import java.util.stream.Stream;
-
-public class LicenseStateProc {
-
-    @Context
-    public SysInfoProcFacade facade;
-
-    @Procedure("gds.license.state")
-    @Description("Returns details about the license state")
-    public Stream<LicenseStateResult> licenseState() {
-        return Stream.of(facade.licenseStateResult());
+    LicenseStateResult(boolean isLicensed, String details) {
+        this.isLicensed = isLicensed;
+        this.details = details;
     }
 }

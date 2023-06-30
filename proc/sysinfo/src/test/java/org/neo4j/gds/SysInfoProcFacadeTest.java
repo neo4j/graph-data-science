@@ -30,14 +30,10 @@ class SysInfoProcFacadeTest {
     @Test
     void shouldTransformLicenseDetailsToProcedureResult() {
         var licensingBusinessFacadeMock = mock(LicensingBusinessFacade.class);
-        // This is a bit dodgy, can we come up with a better way to get the Details 🤔
-        var licenseDetailsMock = mock(LicenseDetails.class);
-        when(licenseDetailsMock.isLicensed()).thenReturn(true);
-        when(licenseDetailsMock.details()).thenReturn("XYZ");
-        when(licensingBusinessFacadeMock.licenseDetails()).thenReturn(licenseDetailsMock);
-
+        var licenseDetails =  LicenseDetails.from(true, "XYZ");
         var sysInfoProcFacade = new SysInfoProcFacade(licensingBusinessFacadeMock);
 
+        when(licensingBusinessFacadeMock.licenseDetails()).thenReturn(licenseDetails);
         var licenseStateResult = sysInfoProcFacade.licenseStateResult();
 
         assertThat(licenseStateResult.isLicensed).isTrue();

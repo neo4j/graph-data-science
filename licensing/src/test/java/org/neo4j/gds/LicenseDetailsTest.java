@@ -19,42 +19,40 @@
  */
 package org.neo4j.gds;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LicenseDetailsTest {
-
-    static Stream<Arguments> allLicenses() {
-
-        return Stream.of(
-            Arguments.of(new TestLicenseStates.Unlicensed(), false, "No valid GDS license specified."),
-            Arguments.of(new TestLicenseStates.Invalid(), false, "License error: License invalid for some reason."),
-            Arguments.of(
-                new TestLicenseStates.ExpiredLicenseState(ZonedDateTime.ofInstant(Instant.ofEpochSecond(0), ZoneId.of("UTC"))),
-                false,
-                "License error: License expires a long time ago. Expiration date at License expires at 1970-01-01T00:00Z[UTC]"
-            ),
-            Arguments.of(
-                new TestLicenseStates.Valid(ZonedDateTime.ofInstant(Instant.ofEpochSecond(99999999999L), ZoneId.of("UTC"))),
-                true,
-                "License expires at 5138-11-16T09:46:39Z[UTC]"
-            )
-        );
+    @Test
+    void unlicensed() {
+        assertThat(LicenseDetails.from(new TestLicenseStates.Unlicensed()))
+            .satisfies(res -> assertThat(res.isLicensed()).isFalse())
+            .satisfies(res -> assertThat(res.details()).isEqualTo("No valid GDS license specified."));
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("allLicenses")
-    void licenceDetailsParsing(LicenseState state, boolean expected, String expectedReason) {
-        assertThat(LicenseDetails.from(state))
-            .satisfies(res -> assertThat(res.isLicensed()).isEqualTo(expected))
-            .satisfies(res -> assertThat(res.details()).isEqualTo(expectedReason));
+    @Test
+    void invalid() {
+        assertThat(LicenseDetails.from(new TestLicenseStates.Invalid()))
+            .satisfies(res -> assertThat(res.isLicensed()).isFalse())
+            .satisfies(res -> assertThat(res.details()).isEqualTo("License error: License invalid for some reason."));
+    }
+
+    @Test
+    void expired() {
+        assertThat(LicenseDetails.from(new TestLicenseStates.ExpiredLicenseState(ZonedDateTime.ofInstant(Instant.ofEpochSecond(0), ZoneId.of("UTC")))))
+            .satisfies(res -> assertThat(res.isLicensed()).isFalse())
+            .satisfies(res -> assertThat(res.details()).isEqualTo("License error: License expires a long time ago. Expiration date at License expires at 1970-01-01T00:00Z[UTC]"));
+    }
+
+    @Test
+    void valid() {
+        assertThat(LicenseDetails.from(new TestLicenseStates.Valid(ZonedDateTime.ofInstant(Instant.ofEpochSecond(99999999999L), ZoneId.of("UTC")))))
+            .satisfies(res -> assertThat(res.isLicensed()).isTrue())
+            .satisfies(res -> assertThat(res.details()).isEqualTo("License expires at 5138-11-16T09:46:39Z[UTC]"));
     }
 }
