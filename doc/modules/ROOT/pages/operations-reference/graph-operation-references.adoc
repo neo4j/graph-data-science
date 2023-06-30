@@ -3,7 +3,7 @@
 
 == Production-quality tier
 
-.List of all production-quality graph operations in the GDS library. Functions are written in _italic_.
+.List of all production-quality graph operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
@@ -14,9 +14,8 @@
 | `gds.graph.project.cypher` (deprecated)
 | `gds.graph.project.cypher.estimate` (deprecated)
 | `gds.graph.project` (aggregation function)
-.2+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
-| `gds.graph.exists`
-| `_gds.graph.exists_`
+.1+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
+| `gds.graph.exists`footnote:function[Available as a link:https://neo4j.com/docs/cypher-manual/current/functions/[Cypher function] too, so it can be used in `RETURN` and `WHERE` statements as well.]
 |xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[List graphs] | `gds.graph.list`
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
 | `gds.graph.nodeProperties.drop`
