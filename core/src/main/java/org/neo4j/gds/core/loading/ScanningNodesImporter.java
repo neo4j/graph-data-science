@@ -25,33 +25,23 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
 
-    private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
+    private final LoadablePropertyMappings propertyMappings;
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
     private final TerminationFlag terminationFlag;
     private final IdMapBuilder idMapBuilder;
@@ -90,13 +80,9 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             );
         }
 
-        var propertyMappings = IndexPropertyMappings.propertyMappings(graphProjectConfig);
+        var propertyMappings = LoadablePropertyMappings.propertyMappings(graphProjectConfig);
 
-        var loadablePropertyMappings = IndexPropertyMappings.prepareProperties(
-            graphProjectConfig,
-            dimensions,
-            loadingContext.transactionContext()
-        );
+        var loadablePropertyMappings = LoadablePropertyMappings.of(graphProjectConfig);
 
         var nodePropertyImporter = initializeNodePropertyImporter(
             loadablePropertyMappings,
@@ -125,7 +111,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         ProgressTracker progressTracker,
         int concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
-        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder
@@ -195,10 +181,6 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             ? new HashMap<>()
             : nodePropertyImporter.result(idMap);
 
-        if (!propertyMappings.indexedProperties().isEmpty()) {
-            importPropertiesFromIndex(idMap, nodeProperties);
-        }
-
         return Nodes.of(
             idMap,
             this.propertyMappingsByLabel,
@@ -207,95 +189,8 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         );
     }
 
-    private void importPropertiesFromIndex(
-        IdMap idMap,
-        Map<PropertyMapping, NodePropertyValues> nodeProperties
-    ) {
-        long indexStart = System.nanoTime();
-
-        try {
-            progressTracker.beginSubTask("Property Index Scan");
-
-            var parallelIndexScan = GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
-            // In order to avoid a race between preparing the importers and the flag being toggled,
-            // we set the concurrency to 1 if we don't import in parallel.
-            //
-            // !! NOTE !!
-            //   If you end up changing this logic
-            //   you need to add a check for the feature flag to IndexedNodePropertyImporter
-            var concurrency = parallelIndexScan ? this.concurrency : 1;
-
-            var buildersByPropertyKey = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
-            propertyMappings.indexedProperties()
-                .values()
-                .stream()
-                .flatMap(propertyMappings -> propertyMappings.mappings().stream())
-                .forEach(propertyMapping ->
-                    buildersByPropertyKey.put(propertyMapping.property(), NodePropertiesFromStoreBuilder.of(propertyMapping.property().defaultValue(), concurrency)));
-
-            var indexScanningImporters = propertyMappings.indexedProperties()
-                .entrySet()
-                .stream()
-                .flatMap(labelAndProperties -> labelAndProperties
-                    .getValue()
-                    .mappings()
-                    .stream()
-                    .map(mappingAndIndex -> new IndexedNodePropertyImporter(
-                        concurrency,
-                        transaction,
-                        labelAndProperties.getKey(),
-                        mappingAndIndex.property(),
-                        mappingAndIndex.index(),
-                        idMap,
-                        progressTracker,
-                        terminationFlag,
-                        executorService,
-                        buildersByPropertyKey.get(mappingAndIndex.property())
-                    ))
-                ).collect(Collectors.toList());
-
-            if (!parallelIndexScan) {
-                // While we don't scan the index in parallel, try to at least scan all properties in parallel
-                ParallelUtil.run(indexScanningImporters, executorService);
-            }
-            long recordsImported = 0L;
-            for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {
-                if (parallelIndexScan) {
-                    // If we run in parallel, we need to run the importers one after another, as they will
-                    // parallelize internally
-                    propertyImporter.run();
-                }
-            }
-
-            for (var entry : buildersByPropertyKey.entrySet()) {
-                NodePropertyValues propertyValues = entry.getValue().build(idMap);
-                nodeProperties.put(entry.getKey(), propertyValues);
-                recordsImported += propertyValues.nodeCount();
-            }
-
-            long tookNanos = System.nanoTime() - indexStart;
-            BigInteger bigNanos = BigInteger.valueOf(tookNanos);
-            double tookInSeconds = new BigDecimal(bigNanos)
-                .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
-                .doubleValue();
-            double recordsPerSecond = new BigDecimal(A_BILLION)
-                .multiply(BigDecimal.valueOf(recordsImported))
-                .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
-                .doubleValue();
-
-            progressTracker.logDebug(formatWithLocale(
-                "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
-                recordsImported,
-                tookInSeconds,
-                recordsPerSecond
-            ));
-        } finally {
-            progressTracker.endSubTask("Property Index Scan");
-        }
-    }
-
     private static @Nullable NativeNodePropertyImporter initializeNodePropertyImporter(
-        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        LoadablePropertyMappings propertyMappings,
         GraphDimensions dimensions,
         int concurrency
     ) {

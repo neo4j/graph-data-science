@@ -42,8 +42,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
@@ -60,8 +58,6 @@ import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 
 class GraphLoaderTest extends BaseTest {
 
@@ -171,41 +167,6 @@ class GraphLoaderTest extends BaseTest {
         assertThat(log.getMessages(TestLog.DEBUG))
             .extracting(removingThreadId())
             .contains("Loading :: Nodes :: Store Scan :: Start using NodeCursorBasedScanner")
-            .contains("Loading :: Relationships :: Store Scan :: Start using RelationshipScanCursorBasedScanner");
-
-        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
-        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
-    }
-
-    @Test
-    public void shouldTrackProgressWithNativeLoadingUsingIndex() {
-        TestLog log = Neo4jProxy.testLog();
-
-        USE_PROPERTY_VALUE_INDEX.enableAndRun(() -> testPropertyLoadingWithIndex(NATIVE, log));
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .contains(
-                "Loading :: Start",
-                "Loading :: Nodes :: Start",
-                "Loading :: Nodes :: Store Scan :: Start",
-                "Loading :: Nodes :: Store Scan 100%",
-                "Loading :: Nodes :: Store Scan :: Finished",
-                "Loading :: Nodes :: Property Index Scan :: Start",
-                "Loading :: Nodes :: Property Index Scan 100%",
-                "Loading :: Nodes :: Property Index Scan :: Finished",
-                "Loading :: Nodes :: Finished",
-                "Loading :: Relationships :: Start",
-                "Loading :: Relationships :: Store Scan :: Start",
-                "Loading :: Relationships :: Store Scan 100%",
-                "Loading :: Relationships :: Store Scan :: Finished",
-                "Loading :: Relationships :: Finished",
-                "Loading :: Finished"
-            );
-
-        assertThat(log.getMessages(TestLog.DEBUG))
-            .extracting(removingThreadId())
-            .contains("Loading :: Nodes :: Store Scan :: Start using MultipleNodeLabelIndexBasedScanner")
             .contains("Loading :: Relationships :: Store Scan :: Start using RelationshipScanCursorBasedScanner");
 
         log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
@@ -343,46 +304,6 @@ class GraphLoaderTest extends BaseTest {
             .withLabels("Node1")
             .graph();
         assertGraphEquals(fromGdl("(a:Node1), (c:Node1)"), graph);
-    }
-
-    @AllGraphStoreFactoryTypesTest
-    void testPropertyViaIndex(GraphFactoryTestSupport.FactoryType factoryType) {
-        USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-            testPropertyLoadingWithIndex(factoryType, NullLog.getInstance()));
-    }
-
-    @AllGraphStoreFactoryTypesTest
-    void testParallelPropertyViaIndex(GraphFactoryTestSupport.FactoryType factoryType) {
-        USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-            USE_PARALLEL_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-                testPropertyLoadingWithIndex(factoryType, NullLog.getInstance())));
-    }
-
-    private void testPropertyLoadingWithIndex(GraphFactoryTestSupport.FactoryType factoryType, Log log) {
-        var indexQueries = List.of(
-            "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
-            "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
-        );
-        indexQueries.forEach(this::runQuery);
-
-        PropertyMappings nodePropertyMappings = PropertyMappings.of(
-            PropertyMapping.of("prop1", "prop1", 41L),
-            PropertyMapping.of("prop2", "prop2", 42L),
-            PropertyMapping.of("prop3", "prop3", 43L)
-        );
-
-        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
-            .withLabels("Node1", "Node2", "Node3")
-            .withNodeProperties(nodePropertyMappings)
-            .withDefaultAggregation(Aggregation.SINGLE)
-            .withLog(log)
-            .graph();
-
-        Graph expected = fromGdl("(a:Node1 {prop1: 1, prop2: 42, prop3: 43})" +
-                                 "(b:Node2 {prop1: 41, prop2: 2, prop3: 43})" +
-                                 "(c:Node3 {prop1: 41, prop2: 42, prop3: 3})" +
-                                 "(a)-->(b), (a)-->(c), (b)-->(c)");
-        assertGraphEquals(expected, graph);
     }
 
     @Test
