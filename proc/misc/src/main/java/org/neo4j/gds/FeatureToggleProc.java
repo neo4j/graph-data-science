@@ -52,21 +52,6 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.usePropertyValueIndex")
-    @Description("Toggle whether the property value index should be used during node property loading.")
-    public void usePropertyValueIndex(@Name(value = "usePropertyValueIndex") boolean usePropertyValueIndex) {
-        GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.toggle(usePropertyValueIndex);
-    }
-
-    @Internal
-    @Procedure("gds.features.usePropertyValueIndex.reset")
-    @Description("Set the behavior of whether to use the property value index to the default. That value is returned.")
-    public Stream<FeatureState> resetUsePropertyValueIndex() {
-        GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()));
-    }
-    
-    @Internal
     @Procedure("gds.features.usePartitionedScan")
     @Description("Toggle whether the new partitioned scan API should be used.")
     public void usePartitionedScan(@Name(value = "usePartitionedScan") boolean usePartitionedScan) {

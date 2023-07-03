@@ -268,9 +268,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             }).mapToLong(Long::longValue).sum();
 
         var properties = IndexPropertyMappings.prepareProperties(
-            graphProjectConfig,
-            dimensions,
-            loadingContext.transactionContext()
+            graphProjectConfig
         );
 
         List<Task> nodeTasks = properties.indexedProperties().isEmpty()

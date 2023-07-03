@@ -37,7 +37,6 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARTITIONED_SCAN;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
 
@@ -65,25 +64,6 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(SKIP_ORPHANS.isEnabled());
-    }
-
-    @Test
-    void toggleUsePropertyValueIndex() {
-        var usePropertyValueIndex = USE_PROPERTY_VALUE_INDEX.isEnabled();
-        runQuery("CALL gds.features.usePropertyValueIndex($value)", Map.of("value", !usePropertyValueIndex));
-        assertEquals(!usePropertyValueIndex, USE_PROPERTY_VALUE_INDEX.isEnabled());
-        runQuery("CALL gds.features.usePropertyValueIndex($value)", Map.of("value", usePropertyValueIndex));
-        assertEquals(usePropertyValueIndex, USE_PROPERTY_VALUE_INDEX.isEnabled());
-    }
-
-    @Test
-    void resetUsePropertyValueIndex() {
-        USE_PROPERTY_VALUE_INDEX.reset();
-        assertCypherResult(
-            "CALL gds.features.usePropertyValueIndex.reset()",
-            List.of(Map.of("enabled", false))
-        );
-        assertFalse(USE_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
     @Test
