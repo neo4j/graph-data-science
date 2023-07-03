@@ -42,8 +42,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
