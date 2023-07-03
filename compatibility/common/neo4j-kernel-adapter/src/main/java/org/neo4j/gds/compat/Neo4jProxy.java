@@ -318,7 +318,8 @@ public final class Neo4jProxy {
         boolean caseInsensitive,
         boolean systemProcedure,
         boolean internal,
-        boolean allowExpiredCredentials
+        boolean allowExpiredCredentials,
+        boolean threadSafe
     ) {
         return IMPL.procedureSignature(
             name,
@@ -333,7 +334,8 @@ public final class Neo4jProxy {
             caseInsensitive,
             systemProcedure,
             internal,
-            allowExpiredCredentials
+            allowExpiredCredentials,
+            threadSafe
         );
     }
 
