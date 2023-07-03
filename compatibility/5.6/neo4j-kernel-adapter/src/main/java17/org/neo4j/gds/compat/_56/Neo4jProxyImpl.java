@@ -604,7 +604,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         boolean caseInsensitive,
         boolean systemProcedure,
         boolean internal,
-        boolean allowExpiredCredentials
+        boolean allowExpiredCredentials,
+        boolean threadSafe
     ) {
         return new ProcedureSignature(
             name,

@@ -230,7 +230,8 @@ public interface Neo4jProxyApi {
         boolean caseInsensitive,
         boolean systemProcedure,
         boolean internal,
-        boolean allowExpiredCredentials
+        boolean allowExpiredCredentials,
+        boolean threadSafe
     );
 
     long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);

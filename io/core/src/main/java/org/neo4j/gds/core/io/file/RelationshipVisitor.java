@@ -99,7 +99,7 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipPro
     }
 
     @Override
-    void reset() {
+    public void reset() {
         currentStartNode = -1;
         currentEndNode = -1;
     }
