@@ -11,32 +11,32 @@
 .5+<.^|xref:management-ops/graph-creation/graph-project.adoc[Project Graph]
 | `gds.graph.project` label:procedure[Procedure]
 | `gds.graph.project.estimate` label:procedure[Procedure]
-| `gds.graph.project.cypher` (deprecated) label:procedure[Procedure]
-| `gds.graph.project.cypher.estimate` (deprecated) label:procedure[Procedure]
-| `gds.graph.project` (aggregation function) label:procedure[Procedure]
+| `gds.graph.project.cypher` label:procedure[Procedure] (deprecated)
+| `gds.graph.project.cypher.estimate` label:procedure[Procedure] (deprecated)
+| `gds.graph.project` label:function[Function] (aggregation function)
 .2+<.^|xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-exists[Check if a graph exists]
 | `gds.graph.exists` label:procedure[Procedure]
 | `gds.graph.exists` label:function[Function]
 |xref:management-ops/inspecting-the-graph-catalog.adoc#catalog-graph-list[List graphs] | `gds.graph.list` label:procedure[Procedure]
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
 | `gds.graph.nodeProperties.drop` label:procedure[Procedure]
-| `gds.graph.removeNodeProperties` (deprecated) label:procedure[Procedure]
+| `gds.graph.removeNodeProperties` label:procedure[Procedure] (deprecated)
 .2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph]
 | `gds.graph.relationships.drop` label:procedure[Procedure]
-| `gds.graph.deleteRelationships` (deprecated) label:procedure[Procedure]
+| `gds.graph.deleteRelationships` label:procedure[Procedure] (deprecated)
 |xref:graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop` label:procedure[Procedure]
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller]
 | `gds.graph.nodeProperty.stream` label:procedure[Procedure]
-| `gds.graph.streamNodeProperty` (deprecated) label:procedure[Procedure]
+| `gds.graph.streamNodeProperty`  label:procedure[Procedure] (deprecated)
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller]
 | `gds.graph.nodeProperties.stream` label:procedure[Procedure]
-| `gds.graph.streamNodeProperties` (deprecated) label:procedure[Procedure]
+| `gds.graph.streamNodeProperties`  label:procedure[Procedure] (deprecated)
 .2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller]
 | `gds.graph.relationshipProperty.stream` label:procedure[Procedure]
-| `gds.graph.streamRelationshipProperty` (deprecated) label:procedure[Procedure]
+| `gds.graph.streamRelationshipProperty`  label:procedure[Procedure] (deprecated)
 .3+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
 | `gds.graph.relationshipProperties.stream` label:procedure[Procedure]
-| `gds.graph.streamRelationshipProperties` (deprecated) label:procedure[Procedure]
+| `gds.graph.streamRelationshipProperties`  label:procedure[Procedure] (deprecated)
 | `gds.graph.relationshipProperties.write` label:procedure[Procedure]
 .2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j]
 | `gds.graph.nodeProperties.write` label:procedure[Procedure]
