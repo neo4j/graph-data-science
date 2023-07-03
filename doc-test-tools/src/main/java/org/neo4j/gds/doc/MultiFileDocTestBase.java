@@ -125,15 +125,15 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runDocQuery(DocQuery docQuery) {
-        if (docQuery.runAsOperator()) {
-            String operatorHandle = docQuery.operator();
-            super.runQuery(operatorHandle, docQuery.query());
-        } else {
-            try {
+        try {
+            if (docQuery.runAsOperator()) {
+                String operatorHandle = docQuery.operator();
+                super.runQuery(operatorHandle, docQuery.query());
+            } else {
                 super.runQuery(docQuery.query());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to run query: " + docQuery.query(), e);
             }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to run query: " + docQuery.query(), e);
         }
     }
 
@@ -168,7 +168,8 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
 
             while (result.hasNext()) {
                 var actualResultRow = result.next();
-                var actualResultValues = queryExample.resultColumns().stream()
+                var actualResultValues = queryExample.resultColumns()
+                    .stream()
                     .map(column -> valueToString(actualResultRow.get(column)))
                     .collect(Collectors.toList());
                 actualResults.add(actualResultValues);
@@ -206,16 +207,17 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         return resultsFromDoc
             .stream()
             .map(list -> list.stream().map(string -> {
-                    try {
-                        if (string.startsWith("[")) {
-                            return formatListOfNumbers(string);
-                        }
-                        return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
-                    } catch (NumberFormatException e) {
-                        return string;
+                try {
+                    if (string.startsWith("[")) {
+                        return formatListOfNumbers(string);
                     }
-                }).collect(Collectors.toList())
-            ).collect(Collectors.toList());
+                    return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
+                } catch (NumberFormatException e) {
+                    return string;
+                }
+            }).collect(Collectors.toList())
+            )
+            .collect(Collectors.toList());
     }
 
     @NotNull
@@ -251,16 +253,20 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             }).collect(Collectors.toList()).toString();
         } else if (value instanceof Map<?, ?>) {
             var map = ((Map<?, ?>) value);
-            var mappedMap = map.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().toString(),
-                entry -> {
-                    var innerValue = entry.getValue();
-                    if (innerValue instanceof Map<?, ?>) {
-                        return new TreeMap<>((Map<?, ?>) innerValue);
-                    }
-                    return innerValue;
-                }
-            ));
+            var mappedMap = map.entrySet()
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        entry -> entry.getKey().toString(),
+                        entry -> {
+                            var innerValue = entry.getValue();
+                            if (innerValue instanceof Map<?, ?>) {
+                                return new TreeMap<>((Map<?, ?>) innerValue);
+                            }
+                            return innerValue;
+                        }
+                    )
+                );
             return new TreeMap<>(mappedMap).toString();
         } else {
             return value.toString();
