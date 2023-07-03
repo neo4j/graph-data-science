@@ -27,16 +27,16 @@
 **** xref:management-ops/graph-creation/sampling/cnarw.adoc[]
 *** xref:management-ops/graph-creation/graph-generation.adoc[]
 ** Catalog operations
-*** xref:management-ops/graph-drop.adoc[]
 *** xref:management-ops/graph-list.adoc[]
 *** xref:management-ops/graph-exists.adoc[]
+*** xref:management-ops/graph-drop.adoc[]
 ** Reading from graphs
 *** xref:management-ops/graph-reads/graph-stream-nodes.adoc[]
 *** xref:management-ops/graph-reads/graph-stream-relationships.adoc[]
 *** xref:management-ops/graph-reads/create-cypher-db.adoc[]
 ** Updating graphs
-*** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/mutate-node-labels.adoc[]
+*** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/dropping-parts.adoc[]
 *** xref:management-ops/graph-reads/create-cypher-db.adoc[]
 ** Writing back to Neo4j
