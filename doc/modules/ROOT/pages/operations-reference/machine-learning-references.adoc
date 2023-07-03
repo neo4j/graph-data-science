@@ -13,70 +13,70 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [[pipelines-beta-tier]]
 === Beta tier
 
-.List of all beta machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+.List of all beta machine learning pipelines operations in the GDS library.
 [[pipelines-table-beta]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
 .12+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
-| `gds.beta.pipeline.linkPrediction.create`
-| `gds.beta.pipeline.linkPrediction.addNodeProperty`
-| `gds.beta.pipeline.linkPrediction.addFeature`
-| `gds.beta.pipeline.linkPrediction.addLogisticRegression`
-| `gds.beta.pipeline.linkPrediction.addRandomForest`
-| `gds.beta.pipeline.linkPrediction.configureSplit`
-| `gds.beta.pipeline.linkPrediction.train`
-| `gds.beta.pipeline.linkPrediction.train.estimate`
-| `gds.beta.pipeline.linkPrediction.predict.mutate`
-| `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
-| `gds.beta.pipeline.linkPrediction.predict.stream`
-| `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
+| `gds.beta.pipeline.linkPrediction.create` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.addNodeProperty` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.addFeature` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.addLogisticRegression` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.addRandomForest` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.configureSplit` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.train` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.train.estimate` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.predict.mutate` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.predict.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.predict.stream` label:procedure[Procedure]
+| `gds.beta.pipeline.linkPrediction.predict.stream.estimate` label:procedure[Procedure]
 .14+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
-| `gds.beta.pipeline.nodeClassification.create`
-| `gds.beta.pipeline.nodeClassification.addNodeProperty`
-| `gds.beta.pipeline.nodeClassification.selectFeatures`
-| `gds.beta.pipeline.nodeClassification.addLogisticRegression`
-| `gds.beta.pipeline.nodeClassification.addRandomForest`
-| `gds.beta.pipeline.nodeClassification.configureSplit`
-| `gds.beta.pipeline.nodeClassification.train`
-| `gds.beta.pipeline.nodeClassification.train.estimate`
-| `gds.beta.pipeline.nodeClassification.predict.mutate`
-| `gds.beta.pipeline.nodeClassification.predict.mutate.estimate`
-| `gds.beta.pipeline.nodeClassification.predict.stream`
-| `gds.beta.pipeline.nodeClassification.predict.stream.estimate`
-| `gds.beta.pipeline.nodeClassification.predict.write`
-| `gds.beta.pipeline.nodeClassification.predict.write.estimate`
+| `gds.beta.pipeline.nodeClassification.create` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.addNodeProperty` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.selectFeatures` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.addLogisticRegression` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.addRandomForest` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.configureSplit` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.train` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.train.estimate` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.predict.mutate` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.predict.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.predict.stream` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.predict.stream.estimate` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.predict.write` label:procedure[Procedure]
+| `gds.beta.pipeline.nodeClassification.predict.write.estimate` label:procedure[Procedure]
 |===
 
 [[pipelines-alpha-tier]]
 === Alpha tier
 
-.List of all alpha machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+.List of all alpha machine learning pipelines operations in the GDS library.
 [[pipelines-table-alpha]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
 .3+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
-| `gds.alpha.pipeline.linkPrediction.addMLP`
-| `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
+| `gds.alpha.pipeline.linkPrediction.addMLP` label:procedure[Procedure]
+| `gds.alpha.pipeline.linkPrediction.configureAutoTuning` label:procedure[Procedure]
 | `gds.alpha.pipeline.linkPrediction.addRandomForest` (deprecated)
 .3+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
-| `gds.alpha.pipeline.nodeClassification.addMLP`
-| `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
+| `gds.alpha.pipeline.nodeClassification.addMLP` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeClassification.configureAutoTuning` label:procedure[Procedure]
 | `gds.alpha.pipeline.nodeClassification.addRandomForest` (deprecated)
 .10+<.^| xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
-| `gds.alpha.pipeline.nodeRegression.create`
-| `gds.alpha.pipeline.nodeRegression.addNodeProperty`
-| `gds.alpha.pipeline.nodeRegression.selectFeatures`
-| `gds.alpha.pipeline.nodeRegression.configureAutoTuning`
-| `gds.alpha.pipeline.nodeRegression.configureSplit`
-| `gds.alpha.pipeline.nodeRegression.addLinearRegression`
-| `gds.alpha.pipeline.nodeRegression.addRandomForest`
-| `gds.alpha.pipeline.nodeRegression.train`
-| `gds.alpha.pipeline.nodeRegression.predict.stream`
-| `gds.alpha.pipeline.nodeRegression.predict.mutate`
+| `gds.alpha.pipeline.nodeRegression.create` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.addNodeProperty` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.selectFeatures` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.configureAutoTuning` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.configureSplit` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.addLinearRegression` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.addRandomForest` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.train` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.predict.stream` label:procedure[Procedure]
+| `gds.alpha.pipeline.nodeRegression.predict.mutate` label:procedure[Procedure]
 |===
 
 
@@ -85,51 +85,51 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [[embeddings-production-quality-tier]]
 === Production-quality tier
 
-.List of all production-quality node embedding algorithms in the GDS library. Functions are written in _italic_.
+.List of all production-quality node embedding algorithms in the GDS library.
 [[embeddings-table-product]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 | Algorithm name | Operation
 .8+<.^| xref:machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
-| `gds.fastRP.mutate`
-| `gds.fastRP.mutate.estimate`
-| `gds.fastRP.stats`
-| `gds.fastRP.stats.estimate`
-| `gds.fastRP.stream`
-| `gds.fastRP.stream.estimate`
-| `gds.fastRP.write`
-| `gds.fastRP.write.estimate`
+| `gds.fastRP.mutate` label:procedure[Procedure]
+| `gds.fastRP.mutate.estimate` label:procedure[Procedure]
+| `gds.fastRP.stats` label:procedure[Procedure]
+| `gds.fastRP.stats.estimate` label:procedure[Procedure]
+| `gds.fastRP.stream` label:procedure[Procedure]
+| `gds.fastRP.stream.estimate` label:procedure[Procedure]
+| `gds.fastRP.write` label:procedure[Procedure]
+| `gds.fastRP.write.estimate` label:procedure[Procedure]
 |===
 
 [[embeddings-beta-tier]]
 === Beta tier
 
-.List of all beta node embedding algorithms in the GDS library. Functions are written in _italic_.
+.List of all beta node embedding algorithms in the GDS library.
 [[embeddings-table-beta]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
 .8+<.^|xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
-| `gds.beta.graphSage.stream`
-| `gds.beta.graphSage.stream.estimate`
-| `gds.beta.graphSage.mutate`
-| `gds.beta.graphSage.mutate.estimate`
-| `gds.beta.graphSage.write`
-| `gds.beta.graphSage.write.estimate`
-| `gds.beta.graphSage.train`
-| `gds.beta.graphSage.train.estimate`
+| `gds.beta.graphSage.stream` label:procedure[Procedure]
+| `gds.beta.graphSage.stream.estimate` label:procedure[Procedure]
+| `gds.beta.graphSage.mutate` label:procedure[Procedure]
+| `gds.beta.graphSage.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.graphSage.write` label:procedure[Procedure]
+| `gds.beta.graphSage.write.estimate` label:procedure[Procedure]
+| `gds.beta.graphSage.train` label:procedure[Procedure]
+| `gds.beta.graphSage.train.estimate` label:procedure[Procedure]
 .4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
-| `gds.beta.hashgnn.mutate`
-| `gds.beta.hashgnn.mutate.estimate`
-| `gds.beta.hashgnn.stream`
-| `gds.beta.hashgnn.stream.estimate`
+| `gds.beta.hashgnn.mutate` label:procedure[Procedure]
+| `gds.beta.hashgnn.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.hashgnn.stream` label:procedure[Procedure]
+| `gds.beta.hashgnn.stream.estimate` label:procedure[Procedure]
 .6+<.^|xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
-| `gds.beta.node2vec.mutate`
-| `gds.beta.node2vec.mutate.estimate`
-| `gds.beta.node2vec.stream`
-| `gds.beta.node2vec.stream.estimate`
-| `gds.beta.node2vec.write`
-| `gds.beta.node2vec.write.estimate`
+| `gds.beta.node2vec.mutate` label:procedure[Procedure]
+| `gds.beta.node2vec.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.node2vec.stream` label:procedure[Procedure]
+| `gds.beta.node2vec.stream.estimate` label:procedure[Procedure]
+| `gds.beta.node2vec.write` label:procedure[Procedure]
+| `gds.beta.node2vec.write.estimate` label:procedure[Procedure]
 |===

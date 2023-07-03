@@ -5,387 +5,387 @@
 [[production-quality-tier]]
 == Production-quality tier
 
-.List of all production-quality algorithms in the GDS library. Functions are written in _italic_.
+.List of all production-quality algorithms in the GDS library.
 [[table-product]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 | Algorithm name | Operation
 .8+<.^| xref:algorithms/delta-single-source.adoc[All Shortest Paths Delta-Stepping]
-| `gds.allShortestPaths.delta.stream`
-| `gds.allShortestPaths.delta.stream.estimate`
-| `gds.allShortestPaths.delta.write`
-| `gds.allShortestPaths.delta.write.estimate`
-| `gds.allShortestPaths.delta.mutate`
-| `gds.allShortestPaths.delta.mutate.estimate`
-| `gds.allShortestPaths.delta.stats`
-| `gds.allShortestPaths.delta.stats.estimate`
+| `gds.allShortestPaths.delta.stream` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.stream.estimate` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.write` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.write.estimate` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.mutate` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.mutate.estimate` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.stats` label:procedure[Procedure]
+| `gds.allShortestPaths.delta.stats.estimate` label:procedure[Procedure]
 .6+<.^| xref:algorithms/dijkstra-single-source.adoc[All Shortest Paths Dijkstra]
-| `gds.allShortestPaths.dijkstra.stream`
-| `gds.allShortestPaths.dijkstra.stream.estimate`
-| `gds.allShortestPaths.dijkstra.write`
-| `gds.allShortestPaths.dijkstra.write.estimate`
-| `gds.allShortestPaths.dijkstra.mutate`
-| `gds.allShortestPaths.dijkstra.mutate.estimate`
+| `gds.allShortestPaths.dijkstra.stream` label:procedure[Procedure]
+| `gds.allShortestPaths.dijkstra.stream.estimate` label:procedure[Procedure]
+| `gds.allShortestPaths.dijkstra.write` label:procedure[Procedure]
+| `gds.allShortestPaths.dijkstra.write.estimate` label:procedure[Procedure]
+| `gds.allShortestPaths.dijkstra.mutate` label:procedure[Procedure]
+| `gds.allShortestPaths.dijkstra.mutate.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/article-rank.adoc[ArticleRank]
-| `gds.articleRank.mutate`
-| `gds.articleRank.mutate.estimate`
-| `gds.articleRank.write`
-| `gds.articleRank.write.estimate`
-| `gds.articleRank.stream`
-| `gds.articleRank.stream.estimate`
-| `gds.articleRank.stats`
-| `gds.articleRank.stats.estimate`
+| `gds.articleRank.mutate` label:procedure[Procedure]
+| `gds.articleRank.mutate.estimate` label:procedure[Procedure]
+| `gds.articleRank.write` label:procedure[Procedure]
+| `gds.articleRank.write.estimate` label:procedure[Procedure]
+| `gds.articleRank.stream` label:procedure[Procedure]
+| `gds.articleRank.stream.estimate` label:procedure[Procedure]
+| `gds.articleRank.stats` label:procedure[Procedure]
+| `gds.articleRank.stats.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford]
-| `gds.bellmanFord.mutate`
-| `gds.bellmanFord.mutate.estimate`
-| `gds.bellmanFord.stats`
-| `gds.bellmanFord.stats.estimate`
-| `gds.bellmanFord.stream`
-| `gds.bellmanFord.stream.estimate`
-| `gds.bellmanFord.write`
-| `gds.bellmanFord.write.estimate`
+| `gds.bellmanFord.mutate` label:procedure[Procedure]
+| `gds.bellmanFord.mutate.estimate` label:procedure[Procedure]
+| `gds.bellmanFord.stats` label:procedure[Procedure]
+| `gds.bellmanFord.stats.estimate` label:procedure[Procedure]
+| `gds.bellmanFord.stream` label:procedure[Procedure]
+| `gds.bellmanFord.stream.estimate` label:procedure[Procedure]
+| `gds.bellmanFord.write` label:procedure[Procedure]
+| `gds.bellmanFord.write.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-syntax[Betweenness Centrality]
-| `gds.betweenness.stream`
-| `gds.betweenness.stream.estimate`
-| `gds.betweenness.stats`
-| `gds.betweenness.stats.estimate`
-| `gds.betweenness.mutate`
-| `gds.betweenness.mutate.estimate`
-| `gds.betweenness.write`
-| `gds.betweenness.write.estimate`
+| `gds.betweenness.stream` label:procedure[Procedure]
+| `gds.betweenness.stream.estimate` label:procedure[Procedure]
+| `gds.betweenness.stats` label:procedure[Procedure]
+| `gds.betweenness.stats.estimate` label:procedure[Procedure]
+| `gds.betweenness.mutate` label:procedure[Procedure]
+| `gds.betweenness.mutate.estimate` label:procedure[Procedure]
+| `gds.betweenness.write` label:procedure[Procedure]
+| `gds.betweenness.write.estimate` label:procedure[Procedure]
 .6+<.^|xref:algorithms/bfs.adoc[Breadth First Search]
-| `gds.bfs.mutate`
-| `gds.bfs.mutate.estimate`
-| `gds.bfs.stream`
-| `gds.bfs.stream.estimate`
-| `gds.bfs.stats`
-| `gds.bfs.stats.estimate`
+| `gds.bfs.mutate` label:procedure[Procedure]
+| `gds.bfs.mutate.estimate` label:procedure[Procedure]
+| `gds.bfs.stream` label:procedure[Procedure]
+| `gds.bfs.stream.estimate` label:procedure[Procedure]
+| `gds.bfs.stats` label:procedure[Procedure]
+| `gds.bfs.stats.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/degree-centrality.adoc[Degree Centrality]
-| `gds.degree.mutate`
-| `gds.degree.mutate.estimate`
-| `gds.degree.stats`
-| `gds.degree.stats.estimate`
-| `gds.degree.stream`
-| `gds.degree.stream.estimate`
-| `gds.degree.write`
-| `gds.degree.write.estimate`
+| `gds.degree.mutate` label:procedure[Procedure]
+| `gds.degree.mutate.estimate` label:procedure[Procedure]
+| `gds.degree.stats` label:procedure[Procedure]
+| `gds.degree.stats.estimate` label:procedure[Procedure]
+| `gds.degree.stream` label:procedure[Procedure]
+| `gds.degree.stream.estimate` label:procedure[Procedure]
+| `gds.degree.write` label:procedure[Procedure]
+| `gds.degree.write.estimate` label:procedure[Procedure]
 .4+<.^|xref:algorithms/dfs.adoc[Depth First Search]
-| `gds.dfs.mutate`
-| `gds.dfs.mutate.estimate`
-| `gds.dfs.stream`
-| `gds.dfs.stream.estimate`
+| `gds.dfs.mutate` label:procedure[Procedure]
+| `gds.dfs.mutate.estimate` label:procedure[Procedure]
+| `gds.dfs.stream` label:procedure[Procedure]
+| `gds.dfs.stream.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/eigenvector-centrality.adoc[Eigenvector]
-| `gds.eigenvector.mutate`
-| `gds.eigenvector.mutate.estimate`
-| `gds.eigenvector.write`
-| `gds.eigenvector.write.estimate`
-| `gds.eigenvector.stream`
-| `gds.eigenvector.stream.estimate`
-| `gds.eigenvector.stats`
-| `gds.eigenvector.stats.estimate`
+| `gds.eigenvector.mutate` label:procedure[Procedure]
+| `gds.eigenvector.mutate.estimate` label:procedure[Procedure]
+| `gds.eigenvector.write` label:procedure[Procedure]
+| `gds.eigenvector.write.estimate` label:procedure[Procedure]
+| `gds.eigenvector.stream` label:procedure[Procedure]
+| `gds.eigenvector.stream.estimate` label:procedure[Procedure]
+| `gds.eigenvector.stats` label:procedure[Procedure]
+| `gds.eigenvector.stats.estimate` label:procedure[Procedure]
 .8+<.^| xref:machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
-| `gds.fastRP.mutate`
-| `gds.fastRP.mutate.estimate`
-| `gds.fastRP.stats`
-| `gds.fastRP.stats.estimate`
-| `gds.fastRP.stream`
-| `gds.fastRP.stream.estimate`
-| `gds.fastRP.write`
-| `gds.fastRP.write.estimate`
+| `gds.fastRP.mutate` label:procedure[Procedure]
+| `gds.fastRP.mutate.estimate` label:procedure[Procedure]
+| `gds.fastRP.stats` label:procedure[Procedure]
+| `gds.fastRP.stats.estimate` label:procedure[Procedure]
+| `gds.fastRP.stream` label:procedure[Procedure]
+| `gds.fastRP.stream.estimate` label:procedure[Procedure]
+| `gds.fastRP.write` label:procedure[Procedure]
+| `gds.fastRP.write.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/k-core.adoc[K-Core Decomposition]
-| `gds.kcore.stats`
-| `gds.kcore.stats.estimate`
-| `gds.kcore.stream`
-| `gds.kcore.stream.estimate`
-| `gds.kcore.mutate`
-| `gds.kcore.mutate.estimate`
-| `gds.kcore.write`
-| `gds.kcore.write.estimate`
+| `gds.kcore.stats` label:procedure[Procedure]
+| `gds.kcore.stats.estimate` label:procedure[Procedure]
+| `gds.kcore.stream` label:procedure[Procedure]
+| `gds.kcore.stream.estimate` label:procedure[Procedure]
+| `gds.kcore.mutate` label:procedure[Procedure]
+| `gds.kcore.mutate.estimate` label:procedure[Procedure]
+| `gds.kcore.write` label:procedure[Procedure]
+| `gds.kcore.write.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/knn.adoc[K-Nearest Neighbors]
-| `gds.knn.mutate`
-| `gds.knn.mutate.estimate`
-| `gds.knn.stats`
-| `gds.knn.stats.estimate`
-| `gds.knn.stream`
-| `gds.knn.stream.estimate`
-| `gds.knn.write`
-| `gds.knn.write.estimate`
+| `gds.knn.mutate` label:procedure[Procedure]
+| `gds.knn.mutate.estimate` label:procedure[Procedure]
+| `gds.knn.stats` label:procedure[Procedure]
+| `gds.knn.stats.estimate` label:procedure[Procedure]
+| `gds.knn.stream` label:procedure[Procedure]
+| `gds.knn.stream.estimate` label:procedure[Procedure]
+| `gds.knn.write` label:procedure[Procedure]
+| `gds.knn.write.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/label-propagation.adoc#algorithms-label-propagation-syntax[Label Propagation]
-| `gds.labelPropagation.mutate`
-| `gds.labelPropagation.mutate.estimate`
-| `gds.labelPropagation.write`
-| `gds.labelPropagation.write.estimate`
-| `gds.labelPropagation.stream`
-| `gds.labelPropagation.stream.estimate`
-| `gds.labelPropagation.stats`
-| `gds.labelPropagation.stats.estimate`
+| `gds.labelPropagation.mutate` label:procedure[Procedure]
+| `gds.labelPropagation.mutate.estimate` label:procedure[Procedure]
+| `gds.labelPropagation.write` label:procedure[Procedure]
+| `gds.labelPropagation.write.estimate` label:procedure[Procedure]
+| `gds.labelPropagation.stream` label:procedure[Procedure]
+| `gds.labelPropagation.stream.estimate` label:procedure[Procedure]
+| `gds.labelPropagation.stats` label:procedure[Procedure]
+| `gds.labelPropagation.stats.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-syntax[Local Clustering Coefficient]
-| `gds.localClusteringCoefficient.stream`
-| `gds.localClusteringCoefficient.stream.estimate`
-| `gds.localClusteringCoefficient.stats`
-| `gds.localClusteringCoefficient.stats.estimate`
-| `gds.localClusteringCoefficient.write`
-| `gds.localClusteringCoefficient.write.estimate`
-| `gds.localClusteringCoefficient.mutate`
-| `gds.localClusteringCoefficient.mutate.estimate`
+| `gds.localClusteringCoefficient.stream` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.stream.estimate` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.stats` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.stats.estimate` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.write` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.write.estimate` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.mutate` label:procedure[Procedure]
+| `gds.localClusteringCoefficient.mutate.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/louvain.adoc#algorithms-louvain-syntax[Louvain]
-| `gds.louvain.mutate`
-| `gds.louvain.mutate.estimate`
-| `gds.louvain.write`
-| `gds.louvain.write.estimate`
-| `gds.louvain.stream`
-| `gds.louvain.stream.estimate`
-| `gds.louvain.stats`
-| `gds.louvain.stats.estimate`
+| `gds.louvain.mutate` label:procedure[Procedure]
+| `gds.louvain.mutate.estimate` label:procedure[Procedure]
+| `gds.louvain.write` label:procedure[Procedure]
+| `gds.louvain.write.estimate` label:procedure[Procedure]
+| `gds.louvain.stream` label:procedure[Procedure]
+| `gds.louvain.stream.estimate` label:procedure[Procedure]
+| `gds.louvain.stats` label:procedure[Procedure]
+| `gds.louvain.stats.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/node-similarity.adoc#algorithms-node-similarity-syntax[Node Similarity]
-| `gds.nodeSimilarity.mutate`
-| `gds.nodeSimilarity.mutate.estimate`
-| `gds.nodeSimilarity.write`
-| `gds.nodeSimilarity.write.estimate`
-| `gds.nodeSimilarity.stream`
-| `gds.nodeSimilarity.stream.estimate`
-| `gds.nodeSimilarity.stats`
-| `gds.nodeSimilarity.stats.estimate`
+| `gds.nodeSimilarity.mutate` label:procedure[Procedure]
+| `gds.nodeSimilarity.mutate.estimate` label:procedure[Procedure]
+| `gds.nodeSimilarity.write` label:procedure[Procedure]
+| `gds.nodeSimilarity.write.estimate` label:procedure[Procedure]
+| `gds.nodeSimilarity.stream` label:procedure[Procedure]
+| `gds.nodeSimilarity.stream.estimate` label:procedure[Procedure]
+| `gds.nodeSimilarity.stats` label:procedure[Procedure]
+| `gds.nodeSimilarity.stats.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/page-rank.adoc#algorithms-page-rank-syntax[PageRank]
-| `gds.pageRank.mutate`
-| `gds.pageRank.mutate.estimate`
-| `gds.pageRank.write`
-| `gds.pageRank.write.estimate`
-| `gds.pageRank.stream`
-| `gds.pageRank.stream.estimate`
-| `gds.pageRank.stats`
-| `gds.pageRank.stats.estimate`
+| `gds.pageRank.mutate` label:procedure[Procedure]
+| `gds.pageRank.mutate.estimate` label:procedure[Procedure]
+| `gds.pageRank.write` label:procedure[Procedure]
+| `gds.pageRank.write.estimate` label:procedure[Procedure]
+| `gds.pageRank.stream` label:procedure[Procedure]
+| `gds.pageRank.stream.estimate` label:procedure[Procedure]
+| `gds.pageRank.stats` label:procedure[Procedure]
+| `gds.pageRank.stats.estimate` label:procedure[Procedure]
 .4+<.^|xref:algorithms/random-walk.adoc[Random Walk]
-| `gds.randomWalk.stats`
-| `gds.randomWalk.stats.estimate`
-| `gds.randomWalk.stream`
-| `gds.randomWalk.stream.estimate`
+| `gds.randomWalk.stats` label:procedure[Procedure]
+| `gds.randomWalk.stats.estimate` label:procedure[Procedure]
+| `gds.randomWalk.stream` label:procedure[Procedure]
+| `gds.randomWalk.stream.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
-| `gds.scaleProperties.mutate`
-| `gds.scaleProperties.mutate.estimate`
-| `gds.scaleProperties.stream`
-| `gds.scaleProperties.stream.estimate`
-| `gds.scaleProperties.stats`
-| `gds.scaleProperties.stats.estimate`
-| `gds.scaleProperties.write`
-| `gds.scaleProperties.write.estimate`
+| `gds.scaleProperties.mutate` label:procedure[Procedure]
+| `gds.scaleProperties.mutate.estimate` label:procedure[Procedure]
+| `gds.scaleProperties.stream` label:procedure[Procedure]
+| `gds.scaleProperties.stream.estimate` label:procedure[Procedure]
+| `gds.scaleProperties.stats` label:procedure[Procedure]
+| `gds.scaleProperties.stats.estimate` label:procedure[Procedure]
+| `gds.scaleProperties.write` label:procedure[Procedure]
+| `gds.scaleProperties.write.estimate` label:procedure[Procedure]
 .6+<.^| xref:algorithms/astar.adoc[Shortest Path AStar]
-| `gds.shortestPath.astar.stream`
-| `gds.shortestPath.astar.stream.estimate`
-| `gds.shortestPath.astar.write`
-| `gds.shortestPath.astar.write.estimate`
-| `gds.shortestPath.astar.mutate`
-| `gds.shortestPath.astar.mutate.estimate`
+| `gds.shortestPath.astar.stream` label:procedure[Procedure]
+| `gds.shortestPath.astar.stream.estimate` label:procedure[Procedure]
+| `gds.shortestPath.astar.write` label:procedure[Procedure]
+| `gds.shortestPath.astar.write.estimate` label:procedure[Procedure]
+| `gds.shortestPath.astar.mutate` label:procedure[Procedure]
+| `gds.shortestPath.astar.mutate.estimate` label:procedure[Procedure]
 .6+<.^| xref:algorithms/dijkstra-source-target.adoc[Shortest Path Dijkstra]
-| `gds.shortestPath.dijkstra.stream`
-| `gds.shortestPath.dijkstra.stream.estimate`
-| `gds.shortestPath.dijkstra.write`
-| `gds.shortestPath.dijkstra.write.estimate`
-| `gds.shortestPath.dijkstra.mutate`
-| `gds.shortestPath.dijkstra.mutate.estimate`
+| `gds.shortestPath.dijkstra.stream` label:procedure[Procedure]
+| `gds.shortestPath.dijkstra.stream.estimate` label:procedure[Procedure]
+| `gds.shortestPath.dijkstra.write` label:procedure[Procedure]
+| `gds.shortestPath.dijkstra.write.estimate` label:procedure[Procedure]
+| `gds.shortestPath.dijkstra.mutate` label:procedure[Procedure]
+| `gds.shortestPath.dijkstra.mutate.estimate` label:procedure[Procedure]
 .6+<.^| xref:algorithms/yens.adoc[Shortest Paths Yens]
-| `gds.shortestPath.yens.stream`
-| `gds.shortestPath.yens.stream.estimate`
-| `gds.shortestPath.yens.write`
-| `gds.shortestPath.yens.write.estimate`
-| `gds.shortestPath.yens.mutate`
-| `gds.shortestPath.yens.mutate.estimate`
+| `gds.shortestPath.yens.stream` label:procedure[Procedure]
+| `gds.shortestPath.yens.stream.estimate` label:procedure[Procedure]
+| `gds.shortestPath.yens.write` label:procedure[Procedure]
+| `gds.shortestPath.yens.write.estimate` label:procedure[Procedure]
+| `gds.shortestPath.yens.mutate` label:procedure[Procedure]
+| `gds.shortestPath.yens.mutate.estimate` label:procedure[Procedure]
 .6+<.^|xref:algorithms/similarity-functions.adoc[Similarity functions]
-| `_gds.similarity.cosine_`
-| `_gds.similarity.euclidean_`
-| `_gds.similarity.euclideanDistance_`
-| `_gds.similarity.jaccard_`
-| `_gds.similarity.overlap_`
-| `_gds.similarity.pearson_`
+| `gds.similarity.cosine` label:function[Function]
+| `gds.similarity.euclidean` label:function[Function]
+| `gds.similarity.euclideanDistance` label:function[Function]
+| `gds.similarity.jaccard` label:function[Function]
+| `gds.similarity.overlap` label:function[Function]
+| `gds.similarity.pearson` label:function[Function]
 .8+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-syntax[Triangle Count]
-| `gds.triangleCount.stream`
-| `gds.triangleCount.stream.estimate`
-| `gds.triangleCount.stats`
-| `gds.triangleCount.stats.estimate`
-| `gds.triangleCount.write`
-| `gds.triangleCount.write.estimate`
-| `gds.triangleCount.mutate`
-| `gds.triangleCount.mutate.estimate`
+| `gds.triangleCount.stream` label:procedure[Procedure]
+| `gds.triangleCount.stream.estimate` label:procedure[Procedure]
+| `gds.triangleCount.stats` label:procedure[Procedure]
+| `gds.triangleCount.stats.estimate` label:procedure[Procedure]
+| `gds.triangleCount.write` label:procedure[Procedure]
+| `gds.triangleCount.write.estimate` label:procedure[Procedure]
+| `gds.triangleCount.mutate` label:procedure[Procedure]
+| `gds.triangleCount.mutate.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/wcc.adoc#algorithms-wcc-syntax[Weakly Connected Components]
-| `gds.wcc.mutate`
-| `gds.wcc.mutate.estimate`
-| `gds.wcc.write`
-| `gds.wcc.write.estimate`
-| `gds.wcc.stream`
-| `gds.wcc.stream.estimate`
-| `gds.wcc.stats`
-| `gds.wcc.stats.estimate`
+| `gds.wcc.mutate` label:procedure[Procedure]
+| `gds.wcc.mutate.estimate` label:procedure[Procedure]
+| `gds.wcc.write` label:procedure[Procedure]
+| `gds.wcc.write.estimate` label:procedure[Procedure]
+| `gds.wcc.stream` label:procedure[Procedure]
+| `gds.wcc.stream.estimate` label:procedure[Procedure]
+| `gds.wcc.stats` label:procedure[Procedure]
+| `gds.wcc.stats.estimate` label:procedure[Procedure]
 |===
 
 [[beta-tier]]
 == Beta tier
 
-.List of all beta algorithms in the GDS library. Functions are written in _italic_.
+.List of all beta algorithms in the GDS library.
 [[table-beta]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
 .4+<.^|xref:algorithms/closeness-centrality.adoc[Closeness Centrality]
-| `gds.beta.closeness.mutate`
-| `gds.beta.closeness.stats`
-| `gds.beta.closeness.stream`
-| `gds.beta.closeness.write`
+| `gds.beta.closeness.mutate` label:procedure[Procedure]
+| `gds.beta.closeness.stats` label:procedure[Procedure]
+| `gds.beta.closeness.stream` label:procedure[Procedure]
+| `gds.beta.closeness.write` label:procedure[Procedure]
 .1+<.^|xref:beta-algorithms/collapse-path.adoc[Collapse Path]
-| `gds.beta.collapsePath.mutate`
+| `gds.beta.collapsePath.mutate` label:procedure[Procedure]
 .8+<.^|xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
-| `gds.beta.graphSage.stream`
-| `gds.beta.graphSage.stream.estimate`
-| `gds.beta.graphSage.mutate`
-| `gds.beta.graphSage.mutate.estimate`
-| `gds.beta.graphSage.write`
-| `gds.beta.graphSage.write.estimate`
-| `gds.beta.graphSage.train`
-| `gds.beta.graphSage.train.estimate`
+| `gds.beta.graphSage.stream` label:procedure[Procedure]
+| `gds.beta.graphSage.stream.estimate` label:procedure[Procedure]
+| `gds.beta.graphSage.mutate` label:procedure[Procedure]
+| `gds.beta.graphSage.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.graphSage.write` label:procedure[Procedure]
+| `gds.beta.graphSage.write.estimate` label:procedure[Procedure]
+| `gds.beta.graphSage.train` label:procedure[Procedure]
+| `gds.beta.graphSage.train.estimate` label:procedure[Procedure]
 .4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
-| `gds.beta.hashgnn.mutate`
-| `gds.beta.hashgnn.mutate.estimate`
-| `gds.beta.hashgnn.stream`
-| `gds.beta.hashgnn.stream.estimate`
+| `gds.beta.hashgnn.mutate` label:procedure[Procedure]
+| `gds.beta.hashgnn.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.hashgnn.stream` label:procedure[Procedure]
+| `gds.beta.hashgnn.stream.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/celf.adoc[Influence Maximization - CELF]
-| `gds.beta.influenceMaximization.celf.mutate`
-| `gds.beta.influenceMaximization.celf.mutate.estimate`
-| `gds.beta.influenceMaximization.celf.stats`
-| `gds.beta.influenceMaximization.celf.stats.estimate`
-| `gds.beta.influenceMaximization.celf.stream`
-| `gds.beta.influenceMaximization.celf.stream.estimate`
-| `gds.beta.influenceMaximization.celf.write`
-| `gds.beta.influenceMaximization.celf.write.estimate`
+| `gds.beta.influenceMaximization.celf.mutate` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.stats` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.stats.estimate` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.stream` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.stream.estimate` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.write` label:procedure[Procedure]
+| `gds.beta.influenceMaximization.celf.write.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/k1coloring.adoc[K1Coloring]
-| `gds.beta.k1coloring.mutate`
-| `gds.beta.k1coloring.mutate.estimate`
-| `gds.beta.k1coloring.stats`
-| `gds.beta.k1coloring.stats.estimate`
-| `gds.beta.k1coloring.stream`
-| `gds.beta.k1coloring.stream.estimate`
-| `gds.beta.k1coloring.write`
-| `gds.beta.k1coloring.write.estimate`
+| `gds.beta.k1coloring.mutate` label:procedure[Procedure]
+| `gds.beta.k1coloring.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.k1coloring.stats` label:procedure[Procedure]
+| `gds.beta.k1coloring.stats.estimate` label:procedure[Procedure]
+| `gds.beta.k1coloring.stream` label:procedure[Procedure]
+| `gds.beta.k1coloring.stream.estimate` label:procedure[Procedure]
+| `gds.beta.k1coloring.write` label:procedure[Procedure]
+| `gds.beta.k1coloring.write.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/kmeans.adoc[Kmeans]
-| `gds.beta.kmeans.mutate`
-| `gds.beta.kmeans.mutate.estimate`
-| `gds.beta.kmeans.stats`
-| `gds.beta.kmeans.stats.estimate`
-| `gds.beta.kmeans.stream`
-| `gds.beta.kmeans.stream.estimate`
-| `gds.beta.kmeans.write`
-| `gds.beta.kmeans.write.estimate`
+| `gds.beta.kmeans.mutate` label:procedure[Procedure]
+| `gds.beta.kmeans.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.kmeans.stats` label:procedure[Procedure]
+| `gds.beta.kmeans.stats.estimate` label:procedure[Procedure]
+| `gds.beta.kmeans.stream` label:procedure[Procedure]
+| `gds.beta.kmeans.stream.estimate` label:procedure[Procedure]
+| `gds.beta.kmeans.write` label:procedure[Procedure]
+| `gds.beta.kmeans.write.estimate` label:procedure[Procedure]
 .8+<.^| xref:algorithms/leiden.adoc[Leiden]
-| `gds.beta.leiden.mutate`
-| `gds.beta.leiden.mutate.estimate`
-| `gds.beta.leiden.stats`
-| `gds.beta.leiden.stats.estimate`
-| `gds.beta.leiden.stream`
-| `gds.beta.leiden.stream.estimate`
-| `gds.beta.leiden.write`
-| `gds.beta.leiden.write.estimate`
+| `gds.beta.leiden.mutate` label:procedure[Procedure]
+| `gds.beta.leiden.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.leiden.stats` label:procedure[Procedure]
+| `gds.beta.leiden.stats.estimate` label:procedure[Procedure]
+| `gds.beta.leiden.stream` label:procedure[Procedure]
+| `gds.beta.leiden.stream.estimate` label:procedure[Procedure]
+| `gds.beta.leiden.write` label:procedure[Procedure]
+| `gds.beta.leiden.write.estimate` label:procedure[Procedure]
 .4+<.^| xref:algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
-| `gds.beta.steinerTree.mutate`
-| `gds.beta.steinerTree.stats`
-| `gds.beta.steinerTree.stream`
-| `gds.beta.steinerTree.write`
+| `gds.beta.steinerTree.mutate` label:procedure[Procedure]
+| `gds.beta.steinerTree.stats` label:procedure[Procedure]
+| `gds.beta.steinerTree.stream` label:procedure[Procedure]
+| `gds.beta.steinerTree.write` label:procedure[Procedure]
 .6+<.^| xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
-| `gds.beta.modularityOptimization.mutate`
-| `gds.beta.modularityOptimization.mutate.estimate`
-| `gds.beta.modularityOptimization.stream`
-| `gds.beta.modularityOptimization.stream.estimate`
-| `gds.beta.modularityOptimization.write`
-| `gds.beta.modularityOptimization.write.estimate`
+| `gds.beta.modularityOptimization.mutate` label:procedure[Procedure]
+| `gds.beta.modularityOptimization.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.modularityOptimization.stream` label:procedure[Procedure]
+| `gds.beta.modularityOptimization.stream.estimate` label:procedure[Procedure]
+| `gds.beta.modularityOptimization.write` label:procedure[Procedure]
+| `gds.beta.modularityOptimization.write.estimate` label:procedure[Procedure]
 .6+<.^|xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
-| `gds.beta.node2vec.mutate`
-| `gds.beta.node2vec.mutate.estimate`
-| `gds.beta.node2vec.stream`
-| `gds.beta.node2vec.stream.estimate`
-| `gds.beta.node2vec.write`
-| `gds.beta.node2vec.write.estimate`
+| `gds.beta.node2vec.mutate` label:procedure[Procedure]
+| `gds.beta.node2vec.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.node2vec.stream` label:procedure[Procedure]
+| `gds.beta.node2vec.stream.estimate` label:procedure[Procedure]
+| `gds.beta.node2vec.write` label:procedure[Procedure]
+| `gds.beta.node2vec.write.estimate` label:procedure[Procedure]
 .8+<.^|xref:algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
-| `gds.beta.spanningTree.mutate`
-| `gds.beta.spanningTree.mutate.estimate`
-| `gds.beta.spanningTree.stats`
-| `gds.beta.spanningTree.stats.estimate`
-| `gds.beta.spanningTree.stream`
-| `gds.beta.spanningTree.stream.estimate`
-| `gds.beta.spanningTree.write`
-| `gds.beta.spanningTree.write.estimate`
+| `gds.beta.spanningTree.mutate` label:procedure[Procedure]
+| `gds.beta.spanningTree.mutate.estimate` label:procedure[Procedure]
+| `gds.beta.spanningTree.stats` label:procedure[Procedure]
+| `gds.beta.spanningTree.stats.estimate` label:procedure[Procedure]
+| `gds.beta.spanningTree.stream` label:procedure[Procedure]
+| `gds.beta.spanningTree.stream.estimate` label:procedure[Procedure]
+| `gds.beta.spanningTree.write` label:procedure[Procedure]
+| `gds.beta.spanningTree.write.estimate` label:procedure[Procedure]
 |===
 
 [[alpha-tier]]
 == Alpha tier
 
-.List of all alpha algorithms in the GDS library. Functions are written in _italic_.
+.List of all alpha algorithms in the GDS library.
 [[table-alpha]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-| xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `_gds.alpha.linkprediction.adamicAdar_`
+| xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `gds.alpha.linkprediction.adamicAdar` label:function[Function]
 .1+<.^|xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
-| `gds.alpha.allShortestPaths.stream`
+| `gds.alpha.allShortestPaths.stream` label:procedure[Procedure]
 .4+<.^|xref:algorithms/alpha/approx-max-k-cut.adoc[Approximate Maximum k-cut]
-| `gds.alpha.maxkcut.mutate`
-| `gds.alpha.maxkcut.mutate.estimate`
-| `gds.alpha.maxkcut.stream`
-| `gds.alpha.maxkcut.stream.estimate`
-| xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `_gds.alpha.linkprediction.commonNeighbors_`
+| `gds.alpha.maxkcut.mutate` label:procedure[Procedure]
+| `gds.alpha.maxkcut.mutate.estimate` label:procedure[Procedure]
+| `gds.alpha.maxkcut.stream` label:procedure[Procedure]
+| `gds.alpha.maxkcut.stream.estimate` label:procedure[Procedure]
+| xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `gds.alpha.linkprediction.commonNeighbors` label:function[Function]
 .1+<.^| xref:algorithms/alpha/conductance.adoc[Conductance]
-| `gds.alpha.conductance.stream`
+| `gds.alpha.conductance.stream` label:procedure[Procedure]
 .4+<.^| xref:algorithms/alpha/filtered-knn.adoc[Filtered KNN]
-| `gds.alpha.knn.filtered.mutate`
-| `gds.alpha.knn.filtered.stats`
-| `gds.alpha.knn.filtered.stream`
-| `gds.alpha.knn.filtered.write`
+| `gds.alpha.knn.filtered.mutate` label:procedure[Procedure]
+| `gds.alpha.knn.filtered.stats` label:procedure[Procedure]
+| `gds.alpha.knn.filtered.stream` label:procedure[Procedure]
+| `gds.alpha.knn.filtered.write` label:procedure[Procedure]
 .8+<.^| xref:algorithms/alpha/filtered-node-similarity.adoc[Filtered NodeSimilarity]
-| `gds.alpha.nodeSimilarity.filtered.mutate`
-| `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
-| `gds.alpha.nodeSimilarity.filtered.stats`
-| `gds.alpha.nodeSimilarity.filtered.stats.estimate`
-| `gds.alpha.nodeSimilarity.filtered.stream`
-| `gds.alpha.nodeSimilarity.filtered.stream.estimate`
-| `gds.alpha.nodeSimilarity.filtered.write`
-| `gds.alpha.nodeSimilarity.filtered.write.estimate`
+| `gds.alpha.nodeSimilarity.filtered.mutate` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.mutate.estimate` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.stats` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.stats.estimate` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.stream` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.stream.estimate` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.write` label:procedure[Procedure]
+| `gds.alpha.nodeSimilarity.filtered.write.estimate` label:procedure[Procedure]
 .2+<.^|xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
-| `gds.alpha.closeness.harmonic.stream`
-| `gds.alpha.closeness.harmonic.write`
+| `gds.alpha.closeness.harmonic.stream` label:procedure[Procedure]
+| `gds.alpha.closeness.harmonic.write` label:procedure[Procedure]
 .8+<.^|xref:algorithms/hits.adoc[HITS]
-| `gds.alpha.hits.mutate`
-| `gds.alpha.hits.mutate.estimate`
-| `gds.alpha.hits.stats`
-| `gds.alpha.hits.stats.estimate`
-| `gds.alpha.hits.stream`
-| `gds.alpha.hits.stream.estimate`
-| `gds.alpha.hits.write`
-| `gds.alpha.hits.write.estimate`
+| `gds.alpha.hits.mutate` label:procedure[Procedure]
+| `gds.alpha.hits.mutate.estimate` label:procedure[Procedure]
+| `gds.alpha.hits.stats` label:procedure[Procedure]
+| `gds.alpha.hits.stats.estimate` label:procedure[Procedure]
+| `gds.alpha.hits.stream` label:procedure[Procedure]
+| `gds.alpha.hits.stream.estimate` label:procedure[Procedure]
+| `gds.alpha.hits.write` label:procedure[Procedure]
+| `gds.alpha.hits.write.estimate` label:procedure[Procedure]
 .1+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
-| `gds.alpha.kSpanningTree.write`
-| xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `_gds.alpha.linkprediction.preferentialAttachment_`
-| xref:alpha-algorithms/resource-allocation.adoc[Resource Allocation] | `_gds.alpha.linkprediction.resourceAllocation_`
-| xref:alpha-algorithms/same-community.adoc[Same Community] | `_gds.alpha.linkprediction.sameCommunity_`
+| `gds.alpha.kSpanningTree.write` label:procedure[Procedure]
+| xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `gds.alpha.linkprediction.preferentialAttachment` label:function[Function]
+| xref:alpha-algorithms/resource-allocation.adoc[Resource Allocation] | `gds.alpha.linkprediction.resourceAllocation` label:function[Function]
+| xref:alpha-algorithms/same-community.adoc[Same Community] | `gds.alpha.linkprediction.sameCommunity` label:function[Function]
 .8+<.^|xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
-| `gds.alpha.sllpa.mutate`
-| `gds.alpha.sllpa.mutate.estimate`
-| `gds.alpha.sllpa.stats`
-| `gds.alpha.sllpa.stats.estimate`
-| `gds.alpha.sllpa.stream`
-| `gds.alpha.sllpa.stream.estimate`
-| `gds.alpha.sllpa.write`
-| `gds.alpha.sllpa.write.estimate`
+| `gds.alpha.sllpa.mutate` label:procedure[Procedure]
+| `gds.alpha.sllpa.mutate.estimate` label:procedure[Procedure]
+| `gds.alpha.sllpa.stats` label:procedure[Procedure]
+| `gds.alpha.sllpa.stats.estimate` label:procedure[Procedure]
+| `gds.alpha.sllpa.stream` label:procedure[Procedure]
+| `gds.alpha.sllpa.stream.estimate` label:procedure[Procedure]
+| `gds.alpha.sllpa.write` label:procedure[Procedure]
+| `gds.alpha.sllpa.write.estimate` label:procedure[Procedure]
 .1+<.^| xref:alpha-algorithms/split-relationships.adoc[Split Relationships]
-| `gds.alpha.ml.splitRelationships.mutate`
+| `gds.alpha.ml.splitRelationships.mutate` label:procedure[Procedure]
 .2+<.^|xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
-| `gds.alpha.scc.stream`
-| `gds.alpha.scc.write`
+| `gds.alpha.scc.stream` label:procedure[Procedure]
+| `gds.alpha.scc.write` label:procedure[Procedure]
 .1+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangle Listing]
-| `gds.alpha.triangles`
-| xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `_gds.alpha.linkprediction.totalNeighbors_`
+| `gds.alpha.triangles` label:procedure[Procedure]
+| xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `gds.alpha.linkprediction.totalNeighbors` label:function[Function]
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
-| `gds.alpha.modularity.stats`
-| `gds.alpha.modularity.stream`
+| `gds.alpha.modularity.stats` label:procedure[Procedure]
+| `gds.alpha.modularity.stream` label:procedure[Procedure]
 .2+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
-| `gds.alpha.scaleProperties.mutate` (deprecated)
-| `gds.alpha.scaleProperties.stream` (deprecated)
+| `gds.alpha.scaleProperties.mutate` (deprecated) label:procedure[Procedure]
+| `gds.alpha.scaleProperties.stream` (deprecated) label:procedure[Procedure]
 |===
