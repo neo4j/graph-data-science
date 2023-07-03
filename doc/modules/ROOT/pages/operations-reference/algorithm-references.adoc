@@ -386,6 +386,6 @@
 | `gds.alpha.modularity.stats` label:procedure[Procedure]
 | `gds.alpha.modularity.stream` label:procedure[Procedure]
 .2+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
-| `gds.alpha.scaleProperties.mutate` label:procedure[Procedure] (deprecated)
-| `gds.alpha.scaleProperties.stream` label:procedure[Procedure] (deprecated)
+| `gds.alpha.scaleProperties.mutate` label:procedure[Procedure] label:deprecated[Deprecated]
+| `gds.alpha.scaleProperties.stream` label:procedure[Procedure] label:deprecated[Deprecated]
 |===
