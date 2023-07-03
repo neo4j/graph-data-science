@@ -40,7 +40,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -267,20 +266,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
                     : relCount;
             }).mapToLong(Long::longValue).sum();
 
-        var properties = IndexPropertyMappings.prepareProperties(
-            graphProjectConfig
-        );
-
-        List<Task> nodeTasks = properties.indexedProperties().isEmpty()
-            ? List.of(Tasks.leaf("Store Scan", dimensions.nodeCount()))
-            : List.of(
-                Tasks.leaf("Store Scan", dimensions.nodeCount()),
-                Tasks.leaf("Property Index Scan", properties.indexedProperties().size() * dimensions.nodeCount())
-            );
-
         var task = Tasks.task(
             "Loading",
-            Tasks.task("Nodes", nodeTasks),
+            Tasks.task("Nodes", Tasks.leaf("Store Scan", dimensions.nodeCount())),
             Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
         );
 

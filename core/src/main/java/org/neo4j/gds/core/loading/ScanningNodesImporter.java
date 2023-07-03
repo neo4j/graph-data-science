@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
 
-    private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
+    private final LoadablePropertyMappings propertyMappings;
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
     private final TerminationFlag terminationFlag;
     private final IdMapBuilder idMapBuilder;
@@ -80,9 +80,9 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             );
         }
 
-        var propertyMappings = IndexPropertyMappings.propertyMappings(graphProjectConfig);
+        var propertyMappings = LoadablePropertyMappings.propertyMappings(graphProjectConfig);
 
-        var loadablePropertyMappings = IndexPropertyMappings.prepareProperties(graphProjectConfig);
+        var loadablePropertyMappings = LoadablePropertyMappings.of(graphProjectConfig);
 
         var nodePropertyImporter = initializeNodePropertyImporter(
             loadablePropertyMappings,
@@ -111,7 +111,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         ProgressTracker progressTracker,
         int concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
-        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder
@@ -190,7 +190,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     }
 
     private static @Nullable NativeNodePropertyImporter initializeNodePropertyImporter(
-        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        LoadablePropertyMappings propertyMappings,
         GraphDimensions dimensions,
         int concurrency
     ) {

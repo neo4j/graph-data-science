@@ -20,20 +20,18 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.internal.schema.IndexDescriptor;
 
-import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
-// TODO: should be named LoadablePropertyMappings
-// TODO: remove
-final class IndexPropertyMappings {
+@ValueClass
+public interface LoadablePropertyMappings {
+
+    Map<NodeLabel, PropertyMappings> storedProperties();
 
     static Map<NodeLabel, PropertyMappings> propertyMappings(GraphProjectFromStoreConfig graphProjectConfig) {
         return graphProjectConfig
@@ -49,38 +47,13 @@ final class IndexPropertyMappings {
             ));
     }
 
-    static LoadablePropertyMappings prepareProperties(GraphProjectFromStoreConfig graphProjectConfig) {
+    static LoadablePropertyMappings of(GraphProjectFromStoreConfig graphProjectConfig) {
         var storeLoadedProperties = propertyMappings(graphProjectConfig);
-        
+
         return ImmutableLoadablePropertyMappings
             .builder()
             .putAllStoredProperties(storeLoadedProperties)
             .build();
-    }
-
-    private IndexPropertyMappings() {}
-
-    @ValueClass
-    interface IndexedPropertyMapping {
-
-        PropertyMapping property();
-
-        IndexDescriptor index();
-    }
-
-    @ValueClass
-    interface IndexedPropertyMappings {
-
-        List<IndexedPropertyMapping> mappings();
-    }
-
-    @ValueClass
-    public interface LoadablePropertyMappings {
-
-        Map<NodeLabel, PropertyMappings> storedProperties();
-
-        // TODO: remove
-        Map<NodeLabel, IndexedPropertyMappings> indexedProperties();
     }
 }
 
