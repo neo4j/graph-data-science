@@ -36,7 +36,6 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
 import java.math.BigDecimal;
@@ -216,14 +215,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         try {
             progressTracker.beginSubTask("Property Index Scan");
 
-            var parallelIndexScan = GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
-            // In order to avoid a race between preparing the importers and the flag being toggled,
-            // we set the concurrency to 1 if we don't import in parallel.
-            //
-            // !! NOTE !!
-            //   If you end up changing this logic
-            //   you need to add a check for the feature flag to IndexedNodePropertyImporter
-            var concurrency = parallelIndexScan ? this.concurrency : 1;
+            var concurrency = 1;
 
             var buildersByPropertyKey = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
             propertyMappings.indexedProperties()
@@ -254,18 +246,9 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                     ))
                 ).collect(Collectors.toList());
 
-            if (!parallelIndexScan) {
-                // While we don't scan the index in parallel, try to at least scan all properties in parallel
-                ParallelUtil.run(indexScanningImporters, executorService);
-            }
+            ParallelUtil.run(indexScanningImporters, executorService);
+
             long recordsImported = 0L;
-            for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {
-                if (parallelIndexScan) {
-                    // If we run in parallel, we need to run the importers one after another, as they will
-                    // parallelize internally
-                    propertyImporter.run();
-                }
-            }
 
             for (var entry : buildersByPropertyKey.entrySet()) {
                 NodePropertyValues propertyValues = entry.getValue().build(idMap);

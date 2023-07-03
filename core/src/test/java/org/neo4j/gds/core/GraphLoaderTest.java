@@ -60,7 +60,6 @@ import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 
 class GraphLoaderTest extends BaseTest {
@@ -349,13 +348,6 @@ class GraphLoaderTest extends BaseTest {
     void testPropertyViaIndex(GraphFactoryTestSupport.FactoryType factoryType) {
         USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
             testPropertyLoadingWithIndex(factoryType, NullLog.getInstance()));
-    }
-
-    @AllGraphStoreFactoryTypesTest
-    void testParallelPropertyViaIndex(GraphFactoryTestSupport.FactoryType factoryType) {
-        USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-            USE_PARALLEL_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-                testPropertyLoadingWithIndex(factoryType, NullLog.getInstance())));
     }
 
     private void testPropertyLoadingWithIndex(GraphFactoryTestSupport.FactoryType factoryType, Log log) {

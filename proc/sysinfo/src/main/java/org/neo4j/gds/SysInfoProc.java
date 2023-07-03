@@ -161,10 +161,6 @@ public class SysInfoProc {
         builder
             .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featurePropertyValueIndex", GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()))
-            .add(value(
-                "featureParallelPropertyValueIndex",
-                GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()
-            ))
             .add(value("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
             .add(value(
