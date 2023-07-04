@@ -5,7 +5,7 @@ plugins {
     id 'de.thetaphi.forbiddenapis'                  version '3.4'                   apply false
     id 'com.github.spotbugs'                        version '5.0.13'                 apply false
     id 'nebula.info-dependencies'                   version '11.4.1'                 apply false
-    id 'com.google.protobuf'                        version '0.9.2'                apply false
+    id 'com.google.protobuf'                        version '0.9.3'                apply false
     id 'me.champeau.mrjar'                          version "0.1"                   apply false
 }
 
