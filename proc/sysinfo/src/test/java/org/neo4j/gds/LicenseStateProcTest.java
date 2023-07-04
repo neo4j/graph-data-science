@@ -30,11 +30,17 @@ class LicenseStateProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(LicenseStateProc.class);
+        registerFunctions(LicenseStateProc.class);
     }
 
     @Test
     void returnState() {
         assertCypherResult("CALL gds.license.state()", List.of(Map.of("isLicensed", false, "details", "No valid GDS license specified.")));
+    }
+
+    @Test
+    void returnIsLicensed() {
+        assertCypherResult("RETURN gds.isLicensed() AS isLicensed", List.of(Map.of("isLicensed", false)));
     }
 
 }

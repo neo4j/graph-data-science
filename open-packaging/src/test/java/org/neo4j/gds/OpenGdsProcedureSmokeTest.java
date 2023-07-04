@@ -511,6 +511,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.util.nodeProperty",
 
         "gds.version",
+        "gds.isLicensed",
 
         "gds.alpha.linkprediction.adamicAdar",
         "gds.alpha.linkprediction.resourceAllocation",
@@ -568,7 +569,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 411;
+        int expectedCount = 412;
         assertEquals(
             expectedCount,
             returnedRows,
