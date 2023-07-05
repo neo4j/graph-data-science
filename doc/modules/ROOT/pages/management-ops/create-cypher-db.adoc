@@ -173,7 +173,7 @@ If we need to drop the GDS database earlier, there are 2 ways to achieve this:
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.ephemeral.database.create(
+CALL gds.ephemeral.database.drop(
     dbName: String
 )
 YIELD
