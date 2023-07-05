@@ -675,18 +675,23 @@ class RandomGraphGeneratorTest {
     }
 
     @Test
-    void shouldGenerateDifferentGraphsOnCall() {
+    void shouldGenerateDifferentGraphsOnCall() throws InterruptedException {
+
+        int nodeCount = 20;
+        int averageDegree = 5;
 
         var graphOne = RandomGraphGenerator.builder()
-            .nodeCount(10)
-            .averageDegree(5)
+            .nodeCount(nodeCount)
+            .averageDegree(averageDegree)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .build()
             .generate();
 
+        Thread.sleep(100);
+
         var graphTwo = RandomGraphGenerator.builder()
-            .nodeCount(10)
-            .averageDegree(5)
+            .nodeCount(nodeCount)
+            .averageDegree(averageDegree)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .build()
             .generate();
