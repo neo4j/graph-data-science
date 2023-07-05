@@ -1,4 +1,5 @@
 = Writing node properties and labels
+:description: This chapter explains how to write node properties and labels back to Neo4j.
 
 It is possible to persist computed node properties into a Neo4j database.
 We refer to this operation as _writing_.
