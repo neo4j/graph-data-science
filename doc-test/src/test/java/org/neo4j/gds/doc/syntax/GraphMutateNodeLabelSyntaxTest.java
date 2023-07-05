@@ -25,7 +25,7 @@ class GraphMutateNodeLabelSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(SyntaxMode.MUTATE_NODE_LABEL));
+        return List.of(SyntaxModeMeta.of(SyntaxMode.SINGLE_MODE));
     }
 
     @Override

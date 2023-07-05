@@ -6,8 +6,8 @@ As with existing labels, they allow filtering the graph on following operations.
 
 == Syntax
 
-[.include-with-mutate-node-label]
-======
+[role=syntax]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.graph.nodeLabel.mutate(
@@ -53,7 +53,7 @@ YIELD
 | nodeCount         | Integer                  | The total number of nodes in the graph.
 | configuration     | Map                      | The configuration used to run the procedure.
 |===
-======
+--
 
 [[catalog-graph-mutate-node-label-example]]
 == Example

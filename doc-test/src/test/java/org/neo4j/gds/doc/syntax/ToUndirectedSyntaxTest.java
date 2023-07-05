@@ -26,7 +26,7 @@ class ToUndirectedSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.CONVERT_TO_UNDIRECTED)
+            SyntaxModeMeta.of(SyntaxMode.SINGLE_MODE)
         );
     }
 

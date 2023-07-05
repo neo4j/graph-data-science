@@ -2,7 +2,7 @@
 :description: This chapter explains how to read relationship properties from a projected graph.
 
 To inspect the relationship topology only, the `gds.beta.graph.relationships.stream` procedure can be used.
-To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
+To inspect stored relationship property values, the `relationshipProperties.stream` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
 == Syntax

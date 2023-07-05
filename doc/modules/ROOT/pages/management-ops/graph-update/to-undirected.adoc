@@ -7,8 +7,8 @@ This can be useful to convert relationships produced by algorithms such as path 
 
 == Syntax
 
-[.include-with-convert-to-undirected]
-======
+[role=syntax]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.relationships.toUndirected(
@@ -55,14 +55,12 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 | mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
-======
+--
 
 [[catalog-graph-relationship-to-undirected-example]]
 == Example
 
 In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.
-
-// FIXME simplify example
 
 image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
 
@@ -96,18 +94,15 @@ CREATE
 ----
 CALL gds.graph.project(
   'personsAndInstruments',
-  ['Person', 'Instrument'],       // <1>
+  ['Person', 'Instrument'],
   {
     LIKES: {
-      type: 'LIKES',              // <2>
-      properties: 'score'         // <3>
+      type: 'LIKES',
+      properties: 'score'
     }
   }
 )
 ----
-<1> Project node labels `Person` and `Instrument`.
-<2> Project relationship type `LIKES`.
-<3> Project property `score` of relationship type `LIKES` .
 
 
 The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.
