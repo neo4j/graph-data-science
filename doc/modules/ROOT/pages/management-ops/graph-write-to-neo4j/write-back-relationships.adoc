@@ -1,8 +1,9 @@
 = Writing relationships
 
 To persist relationship types in a Neo4j database, we can use `gds.graph.relationship.write`.
-Similar to streaming relationship topologies or properties, it is also possible to write back to Neo4j.
+Similar to streaming relationship topologies or properties, it is also possible to write back to the Neo4j database.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
+
 By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
 
 == Syntax
