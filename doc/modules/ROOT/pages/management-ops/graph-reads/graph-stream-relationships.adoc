@@ -1,4 +1,5 @@
 = Streaming relationships
+:description: This chapter explains how to read relationship properties from a projected graph.
 
 To inspect the relationship topology only, the `gds.beta.graph.relationships.stream` procedure can be used.
 To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.

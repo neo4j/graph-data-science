@@ -1,4 +1,5 @@
 = Streaming nodes
+:description: This chapter explains how to read node properties from a projected graph.
 
 To inspect stored values, the `gds.graph.nodeProperties.stream` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
