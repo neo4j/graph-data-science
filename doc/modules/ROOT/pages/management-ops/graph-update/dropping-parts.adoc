@@ -8,7 +8,7 @@ Dropping parts of the graph is useful to free up memory or remove previously mut
 .Syntax descriptions of the different drop operations over a graph
 [.tabbed-example, caption = ]
 ====
-[.include-with-remove-node-property]
+[.include-with-drop-node-property]
 ======
 [source, cypher, role=noplay]
 ----
@@ -49,7 +49,7 @@ YIELD
 |===
 ======
 
-[.include-with-remove-relationship-type]
+[.include-with-drop-relationship-type]
 ======
 [source, cypher, role=noplay]
 ----
