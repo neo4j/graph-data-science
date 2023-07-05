@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.topologicalsort;
+package org.neo4j.gds.paths.dag.topologicalsort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +26,12 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.paths.dag.topologicalsort.TopologicalSortStreamProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class TopologicalSortStreamProcTest extends BaseProcTest {
+class TopologicalSortStreamProcWeightedTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
@@ -39,10 +40,12 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
         ", (n1)" +
         ", (n2)" +
         ", (n3)" +
-        ", (n0)-[:R]->(n1)" +
-        ", (n0)-[:R]->(n2)" +
-        ", (n2)-[:R]->(n1)" +
-        ", (n3)-[:R]->(n0)";
+        ", (n0)-[:T {prop: 8.0}]->(n1)" +
+        ", (n0)-[:T {prop: 5.0}]->(n2)" +
+        ", (n2)-[:T {prop: 2.0}]->(n1)" +
+        ", (n1)-[:T {prop: 0.0}]->(n3)" +
+        ", (n2)-[:T {prop: 4.0}]->(n3)";
+
 
     @BeforeEach
     void setUp() throws Exception {
@@ -51,47 +54,36 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
             TopologicalSortStreamProc.class
         );
 
-        var projectQuery = GdsCypher.call("last").graphProject().loadEverything(Orientation.NATURAL).yields();
+        var projectQuery = GdsCypher.call("last")
+            .graphProject()
+            .withRelationshipProperty("prop")
+            .loadEverything(Orientation.NATURAL)
+            .yields();
         runQuery(projectQuery);
     }
 
     @Test
-    void testStream() {
-        String query = GdsCypher.call("last")
-            .algo("gds.alpha.topologicalSort")
-            .streamMode()
-            .yields();
-
-        runQueryWithResultConsumer(query, result -> {
-            assertEquals(idFunction.of("n3"), result.next().get("nodeId"));
-            assertEquals(idFunction.of("n0"), result.next().get("nodeId"));
-            assertEquals(idFunction.of("n2"), result.next().get("nodeId"));
-            assertEquals(idFunction.of("n1"), result.next().get("nodeId"));
-            assertFalse(result.hasNext());
-        });
-    }
-
-    @Test
-    void testStreamWithLongestPathDistances() {
+    void testStreamWithWeightedLongestPathDistances() {
         String query = GdsCypher.call("last")
             .algo("gds.alpha.topologicalSort")
             .streamMode()
             .addParameter("computeLongestPathDistances", true)
+            .addParameter("relationshipWeightProperty", "prop")
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
             var record = result.next();
-            assertEquals(idFunction.of("n3"), record.get("nodeId"));
+            assertEquals(idFunction.of("n0"), record.get("nodeId"));
             assertEquals(0.0, record.get("longestPathDistance"));
             record = result.next();
-            assertEquals(idFunction.of("n0"), record.get("nodeId"));
-            assertEquals(1.0, record.get("longestPathDistance"));
-            record = result.next();
             assertEquals(idFunction.of("n2"), record.get("nodeId"));
-            assertEquals(2.0, record.get("longestPathDistance"));
+            assertEquals(5.0, record.get("longestPathDistance"));
             record = result.next();
             assertEquals(idFunction.of("n1"), record.get("nodeId"));
-            assertEquals(3.0, record.get("longestPathDistance"));
+            assertEquals(8.0, record.get("longestPathDistance"));
+            record = result.next();
+            assertEquals(idFunction.of("n3"), record.get("nodeId"));
+            assertEquals(9.0, record.get("longestPathDistance"));
             assertFalse(result.hasNext());
         });
     }
