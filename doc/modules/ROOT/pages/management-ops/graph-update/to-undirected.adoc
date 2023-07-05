@@ -96,11 +96,11 @@ CREATE
 ----
 CALL gds.graph.project(
   'personsAndInstruments',
-  ['Person', 'Instrument'],         // <1>
+  ['Person', 'Instrument'],       // <1>
   {
     LIKES: {
-      type: 'LIKES',                // <2>
-      properties: 'score' // <3>
+      type: 'LIKES',              // <2>
+      properties: 'score'         // <3>
     }
   }
 )

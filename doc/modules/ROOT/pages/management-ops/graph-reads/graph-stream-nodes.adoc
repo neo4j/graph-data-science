@@ -1,8 +1,8 @@
 = Streaming nodes
 :description: This chapter explains how to read node properties from a projected graph.
 
-To inspect stored values, the `gds.graph.nodeProperties.stream` procedure can be used.
-This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
+To inspect property values on nodes in GDS graphs, the `gds.graph.nodeProperties.stream` procedure can be used.
+This is useful if we have run multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
 == Syntax
 
@@ -239,24 +239,31 @@ This adds with some overhead, as each property name must be repeated for each no
 
 
 [[utility-functions-catalog]]
-== Utility functions
+== Single node property access
 
-Utility functions allow accessing specific nodes of in-memory graphs directly from a Cypher query.
-
-.Catalog Functions
-[opts=header,cols="1m,1"]
-|===
-| Name                  | Description
-| gds.util.nodeProperty | Allows accessing a node property stored in a named graph.
-|===
-
+GDS offers a function to access the property value of a specific node from an in-memory graph directly in a Cypher query.
 
 === Syntax
 
-[opts=header,cols="1m,1"]
+[source]
+----
+gds.util.nodeProperty(
+  graphName: STRING, 
+  nodeId: INTEGER, 
+  propertyKey: STRING, 
+  nodeLabel: STRING?
+)
+----
+
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
 |===
-| Name                                                                                               | Description
-| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING, nodeLabel: STRING?) | Named graph in the catalog, Neo4j node id, node property key and optional node label present in the named-graph.
+| Name           | Type       | Optional | Description
+| graphName | STRING | no | Name of the graph in the catalog.
+| nodeId        | INTEGER | no | Id of the node.
+| propertyKey | STRING | no | Property key to access.
+| nodeLabel | STRING | yes | Label on the node.
 |===
 
 If a node label is given, the property value for the corresponding projection and the given node is returned.
