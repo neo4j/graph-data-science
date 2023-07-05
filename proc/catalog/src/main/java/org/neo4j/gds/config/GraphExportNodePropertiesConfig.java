@@ -35,6 +35,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConfig {
 
+    boolean LIST_NODE_LABELS_DEFAULT_VALUE = false;
+
     @Configuration.Parameter
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
@@ -43,7 +45,7 @@ public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConf
     @Value.Parameter(false)
     @Configuration.Key("listNodeLabels")
     default boolean listNodeLabels() {
-        return false;
+        return LIST_NODE_LABELS_DEFAULT_VALUE;
     }
 
     static List<String> parseNodeProperties(Object userInput) {
