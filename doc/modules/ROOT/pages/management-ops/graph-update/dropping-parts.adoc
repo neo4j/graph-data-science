@@ -165,7 +165,7 @@ If we still want to drop these relationships we need to xref:management-ops/grap
 ----
 CALL gds.graph.relationships.drop(
   'socialGraph',                    // <1>
-  'READ'                           // <2>
+  'READ'                            // <2>
 )
 YIELD
   graphName, relationshipType, deletedRelationships, deletedProperties
