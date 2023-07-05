@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.ml.core.samplers;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.RelationshipCursor;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -48,6 +51,14 @@ public class UniformSampler {
     }
 
     public LongStream sample(LongStream input, long lowerBoundInputLength, int numberOfSamples) {
+        if ((double) numberOfSamples / lowerBoundInputLength < 0.5) {
+            return sampleWithIndexes(input, lowerBoundInputLength, numberOfSamples);
+        } else {
+            return sampleWithReservoir(input, lowerBoundInputLength, numberOfSamples);
+        }
+    }
+
+    public LongStream sampleWithReservoir(LongStream input, long lowerBoundInputLength, int numberOfSamples) {
         if (numberOfSamples == 0) {
             return LongStream.empty();
         }
@@ -91,5 +102,40 @@ public class UniformSampler {
 
     private long computeNumberOfSkips(double w) {
         return (long) (Math.log(random.nextDouble()) / Math.log(1 - w)) + 1;
+    }
+
+    public LongHashSet sampleUniqueNumbersHashSet(int m, long n) {
+        if (m > n) {
+            throw new IllegalArgumentException("Cannot sample more unique numbers than the range allows.");
+        }
+        var uniqueNumbers = new LongHashSet();
+        if (n == m) {
+            for (long i = 0; i < n; i++) {
+                uniqueNumbers.add(i);
+            }
+            return uniqueNumbers;
+        }
+
+        while (uniqueNumbers.size() < m) {
+            long randomNumber = random.nextLong(n);
+            uniqueNumbers.add(randomNumber);
+        }
+
+        return uniqueNumbers;
+    }
+
+    public LongStream sampleWithIndexes(LongStream input, long lowerBoundInputLength, int numberOfSamples) {
+        if (numberOfSamples == 0) {
+            return LongStream.empty();
+        }
+
+        if (numberOfSamples >= lowerBoundInputLength) {
+            return input;
+        }
+
+        var sampledIndexes = sampleUniqueNumbersHashSet(numberOfSamples,  lowerBoundInputLength);
+
+        AtomicInteger counter = new AtomicInteger(0);
+        return input.filter(value -> sampledIndexes.contains(counter.getAndIncrement()));
     }
 }
