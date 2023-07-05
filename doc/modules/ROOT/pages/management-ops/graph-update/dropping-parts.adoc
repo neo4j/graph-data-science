@@ -1,5 +1,5 @@
 = Dropping parts of the graph
-// TODO tabbed or have different sections?
+:description: This chapter explains how to drop node properties or relationships of a given type from a projected graph.
 
 Dropping parts of the graph is useful to free up memory or remove previously mutated algorithms results.
 
