@@ -1,8 +1,7 @@
 = Writing node properties and labels
 
-
-To persist the values in a Neo4j database, we can use `gds.graph.nodeProperties.write`.
-Similar to streaming node properties, it is also possible to write those back to Neo4j.
+It is possible to persist computed node properties into a Neo4j database.
+We refer to this operation as _writing_.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 
 == Syntax
