@@ -221,6 +221,36 @@ public final class AdjacencyCompression {
         return out;
     }
 
+    /**
+     * Decodes delta encoded values based on a given initial value.
+     * <p>
+     * A little faster due to manual unrolling. Inspired be Lemire.
+     *
+     * @param deltas delta encoded values
+     * @param length number of values to decode
+     * @param first the first decoded value
+     *
+     * @return the last decoded value
+     */
+    public static long deltaDecode(long[] deltas, int length, long first) {
+        int bound = length / 4 * 4;
+        int i = 0;
+        if (bound >= 4) {
+            for (; i < bound - 4; i += 4) {
+                first = deltas[i] += first;
+                first = deltas[i + 1] += first;
+                first = deltas[i + 2] += first;
+                first = deltas[i + 3] += first;
+            }
+        }
+
+        for (; i < length; i++) {
+            first = deltas[i] += first;
+        }
+
+        return deltas[length - 1];
+    }
+
     public static void prefixSumDeltaEncodedValues(long[] values, int length) {
         length = Math.min(values.length, length);
         long value = values[0];
