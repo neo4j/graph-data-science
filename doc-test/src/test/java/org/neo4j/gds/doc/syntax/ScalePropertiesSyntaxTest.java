@@ -39,7 +39,7 @@ class ScalePropertiesSyntaxTest extends SyntaxTestBase {
     }
     @Override
     protected String adocFile() {
-        return "pages/algorithms/scale-properties.adoc";
+        return "pages/machine-learning/pre-processing/scale-properties.adoc";
     }
 
 }

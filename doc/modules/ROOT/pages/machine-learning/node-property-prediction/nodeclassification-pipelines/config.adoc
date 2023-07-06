@@ -85,7 +85,7 @@ The name of the procedure that should be added can be a fully qualified GDS proc
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `beta.node2vec` instead of `gds.beta.node2vec.mutate`.
 But please note that tier qualification (in this case `beta`) must still be given as part of the name.
 
-For example, xref:machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
+For example, xref:machine-learning/pre-processing/index.adoc[pre-processing algorithms] can be used as node property steps.
 
 
 === Syntax

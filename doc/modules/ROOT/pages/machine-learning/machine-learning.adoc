@@ -10,7 +10,7 @@ image::pipeline-model.svg["Workflow of pipelines and models."]
 
 To help with building the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
 
-* xref:machine-learning/pre-processing.adoc[Pre-processing]
+* xref:machine-learning/pre-processing/index.adoc[Pre-processing]
 * xref:machine-learning/training-methods/index.adoc[Training methods]
 
 The Neo4j GDS library includes the following pipelines to train and apply machine learning models, grouped by quality tier:
