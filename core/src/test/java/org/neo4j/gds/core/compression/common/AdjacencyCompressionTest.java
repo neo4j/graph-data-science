@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static java.lang.Double.doubleToLongBits;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -190,6 +191,30 @@ class AdjacencyCompressionTest {
         return new long[]{
             1, 1, 5, 5, 1, 1
         };
+    }
+
+    static Stream<Arguments> deltaArrays() {
+        return Stream.of(
+            Arguments.of(new long[0], 0, new long[0]),
+            Arguments.of(new long[] {1, 1, 1}, 0, new long[] {1, 2, 3}),
+            Arguments.of(new long[] {1, 1, 1}, 41, new long[] {42, 43, 44}),
+            Arguments.of(new long[] {0, 0, 0}, 41, new long[] {41, 41, 41}),
+            // more than 4 elements to trigger unrolled loop
+            Arguments.of(new long[] {1, 1, 1, 1, 1, 1, 1}, 0, new long[] {1, 2, 3, 4, 5, 6, 7}),
+            Arguments.of(new long[] {1, 1, 0, 1, 1, 1, 1}, 1, new long[] {2, 3, 3, 4, 5, 6, 7})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("deltaArrays")
+    void deltaDecodeEmptyArray(long[] deltas, long first, long[] expected) {
+        long last = AdjacencyCompression.deltaDecode(deltas, deltas.length, first);
+
+        assertThat(deltas).isEqualTo(expected);
+
+        if (expected.length > 0) {
+            assertThat(last).isEqualTo(expected[expected.length - 1]);
+        }
     }
 
 }

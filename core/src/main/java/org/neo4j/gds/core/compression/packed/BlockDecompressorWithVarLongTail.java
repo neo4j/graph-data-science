@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.neo4j.gds.api.compress.ByteArrayBuffer;
+import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
@@ -108,14 +109,10 @@ final class BlockDecompressorWithVarLongTail {
             // block unpacking
             byte blockHeader = this.header.buffer[blockId];
             this.targetPtr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.targetPtr);
-            long value = this.lastValue;
-            for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
-                value = this.block[i] += value;
-            }
-            this.lastValue = value;
+            this.lastValue = AdjacencyCompression.deltaDecode(this.block, AdjacencyPacking.BLOCK_SIZE, this.lastValue);
             this.blockId++;
         } else {
-            long ptr = unsafeDecodeDeltaVLongs(
+            unsafeDecodeDeltaVLongs(
                 this.remaining,
                 this.lastValue,
                 this.targetPtr,
