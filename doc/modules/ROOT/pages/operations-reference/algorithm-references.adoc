@@ -232,8 +232,6 @@
 | `gds.beta.closeness.stats` label:procedure[Procedure]
 | `gds.beta.closeness.stream` label:procedure[Procedure]
 | `gds.beta.closeness.write` label:procedure[Procedure]
-.1+<.^|xref:beta-algorithms/collapse-path.adoc[Collapse Path]
-| `gds.beta.collapsePath.mutate` label:procedure[Procedure]
 .8+<.^|xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
 | `gds.beta.graphSage.stream` label:procedure[Procedure]
 | `gds.beta.graphSage.stream.estimate` label:procedure[Procedure]

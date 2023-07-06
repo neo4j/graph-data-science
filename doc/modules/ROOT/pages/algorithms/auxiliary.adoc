@@ -9,8 +9,6 @@ The Neo4j GDS library includes the following auxiliary procedures, grouped by qu
 * Production-ready
 ** xref:algorithms/scale-properties.adoc[Scale Properties]
 
-* Beta
-** xref:beta-algorithms/collapse-path.adoc[Collapse Path]
 
 * Alpha
 ** xref:alpha-algorithms/one-hot-encoding.adoc#algorithms-one-hot-encoding-sample[One Hot Encoding]
