@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.paths.delta;
 
-import com.carrotsearch.hppc.DoubleArrayDeque;
-import com.carrotsearch.hppc.LongArrayDeque;
+import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -366,6 +366,9 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
 
+                var pathNodeIds = new LongArrayList();
+                var costs = new DoubleArrayList();
+
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
                     .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
@@ -374,7 +377,9 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
                         sourceNode,
                         targetNode,
                         distances,
-                        predecessors
+                        predecessors,
+                        pathNodeIds,
+                        costs
                     ));
             })
         );
@@ -385,18 +390,16 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         long sourceNode,
         long targetNode,
         HugeAtomicDoubleArray distances,
-        HugeAtomicLongArray predecessors
+        HugeAtomicLongArray predecessors,
+        LongArrayList pathNodeIds,
+        DoubleArrayList costs
     ) {
-        // TODO: use LongArrayList and then ArrayUtils.reverse
-        var pathNodeIds = new LongArrayDeque();
-        var costs = new DoubleArrayDeque();
-
         // We backtrack until we reach the source node.
         var lastNode = targetNode;
 
         while (true) {
-            pathNodeIds.addFirst(lastNode);
-            costs.addFirst(distances.get(lastNode));
+            pathNodeIds.add(lastNode);
+            costs.add(distances.get(lastNode));
 
             // Break if we reach the end by hitting the source node.
             if (lastNode == sourceNode) {
@@ -406,6 +409,12 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             lastNode = predecessors.get(lastNode);
         }
 
-        return new DeltaSteppingPathResult(pathIndex, sourceNode, targetNode, pathNodeIds.toArray(), costs.toArray());
+        var pathNodeIdsArray = pathNodeIds.toArray();
+        ArrayUtils.reverse(pathNodeIdsArray);
+        pathNodeIds.elementsCount = 0;
+        var costsArray = costs.toArray();
+        ArrayUtils.reverse(costsArray);
+        costs.elementsCount = 0;
+        return new DeltaSteppingPathResult(pathIndex, sourceNode, targetNode, pathNodeIdsArray, costsArray);
     }
 }
