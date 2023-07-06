@@ -248,7 +248,7 @@ public final class AdjacencyCompression {
             first = deltas[i] += first;
         }
 
-        return deltas[length - 1];
+        return first;
     }
 
     public static void prefixSumDeltaEncodedValues(long[] values, int length) {
