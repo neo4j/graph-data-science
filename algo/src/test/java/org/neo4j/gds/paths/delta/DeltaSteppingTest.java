@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.delta;
 
+import org.assertj.core.api.recursive.comparison.ComparingFields;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -96,20 +97,20 @@ final class DeltaSteppingTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:A)" +
-            ", (b:B)" +
-            ", (c:C)" +
-            ", (d:D)" +
-            ", (e:E)" +
-            ", (f:F)" +
+                "  (a:A)" +
+                ", (b:B)" +
+                ", (c:C)" +
+                ", (d:D)" +
+                ", (e:E)" +
+                ", (f:F)" +
 
-            ", (a)-[:TYPE {cost: 4}]->(b)" +
-            ", (a)-[:TYPE {cost: 2}]->(c)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (b)-[:TYPE {cost: 10}]->(d)" +
-            ", (c)-[:TYPE {cost: 3}]->(e)" +
-            ", (d)-[:TYPE {cost: 11}]->(f)" +
-            ", (e)-[:TYPE {cost: 4}]->(d)";
+                ", (a)-[:TYPE {cost: 4}]->(b)" +
+                ", (a)-[:TYPE {cost: 2}]->(c)" +
+                ", (b)-[:TYPE {cost: 5}]->(c)" +
+                ", (b)-[:TYPE {cost: 10}]->(d)" +
+                ", (c)-[:TYPE {cost: 3}]->(e)" +
+                ", (d)-[:TYPE {cost: 11}]->(f)" +
+                ", (e)-[:TYPE {cost: 4}]->(d)";
 
         @Inject
         Graph graph;
@@ -146,7 +147,11 @@ final class DeltaSteppingTest {
                 .compute()
                 .pathSet();
 
-            assertEquals(expected, paths);
+            assertThat(paths)
+                .usingRecursiveComparison()
+                .withIntrospectionStrategy(ComparingFields.COMPARING_FIELDS)
+                .ignoringFields("index")
+                .isEqualTo(expected);
         }
 
         @ParameterizedTest
@@ -176,7 +181,11 @@ final class DeltaSteppingTest {
                 .compute()
                 .pathSet();
 
-            assertEquals(expected, paths);
+            assertThat(paths)
+                .usingRecursiveComparison()
+                .withIntrospectionStrategy(ComparingFields.COMPARING_FIELDS)
+                .ignoringFields("index")
+                .isEqualTo(expected);
         }
 
         @Test
@@ -232,26 +241,26 @@ final class DeltaSteppingTest {
         // https://www.cise.ufl.edu/~sahni/cop3530/slides/lec326.pdf without relationship id 14
         private static final String DB_CYPHER2 =
             "CREATE" +
-            "  (n1:Label)" +
-            ", (n2:Label)" +
-            ", (n3:Label)" +
-            ", (n4:Label)" +
-            ", (n5:Label)" +
-            ", (n6:Label)" +
-            ", (n7:Label)" +
+                "  (n1:Label)" +
+                ", (n2:Label)" +
+                ", (n3:Label)" +
+                ", (n4:Label)" +
+                ", (n5:Label)" +
+                ", (n6:Label)" +
+                ", (n7:Label)" +
 
-            ", (n1)-[:TYPE {cost: 6}]->(n2)" +
-            ", (n1)-[:TYPE {cost: 2}]->(n3)" +
-            ", (n1)-[:TYPE {cost: 16}]->(n4)" +
-            ", (n2)-[:TYPE {cost: 4}]->(n5)" +
-            ", (n2)-[:TYPE {cost: 5}]->(n4)" +
-            ", (n3)-[:TYPE {cost: 7}]->(n2)" +
-            ", (n3)-[:TYPE {cost: 3}]->(n5)" +
-            ", (n3)-[:TYPE {cost: 8}]->(n6)" +
-            ", (n4)-[:TYPE {cost: 7}]->(n3)" +
-            ", (n5)-[:TYPE {cost: 4}]->(n4)" +
-            ", (n5)-[:TYPE {cost: 10}]->(n7)" +
-            ", (n6)-[:TYPE {cost: 1}]->(n7)";
+                ", (n1)-[:TYPE {cost: 6}]->(n2)" +
+                ", (n1)-[:TYPE {cost: 2}]->(n3)" +
+                ", (n1)-[:TYPE {cost: 16}]->(n4)" +
+                ", (n2)-[:TYPE {cost: 4}]->(n5)" +
+                ", (n2)-[:TYPE {cost: 5}]->(n4)" +
+                ", (n3)-[:TYPE {cost: 7}]->(n2)" +
+                ", (n3)-[:TYPE {cost: 3}]->(n5)" +
+                ", (n3)-[:TYPE {cost: 8}]->(n6)" +
+                ", (n4)-[:TYPE {cost: 7}]->(n3)" +
+                ", (n5)-[:TYPE {cost: 4}]->(n4)" +
+                ", (n5)-[:TYPE {cost: 10}]->(n7)" +
+                ", (n6)-[:TYPE {cost: 1}]->(n7)";
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
@@ -283,7 +292,11 @@ final class DeltaSteppingTest {
                 .compute()
                 .pathSet();
 
-            assertEquals(expected, paths);
+            assertThat(paths)
+                .usingRecursiveComparison()
+                .withIntrospectionStrategy(ComparingFields.COMPARING_FIELDS)
+                .ignoringFields("index")
+                .isEqualTo(expected);
         }
     }
 
@@ -294,20 +307,20 @@ final class DeltaSteppingTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:A)" +
-            ", (b:B)" +
-            ", (c:C)" +
-            ", (d:D)" +
-            ", (e:E)" +
-            ", (f:F)" +
+                "  (a:A)" +
+                ", (b:B)" +
+                ", (c:C)" +
+                ", (d:D)" +
+                ", (e:E)" +
+                ", (f:F)" +
 
-            ", (a)-[:TYPE]->(b)" +
-            ", (a)-[:TYPE]->(c)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (b)-[:TYPE]->(d)" +
-            ", (c)-[:TYPE]->(e)" +
-            ", (d)-[:TYPE]->(f)" +
-            ", (e)-[:TYPE]->(d)";
+                ", (a)-[:TYPE]->(b)" +
+                ", (a)-[:TYPE]->(c)" +
+                ", (b)-[:TYPE]->(c)" +
+                ", (b)-[:TYPE]->(d)" +
+                ", (c)-[:TYPE]->(e)" +
+                ", (d)-[:TYPE]->(f)" +
+                ", (e)-[:TYPE]->(d)";
 
         @Inject
         TestGraph graph;
@@ -339,7 +352,11 @@ final class DeltaSteppingTest {
                 .compute()
                 .pathSet();
 
-            assertEquals(expected, paths);
+            assertThat(paths)
+                .usingRecursiveComparison()
+                .withIntrospectionStrategy(ComparingFields.COMPARING_FIELDS)
+                .ignoringFields("index")
+                .isEqualTo(expected);
         }
     }
 

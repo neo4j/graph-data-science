@@ -36,7 +36,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -366,13 +365,11 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             concurrency,
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
-                var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
 
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
                     .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
                     .mapToObj(targetNode -> pathResult(
-                        pathResultBuilder,
                         localPathIndex.getAndIncrement(),
                         sourceNode,
                         targetNode,
@@ -383,10 +380,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         );
     }
 
-    private static final long[] EMPTY_ARRAY = new long[0];
-
     private static PathResult pathResult(
-        ImmutablePathResult.Builder pathResultBuilder,
         long pathIndex,
         long sourceNode,
         long targetNode,
@@ -412,12 +406,6 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             lastNode = predecessors.get(lastNode);
         }
 
-        return pathResultBuilder
-            .index(pathIndex)
-            .targetNode(targetNode)
-            .nodeIds(pathNodeIds.toArray())
-            .relationshipIds(EMPTY_ARRAY)
-            .costs(costs.toArray())
-            .build();
+        return new DeltaSteppingPathResult(pathIndex, sourceNode, targetNode, pathNodeIds.toArray(), costs.toArray());
     }
 }
