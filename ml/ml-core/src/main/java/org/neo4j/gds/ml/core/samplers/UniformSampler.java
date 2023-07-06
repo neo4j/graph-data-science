@@ -20,12 +20,11 @@
 package org.neo4j.gds.ml.core.samplers;
 
 import com.carrotsearch.hppc.LongHashSet;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.RelationshipCursor;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -135,7 +134,7 @@ public class UniformSampler {
 
         var sampledIndexes = sampleUniqueNumbersHashSet(numberOfSamples,  lowerBoundInputLength);
 
-        AtomicInteger counter = new AtomicInteger(0);
+        MutableInt counter = new MutableInt(0);
         return input.filter(value -> sampledIndexes.contains(counter.getAndIncrement()));
     }
 }
