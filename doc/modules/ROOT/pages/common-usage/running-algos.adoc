@@ -83,12 +83,12 @@ For more details on the concurrency settings and limitations please see xref:ins
 [[common-configuration-node-labels]]
 nodeLabels - List of String::
 If the graph, on which the algorithm is run, was projected with multiple node label projections, this parameter can be used to select only a subset of the projected labels.
-The algorithm will only consider nodes with the selected labels.
+The algorithm will only consider nodes with any of the selected labels.
 
 [[common-configuration-relationship-types]]
 relationshipTypes - List of String::
 If the graph, on which the algorithm is run, was projected with multiple relationship type projections, this parameter can be used to select only a subset of the projected types.
-The algorithm will only consider relationships with the selected types.
+The algorithm will only consider relationships with any of the selected types.
 
 [[common-configuration-node-weight-property]]
 nodeWeightProperty - String::
