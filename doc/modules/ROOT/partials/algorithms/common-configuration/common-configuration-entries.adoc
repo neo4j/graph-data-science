@@ -1,3 +1,3 @@
-| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String | ['*']   | yes      | Filter the named graph using the given node labels.
-| xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String | ['*']   | yes      | Filter the named graph using the given relationship types.
+| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String | ['*']   | yes      | Filter the named graph using the given node labels. Nodes with any of the given labels will be included.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String | ['*']   | yes      | Filter the named graph using the given relationship types. Relationships with any of the given types will be included.
 include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
