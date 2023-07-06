@@ -106,7 +106,7 @@ public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
     }
 
     @Override
-    void reset() {
+    public void reset() {
         currentId = -1;
         currentLabels = EMPTY_LABELS;
         labelIdentifier = "";

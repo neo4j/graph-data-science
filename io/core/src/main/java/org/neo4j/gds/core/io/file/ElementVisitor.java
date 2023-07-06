@@ -56,7 +56,7 @@ abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> extends In
 
     protected abstract List<PROPERTY_SCHEMA> getPropertySchema();
 
-    abstract void reset();
+    public abstract void reset();
 
     @Override
     public boolean property(String key, Object value) {
