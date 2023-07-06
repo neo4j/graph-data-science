@@ -19,14 +19,25 @@
  */
 package org.neo4j.gds.topologicalsort;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @Configuration
-public interface LongestPathStreamConfig extends TopologicalSortBaseConfig {
+public interface LongestPathStreamConfig extends TopologicalSortBaseConfig, RelationshipWeightConfig {
 
     static LongestPathStreamConfig of(CypherMapWrapper userInput) {
         return new LongestPathStreamConfigImpl(userInput);
     }
 
+    @Value.Check
+    default void validate() {
+        if (relationshipWeightProperty().isPresent() && ! computeLongestPathDistances()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Relationship weight property can only be set when computeLongestPathDistances is true"));
+        }
+    }
 }

@@ -21,22 +21,10 @@ package org.neo4j.gds.topologicalsort;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-public interface TopologicalSortBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+public interface TopologicalSortBaseConfig extends AlgoBaseConfig {
     @Value.Default
     default boolean computeLongestPathDistances() {
         return false;
     }
-
-    @Value.Check
-    default void validate() {
-        if (relationshipWeightProperty().isPresent() && ! computeLongestPathDistances()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Relationship weight property can only be set when computeLongestPathDistances is true"));
-        }
-    }
-
 }

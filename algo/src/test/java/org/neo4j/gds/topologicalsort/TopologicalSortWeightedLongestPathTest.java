@@ -34,7 +34,6 @@ class TopologicalSortWeightedLongestPathTest {
     private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
         .concurrency(4)
         .computeLongestPathDistances(true)
-        .relationshipWeightProperty("prop")
         .build();
 
     @GdlGraph(graphNamePrefix = "basic")
