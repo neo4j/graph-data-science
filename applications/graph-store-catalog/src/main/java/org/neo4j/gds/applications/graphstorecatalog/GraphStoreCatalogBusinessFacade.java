@@ -17,13 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.ConfigurationService;
+import org.neo4j.gds.core.loading.DropGraphService;
+import org.neo4j.gds.core.loading.GraphNameValidationService;
+import org.neo4j.gds.core.loading.GraphProjectNativeResult;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.ListGraphService;
+import org.neo4j.gds.core.loading.PreconditionsService;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +46,7 @@ import java.util.Map;
  * Here we have just business logic: no Neo4j bits or other integration bits, just Java POJO things.
  * <p>
  * By nature business logic is going to be bespoke, so one method per logical thing.
- * Take {@link GraphStoreCatalogBusinessFacade#graphExists(org.neo4j.gds.api.User, org.neo4j.gds.api.DatabaseId, String)}} for example:
+ * Take {@link GraphStoreCatalogBusinessFacade#graphExists(User, DatabaseId, String)} for example:
  * pure expressed business logic that layers above will use in multiple places, but!
  * Any marshalling happens in those layers, not here.
  * <p>
@@ -50,33 +61,39 @@ import java.util.Map;
 public class GraphStoreCatalogBusinessFacade {
     // services
     private final PreconditionsService preconditionsService;
+    private final ConfigurationService configurationService;
     private final GraphNameValidationService graphNameValidationService;
 
     // business logic
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final DropGraphService dropGraphService;
     private final ListGraphService listGraphService;
+    private final NativeProjectService nativeProjectService;
 
     public GraphStoreCatalogBusinessFacade(
         PreconditionsService preconditionsService,
+        ConfigurationService configurationService,
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
         DropGraphService dropGraphService,
-        ListGraphService listGraphService
+        ListGraphService listGraphService,
+        NativeProjectService nativeProjectService
     ) {
         this.preconditionsService = preconditionsService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.dropGraphService = dropGraphService;
         this.listGraphService = listGraphService;
+        this.nativeProjectService = nativeProjectService;
+        this.configurationService = configurationService;
     }
 
     public boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString) {
         checkPreconditions();
 
-        var validatedGraphName = graphNameValidationService.validate(graphNameAsString);
+        var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        return graphStoreCatalogService.graphExists(user, databaseId, validatedGraphName);
+        return graphStoreCatalogService.graphExists(user, databaseId, graphName);
     }
 
     /**
@@ -115,6 +132,43 @@ public class GraphStoreCatalogBusinessFacade {
         var validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
 
         return listGraphService.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
+    }
+
+    public GraphProjectNativeResult project(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        Object nodeProjection,
+        Object relationshipProjection,
+        Map<String, Object> rawConfiguration
+    ) {
+        checkPreconditions();
+
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
+
+        var projectConfiguration = configurationService.parseNativeProjectConfiguration(
+            user,
+            graphName,
+            nodeProjection,
+            relationshipProjection,
+            rawConfiguration
+        );
+
+        return nativeProjectService.compute(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            user,
+            userLogRegistryFactory,
+            projectConfiguration
+        );
     }
 
     private void checkPreconditions() {

@@ -82,6 +82,9 @@ project(':edition-api').projectDir = file('edition-api')
 include('executor')
 project(':executor').projectDir = file('executor')
 
+include('graph-store-catalog-applications')
+project(':graph-store-catalog-applications').projectDir = file('applications/graph-store-catalog')
+
 include 'procedure-collector'
 project(':procedure-collector').projectDir = file('procedure-collector')
 

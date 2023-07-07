@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.GraphNameValidationService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PreconditionsService;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,8 +40,10 @@ class GraphStoreCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new GraphStoreCatalogBusinessFacade(
             mock(PreconditionsService.class),
+            null,
             new GraphNameValidationService(),
             service,
+            null,
             null,
             null
         );
@@ -58,8 +63,10 @@ class GraphStoreCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new GraphStoreCatalogBusinessFacade(
             mock(PreconditionsService.class),
+            null,
             mock(GraphNameValidationService.class),
             service,
+            null,
             null,
             null
         );
@@ -86,6 +93,8 @@ class GraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
 
@@ -101,8 +110,10 @@ class GraphStoreCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new GraphStoreCatalogBusinessFacade(
             mock(PreconditionsService.class),
+            null,
             new GraphNameValidationService(),
             service,
+            null,
             null,
             null
         );

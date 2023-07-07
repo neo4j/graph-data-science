@@ -1,0 +1,29 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Graph Store Catalog Applications'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    // DependencyResolver, which we should get rid of
+    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
+    // that one Neo4j thing we haven't abstracted yet: GraphDatabaseService
+    compileOnly(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+
+    // the necessary GDS things for the extension to construct the application
+    // I mean damnit, I need GraphProjectConfig but to get that I need BaseConfig
+    implementation project(':config-api') // BaseConfig :eye-roll:
+    implementation project(':core') // this is where domain stuff lives
+    implementation project(':executor') // Preconditions
+    implementation project(':logging') // duh
+    implementation project(':memory-usage') // duh
+    implementation project(':progress-tracking') // duh
+    implementation project(':transaction') // duh
+
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation platform(dep.junit5bom)
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+}
