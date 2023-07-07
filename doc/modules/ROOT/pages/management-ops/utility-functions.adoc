@@ -2,34 +2,6 @@
 = Utility functions
 :description: This section provides explanations and examples for each of the utility functions in the Neo4j Graph Data Science library.
 
-
-[[utility-functions-system]]
-== System Functions
-
-[[system-functions-table]]
-[opts=header,cols="1m,1"]
-|===
-| Name        | Description
-| gds.version | Return the version of the installed Neo4j Graph Data Science library.
-|===
-
-[role=query-example]
---
-.Usage:
-[source, cypher, role=noplay]
-----
-RETURN gds.version() AS version
-----
-
-.Results
-[opts="header"]
-|===
-| version
-| "2.5.0-alpha02"
-|===
---
-
-
 [[utility-functions-numeric]]
 == Numeric Functions
 

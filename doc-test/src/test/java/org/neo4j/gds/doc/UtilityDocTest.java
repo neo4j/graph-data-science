@@ -22,7 +22,6 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.functions.NodePropertyFunc;
-import org.neo4j.gds.functions.VersionFunc;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ class UtilityDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
+        return List.of(AsNodeFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
     }
 
     @Override
