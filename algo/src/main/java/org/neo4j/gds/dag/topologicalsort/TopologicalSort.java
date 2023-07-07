@@ -61,7 +61,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final long nodeCount;
     private final int concurrency;
 
-    // Saves the maximal distance from a source node, which is the longest path in DAG
+    // Saves the maximal distance from a source node, which is also the longest path in DAG
     private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
     protected TopologicalSort(
@@ -74,7 +74,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.nodeCount = graph.nodeCount();
         this.concurrency = config.concurrency();
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
-        this.longestPathDistances = config.computeLongestPathDistances()
+        this.longestPathDistances = config.computeMaxDistanceFromSource()
             ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);

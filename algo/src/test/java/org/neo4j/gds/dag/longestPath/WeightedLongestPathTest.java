@@ -55,7 +55,7 @@ class WeightedLongestPathTest {
         LongestPath ts = new LongestPath(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
 
-        var longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.maxSourceDistances().get();
         var firstLongestPathDistance = longestPathsDistances.get(0);
         var secondLongestPathDistance = longestPathsDistances.get(1);
         var thirdLongestPathDistance = longestPathsDistances.get(2);

@@ -46,7 +46,7 @@ public class LongestPath extends Algorithm<TopologicalSortResult> {
         var topologicalSortConfigMap =
             CypherMapWrapper
                 .create(config.toMap())
-                .withBoolean("computeLongestPathDistances", true);
+                .withBoolean("computeMaxDistanceFromSource", true);
 
         return new TopologicalSortFactory().build(
             graph,

@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TopologicalSortTest {
     private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
         .concurrency(4)
-        .computeLongestPathDistances(true)
+        .computeMaxDistanceFromSource(true)
         .build();
     private static TopologicalSortBaseConfig BASIC_CONFIG = new TopologicalSortStreamConfigImpl.Builder()
         .concurrency(4)
@@ -81,7 +81,7 @@ class TopologicalSortTest {
         assertEquals(2, third);
         assertEquals(1, fourth);
 
-        var longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.maxSourceDistances().get();
         var firstLongestPathDistance = longestPathsDistances.get(0);
         var secondLongestPathDistance = longestPathsDistances.get(1);
         var thirdLongestPathDistance = longestPathsDistances.get(2);
@@ -122,7 +122,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(allCycleGraph, BASIC_CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
 
-        assertTrue(result.longestPathDistances().isEmpty());
+        assertTrue(result.maxSourceDistances().isEmpty());
     }
 
     @GdlGraph(graphNamePrefix = "selfLoop")
@@ -143,7 +143,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(selfLoopGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
-        var longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.maxSourceDistances().get();
 
         long first = nodes.get(0);
         assertEquals(1, result.size());
@@ -222,7 +222,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(lastGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
-        var longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.maxSourceDistances().get();
 
         assertEquals(nodeCount, result.size());
         long last = nodes.get(nodeCount - 1);
@@ -307,7 +307,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(cyclesGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
-        var longestPathsDistances = result.longestPathDistances().get();
+        var longestPathsDistances = result.maxSourceDistances().get();
 
         long first = nodes.get(0);
         long second = nodes.get(1);

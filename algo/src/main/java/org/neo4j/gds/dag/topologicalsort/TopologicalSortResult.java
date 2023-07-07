@@ -31,19 +31,19 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TopologicalSortResult {
     private final HugeLongArray sortedNodes;
     private final AtomicLong addIndex = new AtomicLong(0);
-    private final Optional<HugeAtomicDoubleArray> longestPathDistances;
+    private final Optional<HugeAtomicDoubleArray> maxSourceDistances;
 
-    TopologicalSortResult(long nodeCount, Optional<HugeAtomicDoubleArray> longestPathDistances) {
+    TopologicalSortResult(long nodeCount, Optional<HugeAtomicDoubleArray> maxSourceDistances) {
         this.sortedNodes = HugeLongArray.newArray(nodeCount);
-        this.longestPathDistances = longestPathDistances;
+        this.maxSourceDistances = maxSourceDistances;
     }
 
     public HugeLongArray sortedNodes() {
         return sortedNodes;
     }
 
-    public Optional<HugeAtomicDoubleArray> longestPathDistances() {
-        return longestPathDistances;
+    public Optional<HugeAtomicDoubleArray> maxSourceDistances() {
+        return maxSourceDistances;
     }
 
     public long size() {

@@ -23,10 +23,10 @@ package org.neo4j.gds.paths.dag.topologicalsort;
 public class TopologicalSortStreamResult {
 
     public final long nodeId;
-    public final Double longestPathDistance;
+    public final Double maxDistanceFromSource;
 
-    public TopologicalSortStreamResult(long nodeId, Double longestPathDistance) {
+    public TopologicalSortStreamResult(long nodeId, Double maxDistanceFromSource) {
         this.nodeId = nodeId;
-        this.longestPathDistance = longestPathDistance;
+        this.maxDistanceFromSource = maxDistanceFromSource;
     }
 }

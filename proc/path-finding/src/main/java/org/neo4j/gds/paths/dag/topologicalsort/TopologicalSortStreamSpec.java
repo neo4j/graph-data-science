@@ -63,7 +63,7 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var distances = result.longestPathDistances().orElse(null);
+                    var distances = result.maxSourceDistances().orElse(null);
                     LongFunction<Double> distanceFunction = distances != null
                     ? (nodeId) -> distances.get(nodeId)
                     : (nodeId) ->  null;

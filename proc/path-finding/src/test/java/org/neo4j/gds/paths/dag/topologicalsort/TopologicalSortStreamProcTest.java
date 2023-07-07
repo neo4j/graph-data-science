@@ -77,22 +77,22 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
         String query = GdsCypher.call("last")
             .algo("gds.alpha.topologicalSort")
             .streamMode()
-            .addParameter("computeLongestPathDistances", true)
+            .addParameter("computeMaxDistanceFromSource", true)
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
             var record = result.next();
             assertEquals(idFunction.of("n3"), record.get("nodeId"));
-            assertEquals(0.0, record.get("longestPathDistance"));
+            assertEquals(0.0, record.get("maxDistanceFromSource"));
             record = result.next();
             assertEquals(idFunction.of("n0"), record.get("nodeId"));
-            assertEquals(1.0, record.get("longestPathDistance"));
+            assertEquals(1.0, record.get("maxDistanceFromSource"));
             record = result.next();
             assertEquals(idFunction.of("n2"), record.get("nodeId"));
-            assertEquals(2.0, record.get("longestPathDistance"));
+            assertEquals(2.0, record.get("maxDistanceFromSource"));
             record = result.next();
             assertEquals(idFunction.of("n1"), record.get("nodeId"));
-            assertEquals(3.0, record.get("longestPathDistance"));
+            assertEquals(3.0, record.get("maxDistanceFromSource"));
             assertFalse(result.hasNext());
         });
     }
