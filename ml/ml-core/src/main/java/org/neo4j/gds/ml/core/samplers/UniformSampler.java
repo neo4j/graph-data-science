@@ -116,7 +116,7 @@ public class UniformSampler {
         }
 
         while (uniqueNumbers.size() < m) {
-            long randomNumber = random.nextLong() % n;
+            long randomNumber = random.nextLong(n);
             uniqueNumbers.add(randomNumber);
         }
 
