@@ -52,6 +52,9 @@ import java.util.stream.Stream;
  * this facade will be an extension and can grab/ initialise/ resolve anything except the things the user passes in.
  * Username for example, turns out we resolve that, so no need to consider it a parameter.
  * Nice lovely decoupling innit when we can just focus on business logic.
+ * <p>
+ * Note (to self especially because I keep getting confused) that this is _request scoped_,
+ * i.e. it gets newed up with a fresh @{@link org.neo4j.procedure.Context} all the time.
  */
 public class GraphStoreCatalogProcedureFacade {
     // services
@@ -109,7 +112,7 @@ public class GraphStoreCatalogProcedureFacade {
      */
     @SuppressWarnings("WeakerAccess")
     public <RETURN_TYPE> RETURN_TYPE graphExists(String graphName, Function<Boolean, RETURN_TYPE> outputMarshaller) {
-        boolean graphExists = graphExists(graphName);
+        var graphExists = graphExists(graphName);
 
         return outputMarshaller.apply(graphExists);
     }
@@ -172,7 +175,7 @@ public class GraphStoreCatalogProcedureFacade {
         var results = businessFacade.listGraphs(user, graphName, displayDegreeDistribution, terminationFlag());
 
         // we convert here from domain type to Neo4j display type
-        boolean computeGraphSize = procedureReturnColumns.contains("memoryUsage")
+        var computeGraphSize = procedureReturnColumns.contains("memoryUsage")
             || procedureReturnColumns.contains("sizeInBytes");
         return results.stream().map(p -> GraphInfoWithHistogram.of(
             p.getLeft().config(),
@@ -183,7 +186,7 @@ public class GraphStoreCatalogProcedureFacade {
     }
 
     /**
-     * We have to potentially unstack the placeholder
+     * We have to potentially unstack the placeholder. This is purely a Neo4j Procedure framework concern.
      */
     private String validateValue(String graphName) {
         if (GraphCatalogProcedureConstants.NO_VALUE_PLACEHOLDER.equals(graphName)) return null;
@@ -199,6 +202,11 @@ public class GraphStoreCatalogProcedureFacade {
         return databaseIdService.getDatabaseId(graphDatabaseService);
     }
 
+    /**
+     * The user here is request scoped, so we resolve it now and pass it down stream
+     *
+     * @return
+     */
     private User user() {
         return userServices.getUser(securityContext);
     }
