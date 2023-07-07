@@ -35,4 +35,24 @@ class LogAdapter implements Log {
     public void info(String message) {
         neo4jUserLog.info(message);
     }
+
+    @Override
+    public void info(String format, Object... arguments) {
+        neo4jUserLog.info(format, arguments);
+    }
+
+    @Override
+    public void warn(String message, Exception e) {
+        neo4jUserLog.warn(message, e);
+    }
+
+    @Override
+    public void warn(String format, Object... arguments) {
+        neo4jUserLog.warn(format, arguments);
+    }
+
+    @Override
+    public boolean isDebugEnabled() {
+        return neo4jUserLog.isDebugEnabled();
+    }
 }

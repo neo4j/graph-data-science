@@ -29,4 +29,12 @@ package org.neo4j.gds.logging;
  */
 public interface Log {
     void info(String message);
+
+    void info(String format, Object... arguments);
+
+    void warn(String message, Exception e);
+
+    void warn(String format, Object... arguments);
+
+    boolean isDebugEnabled();
 }
