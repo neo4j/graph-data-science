@@ -25,10 +25,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.topologicalsort.TopologicalSort;
-import org.neo4j.gds.topologicalsort.TopologicalSortFactory;
-import org.neo4j.gds.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.topologicalsort.TopologicalSortStreamConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortFactory;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 
 import java.util.function.LongFunction;
 import java.util.stream.LongStream;
