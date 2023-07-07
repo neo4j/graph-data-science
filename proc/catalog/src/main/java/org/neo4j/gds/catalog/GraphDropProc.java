@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.DROP_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphDropProc extends CatalogProc {
+public class GraphDropProc {
     @Context
     public GraphStoreCatalogProcedureFacade facade;
 
