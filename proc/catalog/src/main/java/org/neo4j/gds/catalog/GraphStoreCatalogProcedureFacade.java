@@ -23,7 +23,7 @@ import org.neo4j.gds.TransactionTerminationMonitor;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;

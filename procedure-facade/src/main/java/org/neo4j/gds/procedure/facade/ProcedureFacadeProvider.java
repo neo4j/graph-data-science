@@ -21,6 +21,8 @@ package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
@@ -28,9 +30,9 @@ import org.neo4j.gds.catalog.ProcedureTransactionService;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
 import org.neo4j.gds.catalog.UserLogServices;
 import org.neo4j.gds.catalog.UserServices;
+import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.DropGraphService;
 import org.neo4j.gds.core.loading.GraphNameValidationService;
-import org.neo4j.gds.core.loading.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.ListGraphService;
 import org.neo4j.gds.core.loading.PreconditionsService;
@@ -72,6 +74,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
     @Override
     public GraphStoreCatalogProcedureFacade apply(Context context) {
         // Neo4j's services, all encapsulated so that they can be resolved late
+        var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransactionService = new KernelTransactionService(context);
         var procedureTransactionService = new ProcedureTransactionService(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
@@ -80,23 +83,27 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
         // GDS applications
+        var configurationService = new ConfigurationService();
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
         var graphNameValidationService = new GraphNameValidationService();
         var listGraphService = new ListGraphService(graphStoreCatalogService);
+        var nativeProjectService = new NativeProjectService(log, graphDatabaseService);
         var preconditionsService = createPreconditionsService();
 
         // GDS business facade
         var businessFacade = new GraphStoreCatalogBusinessFacade(
             preconditionsService,
+            configurationService,
             graphNameValidationService,
             graphStoreCatalogService,
             dropGraphService,
-            listGraphService
+            listGraphService,
+            nativeProjectService
         );
 
         return new GraphStoreCatalogProcedureFacade(
             databaseIdService,
-            context.graphDatabaseAPI(),
+            graphDatabaseService,
             kernelTransactionService,
             log,
             procedureReturnColumns,

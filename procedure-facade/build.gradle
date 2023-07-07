@@ -21,6 +21,7 @@ dependencies {
     implementation project(':core') // this is where the business facade lives (currently)
     implementation project(':core-utils')
     implementation project(':executor') // Preconditions
+    implementation project(':graph-store-catalog-applications') // duh
     implementation project(':neo4j-api') // ProcedureReturnColumns
     implementation project(':neo4j-kernel-adapter') // Neo4jProxy
     implementation project(':proc-catalog') // this is where the (catalog) procedures facade lives
