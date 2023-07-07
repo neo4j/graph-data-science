@@ -21,12 +21,12 @@ package org.neo4j.gds.core.loading;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
@@ -35,7 +35,7 @@ import java.util.Optional;
  * Here we have just business logic: no Neo4j bits or other integration bits, just Java POJO things.
  * <p>
  * By nature business logic is going to be bespoke, so one method per logical thing.
- * Take {@link GraphStoreCatalogBusinessFacade#graphExists(String, org.neo4j.gds.api.DatabaseId, String)} for example:
+ * Take {@link GraphStoreCatalogBusinessFacade#graphExists(org.neo4j.gds.api.User, org.neo4j.gds.api.DatabaseId, String)}} for example:
  * pure expressed business logic that layers above will use in multiple places, but!
  * Any marshalling happens in those layers, not here.
  * <p>
@@ -71,12 +71,12 @@ public class GraphStoreCatalogBusinessFacade {
         this.listGraphService = listGraphService;
     }
 
-    public boolean graphExists(String username, DatabaseId databaseId, String graphName) {
+    public boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString) {
         checkPreconditions();
 
-        var validatedGraphName = graphNameValidationService.validate(graphName);
+        var validatedGraphName = graphNameValidationService.validate(graphNameAsString);
 
-        return graphStoreCatalogService.graphExists(username, databaseId, validatedGraphName);
+        return graphStoreCatalogService.graphExists(user, databaseId, validatedGraphName);
     }
 
     /**
@@ -97,9 +97,9 @@ public class GraphStoreCatalogBusinessFacade {
 
         // general parameter consolidation
         // we imagine any new endpoints will follow the exact same parameter lists I guess, for now
-        List<String> validatedGraphNames = parseGraphNameOrListOfGraphNames(graphNameOrListOfGraphNames);
-        DatabaseId databaseId = currentDatabase.orOverride(databaseName);
-        Optional<String> usernameOverride = User.parseUsernameOverride(username);
+        var validatedGraphNames = parseGraphNameOrListOfGraphNames(graphNameOrListOfGraphNames);
+        var databaseId = currentDatabase.orOverride(databaseName);
+        var usernameOverride = User.parseUsernameOverride(username);
 
         return dropGraphService.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
     }
@@ -112,7 +112,7 @@ public class GraphStoreCatalogBusinessFacade {
     ) {
         checkPreconditions();
 
-        Optional<String> validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
+        var validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
 
         return listGraphService.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
     }
@@ -124,7 +124,7 @@ public class GraphStoreCatalogBusinessFacade {
     /**
      * I wonder if other endpoint will also deliver an Object type to parse in this layer - we shall see
      */
-    private List<String> parseGraphNameOrListOfGraphNames(Object graphNameOrListOfGraphNames) {
+    private List<GraphName> parseGraphNameOrListOfGraphNames(Object graphNameOrListOfGraphNames) {
         return graphNameValidationService.validateSingleOrList(graphNameOrListOfGraphNames);
     }
 }

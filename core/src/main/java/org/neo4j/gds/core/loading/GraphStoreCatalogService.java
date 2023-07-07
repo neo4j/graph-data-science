@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -29,6 +30,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 /**
  * One day the graph catalog won't be a static thing, it'll instead be a dependency you inject here. One day.
  * <p>
@@ -37,44 +40,64 @@ import java.util.stream.Stream;
  * without having to write separate tests for this class.
  */
 public class GraphStoreCatalogService {
-    public boolean graphExists(String username, DatabaseId databaseId, String graphName) {
-        return GraphStoreCatalog.exists(username, databaseId, graphName);
+    public boolean graphExists(User user, DatabaseId databaseId, GraphName graphName) {
+        return GraphStoreCatalog.exists(user.getUsername(), databaseId, graphName.getValue());
     }
 
     public GraphStoreWithConfig removeGraph(
         CatalogRequest request,
-        String graphName,
+        GraphName graphName,
         boolean shouldFailIfMissing
     ) {
         var result = new AtomicReference<GraphStoreWithConfig>();
         GraphStoreCatalog.remove(
             request,
-            graphName,
+            graphName.getValue(),
             result::set,
             shouldFailIfMissing
         );
         return result.get();
     }
 
-    public GraphStoreWithConfig get(CatalogRequest catalogRequest, String graphName) {
-        return GraphStoreCatalog.get(catalogRequest, graphName);
+    public GraphStoreWithConfig get(CatalogRequest catalogRequest, GraphName graphName) {
+        return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
+    }
+
+    /**
+     * Predicate around @graphExists
+     *
+     * @throws java.lang.IllegalArgumentException if graph already exists in graph catalog
+     */
+    public void ensureGraphDoesNotExist(User user, DatabaseId databaseId, GraphName graphName) {
+        if (graphExists(user, databaseId, graphName)) {
+            String message = formatWithLocale(
+                "A graph with name '%s' already exists.",
+                graphName
+            );
+            throw new IllegalArgumentException(message);
+        }
     }
 
     public Optional<Map<String, Object>> getDegreeDistribution(
         User user,
         DatabaseId databaseId,
-        String/*GraphName, fix me*/ graphName
+        GraphName graphName
     ) {
-        return GraphStoreCatalog.getDegreeDistribution(user.getUsername(), databaseId, graphName);
+        return GraphStoreCatalog.getDegreeDistribution(user.getUsername(), databaseId, graphName.getValue());
     }
 
     public void setDegreeDistribution(
         User user,
         DatabaseId databaseId,
-        String/*GraphName, fix me*/ graphName,
+        GraphName graphName,
         Map<String, Object> degreeDistribution
     ) {
-        GraphStoreCatalog.setDegreeDistribution(user.getUsername(), databaseId, graphName, degreeDistribution);
+        GraphStoreCatalog.setDegreeDistribution(
+            user.getUsername(),
+            databaseId,
+            graphName.getValue(),
+            degreeDistribution
+        );
     }
 
     public Stream<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> getAllGraphStores() {

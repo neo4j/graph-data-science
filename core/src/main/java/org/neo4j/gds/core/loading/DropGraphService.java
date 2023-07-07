@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 
 import java.util.LinkedList;
@@ -45,8 +46,8 @@ public class DropGraphService {
      * @param shouldFailIfMissing If true, do an initial check that all graphs exist, fail otherwise
      * @return metadata for the graphs that were removed
      */
-    List<GraphStoreWithConfig> compute(
-        Iterable<String> graphNames,
+    public List<GraphStoreWithConfig> compute(
+        Iterable<GraphName> graphNames,
         boolean shouldFailIfMissing,
         DatabaseId databaseId,
         User operator,
@@ -64,8 +65,8 @@ public class DropGraphService {
         return dropGraphs(request, graphNames, shouldFailIfMissing);
     }
 
-    private void validateGraphsExist(CatalogRequest request, Iterable<String> graphNames) {
-        List<Pair<String, NoSuchElementException>> failures = new LinkedList<>();
+    private void validateGraphsExist(CatalogRequest request, Iterable<GraphName> graphNames) {
+        var failures = new LinkedList<Pair<GraphName, NoSuchElementException>>();
         graphNames.forEach(graphName -> {
                 try {
                     graphStoreCatalogService.get(request, graphName);
@@ -81,7 +82,7 @@ public class DropGraphService {
     }
 
     private NoSuchElementException missingGraphs(
-        List<Pair<String, NoSuchElementException>> missingGraphs,
+        List<Pair<GraphName, NoSuchElementException>> missingGraphs,
         String databaseName
     ) {
         if (missingGraphs.size() == 1) {
@@ -108,11 +109,11 @@ public class DropGraphService {
 
     private List<GraphStoreWithConfig> dropGraphs(
         CatalogRequest request,
-        Iterable<String> graphNames,
+        Iterable<GraphName> graphNames,
         boolean shouldFailIfMissing
     ) {
         var results = new LinkedList<GraphStoreWithConfig>();
-        for (String graphName : graphNames) {
+        for (GraphName graphName : graphNames) {
             var result = graphStoreCatalogService.removeGraph(
                 request,
                 graphName,

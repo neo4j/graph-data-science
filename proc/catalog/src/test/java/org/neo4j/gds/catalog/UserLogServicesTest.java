@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
 
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -42,10 +43,10 @@ class UserLogServicesTest {
     void shouldScopeFactoriesToDatabaseAndUser() {
         var service = new UserLogServices();
 
-        DatabaseId databaseId1 = DatabaseId.from("some database");
-        DatabaseId databaseId2 = DatabaseId.from("some other database");
-        String username1 = "some user";
-        String username2 = "some other user";
+        var databaseId1 = DatabaseId.from("some database");
+        var databaseId2 = DatabaseId.from("some other database");
+        var username1 = new User("some user", false);
+        var username2 = new User("some other user", false);
         var factory1 = service.getUserLogRegistryFactory(databaseId1, username1);
         var factory2 = service.getUserLogRegistryFactory(databaseId1, username1);
         var factory3 = service.getUserLogRegistryFactory(databaseId2, username1);

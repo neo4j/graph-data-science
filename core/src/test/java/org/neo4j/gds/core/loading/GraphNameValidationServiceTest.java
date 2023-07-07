@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.GraphName;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -37,7 +38,7 @@ class GraphNameValidationServiceTest {
 
         var validatedGraphName = graphNameValidationService.validateSingleOrList("a graph name");
 
-        assertThat(validatedGraphName).containsExactly("a graph name");
+        assertThat(validatedGraphName).containsExactly(GraphName.parse("a graph name"));
     }
 
     @Test
@@ -49,7 +50,10 @@ class GraphNameValidationServiceTest {
             "another graph name"
         ));
 
-        assertThat(validatedGraphNames).containsExactly("a graph name", "another graph name");
+        assertThat(validatedGraphNames).containsExactly(
+            GraphName.parse("a graph name"),
+            GraphName.parse("another graph name")
+        );
     }
 
     @Test
@@ -57,9 +61,12 @@ class GraphNameValidationServiceTest {
         var graphNameValidationService = new GraphNameValidationService();
 
         assertThat(graphNameValidationService.validateSingleOrList("   a graph name   "))
-            .containsExactly("a graph name");
+            .containsExactly(GraphName.parse("a graph name"));
         assertThat(graphNameValidationService.validateSingleOrList(List.of("   a graph name", "another graph name   ")))
-            .containsExactly("a graph name", "another graph name");
+            .containsExactly(
+                GraphName.parse("a graph name"),
+                GraphName.parse("another graph name")
+            );
     }
 
     @Test
@@ -142,9 +149,28 @@ class GraphNameValidationServiceTest {
 
         assertThat(service.validatePossibleNull("some graph"))
             .isPresent()
-            .hasValue("some graph");
+            .hasValue(GraphName.parse("some graph"));
 
-        assertThat(service.validatePossibleNull(null))
-            .isEmpty();
+        assertThat(service.validatePossibleNull(null)).isEmpty();
+    }
+
+    @Test
+    void shouldValidate() {
+        var service = new GraphNameValidationService();
+
+        assertThat(service.validate("some graph"))
+            .isEqualTo(GraphName.parse("some graph"));
+    }
+
+    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
+    @MethodSource("invalidGraphNames")
+    void shouldCatchInvalidGraphNamesWhenValidatingAndGettingMicroType(String graphName) {
+        var service = new GraphNameValidationService();
+
+        try {
+            service.validate(graphName);
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).isEqualTo("`graphName` can not be null or blank, but it was `" + graphName + "`");
+        }
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
@@ -45,11 +46,11 @@ public class TaskRegistryFactoryService {
      * The task _store_ is shared for the database; the _registry_ is newed up per request,
      * because it is dependent on the current user for the request.
      */
-    public TaskRegistryFactory getTaskRegistryFactory(DatabaseId databaseId, String username) {
+    public TaskRegistryFactory getTaskRegistryFactory(DatabaseId databaseId, User user) {
         if (!progressTrackingEnabled) return TaskRegistryFactory.empty();
 
         var taskStoreForDatabase = taskStoreService.getTaskStore(databaseId);
 
-        return new LocalTaskRegistryFactory(username, taskStoreForDatabase);
+        return new LocalTaskRegistryFactory(user.getUsername(), taskStoreForDatabase);
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.warnings.LocalUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
@@ -42,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UserLogServices {
     // private final Map<DatabaseId, UserLogStore> stores = new ConcurrentHashMap<>();
-    private final Map<DatabaseId, Map<String, UserLogRegistryFactory>> factories = new ConcurrentHashMap<>();
+    private final Map<DatabaseId, Map<User, UserLogRegistryFactory>> factories = new ConcurrentHashMap<>();
 
     public UserLogStore getUserLogStore(DatabaseId databaseId) {
         String databaseName = databaseId.databaseName();
@@ -51,17 +52,17 @@ public class UserLogServices {
         // return stores.computeIfAbsent(databaseId, __ -> new PerDatabaseUserLogStore());
     }
 
-    public UserLogRegistryFactory getUserLogRegistryFactory(DatabaseId databaseId, String username) {
+    public UserLogRegistryFactory getUserLogRegistryFactory(DatabaseId databaseId, User user) {
         var factoryByUser = getFactoriesForDatabase(databaseId);
 
-        return factoryByUser.computeIfAbsent(username, u -> {
+        return factoryByUser.computeIfAbsent(user, u -> {
             var userLogStoreForDatabase = getUserLogStore(databaseId);
 
-            return new LocalUserLogRegistryFactory(u, userLogStoreForDatabase);
+            return new LocalUserLogRegistryFactory(u.getUsername(), userLogStoreForDatabase);
         });
     }
 
-    private Map<String, UserLogRegistryFactory> getFactoriesForDatabase(DatabaseId databaseId) {
+    private Map<User, UserLogRegistryFactory> getFactoriesForDatabase(DatabaseId databaseId) {
         return factories.computeIfAbsent(
             databaseId,
             __ -> new ConcurrentHashMap<>()

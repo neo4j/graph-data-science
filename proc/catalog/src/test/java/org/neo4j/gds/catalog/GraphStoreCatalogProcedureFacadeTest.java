@@ -62,7 +62,11 @@ class GraphStoreCatalogProcedureFacadeTest {
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("current database"));
         procedureFacade.graphExists("some graph");
 
-        verify(businessFacade).graphExists("current user", DatabaseId.from("current database"), "some graph");
+        verify(businessFacade).graphExists(
+            new User("current user", false),
+            DatabaseId.from("current database"),
+            "some graph"
+        );
     }
 
     /**

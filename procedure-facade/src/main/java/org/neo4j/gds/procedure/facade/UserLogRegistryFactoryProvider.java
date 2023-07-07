@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.UserLogServices;
 import org.neo4j.gds.catalog.UserServices;
@@ -49,9 +48,9 @@ public class UserLogRegistryFactoryProvider implements ThrowingFunction<Context,
 
     @Override
     public UserLogRegistryFactory apply(Context context) {
-        DatabaseId databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
-        String username = userServices.getUser(context.securityContext()).getUsername();
+        var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+        var user = userServices.getUser(context.securityContext());
 
-        return userLogServices.getUserLogRegistryFactory(databaseId, username);
+        return userLogServices.getUserLogRegistryFactory(databaseId, user);
     }
 }

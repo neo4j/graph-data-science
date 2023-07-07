@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 
 import java.util.List;
@@ -43,10 +44,12 @@ class DropGraphServiceTest {
         var catalogRequest = CatalogRequest.of("some user", DatabaseId.from("some database"));
         var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
         var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
-        when(graphStoreCatalogService.removeGraph(catalogRequest, "foo", false)).thenReturn(graphStoreWithConfig1);
-        when(graphStoreCatalogService.removeGraph(catalogRequest, "bar", false)).thenReturn(graphStoreWithConfig2);
-        List<GraphStoreWithConfig> results = dropGraphService.compute(
-            List.of("foo", "bar"),
+        when(graphStoreCatalogService.removeGraph(catalogRequest, GraphName.parse("foo"), false)).thenReturn(
+            graphStoreWithConfig1);
+        when(graphStoreCatalogService.removeGraph(catalogRequest, GraphName.parse("bar"), false)).thenReturn(
+            graphStoreWithConfig2);
+        var results = dropGraphService.compute(
+            List.of(GraphName.parse("foo"), GraphName.parse("bar")),
             false,
             DatabaseId.from("some database"),
             new User("some user", false),
@@ -62,13 +65,17 @@ class DropGraphServiceTest {
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
 
         var request = CatalogRequest.of("some user", DatabaseId.from("some database"));
-        when(graphStoreCatalogService.get(request, "foo")).thenReturn(mock(GraphStoreWithConfig.class));
-        when(graphStoreCatalogService.get(request, "bar")).thenThrow(new NoSuchElementException("aha!"));
-        when(graphStoreCatalogService.get(request, "baz")).thenReturn(mock(GraphStoreWithConfig.class));
-        when(graphStoreCatalogService.get(request, "quux")).thenThrow(new NoSuchElementException("another!"));
+        var g1 = GraphName.parse("foo");
+        var g2 = GraphName.parse("bar");
+        var g3 = GraphName.parse("baz");
+        var g4 = GraphName.parse("quux");
+        when(graphStoreCatalogService.get(request, g1)).thenReturn(mock(GraphStoreWithConfig.class));
+        when(graphStoreCatalogService.get(request, g2)).thenThrow(new NoSuchElementException("aha!"));
+        when(graphStoreCatalogService.get(request, g3)).thenReturn(mock(GraphStoreWithConfig.class));
+        when(graphStoreCatalogService.get(request, g4)).thenThrow(new NoSuchElementException("another!"));
         try {
             dropGraphService.compute(
-                List.of("foo", "bar", "baz", "quux"),
+                List.of(g1, g2, g3, g4),
                 true,
                 DatabaseId.from("some database"),
                 new User("some user", false),
@@ -80,10 +87,10 @@ class DropGraphServiceTest {
                 "The graphs `bar`, and `quux` do not exist on database `some database`.");
         }
 
-        verify(graphStoreCatalogService).get(request, "foo");
-        verify(graphStoreCatalogService).get(request, "bar");
-        verify(graphStoreCatalogService).get(request, "baz");
-        verify(graphStoreCatalogService).get(request, "quux");
+        verify(graphStoreCatalogService).get(request, g1);
+        verify(graphStoreCatalogService).get(request, g2);
+        verify(graphStoreCatalogService).get(request, g3);
+        verify(graphStoreCatalogService).get(request, g4);
         verifyNoMoreInteractions(graphStoreCatalogService);
     }
 
@@ -95,12 +102,16 @@ class DropGraphServiceTest {
         var request = CatalogRequest.of("some user", DatabaseId.from("some database"));
         var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
         var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
-        when(graphStoreCatalogService.removeGraph(request, "foo", false)).thenReturn(graphStoreWithConfig1);
-        when(graphStoreCatalogService.removeGraph(request, "bar", false)).thenReturn(null);
-        when(graphStoreCatalogService.removeGraph(request, "baz", false)).thenReturn(graphStoreWithConfig2);
-        when(graphStoreCatalogService.removeGraph(request, "quux", false)).thenReturn(null);
+        var g1 = GraphName.parse("foo");
+        var g2 = GraphName.parse("bar");
+        var g3 = GraphName.parse("baz");
+        var g4 = GraphName.parse("quux");
+        when(graphStoreCatalogService.removeGraph(request, g1, false)).thenReturn(graphStoreWithConfig1);
+        when(graphStoreCatalogService.removeGraph(request, g2, false)).thenReturn(null);
+        when(graphStoreCatalogService.removeGraph(request, g3, false)).thenReturn(graphStoreWithConfig2);
+        when(graphStoreCatalogService.removeGraph(request, g4, false)).thenReturn(null);
         var results = dropGraphService.compute(
-            List.of("foo", "bar", "baz", "quux"),
+            List.of(g1, g2, g3, g4),
             false,
             DatabaseId.from("some database"),
             new User("some user", false),
@@ -116,7 +127,7 @@ class DropGraphServiceTest {
 
         try {
             service.compute(
-                List.of("some graph"),
+                List.of(GraphName.parse("some graph")),
                 false,
                 DatabaseId.from("some database"),
                 new User("some user", false),

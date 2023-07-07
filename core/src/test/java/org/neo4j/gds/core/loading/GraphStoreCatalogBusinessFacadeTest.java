@@ -21,6 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.User;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,8 +43,12 @@ class GraphStoreCatalogBusinessFacadeTest {
             null
         );
 
-        when(service.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph")).thenReturn(true);
-        boolean graphExists = facade.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph");
+        when(service.graphExists(
+            new User("someUser", false),
+            DatabaseId.from("someDatabase"),
+            GraphName.parse("someGraph")
+        )).thenReturn(true);
+        var graphExists = facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph");
 
         assertTrue(graphExists);
     }
@@ -58,8 +64,16 @@ class GraphStoreCatalogBusinessFacadeTest {
             null
         );
 
-        when(service.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph")).thenReturn(false);
-        boolean graphExists = facade.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph");
+        when(service.graphExists(
+            new User("someUser", false),
+            DatabaseId.from("someDatabase"),
+            GraphName.parse("someGraph")
+        )).thenReturn(false);
+        boolean graphExists = facade.graphExists(
+            new User("someUser", false),
+            DatabaseId.from("someDatabase"),
+            "someGraph"
+        );
 
         assertFalse(graphExists);
     }
@@ -78,7 +92,7 @@ class GraphStoreCatalogBusinessFacadeTest {
         doThrow(new IllegalStateException("call blocked because reasons"))
             .when(preconditionsService).checkPreconditions();
         assertThatThrownBy(
-            () -> facade.graphExists("someUser", DatabaseId.from("someDatabase"), "someGraph")
+            () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph")
         ).hasMessage("call blocked because reasons");
     }
 
@@ -94,7 +108,7 @@ class GraphStoreCatalogBusinessFacadeTest {
         );
 
         assertThatThrownBy(
-            () -> facade.graphExists("someUser", DatabaseId.from("someDatabase"), "   ")
+            () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "   ")
         ).hasMessage("`graphName` can not be null or blank, but it was `   `");
     }
 }

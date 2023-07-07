@@ -116,11 +116,11 @@ public class GraphStoreCatalogProcedureFacade {
 
     boolean graphExists(String graphName) {
         // stripping off Neo4j bits
-        String username = user().getUsername();
-        DatabaseId databaseId = databaseId();
+        var user = user();
+        var databaseId = databaseId();
 
         // no static access! we want to be able to test this stuff
-        return businessFacade.graphExists(username, databaseId, graphName);
+        return businessFacade.graphExists(user, databaseId, graphName);
     }
 
     /**

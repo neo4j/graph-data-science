@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -40,7 +41,7 @@ public class ListGraphService {
 
     public List<Pair<GraphStoreWithConfig, Map<String, Object>>> list(
         User user,
-        Optional<String> graphName,
+        Optional<GraphName> graphName,
         boolean includeDegreeDistribution,
         TerminationFlag terminationFlag
     ) {
@@ -50,7 +51,7 @@ public class ListGraphService {
 
         if (graphName.isPresent()) {
             // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName.get()));
+            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName.get().getValue()));
         }
 
         return graphEntries.map(e ->
@@ -76,13 +77,15 @@ public class ListGraphService {
         if (!includeDegreeDistribution) return null;
 
         // we shall eventually have microtypes, by hook or by crook
-        var username = graphStoreWithConfig.config().username();
-        var user = new User(username, false);
+        var usernameAsString = graphStoreWithConfig.config().username();
+        var user = new User(usernameAsString, false);
+        var graphNameAsString = graphStoreWithConfig.config().graphName();
+        var graphName = GraphName.parse(graphNameAsString);
 
         var maybeDegreeDistribution = graphStoreCatalogService.getDegreeDistribution(
             user,
             graphStoreWithConfig.graphStore().databaseId(),
-            graphStoreWithConfig.config().graphName()
+            graphName
         );
 
         return maybeDegreeDistribution.orElseGet(() -> {
@@ -91,7 +94,7 @@ public class ListGraphService {
             graphStoreCatalogService.setDegreeDistribution(
                 user,
                 graphStoreWithConfig.graphStore().databaseId(),
-                graphStoreWithConfig.config().graphName(),
+                graphName,
                 histogram
             );
             return histogram;

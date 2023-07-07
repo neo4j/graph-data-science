@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.core.CypherMapAccess;
 
 import java.util.Collection;
@@ -41,8 +42,10 @@ public class GraphNameValidationService {
      * @return trimmed graph name for downstream consumption.
      * @throws IllegalArgumentException if graph name is null or blank
      */
-    public String validate(String graphName) {
-        return CypherMapAccess.failOnBlank("graphName", graphName).trim();
+    public GraphName validate(String graphName) {
+        CypherMapAccess.failOnBlank("graphName", graphName);
+
+        return GraphName.parse(graphName);
     }
 
     /**
@@ -51,7 +54,7 @@ public class GraphNameValidationService {
      * @return {@link java.util.Optional#empty()} if graph name was null; trimmed graph name otherwise
      * @throws IllegalArgumentException if graph name is blank
      */
-    public Optional<String> validatePossibleNull(String graphName) {
+    public Optional<GraphName> validatePossibleNull(String graphName) {
         if (graphName == null) return Optional.empty();
 
         return Optional.of(validate(graphName));
@@ -63,7 +66,7 @@ public class GraphNameValidationService {
      * - not blank
      * Furthermore, the graph name(s) are trimmed and put into a List for downstream consumption.
      */
-    public List<String> validateSingleOrList(Object graphNameOrListOfGraphNames) {
+    public List<GraphName> validateSingleOrList(Object graphNameOrListOfGraphNames) {
         if (graphNameOrListOfGraphNames == null) {
             validate(null);
 
@@ -77,7 +80,7 @@ public class GraphNameValidationService {
         if (graphNameOrListOfGraphNames instanceof Collection<?>) {
             var listOfGraphNames = (Collection<?>) graphNameOrListOfGraphNames;
 
-            var validatedGraphNames = new LinkedList<String>();
+            var validatedGraphNames = new LinkedList<GraphName>();
             int index = 0;
             for (Object graphName : listOfGraphNames) {
                 var validatedGraphName = validateSingleFromList(graphName, index);
@@ -90,7 +93,7 @@ public class GraphNameValidationService {
         throw typeMismatch(graphNameOrListOfGraphNames, -1);
     }
 
-    private String validateSingleFromList(Object graphName, int index) {
+    private GraphName validateSingleFromList(Object graphName, int index) {
         if (graphName == null) {
             validate(null);
 

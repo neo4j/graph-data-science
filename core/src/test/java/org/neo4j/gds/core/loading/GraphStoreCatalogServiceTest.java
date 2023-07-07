@@ -22,7 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 
 import java.util.NoSuchElementException;
@@ -55,22 +57,22 @@ class GraphStoreCatalogServiceTest {
         var service = new GraphStoreCatalogService();
 
         assertTrue(service.graphExists(
-            "some user",
+            new User("some user", false),
             DatabaseId.from("some database"),
-            "some graph"
+            GraphName.parse("some graph")
         ));
 
         var graphStoreWithConfig = service.removeGraph(
             CatalogRequest.of("some user", "some database"),
-            "some graph", true
+            GraphName.parse("some graph"), true
         );
         assertSame(configuration, graphStoreWithConfig.config());
         assertSame(graphStore, graphStoreWithConfig.graphStore());
 
         assertFalse(service.graphExists(
-            "some user",
+            new User("some user", false),
             DatabaseId.from("some database"),
-            "some graph"
+            GraphName.parse("some graph")
         ));
     }
 
@@ -80,14 +82,14 @@ class GraphStoreCatalogServiceTest {
 
         assertNull(service.removeGraph(
             CatalogRequest.of("some user", "some database"),
-            "some graph",
+            GraphName.parse("some graph"),
             false
         ));
 
         try {
             service.removeGraph(
                 CatalogRequest.of("some user", "some database"),
-                "some graph",
+                GraphName.parse("some graph"),
                 true
             );
 
