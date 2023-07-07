@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.degree.DegreeCentralityStreamProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.functions.NodePropertyFunc;
+import org.neo4j.gds.paths.traverse.BfsStreamProc;
 
 import java.util.List;
 
@@ -34,7 +37,7 @@ class UtilityDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of();
+        return List.of(GraphProjectProc.class, DegreeCentralityStreamProc.class, BfsStreamProc.class);
     }
 
     @Override
