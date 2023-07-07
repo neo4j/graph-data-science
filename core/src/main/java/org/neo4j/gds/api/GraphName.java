@@ -22,50 +22,36 @@ package org.neo4j.gds.api;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Optional;
+public class GraphName {
+    private final String value;
 
-public class User {
-    private final String username;
-    private final boolean isAdmin;
-
-    public User(String username, boolean isAdmin) {
-        this.username = username;
-        this.isAdmin = isAdmin;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public boolean isAdmin() {
-        return isAdmin;
+    private GraphName(String value) {
+        this.value = value;
     }
 
     /**
-     * Take user input and determine whether it is a valid username override.
-     *
-     * @param username which might be null or blank
-     * @return a proper validated, trimmed username, or {@link java.util.Optional#empty()}
+     * Trim the incoming string and use that.
      */
-    public static Optional<String> parseUsernameOverride(String username) {
-        if (username == null) return Optional.empty();
-        if (username.isBlank()) return Optional.empty();
+    public static GraphName parse(String graphNameAsString) {
+        return new GraphName(graphNameAsString.trim());
+    }
 
-        return Optional.of(username.trim());
+    public String getValue() {
+        return value;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj, "isAdmin");
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, "isAdmin");
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public String toString() {
-        return username;
+        return value;
     }
 }

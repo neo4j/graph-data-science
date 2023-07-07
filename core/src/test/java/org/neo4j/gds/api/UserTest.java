@@ -21,7 +21,10 @@ package org.neo4j.gds.api;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserTest {
     @Test
@@ -32,5 +35,45 @@ class UserTest {
         assertThat(User.parseUsernameOverride(null)).isEmpty();
         assertThat(User.parseUsernameOverride("")).isEmpty();
         assertThat(User.parseUsernameOverride("   ")).isEmpty();
+    }
+
+    @Test
+    void shouldDoEqualityOnNameOnly() {
+        var user1 = new User("a", false);
+        var user2 = new User("a", true);
+        var user3 = new User("b", false);
+
+        assertThat(user1).isEqualTo(user1);
+        assertThat(user1).isEqualTo(user2);
+        assertThat(user1).isNotEqualTo(user3);
+    }
+
+    @Test
+    void shouldDoHashcodeOnNameOnly() {
+        var users = new HashSet<>();
+
+        var user1 = new User("a", false);
+        var user2 = new User("a", true);
+        var user3 = new User("b", false);
+
+        assertThat(users).hasSize(0);
+
+        users.add(user1);
+        assertThat(users).hasSize(1);
+        assertTrue(users.contains(user1));
+        assertTrue(users.contains(user2));
+
+        users.clear();
+
+        users.add(user2);
+        assertThat(users).hasSize(1);
+        assertTrue(users.contains(user1));
+        assertTrue(users.contains(user2));
+
+        users.add(user3);
+        assertThat(users).hasSize(2);
+        assertTrue(users.contains(user1));
+        assertTrue(users.contains(user2));
+        assertTrue(users.contains(user3));
     }
 }
