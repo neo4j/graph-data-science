@@ -17,16 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.topologicalsort;
+package org.neo4j.gds.dag.longestPath;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-@Configuration
-public interface TopologicalSortStreamConfig extends TopologicalSortBaseConfig {
-
-    static TopologicalSortStreamConfig of(CypherMapWrapper userInput) {
-        return new TopologicalSortStreamConfigImpl(userInput);
-    }
-
+public interface LongestPathBaseConfig extends AlgoBaseConfig {
 }

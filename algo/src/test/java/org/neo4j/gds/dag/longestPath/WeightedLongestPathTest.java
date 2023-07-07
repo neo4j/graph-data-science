@@ -17,15 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.topologicalsort;
+package org.neo4j.gds.dag.longestPath;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -34,10 +30,9 @@ import org.neo4j.gds.extension.TestGraph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
-class TopologicalSortWeightedLongestPathTest {
-    private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
+class WeightedLongestPathTest {
+    private static LongestPathBaseConfig CONFIG = new LongestPathStreamConfigImpl.Builder()
         .concurrency(4)
-        .computeLongestPathDistances(true)
         .build();
 
     @GdlGraph(graphNamePrefix = "basic")
@@ -57,9 +52,8 @@ class TopologicalSortWeightedLongestPathTest {
 
     @Test
     void basicWeightedLongestPath() {
-        TopologicalSort ts = new TopologicalSort(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
+        LongestPath ts = new LongestPath(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.sortedNodes();
 
         var longestPathsDistances = result.longestPathDistances().get();
         var firstLongestPathDistance = longestPathsDistances.get(0);

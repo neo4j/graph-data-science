@@ -22,11 +22,11 @@ package org.neo4j.gds.paths.dag.longestPath;
 @SuppressWarnings("unused")
 public class LongestPathStreamResult {
 
-    public final long nodeId;
+    public final long targetNodeId;
     public final double distance;
 
-    public LongestPathStreamResult(long nodeId, double distance) {
-        this.nodeId = nodeId;
+    public LongestPathStreamResult(long targetNodeId, double distance) {
+        this.targetNodeId = targetNodeId;
         this.distance = distance;
     }
 }

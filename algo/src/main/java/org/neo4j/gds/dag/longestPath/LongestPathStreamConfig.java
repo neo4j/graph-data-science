@@ -17,28 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.dag.topologicalsort;
+package org.neo4j.gds.dag.longestPath;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.dag.topologicalsort.LongestPathStreamConfigImpl;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-public interface LongestPathStreamConfig extends TopologicalSortBaseConfig, RelationshipWeightConfig {
+public interface LongestPathStreamConfig extends LongestPathBaseConfig, RelationshipWeightConfig {
 
     static LongestPathStreamConfig of(CypherMapWrapper userInput) {
         return new LongestPathStreamConfigImpl(userInput);
-    }
-
-    @Value.Check
-    default void validate() {
-        if (relationshipWeightProperty().isPresent() && ! computeLongestPathDistances()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Relationship weight property can only be set when computeLongestPathDistances is true"));
-        }
     }
 }

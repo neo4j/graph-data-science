@@ -66,22 +66,21 @@ class LongestPathStreamProcTest extends BaseProcTest {
         String query = GdsCypher.call("last")
             .algo("gds.alpha.longestPath")
             .streamMode()
-            .addParameter("computeLongestPathDistances", true)
             .addParameter("relationshipWeightProperty", "prop")
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
             var record = result.next();
-            assertEquals(idFunction.of("n0"), record.get("nodeId"));
+            assertEquals(idFunction.of("n0"), record.get("targetNodeId"));
             assertEquals(0.0, record.get("distance"));
             record = result.next();
-            assertEquals(idFunction.of("n2"), record.get("nodeId"));
+            assertEquals(idFunction.of("n2"), record.get("targetNodeId"));
             assertEquals(5.0, record.get("distance"));
             record = result.next();
-            assertEquals(idFunction.of("n1"), record.get("nodeId"));
+            assertEquals(idFunction.of("n1"), record.get("targetNodeId"));
             assertEquals(8.0, record.get("distance"));
             record = result.next();
-            assertEquals(idFunction.of("n3"), record.get("nodeId"));
+            assertEquals(idFunction.of("n3"), record.get("targetNodeId"));
             assertEquals(9.0, record.get("distance"));
             assertFalse(result.hasNext());
         });
