@@ -55,4 +55,9 @@ class LogAdapter implements Log {
     public boolean isDebugEnabled() {
         return neo4jUserLog.isDebugEnabled();
     }
+
+    @Override
+    public void debug(String format, Object... arguments) {
+        neo4jUserLog.debug(format, arguments);
+    }
 }

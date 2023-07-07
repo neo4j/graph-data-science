@@ -37,4 +37,6 @@ public interface Log {
     void warn(String format, Object... arguments);
 
     boolean isDebugEnabled();
+
+    void debug(String format, Object... arguments);
 }
