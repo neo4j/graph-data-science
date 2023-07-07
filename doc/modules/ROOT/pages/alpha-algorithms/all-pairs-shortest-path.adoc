@@ -24,7 +24,7 @@ Some pairs of nodes might not be reachable between each other, so no shortest pa
 In this scenario, the algorithm will return `Infinity` value as a result between these pairs of nodes.
 // end::explanation[]
 
-Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite` function was added to help filter `Infinity` values from results.
+Before Neo4j 5, Cypher did not support filtering `Infinity` values, so GDS offers additional xref:management-ops/utility-functions.adoc[functions] such as  `gds.util.isFinite` function to help filter `Infinity` values from results.
 
 
 [[algorithm-all-pairs-shortest-path-usecase]]

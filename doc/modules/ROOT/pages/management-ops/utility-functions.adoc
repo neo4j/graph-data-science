@@ -33,28 +33,18 @@ RETURN gds.version() AS version
 [[utility-functions-numeric]]
 == Numeric Functions
 
-.Numeric Functions
-[[Numeric-functions-table]]
-[opts=header,cols="1m,1"]
-|===
-| Name                | Description
-| gds.util.NaN        | Returns NaN as a Cypher value.
-| gds.util.infinity   | Return infinity as a Cypher value.
-| gds.util.isFinite   | Return false if the given argument is ±Infinity, NaN, or null.
-| gds.util.isInfinite | Return true if the given argument is ±Infinity, NaN, or null.
-|===
-
+NOTE: Since Neo4j 5, this functionality can also be expressed directly in Cypher with using the float literals `Inf, Infinity, NaN`  and the function `isNaN()`.
 
 === Syntax
 
 [[Numeric-functions-syntax-table]]
-[opts=header,cols="1m,1"]
+[opts=header,cols="1m,1, 1"]
 |===
-| Name                                  | Parameter
-| gds.util.NaN()                        | -
-| gds.util.infinity()                   | -
-| gds.util.isFinite(value: NUMBER)      | value to be checked if it is finite.
-| gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite.
+| Name                                  | Parameter                              | Description
+| gds.util.NaN()                        | -                                      | Returns NaN as a Cypher value.
+| gds.util.infinity()                   | -                                      | Return infinity as a Cypher value.
+| gds.util.isFinite(value: NUMBER)      | value to be checked if it is finite.   | Return false if the given argument is ±Infinity, NaN, or null.
+| gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite. | Return true if the given argument is ±Infinity, NaN, or null.
 |===
 
 
