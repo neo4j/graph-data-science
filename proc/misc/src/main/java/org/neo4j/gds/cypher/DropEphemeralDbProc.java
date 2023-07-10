@@ -52,7 +52,7 @@ public class DropEphemeralDbProc extends BaseProc {
             () -> {
                 GraphCreateEphemeralDatabaseProc.validateNeo4jEnterpriseEdition(databaseService);
                 var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
-                validateDatabaseName(dbName, dbms);
+                validateDatabaseName(callContext.databaseName(), dbName, dbms);
                 var dropMillis = new MutableLong(0);
                 try (var ignored = ProgressTimer.start(dropMillis::setValue)) {
                     dbms.dropDatabase(dbName);
@@ -72,7 +72,11 @@ public class DropEphemeralDbProc extends BaseProc {
         return dropInMemoryDatabase(dbName);
     }
 
-    private static void validateDatabaseName(String dbName, DatabaseManagementService dbms) {
+    private static void validateDatabaseName(String activeDbName, String dbName, DatabaseManagementService dbms) {
+        if (activeDbName.equals(dbName)) {
+            throw new IllegalArgumentException("Unable drop the currently active database. Please switch to another database first.");
+        }
+
         if (!dbms.listDatabases().contains(dbName)) {
             throw new DatabaseNotFoundException(formatWithLocale("A database with name `%s` does not exist", dbName));
         }
