@@ -24,7 +24,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.RelationshipCursor;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -35,10 +35,10 @@ import java.util.stream.Stream;
  */
 public class UniformSampler {
 
-    private final Random random;
+    private final SplittableRandom random;
 
     public UniformSampler(long randomSeed) {
-        this.random = new Random(randomSeed);
+        this.random = new SplittableRandom(randomSeed);
     }
 
     public LongStream sample(Stream<RelationshipCursor> relationshipCursorStream, long inputSize, int numberOfSamples) {

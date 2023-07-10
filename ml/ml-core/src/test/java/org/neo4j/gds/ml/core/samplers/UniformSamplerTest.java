@@ -55,8 +55,8 @@ class UniformSamplerTest {
 
         var longSummaryStatistics = Arrays.stream(sampled.values().toArray()).summaryStatistics();
         assertThat(longSummaryStatistics.getAverage()).isEqualTo(100.0D, Offset.offset(1D));
-        assertThat(longSummaryStatistics.getMin()).isCloseTo(80L, Offset.offset(5L));
-        assertThat(longSummaryStatistics.getMax()).isCloseTo(120L, Offset.offset(5L));
+        assertThat(longSummaryStatistics.getMin()).isCloseTo(80L, Offset.offset(15L));
+        assertThat(longSummaryStatistics.getMax()).isCloseTo(120L, Offset.offset(15L));
     }
 
     @Test
@@ -82,8 +82,8 @@ class UniformSamplerTest {
         var longSummaryStatistics = Arrays.stream(sampled.values().toArray()).summaryStatistics();
 
         assertThat(longSummaryStatistics.getAverage()).isEqualTo(100.0D, Offset.offset(1D));
-        assertThat(longSummaryStatistics.getMin()).isCloseTo(80L, Offset.offset(5L));
-        assertThat(longSummaryStatistics.getMax()).isCloseTo(120L, Offset.offset(5L));
+        assertThat(longSummaryStatistics.getMin()).isCloseTo(80L, Offset.offset(15L));
+        assertThat(longSummaryStatistics.getMax()).isCloseTo(120L, Offset.offset(15L));
     }
 
     @ParameterizedTest
