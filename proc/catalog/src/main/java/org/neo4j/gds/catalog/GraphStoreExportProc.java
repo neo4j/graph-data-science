@@ -92,20 +92,28 @@ public class GraphStoreExportProc extends BaseProc {
                     progressTracker
                 );
 
-                var start = System.nanoTime();
-                var exportedProperties = exporter.run();
-                var end = System.nanoTime();
+                try {
+                    var start = System.nanoTime();
+                    var exportedProperties = exporter.run();
+                    var end = System.nanoTime();
 
-                return new DatabaseExportResult(
-                    graphName,
-                    exportConfig.dbName(),
-                    graphStore.nodeCount(),
-                    graphStore.relationshipCount(),
-                    graphStore.relationshipTypes().size(),
-                    exportedProperties.nodePropertyCount(),
-                    exportedProperties.relationshipPropertyCount(),
-                    java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
-                );
+                    return new DatabaseExportResult(
+                        graphName,
+                        exportConfig.dbName(),
+                        graphStore.nodeCount(),
+                        graphStore.relationshipCount(),
+                        graphStore.relationshipTypes().size(),
+                        exportedProperties.nodePropertyCount(),
+                        exportedProperties.relationshipPropertyCount(),
+                        java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
+                    );
+                } catch (Exception e) {
+                    // Ideally we should not have this logic on the proc level
+                    // the progress tracker is instantiated in this proc
+                    // so we need to make sure it closes as well
+                    progressTracker.endSubTaskWithFailure();
+                    throw e;
+                }
             }
         );
 
