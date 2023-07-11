@@ -51,7 +51,7 @@ public class ReverseLogAdapter implements Log {
 
     @Override
     public void debug(String format, Object... arguments) {
-        throw new UnsupportedOperationException("TODOc");
+        gdsLog.debug(format, arguments);
     }
 
     @Override
