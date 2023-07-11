@@ -134,7 +134,7 @@ public final class BlockStatistics implements AutoCloseable {
             }
         }
         this.stdDevBits.record((int) Math.ceil(this.bitsPerValue.stdDev()));
-        this.meanBits.record(this.bitsPerValue.mean());
+        this.meanBits.record((int) Math.ceil(this.bitsPerValue.mean()));
         this.medianBits.record(this.bitsPerValue.median());
         this.maxBits.record(maxValue);
         this.minBits.record(minValue);

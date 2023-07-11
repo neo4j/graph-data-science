@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.compression;
 
-import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
-
 import java.util.Arrays;
 
 /**
@@ -44,6 +42,7 @@ public class BoundedHistogram {
 
     /**
      * Record the occurrence of the value in the histogram.
+     * Resizes the underlying buffer if necessary.
      */
     public void record(int value) {
         if (value >= this.histogram.length) {
@@ -63,8 +62,8 @@ public class BoundedHistogram {
     /**
      * Return the average value recorded.
      */
-    public int mean() {
-        int sum = 0;
+    public double mean() {
+        double sum = 0;
 
         int[] histogram = this.histogram;
         for (int i = 0; i < histogram.length; i++) {
@@ -103,7 +102,7 @@ public class BoundedHistogram {
      * Return the standard deviation across all values.
      */
     public double stdDev() {
-        int mean = mean();
+        double mean = mean();
         double sum = 0;
 
         int[] histogram = this.histogram;
@@ -150,7 +149,6 @@ public class BoundedHistogram {
 
     /**
      * Adds all recorded values of `other` to `this` histogram.
-     * Potentially grows the value space of `this` histogram.
      */
     public void add(BoundedHistogram other) {
         if (other.histogram.length > this.histogram.length) {
@@ -158,9 +156,9 @@ public class BoundedHistogram {
         }
 
         for (int otherValue = 0; otherValue < other.histogram.length; otherValue++) {
-            for (int otherFrequency = 0; otherFrequency < other.histogram[otherValue]; otherFrequency++) {
-                this.record(otherValue);
-            }
+            this.histogram[otherValue] += other.histogram[otherValue];
         }
+
+        this.total += other.total;
     }
 }

@@ -34,15 +34,15 @@ class BoundedHistogramTest {
     static Stream<Arguments> means() {
         return Stream.of(
             Arguments.of(new int[] {5}, 5),
-            Arguments.of(IntStream.range(0, 10).toArray(), 4),
+            Arguments.of(IntStream.range(0, 10).toArray(), 4.5),
             Arguments.of(IntStream.range(1, 10).toArray(), 5),
-            Arguments.of(new int[] {1, 4, 4, 4}, 3)
+            Arguments.of(new int[] {1, 4, 4, 4}, 3.25)
         );
     }
 
     @ParameterizedTest
     @MethodSource("means")
-    void testMean(int[] values, int expected) {
+    void testMean(int[] values, double expected) {
         var histogram = create(values);
         assertThat(histogram.mean()).isEqualTo(expected);
     }
