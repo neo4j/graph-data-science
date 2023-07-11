@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.compression;
 
+import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
+
 import java.util.Arrays;
 
 /**
@@ -30,7 +32,6 @@ public class BoundedHistogram {
     public static final int NO_VALUE = -1;
 
     private int[] histogram;
-    private int ub;
     private int total;
 
     /**
@@ -38,7 +39,6 @@ public class BoundedHistogram {
      */
     public BoundedHistogram(int upperBoundExclusive) {
         this.histogram = new int[upperBoundExclusive];
-        this.ub = upperBoundExclusive;
         this.total = 0;
     }
 
@@ -46,12 +46,11 @@ public class BoundedHistogram {
      * Record the occurrence of the value in the histogram.
      */
     public void record(int value) {
-        if (value < ub) {
-            this.histogram[value]++;
-            this.total++;
-        } else {
-            throw new IllegalArgumentException("Value " + value + " is larger than the histogram upper bound " + ub);
+        if (value >= this.histogram.length) {
+            this.histogram = Arrays.copyOf(this.histogram, value + 1);
         }
+        this.histogram[value]++;
+        this.total++;
     }
 
     /**
@@ -154,9 +153,8 @@ public class BoundedHistogram {
      * Potentially grows the value space of `this` histogram.
      */
     public void add(BoundedHistogram other) {
-        if (other.ub > this.ub) {
-            this.histogram = Arrays.copyOf(this.histogram, other.ub);
-            this.ub = other.ub;
+        if (other.histogram.length > this.histogram.length) {
+            this.histogram = Arrays.copyOf(this.histogram, other.histogram.length);
         }
 
         for (int otherValue = 0; otherValue < other.histogram.length; otherValue++) {

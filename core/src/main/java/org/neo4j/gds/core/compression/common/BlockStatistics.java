@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.core.compression.common;
 
-import org.HdrHistogram.Histogram;
+import org.neo4j.gds.core.compression.BoundedHistogram;
+import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.mem.BitUtil;
 
 public final class BlockStatistics implements AutoCloseable {
@@ -27,33 +28,32 @@ public final class BlockStatistics implements AutoCloseable {
     public static final BlockStatistics EMPTY = new BlockStatistics();
 
     // used per block
-    private final Histogram bitsPerValue;
+    private final BoundedHistogram bitsPerValue;
 
     // used to collect across blocks
     private long blockCount;
-    private final Histogram stdDevBits;
-    private final Histogram meanBits;
-    private final Histogram medianBits;
-    private final Histogram blockLengths;
-    private final Histogram maxBits;
-    private final Histogram minBits;
-    private final Histogram indexOfMaxValue;
-    private final Histogram indexOfMinValue;
-    private final Histogram headTailDiffBits;
+    private final BoundedHistogram stdDevBits;
+    private final BoundedHistogram meanBits;
+    private final BoundedHistogram medianBits;
+    private final BoundedHistogram blockLengths;
+    private final BoundedHistogram maxBits;
+    private final BoundedHistogram minBits;
+    private final BoundedHistogram indexOfMaxValue;
+    private final BoundedHistogram indexOfMinValue;
+    private final BoundedHistogram headTailDiffBits;
 
     BlockStatistics() {
-        this.bitsPerValue = new Histogram(0);
-
         this.blockCount = 0;
-        this.stdDevBits = new Histogram(2);
-        this.meanBits = new Histogram(0);
-        this.medianBits = new Histogram(0);
-        this.blockLengths = new Histogram(0);
-        this.maxBits = new Histogram(0);
-        this.minBits = new Histogram(0);
-        this.indexOfMinValue = new Histogram(0);
-        this.indexOfMaxValue = new Histogram(0);
-        this.headTailDiffBits = new Histogram(0);
+        this.bitsPerValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.stdDevBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.meanBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.medianBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.blockLengths = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.maxBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.minBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.indexOfMinValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.indexOfMaxValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.headTailDiffBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
     }
 
     public long blockCount() {
@@ -100,7 +100,7 @@ public final class BlockStatistics implements AutoCloseable {
         this.bitsPerValue.reset();
 
         this.blockCount++;
-        this.blockLengths.recordValue(length);
+        this.blockLengths.record(length);
 
         int headBits = bitsNeeded(values[start]);
         int tailBitsSum = 0;
@@ -111,7 +111,7 @@ public final class BlockStatistics implements AutoCloseable {
 
         for (int i = start; i < start + length; i++) {
             int bitsPerValue = bitsNeeded(values[i]);
-            this.bitsPerValue.recordValue(bitsPerValue);
+            this.bitsPerValue.record(bitsPerValue);
 
             if (bitsPerValue > maxValue) {
                 indexOfMaxValue = i;
@@ -130,16 +130,16 @@ public final class BlockStatistics implements AutoCloseable {
         if (tailBitsSum > 0) {
             int tailBitsMean = BitUtil.ceilDiv(tailBitsSum, length - 1);
             if (tailBitsMean <= headBits) {
-                this.headTailDiffBits.recordValue(headBits - tailBitsMean);
+                this.headTailDiffBits.record(headBits - tailBitsMean);
             }
         }
-        this.stdDevBits.recordValue((long) Math.ceil(this.bitsPerValue.getStdDeviation()));
-        this.meanBits.recordValue((long) Math.ceil(this.bitsPerValue.getMean()));
-        this.medianBits.recordValue(this.bitsPerValue.getValueAtPercentile(50));
-        this.maxBits.recordValue(maxValue);
-        this.minBits.recordValue(minValue);
-        this.indexOfMaxValue.recordValue(indexOfMaxValue - start);
-        this.indexOfMinValue.recordValue(indexOfMinValue - start);
+        this.stdDevBits.record((int) Math.ceil(this.bitsPerValue.stdDev()));
+        this.meanBits.record(this.bitsPerValue.mean());
+        this.medianBits.record(this.bitsPerValue.median());
+        this.maxBits.record(maxValue);
+        this.minBits.record(minValue);
+        this.indexOfMaxValue.record(indexOfMaxValue - start);
+        this.indexOfMinValue.record(indexOfMinValue - start);
     }
 
     void mergeInto(BlockStatistics other) {
