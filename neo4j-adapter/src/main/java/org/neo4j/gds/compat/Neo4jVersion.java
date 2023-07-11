@@ -37,6 +37,7 @@ public enum Neo4jVersion {
     V_5_7,
     V_5_8,
     V_5_9,
+    V_5_10,
     V_RC;
 
     @Override
@@ -62,6 +63,8 @@ public enum Neo4jVersion {
                 return "5.8";
             case V_5_9:
                 return "5.9";
+            case V_5_10:
+                return "5.10";
             case V_RC:
                 return "rc";
             default:
@@ -71,7 +74,7 @@ public enum Neo4jVersion {
 
     public MajorMinorVersion semanticVersion() {
         if (this == V_RC) {
-            return ImmutableMajorMinorVersion.of(5, 10);
+            return ImmutableMajorMinorVersion.of(5, 11);
         }
 
         String version = toString();
@@ -153,6 +156,8 @@ public enum Neo4jVersion {
             } else if (minorVersion == 9) {
                 return Neo4jVersion.V_5_9;
             } else if (minorVersion == 10) {
+                return Neo4jVersion.V_5_10;
+            } else if (minorVersion == 11) {
                 return Neo4jVersion.V_RC;
             }
         }
