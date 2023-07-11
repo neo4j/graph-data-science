@@ -27,16 +27,16 @@ import java.util.Arrays;
  */
 public class BoundedHistogram {
 
-    public static final int NO_VALUE = -1;
+    public static final int NO_VALUE = 0;
 
-    private int[] histogram;
-    private int total;
+    private long[] histogram;
+    private long total;
 
     /**
      * Create a new histogram that can record values between 0 and `upperBoundExclusive`.
      */
     public BoundedHistogram(int upperBoundExclusive) {
-        this.histogram = new int[upperBoundExclusive];
+        this.histogram = new long[upperBoundExclusive];
         this.total = 0;
     }
 
@@ -49,13 +49,13 @@ public class BoundedHistogram {
             this.histogram = Arrays.copyOf(this.histogram, value + 1);
         }
         this.histogram[value]++;
-        this.total++;
+        this.total = Math.toIntExact((long) this.total + 1L);
     }
 
     /**
      * Returns the total number of recorded values.
      */
-    public int total() {
+    public long total() {
        return this.total;
     }
 
@@ -65,7 +65,7 @@ public class BoundedHistogram {
     public double mean() {
         double sum = 0;
 
-        int[] histogram = this.histogram;
+        long[] histogram = this.histogram;
         for (int i = 0; i < histogram.length; i++) {
             sum += histogram[i] * i;
         }
@@ -84,10 +84,10 @@ public class BoundedHistogram {
      * Return the value that `percentile` percent of all values fall below.
      */
     public int percentile(float percentile) {
-        int count = 0;
-        int limit = Math.round(total * (percentile / 100));
+        long count = 0;
+        long limit = (long) Math.ceil(total * (percentile / 100));
 
-        int[] histogram = this.histogram;
+        long[] histogram = this.histogram;
         for (int i = 0; i < histogram.length; i++) {
             count += histogram[i];
             if (count > limit) {
@@ -105,7 +105,7 @@ public class BoundedHistogram {
         double mean = mean();
         double sum = 0;
 
-        int[] histogram = this.histogram;
+        long[] histogram = this.histogram;
         for (int i = 0; i < histogram.length; i++) {
             sum += Math.pow(i - mean, 2) * histogram[i];
         }
@@ -114,10 +114,11 @@ public class BoundedHistogram {
     }
 
     /**
-     * Returns the lowest recorded value in the histogram.
+     * Returns the lowest recorded value in the histogram
+     * or `0` if no value has been recorded.
      */
     public int min() {
-        int[] histogram = this.histogram;
+        long[] histogram = this.histogram;
         for (int i = 0; i < histogram.length; i++) {
             if (histogram[i] > 0) {
                 return i;
@@ -127,10 +128,11 @@ public class BoundedHistogram {
     }
 
     /**
-     * Returns the highest recorded value in the histogram.
+     * Returns the highest recorded value in the histogram
+     * or `0` if no value has been recorded.
      */
     public int max() {
-        int[] histogram = this.histogram;
+        long[] histogram = this.histogram;
         for (int i = histogram.length - 1; i >= 0; i--) {
             if (histogram[i] > 0) {
                 return i;
