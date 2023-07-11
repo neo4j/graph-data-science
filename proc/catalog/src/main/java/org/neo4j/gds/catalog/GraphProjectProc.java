@@ -43,6 +43,7 @@ import org.neo4j.gds.executor.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.ExceptionUtil;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -53,9 +54,35 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.PROJECT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphProjectProc extends CatalogProc {
+    @Context
+    public GraphStoreCatalogProcedureFacade facade;
+
+    public GraphProjectProc() {
+    }
+
+    GraphProjectProc(GraphStoreCatalogProcedureFacade facade) {
+        this.facade = facade;
+    }
+
+    @Procedure(name = "gds.graph.project", mode = READ)
+    @Description(PROJECT_DESCRIPTION)
+    public Stream<GraphProjectNativeResult> project(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
+        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.project(
+            graphName,
+            nodeProjection,
+            relationshipProjection,
+            configuration
+        );
+    }
 
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
@@ -66,37 +93,6 @@ public class GraphProjectProc extends CatalogProc {
         GraphProjectFromCypherConfig.NODE_QUERY_KEY,
         GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY
     );
-
-    @Procedure(name = "gds.graph.project", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<GraphProjectNativeResult> project(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
-        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        Preconditions.check();
-        validateGraphName(username(), graphName);
-
-        // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphProjectFromStoreConfig config = GraphProjectFromStoreConfig.of(
-            username(),
-            graphName,
-            nodeProjection,
-            relationshipProjection,
-            cypherConfig
-        );
-        validateConfig(cypherConfig, config);
-
-        // computation
-        GraphProjectNativeResult result = runWithExceptionLogging(
-            "Graph creation failed",
-            () -> (GraphProjectNativeResult) projectGraph(config)
-        );
-        // result
-        return Stream.of(result);
-    }
 
     @Procedure(name = "gds.graph.project.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)

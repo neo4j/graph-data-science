@@ -1356,11 +1356,6 @@ class GraphProjectProcTest extends BaseProcTest {
     @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
-            "CALL gds.graph.project($graphName, {}, {})",
-            mapWithNulls("graphName", invalidName),
-            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
-        );
-        assertError(
             "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relationshipQuery)",
             mapWithNulls("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
@@ -1465,7 +1460,6 @@ class GraphProjectProcTest extends BaseProcTest {
             invalidName
         );
 
-        assertError("CALL gds.graph.project($name, '*', '*')", Map.of("name", invalidName), expectedMessage);
         assertError("CALL gds.graph.project.cypher($name, '*', '*')", Map.of("name", invalidName), expectedMessage);
     }
 

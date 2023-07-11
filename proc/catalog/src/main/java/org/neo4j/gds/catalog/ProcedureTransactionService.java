@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class ProcedureTransactionService {
@@ -30,6 +31,10 @@ public class ProcedureTransactionService {
     }
 
     public Transaction getProcedureTransaction() {
-        throw new UnsupportedOperationException("TODO: do it in a version-agnostic manner");
+        try {
+            return context.transaction();
+        } catch (ProcedureException e) {
+            throw new IllegalStateException("This is not possible, we always have a transaction", e);
+        }
     }
 }

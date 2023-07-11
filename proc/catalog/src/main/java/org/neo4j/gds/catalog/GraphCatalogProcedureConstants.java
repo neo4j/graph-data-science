@@ -23,6 +23,7 @@ final class GraphCatalogProcedureConstants {
     static final String DROP_DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
     static final String LIST_DESCRIPTION = "Lists information about named graphs stored in the catalog.";
+    static final String PROJECT_DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
     /**
      * This exists because procedures need default values sometimes.
