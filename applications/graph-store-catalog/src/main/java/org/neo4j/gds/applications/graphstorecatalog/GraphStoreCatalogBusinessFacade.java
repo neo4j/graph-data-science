@@ -148,7 +148,7 @@ public class GraphStoreCatalogBusinessFacade {
     ) {
         checkPreconditions();
 
-        var graphName = graphNameValidationService.validate(graphNameAsString);
+        var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
 
         graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
 

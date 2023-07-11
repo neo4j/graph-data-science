@@ -108,10 +108,6 @@ class GraphNameValidationServiceTest {
         }
     }
 
-    private static Stream<String> invalidGraphNames() {
-        return Stream.of("", "   ", "           ", "\r\n\t", null);
-    }
-
     @Test
     void shouldFailValidationWhenGraphNameNotStringOrListOfString() {
         var graphNameValidationService = new GraphNameValidationService();
@@ -164,13 +160,49 @@ class GraphNameValidationServiceTest {
 
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
     @MethodSource("invalidGraphNames")
-    void shouldCatchInvalidGraphNamesWhenValidatingAndGettingMicroType(String graphName) {
+    void shouldCatchInvalidGraphNamesWhenValidating(String graphName) {
         var service = new GraphNameValidationService();
 
         try {
             service.validate(graphName);
+            fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage()).isEqualTo("`graphName` can not be null or blank, but it was `" + graphName + "`");
         }
+    }
+
+    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
+    @MethodSource("invalidGraphNames")
+    void shouldCatchInvalidGraphNamesWhenValidatingStrictly(String graphName) {
+        var service = new GraphNameValidationService();
+
+        try {
+            service.validateStrictly(graphName);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).isEqualTo("`graphName` can not be null or blank, but it was `" + graphName + "`");
+        }
+    }
+
+    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
+    @MethodSource("strictlyInvalidGraphNames")
+    void shouldRejectLeadingAndTrailingWhitespaceWhenStrictValidating(String graphName) {
+        var service = new GraphNameValidationService();
+
+        try {
+            service.validateStrictly(graphName);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).isEqualTo(
+                "`graphName` must not end or begin with whitespace characters, but got `" + graphName + "`.");
+        }
+    }
+
+    private static Stream<String> invalidGraphNames() {
+        return Stream.of("", "   ", "           ", "\r\n\t", null);
+    }
+
+    private static Stream<String> strictlyInvalidGraphNames() {
+        return Stream.of("   no leading whitespace please", "no trailing whitespace please   ");
     }
 }

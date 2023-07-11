@@ -28,8 +28,10 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.PreconditionsService;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -121,5 +123,38 @@ class GraphStoreCatalogBusinessFacadeTest {
         assertThatThrownBy(
             () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "   ")
         ).hasMessage("`graphName` can not be null or blank, but it was `   `");
+    }
+
+    @Test
+    void shouldUseStrictValidationForNativeProject() {
+        var validationService = mock(GraphNameValidationService.class);
+        var facade = new GraphStoreCatalogBusinessFacade(
+            mock(PreconditionsService.class),
+            null,
+            validationService,
+            null,
+            null,
+            null,
+            null
+        );
+
+        when(validationService.validateStrictly("   somegraph   ")).thenThrow(new IllegalArgumentException("whitespace!"));
+        try {
+            facade.project(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "   somegraph   ",
+                null,
+                null,
+                null
+            );
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertEquals("whitespace!", e.getMessage());
+        }
     }
 }

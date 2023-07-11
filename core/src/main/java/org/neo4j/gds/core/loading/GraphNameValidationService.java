@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.core.CypherMapAccess;
+import org.neo4j.gds.core.StringIdentifierValidations;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -46,6 +47,21 @@ public class GraphNameValidationService {
         CypherMapAccess.failOnBlank("graphName", graphName);
 
         return GraphName.parse(graphName);
+    }
+
+    /**
+     * Like @{@link org.neo4j.gds.core.loading.GraphNameValidationService#validate(String)},
+     * but if input has leading or trailing whitespace, it is rejected.
+     *
+     * @return graph name for downstream consumption.
+     * @throws IllegalArgumentException if graph name is null or blank or contains leading or trailing whitespace
+     */
+    public GraphName validateStrictly(String s) {
+        CypherMapAccess.failOnBlank("graphName", s);
+
+        StringIdentifierValidations.validateNoWhiteCharacter(s, "graphName");
+
+        return GraphName.parse(s);
     }
 
     /**
