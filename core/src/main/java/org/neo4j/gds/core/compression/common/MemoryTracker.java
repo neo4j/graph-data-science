@@ -75,23 +75,23 @@ public abstract class MemoryTracker {
     }
 
     public ImmutableHistogram heapAllocations() {
-        return new ImmutableHistogram(heapAllocations);
+        return ImmutableHistogram.of(heapAllocations);
     }
 
     public ImmutableHistogram nativeAllocations() {
-        return new ImmutableHistogram(nativeAllocations);
+        return ImmutableHistogram.of(nativeAllocations);
     }
 
     public ImmutableHistogram pageSizes() {
-        return new ImmutableHistogram(pageSizes);
+        return ImmutableHistogram.of(pageSizes);
     }
 
     public ImmutableHistogram headerBits() {
-        return new ImmutableHistogram(headerBits);
+        return ImmutableHistogram.of(headerBits);
     }
 
     public ImmutableHistogram headerAllocations() {
-        return new ImmutableHistogram(headerAllocations);
+        return ImmutableHistogram.of(headerAllocations);
     }
 
     public BlockStatistics blockStatistics() {

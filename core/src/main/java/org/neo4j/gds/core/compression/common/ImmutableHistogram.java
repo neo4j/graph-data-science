@@ -20,37 +20,23 @@
 package org.neo4j.gds.core.compression.common;
 
 import org.HdrHistogram.AbstractHistogram;
-import org.HdrHistogram.Histogram;
+import org.neo4j.gds.core.compression.BoundedHistogram;
 
 import java.util.Map;
 
-public class ImmutableHistogram {
+public interface ImmutableHistogram {
 
-    public static final ImmutableHistogram EMPTY = new ImmutableHistogram(new Histogram(0));
+    ImmutableHistogram EMPTY = new Empty();
 
-    private final AbstractHistogram histogram;
+    long minValue();
 
-    public ImmutableHistogram(AbstractHistogram histogram) {
-        this.histogram = histogram;
-    }
+    double mean();
 
-    public long minValue() {
-        return histogram.getMinValue();
-    }
+    long maxValue();
 
-    public double mean() {
-        return histogram.getMean();
-    }
+    long valueAtPercentile(double percentile);
 
-    public long maxValue() {
-        return histogram.getMaxValue();
-    }
-
-    public long valueAtPercentile(double percentile) {
-        return histogram.getValueAtPercentile(percentile);
-    }
-
-    public Map<String, Object> toMap() {
+    default Map<String, Object> toMap() {
         return Map.of(
             "min", minValue(),
             "mean", mean(),
@@ -62,5 +48,76 @@ public class ImmutableHistogram {
             "p99", valueAtPercentile(99),
             "p999", valueAtPercentile(99.9)
         );
+    }
+
+    static ImmutableHistogram of(AbstractHistogram abstractHistogram) {
+        return new ImmutableHistogram() {
+            @Override
+            public long minValue() {
+                return abstractHistogram.getMinValue();
+            }
+
+            @Override
+            public double mean() {
+                return abstractHistogram.getMean();
+            }
+
+            @Override
+            public long maxValue() {
+                return abstractHistogram.getMaxValue();
+            }
+
+            @Override
+            public long valueAtPercentile(double percentile) {
+                return abstractHistogram.getValueAtPercentile(percentile);
+            }
+        };
+    }
+
+    static ImmutableHistogram of(BoundedHistogram boundedHistogram) {
+        return new ImmutableHistogram() {
+            @Override
+            public long minValue() {
+                return boundedHistogram.min();
+            }
+
+            @Override
+            public double mean() {
+                return boundedHistogram.mean();
+            }
+
+            @Override
+            public long maxValue() {
+                return boundedHistogram.max();
+            }
+
+            @Override
+            public long valueAtPercentile(double percentile) {
+                return boundedHistogram.percentile((float) percentile);
+            }
+        };
+    }
+
+    class Empty implements ImmutableHistogram {
+
+        @Override
+        public long minValue() {
+            return 0;
+        }
+
+        @Override
+        public double mean() {
+            return 0;
+        }
+
+        @Override
+        public long maxValue() {
+            return 0;
+        }
+
+        @Override
+        public long valueAtPercentile(double percentile) {
+            return 0;
+        }
     }
 }

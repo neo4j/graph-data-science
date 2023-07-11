@@ -61,39 +61,39 @@ public final class BlockStatistics implements AutoCloseable {
     }
 
     public ImmutableHistogram stdDevBits() {
-        return new ImmutableHistogram(stdDevBits);
+        return ImmutableHistogram.of(stdDevBits);
     }
 
     public ImmutableHistogram meanBits() {
-        return new ImmutableHistogram(meanBits);
+        return ImmutableHistogram.of(meanBits);
     }
 
     public ImmutableHistogram medianBits() {
-        return new ImmutableHistogram(medianBits);
+        return ImmutableHistogram.of(medianBits);
     }
 
     public ImmutableHistogram blockLengths() {
-        return new ImmutableHistogram(blockLengths);
+        return ImmutableHistogram.of(blockLengths);
     }
 
     public ImmutableHistogram maxBits() {
-        return new ImmutableHistogram(maxBits);
+        return ImmutableHistogram.of(maxBits);
     }
 
     public ImmutableHistogram minBits() {
-        return new ImmutableHistogram(minBits);
+        return ImmutableHistogram.of(minBits);
     }
 
     public ImmutableHistogram indexOfMinValue() {
-        return new ImmutableHistogram(indexOfMinValue);
+        return ImmutableHistogram.of(indexOfMinValue);
     }
 
     public ImmutableHistogram indexOfMaxValue() {
-        return new ImmutableHistogram(indexOfMaxValue);
+        return ImmutableHistogram.of(indexOfMaxValue);
     }
 
     public ImmutableHistogram headTailDiffBits() {
-        return new ImmutableHistogram(headTailDiffBits);
+        return ImmutableHistogram.of(headTailDiffBits);
     }
 
     public void record(long[] values, int start, int length) {
