@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compression.common;
 
 import org.HdrHistogram.ConcurrentHistogram;
+import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 public abstract class MemoryTracker {
@@ -29,6 +30,8 @@ public abstract class MemoryTracker {
     private final ConcurrentHistogram pageSizes;
     private final ConcurrentHistogram headerBits;
     private final ConcurrentHistogram headerAllocations;
+
+    private final AutoCloseableThreadLocal<BlockStatistics> blockStatistics;
 
     public static MemoryTracker of() {
         return GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled() ? new NonEmpty() : EMPTY;
@@ -44,6 +47,7 @@ public abstract class MemoryTracker {
         this.pageSizes = new ConcurrentHistogram(0);
         this.headerBits = new ConcurrentHistogram(0);
         this.headerAllocations = new ConcurrentHistogram(0);
+        this.blockStatistics = AutoCloseableThreadLocal.withInitial(BlockStatistics::new);
     }
 
     public void recordHeapAllocation(long size) {
@@ -66,6 +70,10 @@ public abstract class MemoryTracker {
         this.headerAllocations.recordValue(size);
     }
 
+    public void recordBlockStatistics(long[] values, int start, int length) {
+        blockStatistics.get().record(values, start, length);
+    }
+
     public ImmutableHistogram heapAllocations() {
         return new ImmutableHistogram(heapAllocations);
     }
@@ -84,6 +92,12 @@ public abstract class MemoryTracker {
 
     public ImmutableHistogram headerAllocations() {
         return new ImmutableHistogram(headerAllocations);
+    }
+
+    public BlockStatistics blockStatistics() {
+        var union = new BlockStatistics();
+        blockStatistics.forEach(localStats -> localStats.mergeInto(union));
+        return union;
     }
 
     private static final class NonEmpty extends MemoryTracker {

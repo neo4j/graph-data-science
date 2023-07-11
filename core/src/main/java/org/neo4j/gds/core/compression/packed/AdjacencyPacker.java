@@ -216,7 +216,8 @@ public final class AdjacencyPacker {
             blockBytes,
             tailBytes,
             length,
-            tailLength
+            tailLength,
+            memoryTracker
         );
     }
 
@@ -228,7 +229,8 @@ public final class AdjacencyPacker {
         long blockBytes,
         long tailBytes,
         int length,
-        int tailLength
+        int tailLength,
+        MemoryTracker memoryTracker
     ) {
         assert values.length % AdjacencyPacking.BLOCK_SIZE == 0 : "values length must be a multiple of " + AdjacencyPacking.BLOCK_SIZE + ", but was " + values.length;
 
@@ -253,6 +255,7 @@ public final class AdjacencyPacker {
         // main packing loop
         int in = 0;
         for (byte bits : header) {
+            memoryTracker.recordBlockStatistics(values, in, AdjacencyPacking.BLOCK_SIZE);
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
@@ -387,6 +390,7 @@ public final class AdjacencyPacker {
 
         for (int i = 0; i < headerLength; i++) {
             byte bits = header[i];
+            memoryTracker.recordBlockStatistics(values, in, AdjacencyPacking.BLOCK_SIZE);
             ptr = AdjacencyPacking.pack(bits, values, in, ptr);
             in += AdjacencyPacking.BLOCK_SIZE;
         }
@@ -394,6 +398,7 @@ public final class AdjacencyPacker {
         // tail packing
         if (hasTail) {
             byte bits = header[header.length - 1];
+            memoryTracker.recordBlockStatistics(values, in, tailLength);
             ptr = AdjacencyPacking.loopPack(bits, values, in, tailLength, ptr);
         }
 

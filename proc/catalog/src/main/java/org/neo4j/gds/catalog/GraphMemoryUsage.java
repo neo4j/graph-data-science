@@ -153,7 +153,7 @@ public  final class GraphMemoryUsage {
             var unionGraph = csrGraphStore.getUnion();
             unionGraph.relationshipTopologies().forEach((relationshipType, adjacency) -> {
                 var memoryInfo = adjacency.adjacencyList().memoryInfo();
-                adjacencyListDetails.put(relationshipType.name(), Map.of(
+                var listDetail = Map.of(
                     "pages", memoryInfo.pages(),
                     "bytesTotal", memoryInfo.bytesTotal().orElse(0),
                     "bytesOnHeap", memoryInfo.bytesOnHeap().orElse(0),
@@ -162,8 +162,21 @@ public  final class GraphMemoryUsage {
                     "heapAllocations", memoryInfo.heapAllocations().toMap(),
                     "nativeAllocations", memoryInfo.nativeAllocations().toMap(),
                     "headerAllocations", memoryInfo.headerAllocations().toMap(),
-                    "headerBits", memoryInfo.headerBits().toMap()
-                ));
+                    "headerBits", memoryInfo.headerBits().toMap(),
+                    "blockStatistics", memoryInfo.blockStatistics().map(stats -> Map.of(
+                        "blockCount", stats.blockCount(),
+                        "blockLengths", stats.blockLengths().toMap(),
+                        "indexOfMaxValue", stats.indexOfMaxValue().toMap(),
+                        "indexOfMinValue", stats.indexOfMinValue().toMap(),
+                        "maxBits", stats.maxBits().toMap(),
+                        "minBits", stats.minBits().toMap(),
+                        "meanBits", stats.meanBits().toMap(),
+                        "medianBits", stats.medianBits().toMap(),
+                        "stdDevBits", stats.stdDevBits().toMap(),
+                        "headTailDiffBits", stats.headTailDiffBits().toMap()
+                    )).orElse(Map.of())
+                );
+                adjacencyListDetails.put(relationshipType.name(), listDetail);
             });
             details.put("adjacencyLists", adjacencyListDetails);
         }

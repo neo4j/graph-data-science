@@ -77,7 +77,8 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         var memoryInfoBuilder = AdjacencyList.MemoryInfo
             .builder(memoryTracker)
             .pages(allocationSizes.length)
-            .bytesOffHeap(bytesOffHeap);
+            .bytesOffHeap(bytesOffHeap)
+            .blockStatistics(this.memoryTracker.blockStatistics());
 
         var sizeOnHeap = new MutableLong();
         MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);

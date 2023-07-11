@@ -117,6 +117,8 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                                 "headerBits",
                                 instanceOf(Map.class),
                                 "headerAllocations",
+                                instanceOf(Map.class),
+                                "blockStatistics",
                                 instanceOf(Map.class)
                             ))
                     ),
@@ -124,6 +126,65 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                     "relationshipCount", 200L
                 )
             ));
+        });
+    }
+
+    @Test
+    void testWithAdjacencyMemoryTrackingWithPacking() {
+        var graphName = "g";
+        var params = Map.of("name", (Object) graphName);
+        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.enableAndRun(() -> {
+            GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.enableAndRun(() -> {
+
+                runQuery(
+                    "CALL gds.beta.graph.generate($name, 100, 2)",
+                    params
+                );
+
+                assertCypherResult("CALL gds.internal.graph.sizeOf($name)", params, List.of(
+                    Map.of(
+                        "graphName", graphName,
+                        "memoryUsage", instanceOf(String.class),
+                        "sizeInBytes", allOf(instanceOf(Long.class), greaterThan(0L)),
+                        "detailSizeInBytes", Map.of(
+                            "relationships", instanceOf(Map.class),
+                            "total", allOf(instanceOf(Long.class), greaterThan(0L)),
+                            "nodes", instanceOf(Map.class),
+                            "adjacencyLists", Map.of(
+                                "REL", Map.of(
+                                    "pages",
+                                    allOf(instanceOf(Long.class), greaterThan(0L)),
+                                    "bytesTotal",
+                                    allOf(instanceOf(Long.class), greaterThan(0L)),
+                                    "bytesOnHeap",
+                                    allOf(instanceOf(Long.class), greaterThan(0L)),
+                                    "bytesOffHeap",
+                                    allOf(instanceOf(Long.class), greaterThan(0L)),
+                                    "pageSizes",
+                                    instanceOf(Map.class),
+                                    "heapAllocations",
+                                    allOf(instanceOf(Map.class)),
+                                    "nativeAllocations",
+                                    instanceOf(Map.class),
+                                    "headerBits",
+                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThan(0D))),
+                                    "headerAllocations",
+                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThan(0D))),
+                                    "blockStatistics",
+                                    allOf(instanceOf(Map.class), hasEntry(
+                                        equalTo("blockLengths"),
+                                        allOf(
+                                            instanceOf(Map.class),
+                                            hasEntry(equalTo("mean"), greaterThan(0D))
+                                        )
+                                    ))
+                                ))
+                        ),
+                        "nodeCount", 100L,
+                        "relationshipCount", 200L
+                    )
+                ));
+            });
         });
     }
 }

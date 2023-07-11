@@ -21,9 +21,11 @@ package org.neo4j.gds.api;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.compression.common.BlockStatistics;
 import org.neo4j.gds.core.compression.common.ImmutableHistogram;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Stream;
 
@@ -210,5 +212,10 @@ public interface AdjacencyList {
          * a single adjacency list. That allocation is included in either {@link #heapAllocations()} or {@link #nativeAllocations()}.
          */
         ImmutableHistogram headerAllocations();
+
+        /**
+         * A collection of histograms that record various statistics for block packing.
+         */
+        Optional<BlockStatistics> blockStatistics();
     }
 }
