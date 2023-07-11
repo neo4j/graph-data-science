@@ -63,7 +63,8 @@
 .2+<.^|xref:management-ops/graph-update/to-undirected.adoc#catalog-graph-relationship-to-undirected-example[Convert directed relationships to undirected]
 | `gds.beta.graph.relationships.toUndirected` label:procedure[Procedure]
 | `gds.beta.graph.relationships.toUndirected.estimate` label:procedure[Procedure]
-
+.1+<.^|xref:management-ops/graph-update/collapse-path.adoc[Collapse Path]
+| `gds.beta.collapsePath.mutate` label:procedure[Procedure]
 |===
 
 

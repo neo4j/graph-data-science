@@ -2,6 +2,7 @@
 [.alpha]
 = One Hot Encoding
 :description: This section describes the One Hot Encoding function in the Neo4j Graph Data Science library.
+:page-aliases: alpha-algorithms/one-hot-encoding
 
 
 The One Hot Encoding function is used to convert categorical data into a numerical format that can be used by Machine Learning libraries.
@@ -17,13 +18,13 @@ In the list, `selected values` are represented by `1`, and `unselected values` a
 .The following will run the algorithm on hardcoded lists:
 [source, cypher, role=noplay]
 ----
-RETURN gds.alpha.ml.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS embedding
+RETURN gds.alpha.ml.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS value
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
-| embedding
+| value
 | [0,0,1]
 |===
 
@@ -53,14 +54,14 @@ WITH cuisine
   ORDER BY cuisine.name
 WITH collect(cuisine) AS cuisines
 MATCH (p:Person)
-RETURN p.name AS name, gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS embedding
+RETURN p.name AS name, gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS value
   ORDER BY name
 ----
 
 .Results
 [opts="header",cols="1, 1"]
 |===
-| name     | embedding
+| name     | value
 | Arya     | [0,0,0]
 | Michael  | [1,0,1]
 | Praveena | [0,1,0]

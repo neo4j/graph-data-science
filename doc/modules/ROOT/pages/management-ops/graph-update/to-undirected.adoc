@@ -2,6 +2,10 @@
 = Converting directed relationships to undirected
 :description: This section details the converting directed relationships to undirected in the Neo4j Graph Data Science library.
 
+include::partial$/operations-reference/beta-note.adoc[]
+
+== Introduction
+
 In GDS, some algorithms such as Triangle Count and Link Prediction expect undirected relationships. This procedure converts directed relationships to undirected and outputs the result as a new relationship type.
 This can be useful to convert relationships produced by algorithms such as path algorithms.
 

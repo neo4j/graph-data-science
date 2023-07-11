@@ -39,7 +39,7 @@ class SplitRelationshipsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/split-relationships.adoc";
+        return "pages/machine-learning/pre-processing/split-relationships.adoc";
     }
 
 }

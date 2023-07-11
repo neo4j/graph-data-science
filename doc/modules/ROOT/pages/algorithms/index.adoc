@@ -16,5 +16,4 @@ This chapter is divided into the following sections:
 * xref:algorithms/pathfinding.adoc[Path finding]
 * xref:machine-learning/node-embeddings/index.adoc[Node embeddings]
 * xref:algorithms/linkprediction.adoc[Topological link prediction]
-* xref:algorithms/auxiliary.adoc[Auxiliary procedures]
 * xref:algorithms/pregel-api.adoc[Pregel API]

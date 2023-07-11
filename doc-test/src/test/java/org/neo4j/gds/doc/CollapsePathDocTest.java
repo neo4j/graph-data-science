@@ -36,7 +36,7 @@ class CollapsePathDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/beta-algorithms/collapse-path.adoc";
+        return "pages/management-ops/graph-update/collapse-path.adoc";
     }
 
 }

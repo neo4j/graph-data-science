@@ -1,7 +1,7 @@
 [[algorithms-scale-properties]]
 = Scale Properties
 :description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
-:page-aliases: alpha-algorithms/scale-properties
+:page-aliases: alpha-algorithms/scale-properties, algorithms/scale-properties
 
 :algorithm: Scale Properties
 :entity: node
@@ -29,7 +29,7 @@ There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scaler` configuration parameter.
 
 List properties are scaled index-by-index.
-See xref:algorithms/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
+See xref:machine-learning/pre-processing/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
 
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
@@ -402,7 +402,7 @@ The `mutate` mode is especially useful when multiple algorithms are used in conj
 
 For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].
 
-In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:algorithms/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:machine-learning/pre-processing/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
 The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
 
 [role=query-example]
