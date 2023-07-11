@@ -104,10 +104,17 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             exportGraphCapabilities(graphStoreInput);
         }
         var progressTracker = createProgressTracker(graphStoreInput);
-        progressTracker.beginSubTask();
-        exportNodes(graphStoreInput, progressTracker);
-        exportRelationships(graphStoreInput, progressTracker);
-        exportGraphProperties(graphStoreInput, progressTracker);
+
+        try {
+            progressTracker.beginSubTask();
+            exportNodes(graphStoreInput, progressTracker);
+            exportRelationships(graphStoreInput, progressTracker);
+            exportGraphProperties(graphStoreInput, progressTracker);
+        } catch (Exception e) {
+            // as the tracker is created in this method
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        }
         progressTracker.endSubTask();
     }
 

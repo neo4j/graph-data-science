@@ -43,6 +43,7 @@ public class TestTaskStore extends PerDatabaseTaskStore {
 
     @Override
     public void remove(String username, JobId jobId) {
+        super.remove(username, jobId);
         tasks.remove(jobId);
     }
 
