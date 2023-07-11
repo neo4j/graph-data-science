@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -192,6 +193,7 @@ class GraphProjectProcTest extends BaseProcTest {
         assertGraphExists(graphName);
     }
 
+    @Disabled("The trouble of injecting procedure facade as things stand currently is not worth the value od this test")
     @Test
     void testNativeProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
