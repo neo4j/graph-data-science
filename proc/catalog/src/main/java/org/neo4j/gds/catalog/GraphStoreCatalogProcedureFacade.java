@@ -185,6 +185,36 @@ public class GraphStoreCatalogProcedureFacade {
         ));
     }
 
+    public Stream<GraphProjectNativeResult> project(
+        String graphName,
+        Object nodeProjection,
+        Object relationshipProjection,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var terminationFlag = terminationFlag();
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.project(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext(),
+            userLogRegistryFactory,
+            graphName,
+            nodeProjection,
+            relationshipProjection,
+            configuration
+        );
+
+        // the fact that it is a stream is just a Neo4j Procedure Framework convention
+        return Stream.of(result);
+    }
+
     /**
      * We have to potentially unstack the placeholder. This is purely a Neo4j Procedure framework concern.
      */
@@ -215,5 +245,12 @@ public class GraphStoreCatalogProcedureFacade {
         var kernelTransaction = kernelTransactionService.getKernelTransaction();
         var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
         return TerminationFlag.wrap(terminationMonitor);
+    }
+
+    private TransactionContext transactionContext() {
+        return DatabaseTransactionContext.of(
+            graphDatabaseService,
+            procedureTransactionService.getProcedureTransaction()
+        );
     }
 }
