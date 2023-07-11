@@ -25,11 +25,13 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 public final class StringIdentifierValidations {
-    private static final Pattern TRAILING_WHITESPACES_PATTERN = Pattern.compile("(^\\s)|(\\s$)");
+    private static final Pattern LEADING_OR_TRAILING_WHITESPACES_PATTERN = Pattern.compile("(^\\s)|(\\s$)");
 
-    public static @Nullable String validateNoWhiteCharacter(@Nullable String input, String paramterName) {
-        if (input != null && TRAILING_WHITESPACES_PATTERN.matcher(input).find()) {
-            throw new IllegalArgumentException(String.format(Locale.ENGLISH, "`%s` must not end or begin with whitespace characters, but got `%s`.", paramterName, input));
+    private StringIdentifierValidations() {}
+
+    public static @Nullable String validateNoWhiteCharacter(@Nullable String input, String parameterName) {
+        if (input != null && LEADING_OR_TRAILING_WHITESPACES_PATTERN.matcher(input).find()) {
+            throw new IllegalArgumentException(String.format(Locale.ENGLISH, "`%s` must not end or begin with whitespace characters, but got `%s`.", parameterName, input));
         }
 
         return input;
