@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
+import org.neo4j.kernel.impl.query.QuerySubscription;
 
 public final class CypherLoadingUtils {
 
-    public static void consume(QueryExecution execution) {
+    public static void consume(QuerySubscription execution) {
         try {
             execution.consumeAll();
         } catch (RuntimeException e) {
