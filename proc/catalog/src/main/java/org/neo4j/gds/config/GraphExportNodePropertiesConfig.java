@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
@@ -34,12 +35,20 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConfig {
 
+    boolean LIST_NODE_LABELS_DEFAULT_VALUE = false;
+
     @Configuration.Parameter
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Key("listNodeLabels")
+    default boolean listNodeLabels() {
+        return LIST_NODE_LABELS_DEFAULT_VALUE;
+    }
+
     static List<String> parseNodeProperties(Object userInput) {
-        
         return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
     }
 
