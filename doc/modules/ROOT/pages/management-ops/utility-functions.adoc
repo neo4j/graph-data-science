@@ -2,67 +2,29 @@
 = Utility functions
 :description: This section provides explanations and examples for each of the utility functions in the Neo4j Graph Data Science library.
 
-
-[[utility-functions-system]]
-== System Functions
-
-[[system-functions-table]]
-[opts=header,cols="1m,1"]
-|===
-| Name        | Description
-| gds.version | Return the version of the installed Neo4j Graph Data Science library.
-|===
-
-[role=query-example]
---
-.Usage:
-[source, cypher, role=noplay]
-----
-RETURN gds.version() AS version
-----
-
-.Results
-[opts="header"]
-|===
-| version
-| "2.5.0-alpha02"
-|===
---
-
-
 [[utility-functions-numeric]]
 == Numeric Functions
 
-.Numeric Functions
+NOTE: Since Neo4j 5, this functionality can also be expressed directly in Cypher using the `Inf`, `Infinity`, and `NaN` literals and the `isNaN()` function.
+
 [[Numeric-functions-table]]
-[opts=header,cols="1m,1"]
+[opts=header,cols="1m,1,1"]
 |===
-| Name                | Description
-| gds.util.NaN        | Returns NaN as a Cypher value.
-| gds.util.infinity   | Return infinity as a Cypher value.
-| gds.util.isFinite   | Return false if the given argument is ±Infinity, NaN, or null.
-| gds.util.isInfinite | Return true if the given argument is ±Infinity, NaN, or null.
-|===
-
-
-=== Syntax
-
-[[Numeric-functions-syntax-table]]
-[opts=header,cols="1m,1"]
-|===
-| Name                                  | Parameter
-| gds.util.NaN()                        | -
-| gds.util.infinity()                   | -
-| gds.util.isFinite(value: NUMBER)      | value to be checked if it is finite.
-| gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite.
+| Name                                  | Parameter                              | Description
+| gds.util.NaN()                        | -                                      | Returns `NaN` as a Cypher value.
+| gds.util.infinity()                   | -                                      | Returns `Infinity` as a Cypher value.
+| gds.util.isFinite(value: Number)      | value to be checked if it is finite.   | Return false if the given argument is ±Infinity, NaN, or null.
+| gds.util.isInfinite(value: Number)    | value to be checked if it is infinite. | Returns `true` if the given argument is `±Infinity`, `NaN`, or `null`.
 |===
 
 
 === Examples
 
+==== `gds.util.isFinite`
+
 [role=query-example]
 --
-.Example for gds.util.IsFinite:
+.Example for gds.util.isFinite():
 [source, cypher, role=noplay]
 ----
 UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
@@ -78,6 +40,8 @@ RETURN gds.util.isFinite(value) AS isFinite
 | false
 |===
 --
+
+==== `gds.util.isInfinite`
 
 [role=query-example]
 --
@@ -104,24 +68,14 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 [[utility-functions-node-path]]
 == Node id functions
 
-.Node id functions
+Results in GDS often contain node IDs. You can use the following functions to connect IDs to nodes in the graph.
+
 [[Node-and-Path-functions-table]]
-[opts=header,cols="1m,1m"]
+[opts=header,cols="1m,1,1"]
 |===
-| Name             | Description
-| gds.util.asNode  | Return the node object for the given node id or null if none exists.
-| gds.util.asNodes | Return the node objects for the given node ids or an empty list if none exists.
-|===
-
-
-=== Syntax
-
-[[Node-and-Path-functions-syntax-table]]
-[opts=header,cols="1m,1"]
-|===
-| Name                                | Parameters
-| gds.util.asNode(nodeId: NUMBER)     | nodeId of a node in the neo4j-graph
-| gds.util.asNodes(nodeIds: List of NUMBER) | list of nodeIds of nodes in the neo4j-graph
+| Name                                | Parameters | Description
+| gds.util.asNode(nodeId: Number)     | nodeId of a node in the neo4j-graph | Return the node object for the given node id or null if none exists.
+| gds.util.asNodes(nodeIds: List of Number) | list of nodeIds of nodes in the neo4j-graph | Return the node objects for the given node ids or an empty list if none exists.
 |===
 
 
@@ -139,32 +93,45 @@ CREATE  (nAlice)-[:LINK]->(nBridget)
 CREATE  (nBridget)-[:LINK]->(nCharles)
 ----
 
+.Project the graph into GDS:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project('socialGraph', 'User', 'LINK')
+----
+
+==== `AsNode`
+
 [role=query-example]
 --
-.Example for gds.util.asNode:
+.Example for gds.util.asNode using Degree Centrality:
 [source, cypher, role=noplay]
 ----
-MATCH (u:User{name: 'Alice'})
-WITH id(u) AS nodeId
-RETURN gds.util.asNode(nodeId).name AS node
+CALL gds.degree.stream('socialGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS node, score
+ORDER BY score DESC
 ----
 
 .Results
-[opts="header"]
+[opts="header", cols="1,1"]
 |===
-| node
-| "Alice"
+| node | score
+| "Alice" | 1
+| "Bridget" | 1
+| "Charles" | 0
 |===
 --
 
+==== `AsNodes`
+
 [role=query-example]
 --
-.Example for gds.util.asNodes:
+.Example for gds.util.asNodes using Breadth-First-Search (BFS):
 [source, cypher, role=noplay]
 ----
-MATCH (u:User)
-WHERE NOT u.name = 'Charles'
-WITH collect(id(u)) AS nodeIds
+MATCH (alice {name: 'Alice'})
+CALL gds.bfs.stream('socialGraph', {sourceNode: alice, maxDepth: 1})
+YIELD sourceNode, nodeIds
 RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 ----
 
@@ -175,5 +142,3 @@ RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 | [Alice, Bridget]
 |===
 --
-
-As many algorithms streaming mode only return the node id, `gds.util.asNode` and `gds.util.asNodes` can be used to retrieve the whole node from the neo4j database.

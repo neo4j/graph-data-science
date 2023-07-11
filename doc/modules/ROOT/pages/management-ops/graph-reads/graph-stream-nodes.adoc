@@ -289,10 +289,10 @@ GDS offers a function to access the property value of a specific node from an in
 [source]
 ----
 gds.util.nodeProperty(
-  graphName: STRING, 
-  nodeId: INTEGER, 
-  propertyKey: STRING, 
-  nodeLabel: STRING?
+  graphName: String,
+  nodeId: Integer,
+  propertyKey: String,
+  nodeLabel: String
 )
 ----
 
@@ -301,14 +301,12 @@ gds.util.nodeProperty(
 [opts="header",cols="1,3,1,5"]
 |===
 | Name           | Type       | Optional | Description
-| graphName | STRING | no | Name of the graph in the catalog.
-| nodeId        | INTEGER | no | Id of the node.
-| propertyKey | STRING | no | Property key to access.
-| nodeLabel | STRING | yes | Label on the node.
+| graphName | String | no | Name of the graph in the catalog.
+| nodeId        | Integer | no | Id of the node.
+| propertyKey | String | no | Property key to access.
+| nodeLabel | String | yes | Label on the node.
 |===
 
-If a node label is given, the property value for the corresponding projection and the given node is returned.
-If no label or `'*'` is given, the property value is retrieved and returned from an arbitrary projection that contains the given propertyKey.
 If the property value is missing for the given node, `null` is returned.
 
 
@@ -325,27 +323,6 @@ MATCH (florentin:Person {name: 'Florentin'})
 RETURN
   florentin.name AS name,
   gds.util.nodeProperty('socialGraph', id(florentin), 'score') AS score
-----
-
-.Results
-[opts="header",cols="2"]
-|===
-| name        | score
-| "Florentin" | 2.0
-|===
---
-
-We can also specifically return the `score` property from the `Person` projection in case other projections also have a `score` property as follows.
-
-[role=query-example, group=nodes]
---
-.Access a property node property from Person for Florentin:
-[source, cypher, role=noplay]
-----
-MATCH (florentin:Person {name: 'Florentin'})
-RETURN
-  florentin.name AS name,
-  gds.util.nodeProperty('socialGraph', id(florentin), 'score', 'Person') AS score
 ----
 
 .Results
