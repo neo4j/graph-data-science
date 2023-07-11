@@ -10,4 +10,4 @@ Some options include:
 * xref:machine-learning/node-embeddings/index.adoc[Node embeddings]
 * xref:algorithms/centrality.adoc[Centrality algorithms]
 * xref:machine-learning/pre-processing/scale-properties.adoc[] to normalize node features
-* xref:machine-learning/pre-processing/one-hot-encoding.adoc[] to encode String properties as numeric arrays
+* xref:machine-learning/pre-processing/one-hot-encoding.adoc[] to encode string properties as numeric arrays
