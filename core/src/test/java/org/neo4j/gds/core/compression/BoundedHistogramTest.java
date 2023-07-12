@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -101,19 +102,52 @@ class BoundedHistogramTest {
 
     static Stream<Arguments> adds() {
         return Stream.of(
-            Arguments.of(new int[] {}, new int[] {42}, 1),
-            Arguments.of(new int[] {5}, new int[] {5}, 2),
-            Arguments.of(IntStream.range(0, 10).toArray(), new int[] {42}, 11),
-            Arguments.of(new int[] {42}, IntStream.range(0, 10).toArray(), 11)
+            Arguments.of(new int[] {}, new int[] {42}),
+            Arguments.of(new int[] {5}, new int[] {5}),
+            Arguments.of(IntStream.range(0, 10).toArray(), new int[] {42}),
+            Arguments.of(new int[] {42}, IntStream.range(0, 10).toArray()),
+            Arguments.of(
+                IntStream.generate(() -> ThreadLocalRandom.current().nextInt(0, 64)).limit(42).toArray(),
+                IntStream.generate(() -> ThreadLocalRandom.current().nextInt(0, 64)).limit(23).toArray()
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("adds")
-    void testAdd(int[] first, int[] second, int expected) {
-        var histogram = create(first);
-        histogram.add(create(second));
-        assertThat(histogram.total()).isEqualTo(expected);
+    void testAdd(int[] first, int[] second) {
+        var actual = create(first);
+        var h1 = create(second);
+        actual.add(h1);
+
+        var unionValues = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, unionValues, first.length, second.length);
+
+        var expected = create(unionValues);
+
+        assertThat(expected.mean()).isEqualTo(actual.mean());
+        assertThat(expected.median()).isEqualTo(actual.median());
+        assertThat(expected.min()).isEqualTo(actual.min());
+        assertThat(expected.max()).isEqualTo(actual.max());
+        assertThat(expected.total()).isEqualTo(actual.total());
+    }
+
+    static Stream<Arguments> percentiles() {
+        return Stream.of(
+            Arguments.of(new int[] {}, 50.0f, 0),
+            Arguments.of(new int[] {1, 1, 1, 2, 3}, 25.0f, 1),
+            Arguments.of(new int[] {1, 1, 1, 2, 3}, 50.0f, 2),
+            Arguments.of(new int[] {1, 1, 1, 2, 3}, 60.0f, 2),
+            Arguments.of(new int[] {1, 1, 1, 2, 3}, 75.0f, 3),
+            Arguments.of(new int[] {1, 1, 1, 1, 3}, 60.0f, 1)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("percentiles")
+    void testPercentile(int[] values, float percentile, int expected) {
+        var histogram = create(values);
+        assertThat(histogram.percentile(percentile)).isEqualTo(expected);
     }
 
     static BoundedHistogram create(int... values) {
