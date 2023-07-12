@@ -35,7 +35,8 @@ CALL gds.graph.nodeProperty.stream(
 )
 YIELD
     nodeId: Integer,
-    propertyValue: Integer or Float or List of Integer or List of Float
+    propertyValue: Integer or Float or List of Integer or List of Float,
+    nodeLabels: List of Strings
 ----
 
 .Parameters
@@ -53,6 +54,7 @@ YIELD
 |===
 | Name                   | Type                  | Default | Description
 | concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+| listNodeLabels | Boolean | false | Whether to return a list of node labels for each node.
 |===
 
 .Results
@@ -65,6 +67,7 @@ YIELD
 * Float
 * List of Integer
 * List of Float  .^| The stored property value.
+| nodeLabels | List of Strings | The node labels of the node.
 |===
 ======
 
@@ -81,7 +84,8 @@ CALL gds.graph.nodeProperties.stream(
 YIELD
     nodeId: Integer,
     nodeProperty: String,
-    propertyValue: Integer or Float or List of Integer or List of Float
+    propertyValue: Integer or Float or List of Integer or List of Float,
+    nodeLabels: List of Strings
 ----
 
 .Parameters
@@ -99,6 +103,7 @@ YIELD
 |===
 | Name                   | Type                  | Default | Description
 | concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+| listNodeLabels | Boolean | false | Whether to return a list of node labels for each node.
 |===
 
 .Results
@@ -112,6 +117,7 @@ YIELD
 * Float
 * List of Integer
 * List of Float  .^| The stored property value.
+| nodeLabels | List of Strings | The node labels of the node.
 |===
 ======
 
@@ -437,6 +443,43 @@ ORDER BY name, nodeProperty
 When streaming multiple node properties, the name of each property is included in the result.
 This adds with some overhead, as each property name must be repeated for each node in the result, but is necessary in order to distinguish properties.
 ====
+
+
+[[catalog-graph-stream-node-properties-with-labels-example]]
+
+Additionally, when streaming one or more node properties, we can also return the node labels for each individual node by setting the `listNodeLabels` configuration option.
+
+[role=query-example]
+--
+.Stream multiple node properties with labels:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperties.stream(
+  'socialGraph',
+  ['score'],
+  ['*'],
+  { listNodeLabels: true }
+)
+YIELD nodeId, nodeProperty, propertyValue, nodeLabels
+RETURN
+  gds.util.asNode(nodeId).name AS name,
+  nodeProperty,
+  propertyValue,
+  nodeLabels
+----
+
+.Results
+[opts="header"]
+|===
+| name         | nodeProperty  | propertyValue | nodeLabels
+| "Florentin"  | "score"       | 2.0           | [Person]
+| "Adam"       | "score"       | 1.0           | [Person]
+| "Veselin"    | "score"       | 0.0           | [Person]
+| "The Hobbit" | "score"       | 0.0           | [Book]
+|===
+--
+
+
 
 [[catalog-graph-write-node-properties-example]]
 === Write
