@@ -60,4 +60,9 @@ class LogAdapter implements Log {
     public void debug(String format, Object... arguments) {
         neo4jUserLog.debug(format, arguments);
     }
+
+    @Override
+    public Object getNeo4jLog() {
+        return neo4jUserLog;
+    }
 }

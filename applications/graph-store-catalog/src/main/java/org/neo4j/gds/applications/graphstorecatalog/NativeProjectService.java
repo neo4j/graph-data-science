@@ -28,7 +28,6 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.ReverseLogAdapter;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -123,7 +122,7 @@ public class NativeProjectService {
 
     private MemoryUsageValidator memoryUsageValidator() {
         return new MemoryUsageValidator(
-            new ReverseLogAdapter(log),
+            (org.neo4j.logging.Log) log.getNeo4jLog(),
             GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService)
         );
     }
@@ -169,7 +168,7 @@ public class NativeProjectService {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService))
-            .log(new ReverseLogAdapter(log))
+            .log((org.neo4j.logging.Log) log.getNeo4jLog())
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)
             .transactionContext(transactionContext)
