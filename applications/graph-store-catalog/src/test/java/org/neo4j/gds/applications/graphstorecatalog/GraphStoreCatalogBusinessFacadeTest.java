@@ -27,11 +27,10 @@ import org.neo4j.gds.core.loading.GraphNameValidationService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.PreconditionsService;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -139,8 +138,8 @@ class GraphStoreCatalogBusinessFacadeTest {
         );
 
         when(validationService.validateStrictly("   somegraph   ")).thenThrow(new IllegalArgumentException("whitespace!"));
-        try {
-            facade.project(
+        assertThatIllegalArgumentException().isThrownBy(
+            () -> facade.project(
                 null,
                 null,
                 null,
@@ -151,10 +150,7 @@ class GraphStoreCatalogBusinessFacadeTest {
                 null,
                 null,
                 null
-            );
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("whitespace!", e.getMessage());
-        }
+            )
+        ).withMessage("whitespace!");
     }
 }
