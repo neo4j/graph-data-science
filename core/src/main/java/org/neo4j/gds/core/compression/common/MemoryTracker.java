@@ -119,5 +119,8 @@ public abstract class MemoryTracker {
 
         @Override
         public void recordHeaderAllocation(long size) {}
+
+        @Override
+        public void recordBlockStatistics(long[] values, int start, int length) {}
     };
 }
