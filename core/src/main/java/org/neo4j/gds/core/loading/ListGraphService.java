@@ -32,6 +32,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ListGraphService {
+    private final GraphStoreCatalogService graphStoreCatalogService;
+
+    public ListGraphService(GraphStoreCatalogService graphStoreCatalogService) {
+        this.graphStoreCatalogService = graphStoreCatalogService;
+    }
+
     public List<Pair<GraphStoreWithConfig, Map<String, Object>>> list(
         User user,
         Optional<String> graphName,
@@ -49,8 +55,8 @@ public class ListGraphService {
 
         return graphEntries.map(e ->
         {
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(e.getValue(), e.getKey());
-            Map<String, Object> degreeDistribution = getOrCreateDegreeDistribution(
+            var graphStoreWithConfig = GraphStoreWithConfig.of(e.getValue(), e.getKey());
+            var degreeDistribution = getOrCreateDegreeDistribution(
                 includeDegreeDistribution,
                 graphStoreWithConfig,
                 terminationFlag
@@ -69,8 +75,12 @@ public class ListGraphService {
     ) {
         if (!includeDegreeDistribution) return null;
 
-        Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
-            graphStoreWithConfig.config().username(),
+        // we shall eventually have microtypes, by hook or by crook
+        var username = graphStoreWithConfig.config().username();
+        var user = new User(username, false);
+
+        var maybeDegreeDistribution = graphStoreCatalogService.getDegreeDistribution(
+            user,
             graphStoreWithConfig.graphStore().databaseId(),
             graphStoreWithConfig.config().graphName()
         );
@@ -78,8 +88,8 @@ public class ListGraphService {
         return maybeDegreeDistribution.orElseGet(() -> {
             var histogram = DegreeDistribution.compute(graphStoreWithConfig.graphStore().getUnion(), terminationFlag);
             // Cache the computed degree distribution in the Catalog
-            GraphStoreCatalog.setDegreeDistribution(
-                graphStoreWithConfig.config().username(),
+            graphStoreCatalogService.setDegreeDistribution(
+                user,
                 graphStoreWithConfig.graphStore().databaseId(),
                 graphStoreWithConfig.config().graphName(),
                 histogram
@@ -88,8 +98,8 @@ public class ListGraphService {
         });
     }
 
-    private static Stream<Map.Entry<GraphProjectConfig, GraphStore>> listAll() {
-        return GraphStoreCatalog.getAllGraphStores()
+    private Stream<Map.Entry<GraphProjectConfig, GraphStore>> listAll() {
+        return graphStoreCatalogService.getAllGraphStores()
             .map(graphStore -> Map.entry(
                     graphStore.config(),
                     graphStore.graphStore()
@@ -97,7 +107,7 @@ public class ListGraphService {
             );
     }
 
-    private static Stream<Map.Entry<GraphProjectConfig, GraphStore>> listForUser(User user) {
-        return GraphStoreCatalog.getGraphStores(user.getUsername()).entrySet().stream();
+    private Stream<Map.Entry<GraphProjectConfig, GraphStore>> listForUser(User user) {
+        return graphStoreCatalogService.getGraphStores(user).entrySet().stream();
     }
 }

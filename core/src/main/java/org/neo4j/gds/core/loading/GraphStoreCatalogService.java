@@ -20,8 +20,14 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 /**
  * One day the graph catalog won't be a static thing, it'll instead be a dependency you inject here. One day.
@@ -52,5 +58,30 @@ public class GraphStoreCatalogService {
 
     public GraphStoreWithConfig get(CatalogRequest catalogRequest, String graphName) {
         return GraphStoreCatalog.get(catalogRequest, graphName);
+    }
+
+    public Optional<Map<String, Object>> getDegreeDistribution(
+        User user,
+        DatabaseId databaseId,
+        String/*GraphName, fix me*/ graphName
+    ) {
+        return GraphStoreCatalog.getDegreeDistribution(user.getUsername(), databaseId, graphName);
+    }
+
+    public void setDegreeDistribution(
+        User user,
+        DatabaseId databaseId,
+        String/*GraphName, fix me*/ graphName,
+        Map<String, Object> degreeDistribution
+    ) {
+        GraphStoreCatalog.setDegreeDistribution(user.getUsername(), databaseId, graphName, degreeDistribution);
+    }
+
+    public Stream<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> getAllGraphStores() {
+        return GraphStoreCatalog.getAllGraphStores();
+    }
+
+    public Map<GraphProjectConfig, GraphStore> getGraphStores(User user) {
+        return GraphStoreCatalog.getGraphStores(user.getUsername());
     }
 }

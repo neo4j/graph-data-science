@@ -79,9 +79,10 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         // GDS services
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
+        // GDS applications
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
         var graphNameValidationService = new GraphNameValidationService();
-        var listGraphService = new ListGraphService();
+        var listGraphService = new ListGraphService(graphStoreCatalogService);
         var preconditionsService = createPreconditionsService();
 
         // GDS business facade
