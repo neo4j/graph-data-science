@@ -31,7 +31,6 @@ public final class ColoringStep implements Runnable {
     
     private final RelationshipIterator graph;
     private final HugeLongArray colors;
-    private final BitSet nodesToColor;
     private final BitSet forbiddenColors;
     private final IteratorPartition partition;
     private final ProgressTracker progressTracker;
@@ -40,13 +39,11 @@ public final class ColoringStep implements Runnable {
     public ColoringStep(
         RelationshipIterator graph,
         HugeLongArray colors,
-        BitSet nodesToColor,
         IteratorPartition partition,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.colors = colors;
-        this.nodesToColor = nodesToColor;
         this.partition = partition;
         this.forbiddenColors = new BitSet(INITIAL_FORBIDDEN_COLORS);
         this.resetMask = new long[INITIAL_FORBIDDEN_COLORS];

@@ -175,7 +175,6 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
             partition -> new ColoringStep(
                 graph.concurrentCopy(),
                 colors,
-                nodesToColor,
                 partition,
                 getProgressTracker()
             )
