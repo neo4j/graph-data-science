@@ -241,7 +241,6 @@ public final class DefaultValue {
         return defaultValue;
     }
 
-
     @Override
     public String toString() {
         return "DefaultValue(" + defaultValue + ')';

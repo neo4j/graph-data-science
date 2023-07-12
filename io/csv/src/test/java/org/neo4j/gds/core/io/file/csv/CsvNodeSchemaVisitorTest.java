@@ -113,6 +113,28 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
         );
     }
 
+    @Test
+    void shouldWriteDoubleArrayProperty() {
+        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
+        NodeLabel labelA = NodeLabel.of("A");
+        nodeSchemaVisitor.nodeLabel(labelA);
+        nodeSchemaVisitor.key("prop1");
+        nodeSchemaVisitor.valueType(ValueType.DOUBLE_ARRAY);
+        nodeSchemaVisitor.defaultValue(DefaultValue.of(new double[]{42.0, 43.0}));
+        nodeSchemaVisitor.state(PropertyState.PERSISTENT);
+        nodeSchemaVisitor.endOfEntity();
+        nodeSchemaVisitor.close();
+
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME));
+        assertDataContent(
+            NODE_SCHEMA_FILE_NAME,
+            List.of(
+                defaultHeaderColumns(),
+                List.of("A", "prop1", "double[]", "\"DefaultValue([42.0,43.0])\"", "PERSISTENT")
+            )
+        );
+    }
+
     @Override
     protected List<String> defaultHeaderColumns() {
         return NODE_SCHEMA_COLUMNS;

@@ -144,4 +144,22 @@ class NodeSchemaLoaderTest {
             .isEqualTo(new MutableNodeSchemaEntry(NodeLabel.of("B"), Map.of()));
     }
 
+    @Test
+    void shouldReadArrayDefaultValues() throws IOException {
+        var nodeSchemaFile = exportDir.resolve(NODE_SCHEMA_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", NODE_SCHEMA_COLUMNS),
+            "A, prop1, double[], \"DefaultValue([42.0,13.37])\", PERSISTENT"
+        );
+        FileUtils.writeLines(nodeSchemaFile, lines);
+
+        var schemaLoader = new NodeSchemaLoader(exportDir);
+        var nodeSchema = schemaLoader.load();
+
+        assertThat(nodeSchema).isNotNull();
+
+        assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"));
+        assertThat(nodeSchema.get(NodeLabel.of("A")).properties().get("prop1").defaultValue().doubleArrayValue())
+            .containsExactly(42.0, 13.37);
+    }
 }

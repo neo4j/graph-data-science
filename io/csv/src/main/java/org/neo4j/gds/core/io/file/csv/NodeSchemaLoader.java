@@ -26,7 +26,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
@@ -62,7 +61,7 @@ public class NodeSchemaLoader {
                 if (schemaLine.propertyKey != null) {
                     schemaBuilder.key(schemaLine.propertyKey);
                     schemaBuilder.valueType(schemaLine.valueType);
-                    schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
+                    schemaBuilder.defaultValue(DefaultValueIOHelper.deserialize(schemaLine.defaultValue, schemaLine.valueType, true));
                     schemaBuilder.state(schemaLine.state);
                 }
                 schemaBuilder.endOfEntity();
