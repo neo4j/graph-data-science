@@ -61,7 +61,7 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
  * </p>
  */
 public class K1Coloring extends Algorithm<HugeLongArray> {
-
+    private static final long FINISHED = -1;
     private final Graph graph;
     private final long nodeCount;
     private final ExecutorService executor;
@@ -70,8 +70,10 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
 
     private final long maxIterations;
 
-    private BitSet nodesToColor;
+    private BitSet[] nodesToColor;
     // Not thread-safe on purpose
+
+    private int bitSetId;
     private HugeLongArray colors;
     private long ranIterations;
     private boolean didConverge;
@@ -95,11 +97,20 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         this.nodeCount = graph.nodeCount();
         this.maxIterations = maxIterations;
 
-        this.nodesToColor = new BitSet(nodeCount);
+        this.nodesToColor = new BitSet[]{new BitSet(nodeCount), new BitSet(nodeCount)};
+
 
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
+    }
+
+    private BitSet currentNodesToColor() {
+        return nodesToColor[bitSetId];
+    }
+
+    private BitSet nextNodesToColor() {
+        return nodesToColor[(bitSetId + 1) % 2];
     }
 
     public long ranIterations() {
@@ -126,6 +137,7 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         return colors;
     }
 
+
     @Override
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
@@ -134,21 +146,14 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         colors.setAll((nodeId) -> ColoringStep.INITIAL_FORBIDDEN_COLORS);
 
         ranIterations = 0L;
-        nodesToColor.set(0, nodeCount);
+        currentNodesToColor().set(0, nodeCount);
 
         var currentVolume = nodeCount;
-        while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-            terminationFlag.assertRunning();
-            runColoring(currentVolume);
+        while (ranIterations < maxIterations && !currentNodesToColor().isEmpty()) {
 
-            terminationFlag.assertRunning();
-            runValidation(currentVolume);
+            runOneIteration(currentVolume);
+            currentVolume = updateVolume();
 
-            ++ranIterations;
-
-            if (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-                currentVolume = nodesToColor.cardinality();
-            }
         }
 
         this.didConverge = ranIterations < maxIterations;
@@ -157,10 +162,35 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         return colors();
     }
 
+    private long updateVolume() {
+        if (ranIterations < maxIterations && !currentNodesToColor().isEmpty()) {
+            return currentNodesToColor().cardinality();
+        }
+        return FINISHED;
+    }
+
+    private void runOneIteration(long currentVolume) {
+        terminationFlag.assertRunning();
+        runColoring(currentVolume);
+
+        terminationFlag.assertRunning();
+        runValidation(currentVolume);
+
+        ++ranIterations;
+        bitSetId = (bitSetId == 0) ? 1 : 0;
+
+
+    }
+
     private void runColoring(long volume) {
         progressTracker.beginSubTask(volume);
         long nodeCount = graph.nodeCount();
-        long approximateRelationshipCount = ceilDiv(graph.relationshipCount(), nodeCount) * nodesToColor.cardinality();
+        var currentNodesToColor = currentNodesToColor();
+        long approximateRelationshipCount = ceilDiv(
+            graph.relationshipCount(),
+            nodeCount
+        ) * currentNodesToColor.cardinality();
+
         long adjustedBatchSize = ParallelUtil.adjustedBatchSize(
             approximateRelationshipCount,
             concurrency,
@@ -169,7 +199,7 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         );
 
         var steps = PartitionUtils.degreePartitionWithBatchSize(
-            nodesToColor,
+            currentNodesToColor,
             graph::degree,
             adjustedBatchSize,
             partition -> new ColoringStep(
@@ -190,15 +220,18 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
 
     private void runValidation(long volume) {
         progressTracker.beginSubTask(volume);
-        BitSet nextNodesToColor = new BitSet(nodeCount);
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
         List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(concurrency, nodeCount, Long.SIZE);
 
+        var currentNodesToColor = currentNodesToColor();
+        var nextNodesToColor = nextNodesToColor();
+
+        nextNodesToColor.clear();
         List<ValidationStep> steps = partitions.stream().map(partition -> new ValidationStep(
             graph.concurrentCopy(),
             colors,
-            nodesToColor,
+            currentNodesToColor,
             nextNodesToColor,
             partition,
             progressTracker
@@ -209,7 +242,6 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
             .tasks(steps)
             .executor(executor)
             .run();
-        this.nodesToColor = nextNodesToColor;
         progressTracker.endSubTask();
     }
 }
