@@ -32,7 +32,7 @@ public class ProcedureTransactionService {
 
     public Transaction getProcedureTransaction() {
         try {
-            return context.transaction();
+            return context.internalTransaction();
         } catch (ProcedureException e) {
             throw new IllegalStateException("This is not possible, we always have a transaction", e);
         }
