@@ -56,12 +56,12 @@ public class User {
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj, "isAdmin");
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, "isAdmin");
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

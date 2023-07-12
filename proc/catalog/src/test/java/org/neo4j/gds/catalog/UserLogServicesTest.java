@@ -57,4 +57,17 @@ class UserLogServicesTest {
         assertNotSame(factory1, factory4);
         assertNotSame(factory3, factory4); // duh
     }
+
+    @Test
+    void shouldNotCareAboutUserAdminStatus() {
+        var service = new UserLogServices();
+
+        var databaseId = DatabaseId.from("some database");
+        var username1 = new User("some user", false);
+        var username2 = new User("some user", true);
+        var factory1 = service.getUserLogRegistryFactory(databaseId, username1);
+        var factory2 = service.getUserLogRegistryFactory(databaseId, username2);
+
+        assertSame(factory1, factory2);
+    }
 }

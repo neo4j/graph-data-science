@@ -26,8 +26,10 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogStoreHolder;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * We have a user log store per database, and registry factories per database and user.
@@ -65,7 +67,7 @@ public class UserLogServices {
     private Map<User, UserLogRegistryFactory> getFactoriesForDatabase(DatabaseId databaseId) {
         return factories.computeIfAbsent(
             databaseId,
-            __ -> new ConcurrentHashMap<>()
+            __ -> new ConcurrentSkipListMap<>(Comparator.comparing(User::getUsername))
         );
     }
 }
