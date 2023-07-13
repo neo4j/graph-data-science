@@ -39,7 +39,7 @@ public class SteinerTreeWriteProc extends BaseProc {
     public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE)
-    @Description(SteinerTreeStatsProc.DESCRIPTION)
+    @Description(Constants.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -54,7 +54,7 @@ It is possible to use the GDS implementation to find a solution for Minimum Stei
 .Run the algorithm in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.steinerTree.stream(
+CALL gds.steinerTree.stream(
   graphName: String,
   configuration: Map
 )
@@ -272,7 +272,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [source,cypher,role=noplay]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
-CALL gds.beta.steinerTree.stream('graph', {
+CALL gds.steinerTree.stream('graph', {
   sourceNode: id(a),
   targetNodes: [id(d), id(e), id(f)],
   relationshipWeightProperty: 'cost'
@@ -442,7 +442,7 @@ Note that there is no guarantee that enabling rerouting will always lead to an i
 [source,cypher,role=noplay]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
-CALL gds.beta.steinerTree.stream('graph', {
+CALL gds.steinerTree.stream('graph', {
   sourceNode: id(a),
   targetNodes: [id(d), id(e), id(f)],
   relationshipWeightProperty: 'cost',
@@ -494,7 +494,7 @@ We know repeat the algorithm; this time with the extended rerouting heuristic.
 [source,cypher,role=noplay]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
-CALL gds.beta.steinerTree.stream('inverseGraph', {
+CALL gds.steinerTree.stream('inverseGraph', {
   sourceNode: id(a),
   targetNodes: [id(d), id(e), id(f)],
   relationshipWeightProperty: 'cost',

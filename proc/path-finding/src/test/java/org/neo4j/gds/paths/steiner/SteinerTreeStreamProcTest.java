@@ -20,7 +20,8 @@
 package org.neo4j.gds.paths.steiner;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -65,10 +66,11 @@ class SteinerTreeStreamProcTest extends BaseProcTest {
         return idFunction.of("c");
     }
 
-    @Test
-    void testYields() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.steinerTree", "gds.beta.steinerTree"})
+    void testYields(String procedure) {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.steinerTree")
+            .algo(procedure)
             .streamMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("targetNodes", List.of(getTerminal()))

@@ -36,7 +36,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.beta.SteinerTree.stream", description = SteinerTreeStatsProc.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.SteinerTree.stream", aliases = {"gds.beta.SteinerTree.stream"},
+    description = Constants.DESCRIPTION,
+    executionMode = STREAM
+)
 public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<StreamResult>, SteinerTreeAlgorithmFactory<SteinerTreeStreamConfig>> {
 
     @Override

@@ -28,14 +28,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.steiner.Constants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeMutateProc extends BaseProc {
-    static final String procedure = "gds.beta.steinerTree.mutate";
-    static final String DESCRIPTION = SteinerTreeStatsProc.DESCRIPTION;
 
-
-    @Procedure(value = procedure, mode = READ)
+    @Procedure(value = "gds.beta.steinerTree.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> spanningTree(
         @Name(value = "graphName") String graphName,

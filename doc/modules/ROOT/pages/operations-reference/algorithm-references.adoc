@@ -285,7 +285,7 @@
 .4+<.^| xref:algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
 | `gds.beta.steinerTree.mutate` label:procedure[Procedure]
 | `gds.beta.steinerTree.stats` label:procedure[Procedure]
-| `gds.beta.steinerTree.stream` label:procedure[Procedure]
+| `gds.steinerTree.stream` label:procedure[Procedure]
 | `gds.beta.steinerTree.write` label:procedure[Procedure]
 .6+<.^| xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
 | `gds.beta.modularityOptimization.mutate` label:procedure[Procedure]

@@ -28,17 +28,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.steiner.Constants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeStatsProc extends BaseProc {
 
-    static final String procedure = "gds.beta.steinerTree.stats";
-    static final String DESCRIPTION =
-        "The steiner tree algorithm accepts a source node, as well as a list of target nodes. " +
-        "It then attempts to find a spanning tree where there is a path from the source node to each target node, " +
-        "such that the total weight of the relationships is as low as possible.";
-
-    @Procedure(value = procedure, mode = READ)
+    @Procedure(value = "gds.beta.steinerTree.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StatsResult> compute(
         @Name(value = "graphName") String graphName,
