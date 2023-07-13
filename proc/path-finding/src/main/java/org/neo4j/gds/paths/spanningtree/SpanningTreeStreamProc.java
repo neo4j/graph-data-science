@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -65,6 +66,8 @@ public class SpanningTreeStreamProc extends BaseProc {
 
     @Procedure(value = betaProcedure, mode = READ, deprecatedBy = procedure)
     @Description(DESCRIPTION)
+    @Internal
+    @Deprecated
     public Stream<StreamResult> betaSpanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -77,6 +80,8 @@ public class SpanningTreeStreamProc extends BaseProc {
 
     @Procedure(value = betaProcedure + ".estimate", mode = READ, deprecatedBy = procedure + ".estimate")
     @Description(ESTIMATE_DESCRIPTION)
+    @Internal
+    @Deprecated
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
