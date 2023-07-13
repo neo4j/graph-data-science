@@ -130,7 +130,7 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 .Run the Spanning Tree algorithm in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.steinerTree.mutate(
+CALL gds.steinerTree.mutate(
   graphName: String,
   configuration: Map
 )
@@ -394,7 +394,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
-CALL gds.beta.steinerTree.mutate('graph', {
+CALL gds.steinerTree.mutate('graph', {
   sourceNode: id(a),
   targetNodes: [id(d), id(e), id(f)],
   relationshipWeightProperty: 'cost',

@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,9 +34,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeMutateProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.steinerTree.mutate", mode = READ)
+    @Procedure(value = "gds.steinerTree.mutate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> spanningTree(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -43,6 +44,20 @@ public class SteinerTreeMutateProc extends BaseProc {
             new SteinerTreeMutateSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Deprecated
+    @Procedure(value = "gds.beta.steinerTree.mutate", mode = READ, deprecatedBy = "gds.steinerTree.mutate")
+    @Description(DESCRIPTION)
+    @Internal
+    public Stream<MutateResult> mutateBeta(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.steinerTree.mutate` has been deprecated, please use `gds.steinerTree.mutate`.");
+        return mutate(graphName, configuration);
     }
 
 }

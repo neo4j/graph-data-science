@@ -283,7 +283,7 @@
 | `gds.beta.leiden.write` label:procedure[Procedure]
 | `gds.beta.leiden.write.estimate` label:procedure[Procedure]
 .4+<.^| xref:algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
-| `gds.beta.steinerTree.mutate` label:procedure[Procedure]
+| `gds.steinerTree.mutate` label:procedure[Procedure]
 | `gds.steinerTree.stats` label:procedure[Procedure]
 | `gds.steinerTree.stream` label:procedure[Procedure]
 | `gds.beta.steinerTree.write` label:procedure[Procedure]

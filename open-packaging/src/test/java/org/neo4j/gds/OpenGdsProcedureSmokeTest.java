@@ -214,7 +214,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.spanningTree.write.estimate",
         "gds.alpha.kSpanningTree.write",
 
-        "gds.beta.steinerTree.mutate",
+        "gds.steinerTree.mutate",
         "gds.steinerTree.stats",
         "gds.steinerTree.stream",
         "gds.beta.steinerTree.write",
