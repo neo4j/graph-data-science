@@ -32,6 +32,12 @@ import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_B
 import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.bitsNeeded;
 import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.bytesNeeded;
 
+/**
+ * Compresses values in blocks of {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} using bit-packing.
+ * <p>
+ * If a block to compress has less than {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} values,
+ * this strategy considers the block as full and compresses the 0-values with the bit size for that block.
+ */
 final class BlockAlignedTailPacker {
 
     static long compress(

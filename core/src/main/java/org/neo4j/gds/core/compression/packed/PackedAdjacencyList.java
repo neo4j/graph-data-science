@@ -25,7 +25,7 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.utils.GdsSystemProperties;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.lang.ref.Cleaner;
 
@@ -54,6 +54,40 @@ public class PackedAdjacencyList implements AdjacencyList {
         AdjacencyCursor newRawCursor(long[] pages);
     }
 
+    /**
+     * Block-aligned-tail cursor methods.
+     */
+
+    private static AdjacencyCursor newCursorWithBlockAlignedTail(long offset, int degree, long[] pages) {
+        var cursor = new DecompressingCursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    private static AdjacencyCursor newReuseCursorWithBlockAlignedTail(
+        @Nullable AdjacencyCursor reuse,
+        long offset,
+        int degree,
+        long[] pages
+    ) {
+        if (reuse instanceof DecompressingCursor) {
+            reuse.init(offset, degree);
+            return reuse;
+        } else {
+            var cursor = new DecompressingCursor(pages);
+            cursor.init(offset, degree);
+            return cursor;
+        }
+    }
+
+    private static AdjacencyCursor newRawCursorWithBlockAlignedTail(long[] pages) {
+        return new DecompressingCursor(pages);
+    }
+
+    /**
+     * Packed-tail cursor methods.
+     */
+
     private static AdjacencyCursor newCursorWithPackedTail(long offset, int degree, long[] pages) {
         var cursor = new DecompressingCursorWithPackedTail(pages);
         cursor.init(offset, degree);
@@ -80,13 +114,17 @@ public class PackedAdjacencyList implements AdjacencyList {
         return new DecompressingCursorWithPackedTail(pages);
     }
 
+    /**
+     * Var-long-tail cursor methods.
+     */
+
     private static AdjacencyCursor newCursorWithVarLongTail(long offset, int degree, long[] pages) {
         var cursor = new DecompressingCursorWithVarLongTail(pages);
         cursor.init(offset, degree);
         return cursor;
     }
 
-    private static AdjacencyCursor newReuseCursorWithVarLongTail(
+    private static AdjacencyCursor newReuseCursorWithVarLengthTail(
         @Nullable AdjacencyCursor reuse,
         long offset,
         int degree,
@@ -123,19 +161,26 @@ public class PackedAdjacencyList implements AdjacencyList {
         this.memoryInfo = memoryInfo;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
 
-        switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
-            case VarLong:
+        var adjacencyPackingStrategy = GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get();
+
+        switch (adjacencyPackingStrategy) {
+            case VAR_LONG_TAIL:
                 this.newCursor = PackedAdjacencyList::newCursorWithVarLongTail;
-                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLongTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLengthTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithVarLongTail;
                 break;
-            case Packed:
+            case PACKED_TAIL:
                 this.newCursor = PackedAdjacencyList::newCursorWithPackedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithPackedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithPackedTail;
                 break;
+            case BLOCK_ALIGNED_TAIL:
+                this.newCursor = PackedAdjacencyList::newCursorWithBlockAlignedTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithBlockAlignedTail;
+                this.newRawCursor = PackedAdjacencyList::newRawCursorWithBlockAlignedTail;
+                break;
             default:
-                throw new IllegalArgumentException("Unknown compression type");
+                throw new IllegalArgumentException("Unsupported packing strategy: " + adjacencyPackingStrategy);
         }
     }
 

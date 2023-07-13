@@ -25,9 +25,11 @@ import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 /**
  * General heap of feature toggles we have and procedures to toggle them
@@ -110,6 +112,39 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.adjacencyPackingStrategy")
+    @Description("If `usePackedAdjacencyList` is enabled, this function allows setting the implementation strategy.")
+    public void adjacencyPackingStrategy(@Name(value = "adjacencyPackingStrategy") String adjacencyPackingStrategy) {
+        if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) {
+            try {
+                var strategy = GdsFeatureToggles.AdjacencyPackingStrategy.valueOf(toUpperCaseWithLocale(
+                    adjacencyPackingStrategy));
+                GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.set(strategy);
+            } catch (IllegalArgumentException iae) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Invalid adjacency packing strategy: %s, must be one of %s",
+                    adjacencyPackingStrategy,
+                    Arrays.toString(GdsFeatureToggles.AdjacencyPackingStrategy.values())
+                ));
+            }
+        } else {
+            throw new IllegalStateException("Cannot set adjacency packing strategy when packed adjacency list is disabled.");
+        }
+    }
+
+    @Internal
+    @Procedure("gds.features.adjacencyPackingStrategy.reset")
+    @Description("If `usePackedAdjacencyList` is enabled, this function resets the implementation strategy to the default.")
+    public Stream<FeatureStringValue> resetAdjacencyPackingStrategy() {
+        if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) {
+            GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.set(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING);
+            return Stream.of(new FeatureStringValue(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get().name()));
+        } else {
+            throw new IllegalStateException("Cannot reset adjacency packing strategy when packed adjacency list is disabled.");
+        }
+    }
+
+    @Internal
     @Procedure("gds.features.useReorderedAdjacencyList")
     @Description("Toggle whether the adjacency list should be reordered during graph creation.")
     public void useReorderedAdjacencyList(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {
@@ -142,9 +177,9 @@ public final class FeatureToggleProc {
     @Internal
     @Procedure("gds.features.pagesPerThread.reset")
     @Description("Set the value of pages per thread to the default. That value is returned.")
-    public Stream<FeatureValue> resetPagesPerThread() {
+    public Stream<FeatureLongValue> resetPagesPerThread() {
         GdsFeatureToggles.PAGES_PER_THREAD.set(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING);
-        return Stream.of(new FeatureValue(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING));
+        return Stream.of(new FeatureLongValue(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING));
     }
 
     @Internal
@@ -172,10 +207,18 @@ public final class FeatureToggleProc {
     }
 
     @SuppressWarnings("unused")
-    public static final class FeatureValue {
+    public static final class FeatureLongValue {
         public final long value;
 
-        FeatureValue(long value) {
+        FeatureLongValue(long value) {
+            this.value = value;
+        }
+    }
+
+    public static final class FeatureStringValue {
+        public final String value;
+
+        FeatureStringValue(String value) {
             this.value = value;
         }
     }
