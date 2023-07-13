@@ -20,7 +20,8 @@
 package org.neo4j.gds.paths.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -51,17 +52,18 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE(a:Node) " +
-                                    "CREATE(b:Node) " +
-                                    "CREATE(c:Node) " +
-                                    "CREATE(d:Node) " +
-                                    "CREATE(e:Node) " +
-                                    "CREATE(z:Node) " +
-                                    "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
-                                    "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
-                                    "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
-                                    "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
-                                    "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
-                                    "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
+        "CREATE(b:Node) " +
+        "CREATE(c:Node) " +
+        "CREATE(d:Node) " +
+        "CREATE(e:Node) " +
+        "CREATE(z:Node) " +
+        "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
+        "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
+        "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
+        "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
+        "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
+        "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
+
 
     @BeforeEach
     void setup() throws Exception {
@@ -75,15 +77,15 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
         runQuery(createQuery);
     }
 
-
     private long getSourceNode() {
         return idFunction.of("a");
     }
 
-    @Test
-    void testYields() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.spanningTree", "gds.beta.spanningTree"})
+    void testYields(String tieredProcedure) {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.spanningTree")
+            .algo(tieredProcedure)
             .mutateMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
@@ -96,6 +98,7 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
                 "effectiveNodeCount",
                 "relationshipsWritten"
             );
+
         var graph = findLoadedGraph(DEFAULT_GRAPH_NAME);
 
         assertThat(graph.relationshipCount()).isEqualTo(12);
@@ -120,17 +123,17 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
 
         var expected = TestSupport.fromGdl(
             "CREATE" +
-            "(a:Node)" +
-            ",(b:Node)" +
-            ",(c:Node)" +
-            ",(d:Node)" +
-            ",(e:Node)" +
-            ",(z:Node)" +
+                "(a:Node)" +
+                ",(b:Node)" +
+                ",(c:Node)" +
+                ",(d:Node)" +
+                ",(e:Node)" +
+                ",(z:Node)" +
 
-            " ,(a)-[:MST {foo: 1.0}]->(b)" +
-            " ,(a)-[:MST{foo: 2.0}]->(c)" +
-            " ,(b)-[:MST{foo: 4.0}]->(d)" +
-            " ,(c)-[:MST{foo: 5.0}]->(e)");
+                " ,(a)-[:MST {foo: 1.0}]->(b)" +
+                " ,(a)-[:MST{foo: 2.0}]->(c)" +
+                " ,(b)-[:MST{foo: 4.0}]->(d)" +
+                " ,(c)-[:MST{foo: 5.0}]->(e)");
 
         assertGraphEquals(expected, actual);
 
