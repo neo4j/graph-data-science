@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeStatsProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.steinerTree.stats", mode = READ)
+    @Procedure(value = "gds.steinerTree.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StatsResult> compute(
         @Name(value = "graphName") String graphName,
@@ -45,4 +46,17 @@ public class SteinerTreeStatsProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
+    @Deprecated
+    @Procedure(value = "gds.beta.steinerTree.stats", mode = READ, deprecatedBy = "gds.steinerTree.stats")
+    @Description(DESCRIPTION)
+    @Internal
+    public Stream<StatsResult> computeBeta(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.steinerTree.stats` has been deprecated, please use `gds.steinerTree.stats`.");
+        return compute(graphName, configuration);
+    }
 }
