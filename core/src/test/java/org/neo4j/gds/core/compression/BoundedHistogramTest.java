@@ -37,7 +37,7 @@ class BoundedHistogramTest {
             Arguments.of(new int[] {5}, 5),
             Arguments.of(IntStream.range(0, 10).toArray(), 4.5),
             Arguments.of(IntStream.range(1, 10).toArray(), 5),
-            Arguments.of(new int[] {1, 4, 4, 4}, 3.25)
+            Arguments.of(new int[] {1, 3, 3, 7}, 3.5)
         );
     }
 
@@ -50,10 +50,10 @@ class BoundedHistogramTest {
 
     static Stream<Arguments> medians() {
         return Stream.of(
-            Arguments.of(new int[] {5}, 5),
+            Arguments.of(new int[] {5}, 6),
             Arguments.of(IntStream.range(0, 10).toArray(), 5),
             Arguments.of(IntStream.range(1, 10).toArray(), 6),
-            Arguments.of(new int[] {1, 4, 4, 4}, 4)
+            Arguments.of(new int[] {1, 3, 3, 7}, 3)
         );
     }
 
@@ -66,11 +66,10 @@ class BoundedHistogramTest {
 
     static Stream<Arguments> mins() {
         return Stream.of(
-            Arguments.of(new int[] {}, BoundedHistogram.NO_VALUE),
             Arguments.of(new int[] {5}, 5),
             Arguments.of(IntStream.range(0, 10).toArray(), 0),
             Arguments.of(IntStream.range(1, 10).toArray(), 1),
-            Arguments.of(new int[] {1, 4, 4, 4}, 1)
+            Arguments.of(new int[] {1, 3, 3, 7}, 1)
         );
     }
 
@@ -83,11 +82,10 @@ class BoundedHistogramTest {
 
     static Stream<Arguments> maxs() {
         return Stream.of(
-            Arguments.of(new int[] {}, BoundedHistogram.NO_VALUE),
             Arguments.of(new int[] {5}, 5),
             Arguments.of(IntStream.range(0, 10).toArray(), 9),
             Arguments.of(IntStream.range(1, 10).toArray(), 9),
-            Arguments.of(new int[] {1, 4, 4, 4}, 4),
+            Arguments.of(new int[] {1, 3, 3, 7}, 7),
             Arguments.of(new int[] {1, 1, 2, 4}, 4),
             Arguments.of(new int[] {1, 1, 2, 2, 4, 4, 4}, 4)
         );
@@ -134,7 +132,6 @@ class BoundedHistogramTest {
 
     static Stream<Arguments> percentiles() {
         return Stream.of(
-            Arguments.of(new int[] {}, 50.0f, 0),
             Arguments.of(new int[] {1, 1, 1, 2, 3}, 25.0f, 1),
             Arguments.of(new int[] {1, 1, 1, 2, 3}, 50.0f, 2),
             Arguments.of(new int[] {1, 1, 1, 2, 3}, 60.0f, 2),

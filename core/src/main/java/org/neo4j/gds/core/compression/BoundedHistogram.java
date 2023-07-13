@@ -24,32 +24,27 @@ import java.util.Arrays;
 /**
  * A simple, exact histogram implementation that is used for small domain spaces.
  * It's main purpose is tracking statistics for compression related logic.
+ * If no values are recorded the returned values are undefined.
  */
-public class BoundedHistogram {
-
-    public static final int NO_VALUE = 0;
+public final class BoundedHistogram {
 
     private long[] histogram;
     private long total;
 
     /**
-     * Create a new histogram that can record values between 0 and `upperBoundExclusive`.
+     * Creates a histogram that accepts values in [0, upperBoundInclusive].
      */
-    public BoundedHistogram(int upperBoundExclusive) {
-        this.histogram = new long[upperBoundExclusive];
+    public BoundedHistogram(int upperBoundInclusive) {
+        this.histogram = new long[upperBoundInclusive + 1];
         this.total = 0;
     }
 
     /**
      * Record the occurrence of the value in the histogram.
-     * Resizes the underlying buffer if necessary.
      */
     public void record(int value) {
-        if (value >= this.histogram.length) {
-            this.histogram = Arrays.copyOf(this.histogram, value + 1);
-        }
         this.histogram[value]++;
-        this.total = Math.toIntExact((long) this.total + 1L);
+        this.total++;
     }
 
     /**
@@ -114,8 +109,7 @@ public class BoundedHistogram {
     }
 
     /**
-     * Returns the lowest recorded value in the histogram
-     * or `0` if no value has been recorded.
+     * Returns the lowest recorded value in the histogram.
      */
     public int min() {
         long[] histogram = this.histogram;
@@ -124,12 +118,11 @@ public class BoundedHistogram {
                 return i;
             }
         }
-        return NO_VALUE;
+        return histogram.length - 1;
     }
 
     /**
-     * Returns the highest recorded value in the histogram
-     * or `0` if no value has been recorded.
+     * Returns the highest recorded value in the histogram.
      */
     public int max() {
         long[] histogram = this.histogram;
@@ -138,7 +131,7 @@ public class BoundedHistogram {
                 return i;
             }
         }
-        return NO_VALUE;
+        return histogram.length - 1;
     }
 
     /**
