@@ -17,18 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.StringIdentifierValidations;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * GraphName ought to be a micro type. That would strengthen our domain model. And we could then create a guard,
@@ -50,7 +49,7 @@ public class GraphNameValidationService {
     }
 
     /**
-     * Like @{@link org.neo4j.gds.core.loading.GraphNameValidationService#validate(String)},
+     * Like @{@link GraphNameValidationService#validate(String)},
      * but if input has leading or trailing whitespace, it is rejected.
      *
      * @return graph name for downstream consumption.
@@ -122,7 +121,7 @@ public class GraphNameValidationService {
     }
 
     private IllegalArgumentException typeMismatch(Object invalid, int index) {
-        String errorMessage = formatWithLocale(
+        String errorMessage = StringFormatting.formatWithLocale(
             "Type mismatch%s: expected String but was %s.",
             index >= 0 ? (" at index " + index) : "",
             invalid == null ? "null" : invalid.getClass().getSimpleName()
