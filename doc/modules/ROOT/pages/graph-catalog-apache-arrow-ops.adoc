@@ -47,7 +47,8 @@ To stream a single node property, the client needs to encode that information in
     procedure_name: "gds.graph.nodeProperty.stream",
     configuration: {
         node_labels: ["*"],
-        node_property: "foo"
+        node_property: "foo",
+        list_node_labels: true
     }
 }
 ----
@@ -61,20 +62,22 @@ The specific configuration needs to include the following keys:
 | Name              | Type                      | Description
 | node_labels       | String or List of Strings | Stream only properties for nodes with the given labels.
 | node_property     | String                    | The node property in the graph to stream.
+| list_node_labels  | Boolean                   | Whether to include node labels of the respective nodes in the result.
 |===
 
 The schema of the result records is identical to the corresponding procedure:
 
 .Results
-[opts="header",cols="2,3,5"]
+[opts="header",cols="2,3,5, 1"]
 |===
-| Name           | Type                                                 | Description
-|nodeId          | Integer                                              | The id of the node.
+| Name           | Type                                                 | Description  | Optional
+| nodeId          | Integer                                              | The id of the node. | false
 .^|propertyValue    a|
 * Integer
 * Float
 * List of Integer
-* List of Float  .^| The stored property value.
+* List of Float  .^| The stored property value. | false
+| labels         | List of Strings                                      | The labels of the node. If the `list_node_labels` option was set | true
 |===
 
 
@@ -89,7 +92,8 @@ To stream multiple node properties, the client needs to encode that information 
     procedure_name: "gds.graph.streamNodeProperties",
     configuration: {
         node_labels: ["*"],
-        node_properties: ["foo", "bar", "baz"]
+        node_properties: ["foo", "bar", "baz"],
+        list_node_labels: true
     }
 }
 ----
@@ -103,6 +107,7 @@ The specific configuration needs to include the following keys:
 | Name              | Type                      | Description
 | node_labels       | String or List of Strings | Stream only properties for nodes with the given labels.
 | node_properties   | String or List of Strings | The node properties in the graph to stream.
+| list_node_labels  | Boolean                   | Whether to include node labels of the respective nodes in the result.
 |===
 
 Note that the schema of the result records is not identical to the corresponding procedure.
