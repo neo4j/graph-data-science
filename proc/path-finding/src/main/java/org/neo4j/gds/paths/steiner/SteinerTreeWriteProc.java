@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -38,7 +39,7 @@ public class SteinerTreeWriteProc extends BaseProc {
     @Context
     public RelationshipExporterBuilder relationshipExporterBuilder;
 
-    @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE)
+    @Procedure(value = "gds.steinerTree.write", mode = WRITE)
     @Description(Constants.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -48,6 +49,20 @@ public class SteinerTreeWriteProc extends BaseProc {
             new SteinerTreeWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Deprecated
+    @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE, deprecatedBy = "gds.steinerTree.write")
+    @Description(Constants.DESCRIPTION)
+    @Internal
+    public Stream<WriteResult> writeBeta(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.steinerTree.write` has been deprecated, please use `gds.steinerTree.write`.");
+        return write(graphName, configuration);
     }
 
     @Override
