@@ -36,7 +36,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.beta.spanningTree.stream", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.spanningTree.stream",
+    aliases = {"gds.beta.spanningTree.stream"},
+    description = SpanningTreeWriteProc.DESCRIPTION,
+    executionMode = STREAM
+)
 public class SpanningTreeStreamSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeStreamConfig, Stream<StreamResult>, SpanningTreeAlgorithmFactory<SpanningTreeStreamConfig>> {
 
     @Override

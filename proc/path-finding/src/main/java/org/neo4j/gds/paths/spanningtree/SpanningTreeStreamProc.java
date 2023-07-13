@@ -32,7 +32,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 public class SpanningTreeStreamProc extends BaseProc {
-    static final String procedure = "gds.beta.spanningTree.stream";
+    static final String procedure = "gds.spanningTree.stream";
+    static final String betaProcedure = "gds.beta.spanningTree.stream";
+
     static final String DESCRIPTION = SpanningTreeWriteProc.DESCRIPTION;
 
     @Procedure(value = procedure, mode = READ)
@@ -59,5 +61,30 @@ public class SpanningTreeStreamProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
+    }
+
+    @Procedure(value = betaProcedure, mode = READ, deprecatedBy = procedure)
+    @Description(DESCRIPTION)
+    public Stream<StreamResult> betaSpanningTree(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.spanningTree.stream` has been deprecated, please use `gds.spanningTree.stream`.");
+        return spanningTree(graphName, configuration);
+    }
+
+    @Procedure(value = betaProcedure + ".estimate", mode = READ, deprecatedBy = procedure + ".estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.spanningTree.stream.estimate` has been deprecated, please use `gds.spanningTree.stream.estimate`.");
+        return estimate(graphName, configuration);
     }
 }
