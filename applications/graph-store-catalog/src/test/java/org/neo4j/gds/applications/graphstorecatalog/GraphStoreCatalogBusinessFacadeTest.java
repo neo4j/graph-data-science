@@ -137,7 +137,7 @@ class GraphStoreCatalogBusinessFacadeTest {
 
         when(validationService.validateStrictly("   somegraph   ")).thenThrow(new IllegalArgumentException("whitespace!"));
         assertThatIllegalArgumentException().isThrownBy(
-            () -> facade.project(
+            () -> facade.nativeProject(
                 null,
                 null,
                 null,

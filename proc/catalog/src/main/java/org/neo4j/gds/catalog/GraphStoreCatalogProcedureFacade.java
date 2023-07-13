@@ -189,7 +189,7 @@ public class GraphStoreCatalogProcedureFacade {
         ));
     }
 
-    public Stream<GraphProjectNativeResult> project(
+    public Stream<GraphProjectNativeResult> nativeProject(
         String graphName,
         Object nodeProjection,
         Object relationshipProjection,
@@ -202,7 +202,7 @@ public class GraphStoreCatalogProcedureFacade {
         var terminationFlag = terminationFlag();
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
-        var result = businessFacade.project(
+        var result = businessFacade.nativeProject(
             user,
             databaseId,
             taskRegistryFactory,

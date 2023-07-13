@@ -60,7 +60,7 @@ class NativeProjectProcedureTest {
             87,
             117
         ));
-        when(facade.project(
+        when(facade.nativeProject(
             "some graph",
             "some label",
             "some relationship type",

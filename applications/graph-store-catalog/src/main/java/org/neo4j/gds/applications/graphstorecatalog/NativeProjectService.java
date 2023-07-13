@@ -63,7 +63,10 @@ public class NativeProjectService {
         try {
             return projectGraph(
                 databaseId,
-                taskRegistryFactory, terminationFlag, transactionContext, user,
+                taskRegistryFactory,
+                terminationFlag,
+                transactionContext,
+                user,
                 userLogRegistryFactory,
                 configuration
             );

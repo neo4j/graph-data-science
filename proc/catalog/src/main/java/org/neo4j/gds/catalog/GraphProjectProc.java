@@ -76,7 +76,7 @@ public class GraphProjectProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.project(
+        return facade.nativeProject(
             graphName,
             nodeProjection,
             relationshipProjection,

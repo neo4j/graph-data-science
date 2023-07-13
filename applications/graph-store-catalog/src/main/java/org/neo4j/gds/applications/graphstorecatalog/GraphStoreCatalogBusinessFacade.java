@@ -130,7 +130,7 @@ public class GraphStoreCatalogBusinessFacade {
         return listGraphService.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
     }
 
-    public GraphProjectNativeResult project(
+    public GraphProjectNativeResult nativeProject(
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
@@ -148,7 +148,7 @@ public class GraphStoreCatalogBusinessFacade {
 
         graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
 
-        var projectConfiguration = configurationService.parseNativeProjectConfiguration(
+        var nativeProjectConfiguration = configurationService.parseNativeProjectConfiguration(
             user,
             graphName,
             nodeProjection,
@@ -163,7 +163,7 @@ public class GraphStoreCatalogBusinessFacade {
             transactionContext,
             user,
             userLogRegistryFactory,
-            projectConfiguration
+            nativeProjectConfiguration
         );
     }
 
