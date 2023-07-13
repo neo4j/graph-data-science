@@ -37,10 +37,12 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 public class SpanningTreeWriteProc extends BaseProc {
 
-    static final String procedure = "gds.beta.spanningTree.write";
+    static final String procedure = "gds.spanningTree.write";
+    static final String betaProcedure = "gds.beta.spanningTree.write";
+
     static final String DESCRIPTION =
         "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +
-        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
+            "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
     @Context
     public RelationshipExporterBuilder relationshipExporterBuilder;
 
@@ -68,6 +70,31 @@ public class SpanningTreeWriteProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
+    }
+
+    @Procedure(value = betaProcedure, mode = WRITE, deprecatedBy = procedure)
+    @Description(DESCRIPTION)
+    public Stream<WriteResult> betaSpanningTree(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.spanningTree.write` has been deprecated, please use `gds.spanningTree.write`.");
+        return spanningTree(graphName, configuration);
+    }
+
+    @Procedure(value = betaProcedure + ".estimate", mode = READ, deprecatedBy = procedure + ".estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.spanningTree.write.estimate` has been deprecated, please use `gds.spanningTree.write.estimate`.");
+        return estimate(graphName, configuration);
     }
 
     @Override
