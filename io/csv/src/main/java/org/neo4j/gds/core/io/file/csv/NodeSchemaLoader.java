@@ -88,7 +88,6 @@ public class NodeSchemaLoader {
         ValueType valueType;
 
         @JsonProperty
-        @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
         String defaultValue;
 
         @JsonProperty

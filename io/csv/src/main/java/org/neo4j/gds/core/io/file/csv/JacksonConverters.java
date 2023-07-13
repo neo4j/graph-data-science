@@ -46,11 +46,4 @@ class JacksonConverters {
             return ValueType.fromCsvName(value);
         }
     }
-
-    static class DefaultValueConverter extends StdConverter<String, String> {
-        @Override
-        public String convert(String value) {
-            return value.replaceAll("DefaultValue\\(|null|NaN|\\)", "");
-        }
-    }
 }
