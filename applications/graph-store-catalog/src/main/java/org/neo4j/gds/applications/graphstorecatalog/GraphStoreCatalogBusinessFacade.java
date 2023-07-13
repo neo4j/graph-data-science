@@ -30,6 +30,7 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
@@ -165,6 +166,36 @@ public class GraphStoreCatalogBusinessFacade {
             userLogRegistryFactory,
             nativeProjectConfiguration
         );
+    }
+
+    public MemoryEstimateResult estimateNativeProject(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        Object nodeProjection,
+        Object relationshipProjection,
+        Map<String, Object> rawConfiguration
+    ) {
+        checkPreconditions();
+
+        var estimateNativeProjectConfiguration = configurationService.parseEstimateNativeProjectConfiguration(
+            user,
+            nodeProjection,
+            relationshipProjection,
+            rawConfiguration
+        );
+
+        return nativeProjectService.estimate(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            user,
+            userLogRegistryFactory,
+            estimateNativeProjectConfiguration);
     }
 
     private void checkPreconditions() {

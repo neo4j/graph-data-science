@@ -28,6 +28,7 @@ import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -216,6 +217,33 @@ public class GraphStoreCatalogProcedureFacade {
         );
 
         // the fact that it is a stream is just a Neo4j Procedure Framework convention
+        return Stream.of(result);
+    }
+
+    public Stream<MemoryEstimateResult> estimateNativeProject(
+        Object nodeProjection,
+        Object relationshipProjection,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var terminationFlag = terminationFlag();
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.estimateNativeProject(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext(),
+            userLogRegistryFactory,
+            nodeProjection,
+            relationshipProjection,
+            configuration
+        );
+
         return Stream.of(result);
     }
 

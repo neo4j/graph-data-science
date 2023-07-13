@@ -39,6 +39,7 @@ import org.neo4j.gds.executor.GraphStoreCreator;
 import org.neo4j.gds.executor.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.executor.MemoryUsageValidator;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -74,6 +75,28 @@ public class NativeProjectService {
             log.warn("Graph creation failed", e);
             throw e;
         }
+    }
+
+    public MemoryEstimateResult estimate(
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        User user,
+        UserLogRegistryFactory userLogRegistryFactory,
+        GraphProjectFromStoreConfig configuration
+    ) {
+        var memoryTreeWithDimensions = memoryTreeWithDimensions(
+            configuration,
+            databaseId,
+            terminationFlag,
+            transactionContext,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            user
+        );
+
+        return new MemoryEstimateResult(memoryTreeWithDimensions);
     }
 
     private GraphProjectNativeResult projectGraph(

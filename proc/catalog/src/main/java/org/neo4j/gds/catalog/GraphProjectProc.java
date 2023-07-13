@@ -84,6 +84,16 @@ public class GraphProjectProc extends CatalogProc {
         );
     }
 
+    @Procedure(name = "gds.graph.project.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> projectEstimate(
+        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
+        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.estimateNativeProject(nodeProjection, relationshipProjection, configuration);
+    }
+
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
@@ -93,27 +103,6 @@ public class GraphProjectProc extends CatalogProc {
         GraphProjectFromCypherConfig.NODE_QUERY_KEY,
         GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY
     );
-
-    @Procedure(name = "gds.graph.project.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> projectEstimate(
-        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
-        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        Preconditions.check();
-
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphProjectConfig config = GraphProjectFromStoreConfig.of(
-            username(),
-            NO_GRAPH_NAME,
-            nodeProjection,
-            relationshipProjection,
-            cypherConfig
-        );
-        validateConfig(cypherConfig, config);
-        return estimateGraph(config);
-    }
 
     @Procedure(
         name = "gds.graph.project.cypher", mode = READ,

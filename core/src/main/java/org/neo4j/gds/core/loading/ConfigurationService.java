@@ -62,6 +62,27 @@ public class ConfigurationService {
         return configuration;
     }
 
+    public GraphProjectFromStoreConfig parseEstimateNativeProjectConfiguration(
+        User user,
+        Object nodeProjection,
+        Object relationshipProjection,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphProjectFromStoreConfig.of(
+            user.getUsername(),
+            "",
+            nodeProjection,
+            relationshipProjection,
+            cypherConfig
+        );
+
+        validateNativeProjectConfig(cypherConfig, configuration);
+
+        return configuration;
+    }
+
     private void validateNativeProjectConfig(
         CypherMapWrapper cypherConfig,
         GraphProjectFromStoreConfig graphProjectConfig
