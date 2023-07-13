@@ -19,16 +19,18 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import org.junit.jupiter.api.Test;
+import org.intellij.lang.annotations.Subst;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class DefaultValueIOHelperTest {
 
@@ -48,30 +50,31 @@ class DefaultValueIOHelperTest {
         assertThat(DefaultValueIOHelper.serialize(defaultValue)).isEqualTo(expected);
     }
 
-    @Test
-    void shouldDeserializedDefaultValues() {
+    @ParameterizedTest
+    @ValueSource(strings = { "DefaultValue(%s)", "%s" })
+    void shouldDeserializedDefaultValues(@Subst("") String defaultValueTemplate) {
         assertThat(DefaultValueIOHelper
-            .deserialize("[42,43]", ValueType.LONG_ARRAY, true)
+            .deserialize(formatWithLocale(defaultValueTemplate, "[42,43]"), ValueType.LONG_ARRAY, true)
             .longArrayValue()
         ).contains(42, 43);
 
         assertThat(DefaultValueIOHelper
-            .deserialize("[42.0,13.37]", ValueType.FLOAT_ARRAY, true)
+            .deserialize(formatWithLocale(defaultValueTemplate, "[42.0,13.37]"), ValueType.FLOAT_ARRAY, true)
             .floatArrayValue()
         ).contains(42.0f, 13.37f);
 
         assertThat(DefaultValueIOHelper
-            .deserialize("[42.0,13.37]", ValueType.DOUBLE_ARRAY, true)
+            .deserialize(formatWithLocale(defaultValueTemplate, "[42.0,13.37]"), ValueType.DOUBLE_ARRAY, true)
             .doubleArrayValue()
         ).contains(42.0D, 13.37D);
 
         assertThat(DefaultValueIOHelper
-            .deserialize("42.0", ValueType.DOUBLE, true)
+            .deserialize(formatWithLocale(defaultValueTemplate, "42.0"), ValueType.DOUBLE, true)
             .doubleValue()
         ).isEqualTo(42.0D);
 
         assertThat(DefaultValueIOHelper
-            .deserialize("1337", ValueType.LONG, true)
+            .deserialize(formatWithLocale(defaultValueTemplate, "1337"), ValueType.LONG, true)
             .longValue()
         ).isEqualTo(1337L);
     }

@@ -24,27 +24,35 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 final class DefaultValueIOHelper {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final String DEFAULT_VALUE_PREFIX = "DefaultValue(";
+    private static final String DEFAULT_VALUE_TEMPLATE = "DefaultValue(%s)";
 
     private DefaultValueIOHelper() {}
 
     static String serialize(DefaultValue defaultValue) {
         try {
             var serializedValue = OBJECT_MAPPER.writeValueAsString(defaultValue.getObject());
-            return DEFAULT_VALUE_PREFIX + serializedValue + ")";
+            return formatWithLocale(DEFAULT_VALUE_TEMPLATE, serializedValue);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    static DefaultValue deserialize(String value, ValueType valueType, boolean isUserDefined) {
+    static DefaultValue deserialize(String serializedValue, ValueType valueType, boolean isUserDefined) {
         try {
-            if (value == null || value.isEmpty()) {
+            if (serializedValue == null) {
                 return valueType.fallbackValue();
             }
+
+            var value = serializedValue.replaceAll("DefaultValue\\(|null|NaN|\\)", "");
+            if (value.isEmpty()) {
+                return valueType.fallbackValue();
+            }
+
             Object parseValue;
             switch (valueType) {
                 case DOUBLE:
