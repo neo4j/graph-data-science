@@ -35,13 +35,14 @@ final class K1ColoringSpecificationHelper {
         ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult,
         ProcedureReturnColumns returnColumns
     ) {
+        var algorithm=computeResult.algorithm();
         if (returnColumns.contains(COLOR_COUNT_FIELD_NAME)) {
-            procResultBuilder.withColorCount(computeResult.algorithm().usedColors().cardinality());
+            procResultBuilder.withColorCount(computeResult.isGraphEmpty() ? 0: algorithm.usedColors().cardinality());
         }
 
         return procResultBuilder
-            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.algorithm().ranIterations())
-            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
+            .withRanIterations(computeResult.isGraphEmpty() ? 0 : algorithm.ranIterations())
+            .withDidConverge(computeResult.isGraphEmpty() ? false : algorithm.didConverge());
     }
 
 }
