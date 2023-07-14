@@ -150,6 +150,7 @@ public abstract class FileToGraphStoreImporter {
         progressTracker.beginSubTask();
         MutableNodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
+        nodeSchema.entries().stream().forEach(entry -> log.info("Imported node label schema: " + entry.identifier().toString()));
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(fileInput.graphInfo().maxOriginalId())
