@@ -36,6 +36,7 @@ import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.indexInverse.InverseRelationshipsAlgorithmFactory;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfigImpl;
+import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
@@ -142,7 +143,7 @@ public final class PregelBaseProc {
                 NodePropertyValues nodePropertyValues;
                 switch (element.propertyType()) {
                     case LONG:
-                        nodePropertyValues = compositeNodeValue.longProperties(propertyKey).asNodeProperties();
+                        nodePropertyValues = LongNodePropertiesAdapter.asNodeProperties(compositeNodeValue.longProperties(propertyKey));
                         break;
                     case DOUBLE:
                         nodePropertyValues = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();

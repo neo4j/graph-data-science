@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -61,7 +62,7 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
                     var graph = computationResult.graph();
                     var nodeProperties = CommunityProcCompanion.nodeProperties(
                         computationResult.config(),
-                        result.dendrogramManager().getCurrent().asNodeProperties()
+                        LongNodePropertiesAdapter.asNodeProperties(result.dendrogramManager().getCurrent())
                     );
                     var includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
 

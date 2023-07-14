@@ -22,7 +22,7 @@ package org.neo4j.gds.labelpropagation;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -74,8 +75,8 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
                     computationResult.config().mutateProperty(),
                     computationResult.result()
                         .map(LabelPropagationResult::labels)
-                        .orElseGet(() -> HugeLongArray.newArray(0))
-                        .asNodeProperties(),
+                        .map(LongNodePropertiesAdapter::asNodeProperties)
+                        .orElse(EmptyLongNodePropertyValues.INSTANCE),
                     () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
                 )
             ));

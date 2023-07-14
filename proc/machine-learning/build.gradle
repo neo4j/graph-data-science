@@ -37,6 +37,7 @@ dependencies {
     implementation project(':ml-api')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
+    implementation project(':node-property-adapters')
     implementation project(':pipeline')
     implementation project(':proc-common')
     implementation project(':progress-tracking')

@@ -22,8 +22,8 @@ package org.neo4j.gds.k1coloring;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -66,13 +67,15 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     private static List<NodeProperty> nodePropertyList(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult) {
+        LongNodePropertyValues longNodePropertyValues = computationResult.result()
+            .map(LongNodePropertiesAdapter::asNodeProperties)
+            .orElse(EmptyLongNodePropertyValues.INSTANCE);
         return List.of(
-            ImmutableNodeProperty.of(
+            NodeProperty.of(
                 computationResult.config().mutateProperty(),
                 CommunityProcCompanion.considerSizeFilter(
                     computationResult.config(),
-                    computationResult.result().map(HugeLongArray::asNodeProperties)
-                        .orElse(EmptyLongNodePropertyValues.INSTANCE)
+                    longNodePropertyValues
                 )
             )
         );
