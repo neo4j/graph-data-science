@@ -55,7 +55,7 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
         if (key() != null) {
             row.add(key());
             row.add(valueType().csvName());
-            row.add(defaultValue().toString());
+            row.add(DefaultValueIOHelper.serialize(defaultValue()));
             row.add(state().name());
         }
         csvWriter.writeRow(row);
