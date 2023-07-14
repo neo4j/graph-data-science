@@ -119,16 +119,16 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-    (J:female {id:'Juliette'}),
-    (R:male {id:'Romeo'}),
-    (r1:male {id:'Ryan'}),
-    (r2:male {id:'Robert'}),
-    (r3:male {id:'Riley'}),
-    (r4:female {id:'Ruby'}),
-    (j1:female {id:'Josie'}),
-    (j2:male {id:'Joseph'}),
-    (j3:female {id:'Jasmine'}),
-    (j4:female {id:'June'}),
+    (J:Female {name:'Juliette'}),
+    (R:Male {name:'Romeo'}),
+    (r1:Male {name:'Ryan'}),
+    (r2:Male {name:'Robert'}),
+    (r3:Male {name:'Riley'}),
+    (r4:Female {name:'Ruby'}),
+    (j1:Female {name:'Josie'}),
+    (j2:Male {name:'Joseph'}),
+    (j3:Female {name:'Jasmine'}),
+    (j4:Female {name:'June'}),
     (J)-[:LINK]->(R),
     (R)-[:LINK]->(J),
     (r1)-[:LINK]->(R),   (R)-[:LINK]->(r1),
@@ -163,7 +163,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project( 'myGraph', ['male', 'female'], 'LINK' );
+CALL gds.graph.project( 'graph', ['Male', 'Female'], 'LINK' );
 ----
 
 
@@ -178,8 +178,8 @@ Since we have six nodes total in our graph, and 5/10 = 0.5 we will use this as o
 .The following will run the Common Neighbour Aware random walk sampling algorithm:
 [source, cypher, role=noplay]
 ----
-MATCH (start:female {id: 'Juliette'})
-CALL gds.graph.sample.cnarw('mySampleCNARW', 'myGraph',
+MATCH (start:Female {name: 'Juliette'})
+CALL gds.graph.sample.cnarw('sampledGraph', 'graph',
 {
     samplingRatio: 0.5,
     startNodes: [id(start)]
@@ -217,7 +217,7 @@ For more details on `estimate` in general, see xref:common-usage/memory-estimati
 .The following will estimate the memory requirements for running the sampling algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.sample.cnarw.estimate('myGraph',
+CALL gds.graph.sample.cnarw.estimate('graph',
 {
     samplingRatio: 0.5
 })
