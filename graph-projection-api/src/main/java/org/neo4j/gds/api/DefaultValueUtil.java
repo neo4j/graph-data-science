@@ -27,7 +27,7 @@ import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class DefaultValueUtil {
+final class DefaultValueUtil {
 
     private DefaultValueUtil() {}
 
@@ -50,7 +50,9 @@ public final class DefaultValueUtil {
 
     static double[] parseDoubleArrayValue(Object defaultValue, ValueType type) {
         double[] defaultDoubleArray;
-        if (defaultValue instanceof Collection) {
+        if (defaultValue instanceof double[]) {
+            defaultDoubleArray = (double[]) defaultValue;
+        } else if (defaultValue instanceof Collection) {
             defaultDoubleArray = ((Collection<?>) defaultValue).stream()
                 .map(Object::toString)
                 .mapToDouble(Double::parseDouble)
@@ -73,7 +75,9 @@ public final class DefaultValueUtil {
 
     static long[] parseLongArrayValue(Object defaultValue, ValueType type) {
         long[] defaultLongArray;
-        if (defaultValue instanceof Collection) {
+        if (defaultValue instanceof long[]) {
+            defaultLongArray = (long[]) defaultValue;
+        } else if (defaultValue instanceof Collection) {
             defaultLongArray = ((Collection<?>) defaultValue).stream()
                 .map(Object::toString)
                 .mapToLong(Long::parseLong)
@@ -96,7 +100,9 @@ public final class DefaultValueUtil {
 
     static float[] parseFloatArrayValue(Object defaultValue, ValueType type) {
         float[] defaultFloatArray;
-        if (defaultValue instanceof List) {
+        if (defaultValue instanceof float[]) {
+            defaultFloatArray = (float[]) defaultValue;
+        } else if (defaultValue instanceof List) {
             var df = ((List<?>) defaultValue);
             defaultFloatArray = new float[df.size()];
             for (int i = 0; i < df.size(); i++) {

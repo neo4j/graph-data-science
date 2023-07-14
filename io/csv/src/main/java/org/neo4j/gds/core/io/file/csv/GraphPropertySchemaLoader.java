@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -61,7 +60,7 @@ class GraphPropertySchemaLoader {
                     var schemaLine = linesIterator.next();
                     schemaBuilder.key(schemaLine.propertyKey);
                     schemaBuilder.valueType(schemaLine.valueType);
-                    schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
+                    schemaBuilder.defaultValue(DefaultValueIOHelper.deserialize(schemaLine.defaultValue, schemaLine.valueType, true));
                     schemaBuilder.state(schemaLine.state);
 
                     schemaBuilder.endOfEntity();
@@ -84,7 +83,6 @@ class GraphPropertySchemaLoader {
         ValueType valueType;
 
         @JsonProperty
-        @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
         String defaultValue;
 
         @JsonProperty
