@@ -37,7 +37,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
@@ -73,9 +72,9 @@ class K1ColoringTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        k1Coloring.compute();
+        var result=k1Coloring.compute();
 
-        var colors = k1Coloring.colors();
+        var colors = result.colors();
 
         var colorOfNode0 = colors.get(0);
         var colorOfNode1 = colors.get(1);
@@ -88,6 +87,11 @@ class K1ColoringTest {
         assertThat(colorOfNode1)
             .as("Color of Node1 should be the same as color of Node2")
             .isEqualTo(colorOfNode2);
+
+        var usedColors=result.usedColors();
+        assertThat(usedColors.get(colorOfNode0)).isTrue();
+        assertThat(usedColors.get(colorOfNode1)).isTrue();
+        assertThat(usedColors.cardinality()).isEqualTo(2);
     }
 
     @Test
@@ -114,17 +118,15 @@ class K1ColoringTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        k1Coloring.compute();
-        var colors = k1Coloring.colors();
-
-        var usedColors = new HashSet<>(100);
+        var result=k1Coloring.compute();
+        var colors = result.colors();
+        var usedColors=result.usedColors();
         var conflicts = new MutableLong(0);
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, (source, target) -> {
                 if (source != target && colors.get(source) == colors.get(target)) {
                     conflicts.increment();
                 }
-                usedColors.add(colors.get(source));
                 return true;
             });
             return true;
@@ -134,7 +136,7 @@ class K1ColoringTest {
             .as("Conflicts should be less than 20")
             .isLessThan(20L);
 
-        assertThat(usedColors.size())
+        assertThat(usedColors.cardinality())
             .as("Used colors should be less than or equal to 21")
             .isLessThanOrEqualTo(21);
     }
@@ -181,9 +183,9 @@ class K1ColoringTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        k1Coloring.compute();
+      var result=  k1Coloring.compute();
 
-        assertThat(k1Coloring.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS))
+        assertThat(result.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS))
             .as("The result should not contain the initial forbidden colors")
             .isFalse();
     }
@@ -218,15 +220,15 @@ class K1ColoringTest {
             progressTracker
         );
 
-        k1Coloring.compute();
+        var result=k1Coloring.compute();
 
         List<AtomicLong> progresses = progressTracker.getProgresses();
 
-        assertEquals(k1Coloring.ranIterations() * concurrency + 1, progresses.size());
+        assertEquals(result.ranIterations() * concurrency + 1, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
         assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
-        LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration ->
+        LongStream.range(1, result.ranIterations() + 1).forEach(iteration ->
             assertThat(log.getMessages(TestLog.INFO)).anyMatch(message -> {
                 var expected = formatWithLocale("%d of %d", iteration, config.maxIterations());
                 return message.contains(expected);

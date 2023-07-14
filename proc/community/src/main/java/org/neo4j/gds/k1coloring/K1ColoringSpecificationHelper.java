@@ -20,7 +20,6 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -32,16 +31,18 @@ final class K1ColoringSpecificationHelper {
 
     static <PROC_RESULT, CONFIG extends K1ColoringConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         K1ColoringResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult,
+        ComputationResult<K1Coloring, K1ColoringResult, CONFIG> computeResult,
         ProcedureReturnColumns returnColumns
     ) {
+
+        var result= computeResult.result().orElse(null);
         if (returnColumns.contains(COLOR_COUNT_FIELD_NAME)) {
-            procResultBuilder.withColorCount(computeResult.algorithm().usedColors().cardinality());
+            procResultBuilder.withColorCount(computeResult.isGraphEmpty() ? 0 : result.usedColors().cardinality());
         }
 
         return procResultBuilder
-            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.algorithm().ranIterations())
-            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
+            .withRanIterations(computeResult.isGraphEmpty() ? 0 : result.ranIterations())
+            .withDidConverge(computeResult.isGraphEmpty() ? false : result.didConverge());
     }
 
 }

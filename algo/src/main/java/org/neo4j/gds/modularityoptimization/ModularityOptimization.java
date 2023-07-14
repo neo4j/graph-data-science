@@ -182,9 +182,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
+
+        var k1ColoringResult=coloring.compute();
         modularityColorArray = ModularityColorArray.create(
-            coloring.compute(),
-            coloring.usedColors()
+            k1ColoringResult.colors(),
+            k1ColoringResult.usedColors()
         );
 
 
