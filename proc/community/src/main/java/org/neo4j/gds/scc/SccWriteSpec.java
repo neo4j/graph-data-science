@@ -30,7 +30,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
+import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -63,7 +63,7 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 computationResult.result()
-                    .map(LongNodePropertiesAdapter::asNodeProperties)
+                    .map(LongNodePropertyValuesAdapter::create)
                     .orElse(EmptyLongNodePropertyValues.INSTANCE)
             )),
             name()

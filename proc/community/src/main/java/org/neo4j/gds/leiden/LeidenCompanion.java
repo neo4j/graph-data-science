@@ -24,7 +24,7 @@ import org.neo4j.gds.api.properties.nodes.EmptyLongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
+import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 
 final class LeidenCompanion {
     private LeidenCompanion() {}
@@ -66,7 +66,7 @@ final class LeidenCompanion {
             computationResult.result()
                 .map(LeidenResult::dendrogramManager)
                 .map(LeidenDendrogramManager::getCurrent)
-                .map(LongNodePropertiesAdapter::asNodeProperties)
+                .map(LongNodePropertyValuesAdapter::create)
                 .orElse(EmptyLongNodePropertyValues.INSTANCE),
             () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );

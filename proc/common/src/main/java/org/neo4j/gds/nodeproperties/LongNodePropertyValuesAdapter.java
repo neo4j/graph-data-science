@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.node.properties;
+package org.neo4j.gds.nodeproperties;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -25,16 +25,16 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 /**
  * NodePropertyValues backed by HugeLongArray
  */
-public final class LongNodePropertiesAdapter implements LongNodePropertyValues {
+public final class LongNodePropertyValuesAdapter implements LongNodePropertyValues {
 
     private final HugeLongArray delegate;
 
-    private LongNodePropertiesAdapter(HugeLongArray delegate) {
+    private LongNodePropertyValuesAdapter(HugeLongArray delegate) {
         this.delegate = delegate;
     }
 
-    public static LongNodePropertyValues asNodeProperties(HugeLongArray delegate) {
-        return new LongNodePropertiesAdapter(delegate);
+    public static LongNodePropertyValues create(HugeLongArray delegate) {
+        return new LongNodePropertyValuesAdapter(delegate);
     }
 
     @Override

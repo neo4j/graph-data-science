@@ -1,9 +1,0 @@
-apply plugin: 'java-library'
-
-description = 'Neo4j Graph Data Science :: Node Property Adapters'
-
-group = 'org.neo4j.gds'
-
-dependencies {
-    implementation project(':core')
-}

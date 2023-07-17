@@ -32,7 +32,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.node.properties.LongNodePropertiesAdapter;
+import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -82,7 +82,7 @@ public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, H
         var properties = (NodePropertyValues) CommunityProcCompanion.considerSizeFilter(
             config,
             computationResult.result()
-                .map(LongNodePropertiesAdapter::asNodeProperties)
+                .map(LongNodePropertyValuesAdapter::create)
                 .orElse(EmptyLongNodePropertyValues.INSTANCE)
         );
         return List.of(ImmutableNodeProperty.of(config.writeProperty(), properties));
