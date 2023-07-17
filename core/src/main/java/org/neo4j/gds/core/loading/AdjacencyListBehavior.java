@@ -75,7 +75,7 @@ public interface AdjacencyListBehavior {
             propertyMappings,
             aggregations,
             noAggregation,
-            MemoryTracker.of()
+            MemoryTracker.create()
         );
     }
 
@@ -91,7 +91,7 @@ public interface AdjacencyListBehavior {
             propertyMappings,
             aggregations,
             noAggregation,
-            MemoryTracker.of()
+            MemoryTracker.create()
         );
     }
 
@@ -107,7 +107,7 @@ public interface AdjacencyListBehavior {
             propertyMappings,
             aggregations,
             noAggregation,
-            MemoryTracker.of()
+            MemoryTracker.create()
         );
     }
 
