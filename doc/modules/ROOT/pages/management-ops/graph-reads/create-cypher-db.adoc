@@ -26,12 +26,12 @@ As such, not every aspect of Cypher is implemented.
 == Syntax
 
 [[create-ephemeral-db-example]]
-=== Creating a database
+=== Creating an ephemeral database
 
 include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
 
 [[drop-ephemeral-db-procedure-syntax]]
-=== Dropping a database
+=== Dropping an ephemeral database
 
 include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
 
