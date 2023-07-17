@@ -23,8 +23,6 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
@@ -45,40 +43,11 @@ public final class GraphStoreToCsvExporter {
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        return create(
-            graphStore,
-            config,
-            exportPath,
-            Optional.empty(),
-            TaskRegistryFactory.empty(),
-            NullLog.getInstance()
-        );
+        return create(graphStore, config, exportPath, Optional.empty(), TaskRegistryFactory.empty(), NullLog.getInstance());
     }
 
     public static GraphStoreToFileExporter create(
         GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path exportPath,
-        Optional<NeoNodeProperties> neoNodeProperties,
-        TaskRegistryFactory taskRegistryFactory,
-        Log log
-    ) {
-        return create(
-            graphStore,
-            graphStore.schema().nodeSchema(),
-            graphStore.schema().relationshipSchema(),
-            config,
-            exportPath,
-            neoNodeProperties,
-            taskRegistryFactory,
-            log
-        );
-    }
-
-    public static GraphStoreToFileExporter create(
-        GraphStore graphStore,
-        NodeSchema nodeSchema,
-        RelationshipSchema relationshipSchema,
         GraphStoreToFileExporterConfig config,
         Path exportPath,
         Optional<NeoNodeProperties> neoNodeProperties,
@@ -86,6 +55,9 @@ public final class GraphStoreToCsvExporter {
         Log log
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
+
+        var nodeSchema = graphStore.schema().nodeSchema();
+        var relationshipSchema = graphStore.schema().relationshipSchema();
 
         var neoNodeSchema = MutableNodeSchema.empty();
 

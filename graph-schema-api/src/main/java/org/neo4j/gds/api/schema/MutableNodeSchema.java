@@ -117,11 +117,6 @@ public final class MutableNodeSchema implements NodeSchema {
         return this;
     }
 
-    public MutableNodeSchema removeProperty(NodeLabel nodeLabel, String propertyName) {
-        getOrCreateLabel(nodeLabel).removeProperty(propertyName);
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

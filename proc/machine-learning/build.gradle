@@ -28,7 +28,6 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':io-core')
-    implementation project(':csv')
     implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':executor')
