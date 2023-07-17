@@ -13,11 +13,11 @@ Using an ephemeral database, you can use Cypher to update your graph as well as 
 
 include::partial$/management-ops/ephemeral-db/syntax.adoc[]
 
+[[create-ephemeral-db-example]]
 == Example
 
 This example shows the creation of an ephemeral database from a simple social network graph and its usage with Cypher queries.
 
-[[create-ephemeral-db-syntax]]
 === Setup
 
 include::partial$/management-ops/ephemeral-db/create-example.adoc[]
