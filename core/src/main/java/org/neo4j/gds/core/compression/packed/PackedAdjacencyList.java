@@ -59,7 +59,7 @@ public class PackedAdjacencyList implements AdjacencyList {
      */
 
     private static AdjacencyCursor newCursorWithBlockAlignedTail(long offset, int degree, long[] pages) {
-        var cursor = new DecompressingCursor(pages);
+        var cursor = new BlockAlignedTailCursor(pages);
         cursor.init(offset, degree);
         return cursor;
     }
@@ -70,18 +70,18 @@ public class PackedAdjacencyList implements AdjacencyList {
         int degree,
         long[] pages
     ) {
-        if (reuse instanceof DecompressingCursor) {
+        if (reuse instanceof BlockAlignedTailCursor) {
             reuse.init(offset, degree);
             return reuse;
         } else {
-            var cursor = new DecompressingCursor(pages);
+            var cursor = new BlockAlignedTailCursor(pages);
             cursor.init(offset, degree);
             return cursor;
         }
     }
 
     private static AdjacencyCursor newRawCursorWithBlockAlignedTail(long[] pages) {
-        return new DecompressingCursor(pages);
+        return new BlockAlignedTailCursor(pages);
     }
 
     /**
@@ -89,7 +89,7 @@ public class PackedAdjacencyList implements AdjacencyList {
      */
 
     private static AdjacencyCursor newCursorWithPackedTail(long offset, int degree, long[] pages) {
-        var cursor = new DecompressingCursorWithPackedTail(pages);
+        var cursor = new PackedTailCursor(pages);
         cursor.init(offset, degree);
         return cursor;
     }
@@ -100,18 +100,18 @@ public class PackedAdjacencyList implements AdjacencyList {
         int degree,
         long[] pages
     ) {
-        if (reuse instanceof DecompressingCursorWithPackedTail) {
+        if (reuse instanceof PackedTailCursor) {
             reuse.init(offset, degree);
             return reuse;
         } else {
-            var cursor = new DecompressingCursorWithPackedTail(pages);
+            var cursor = new PackedTailCursor(pages);
             cursor.init(offset, degree);
             return cursor;
         }
     }
 
     private static AdjacencyCursor newRawCursorWithPackedTail(long[] pages) {
-        return new DecompressingCursorWithPackedTail(pages);
+        return new PackedTailCursor(pages);
     }
 
     /**
@@ -119,7 +119,7 @@ public class PackedAdjacencyList implements AdjacencyList {
      */
 
     private static AdjacencyCursor newCursorWithVarLongTail(long offset, int degree, long[] pages) {
-        var cursor = new DecompressingCursorWithVarLongTail(pages);
+        var cursor = new VarLongTailCursor(pages);
         cursor.init(offset, degree);
         return cursor;
     }
@@ -130,18 +130,18 @@ public class PackedAdjacencyList implements AdjacencyList {
         int degree,
         long[] pages
     ) {
-        if (reuse instanceof DecompressingCursorWithVarLongTail) {
+        if (reuse instanceof VarLongTailCursor) {
             reuse.init(offset, degree);
             return reuse;
         } else {
-            var cursor = new DecompressingCursorWithVarLongTail(pages);
+            var cursor = new VarLongTailCursor(pages);
             cursor.init(offset, degree);
             return cursor;
         }
     }
 
     private static AdjacencyCursor newRawCursorWithVarLongTail(long[] pages) {
-        return new DecompressingCursorWithVarLongTail(pages);
+        return new VarLongTailCursor(pages);
     }
 
     private final NewCursor newCursor;

@@ -73,7 +73,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree,
                         MemoryTracker.empty()
                     );
-                    cursor = new DecompressingCursorWithVarLongTail(new long[]{slice.slice().address()});
+                    cursor = new VarLongTailCursor(new long[]{slice.slice().address()});
                     break;
                 case PACKED_TAIL:
                     offset = PackedTailPacker.compress(
@@ -85,7 +85,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree,
                         MemoryTracker.empty()
                     );
-                    cursor = new DecompressingCursorWithPackedTail(new long[]{slice.slice().address()});
+                    cursor = new PackedTailCursor(new long[]{slice.slice().address()});
                     break;
                 case BLOCK_ALIGNED_TAIL:
                     offset = BlockAlignedTailPacker.compress(allocator,
@@ -95,7 +95,7 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         aggregation,
                         degree
                     );
-                    cursor = new DecompressingCursor(new long[]{slice.slice().address()});
+                    cursor = new BlockAlignedTailCursor(new long[]{slice.slice().address()});
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown compression type" + adjacencyPackingStrategy);

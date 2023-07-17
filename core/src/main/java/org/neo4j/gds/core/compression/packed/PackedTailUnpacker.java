@@ -24,10 +24,9 @@ import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
-import static org.neo4j.gds.core.compression.common.VarLongDecoding.unsafeDecodeDeltaVLongs;
 import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
 
-final class BlockDecompressorWithVarLongTail {
+final class PackedTailUnpacker {
 
     private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
 
@@ -44,12 +43,12 @@ final class BlockDecompressorWithVarLongTail {
     private long lastValue;
     private int remaining;
 
-    BlockDecompressorWithVarLongTail() {
+    PackedTailUnpacker() {
         this.block = new long[BLOCK_SIZE];
         this.header = new ByteArrayBuffer();
     }
 
-    void copyFrom(BlockDecompressorWithVarLongTail other) {
+    void copyFrom(PackedTailUnpacker other) {
         System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
         System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
         this.targetPtr = other.targetPtr;
@@ -61,7 +60,7 @@ final class BlockDecompressorWithVarLongTail {
     }
 
     void reset(long ptr, int degree) {
-        int headerSize = degree / AdjacencyPacking.BLOCK_SIZE;
+        int headerSize = BitUtil.ceilDiv(degree, AdjacencyPacking.BLOCK_SIZE);
         long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);
 
         // Read header bytes
@@ -107,22 +106,28 @@ final class BlockDecompressorWithVarLongTail {
     private void decompressBlock() {
         if (this.blockId < this.headerLength) {
             // block unpacking
-            byte blockHeader = this.header.buffer[blockId];
-            this.targetPtr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.targetPtr);
-            this.lastValue = AdjacencyCompression.deltaDecode(this.block, AdjacencyPacking.BLOCK_SIZE, this.lastValue);
+            byte bits = this.header.buffer[blockId];
+            int length;
+            if (this.remaining < BLOCK_SIZE) {
+                // last block
+                this.targetPtr = AdjacencyUnpacking.loopUnpack(
+                    bits,
+                    this.block,
+                    0,
+                    this.remaining,
+                    this.targetPtr
+                );
+                length = remaining;
+                this.remaining = 0;
+            } else {
+                this.targetPtr = AdjacencyUnpacking.unpack(bits, this.block, 0, this.targetPtr);
+                this.remaining -= BLOCK_SIZE;
+                length = BLOCK_SIZE;
+            }
+            this.lastValue = AdjacencyCompression.deltaDecode(this.block, length, this.lastValue);
             this.blockId++;
-        } else {
-            unsafeDecodeDeltaVLongs(
-                this.remaining,
-                this.lastValue,
-                this.targetPtr,
-                this.block,
-                0
-            );
-            this.targetPtr = 0;
         }
 
-        this.remaining -= BLOCK_SIZE;
         this.idxInBlock = 0;
     }
 }

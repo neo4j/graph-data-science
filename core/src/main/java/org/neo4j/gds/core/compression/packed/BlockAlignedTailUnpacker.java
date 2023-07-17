@@ -25,7 +25,7 @@ import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
 
-final class BlockDecompressor {
+final class BlockAlignedTailUnpacker {
 
     private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
 
@@ -41,12 +41,12 @@ final class BlockDecompressor {
     private int blockId;
     private long lastValue;
 
-    BlockDecompressor() {
+    BlockAlignedTailUnpacker() {
         this.block = new long[BLOCK_SIZE];
         this.header = new ByteArrayBuffer();
     }
 
-    void copyFrom(BlockDecompressor other) {
+    void copyFrom(BlockAlignedTailUnpacker other) {
         System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
         System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
         this.targetPtr = other.targetPtr;
