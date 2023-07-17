@@ -29,7 +29,7 @@ include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
 === Read query
 
-We can now run a Cypher query on the in-memory database and check the results:
+We can now run a `MATCH` Cypher query on the in-memory database and check the results:
 
 [source, cypher, role=noplay]
 ----

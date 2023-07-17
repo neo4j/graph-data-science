@@ -24,7 +24,7 @@ include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
 === Update query
 
-We run an example of update query.
+As an example of updating the graph, we add a `level` node property only to some nodes that match a condition:
 
 [source, cypher, role=noplay]
 ----
@@ -41,7 +41,7 @@ RETURN n.age, n.level
 | 42    | 3
 |===
 
-We can check the results.
+Then, we run a Cypher query to check that the new property has actually been added.
 
 [source, cypher, role=noplay]
 ----
