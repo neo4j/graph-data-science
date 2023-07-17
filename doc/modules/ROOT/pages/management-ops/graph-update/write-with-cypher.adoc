@@ -11,17 +11,7 @@ NOTE: This feature requires Neo4j Enterprise Edition.
 
 Using an ephemeral database, you can use Cypher to update your graph as well as xref:management-ops/graph-reads/create-cypher-db.adoc[reading from it].
 
-== Syntax
-
-[[create-ephemeral-db-example]]
-=== Creating an ephemeral database
-
-include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
-
-[[drop-ephemeral-db-procedure-syntax]]
-=== Dropping an ephemeral database
-
-include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
+include::partial$/management-ops/ephemeral-db/syntax.adoc[]
 
 == Example
 

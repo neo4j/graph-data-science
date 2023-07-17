@@ -1,0 +1,11 @@
+== Syntax
+
+[[create-ephemeral-db-example]]
+=== Creating an ephemeral database
+
+include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
+
+[[drop-ephemeral-db-procedure-syntax]]
+=== Dropping an ephemeral database
+
+include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
