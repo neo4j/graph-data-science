@@ -1,4 +1,4 @@
-Here we create a Neo4j database and xref:management-ops/graph-creation/graph-project.adoc[project] it into memory.
+Here we create a Neo4j database and xref:management-ops/graph-creation/graph-project.adoc[project] it into memory:
 
 [source, cypher, role=noplay]
 ----
@@ -33,7 +33,7 @@ YIELD
 |===
 
 
-Next, we create an ephemeral database from the projected graph.
+Next, we create an ephemeral database from the projected graph:
 
 .Create a new database `gdsdb` using our `social_network` graph:
 [source, cypher, role=noplay]
@@ -44,7 +44,7 @@ CALL gds.ephemeral.database.create(
 )
 ----
 
-We can use the Neo4j `SHOW DATABASES` command to verify that the new database has been created successfully.
+We can use the Neo4j `SHOW DATABASES` command to verify that the new database has been created successfully:
 
 [source, cypher, role=noplay]
 ----
@@ -60,7 +60,7 @@ SHOW DATABASES
 | "gdsdb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
 |===
 
-Finally, we switch to the newly created database to start using it.
+Finally, we switch to the newly created database to start using it:
 
 [source, cypher, role=noplay]
 ----

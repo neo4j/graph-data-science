@@ -1,5 +1,7 @@
-As described above, in-memory GDS databases are impermanent and will be removed when the DBMS is shut down.
-If we need to drop the GDS database earlier, there are 2 ways to achieve this:
+As described above, ephemeral databases are impermanent and are removed when the DBMS is shut down.
+To drop an ephemeral database immediately, you can:
 
- 1. Using an administrative cypher command against the system database (`DROP DATABASE <db-name>`)
- 2. Using the <<drop-ephemeral-db-procedure-syntax, `gds.ephemeral.database.drop`>> procedure
+* Use an administrative command against the `system` database (`DROP DATABASE <db-name>`)
+* Use the <<drop-ephemeral-db-procedure-syntax, `gds.ephemeral.database.drop`>> procedure
+
+In both cases, you need to switch to a different database before proceeding.

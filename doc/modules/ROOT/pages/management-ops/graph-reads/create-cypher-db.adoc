@@ -29,7 +29,7 @@ include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
 === Read query
 
-We are set up to execute Cypher queries on the in-memory database.
+We can now run a Cypher query on the in-memory database and check the results:
 
 [source, cypher, role=noplay]
 ----
@@ -45,7 +45,7 @@ MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 | 23   | 31
 |===
 
-We can see that the returned properties correspond to those from the original graph.
+The returned properties correctly match those from the original graph.
 
 It is important to note that the `name` property cannot be retrieved from the ephemeral database because it is not present in the projected graph.
 
@@ -54,8 +54,4 @@ It is important to note that the `name` property cannot be retrieved from the ep
 
 include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
 
-[[ephemeral-db-limitations]]
-== Limitations
-
-Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
-As such, not every aspect of Cypher is implemented.
+include::partial$/management-ops/ephemeral-db/limitations.adoc[]

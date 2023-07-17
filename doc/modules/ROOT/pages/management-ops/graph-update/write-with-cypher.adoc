@@ -62,14 +62,4 @@ RETURN n.age, n.level
 
 include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
 
-[[ephemeral-db-limitations]]
-== Limitations
-
-Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
-As such, not every aspect of Cypher is implemented.
-
-Some known limitations are listed below:
-
-* Some writes will fail
-** Creating new nodes and adding node labels
-** Everything related to relationships
+include::partial$/management-ops/ephemeral-db/limitations.adoc[]
