@@ -1,5 +1,5 @@
 [[cypher-writes-on-gds]]
-= Writing with Cypher
+= Updating with Cypher
 :description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
 
 
@@ -9,8 +9,7 @@ include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 NOTE: This feature requires Neo4j Enterprise Edition.
 
-TODO
-
+[[ephemeral-db-limitations]]
 == Limitations
 
 Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
@@ -21,3 +20,48 @@ Some known limitations are listed below:
 * Some writes will fail
 ** Creating new nodes and adding node labels
 ** Everything related to relationships
+
+== Syntax
+
+[[create-ephemeral-db-example]]
+=== Creating a database
+
+include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
+
+[[drop-ephemeral-db-procedure-syntax]]
+=== Dropping a database
+
+include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
+
+== Example
+
+[[create-ephemeral-db-syntax]]
+=== Setup
+
+include::partial$/management-ops/ephemeral-db/create-example.adoc[]
+
+=== Update query
+
+We run an example of update query.
+
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)
+WHERE n.age > 40
+SET n.level = 3
+RETURN n.age, n.level
+----
+
+.Results
+[opts="header"]
+|===
+| n.age | n.level
+| 42    | 3
+|===
+
+We can see that the returned ages correspond to the structure of the original graph.
+
+[[drop-ephemeral-db]]
+=== Cleanup
+
+include::partial$/management-ops/ephemeral-db/drop-example.adoc[]

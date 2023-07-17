@@ -17,7 +17,7 @@ Once the database is created, you can run Cypher queries on it as you would on a
 You can also xref:management-ops/graph-update/write-with-cypher.adoc[update the graph] using Cypher.
 
 
-[[create-ephemeral-db-limitations]]
+[[ephemeral-db-limitations]]
 == Limitations
 
 Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
