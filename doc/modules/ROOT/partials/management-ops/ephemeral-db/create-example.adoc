@@ -1,0 +1,71 @@
+To demonstrate how to execute cypher statements on projected graphs we are going to create a simple social network graph.
+We will use this graph to create a new database which we will execute our statements on.
+
+[source, cypher, role=noplay]
+----
+CREATE
+  (alice:Person { name: 'Alice', age: 23 }),
+  (bob:Person { name: 'Bob', age: 42 }),
+  (carl:Person { name: 'Carl', age: 31 }),
+
+  (alice)-[:KNOWS]->(bob),
+  (bob)-[:KNOWS]->(alice),
+  (alice)-[:KNOWS]->(carl)
+----
+
+We will now load a graph projection of the created graph via the xref:management-ops/graph-creation/graph-project.adoc[graph project] procedure:
+
+.Project `Person` nodes and `KNOWS` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project(
+  'social_network',
+  'Person',
+  'KNOWS',
+  { nodeProperties: 'age' }
+)
+YIELD
+  graphName, nodeCount, relationshipCount
+----
+
+.Results
+[opts="header"]
+|===
+| graph            | nodeCont | relationshipCount
+| "social_network" | 3        | 3
+|===
+
+
+With a named graph loaded into the Neo4j Graph Data Science library, we can proceed to create the new database using the loaded graph as underlying data.
+
+.Create a new database `gdsdb` using our `social_network` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.ephemeral.database.create(
+  'gdsdb',
+  'social_network'
+)
+----
+
+In order to verify that the new database was created successfully we can use the Neo4j database administration commands.
+
+[source, cypher, role=noplay]
+----
+SHOW DATABASES
+----
+
+.Results
+[opts="header"]
+|===
+| name     | address          | role         | requestedStatus | currentStatus  | error  | default  | home
+| "neo4j"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | true     | true
+| "system" | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
+| "gdsdb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
+|===
+
+We can now switch to the newly created database.
+
+[source, cypher, role=noplay]
+----
+:use gdsdb
+----

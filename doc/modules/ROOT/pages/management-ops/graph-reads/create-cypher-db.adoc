@@ -14,6 +14,7 @@ Although you can inspect node and relationship properties using `stream` procedu
 
 The `gds.ephemeral.database.create` procedure creates an ephemeral Neo4j database that mirrors your in-memory graph.
 Once the database is created, you can run Cypher queries on it as you would on any Neo4j database.
+You can also xref:management-ops/graph-update/write-with-cypher.adoc[update the graph] using Cypher.
 
 
 [[create-ephemeral-db-limitations]]
@@ -22,123 +23,23 @@ Once the database is created, you can run Cypher queries on it as you would on a
 Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
 As such, not every aspect of Cypher is implemented.
 
-Some known limitations are listed below:
+== Syntax
 
-* Some writes will fail
-** Creating new nodes and adding node labels
-** Everything related to relationships
+=== Creating a database
 
+include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
 
-[[create-ephemeral-db-syntax]]
-== Create database syntax
+=== Dropping a database
 
-[.create-cypher-db-syntax]
---
-[source, cypher, role=noplay]
-----
-CALL gds.ephemeral.database.create(
-    dbName: String
-    graphName: String
-)
-YIELD
-    dbName: String,
-    graphName: String,
-    createMillis: Integer
-----
+include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
 
-.Parameters
-[opts="header",cols="1,1,1, 4"]
-|===
-| Name                  | Type                | Optional | Description
-| dbName                | String              | no       | The name under which the new database is stored.
-| graphName             | String              | no       | The name under which the graph is stored in the catalog.
-|===
-
-.Results
-[opts="header",cols="2,1,4"]
-|===
-| Name                   | Type     | Description
-| dbName                 | String   | The name under which the new database is stored.
-| graphName              | String   | The name under which the graph is stored in the catalog.
-| createMillis           | Integer  | Milliseconds for creating the database.
-|===
---
-
-
-[[create-ephemeral-db-example]]
 == Example
 
-To demonstrate how to execute cypher statements on projected graphs we are going to create a simple social network graph.
-We will use this graph to create a new database which we will execute our statements on.
+=== Setup
 
-[source, cypher, role=noplay]
-----
-CREATE
-  (alice:Person { name: 'Alice', age: 23 }),
-  (bob:Person { name: 'Bob', age: 42 }),
-  (carl:Person { name: 'Carl', age: 31 }),
+include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
-  (alice)-[:KNOWS]->(bob),
-  (bob)-[:KNOWS]->(alice),
-  (alice)-[:KNOWS]->(carl)
-----
-
-We will now load a graph projection of the created graph via the xref:management-ops/graph-creation/graph-project.adoc[graph project] procedure:
-
-.Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.project(
-  'social_network',
-  'Person',
-  'KNOWS',
-  { nodeProperties: 'age' }
-)
-YIELD
-  graphName, nodeCount, relationshipCount
-----
-
-.Results
-[opts="header"]
-|===
-| graph            | nodeCont | relationshipCount
-| "social_network" | 3        | 3
-|===
-
-
-With a named graph loaded into the Neo4j Graph Data Science library, we can proceed to create the new database using the loaded graph as underlying data.
-
-.Create a new database `gdsdb` using our `social_network` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.ephemeral.database.create(
-  'gdsdb',
-  'social_network'
-)
-----
-
-In order to verify that the new database was created successfully we can use the Neo4j database administration commands.
-
-[source, cypher, role=noplay]
-----
-SHOW DATABASES
-----
-
-.Results
-[opts="header"]
-|===
-| name     | address          | role         | requestedStatus | currentStatus  | error  | default  | home
-| "neo4j"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | true     | true
-| "system" | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
-| "gdsdb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
-|===
-
-We can now switch to the newly created database.
-
-[source, cypher, role=noplay]
-----
-:use gdsdb
-----
+=== Read query
 
 Finally, we are set up to execute cypher queries on our in-memory graph.
 
@@ -159,26 +60,6 @@ MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 We can see that the returned ages correspond to the structure of the original graph.
 
 
-[[drop-ephemeral-db]]
-== Dropping a GDS database
+=== Cleanup
 
-As described above, in-memory GDS databases are impermanent and will be removed when the DBMS is shut down.
-If we need to drop the GDS database earlier, there are 2 ways to achieve this:
- 1. Using an administrative cypher command against the system database (`DROP DATABASE <db-name>`)
- 2. Using the <<drop-ephemeral-db-procedure-syntax, `gds.ephemeral.database.drop`>> procedure
-
-[[drop-ephemeral-db-procedure-syntax]]
-=== Drop database syntax
-
-[.drop-cypher-db-syntax]
---
-[source, cypher, role=noplay]
-----
-CALL gds.ephemeral.database.drop(
-    dbName: String
-)
-YIELD
-    dbName: String,
-    dropMillis: Integer
-----
---
+include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
