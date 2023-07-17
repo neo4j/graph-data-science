@@ -44,8 +44,6 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':transaction')
 
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
-
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
 
     testAnnotationProcessor project(':annotations')
