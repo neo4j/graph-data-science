@@ -25,23 +25,26 @@ As such, not every aspect of Cypher is implemented.
 
 == Syntax
 
+[[create-ephemeral-db-example]]
 === Creating a database
 
 include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
 
+[[drop-ephemeral-db-procedure-syntax]]
 === Dropping a database
 
 include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
 
 == Example
 
+[[create-ephemeral-db-syntax]]
 === Setup
 
 include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
 === Read query
 
-Finally, we are set up to execute cypher queries on our in-memory graph.
+We are set up to execute cypher queries on our in-memory graph.
 
 [source, cypher, role=noplay]
 ----
@@ -59,7 +62,7 @@ MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 
 We can see that the returned ages correspond to the structure of the original graph.
 
-
+[[drop-ephemeral-db]]
 === Cleanup
 
 include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
