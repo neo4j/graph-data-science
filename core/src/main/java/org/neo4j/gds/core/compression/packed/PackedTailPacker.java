@@ -29,9 +29,9 @@ import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.bitsNeeded;
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.bytesNeeded;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.BYTE_ARRAY_BASE_OFFSET;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.bitsNeeded;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.bytesNeeded;
 
 /**
  * Compresses values in blocks of {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} using bit-packing.
@@ -58,7 +58,7 @@ final class PackedTailPacker {
 
         degree.setValue(length);
 
-        return preparePackingWithPackedTail(allocator, slice, values, length, memoryTracker);
+        return preparePacking(allocator, slice, values, length, memoryTracker);
     }
 
     static long compressWithProperties(
@@ -68,10 +68,10 @@ final class PackedTailPacker {
         int length,
         MemoryTracker memoryTracker
     ) {
-        return preparePackingWithPackedTail(allocator, slice, values, length, memoryTracker);
+        return preparePacking(allocator, slice, values, length, memoryTracker);
     }
 
-    private static long preparePackingWithPackedTail(
+    private static long preparePacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
@@ -102,7 +102,7 @@ final class PackedTailPacker {
             header[blockIdx] = (byte) bits;
         }
 
-        return runPackingWithPackedTail(
+        return runPacking(
             allocator,
             slice,
             values,
@@ -113,7 +113,7 @@ final class PackedTailPacker {
         );
     }
 
-    private static long runPackingWithPackedTail(
+    private static long runPacking(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,

@@ -30,9 +30,9 @@ import org.neo4j.internal.unsafe.UnsafeUtil;
 import java.util.Arrays;
 
 import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLongsSize;
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.bitsNeeded;
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.bytesNeeded;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.BYTE_ARRAY_BASE_OFFSET;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.bitsNeeded;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.bytesNeeded;
 
 /**
  * Compresses values in blocks of {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} using bit-packing.

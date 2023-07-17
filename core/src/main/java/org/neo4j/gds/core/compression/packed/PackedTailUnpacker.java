@@ -24,7 +24,7 @@ import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.BYTE_ARRAY_BASE_OFFSET;
 
 final class PackedTailUnpacker {
 

@@ -193,7 +193,7 @@ class AdjacencyPackerTest {
     void compressNonBlockAlignedConsecutiveLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy, int valueCount) {
         assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var data = LongStream.range(0, valueCount).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
+        var alignedData = Arrays.copyOf(data, AdjacencyPackerUtil.align(valueCount));
 
         TestAllocator.testCursor(strategy, alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
@@ -221,7 +221,7 @@ class AdjacencyPackerTest {
             .limit(valueCount)
             .toArray();
 
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
+        var alignedData = Arrays.copyOf(data, AdjacencyPackerUtil.align(valueCount));
 
         TestAllocator.testCursor(strategy, alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
@@ -260,7 +260,7 @@ class AdjacencyPackerTest {
     @MethodSource("strategyAndBlockSizes")
     void decompressConsecutiveLongsViaCursor(GdsFeatureToggles.AdjacencyPackingStrategy strategy, int length) {
         var data = LongStream.range(0, length).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
+        var alignedData = Arrays.copyOf(data, AdjacencyPackerUtil.align(length));
 
         TestAllocator.testCursor(strategy, alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
@@ -279,7 +279,7 @@ class AdjacencyPackerTest {
     void decompressRandomLongsViaCursor(GdsFeatureToggles.AdjacencyPackingStrategy strategy, int length) {
         var random = newRandom();
         var data = random.random().longs(length, 0, 1L << 50).toArray();
-        var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(length));
+        var alignedData = Arrays.copyOf(data, AdjacencyPackerUtil.align(length));
 
         TestAllocator.testCursor(strategy, alignedData, length, Aggregation.NONE, (cursor, ignore) -> {
 
