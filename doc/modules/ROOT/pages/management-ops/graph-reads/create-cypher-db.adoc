@@ -10,18 +10,11 @@ include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 NOTE: This feature requires Neo4j Enterprise Edition.
 
-Although you can inspect node and relationship properties using `stream` procedures, you can also use Cypher queries for more complex use cases.
+Besides `stream` procedures, you can also use Cypher queries to inspect nodes and relationships in a graph.
 
 The `gds.ephemeral.database.create` procedure creates an ephemeral Neo4j database that mirrors your in-memory graph.
 Once the database is created, you can run Cypher queries on it as you would on any Neo4j database.
 You can also xref:management-ops/graph-update/write-with-cypher.adoc[update the graph] using Cypher.
-
-
-[[ephemeral-db-limitations]]
-== Limitations
-
-Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
-As such, not every aspect of Cypher is implemented.
 
 == Syntax
 
@@ -66,3 +59,9 @@ We can see that the returned ages correspond to the structure of the original gr
 === Cleanup
 
 include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
+
+[[ephemeral-db-limitations]]
+== Limitations
+
+Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
+As such, not every aspect of Cypher is implemented.
