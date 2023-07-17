@@ -1,7 +1,18 @@
 As described above, ephemeral databases are impermanent and are removed when the DBMS is shut down.
-To drop an ephemeral database immediately, you can:
+There are two ways to drop an ephemeral database immediately:
 
-* Use an administrative command against the `system` database (`DROP DATABASE <db-name>`)
-* Use the <<drop-ephemeral-db-procedure-syntax, `gds.ephemeral.database.drop`>> procedure
+* Use an administrative command against the `system` database:
++
+[source, cypher, role=noplay]
+----
+DROP DATABASE gdsdb
+----
+
+* Use the <<drop-ephemeral-db-syntax, `gds.ephemeral.database.drop`>> procedure:
++
+[source, cypher, role=noplay]
+----
+CALL gds.ephemeral.database.drop('gdsdb')
+----
 
 In both cases, you need to switch to a different database before proceeding.
