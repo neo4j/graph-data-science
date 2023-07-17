@@ -39,7 +39,7 @@
 *** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/collapse-path.adoc[]
 *** xref:management-ops/graph-update/dropping-parts.adoc[]
-*** xref:management-ops/graph-reads/create-cypher-db.adoc[]
+*** xref:management-ops/graph-update/write-with-cypher.adoc[]
 ** Writing back to Neo4j
 *** xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[]
 *** xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc[]
