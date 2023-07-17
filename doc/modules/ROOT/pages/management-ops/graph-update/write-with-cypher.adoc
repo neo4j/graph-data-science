@@ -25,6 +25,8 @@ include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
 
 == Example
 
+This example shows the creation of an ephemeral database from a simple social network graph and its usage with Cypher queries.
+
 [[create-ephemeral-db-syntax]]
 === Setup
 
@@ -49,7 +51,21 @@ RETURN n.age, n.level
 | 42    | 3
 |===
 
-We can see that the returned ages correspond to the structure of the original graph.
+We can check the results.
+
+[source, cypher, role=noplay]
+----
+MATCH (n:Person)
+WHERE n.level = 3
+RETURN n.age, n.level
+----
+
+.Results
+[opts="header"]
+|===
+| n.age | n.level
+| 42    | 3
+|===
 
 [[drop-ephemeral-db]]
 === Cleanup
@@ -61,3 +77,9 @@ include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
 
 Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
 As such, not every aspect of Cypher is implemented.
+
+Some known limitations are listed below:
+
+* Some writes will fail
+** Creating new nodes and adding node labels
+** Everything related to relationships
