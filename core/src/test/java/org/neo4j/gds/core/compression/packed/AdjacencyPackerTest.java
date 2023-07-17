@@ -21,18 +21,23 @@ package org.neo4j.gds.core.compression.packed;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junitpioneer.jupiter.params.IntRangeSource;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.SeededRandom.newRandom;
@@ -41,8 +46,9 @@ import static org.neo4j.gds.core.compression.common.CursorUtil.decompressCursor;
 class AdjacencyPackerTest {
 
     @SuppressForbidden(reason = "Want to look at the data")
-    @Test
-    void roundtrip() {
+    @ParameterizedTest
+    @EnumSource(GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void roundtrip(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
         var random = newRandom();
 
         var values = random.random().longs(256, 0, 1L << 50).toArray();
@@ -50,8 +56,7 @@ class AdjacencyPackerTest {
         var originalValues = Arrays.copyOf(values, values.length);
         var uncompressedSize = originalValues.length * Long.BYTES;
 
-        TestAllocator.testCursor(values, values.length, Aggregation.NONE, (cursor, slice) -> {
-
+        TestAllocator.testCursor(strategy, values, values.length, Aggregation.NONE, (cursor, slice) -> {
             var newRequiredBytes = slice.length();
             System.out.printf(
                 Locale.ENGLISH,
@@ -85,11 +90,12 @@ class AdjacencyPackerTest {
 
     }
 
-    @Test
-    void compressConsecutiveLongs() {
+    @ParameterizedTest
+    @EnumSource(GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void compressConsecutiveLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
 
-        TestAllocator.testCursor(data, data.length, Aggregation.NONE, (cursor, slice) -> {
+        TestAllocator.testCursor(strategy, data, data.length, Aggregation.NONE, (cursor, slice) -> {
             int maxBitsPerValues = 1; // delta + packing uses 1 bit for any value in this test
             int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
             int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
@@ -104,12 +110,13 @@ class AdjacencyPackerTest {
         });
     }
 
-    @Test
-    void compressRandomLongs() {
+    @ParameterizedTest
+    @EnumSource(GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void compressRandomLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
         var random = newRandom();
         var data = random.random().longs(AdjacencyPacking.BLOCK_SIZE, 0, 1L << 50).toArray();
 
-        TestAllocator.testCursor(data, data.length, Aggregation.NONE, (cursor, slice) -> {
+        TestAllocator.testCursor(strategy, data, data.length, Aggregation.NONE, (cursor, slice) -> {
             assertThat(slice.length())
                 .as("compressed exceeds original size, seed = %d", random.seed())
                 .isLessThanOrEqualTo(1 + AdjacencyPacking.BLOCK_SIZE * Long.BYTES);
@@ -207,15 +214,16 @@ class AdjacencyPackerTest {
         UnsafeUtil.free(ptr, allocation, EmptyMemoryTracker.INSTANCE);
     }
 
-    @Test
-    void compressDuplicatedLongs() {
+    @ParameterizedTest
+    @EnumSource(GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void compressDuplicatedLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
         var random = newRandom();
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE)
             .flatMap(value -> random.random().nextBoolean() ? LongStream.of(value) : LongStream.of(value, value))
             .limit(AdjacencyPacking.BLOCK_SIZE)
             .toArray();
 
-        TestAllocator.testCursor(data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
+        TestAllocator.testCursor(strategy, data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
             int maxBitsPerValues = 6; // packed uses at most 6 bits for any value in this test
             int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
             int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
@@ -232,8 +240,9 @@ class AdjacencyPackerTest {
         });
     }
 
-    @Test
-    void compressRandomDuplicatedLongs() {
+    @ParameterizedTest
+    @EnumSource(GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void compressRandomDuplicatedLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
         var random = newRandom();
         var data = random.random().longs(2 * AdjacencyPacking.BLOCK_SIZE, 0, 1L << 50)
             .distinct()
@@ -241,7 +250,7 @@ class AdjacencyPackerTest {
             .limit(AdjacencyPacking.BLOCK_SIZE)
             .toArray();
 
-        TestAllocator.testCursor(data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
+        TestAllocator.testCursor(strategy, data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
 
             assertThat(slice.length())
                 .as("compressed exceeds original size, seed = %d", random.seed())
@@ -259,14 +268,21 @@ class AdjacencyPackerTest {
         });
     }
 
+    static Stream<Arguments> strategyAndValueCount() {
+        return TestSupport.crossArgument(
+            () -> Arrays.stream(GdsFeatureToggles.AdjacencyPackingStrategy.values()),
+            () -> Stream.of(42, 1337)
+        );
+    }
+
     @ParameterizedTest
-    @ValueSource(ints = {42, 1337})
-    void compressNonBlockAlignedConsecutiveLongs(int valueCount) {
+    @MethodSource("strategyAndValueCount")
+    void compressNonBlockAlignedConsecutiveLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy, int valueCount) {
         assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var data = LongStream.range(0, valueCount).toArray();
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
 
-        TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
+        TestAllocator.testCursor(strategy, alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
             // We have plans to improve this and eventually re-enable those assertions
             //        assertThat(compressed.bytesUsed())
@@ -283,8 +299,8 @@ class AdjacencyPackerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {42, 1337})
-    void compressNonBlockAlignedRandomLongs(int valueCount) {
+    @MethodSource("strategyAndValueCount")
+    void compressNonBlockAlignedRandomLongs(GdsFeatureToggles.AdjacencyPackingStrategy strategy, int valueCount) {
         assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var random = newRandom();
         var data = random.random().longs(4242, 0, 1L << 50)
@@ -294,7 +310,7 @@ class AdjacencyPackerTest {
 
         var alignedData = Arrays.copyOf(data, AdjacencyPacker.align(valueCount));
 
-        TestAllocator.testCursor(alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
+        TestAllocator.testCursor(strategy, alignedData, valueCount, Aggregation.NONE, (cursor, slice) -> {
             // TODO: we want to keep those assertions, but they fail with the current implementation
             // We have plans to improve this and eventually re-enable those assertions
 //            assertThat(slice.length())

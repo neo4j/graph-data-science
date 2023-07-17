@@ -47,12 +47,21 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         Aggregation aggregation,
         BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
     ) {
+        testCursor(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get(), values, length, aggregation, code);
+    }
+
+    public static void testCursor(
+        GdsFeatureToggles.AdjacencyPackingStrategy adjacencyPackingStrategy,
+        long[] values,
+        int length,
+        Aggregation aggregation,
+        BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
+    ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
             long offset;
             AdjacencyCursor cursor;
 
-            var adjacencyPackingStrategy = GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get();
             switch (adjacencyPackingStrategy) {
                 case VAR_LONG_TAIL:
                     offset = VarLongTailPacker.compress(
