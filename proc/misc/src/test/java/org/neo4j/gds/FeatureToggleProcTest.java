@@ -21,17 +21,23 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY;
+import static org.neo4j.gds.utils.GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
@@ -133,6 +139,50 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(USE_PACKED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void toggleAdjacencyPackingStrategy(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
+        USE_PACKED_ADJACENCY_LIST.enableAndRun(() -> {
+            runQuery("CALL gds.features.adjacencyPackingStrategy($value)", Map.of("value", strategy.name()));
+            assertThat(ADJACENCY_PACKING_STRATEGY.get()).isEqualTo(strategy);
+        });
+    }
+
+    @Test
+    void toggleAdjacencyPackingStrategyShouldFailIfAdjacencyPackingIsDisabled() {
+        assertThatThrownBy(() -> runQuery("CALL gds.features.adjacencyPackingStrategy($value)", Map.of("value",
+            GdsFeatureToggles.AdjacencyPackingStrategy.PACKED_TAIL.name()
+        ))).rootCause()
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("packed adjacency list is disabled");
+    }
+
+    @Test
+    void toggleAdjacencyPackingStrategyShouldFailIfStrategyIsUnsupported() {
+        USE_PACKED_ADJACENCY_LIST.enableAndRun(() -> {
+            assertThatThrownBy(() -> runQuery("CALL gds.features.adjacencyPackingStrategy($value)", Map.of("value", "gzip")))
+                .rootCause()
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid adjacency packing strategy")
+                .hasMessageContaining("gzip")
+                .hasMessageContaining(Arrays.toString(GdsFeatureToggles.AdjacencyPackingStrategy.values()));
+        });
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = GdsFeatureToggles.AdjacencyPackingStrategy.class)
+    void shouldResetAdjacencyPackingStrategy(GdsFeatureToggles.AdjacencyPackingStrategy strategy) {
+        USE_PACKED_ADJACENCY_LIST.enableAndRun(() -> {
+            runQuery("CALL gds.features.adjacencyPackingStrategy($value)", Map.of("value", strategy.name()));
+            assertThat(ADJACENCY_PACKING_STRATEGY.get()).isEqualTo(strategy);
+            assertCypherResult(
+                "CALL gds.features.adjacencyPackingStrategy.reset()",
+                List.of(Map.of("value", ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING.name()))
+            );
+            assertThat(ADJACENCY_PACKING_STRATEGY.get()).isEqualTo(ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING);
+        });
     }
 
     @Test

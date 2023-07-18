@@ -24,9 +24,9 @@ import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.BYTE_ARRAY_BASE_OFFSET;
 
-final class BlockDecompressorWithPackedTail {
+final class PackedTailUnpacker {
 
     private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
 
@@ -43,12 +43,12 @@ final class BlockDecompressorWithPackedTail {
     private long lastValue;
     private int remaining;
 
-    BlockDecompressorWithPackedTail() {
+    PackedTailUnpacker() {
         this.block = new long[BLOCK_SIZE];
         this.header = new ByteArrayBuffer();
     }
 
-    void copyFrom(BlockDecompressorWithPackedTail other) {
+    void copyFrom(PackedTailUnpacker other) {
         System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
         System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
         this.targetPtr = other.targetPtr;

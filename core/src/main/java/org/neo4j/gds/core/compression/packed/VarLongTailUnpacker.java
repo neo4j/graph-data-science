@@ -20,12 +20,14 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.neo4j.gds.api.compress.ByteArrayBuffer;
+import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
-import static org.neo4j.gds.core.compression.packed.AdjacencyPacker.BYTE_ARRAY_BASE_OFFSET;
+import static org.neo4j.gds.core.compression.common.VarLongDecoding.unsafeDecodeDeltaVLongs;
+import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.BYTE_ARRAY_BASE_OFFSET;
 
-final class BlockDecompressor {
+final class VarLongTailUnpacker {
 
     private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
 
@@ -40,13 +42,14 @@ final class BlockDecompressor {
     private int idxInBlock;
     private int blockId;
     private long lastValue;
+    private int remaining;
 
-    BlockDecompressor() {
+    VarLongTailUnpacker() {
         this.block = new long[BLOCK_SIZE];
         this.header = new ByteArrayBuffer();
     }
 
-    void copyFrom(BlockDecompressor other) {
+    void copyFrom(VarLongTailUnpacker other) {
         System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
         System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
         this.targetPtr = other.targetPtr;
@@ -54,10 +57,11 @@ final class BlockDecompressor {
         this.idxInBlock = other.idxInBlock;
         this.blockId = other.blockId;
         this.lastValue = other.lastValue;
+        this.remaining = other.remaining;
     }
 
     void reset(long ptr, int degree) {
-        int headerSize = BitUtil.ceilDiv(degree, AdjacencyPacking.BLOCK_SIZE);
+        int headerSize = degree / AdjacencyPacking.BLOCK_SIZE;
         long alignedHeaderSize = BitUtil.align(headerSize, Long.BYTES);
 
         // Read header bytes
@@ -69,6 +73,7 @@ final class BlockDecompressor {
         this.idxInBlock = 0;
         this.blockId = 0;
         this.lastValue = 0;
+        this.remaining = degree;
 
         this.decompressBlock();
     }
@@ -104,14 +109,20 @@ final class BlockDecompressor {
             // block unpacking
             byte blockHeader = this.header.buffer[blockId];
             this.targetPtr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.targetPtr);
-            long value = this.lastValue;
-            for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
-                value = this.block[i] += value;
-            }
-            this.lastValue = value;
+            this.lastValue = AdjacencyCompression.deltaDecode(this.block, AdjacencyPacking.BLOCK_SIZE, this.lastValue);
             this.blockId++;
+        } else {
+            unsafeDecodeDeltaVLongs(
+                this.remaining,
+                this.lastValue,
+                this.targetPtr,
+                this.block,
+                0
+            );
+            this.targetPtr = 0;
         }
 
+        this.remaining -= BLOCK_SIZE;
         this.idxInBlock = 0;
     }
 }

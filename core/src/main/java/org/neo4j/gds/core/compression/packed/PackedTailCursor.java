@@ -25,18 +25,18 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 
-public final class DecompressingCursorWithPackedTail implements AdjacencyCursor {
+public final class PackedTailCursor implements AdjacencyCursor {
 
     private final long[] pages;
 
-    private final BlockDecompressorWithPackedTail decompressingReader;
+    private final PackedTailUnpacker decompressingReader;
 
     private int maxTargets;
     private int currentPosition;
 
-    public DecompressingCursorWithPackedTail(long[] pages) {
+    public PackedTailCursor(long[] pages) {
         this.pages = pages;
-        this.decompressingReader = new BlockDecompressorWithPackedTail();
+        this.decompressingReader = new PackedTailUnpacker();
     }
 
     @Override
@@ -119,9 +119,9 @@ public final class DecompressingCursorWithPackedTail implements AdjacencyCursor 
 
     @Override
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        var dest = destination instanceof DecompressingCursorWithPackedTail
-            ? (DecompressingCursorWithPackedTail) destination
-            : new DecompressingCursorWithPackedTail(this.pages);
+        var dest = destination instanceof PackedTailCursor
+            ? (PackedTailCursor) destination
+            : new PackedTailCursor(this.pages);
         dest.decompressingReader.copyFrom(this.decompressingReader);
         dest.currentPosition = this.currentPosition;
         dest.maxTargets = this.maxTargets;

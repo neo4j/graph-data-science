@@ -25,7 +25,7 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.utils.GdsSystemProperties;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
@@ -47,27 +47,24 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
         Aggregation aggregation,
         BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
     ) {
+        testCursor(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get(), values, length, aggregation, code);
+    }
+
+    public static void testCursor(
+        GdsFeatureToggles.AdjacencyPackingStrategy adjacencyPackingStrategy,
+        long[] values,
+        int length,
+        Aggregation aggregation,
+        BiConsumer<AdjacencyCursor, AdjacencyListBuilder.Slice<Address>> code
+    ) {
         test((allocator, slice) -> {
             var degree = new MutableInt();
             long offset;
             AdjacencyCursor cursor;
 
-            switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
-                case VarLong:
-                    offset = AdjacencyPacker.compressWithVarLongTail(
-                        allocator,
-                        slice,
-                        values.clone(),
-                        length,
-                        aggregation,
-                        degree,
-                        MemoryTracker.empty()
-            );
-
-            cursor = new DecompressingCursorWithVarLongTail(new long[]{slice.slice().address()});
-                    break;
-                case Packed:
-                    offset = AdjacencyPacker.compressWithPackedTail(
+            switch (adjacencyPackingStrategy) {
+                case VAR_LONG_TAIL:
+                    offset = VarLongTailPacker.compress(
                         allocator,
                         slice,
                         values.clone(),
@@ -76,10 +73,32 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                         degree,
                         MemoryTracker.empty()
                     );
-                    cursor = new DecompressingCursorWithPackedTail(new long[]{slice.slice().address()});
+                    cursor = new VarLongTailCursor(new long[]{slice.slice().address()});
+                    break;
+                case PACKED_TAIL:
+                    offset = PackedTailPacker.compress(
+                        allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree,
+                        MemoryTracker.empty()
+                    );
+                    cursor = new PackedTailCursor(new long[]{slice.slice().address()});
+                    break;
+                case BLOCK_ALIGNED_TAIL:
+                    offset = BlockAlignedTailPacker.compress(allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree
+                    );
+                    cursor = new BlockAlignedTailCursor(new long[]{slice.slice().address()});
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown compression type");
+                    throw new IllegalArgumentException("Unknown compression type" + adjacencyPackingStrategy);
             }
             cursor.init(offset, degree.intValue());
             code.accept(cursor, slice);

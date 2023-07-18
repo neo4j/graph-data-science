@@ -24,6 +24,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public enum GdsFeatureToggles {
 
@@ -100,6 +101,25 @@ public enum GdsFeatureToggles {
         PAGES_PER_THREAD_DEFAULT_SETTING
     );
     public static final AtomicInteger PAGES_PER_THREAD = new AtomicInteger(PAGES_PER_THREAD_FLAG);
+
+
+    // Determines the packing strategy when adjacency packing is used.
+    public enum AdjacencyPackingStrategy {
+        BLOCK_ALIGNED_TAIL,
+        VAR_LONG_TAIL,
+        PACKED_TAIL,
+    }
+    public static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING =
+        AdjacencyPackingStrategy.PACKED_TAIL;
+    private static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_FLAG =
+        AdjacencyPackingStrategy.valueOf(
+            System.getProperty(
+                name(GdsFeatureToggles.class, "adjacencyPackingStrategy"),
+                ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING.name()
+            )
+        );
+    public static final AtomicReference<AdjacencyPackingStrategy> ADJACENCY_PACKING_STRATEGY =
+        new AtomicReference<>(AdjacencyPackingStrategy.PACKED_TAIL);
 
     private static String name(Class<?> location, String name) {
         return location.getCanonicalName() + "." + name;
