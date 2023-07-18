@@ -28,6 +28,9 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.util.OptionalLong;
+import java.util.stream.LongStream;
+
 public final class ArrayIdMapBuilderOps {
 
     static ArrayIdMap build(
@@ -38,7 +41,7 @@ public final class ArrayIdMapBuilderOps {
         int concurrency
     ) {
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
-            highestNodeId = internalToOriginalIds.asNodeProperties().getMaxLongPropertyValue().orElse(NodesBuilder.UNKNOWN_MAX_ID);
+            highestNodeId = findMaxNodeId(internalToOriginalIds).orElse(NodesBuilder.UNKNOWN_MAX_ID);
         }
 
         HugeSparseLongArray originalToInternalIds = buildSparseIdMap(
@@ -57,6 +60,15 @@ public final class ArrayIdMapBuilderOps {
             nodeCount,
             highestNodeId
         );
+    }
+
+    private static OptionalLong findMaxNodeId(HugeLongArray nodeIds) {
+        var nodeCount = nodeIds.size();
+        return LongStream
+            .range(0, nodeCount)
+            .parallel()
+            .map(nodeIds::get)
+            .max();
     }
 
     @NotNull

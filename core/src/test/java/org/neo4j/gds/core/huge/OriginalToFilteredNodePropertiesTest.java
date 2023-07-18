@@ -28,6 +28,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
@@ -115,7 +116,7 @@ class OriginalToFilteredNodePropertiesTest {
         propertyArray.setAll((i) -> 42L);
 
         var filteredNodeProperties = new OriginalToFilteredNodePropertyValues(
-            propertyArray.asNodeProperties(),
+            LongNodePropertyValuesAdapter.create(propertyArray),
             nodeFilteredGraph
         );
 
@@ -129,4 +130,32 @@ class OriginalToFilteredNodePropertiesTest {
             Arguments.arguments("B", DefaultValue.LONG_DEFAULT_FALLBACK, 42L)
         );
     }
+
+    /**
+     * NodePropertyValues backed by HugeLongArray
+     */
+    // This is a test-only class with a single usage, it is okay to have it here instead of creating module dependencies
+    private static final class LongNodePropertyValuesAdapter implements LongNodePropertyValues {
+
+        private final HugeLongArray delegate;
+
+        private LongNodePropertyValuesAdapter(HugeLongArray delegate) {
+            this.delegate = delegate;
+        }
+
+        public static LongNodePropertyValues create(HugeLongArray delegate) {
+            return new LongNodePropertyValuesAdapter(delegate);
+        }
+
+        @Override
+        public long longValue(long nodeId) {
+            return delegate.get(nodeId);
+        }
+
+        @Override
+        public long nodeCount() {
+            return delegate.size();
+        }
+    }
+
 }
