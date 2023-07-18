@@ -331,7 +331,7 @@ public final class RandomGraphGenerator {
                     nodes,
                     longValues,
                     (PropertyProducer<long[]>) propertyProducer,
-                    HugeLongArray::asNodeProperties
+                    LongNodePropertyValuesAdapter::create
                 );
             case DOUBLE:
                 var doubleValues = HugeDoubleArray.newArray(nodeCount);

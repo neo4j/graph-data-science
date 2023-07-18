@@ -24,6 +24,7 @@ import org.neo4j.gds.api.properties.nodes.EmptyLongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 
 final class LouvainNodePropertyValuesDelegate {
     private LouvainNodePropertyValuesDelegate() {}
@@ -49,7 +50,7 @@ final class LouvainNodePropertyValuesDelegate {
         return CommunityProcCompanion.nodeProperties(
             computationResult.config(),
             resultProperty,
-            result.dendrogramManager().getCurrent().asNodeProperties(),
+            LongNodePropertyValuesAdapter.create(result.dendrogramManager().getCurrent()),
             () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }
