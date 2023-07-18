@@ -9,9 +9,7 @@ include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 NOTE: This feature requires Neo4j Enterprise Edition.
 
-Using an ephemeral database, you can use Cypher to update your graph as well as xref:management-ops/graph-reads/create-cypher-db.adoc[reading from it].
-
-include::partial$/management-ops/ephemeral-db/syntax.adoc[]
+Using an xref:management-ops/graph-reads/create-cypher-db.adoc#_syntax[ephemeral database], you can use Cypher to update your graph as well as xref:management-ops/graph-reads/create-cypher-db.adoc#_read_query[reading from it].
 
 [[create-ephemeral-db-example]]
 == Example
@@ -24,7 +22,7 @@ include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
 === Update query
 
-As an example of updating the graph, we add a `level` node property only to some nodes that match a condition:
+As an example of updating the graph, we add a `level` node property only to some nodes that match a given condition:
 
 [source, cypher, role=noplay]
 ----
@@ -41,7 +39,7 @@ RETURN n.age, n.level
 | 42    | 3
 |===
 
-Then, we run a Cypher query to check that the new property has actually been added.
+Then, we run a Cypher query to check that the new property has actually been added:
 
 [source, cypher, role=noplay]
 ----

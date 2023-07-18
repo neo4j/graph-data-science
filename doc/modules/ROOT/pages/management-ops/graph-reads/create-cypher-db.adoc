@@ -16,7 +16,17 @@ The `gds.ephemeral.database.create` procedure creates an ephemeral Neo4j databas
 Once the database is created, you can run Cypher queries on it as you would on any Neo4j database.
 You can also xref:management-ops/graph-update/write-with-cypher.adoc[update the graph] using Cypher.
 
-include::partial$/management-ops/ephemeral-db/syntax.adoc[]
+== Syntax
+
+[[create-ephemeral-db-syntax]]
+=== Creating an ephemeral database
+
+include::partial$/management-ops/ephemeral-db/create-syntax.adoc[]
+
+[[drop-ephemeral-db-syntax]]
+=== Dropping an ephemeral database
+
+include::partial$/management-ops/ephemeral-db/drop-syntax.adoc[]
 
 [[create-ephemeral-db-example]]
 == Example
