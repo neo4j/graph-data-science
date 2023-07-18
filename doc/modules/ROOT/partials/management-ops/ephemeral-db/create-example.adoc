@@ -25,14 +25,6 @@ YIELD
   graphName, nodeCount, relationshipCount
 ----
 
-.Results
-[opts="header"]
-|===
-| graph            | nodeCont | relationshipCount
-| "social_network" | 3        | 3
-|===
-
-
 Next, we create an ephemeral database from the projected graph:
 
 .Create a new database `gdsdb` using our `social_network` graph:
