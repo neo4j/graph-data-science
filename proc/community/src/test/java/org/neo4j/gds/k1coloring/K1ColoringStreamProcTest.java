@@ -20,7 +20,6 @@
 package org.neo4j.gds.k1coloring;
 
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,40 +28,20 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.InvocationCountingTaskStore;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphLoader;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class K1ColoringStreamProcTest extends BaseProcTest {
 
@@ -196,52 +174,24 @@ class K1ColoringStreamProcTest extends BaseProcTest {
     @Test
     void testRunOnEmptyGraph() {
         // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringStreamProc.class, (proc) -> {
-            var methods = ProcedureMethodHelper.streamMethods(proc).collect(Collectors.toList());
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
 
-                var graphName = "graph";
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    Username.EMPTY_USERNAME.username(),
-                    graphName,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
-                var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
-                methods.forEach(method -> {
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, Map.<String, Object>of());
-                        assertEquals(0, result.count(), "Stream result should be empty.");
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
-        }
-        );
+        runQuery("CALL db.createLabel('X')");
+        runQuery("MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
+
+        String  projectQuery = GdsCypher.call("foo")
+            .graphProject().withNodeLabel("X").yields();
+        runQuery(projectQuery);
+
+        String query = GdsCypher.call("foo")
+            .algo("gds", "beta", "k1coloring")
+            .streamMode()
+            .yields();
+
+        var rowCount=runQueryWithRowConsumer(query, resultRow -> {});
+
+        assertThat(rowCount).isEqualTo(0L);
+
     }
 
-    @NotNull
-    private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
-                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-                .transactionContext(TestSupport.fullAccessTransaction(db))
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
-                .build())
-            .username("")
-            .projectConfig(graphProjectConfig)
-            .build();
-    }
 }
