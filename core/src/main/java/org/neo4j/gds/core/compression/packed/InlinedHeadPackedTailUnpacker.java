@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.compress.ByteArrayBuffer;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
+import org.neo4j.gds.core.compression.common.VarLongDecoding;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
@@ -35,7 +37,7 @@ final class InlinedHeadPackedTailUnpacker {
 
     // Decompression state
     private final long[] block;
-
+    private final MutableLong headValue;
     private int idxInBlock;
     private int blockId;
     private long lastValue;
@@ -44,6 +46,7 @@ final class InlinedHeadPackedTailUnpacker {
     InlinedHeadPackedTailUnpacker() {
         this.block = new long[BLOCK_SIZE];
         this.header = new ByteArrayBuffer();
+        this.headValue = new MutableLong();
     }
 
     void copyFrom(InlinedHeadPackedTailUnpacker other) {
@@ -66,28 +69,15 @@ final class InlinedHeadPackedTailUnpacker {
             this.header.buffer[i] = UnsafeUtil.getByte(ptr + i);
         }
         ptr += blocks;
-
         // Var-length decode head value following the block information.
-        long head = 0L, input;
-        int shift = 0;
-        while (true) {
-            input = UnsafeUtil.getByte(ptr);
-            ptr++;
-            head += (input & 127L) << shift;
-            if ((input & 128L) == 128L) {
-                break;
-            } else {
-                shift += 7;
-            }
-        }
-
+        ptr = VarLongDecoding.unsafeDecodeVLong(ptr, this.headValue);
+        // Set the last value to the head value for correct
+        // delta decoding of the first block.
+        this.lastValue = this.headValue.longValue();
         // Align target ptr to read from data block
         this.targetPtr = BitUtil.align(ptr, Long.BYTES);
         this.idxInBlock = 0;
         this.blockId = 0;
-        // Set the last value to the head value for correct
-        // delta decoding of the first block.
-        this.lastValue = head;
         this.remaining = degree;
         this.decompressBlock();
     }

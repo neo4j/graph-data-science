@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.common;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
 public final class VarLongDecoding {
@@ -96,6 +97,31 @@ public final class VarLongDecoding {
                 shift += 7;
             }
         }
+
+        return ptr;
+    }
+
+    /**
+     * Decodes a single var-length encoded long starting at the given address.
+     *
+     * @param ptr address to read from
+     * @param out output value
+     * @return address after the decoded value
+     */
+    public static long unsafeDecodeVLong(long ptr, MutableLong out) {
+        long value = 0L, input;
+        int shift = 0;
+        while (true) {
+            input = UnsafeUtil.getByte(ptr);
+            ptr++;
+            value += (input & 127L) << shift;
+            if ((input & 128L) == 128L) {
+                break;
+            } else {
+                shift += 7;
+            }
+        }
+        out.setValue(value);
 
         return ptr;
     }
