@@ -84,7 +84,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Log log,
         String rootTaskName
     ) {
-        super(graphStore, config, neoNodeProperties);
+        super(graphStore, config, neoNodeProperties, config.useLabelMapping());
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
         this.graphPropertyVisitorSupplier = graphPropertyVisitorSupplier;
@@ -110,7 +110,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             exportGraphPropertySchema(graphStoreInput);
             exportGraphCapabilities(graphStoreInput);
         }
-        // todo: if configuration then:
         exportNodeLabelMapping(graphStoreInput);
 
         var progressTracker = createProgressTracker(graphStoreInput);

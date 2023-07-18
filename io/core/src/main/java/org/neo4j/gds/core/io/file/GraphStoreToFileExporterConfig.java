@@ -42,6 +42,13 @@ public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseCo
 
     String exportName();
 
+    @Value.Default
+    default boolean useLabelMapping() {
+        // the default should generally be true, however neo4j admin, backwards compatability and maybe some feedback
+        // about this change from field engineers should be taken into account first.
+        return false;
+    }
+
     static GraphStoreToFileExporterConfig of(String username, CypherMapWrapper config) {
         return new GraphStoreToFileExporterConfigImpl(username, config);
     }
