@@ -29,7 +29,9 @@ public final class DoubleNodePropertyValuesAdapter implements DoubleNodeProperty
 
     private final HugeDoubleArray delegate;
 
-    private DoubleNodePropertyValuesAdapter(HugeDoubleArray delegate) {this.delegate = delegate;}
+    private DoubleNodePropertyValuesAdapter(HugeDoubleArray delegate) {
+        this.delegate = delegate;
+    }
 
     public static DoubleNodePropertyValues create(HugeDoubleArray hugeDoubleArray) {
         return new DoubleNodePropertyValuesAdapter(hugeDoubleArray);
