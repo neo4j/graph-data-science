@@ -340,7 +340,7 @@ public final class RandomGraphGenerator {
                     nodes,
                     doubleValues,
                     (PropertyProducer<double[]>) propertyProducer,
-                    HugeDoubleArray::asNodeProperties
+                    DoubleNodePropertyValuesAdapter::create
                 );
             case DOUBLE_ARRAY:
                 return generateProperties(

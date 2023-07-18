@@ -20,7 +20,7 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -61,8 +62,8 @@ public class ClosenessCentralityMutateSpec implements AlgorithmSpec<ClosenessCen
                 computationResult.config().mutateProperty(),
                 computationResult.result()
                     .map(ClosenessCentralityResult::centralities)
-                    .orElseGet(() -> HugeDoubleArray.newArray(0))
-                    .asNodeProperties()
+                    .map(DoubleNodePropertyValuesAdapter::create)
+                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder
         );

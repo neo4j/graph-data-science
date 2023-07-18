@@ -20,13 +20,15 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -57,10 +59,17 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
     public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult ->
-                List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                    computationResult.result().get().scores().asNodeProperties())
-            ),this::resultBuilder);
+                List.of(
+                    NodeProperty.of(
+                        computationResult.config().mutateProperty(),
+                        computationResult.result()
+                            .map(PageRankResult::scores)
+                            .map(DoubleNodePropertyValuesAdapter::create)
+                            .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
+                    )
+                ),
+            this::resultBuilder
+        );
     }
 
     private AbstractResultBuilder<MutateResult> resultBuilder(
