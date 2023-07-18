@@ -19,24 +19,29 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 
-@ValueClass
-public interface MaxKCutResult {
-    // Value at index `i` is the idx of the community to which node with id `i` belongs.
-    HugeByteArray candidateSolution();
+/**
+ * NodePropertyValues backed by HugeByteArray
+ */
+final class NodePropertyValuesAdapter implements LongNodePropertyValues {
 
-    double cutCost();
+    private final HugeByteArray delegate;
 
-    static MaxKCutResult of(
-        HugeByteArray candidateSolution,
-        double cutCost
-    ) {
-        return ImmutableMaxKCutResult
-            .builder()
-            .candidateSolution(candidateSolution)
-            .cutCost(cutCost)
-            .build();
+    private NodePropertyValuesAdapter(HugeByteArray delegate) {this.delegate = delegate;}
+
+    static LongNodePropertyValues create(HugeByteArray hugeByteArray) {
+        return new NodePropertyValuesAdapter(hugeByteArray);
+    }
+
+    @Override
+    public long longValue(long nodeId) {
+        return delegate.get(nodeId);
+    }
+
+    @Override
+    public long nodeCount() {
+        return delegate.size();
     }
 }

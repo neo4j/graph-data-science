@@ -63,7 +63,8 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
                 CommunityProcCompanion.considerSizeFilter(
                     computationResult.config(),
                     computationResult.result()
-                        .map(MaxKCutResult::asNodeProperties)
+                        .map(MaxKCutResult::candidateSolution)
+                        .map(NodePropertyValuesAdapter::create)
                         .orElse(EmptyLongNodePropertyValues.INSTANCE)
                 )
             )),

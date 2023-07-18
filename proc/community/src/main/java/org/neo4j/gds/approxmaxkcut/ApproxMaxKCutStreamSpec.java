@@ -63,7 +63,7 @@ public class ApproxMaxKCutStreamSpec implements AlgorithmSpec<ApproxMaxKCut, Max
                     var graph = computationResult.graph();
                     var nodeProperties = CommunityProcCompanion.considerSizeFilter(
                         computationResult.config(),
-                        result.asNodeProperties()
+                        NodePropertyValuesAdapter.create(result.candidateSolution())
                     );
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(nodeProperties::hasValue)
