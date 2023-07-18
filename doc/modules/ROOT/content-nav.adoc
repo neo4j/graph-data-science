@@ -33,7 +33,7 @@
 ** Reading from graphs
 *** xref:management-ops/graph-reads/graph-stream-nodes.adoc[]
 *** xref:management-ops/graph-reads/graph-stream-relationships.adoc[]
-*** xref:management-ops/graph-reads/create-cypher-db.adoc[]
+*** xref:management-ops/graph-reads/read-with-cypher.adoc[]
 ** Updating graphs
 *** xref:management-ops/graph-update/mutate-node-labels.adoc[]
 *** xref:management-ops/graph-update/to-undirected.adoc[]
