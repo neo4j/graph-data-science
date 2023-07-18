@@ -64,7 +64,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         Log log,
         ProgressTracker progressTracker
     ) {
-        super(graphStore, config, neoNodeProperties);
+        super(graphStore, config, neoNodeProperties, false);
         var executionMonitor = ProgressTrackerExecutionMonitor.of(
             progressTracker,
             ClockService.clock(),
