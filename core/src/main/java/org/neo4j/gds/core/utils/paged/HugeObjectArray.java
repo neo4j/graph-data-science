@@ -190,6 +190,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     @Override
     public abstract T[] toArray();
 
+    @Deprecated(forRemoval = true)
     @Override
     public NodePropertyValues asNodeProperties() {
         var cls = elementClass();
@@ -235,7 +236,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         throw new UnsupportedOperationException("This HugeObjectArray can not be converted to node properties.");
     }
 
-    abstract Class<T> elementClass();
+    public abstract Class<T> elementClass();
 
     /**
      * Creates a new array of the given size.
@@ -457,7 +458,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
-        Class<T> elementClass() {
+        public Class<T> elementClass() {
             return (Class<T>) page.getClass().getComponentType();
         }
     }
@@ -625,7 +626,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
-        Class<T> elementClass() {
+        public Class<T> elementClass() {
             return (Class<T>) pages.getClass().getComponentType().getComponentType();
         }
     }
