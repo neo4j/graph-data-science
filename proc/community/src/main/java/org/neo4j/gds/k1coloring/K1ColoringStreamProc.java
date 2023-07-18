@@ -67,6 +67,10 @@ public class K1ColoringStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.stream` has been deprecated, please use `gds.k1coloring.stream`.");
         return stream(graphName,configuration);
     }
 
@@ -77,6 +81,10 @@ public class K1ColoringStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.stream.estimate` has been deprecated, please use `gds.k1coloring.stream.estimate`.");
         return estimate(graphNameOrConfiguration,algoConfiguration);
     }
 

@@ -75,6 +75,10 @@ public class K1ColoringWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.write` has been deprecated, please use `gds.k1coloring.write`.");
         return  write(graphName,configuration);
     }
 
@@ -85,6 +89,10 @@ public class K1ColoringWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.write.estimate` has been deprecated, please use `gds.k1coloring.write.estimate`.");
         return estimate(graphNameOrConfiguration,algoConfiguration);
     }
 
