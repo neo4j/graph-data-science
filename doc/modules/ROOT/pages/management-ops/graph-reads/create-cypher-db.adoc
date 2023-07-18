@@ -58,6 +58,7 @@ MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 The returned properties correctly match those from the original graph.
 
 It is important to note that the `name` property cannot be retrieved from the ephemeral database because it is not present in the projected graph.
+If you need to retrieve properties from the Neo4j database at the same time, you can use a link:https://neo4j.com/docs/graph-data-science/current/production-deployment/composite/[composite database].
 
 [[drop-ephemeral-db]]
 === Cleanup
