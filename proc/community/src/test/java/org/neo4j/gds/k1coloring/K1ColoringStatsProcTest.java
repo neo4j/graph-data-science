@@ -23,6 +23,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -67,11 +69,12 @@ class K1ColoringStatsProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testStats() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testStats(String tieredProcedure) {
         @Language("Cypher")
         String query = GdsCypher.call(K1COLORING_GRAPH)
-            .algo("gds", "beta", "k1coloring")
+            .algo(tieredProcedure)
             .statsMode()
             .yields();
 
@@ -102,7 +105,7 @@ class K1ColoringStatsProcTest extends BaseProcTest {
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")
-            .algo("gds", "beta", "k1coloring")
+            .algo("gds", "k1coloring")
             .statsMode()
             .yields();
 

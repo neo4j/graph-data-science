@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringStatsProc extends BaseProc {
 
-    @Procedure(name = "gds.beta.k1coloring.stats", mode = READ)
+    @Procedure(name = "gds.k1coloring.stats", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringStatsResult> stats(
         @Name(value = "graphName") String graphName,
@@ -47,7 +48,7 @@ public class K1ColoringStatsProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.k1coloring.stats.estimate", mode = READ)
+    @Procedure(value = "gds.k1coloring.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -58,5 +59,25 @@ public class K1ColoringStatsProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Procedure(name = "gds.beta.k1coloring.stats", mode = READ, deprecatedBy = "gds.k1coloring.stats")
+    @Description(K1_COLORING_DESCRIPTION)
+    @Internal
+    public Stream<K1ColoringStatsResult> betaStats(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return stats(graphName,configuration);
+    }
+
+    @Procedure(value = "gds.beta.k1coloring.stats.estimate", mode = READ, deprecatedBy = "gds.k1coloring.stats.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    @Internal
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return estimate(graphNameOrConfiguration,algoConfiguration);
     }
 }
