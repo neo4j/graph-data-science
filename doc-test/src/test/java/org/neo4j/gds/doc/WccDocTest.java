@@ -56,7 +56,7 @@ class WccDocTest extends SingleFileDocTestBase {
     Runnable cleanup() {
         return () -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
-            db.executeTransactionally("MATCH (n) DETACH DELETE n");
+            defaultDb.executeTransactionally("MATCH (n) DETACH DELETE n");
         };
     }
 

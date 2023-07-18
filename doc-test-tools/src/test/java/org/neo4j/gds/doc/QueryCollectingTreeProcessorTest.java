@@ -126,6 +126,22 @@ class QueryCollectingTreeProcessorTest {
     }
 
     @Test
+    void parseDatabase() {
+        processor = new QueryCollectingTreeProcessor();
+        asciidoctor.javaExtensionRegistry().treeprocessor(processor);
+
+        var file = ResourceUtil.path("query-collecting-tree-processor-test_database.adoc").toFile();
+        assertThat(file).exists().canRead();
+
+        asciidoctor.loadFile(file, Collections.emptyMap());
+
+        assertThat(processor.getQueryExampleGroups()).hasSize(1);
+        assertThat(processor.getQueryExampleGroups().get(0).queryExamples()).containsExactly(
+            QueryExample.builder().query("SHOW DATABASES").database("system").assertResults(false).build()
+        );
+    }
+
+    @Test
     void parseMultipleDocuments() {
         var file = ResourceUtil.path("query-collecting-tree-processor-test_part2.adoc").toFile();
         assertThat(file).exists().canRead();

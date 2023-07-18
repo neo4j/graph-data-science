@@ -48,6 +48,8 @@ final class DocumentationTestToolsConstants {
     static final String GRAPH_PROJECT_QUERY_ROLE = "graph-project-query";
     static final String QUERY_EXAMPLE_ROLE = "query-example";
     static final String TEST_TYPE_NO_RESULT = "no-result";
+
+    static final String TEST_DATABASE_ATTRIBUTE = "database";
     static final String TEST_GROUP_ATTRIBUTE = "group";
     static final String TEST_OPERATOR_ATTRIBUTE = "operator";
     static final String ROLE_SELECTOR = "role";

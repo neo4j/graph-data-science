@@ -39,20 +39,23 @@ include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 === Read query
 
 We can now run a `MATCH` Cypher query on the in-memory database and check the results:
-
-[source, cypher, role=noplay]
+[role=query-example]
+--
+[source, cypher, role=noplay, database=gdsdb]
 ----
 MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
+ORDER BY age1, age2
 ----
 
 .Results
 [opts="header"]
 |===
 | age1 | age2
+| 23   | 31
 | 23   | 42
 | 42   | 23
-| 23   | 31
 |===
+--
 
 The returned properties correctly match those from the original graph.
 
