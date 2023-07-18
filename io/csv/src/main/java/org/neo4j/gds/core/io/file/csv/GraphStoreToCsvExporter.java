@@ -76,6 +76,7 @@ public final class GraphStoreToCsvExporter {
             () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
+            () -> new CsvNodeLabelMappingVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
             () -> new CsvGraphPropertySchemaVisitor(exportPath),
             () -> new CsvGraphCapabilitiesWriter(exportPath),

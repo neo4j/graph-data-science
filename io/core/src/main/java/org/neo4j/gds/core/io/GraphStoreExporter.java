@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.common.Validator;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -99,7 +100,14 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     public ExportedProperties run() {
         var metaDataStore = MetaDataStore.of(graphStore);
-        var nodeStore = NodeStore.of(graphStore, neoNodeProperties);
+        // todo: map only on config
+        var nodeStore = NodeStore.of(
+            graphStore,
+            neoNodeProperties,
+            true
+                ? Optional.of(new NodeLabelMapping(graphStore.nodeLabels()))
+                : Optional.empty()
+        );
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphProperties = graphStore
             .graphPropertyKeys()

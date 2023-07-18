@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -29,6 +30,7 @@ import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
+import org.neo4j.gds.core.io.schema.SimpleVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,6 +43,7 @@ import org.neo4j.logging.Log;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -53,6 +56,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier;
     private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
     private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
+    private final Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplierVisitorSupplier;
+
     private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
     private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
     private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
@@ -68,6 +73,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
+        Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplierVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
         Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier,
         Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
@@ -85,6 +91,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         this.userInfoVisitorSupplier = userInfoVisitorSupplier;
         this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
         this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
+        this.labelMappingVisitorSupplierVisitorSupplier = labelMappingVisitorSupplierVisitorSupplier;
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
@@ -103,6 +110,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             exportGraphPropertySchema(graphStoreInput);
             exportGraphCapabilities(graphStoreInput);
         }
+        // todo: if configuration then:
+        exportNodeLabelMapping(graphStoreInput);
+
         var progressTracker = createProgressTracker(graphStoreInput);
 
         try {
@@ -243,6 +253,17 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                     });
                 }
             });
+        }
+    }
+
+    private void exportNodeLabelMapping(GraphStoreInput graphStoreInput) {
+        var labelMapping = graphStoreInput.labelMapping();
+        if (labelMapping.isPresent()) {
+            try (var labelMappingVisitor = labelMappingVisitorSupplierVisitorSupplier.get()) {
+                labelMapping.get().entrySet().forEach(entry -> labelMappingVisitor.export(entry));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 
