@@ -20,7 +20,6 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -104,27 +103,14 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 
-                LongNodePropertyValues properties;
-                if (computationResult.result().isPresent()) {
-                    var communities = computationResult.result().get().communities();
-                    properties = new LongNodePropertyValues() {
-                        @Override
-                        public long nodeCount() {
-                            return graph.nodeCount();
-                        }
-
-                        @Override
-                        public long longValue(long nodeId) {
-                            return communities.get(nodeId);
-                        }
-                    };
-                } else {
-                    properties = EmptyLongNodePropertyValues.INSTANCE;
-                }
+                var nodePropertyValues  = computationResult.result()
+                    .map(KmeansResult::communities)
+                    .map(NodePropertyValuesAdapter::create)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE);
 
                 exporter.write(
                     config.writeProperty(),
-                    properties
+                    nodePropertyValues
                 );
                 builder.withNodePropertiesWritten(exporter.propertiesWritten());
             }
