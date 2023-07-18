@@ -30,7 +30,7 @@ public class KernelTransactionService {
         this.context = context;
     }
 
-    KernelTransaction getKernelTransaction() {
+    public KernelTransaction getKernelTransaction() {
         try {
             // this is not opening something new that we should close
             // it only fetches the current transaction

@@ -28,6 +28,8 @@ import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
 import org.neo4j.gds.catalog.ProcedureTransactionService;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
+import org.neo4j.gds.catalog.TerminationFlagService;
+import org.neo4j.gds.catalog.TransactionContextService;
 import org.neo4j.gds.catalog.UserLogServices;
 import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.core.loading.ConfigurationService;
@@ -78,6 +80,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var kernelTransactionService = new KernelTransactionService(context);
         var procedureTransactionService = new ProcedureTransactionService(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+        var terminationFlagService = new TerminationFlagService();
+        var transactionContextService = new TransactionContextService();
 
         // GDS services
         var graphStoreCatalogService = new GraphStoreCatalogService();
@@ -110,6 +114,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             procedureTransactionService,
             context.securityContext(),
             taskRegistryFactoryService,
+            terminationFlagService,
+            transactionContextService,
             userLogServices,
             userServices,
             businessFacade

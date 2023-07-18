@@ -54,6 +54,8 @@ class GraphStoreCatalogProcedureFacadeTest {
             securityContext,
             null,
             null,
+            null,
+            null,
             usernameService,
             businessFacade
         );
@@ -94,6 +96,8 @@ class GraphStoreCatalogProcedureFacadeTest {
             null,
             null,
             securityContext,
+            null,
+            null,
             null,
             userLogServices,
             usernameService,

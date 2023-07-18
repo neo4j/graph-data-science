@@ -19,18 +19,14 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.TransactionTerminationMonitor;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
@@ -71,6 +67,8 @@ public class GraphStoreCatalogProcedureFacade {
     private final ProcedureTransactionService procedureTransactionService;
     private final SecurityContext securityContext;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final TerminationFlagService terminationFlagService;
+    private final TransactionContextService transactionContextService;
     private final UserLogServices userLogServices;
     private final UserServices userServices;
 
@@ -86,6 +84,8 @@ public class GraphStoreCatalogProcedureFacade {
         ProcedureTransactionService procedureTransactionService,
         SecurityContext securityContext,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        TerminationFlagService terminationFlagService,
+        TransactionContextService transactionContextService,
         UserLogServices userLogServices,
         UserServices userServices,
         GraphStoreCatalogBusinessFacade businessFacade
@@ -98,6 +98,8 @@ public class GraphStoreCatalogProcedureFacade {
         this.procedureTransactionService = procedureTransactionService;
         this.securityContext = securityContext;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.terminationFlagService = terminationFlagService;
+        this.transactionContextService = transactionContextService;
         this.userLogServices = userLogServices;
         this.userServices = userServices;
 
@@ -176,8 +178,9 @@ public class GraphStoreCatalogProcedureFacade {
 
         var user = user();
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
-        var results = businessFacade.listGraphs(user, graphName, displayDegreeDistribution, terminationFlag());
+        var results = businessFacade.listGraphs(user, graphName, displayDegreeDistribution, terminationFlag);
 
         // we convert here from domain type to Neo4j display type
         var computeGraphSize = procedureReturnColumns.contains("memoryUsage")
@@ -200,7 +203,11 @@ public class GraphStoreCatalogProcedureFacade {
         var databaseId = databaseId();
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlag();
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var transactionContext = transactionContextService.transactionContext(
+            graphDatabaseService,
+            procedureTransactionService
+        );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
         var result = businessFacade.nativeProject(
@@ -208,7 +215,7 @@ public class GraphStoreCatalogProcedureFacade {
             databaseId,
             taskRegistryFactory,
             terminationFlag,
-            transactionContext(),
+            transactionContext,
             userLogRegistryFactory,
             graphName,
             nodeProjection,
@@ -229,15 +236,18 @@ public class GraphStoreCatalogProcedureFacade {
         var databaseId = databaseId();
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlag();
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var transactionContext = transactionContextService.transactionContext(
+            graphDatabaseService,
+            procedureTransactionService
+        );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
         var result = businessFacade.estimateNativeProject(
-            user,
             databaseId,
             taskRegistryFactory,
             terminationFlag,
-            transactionContext(),
+            transactionContext,
             userLogRegistryFactory,
             nodeProjection,
             relationshipProjection,
@@ -273,16 +283,4 @@ public class GraphStoreCatalogProcedureFacade {
         return userServices.getUser(securityContext);
     }
 
-    private TerminationFlag terminationFlag() {
-        var kernelTransaction = kernelTransactionService.getKernelTransaction();
-        var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
-        return TerminationFlag.wrap(terminationMonitor);
-    }
-
-    private TransactionContext transactionContext() {
-        return DatabaseTransactionContext.of(
-            graphDatabaseService,
-            procedureTransactionService.getProcedureTransaction()
-        );
-    }
 }

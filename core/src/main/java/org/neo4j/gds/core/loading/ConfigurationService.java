@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -63,16 +64,18 @@ public class ConfigurationService {
     }
 
     public GraphProjectFromStoreConfig parseEstimateNativeProjectConfiguration(
-        User user,
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     ) {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
+        /*
+         * We should mint a type for estimation, instead of relying on this superset of stuff (the unused fields)
+         */
         var configuration = GraphProjectFromStoreConfig.of(
-            user.getUsername(),
-            "",
+            "unused",
+            "unused",
             nodeProjection,
             relationshipProjection,
             cypherConfig
@@ -84,8 +87,8 @@ public class ConfigurationService {
     }
 
     private void validateNativeProjectConfig(
-        CypherMapWrapper cypherConfig,
-        GraphProjectFromStoreConfig graphProjectConfig
+        CypherMapAccess cypherConfig,
+        GraphProjectConfig graphProjectConfig
     ) {
         var allowedKeys = graphProjectConfig.isFictitiousLoading()
             ? graphProjectConfig.configKeys()

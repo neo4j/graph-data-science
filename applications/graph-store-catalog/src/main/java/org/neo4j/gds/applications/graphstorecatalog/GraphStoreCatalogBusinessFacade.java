@@ -162,14 +162,12 @@ public class GraphStoreCatalogBusinessFacade {
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            user,
             userLogRegistryFactory,
             nativeProjectConfiguration
         );
     }
 
     public MemoryEstimateResult estimateNativeProject(
-        User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -181,21 +179,22 @@ public class GraphStoreCatalogBusinessFacade {
     ) {
         checkPreconditions();
 
-        var estimateNativeProjectConfiguration = configurationService.parseEstimateNativeProjectConfiguration(
-            user,
+        var configuration = configurationService.parseEstimateNativeProjectConfiguration(
             nodeProjection,
             relationshipProjection,
             rawConfiguration
         );
+
+        if (configuration.isFictitiousLoading()) return nativeProjectService.estimateButFictitiously(configuration);
 
         return nativeProjectService.estimate(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
-            user,
             userLogRegistryFactory,
-            estimateNativeProjectConfiguration);
+            configuration
+        );
     }
 
     private void checkPreconditions() {
