@@ -75,7 +75,7 @@ public final class VarLongEncoding {
     }
 
     //@formatter:off
-    private static int encodeVLong(final byte[] buffer, final long val, int output) {
+    public static int encodeVLong(final byte[] buffer, final long val, int output) {
         if (val < THRESHOLD_1_BYTE) {
             buffer[    output] = (byte) (val       | 128L);
             return 1 + output;

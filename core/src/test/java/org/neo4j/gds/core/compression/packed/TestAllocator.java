@@ -97,6 +97,18 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
                     );
                     cursor = new BlockAlignedTailCursor(new long[]{slice.slice().address()});
                     break;
+                case INLINED_HEAD_PACKED_TAIL:
+                    offset = InlinedHeadPackedTailPacker.compress(
+                        allocator,
+                        slice,
+                        values.clone(),
+                        length,
+                        aggregation,
+                        degree,
+                        MemoryTracker.empty()
+                    );
+                    cursor = new InlinedHeadPackedTailCursor(new long[]{slice.slice().address()});
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown compression type" + adjacencyPackingStrategy);
             }

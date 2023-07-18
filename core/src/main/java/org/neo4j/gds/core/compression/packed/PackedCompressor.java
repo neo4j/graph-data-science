@@ -231,6 +231,15 @@ public final class PackedCompressor implements AdjacencyCompressor {
                     this.memoryTracker
                 );
                 break;
+            case INLINED_HEAD_PACKED_TAIL:
+                offset = InlinedHeadPackedTailPacker.compressWithProperties(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.memoryTracker
+                );
+                break;
             case BLOCK_ALIGNED_TAIL:
                 throw new IllegalArgumentException(
                     "Block aligned tail is not supported for adjacency lists with properties");
@@ -275,6 +284,17 @@ public final class PackedCompressor implements AdjacencyCompressor {
                 break;
             case PACKED_TAIL:
                 offset = PackedTailPacker.compress(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.aggregations[0],
+                    this.degree,
+                    this.memoryTracker
+                );
+                break;
+            case INLINED_HEAD_PACKED_TAIL:
+                offset = InlinedHeadPackedTailPacker.compress(
                     this.adjacencyAllocator,
                     this.adjacencySlice,
                     targets,

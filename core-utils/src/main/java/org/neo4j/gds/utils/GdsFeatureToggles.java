@@ -108,18 +108,12 @@ public enum GdsFeatureToggles {
         BLOCK_ALIGNED_TAIL,
         VAR_LONG_TAIL,
         PACKED_TAIL,
+        INLINED_HEAD_PACKED_TAIL,
     }
-    public static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING =
-        AdjacencyPackingStrategy.PACKED_TAIL;
-    private static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_FLAG =
-        AdjacencyPackingStrategy.valueOf(
-            System.getProperty(
-                name(GdsFeatureToggles.class, "adjacencyPackingStrategy"),
-                ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING.name()
-            )
-        );
+
+    public static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING = AdjacencyPackingStrategy.PACKED_TAIL;
     public static final AtomicReference<AdjacencyPackingStrategy> ADJACENCY_PACKING_STRATEGY =
-        new AtomicReference<>(AdjacencyPackingStrategy.PACKED_TAIL);
+        new AtomicReference<>(ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING);
 
     private static String name(Class<?> location, String name) {
         return location.getCanonicalName() + "." + name;
