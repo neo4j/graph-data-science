@@ -114,14 +114,12 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var actual = runOnPregel(graph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -158,14 +156,12 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var actual = runOnPregel(graph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -331,14 +327,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -351,14 +345,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(zeroWeightsGraph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(zeroWeightsGraph, config).scores();
 
             var expected = zeroWeightsGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < zeroWeightsGraph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
@@ -430,20 +422,18 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.ARTICLE_RANK)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.ARTICLE_RANK).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                softly.assertThat(actual.doubleValue(nodeId))
+                softly.assertThat(actual.get(nodeId))
                     .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
         @Test
-        void articleRankOnPaperGraph(SoftAssertions softly) {
+        void articleRankOnPaperGraphTest(SoftAssertions softly) {
             var config = ImmutablePageRankStreamConfig
                 .builder()
                 .maxIterations(20)
@@ -452,14 +442,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK).scores();
 
             var expected = paperGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < paperGraph.nodeCount(); nodeId++) {
-                softly.assertThat(actual.doubleValue(nodeId))
+                softly.assertThat(actual.get(nodeId))
                     .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
@@ -507,14 +495,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -528,14 +514,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
 
             var expected = graph.nodeProperties("expectedWeightedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -549,14 +533,12 @@ class PageRankTest {
                 .addSourceNode(idFunction.of("d"))
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
 
             var expected = graph.nodeProperties("expectedPersonalizedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }

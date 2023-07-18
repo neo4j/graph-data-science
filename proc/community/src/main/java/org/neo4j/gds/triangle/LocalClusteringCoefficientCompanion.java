@@ -28,6 +28,7 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
@@ -47,7 +48,7 @@ final class LocalClusteringCoefficientCompanion {
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
         return computeResult.result()
-            .map(LocalClusteringCoefficient.Result::asNodeProperties)
+            .map(result -> DoubleNodePropertyValuesAdapter.create(result.localClusteringCoefficients()))
             .orElse(EmptyDoubleNodePropertyValues.INSTANCE);
     }
 

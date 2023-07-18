@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -58,7 +59,7 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(LocalClusteringCoefficient.Result::asNodeProperties)
+                    .map(result -> DoubleNodePropertyValuesAdapter.create(result.localClusteringCoefficients()))
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder

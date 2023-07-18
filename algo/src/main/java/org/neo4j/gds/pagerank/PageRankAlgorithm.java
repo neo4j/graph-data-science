@@ -89,7 +89,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         }
 
         var scaler = scalerFactory.create(
-            scores.asNodeProperties(),
+            DoubleNodePropertyValuesAdapter.create(scores),
             graph.nodeCount(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,

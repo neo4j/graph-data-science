@@ -22,7 +22,6 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -148,10 +147,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
                 .localClusteringCoefficients(localClusteringCoefficients)
                 .averageClusteringCoefficient(averageClusteringCoefficient)
                 .build();
-        }
-
-        default DoubleNodePropertyValues asNodeProperties() {
-            return localClusteringCoefficients().asNodeProperties();
         }
     }
 }
