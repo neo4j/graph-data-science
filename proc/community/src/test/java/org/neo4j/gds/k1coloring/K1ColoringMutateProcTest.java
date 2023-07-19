@@ -19,69 +19,41 @@
  */
 package org.neo4j.gds.k1coloring;
 
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -131,22 +103,41 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void testMutateYields() {
+    void testMutate() {
         @Language("Cypher")
         String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .mutateMode()
             .addParameter("mutateProperty", MUTATE_PROPERTY)
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(4, row.getNumber("nodeCount").longValue(), "wrong nodeCount");
-            assertTrue(row.getBoolean("didConverge"), "did not converge");
-            assertTrue(row.getNumber("ranIterations").longValue() < 3, "wrong ranIterations");
-            assertEquals(2, row.getNumber("colorCount").longValue(), "wrong color count");
-            assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0, "invalid preProcessingMillis");
-            assertTrue(row.getNumber("mutateMillis").longValue() >= 0, "invalid mutateMillis");
-            assertTrue(row.getNumber("computeMillis").longValue() >= 0, "invalid computeMillis");
+        var rowCount=runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
+            assertThat(row.getNumber("computeMillis").longValue()).isNotEqualTo(-1);
+            assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(4);
+            assertThat(row.getNumber("colorCount").longValue()).isEqualTo(2);
+            assertThat(row.getNumber("ranIterations").longValue()).isLessThan(3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+
         });
+
+        assertThat(rowCount).isEqualTo(1L);
+
+        var graphStore = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), K1COLORING_GRAPH).graphStore();
+
+        var mutatedGraph=graphStore.getUnion();
+        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
+
+        var containsMutateProperty =  graphStore.schema().nodeSchema()
+            .entries()
+            .stream()
+            .flatMap(e -> e.properties().entrySet().stream())
+            .anyMatch(
+                props -> props.getKey().equals(MUTATE_PROPERTY) &&
+                    props.getValue().valueType() == ValueType.LONG
+            );
+        assertThat(containsMutateProperty).isTrue();
+
+
     }
 
     @Test
@@ -171,32 +162,20 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery("CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
+        String  projectQuery = GdsCypher.call(K1COLORING_GRAPH)
+            .graphProject()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
+            .yields();
+        runQuery(projectQuery);
 
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-            .databaseService(db)
-            .graphName(K1COLORING_GRAPH)
-            .addNodeProjection(ImmutableNodeProjection.of("A", PropertyMappings.of()))
-            .addNodeProjection(ImmutableNodeProjection.of("B", PropertyMappings.of()));
-        RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
-            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
-        GraphLoader loader = storeLoaderBuilder.build();
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+            .mutateMode()
+            .addParameter("nodeLabels", Collections.singletonList("B"))
+            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .yields();
 
-        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
-
-        applyOnProcedure(procedure ->
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = Map.of(
-                        "nodeLabels", Collections.singletonList("B"),
-                        "mutateProperty", MUTATE_PROPERTY
-                    );
-                    try {
-                        mutateMethod.invoke(procedure, K1COLORING_GRAPH, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
+        runQuery(query);
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
@@ -208,37 +187,25 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         String checkNeo4jGraphNegativeQuery = formatWithLocale("MATCH (n:A) RETURN n.%s AS property", MUTATE_PROPERTY);
 
-        runQueryWithRowConsumer(
-            db,
+        var rowCountA=runQueryWithRowConsumer(
             checkNeo4jGraphNegativeQuery,
-            Map.of(),
             (resultRow) -> assertNull(resultRow.get("property"))
         );
 
+        assertThat(rowCountA).isEqualTo(2L);
+
         String checkNeo4jGraphPositiveQuery = formatWithLocale("MATCH (n:B) RETURN n.%s AS property", MUTATE_PROPERTY);
 
-        runQueryWithRowConsumer(
-            db,
+        var rowCountB= runQueryWithRowConsumer(
             checkNeo4jGraphPositiveQuery,
-            Map.of(),
             (resultRow) -> assertNotNull(resultRow.get("property"))
         );
+
+        assertThat(rowCountB).isEqualTo(2L);
+
     }
 
-    @Test
-    void testGraphMutation() {
-        GraphStore graphStore = runMutation(ensureGraphExists(), Map.of("mutateProperty", MUTATE_PROPERTY));
-        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
-        var containsMutateProperty =  graphStore.schema().nodeSchema()
-            .entries()
-            .stream()
-            .flatMap(e -> e.properties().entrySet().stream())
-            .anyMatch(
-                props -> props.getKey().equals(MUTATE_PROPERTY) &&
-                         props.getValue().valueType() == ValueType.LONG
-            );
-        assertThat(containsMutateProperty).isTrue();
-    }
+
 
     @Test
     void testGraphMutationOnFilteredGraph() {
@@ -246,20 +213,21 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery("CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
-        var graphStore = new TestNativeGraphLoader(db)
-            .withLabels("A", "B")
-            .withNodeProperties(ImmutablePropertyMappings.of())
-            .withDefaultOrientation(Orientation.NATURAL)
-            .graphStore();
+        String  projectQuery = GdsCypher.call(K1COLORING_GRAPH)
+            .graphProject()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
+            .yields();
+        runQuery(projectQuery);
 
-        var graphProjectConfig = withAllNodesAndRelationshipsProjectConfig(K1COLORING_GRAPH);
-        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
-        Map<String, Object> config = Map.of(
-            "nodeLabels", Collections.singletonList("A"),
-            "mutateProperty", MUTATE_PROPERTY
-        );
-        runMutation(K1COLORING_GRAPH, config);
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+            .mutateMode()
+            .addParameter("nodeLabels", Collections.singletonList("A"))
+            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .yields();
+
+        runQuery(query);
 
         var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), K1COLORING_GRAPH).graphStore();
 
@@ -270,30 +238,16 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
     @Test
     void testMutateFailsOnExistingToken() {
-        String graphName = ensureGraphExists();
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+            .mutateMode()
+            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .yields();
+        runQuery(query);
 
-        applyOnProcedure(procedure ->
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
-                    try {
-                        // mutate first time
-                        mutateMethod.invoke(procedure, graphName, config);
-                        // mutate second time using same `mutateProperty`
-                        assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
-                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-                            .hasRootCauseMessage(formatWithLocale(
-                                "Node property `%s` already exists in the in-memory graph.",
-                                MUTATE_PROPERTY
-                            ));
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
-
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore().getUnion();
-        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
+        assertThatException().isThrownBy( () -> runQuery(query)).withMessageContaining(formatWithLocale(
+        "Node property `%s` already exists in the in-memory graph.",
+        MUTATE_PROPERTY
+        ));
     }
 
     @Test
@@ -301,7 +255,8 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         List<TestLog> log = new ArrayList<>(1);
         assertThrows(
             NullPointerException.class,
-            () -> applyOnProcedure(procedure -> {
+            ()->TestProcedureRunner.applyOnProcedure(db, K1ColoringMutateProc.class,
+                procedure -> {
                 var computationResult = mock(ComputationResult.class);
                 log.add(0, ((TestLog) procedure.log));
                 new K1ColoringMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
@@ -313,91 +268,35 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
     @Test
     void testRunOnEmptyGraph() {
-        applyOnProcedure((proc) -> {
-            var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
+        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
 
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
+        runQuery("CALL db.createLabel('X')");
+        runQuery("MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
 
-                var graphName = "graph";
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    TEST_USERNAME,
-                    graphName,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
-                var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
-                methods.forEach(method -> {
-                    Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, configMap);
-                        assertEquals(1, result.count());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
+        String  projectQuery = GdsCypher.call("foo")
+            .graphProject().withNodeLabel("X").yields();
+        runQuery(projectQuery);
+
+        String query = GdsCypher.call("foo")
+            .algo("gds", "beta", "k1coloring")
+            .mutateMode()
+            .addParameter("mutateProperty","foo2")
+            .yields();
+
+
+        var rowCount=runQueryWithRowConsumer(query, row -> {
+            AssertionsForClassTypes.assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
+            AssertionsForClassTypes.assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getNumber("colorCount").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getNumber("ranIterations").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getBoolean("didConverge")).isFalse();
         });
+
+        AssertionsForClassTypes.assertThat(rowCount).isEqualTo(1L);
     }
 
-    @NotNull
-    private String ensureGraphExists() {
-        String loadedGraphName = "loadGraph";
-        GraphProjectConfig graphProjectConfig = withAllNodesAndRelationshipsProjectConfig(loadedGraphName);
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-        return loadedGraphName;
-    }
 
-    @NotNull
-    private GraphStore runMutation(String graphName, Map<String, Object> config) {
-        applyOnProcedure(procedure ->
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
 
-        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore();
-    }
-
-    private void applyOnProcedure(Consumer<K1ColoringMutateProc> func) {
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringMutateProc.class, func);
-    }
-
-    private GraphProjectFromStoreConfig withAllNodesAndRelationshipsProjectConfig(String graphName) {
-        return ImmutableGraphProjectFromStoreConfig.of(
-            TEST_USERNAME,
-            graphName,
-            NodeProjections.create(Map.of(
-                ALL_NODES, ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-            )), RelationshipProjections.ALL
-        );
-    }
-
-    @NotNull
-    private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
-                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-                .transactionContext(TestSupport.fullAccessTransaction(db))
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
-                .build())
-            .username("")
-            .projectConfig(graphProjectConfig)
-            .build();
-    }
 }
