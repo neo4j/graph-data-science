@@ -169,3 +169,4 @@
 *** xref:migration-gds-1-to-gds-2/migration-algorithms.adoc[]
 *** xref:migration-gds-1-to-gds-2/migration-ml.adoc[]
 ** xref:migration-lcp-to-cpv2/index.adoc[]
+** xref:migration-alpha-cp-to-cpv2/index.adoc[]
