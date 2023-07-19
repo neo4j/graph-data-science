@@ -21,6 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -89,7 +90,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         }
 
         var scaler = scalerFactory.create(
-            DoubleNodePropertyValuesAdapter.create(scores),
+            NodePropertyValuesAdapter.adapt(scores),
             graph.nodeCount(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.MutateNodePropertyListFunction;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -63,7 +64,7 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
                 computationResult.config().mutateProperty(),
                 computationResult.result()
                     .map(KmeansResult::communities)
-                    .map(NodePropertyValuesAdapter::create)
+                    .map(NodePropertyValuesAdapter::adapt)
                     .orElse(EmptyLongNodePropertyValues.INSTANCE)
             ));
         return new MutatePropertyComputationResultConsumer<>(

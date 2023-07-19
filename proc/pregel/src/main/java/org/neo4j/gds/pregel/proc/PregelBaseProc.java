@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -36,8 +37,6 @@ import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.indexInverse.InverseRelationshipsAlgorithmFactory;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfigImpl;
-import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
@@ -144,10 +143,10 @@ public final class PregelBaseProc {
                 NodePropertyValues nodePropertyValues;
                 switch (element.propertyType()) {
                     case LONG:
-                        nodePropertyValues = LongNodePropertyValuesAdapter.create(compositeNodeValue.longProperties(propertyKey));
+                        nodePropertyValues = NodePropertyValuesAdapter.adapt(compositeNodeValue.longProperties(propertyKey));
                         break;
                     case DOUBLE:
-                        nodePropertyValues = DoubleNodePropertyValuesAdapter.create(compositeNodeValue.doubleProperties(propertyKey));
+                        nodePropertyValues = NodePropertyValuesAdapter.adapt(compositeNodeValue.doubleProperties(propertyKey));
                         break;
                     case LONG_ARRAY:
                         nodePropertyValues = new HugeObjectArrayLongArrayPropertyValues(compositeNodeValue.longArrayProperties(propertyKey));

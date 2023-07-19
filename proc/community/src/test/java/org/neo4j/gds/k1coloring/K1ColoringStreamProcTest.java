@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InvocationCountingTaskStore;
@@ -86,10 +87,11 @@ class K1ColoringStreamProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testStreamingImplicit() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testStreamingImplicit(String tieredProcedure) {
         @Language("Cypher")
-        String yields = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String yields = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .streamMode()
             .yields("nodeId", "color");
 
@@ -104,10 +106,11 @@ class K1ColoringStreamProcTest extends BaseProcTest {
         assertNotEquals(coloringResult.get("a"), coloringResult.get("c"));
     }
 
-    @Test
-    void testStreamingEstimate() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testStreamingEstimate(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
 
@@ -141,7 +144,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
     @MethodSource("communitySizeInputs")
     void testStreamingMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         @Language("Cypher")
-        String yields = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String yields = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
                 .streamMode()
                 .addAllParameters(parameter)
                 .yields("nodeId", "color");
@@ -184,7 +187,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")
-            .algo("gds", "beta", "k1coloring")
+            .algo("gds",  "k1coloring")
             .streamMode()
             .yields();
 

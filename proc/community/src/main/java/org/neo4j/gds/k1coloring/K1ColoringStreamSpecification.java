@@ -37,7 +37,10 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.k1coloring.stream", description = K1_COLORING_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.k1coloring.stream",
+             aliases = {"gds.beta.k1coloring.stream"},
+             description = K1_COLORING_DESCRIPTION,
+             executionMode = STREAM)
 public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>, K1ColoringFactory<K1ColoringStreamConfig>> {
 
     @Override

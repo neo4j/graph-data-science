@@ -20,11 +20,16 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.Collection;
 
 @ValueClass
 @Configuration
@@ -43,6 +48,29 @@ public interface PregelProcedureConfig extends
     default String mutateProperty() {
         return "";
     }
+
+    @Override
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateGraphIsSuitableForWrite(
+        GraphStore graphStore,
+        @SuppressWarnings("unused") Collection<NodeLabel> selectedLabels,
+        @SuppressWarnings("unused") Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        // VN/IP: HACK!
+        // Since we are using the same configuration for all the modes (`stream`, `write` and `mutate`) we check if the
+        // graph is writable in all modes.
+        // We only want to raise the error if the user actually doing writes,
+        // which we assume is when there is a `writeProperty` present
+        if (writeProperty().isBlank()) {
+            return;
+        }
+
+        if (!graphStore.capabilities().canWriteToDatabase() && !graphStore.capabilities().canWriteToRemoteDatabase()) {
+            throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
+        }
+    }
+
 
     static PregelProcedureConfig of(CypherMapWrapper userInput) {
         return new PregelProcedureConfigImpl(userInput);

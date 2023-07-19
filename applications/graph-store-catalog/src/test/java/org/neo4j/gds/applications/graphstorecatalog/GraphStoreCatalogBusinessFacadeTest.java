@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,8 +36,7 @@ class GraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphExists() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new GraphStoreCatalogBusinessFacade(
-            mock(PreconditionsService.class),
+        var facade = new DefaultGraphStoreCatalogBusinessFacade(
             null,
             new GraphNameValidationService(),
             service,
@@ -60,8 +58,7 @@ class GraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphDoesNotExist() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new GraphStoreCatalogBusinessFacade(
-            mock(PreconditionsService.class),
+        var facade = new DefaultGraphStoreCatalogBusinessFacade(
             null,
             mock(GraphNameValidationService.class),
             service,
@@ -85,30 +82,9 @@ class GraphStoreCatalogBusinessFacadeTest {
     }
 
     @Test
-    void shouldCheckPreconditions() {
-        var preconditionsService = mock(PreconditionsService.class);
-        var facade = new GraphStoreCatalogBusinessFacade(
-            preconditionsService,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-
-        doThrow(new IllegalStateException("call blocked because reasons"))
-            .when(preconditionsService).checkPreconditions();
-        assertThatThrownBy(
-            () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph")
-        ).hasMessage("call blocked because reasons");
-    }
-
-    @Test
     void shouldValidateInputGraphName() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new GraphStoreCatalogBusinessFacade(
-            mock(PreconditionsService.class),
+        var facade = new DefaultGraphStoreCatalogBusinessFacade(
             null,
             new GraphNameValidationService(),
             service,
@@ -125,8 +101,7 @@ class GraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldUseStrictValidationForNativeProject() {
         var validationService = mock(GraphNameValidationService.class);
-        var facade = new GraphStoreCatalogBusinessFacade(
-            mock(PreconditionsService.class),
+        var facade = new DefaultGraphStoreCatalogBusinessFacade(
             null,
             validationService,
             null,

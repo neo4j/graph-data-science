@@ -22,6 +22,7 @@ package org.neo4j.gds.approxmaxkcut;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -64,7 +65,7 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
                     computationResult.config(),
                     computationResult.result()
                         .map(MaxKCutResult::candidateSolution)
-                        .map(NodePropertyValuesAdapter::create)
+                        .map(NodePropertyValuesAdapter::adapt)
                         .orElse(EmptyLongNodePropertyValues.INSTANCE)
                 )
             )),

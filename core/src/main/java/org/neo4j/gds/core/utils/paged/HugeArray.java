@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 
@@ -99,8 +98,6 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
      * @throws IllegalStateException if the array is too large
      */
     public abstract Array toArray();
-
-    public abstract NodePropertyValues asNodeProperties();
 
     /**
      * Copies data from {@code source} into this array, starting from {@code sliceStart} up until {@code sliceEnd}.
