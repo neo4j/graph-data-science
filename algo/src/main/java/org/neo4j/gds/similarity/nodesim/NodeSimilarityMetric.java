@@ -21,5 +21,6 @@ package org.neo4j.gds.similarity.nodesim;
 
 public enum NodeSimilarityMetric {
     JACCARD,
-    OVERLAP
+    OVERLAP,
+    COSINE,
 }
