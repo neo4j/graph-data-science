@@ -61,8 +61,16 @@ abstract class ClusterManager {
         }
     }
 
-
-    abstract void normalizeClusters();
+     void normalizeClusters(){
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            if (nodesInCluster[centroidId] > 0) {
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
+                    normalize(centroidId,dimension);
+                }
+            }
+        }
+    }
+    abstract  void normalize(int centroidId,int dimension);
 
     abstract void updateFromTask(KmeansTask task);
 

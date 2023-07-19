@@ -33,16 +33,9 @@ class DoubleClusterManager extends ClusterManager {
         this.centroids = new double[k][dimensions];
     }
 
-
     @Override
-    public void normalizeClusters() {
-        for (int centroidId = 0; centroidId < k; ++centroidId) {
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                if (nodesInCluster[centroidId] > 0) {
-                    centroids[centroidId][dimension] /= (double) nodesInCluster[centroidId];
-                }
-            }
-        }
+    public void normalize(int centroidId,int dimension){
+        centroids[centroidId][dimension] /= (double) nodesInCluster[centroidId];
     }
 
     @Override
