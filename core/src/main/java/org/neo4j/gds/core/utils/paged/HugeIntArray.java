@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
 
@@ -195,21 +194,6 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
     @Override
     public int[] toArray() {
         return dumpToArray(int[].class);
-    }
-
-    @Override
-    public LongNodePropertyValues asNodeProperties() {
-        return new LongNodePropertyValues() {
-            @Override
-            public long longValue(long nodeId) {
-                return get(nodeId);
-            }
-
-            @Override
-            public long nodeCount() {
-                return HugeIntArray.this.size();
-            }
-        };
     }
 
     /**

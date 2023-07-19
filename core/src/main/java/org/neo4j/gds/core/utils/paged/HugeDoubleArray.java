@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
 
@@ -179,21 +178,6 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     @Override
     public double[] toArray() {
         return dumpToArray(double[].class);
-    }
-
-    @Override
-    public DoubleNodePropertyValues asNodeProperties() {
-        return new DoubleNodePropertyValues() {
-            @Override
-            public double doubleValue(long nodeId) {
-                return get(nodeId);
-            }
-
-            @Override
-            public long nodeCount() {
-                return HugeDoubleArray.this.size();
-            }
-        };
     }
 
     /**
