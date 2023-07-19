@@ -21,8 +21,14 @@ package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
+import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacadePreConditionsDecorator;
+import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
+import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
@@ -33,10 +39,6 @@ import org.neo4j.gds.catalog.TransactionContextService;
 import org.neo4j.gds.catalog.UserLogServices;
 import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.core.loading.ConfigurationService;
-import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
-import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
-import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
-import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
@@ -95,14 +97,19 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var preconditionsService = createPreconditionsService();
 
         // GDS business facade
-        var businessFacade = new GraphStoreCatalogBusinessFacade(
-            preconditionsService,
+        GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
             configurationService,
             graphNameValidationService,
             graphStoreCatalogService,
             dropGraphService,
             listGraphService,
             nativeProjectService
+        );
+
+        // wrap in decorator to enable preconditions checks
+        businessFacade = new GraphStoreCatalogBusinessFacadePreConditionsDecorator(
+            businessFacade,
+            preconditionsService
         );
 
         return new GraphStoreCatalogProcedureFacade(
