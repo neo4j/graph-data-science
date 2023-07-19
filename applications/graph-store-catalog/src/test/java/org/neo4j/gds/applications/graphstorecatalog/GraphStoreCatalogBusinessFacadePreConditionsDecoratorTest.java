@@ -24,8 +24,10 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GraphStoreCatalogBusinessFacadePreConditionsDecoratorTest {
     @Test
@@ -39,5 +41,21 @@ class GraphStoreCatalogBusinessFacadePreConditionsDecoratorTest {
         assertThatThrownBy(
             () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph")
         ).hasMessage("call blocked because reasons");
+    }
+
+    @Test
+    void shouldNotBlockLegitimateUsage() {
+        var delegate = mock(GraphStoreCatalogBusinessFacade.class);
+        var preconditionsService = mock(PreconditionsService.class);
+        var facade = new GraphStoreCatalogBusinessFacadePreConditionsDecorator(delegate, preconditionsService);
+
+        when(delegate.graphExists(
+            new User("someUser", false),
+            DatabaseId.from("someDatabase"),
+            "someGraph"
+        )).thenReturn(true);
+        var exists = facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph");
+
+        assertTrue(exists);
     }
 }

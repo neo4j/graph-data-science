@@ -26,7 +26,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
@@ -44,10 +44,16 @@ import org.neo4j.graphdb.GraphDatabaseService;
 public class NativeProjectService {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
+    private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public NativeProjectService(Log log, GraphDatabaseService graphDatabaseService) {
+    public NativeProjectService(
+        Log log,
+        GraphDatabaseService graphDatabaseService,
+        GraphStoreCatalogService graphStoreCatalogService
+    ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
+        this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
     public GraphProjectNativeResult compute(
@@ -140,7 +146,7 @@ public class NativeProjectService {
                 .withNodeCount(graphStore.nodeCount())
                 .withRelationshipCount(graphStore.relationshipCount());
 
-            GraphStoreCatalog.set(configuration, graphStore);
+            graphStoreCatalogService.set(configuration, graphStore);
         }
 
         return builder.build();

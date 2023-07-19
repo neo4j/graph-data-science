@@ -93,8 +93,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
         var graphNameValidationService = new GraphNameValidationService();
         var listGraphService = new ListGraphService(graphStoreCatalogService);
-        var nativeProjectService = new NativeProjectService(log, graphDatabaseService);
-        var preconditionsService = createPreconditionsService();
+        var nativeProjectService = new NativeProjectService(log, graphDatabaseService, graphStoreCatalogService);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -107,6 +106,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         );
 
         // wrap in decorator to enable preconditions checks
+        var preconditionsService = createPreconditionsService();
         businessFacade = new GraphStoreCatalogBusinessFacadePreConditionsDecorator(
             businessFacade,
             preconditionsService

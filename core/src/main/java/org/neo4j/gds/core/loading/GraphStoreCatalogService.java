@@ -107,4 +107,8 @@ public class GraphStoreCatalogService {
     public Map<GraphProjectConfig, GraphStore> getGraphStores(User user) {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
     }
+
+    public void set(GraphProjectConfig configuration, GraphStore graphStore) {
+        GraphStoreCatalog.set(configuration, graphStore);
+    }
 }
