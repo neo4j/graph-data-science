@@ -77,7 +77,7 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
                             try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                                 SimilarityGraphResult similarityGraphResult = FilteredKnnHelpers.computeToGraph(
                                     computationResult.graph(),
-                                    filteredKnn.nodeCount(),
+                                    computationResult.graph().nodeCount(),
                                     config.concurrency(),
                                     result,
                                     filteredKnn.executorService()
@@ -92,7 +92,7 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
                             }
                         } else {
                             resultBuilder
-                                .withNodesCompared(filteredKnn.nodeCount())
+                                .withNodesCompared(computationResult.graph().nodeCount())
                                 .withRelationshipsWritten(result.numberOfSimilarityPairs());
                         }
                     });

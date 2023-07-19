@@ -137,10 +137,6 @@ public class Knn extends Algorithm<Knn.Result> {
         this.neighborConsumers = neighborConsumers;
     }
 
-    public long nodeCount() {
-        return graph.nodeCount();
-    }
-
     public ExecutorService executorService() {
         return this.executorService;
     }

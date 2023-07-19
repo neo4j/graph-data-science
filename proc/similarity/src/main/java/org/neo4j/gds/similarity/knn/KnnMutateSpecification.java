@@ -82,7 +82,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, Knn.Result, Kn
                     try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
                         similarityGraphResult = KnnProc.computeToGraph(
                             computationResult.graph(),
-                            knn.nodeCount(),
+                            computationResult.graph().nodeCount(),
                             config.concurrency(),
                             Objects.requireNonNull(result),
                             knn.executorService()

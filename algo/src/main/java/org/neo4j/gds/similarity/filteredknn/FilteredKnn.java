@@ -103,10 +103,6 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         );
     }
 
-    long nodeCount() {
-        return delegate.nodeCount();
-    }
-
     ExecutorService executorService() {
         return delegate.executorService();
     }
