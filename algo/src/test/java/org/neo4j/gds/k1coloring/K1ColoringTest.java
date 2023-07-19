@@ -72,7 +72,7 @@ class K1ColoringTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result=k1Coloring.compute();
+        var result = k1Coloring.compute();
 
         var colors = result.colors();
 
@@ -118,7 +118,7 @@ class K1ColoringTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result=k1Coloring.compute();
+        var result = k1Coloring.compute();
         var colors = result.colors();
         var usedColors=result.usedColors();
         var conflicts = new MutableLong(0);
@@ -183,7 +183,7 @@ class K1ColoringTest {
             ProgressTracker.NULL_TRACKER
         );
 
-      var result=  k1Coloring.compute();
+      var result =  k1Coloring.compute();
 
         assertThat(result.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS))
             .as("The result should not contain the initial forbidden colors")
@@ -220,7 +220,7 @@ class K1ColoringTest {
             progressTracker
         );
 
-        var result=k1Coloring.compute();
+        var result = k1Coloring.compute();
 
         List<AtomicLong> progresses = progressTracker.getProgresses();
 

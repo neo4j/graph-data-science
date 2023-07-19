@@ -39,9 +39,12 @@ public interface K1ColoringResult {
                 var colors=colors();
                 var nodeCount=colors.size();
                 var usedColors = new BitSet(nodeCount);
+
                 for (long u=0;u<nodeCount;++u) {
+
                         usedColors.set(colors.get(u));
                 }
+
                 return usedColors;
 
         }
@@ -51,6 +54,7 @@ public interface K1ColoringResult {
             long ranIterations,
             boolean didConverge
         ) {
+
             return ImmutableK1ColoringResult.of(
                 color,
                 ranIterations,
