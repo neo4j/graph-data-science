@@ -77,7 +77,7 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
         FilteredKnnWriteConfig config = computationResult.config();
         return FilteredKnnHelpers.computeToGraph(
             computationResult.graph(),
-            algorithm.nodeCount(),
+            computationResult.graph().nodeCount(),
             config.concurrency(),
             computationResult.result().get(),
             algorithm.executorService()

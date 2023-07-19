@@ -62,7 +62,7 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
 
                 return computeToGraph(
                     computationResult.graph(),
-                    computationResult.algorithm().nodeCount(),
+                    computationResult.graph().nodeCount(),
                     computationResult.config().concurrency(),
                     computationResult.result().get(),
                     computationResult.algorithm().executorService()
