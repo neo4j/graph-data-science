@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.alpha.maxkcut.mutate", description = APPROX_MAX_K_CUT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.maxkcut.mutate", aliases = {"gds.alpha.maxkcut.mutate"}, description = APPROX_MAX_K_CUT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutMutateConfig, Stream<MutateResult>, ApproxMaxKCutFactory<ApproxMaxKCutMutateConfig>> {
     @Override
     public String name() {

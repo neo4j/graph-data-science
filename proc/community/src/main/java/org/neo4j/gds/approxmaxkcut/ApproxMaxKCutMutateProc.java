@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ApproxMaxKCutMutateProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.maxkcut.mutate", mode = READ)
+    @Procedure(value = "gds.maxkcut.mutate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -47,7 +48,7 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.alpha.maxkcut.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.maxkcut.mutate.estimate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -58,6 +59,36 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Deprecated
+    @Internal
+    @Procedure(value = "gds.alpha.maxkcut.mutate", mode = READ, deprecatedBy = "gds.maxkcut.mutate")
+    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    public Stream<MutateResult> mutateAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.maxkcut.mutate` has been deprecated, please use `gds.maxkcut.mutate`.");
+
+        return mutate(graphName, configuration);
+    }
+
+    @Deprecated
+    @Internal
+    @Procedure(value = "gds.alpha.maxkcut.mutate.estimate", mode = READ, deprecatedBy = "gds.maxkcut.mutate.estimate")
+    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateAlpha(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.maxkcut.mutate.estimate` has been deprecated, please use `gds.maxkcut.mutate.estimate`.");
+
+        return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

@@ -1,13 +1,11 @@
+:page-aliases: algorithms/alpha/approx-max-k-cut.adoc
 [[alpha-algorithms-approx-max-k-cut]]
-[.alpha]
+
 = Approximate Maximum k-cut
 :description: This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: approximate maximum k-cut
 :algorithm: Approximate Maximum k-cut
-
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 :directed:
@@ -106,7 +104,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Approximate Maximum k-cut in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.maxkcut.stream(
+CALL gds.maxkcut.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -121,7 +119,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration-stream.adoc[]
+include::partial$/algorithms/approx-max-k-cut/specific-configuration-stream.adoc[]
 |===
 
 .Results
@@ -139,7 +137,7 @@ include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration-strea
 .Run Approximate Maximum k-cut in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.maxkcut.mutate(
+CALL gds.maxkcut.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -159,7 +157,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[]
+include::partial$/algorithms/approx-max-k-cut/specific-configuration.adoc[]
 |===
 
 .Results
@@ -242,7 +240,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.maxkcut.mutate.estimate('myGraph', {mutateProperty: 'community'})
+CALL gds.maxkcut.mutate.estimate('myGraph', {mutateProperty: 'community'})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
@@ -265,7 +263,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.maxkcut.mutate('myGraph', {mutateProperty: 'community'})
+CALL gds.maxkcut.mutate('myGraph', {mutateProperty: 'community'})
 YIELD cutCost, nodePropertiesWritten
 ----
 
@@ -330,7 +328,7 @@ In this example we will have a look at how adding relationship weight can affect
 .The following will run the algorithm in `mutate` mode, diving our nodes into two communities once again:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.maxkcut.mutate(
+CALL gds.maxkcut.mutate(
    'myGraph',
    {
         relationshipWeightProperty: 'value',
@@ -377,7 +375,7 @@ RETURN gds.util.asNode(nodeId).name as name, propertyValue AS weightedCommunity
 |===
 --
 
-Comparing this result with that of xref:algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[unweighted case] we can see that `Bridget` has moved to another community but the output is otherwise the same.
+Comparing this result with that of xref:algorithms/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[unweighted case] we can see that `Bridget` has moved to another community but the output is otherwise the same.
 Indeed, this makes sense by looking at our graph.
 `Bridget` is connected to nodes of community `1` by eight relationships, but these relationships all have weight `1.0`.
 And although `Bridget` is only connected to two community `0` nodes, these relationships are of weight `81.0` and `45.0`.
@@ -402,7 +400,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 .The following will run the algorithm in `stream` mode using default configuration parameters:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.maxkcut.stream('myGraph')
+CALL gds.maxkcut.stream('myGraph')
 YIELD nodeId, communityId
 RETURN gds.util.asNode(nodeId).name AS name, communityId
 ----
@@ -422,7 +420,7 @@ RETURN gds.util.asNode(nodeId).name AS name, communityId
 |===
 --
 
-We can see that the result is what we expect, namely the same as in the xref:algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[mutate unweighted] example.
+We can see that the result is what we expect, namely the same as in the xref:algorithms/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[mutate unweighted] example.
 
 [NOTE]
 ====
