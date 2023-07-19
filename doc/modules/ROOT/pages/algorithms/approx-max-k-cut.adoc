@@ -1,3 +1,4 @@
+:page-aliases: algorithms/alpha/approx-max-k-cut.adoc
 [[alpha-algorithms-approx-max-k-cut]]
 
 = Approximate Maximum k-cut
