@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.ObjectNodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 
@@ -47,7 +47,7 @@ final class PredictedProbabilities {
 
         if (result.get().predictedProbabilities().isEmpty()) return nodeProperties;
 
-        NodePropertyValues nodePropertyValues = result.get().predictedProbabilities().get().asNodeProperties();
+        var nodePropertyValues = ObjectNodePropertyValuesAdapter.adapt(result.get().predictedProbabilities().get());
         nodeProperties.add(NodeProperty.of(predictedProbabilityProperty.orElseThrow(), nodePropertyValues));
 
         return nodeProperties;

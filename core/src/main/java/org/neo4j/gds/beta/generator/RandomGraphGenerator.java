@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.paged.HugeArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.properties.nodes.ObjectNodePropertyValuesAdapter;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.ArrayList;
@@ -347,21 +348,21 @@ public final class RandomGraphGenerator {
                     nodes,
                     HugeObjectArray.newArray(double[].class, nodeCount),
                     (PropertyProducer<double[][]>) propertyProducer,
-                    HugeObjectArray::asNodeProperties
+                    hugeObjectArray -> ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray)
                 );
             case FLOAT_ARRAY:
                 return generateProperties(
                     nodes,
                     HugeObjectArray.newArray(float[].class, nodeCount),
                     (PropertyProducer<float[][]>) propertyProducer,
-                    HugeObjectArray::asNodeProperties
+                    hugeObjectArray -> ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray)
                 );
             case LONG_ARRAY:
                 return generateProperties(
                     nodes,
                     HugeObjectArray.newArray(long[].class, nodeCount),
                     (PropertyProducer<long[][]>) propertyProducer,
-                    HugeObjectArray::asNodeProperties
+                    hugeObjectArray -> ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray)
                 );
             default:
                 throw new UnsupportedOperationException("properties producer must return a known value type");
