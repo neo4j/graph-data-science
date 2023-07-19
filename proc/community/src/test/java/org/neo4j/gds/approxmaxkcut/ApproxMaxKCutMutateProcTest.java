@@ -91,7 +91,7 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.maxkcut")
+            .algo("maxkcut")
             .mutateMode()
             .addParameter("k", 2)
             .addParameter("iterations", 8)

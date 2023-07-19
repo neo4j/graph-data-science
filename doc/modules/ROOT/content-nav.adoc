@@ -74,7 +74,7 @@
 *** xref:algorithms/modularity-optimization.adoc[]
 *** xref:algorithms/strongly-connected-components.adoc[]
 *** xref:algorithms/sllpa.adoc[]
-*** xref:algorithms/alpha/approx-max-k-cut.adoc[]
+*** xref:algorithms/approx-max-k-cut.adoc[]
 *** xref:algorithms/alpha/conductance.adoc[]
 *** xref:algorithms/alpha/modularity.adoc[]
 *** xref:algorithms/kmeans.adoc[]

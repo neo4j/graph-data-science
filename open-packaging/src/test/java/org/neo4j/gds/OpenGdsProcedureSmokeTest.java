@@ -103,10 +103,10 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.knn.filtered.stream",
         "gds.alpha.knn.filtered.write",
 
-        "gds.alpha.maxkcut.mutate",
-        "gds.alpha.maxkcut.mutate.estimate",
-        "gds.alpha.maxkcut.stream",
-        "gds.alpha.maxkcut.stream.estimate",
+        "gds.maxkcut.mutate",
+        "gds.maxkcut.mutate.estimate",
+        "gds.maxkcut.stream",
+        "gds.maxkcut.stream.estimate",
 
         "gds.alpha.modularity.stats",
         "gds.alpha.modularity.stream",
