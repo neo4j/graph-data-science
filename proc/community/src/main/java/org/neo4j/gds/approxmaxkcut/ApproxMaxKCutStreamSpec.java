@@ -22,6 +22,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -63,7 +64,7 @@ public class ApproxMaxKCutStreamSpec implements AlgorithmSpec<ApproxMaxKCut, Max
                     var graph = computationResult.graph();
                     var nodeProperties = CommunityProcCompanion.considerSizeFilter(
                         computationResult.config(),
-                        NodePropertyValuesAdapter.create(result.candidateSolution())
+                        NodePropertyValuesAdapter.adapt(result.candidateSolution())
                     );
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(nodeProperties::hasValue)

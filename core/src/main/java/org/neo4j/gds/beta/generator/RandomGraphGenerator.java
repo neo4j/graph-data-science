@@ -26,6 +26,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
@@ -41,7 +42,6 @@ import org.neo4j.gds.core.utils.paged.HugeArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.api.properties.nodes.ObjectNodePropertyValuesAdapter;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.ArrayList;
@@ -332,7 +332,7 @@ public final class RandomGraphGenerator {
                     nodes,
                     longValues,
                     (PropertyProducer<long[]>) propertyProducer,
-                    LongNodePropertyValuesAdapter::create
+                    NodePropertyValuesAdapter::adapt
                 );
             case DOUBLE:
                 var doubleValues = HugeDoubleArray.newArray(nodeCount);
@@ -341,28 +341,28 @@ public final class RandomGraphGenerator {
                     nodes,
                     doubleValues,
                     (PropertyProducer<double[]>) propertyProducer,
-                    DoubleNodePropertyValuesAdapter::create
+                    NodePropertyValuesAdapter::adapt
                 );
             case DOUBLE_ARRAY:
                 return generateProperties(
                     nodes,
                     HugeObjectArray.newArray(double[].class, nodeCount),
                     (PropertyProducer<double[][]>) propertyProducer,
-                    hugeObjectArray -> ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray)
+                    NodePropertyValuesAdapter::adapt
                 );
             case FLOAT_ARRAY:
                 return generateProperties(
                     nodes,
                     HugeObjectArray.newArray(float[].class, nodeCount),
                     (PropertyProducer<float[][]>) propertyProducer,
-                    hugeObjectArray -> ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray)
+                    NodePropertyValuesAdapter::adapt
                 );
             case LONG_ARRAY:
                 return generateProperties(
                     nodes,
                     HugeObjectArray.newArray(long[].class, nodeCount),
                     (PropertyProducer<long[][]>) propertyProducer,
-                    hugeObjectArray -> ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray)
+                    NodePropertyValuesAdapter::adapt
                 );
             default:
                 throw new UnsupportedOperationException("properties producer must return a known value type");
