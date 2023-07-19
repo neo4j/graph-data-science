@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,7 +29,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -59,7 +59,8 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(result -> DoubleNodePropertyValuesAdapter.create(result.localClusteringCoefficients()))
+                    .map(LocalClusteringCoefficient.Result::localClusteringCoefficients)
+                    .map(NodePropertyValuesAdapter::adapt)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder

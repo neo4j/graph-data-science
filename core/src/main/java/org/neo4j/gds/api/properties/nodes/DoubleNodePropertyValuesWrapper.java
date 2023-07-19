@@ -17,26 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.approxmaxkcut;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
-/**
- * NodePropertyValues backed by HugeByteArray
- */
-final class NodePropertyValuesAdapter implements LongNodePropertyValues {
+public final class DoubleNodePropertyValuesWrapper implements DoubleNodePropertyValues {
+    private final HugeDoubleArray delegate;
 
-    private final HugeByteArray delegate;
-
-    private NodePropertyValuesAdapter(HugeByteArray delegate) {this.delegate = delegate;}
-
-    static LongNodePropertyValues create(HugeByteArray hugeByteArray) {
-        return new NodePropertyValuesAdapter(hugeByteArray);
+    DoubleNodePropertyValuesWrapper(HugeDoubleArray delegate) {
+        this.delegate = delegate;
     }
 
     @Override
-    public long longValue(long nodeId) {
+    public double doubleValue(long nodeId) {
         return delegate.get(nodeId);
     }
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.node.regression.predict;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -31,7 +32,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
-import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +90,7 @@ public class NodeRegressionPipelineMutateSpec
 
     private NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computationResult) {
         return computationResult.result()
-            .map(DoubleNodePropertyValuesAdapter::create)
+            .map(NodePropertyValuesAdapter::adapt)
             .orElse(EmptyDoubleNodePropertyValues.INSTANCE);
     }
 

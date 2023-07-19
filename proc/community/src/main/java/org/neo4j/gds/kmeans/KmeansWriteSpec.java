@@ -22,6 +22,7 @@ package org.neo4j.gds.kmeans;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -62,7 +63,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                 computationResult -> {
                     var nodePropertyValues  = computationResult.result()
                         .map(KmeansResult::communities)
-                        .map(NodePropertyValuesAdapter::create)
+                        .map(NodePropertyValuesAdapter::adapt)
                         .orElse(EmptyLongNodePropertyValues.INSTANCE);
 
                     return List.of(ImmutableNodeProperty.of(

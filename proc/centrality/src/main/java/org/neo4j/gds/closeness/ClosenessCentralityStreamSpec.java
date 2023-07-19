@@ -20,13 +20,13 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.DoubleNodePropertyValuesAdapter;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -60,7 +60,7 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
-                    var nodePropertyValues = DoubleNodePropertyValuesAdapter.create(result.centralities());
+                    var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.centralities());
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
