@@ -19,10 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -189,52 +185,6 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      */
     @Override
     public abstract T[] toArray();
-
-    @Deprecated(forRemoval = true)
-    @Override
-    public NodePropertyValues asNodeProperties() {
-        var cls = elementClass();
-        if (cls == float[].class) {
-            return new FloatArrayNodePropertyValues() {
-                @Override
-                public float[] floatArrayValue(long nodeId) {
-                    return (float[]) get(nodeId);
-                }
-
-                @Override
-                public long nodeCount() {
-                    return HugeObjectArray.this.size();
-                }
-            };
-        }
-        if (cls == double[].class) {
-            return new DoubleArrayNodePropertyValues() {
-                @Override
-                public double[] doubleArrayValue(long nodeId) {
-                    return (double[]) get(nodeId);
-                }
-
-                @Override
-                public long nodeCount() {
-                    return HugeObjectArray.this.size();
-                }
-            };
-        }
-        if (cls == long[].class) {
-            return new LongArrayNodePropertyValues() {
-                @Override
-                public long[] longArrayValue(long nodeId) {
-                    return (long[]) get(nodeId);
-                }
-
-                @Override
-                public long nodeCount() {
-                    return HugeObjectArray.this.size();
-                }
-            };
-        }
-        throw new UnsupportedOperationException("This HugeObjectArray can not be converted to node properties.");
-    }
 
     public abstract Class<T> elementClass();
 
