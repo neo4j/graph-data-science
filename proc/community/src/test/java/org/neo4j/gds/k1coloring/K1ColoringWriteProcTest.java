@@ -92,9 +92,9 @@ class K1ColoringWriteProcTest extends BaseProcTest {
             .yields();
 
        var rowCount= runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
-            assertThat(row.getNumber("computeMillis").longValue()).isNotEqualTo(-1);
-            assertThat(row.getNumber("writeMillis").longValue()).isNotEqualTo(-1);
+            assertThat(row.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(4);
             assertThat(row.getNumber("colorCount").longValue()).isEqualTo(2);
             assertThat(row.getNumber("ranIterations").longValue()).isLessThan(3);
