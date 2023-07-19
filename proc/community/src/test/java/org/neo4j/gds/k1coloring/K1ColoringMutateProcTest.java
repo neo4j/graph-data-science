@@ -24,6 +24,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -102,10 +104,11 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
             ", (w)-->(z) ";
     }
 
-    @Test
-    void testMutate() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testMutate(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .mutateMode()
             .addParameter("mutateProperty", MUTATE_PROPERTY)
             .yields();
@@ -140,10 +143,11 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
     }
 
-    @Test
-    void testMutateEstimate() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testMutateEstimate(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .mutateEstimation()
             .addParameter("mutateProperty", "color")
             .yields("nodeCount", "bytesMin", "bytesMax", "requiredMemory");
@@ -169,7 +173,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
             .yields();
         runQuery(projectQuery);
 
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
             .mutateMode()
             .addParameter("nodeLabels", Collections.singletonList("B"))
             .addParameter("mutateProperty", MUTATE_PROPERTY)
@@ -221,7 +225,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         runQuery(projectQuery);
 
 
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
             .mutateMode()
             .addParameter("nodeLabels", Collections.singletonList("A"))
             .addParameter("mutateProperty", MUTATE_PROPERTY)
@@ -238,7 +242,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
     @Test
     void testMutateFailsOnExistingToken() {
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
             .mutateMode()
             .addParameter("mutateProperty", MUTATE_PROPERTY)
             .yields();
@@ -279,7 +283,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")
-            .algo("gds", "beta", "k1coloring")
+            .algo("gds", "k1coloring")
             .mutateMode()
             .addParameter("mutateProperty","foo2")
             .yields();

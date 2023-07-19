@@ -33,7 +33,10 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.k1coloring.stats", description = K1_COLORING_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.k1coloring.stats",
+             aliases = {"gds.beta.k1coloring.stats"},
+             description = K1_COLORING_DESCRIPTION,
+             executionMode = STATS)
 public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>, K1ColoringFactory<K1ColoringStatsConfig>> {
 
     @Override

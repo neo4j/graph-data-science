@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -83,10 +84,11 @@ class K1ColoringWriteProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testWriting() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testWriting(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .writeMode()
             .addParameter("writeProperty", "color")
             .yields();
@@ -116,10 +118,11 @@ class K1ColoringWriteProcTest extends BaseProcTest {
 
     }
 
-    @Test
-    void testWritingEstimate() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testWritingEstimate(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .estimationMode(GdsCypher.ExecutionModes.WRITE)
             .addParameter("writeProperty", "color")
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
@@ -154,7 +157,7 @@ class K1ColoringWriteProcTest extends BaseProcTest {
     @MethodSource("communitySizeInputs")
     void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
                 .writeMode()
                 .addParameter("writeProperty", "color")
                 .addAllParameters(parameter)
@@ -184,7 +187,7 @@ class K1ColoringWriteProcTest extends BaseProcTest {
         runQuery(projectQuery);
 
         String query = GdsCypher.call("foo")
-            .algo("gds", "beta", "k1coloring")
+            .algo("gds", "k1coloring")
             .writeMode()
             .addParameter("writeProperty","foo2")
             .yields();

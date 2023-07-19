@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringStreamProc extends BaseProc {
 
-    @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
+    @Procedure(name = "gds.k1coloring.stream", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringStreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -47,7 +48,7 @@ public class K1ColoringStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ)
+    @Procedure(value = "gds.k1coloring.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -59,4 +60,33 @@ public class K1ColoringStreamProc extends BaseProc {
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
+    @Procedure(value = "gds.beta.k1coloring.stream", mode = READ, deprecatedBy = "gds.k1coloring.stream")
+    @Description(K1_COLORING_DESCRIPTION)
+    @Internal
+    public Stream<K1ColoringStreamResult> betaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.stream` has been deprecated, please use `gds.k1coloring.stream`.");
+        return stream(graphName,configuration);
+    }
+
+    @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ, deprecatedBy = "gds.k1coloring.stream.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    @Internal
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.stream.estimate` has been deprecated, please use `gds.k1coloring.stream.estimate`.");
+        return estimate(graphNameOrConfiguration,algoConfiguration);
+    }
+
+
 }
