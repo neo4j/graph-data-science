@@ -36,6 +36,7 @@ ext {
                     project(':neo4j-kernel-adapter-5.7'),
                     project(':neo4j-kernel-adapter-5.8'),
                     project(':neo4j-kernel-adapter-5.9'),
+                    project(':neo4j-kernel-adapter-5.10'),
             ],
             'storage-engine-adapter': [
                     project(':storage-engine-adapter-4.4'),
@@ -48,6 +49,7 @@ ext {
                     project(':storage-engine-adapter-5.7'),
                     project(':storage-engine-adapter-5.8'),
                     project(':storage-engine-adapter-5.9'),
+                    project(':storage-engine-adapter-5.10'),
             ]
     ]
 }
