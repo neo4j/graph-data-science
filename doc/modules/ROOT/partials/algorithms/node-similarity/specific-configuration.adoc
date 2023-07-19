@@ -24,5 +24,5 @@ This value cannot be negative, a value of 0 means no global limit.
 If unspecified, the algorithm runs unweighted.
 | similarityMetric
 | String | JACCARD       | yes      |  The metric used to compute similarity.
-Can be either `JACCARD` or `OVERLAP`.
+Can be either `JACCARD`, `OVERLAP` or `COSINE`.
 |===
