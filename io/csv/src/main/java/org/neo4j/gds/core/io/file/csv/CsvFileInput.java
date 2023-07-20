@@ -31,6 +31,7 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.io.GraphStoreInput;
+import org.neo4j.gds.core.io.NodeLabelInverseMapping;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.GraphInfo;
@@ -54,6 +55,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 final class CsvFileInput implements FileInput {
@@ -80,6 +82,7 @@ final class CsvFileInput implements FileInput {
     private final String userName;
     private final GraphInfo graphInfo;
     private final MutableNodeSchema nodeSchema;
+    private final Optional<NodeLabelInverseMapping> labelMapping;
     private final MutableRelationshipSchema relationshipSchema;
     private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
@@ -89,6 +92,7 @@ final class CsvFileInput implements FileInput {
         this.userName = new UserInfoLoader(importPath).load();
         this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
+        this.labelMapping = new NodeLabelMappingLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
         this.graphPropertySchema = new GraphPropertySchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
@@ -97,10 +101,15 @@ final class CsvFileInput implements FileInput {
     @Override
     public InputIterable nodes(Collector badCollector) {
         Map<Path, List<Path>> pathMapping = CsvImportFileUtil.nodeHeaderToFileMapping(importPath);
-        Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportFileUtil.parseNodeHeader(entry.getKey()),
-            Map.Entry::getValue
-        ));
+        Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                entry -> CsvImportFileUtil.parseNodeHeader(
+                    entry.getKey(),
+                    labelMapping.isPresent() ? labelMapping.get()::get : x -> x
+                ),
+                Map.Entry::getValue
+            ));
 
         return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema);
     }
@@ -155,6 +164,11 @@ final class CsvFileInput implements FileInput {
     @Override
     public MutableNodeSchema nodeSchema() {
         return nodeSchema;
+    }
+
+    @Override
+    public Optional<NodeLabelInverseMapping> labelMapping() {
+        return labelMapping;
     }
 
     @Override

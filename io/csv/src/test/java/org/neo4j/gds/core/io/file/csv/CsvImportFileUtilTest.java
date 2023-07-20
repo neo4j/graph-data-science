@@ -164,7 +164,7 @@ class CsvImportFileUtilTest {
         var headerPath = tempDir.resolve("nodes_Person_King_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of(":ID,foo:long,bar:double"));
 
-        var parsedHeader = CsvImportFileUtil.parseNodeHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseNodeHeader(headerPath, x -> x);
 
         assertThat(parsedHeader.nodeLabels()).containsExactlyInAnyOrder("Person", "King");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(

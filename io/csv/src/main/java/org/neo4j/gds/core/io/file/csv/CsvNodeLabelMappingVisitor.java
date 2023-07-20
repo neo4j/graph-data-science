@@ -34,7 +34,7 @@ public class CsvNodeLabelMappingVisitor implements SimpleVisitor<Map.Entry<NodeL
 
     private static final String LABEL_MAPPING = "index";
     private static final String LABEL_COLUMN_NAME = "label";
-    private static final String LABEL_MAPPING_FILE_NAME = "label-mappings.csv";
+    static final String LABEL_MAPPING_FILE_NAME = "label-mappings.csv";
     private final CsvWriter csvWriter;
 
     CsvNodeLabelMappingVisitor(Path fileLocation) {
