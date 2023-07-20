@@ -28,17 +28,17 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BetterUserLogStoreTest {
+class PerDatabaseUserLogStoreTest {
     @Test
     void shouldDealWithNoEntries() {
-        var userLogStore = new BetterUserLogStore();
+        var userLogStore = new PerDatabaseUserLogStore();
 
         assertThat(userLogStore.query("user 1")).isEmpty();
     }
 
     @Test
     void shouldStoreAndRetrieveUserLogEntry() {
-        var userLogStore = new BetterUserLogStore();
+        var userLogStore = new PerDatabaseUserLogStore();
 
         userLogStore.addUserLogMessage("user 1", new Task("task description 1", null), "log message 1");
 
@@ -49,7 +49,7 @@ class BetterUserLogStoreTest {
 
     @Test
     void shouldStoreAndRetrieveUserLogEntries() {
-        var userLogStore = new BetterUserLogStore();
+        var userLogStore = new PerDatabaseUserLogStore();
 
         userLogStore.addUserLogMessage("user 1", new Task("task description 1", null), "log message 01");
         userLogStore.addUserLogMessage("user 1", new Task("task description 2", null), "log message 02");
