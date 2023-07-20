@@ -62,7 +62,7 @@ RETURN gds.graph.project(
 == Examples
 
 The following examples not include the full Cypher queries before the aggreation function is called, nor do they include and YIELD of return fields.
-There no changes related to those two aspects.
+There are no changes related to those two aspects.
 
 .Side-by-side comparison
 [opts=header,cols="1a,1a"]
