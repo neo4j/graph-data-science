@@ -63,6 +63,6 @@ public final class UserLogStoreHolder {
     public static UserLogStore getUserLogStore(String databaseName) {
         String normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
 
-        return USER_LOG_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseUserLogStore());
+        return USER_LOG_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new BetterUserLogStore());
     }
 }
