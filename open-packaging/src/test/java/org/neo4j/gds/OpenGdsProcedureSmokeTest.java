@@ -72,10 +72,10 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.conductance.stream",
 
-        "gds.beta.closeness.mutate",
-        "gds.beta.closeness.stats",
-        "gds.beta.closeness.stream",
-        "gds.beta.closeness.write",
+        "gds.closeness.mutate",
+        "gds.closeness.stats",
+        "gds.closeness.stream",
+        "gds.closeness.write",
 
         "gds.alpha.closeness.harmonic.write",
         "gds.alpha.closeness.harmonic.stream",

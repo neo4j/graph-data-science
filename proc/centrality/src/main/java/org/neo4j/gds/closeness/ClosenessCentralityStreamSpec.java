@@ -35,7 +35,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.beta.closeness.stream", description = CLOSENESS_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.closeness.stream", aliases = {"gds.beta.closeness.stream"}, description = CLOSENESS_DESCRIPTION, executionMode = STREAM)
 public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig, Stream<CentralityStreamResult>, ClosenessCentralityFactory<ClosenessCentralityStreamConfig>> {
 
     @Override

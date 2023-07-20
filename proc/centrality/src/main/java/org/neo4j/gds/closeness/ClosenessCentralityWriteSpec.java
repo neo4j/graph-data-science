@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.closeness.write", aliases = {"gds.beta.closeness.write"}, description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 
 public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
 

@@ -61,6 +61,11 @@
 | `gds.bfs.stream.estimate` label:procedure[Procedure]
 | `gds.bfs.stats` label:procedure[Procedure]
 | `gds.bfs.stats.estimate` label:procedure[Procedure]
+.4+<.^|xref:algorithms/closeness-centrality.adoc[Closeness Centrality]
+| `gds.closeness.mutate` label:procedure[Procedure]
+| `gds.closeness.stats` label:procedure[Procedure]
+| `gds.closeness.stream` label:procedure[Procedure]
+| `gds.closeness.write` label:procedure[Procedure]
 .8+<.^| xref:algorithms/degree-centrality.adoc[Degree Centrality]
 | `gds.degree.mutate` label:procedure[Procedure]
 | `gds.degree.mutate.estimate` label:procedure[Procedure]
@@ -237,11 +242,6 @@
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.4+<.^|xref:algorithms/closeness-centrality.adoc[Closeness Centrality]
-| `gds.beta.closeness.mutate` label:procedure[Procedure]
-| `gds.beta.closeness.stats` label:procedure[Procedure]
-| `gds.beta.closeness.stream` label:procedure[Procedure]
-| `gds.beta.closeness.write` label:procedure[Procedure]
 .8+<.^|xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
 | `gds.beta.graphSage.stream` label:procedure[Procedure]
 | `gds.beta.graphSage.stream.estimate` label:procedure[Procedure]

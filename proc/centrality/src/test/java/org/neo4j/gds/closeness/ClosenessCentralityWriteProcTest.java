@@ -120,7 +120,7 @@ class ClosenessCentralityWriteProcTest extends BaseProcTest {
     @Test
     void shouldWrite() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
+            .algo("closeness")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields();

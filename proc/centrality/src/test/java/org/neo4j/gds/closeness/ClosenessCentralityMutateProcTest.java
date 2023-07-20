@@ -124,7 +124,7 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
     @Test
     void shouldMutate() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
+            .algo("closeness")
             .mutateMode()
             .addParameter("mutateProperty", MUTATE_PROPERTY)
             .yields();
