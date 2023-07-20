@@ -37,20 +37,19 @@ For more information on this algorithm, see:
 [[algorithms-kmeans-sampling]]
 == Initial Centroid Sampling
 
-The algorithm starts by picking `k` centroids by  randomly sampling from the set of available nodes.
+The algorithm starts by picking `k` centroids by randomly sampling from the set of available nodes.
 There are two different sampling strategies.
 
 Uniform::
 
-With uniform sampling, each node has the same probability to be picked as one of the `k`  initial centroids.
+With uniform sampling, each node has the same probability to be picked as one of the `k` initial centroids.
 This is the default sampler for K-Means denoted with the `uniform` parameter.
 
 K-Means++::
 
-This sampling strategy adapts the well-known
-K-means\++  http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf[initialization algorithm] for K-Means.
-The sampling begins by choosing the  first centroid uniformly at random.
-Then, the remaining `k-1`  centroids are picked one-by-one based on weighted random sampling.
+This sampling strategy adapts the well-known K-means\++ initialization algorithmfootnote:[Arthur, David and Sergei Vassilvitskii. "k-means{plus}{plus}: The Advantages of Careful Seeding." _ACM-SIAM Symposium on Discrete Algorithms_ (2007).] for K-Means.
+The sampling begins by choosing the first centroid uniformly at random.
+Then, the remaining `k-1` centroids are picked one-by-one based on weighted random sampling.
 That is, the probability a node is chosen as the next centroid is proportional to its minimum distance from the already picked centroids.
 Nodes with larger distance hence have higher chance to be picked as a centroid.
 This sampling strategy tries to spread the initial clusters more evenly so as to obtain a better final clustering. This option can be enabled by choosing `kmeans++` as the initial sampler in the configuration.
@@ -105,7 +104,7 @@ include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID.
 | distanceFromCentroid      | Float     | Distance of the node from the centroid of its community.
-| silhouette      | Float     | Silhouette score  of the node.
+| silhouette      | Float     | Silhouette score of the node.
 |===
 ======
 
