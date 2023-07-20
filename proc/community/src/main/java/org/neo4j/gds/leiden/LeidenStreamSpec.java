@@ -35,7 +35,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.leiden.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.leiden.stream", aliases = {"gds.beta.leiden.stream"}, description = DESCRIPTION, executionMode = STREAM)
 public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStreamConfig, Stream<StreamResult>, LeidenAlgorithmFactory<LeidenStreamConfig>> {
     @Override
     public String name() {

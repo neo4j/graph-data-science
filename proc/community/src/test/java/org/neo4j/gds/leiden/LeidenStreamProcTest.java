@@ -80,7 +80,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        runQuery("CALL gds.beta.leiden.stream('leiden')", result -> {
+        runQuery("CALL gds.leiden.stream('leiden')", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
@@ -100,7 +100,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void streamWithIntermediateCommunityIds() {
-        runQuery("CALL gds.beta.leiden.stream('leiden', {includeIntermediateCommunities: true}) ", result -> {
+        runQuery("CALL gds.leiden.stream('leiden', {includeIntermediateCommunities: true}) ", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
@@ -124,7 +124,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldStreamWithConsecutiveIds() {
-        runQuery("CALL gds.beta.leiden.stream('leiden', {consecutiveIds: true})", result -> {
+        runQuery("CALL gds.leiden.stream('leiden', {consecutiveIds: true})", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
@@ -145,7 +145,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.beta.leiden.stream.estimate('leiden', {" +
+        var query = "CALL gds.leiden.stream.estimate('leiden', {" +
                     "   includeIntermediateCommunities: true" +
                     "})";
         assertThatNoException().isThrownBy(() -> runQuery(query));
@@ -161,7 +161,7 @@ class LeidenStreamProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
     void streamWithMinCommunitySize(int minCommunitySize, Set<Long> expectedCommunityIds) {
-        runQuery(format("CALL gds.beta.leiden.stream('leiden', {minCommunitySize: %d, consecutiveIds: true})", minCommunitySize), result -> {
+        runQuery(format("CALL gds.leiden.stream('leiden', {minCommunitySize: %d, consecutiveIds: true})", minCommunitySize), result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             var communities = new HashSet<Long>();
             while (result.hasNext()) {
