@@ -50,6 +50,8 @@ public interface MetricSimilarityComputer {
             return NodeSimilarityMetric.JACCARD;
         } else if (userInputInCaps.equals("OVERLAP")) {
             return NodeSimilarityMetric.OVERLAP;
+        } else if (userInputInCaps.equals("COSINE")) {
+            return NodeSimilarityMetric.COSINE;
         } else {
             throw new IllegalArgumentException(userInput + " is not a valid metric. Available metrics include Jaccard and Overlap");
         }
@@ -58,8 +60,10 @@ public interface MetricSimilarityComputer {
     private static MetricSimilarityComputerBuilder create(NodeSimilarityMetric metric) {
         if (metric == NodeSimilarityMetric.JACCARD) {
             return new JaccardSimilarityComputer.Builder();
-        } else {
+        } else if (metric == NodeSimilarityMetric.OVERLAP) {
             return new OverlapSimilarityComputer.Builder();
+        } else {
+            return new CosineSimilarityComputer.Builder();
         }
 
     }
