@@ -152,6 +152,7 @@ public class GraphInfo {
         @Override
         public void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
             configuration = cleansed(cypherAggregationConfig.toMap(), cypherAggregationConfig.outputFieldDenylist());
+            configuration.put("query", cypherAggregationConfig.query());
         }
 
         @Override

@@ -30,8 +30,13 @@ import org.neo4j.values.storable.TextValue;
 @SuppressWarnings("WeakerAccess")
 public class ProductGraphAggregator extends GraphAggregator {
 
-    ProductGraphAggregator(DatabaseId databaseId, String username, WriteMode writeMode) {
-        super(databaseId, username, writeMode);
+    ProductGraphAggregator(
+        DatabaseId databaseId,
+        String username,
+        WriteMode writeMode,
+        ExecutingQueryProvider queryProvider
+    ) {
+        super(databaseId, username, writeMode, queryProvider);
     }
 
     @Override

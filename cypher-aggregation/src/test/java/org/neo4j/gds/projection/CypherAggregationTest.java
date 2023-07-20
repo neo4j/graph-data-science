@@ -893,9 +893,39 @@ class CypherAggregationTest extends BaseProcTest {
             (Result result) -> result.next().get("config")
         );
 
-        var config = GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
+        var config = GraphProjectFromCypherAggregationConfig.of("", "g", "", configMap);
 
         assertThat(config.readConcurrency()).isEqualTo(2);
+    }
+
+    @Test
+    void testReturnExecutingQuery() {
+        var query = "MATCH (s)-->(t) RETURN gds.graph.project('g', s, t, {}).query as query";
+        var resultQuery = runQuery(query, result -> result.<String>columnAs("query").next());
+
+        assertThat(resultQuery).isEqualTo(query);
+
+        var listQuery = runQuery(
+            "CALL gds.graph.list('g') YIELD configuration RETURN configuration.query as query",
+            result -> result.<String>columnAs("query").next()
+        );
+
+        assertThat(listQuery).isEqualTo(query);
+    }
+
+    @Test
+    void testReturnExecutingQueryWithParams() {
+        var query = "MATCH (s)-->(t) RETURN gds.graph.project($graphName, s, t, {}).query as query";
+        var resultQuery = runQuery(query, Map.of("graphName", "g"), result -> result.<String>columnAs("query").next());
+
+        assertThat(resultQuery).isEqualTo(query);
+
+        var listQuery = runQuery(
+            "CALL gds.graph.list('g') YIELD configuration RETURN configuration.query as query",
+            result -> result.<String>columnAs("query").next()
+        );
+
+        assertThat(listQuery).isEqualTo(query);
     }
 
     @Test

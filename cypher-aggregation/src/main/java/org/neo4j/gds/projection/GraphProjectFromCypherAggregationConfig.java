@@ -37,27 +37,26 @@ import static org.neo4j.gds.Orientation.NATURAL;
 @Configuration
 public interface GraphProjectFromCypherAggregationConfig extends GraphProjectConfig {
 
-    @org.immutables.value.Value.Default
     @Configuration.Ignore
     default Orientation orientation() {
         return NATURAL;
     }
 
-    @org.immutables.value.Value.Default
     @Configuration.Ignore
     default Aggregation aggregation() {
         return Aggregation.NONE;
     }
 
-    @org.immutables.value.Value.Default
     default List<String> undirectedRelationshipTypes() {
         return List.of();
     }
 
-    @org.immutables.value.Value.Default
     default List<String> inverseIndexedRelationshipTypes() {
         return List.of();
     }
+
+    @Configuration.Parameter()
+    String query();
 
     @Configuration.Ignore
     @Override
@@ -79,8 +78,14 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
         );
     }
 
-    static GraphProjectFromCypherAggregationConfig of(String userName, String graphName, MapValue config) {
+    static GraphProjectFromCypherAggregationConfig of(
+        String userName,
+        String graphName,
+        String query,
+        MapValue config
+    ) {
         return new GraphProjectFromCypherAggregationConfigImpl(
+            query,
             userName,
             graphName,
             ValueMapWrapper.create(config)
@@ -90,9 +95,11 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
     static GraphProjectFromCypherAggregationConfig of(
         String userName,
         String graphName,
+        String query,
         @Nullable Map<String, Object> config
     ) {
         return new GraphProjectFromCypherAggregationConfigImpl(
+            query,
             userName,
             graphName,
             CypherMapWrapper.create(config)
