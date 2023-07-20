@@ -10,7 +10,7 @@ This guide is intended for users who have been using the Alpha Cypher Aggregatio
 Cypher projections are now done using the `gds.graph.project` aggregation function.
 We assume that most of the mentioned operations and concepts can be understood with little explanation.
 Thus we are intentionally brief in the examples and comparisons.
-Please see xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[the documentation for the Cypher projection] for more details.
+Please see xref:management-ops/projections/graph-project-cypher-projection.adoc[the documentation for the Cypher projection] for more details.
 
 == API Changes
 
