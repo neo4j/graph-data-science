@@ -26,7 +26,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class BetterUserLogStore implements UserLogStore {
+public class PerDatabaseUserLogStore implements UserLogStore {
     private final ConcurrentHashMap<String, LogStore> logStores = new ConcurrentHashMap<>();
 
     @Override
@@ -40,7 +40,7 @@ public class BetterUserLogStore implements UserLogStore {
     public Stream<UserLogEntry> query(String username) {
         var logStore = getUserLogStore(username);
 
-        return logStore.stream().flatMap(BetterUserLogStore::taskWithMessagesToUserLogEntryStream);
+        return logStore.stream().flatMap(PerDatabaseUserLogStore::taskWithMessagesToUserLogEntryStream);
     }
 
     private LogStore getUserLogStore(String username) {
