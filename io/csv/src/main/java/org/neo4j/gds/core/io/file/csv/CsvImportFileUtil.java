@@ -30,6 +30,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,13 +45,18 @@ public final class CsvImportFileUtil {
 
     private CsvImportFileUtil() {}
 
-    public static NodeFileHeader parseNodeHeader(Path headerFile) {
+    public static NodeFileHeader parseNodeHeader(Path headerFile, Function<String, String> labelMapping) {
         try (MappingIterator<String[]> iterator = HEADER_FILE_READER.readValues(headerFile.toFile())) {
             var headerLine = iterator.next();
             if (headerLine == null) {
                 throw new UncheckedIOException(new IOException("Header line was null"));
             }
-            return NodeFileHeader.of(headerLine, inferNodeLabels(headerFile));
+            return NodeFileHeader.of(
+                headerLine,
+                Arrays.stream(inferNodeLabels(headerFile))
+                    .map(label -> labelMapping.apply(label))
+                    .toArray(String[]::new)
+            );
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -107,7 +113,10 @@ public final class CsvImportFileUtil {
         return getFilesByRegex(csvDirectory, graphPropertyFilesPattern);
     }
 
-    private static Map<Path, List<Path>> headerToFileMapping(Path csvDirectory, Function<Path, Collection<Path>> headerPaths) {
+    private static Map<Path, List<Path>> headerToFileMapping(
+        Path csvDirectory,
+        Function<Path, Collection<Path>> headerPaths
+    ) {
         Map<Path, List<Path>> headerToDataFileMapping = new HashMap<>();
         for (Path headerFile : headerPaths.apply(csvDirectory)) {
             String dataFilePattern = headerFile.getFileName().toString().replace("_header", "(_\\d+)");
