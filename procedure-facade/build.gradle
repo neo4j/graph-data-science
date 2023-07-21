@@ -18,6 +18,7 @@ dependencies {
     compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
 
     // the necessary GDS things for the extension to construct the application
+    implementation project(':config-api') // because we reference configurations
     implementation project(':core') // this is where the business facade lives (currently)
     implementation project(':core-utils')
     implementation project(':executor') // Preconditions

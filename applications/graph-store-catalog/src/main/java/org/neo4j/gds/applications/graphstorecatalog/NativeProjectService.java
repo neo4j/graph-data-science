@@ -20,43 +20,34 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.executor.FictitiousGraphStoreLoader;
-import org.neo4j.gds.executor.GraphStoreCreator;
-import org.neo4j.gds.executor.GraphStoreFromDatabaseLoader;
-import org.neo4j.gds.executor.MemoryUsageValidator;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 public class NativeProjectService {
-    private final Log log;
-    private final GraphDatabaseService graphDatabaseService;
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GraphProjectMemoryUsage graphProjectMemoryUsage;
+    private final GenericProjectService<
+        GraphProjectNativeResult,
+        GraphProjectFromStoreConfig,
+        GraphProjectNativeResult.Builder> genericProjectService;
 
     public NativeProjectService(
-        Log log,
-        GraphDatabaseService graphDatabaseService,
-        GraphStoreCatalogService graphStoreCatalogService
+        GraphProjectMemoryUsage graphProjectMemoryUsage,
+        GenericProjectService<
+            GraphProjectNativeResult,
+            GraphProjectFromStoreConfig,
+            GraphProjectNativeResult.Builder> genericProjectService
     ) {
-        this.log = log;
-        this.graphDatabaseService = graphDatabaseService;
-        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.graphProjectMemoryUsage = graphProjectMemoryUsage;
+        this.genericProjectService = genericProjectService;
     }
 
-    public GraphProjectNativeResult compute(
+    public GraphProjectNativeResult project(
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -64,25 +55,14 @@ public class NativeProjectService {
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromStoreConfig configuration
     ) {
-        try {
-            return projectGraph(
-                databaseId,
-                taskRegistryFactory,
-                terminationFlag,
-                transactionContext,
-                userLogRegistryFactory,
-                configuration
-            );
-        } catch (RuntimeException e) {
-            log.warn("Graph creation failed", e);
-            throw e;
-        }
-    }
-
-    public MemoryEstimateResult estimateButFictitiously(GraphProjectFromStoreConfig configuration) {
-        var memoryTreeWithDimensions = fictitiousMemoryTreeWithDimensions(configuration);
-
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
+        return genericProjectService.project(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            userLogRegistryFactory,
+            configuration
+        );
     }
 
     public MemoryEstimateResult estimate(
@@ -93,7 +73,9 @@ public class NativeProjectService {
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectConfig configuration
     ) {
-        var memoryTreeWithDimensions = computeMemoryTreeWithDimensions(
+        if (configuration.isFictitiousLoading()) return estimateButFictitiously(configuration);
+
+        var memoryTreeWithDimensions = graphProjectMemoryUsage.getEstimate(
             databaseId,
             terminationFlag,
             transactionContext,
@@ -105,119 +87,12 @@ public class NativeProjectService {
         return new MemoryEstimateResult(memoryTreeWithDimensions);
     }
 
-    private GraphProjectNativeResult projectGraph(
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory,
-        GraphProjectFromStoreConfig configuration
-    ) {
-        // do later
-        memoryUsageValidator().tryValidateMemoryUsage(
-            configuration,
-            graphProjectConfig -> computeMemoryTreeWithDimensions(
-                databaseId,
-                terminationFlag,
-                transactionContext,
-                taskRegistryFactory,
-                userLogRegistryFactory,
-                graphProjectConfig
-            )
-        );
+    /**
+     * Public because EstimationCLI tests needs it. Should redesign something here I think
+     */
+    public MemoryEstimateResult estimateButFictitiously(GraphProjectConfig configuration) {
+        var estimate = graphProjectMemoryUsage.getFictitiousEstimate(configuration);
 
-        var builder = new GraphProjectNativeResult.Builder(configuration);
-
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withProjectMillis)) {
-            var graphLoaderContext = graphLoaderContext(
-                databaseId,
-                taskRegistryFactory,
-                terminationFlag,
-                transactionContext,
-                userLogRegistryFactory
-            );
-            var graphStore = new GraphStoreFromDatabaseLoader(
-                configuration,
-                configuration.username(),
-                graphLoaderContext
-            ).graphStore();
-
-            builder
-                .withNodeCount(graphStore.nodeCount())
-                .withRelationshipCount(graphStore.relationshipCount());
-
-            graphStoreCatalogService.set(configuration, graphStore);
-        }
-
-        return builder.build();
-    }
-
-    private MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
-            GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService)
-        );
-    }
-
-    private MemoryTreeWithDimensions computeMemoryTreeWithDimensions(
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
-        TransactionContext transactionContext,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
-        GraphProjectConfig configuration
-    ) {
-        var graphLoaderContext = graphLoaderContext(
-            databaseId,
-            taskRegistryFactory,
-            terminationFlag,
-            transactionContext,
-            userLogRegistryFactory
-        );
-
-        var graphStoreCreator = new GraphStoreFromDatabaseLoader(
-            configuration,
-            "unused", // again, too wide types
-            graphLoaderContext
-        );
-
-        return computeMemoryTreeWithDimensions(configuration, graphStoreCreator);
-    }
-
-    private MemoryTreeWithDimensions fictitiousMemoryTreeWithDimensions(GraphProjectConfig config) {
-        var graphStoreCreator = new FictitiousGraphStoreLoader(config);
-
-        return computeMemoryTreeWithDimensions(config, graphStoreCreator);
-    }
-
-    private static MemoryTreeWithDimensions computeMemoryTreeWithDimensions(
-        GraphProjectConfig config,
-        GraphStoreCreator graphStoreCreator
-    ) {
-        var graphDimensions = graphStoreCreator.graphDimensions();
-
-        var memoryTree = graphStoreCreator
-            .estimateMemoryUsageDuringLoading()
-            .estimate(graphDimensions, config.readConcurrency());
-
-        return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
-    }
-
-    private GraphLoaderContext graphLoaderContext(
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        TransactionContext transactionContext,
-        UserLogRegistryFactory userLogRegistryFactory
-    ) {
-        return ImmutableGraphLoaderContext.builder()
-            .databaseId(databaseId)
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService))
-            .log((org.neo4j.logging.Log) log.getNeo4jLog())
-            .taskRegistryFactory(taskRegistryFactory)
-            .terminationFlag(terminationFlag)
-            .transactionContext(transactionContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .build();
+        return new MemoryEstimateResult(estimate);
     }
 }

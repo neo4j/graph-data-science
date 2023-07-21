@@ -29,6 +29,7 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -94,6 +95,21 @@ public class GraphProjectProc extends CatalogProc {
         return facade.estimateNativeProject(nodeProjection, relationshipProjection, configuration);
     }
 
+    @Procedure(
+        name = "gds.graph.project.cypher", mode = READ,
+        deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
+    )
+    @Description(PROJECT_DESCRIPTION)
+    public Stream<GraphProjectCypherResult> projectCypher(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeQuery") String nodeQuery,
+        @Name(value = "relationshipQuery") String relationshipQuery,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
+    }
+
+
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
@@ -103,40 +119,6 @@ public class GraphProjectProc extends CatalogProc {
         GraphProjectFromCypherConfig.NODE_QUERY_KEY,
         GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY
     );
-
-    @Procedure(
-        name = "gds.graph.project.cypher", mode = READ,
-        deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
-    )
-    @Description(DESCRIPTION)
-    public Stream<GraphProjectCypherResult> projectCypher(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "nodeQuery") String nodeQuery,
-        @Name(value = "relationshipQuery") String relationshipQuery,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        Preconditions.check();
-        validateGraphName(username(), graphName);
-
-        // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphProjectFromCypherConfig config = GraphProjectFromCypherConfig.of(
-            username(),
-            graphName,
-            nodeQuery,
-            relationshipQuery,
-            cypherConfig
-        );
-        validateConfig(cypherConfig, config);
-
-        // computation
-        GraphProjectCypherResult result = runWithExceptionLogging(
-            "Graph creation failed",
-            () -> (GraphProjectCypherResult) projectGraph(config)
-        );
-        // result
-        return Stream.of(result);
-    }
 
     @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
@@ -293,46 +275,6 @@ public class GraphProjectProc extends CatalogProc {
             .estimate(graphDimensions, config.readConcurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
-    }
-
-    public static class GraphProjectCypherResult extends GraphProjectResult {
-        public final String nodeQuery;
-        public final String relationshipQuery;
-
-        GraphProjectCypherResult(
-            String graphName,
-            String nodeQuery,
-            String relationshipQuery,
-            long nodeCount,
-            long relationshipCount,
-            long projectMillis
-        ) {
-            super(graphName, nodeCount, relationshipCount, projectMillis);
-            this.nodeQuery = nodeQuery;
-            this.relationshipQuery = relationshipQuery;
-        }
-
-        protected static final class Builder extends GraphProjectResult.Builder {
-            private final String nodeQuery;
-            private final String relationshipQuery;
-
-            Builder(GraphProjectFromCypherConfig config) {
-                super(config);
-                this.nodeQuery = config.nodeQuery();
-                this.relationshipQuery = config.relationshipQuery();
-            }
-
-            public GraphProjectCypherResult build() {
-                return new GraphProjectCypherResult(
-                    graphName,
-                    nodeQuery,
-                    relationshipQuery,
-                    nodeCount,
-                    relationshipCount,
-                    projectMillis
-                );
-            }
-        }
     }
 
     public static class GraphProjectSubgraphResult extends GraphProjectResult {

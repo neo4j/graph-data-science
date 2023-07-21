@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.ConfigurationService;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -65,6 +66,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final DropGraphService dropGraphService;
     private final ListGraphService listGraphService;
     private final NativeProjectService nativeProjectService;
+    private final CypherProjectService cypherProjectService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         ConfigurationService configurationService,
@@ -72,7 +74,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         GraphStoreCatalogService graphStoreCatalogService,
         DropGraphService dropGraphService,
         ListGraphService listGraphService,
-        NativeProjectService nativeProjectService
+        NativeProjectService nativeProjectService,
+        CypherProjectService cypherProjectService
     ) {
         this.configurationService = configurationService;
         this.graphNameValidationService = graphNameValidationService;
@@ -80,6 +83,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.dropGraphService = dropGraphService;
         this.listGraphService = listGraphService;
         this.nativeProjectService = nativeProjectService;
+        this.cypherProjectService = cypherProjectService;
     }
 
     @Override
@@ -150,7 +154,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        return nativeProjectService.compute(
+        return nativeProjectService.project(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -177,8 +181,6 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        if (configuration.isFictitiousLoading()) return nativeProjectService.estimateButFictitiously(configuration);
-
         return nativeProjectService.estimate(
             databaseId,
             taskRegistryFactory,
@@ -186,6 +188,41 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             transactionContext,
             userLogRegistryFactory,
             configuration
+        );
+    }
+
+    @Override
+    public GraphProjectCypherResult cypherProject(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> configuration
+    ) {
+        var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
+
+        graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
+
+        var cypherProjectConfiguration = configurationService.parseCypherProjectConfiguration(
+            user,
+            graphName,
+            nodeQuery,
+            relationshipQuery,
+            configuration
+        );
+
+        return cypherProjectService.project(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            userLogRegistryFactory,
+            cypherProjectConfiguration
         );
     }
 

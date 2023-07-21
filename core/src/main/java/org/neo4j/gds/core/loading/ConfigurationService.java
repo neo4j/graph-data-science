@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -48,17 +49,39 @@ public class ConfigurationService {
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     ) {
-        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+        var wrappedRawConfiguration = CypherMapWrapper.create(rawConfiguration);
 
         var configuration = GraphProjectFromStoreConfig.of(
             user.getUsername(),
             graphName.getValue(),
             nodeProjection,
             relationshipProjection,
-            cypherConfig
+            wrappedRawConfiguration
         );
 
-        validateNativeProjectConfig(cypherConfig, configuration);
+        validateProjectConfiguration(wrappedRawConfiguration, configuration);
+
+        return configuration;
+    }
+
+    public GraphProjectFromCypherConfig parseCypherProjectConfiguration(
+        User user,
+        GraphName graphName,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> rawConfiguration
+    ) {
+        var wrappedRawConfiguration = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphProjectFromCypherConfig.of(
+            user.getUsername(),
+            graphName.getValue(),
+            nodeQuery,
+            relationshipQuery,
+            wrappedRawConfiguration
+        );
+
+        validateProjectConfiguration(wrappedRawConfiguration, configuration);
 
         return configuration;
     }
@@ -81,12 +104,12 @@ public class ConfigurationService {
             cypherConfig
         );
 
-        validateNativeProjectConfig(cypherConfig, configuration);
+        validateProjectConfiguration(cypherConfig, configuration);
 
         return configuration;
     }
 
-    private void validateNativeProjectConfig(
+    private void validateProjectConfiguration(
         CypherMapAccess cypherConfig,
         GraphProjectConfig graphProjectConfig
     ) {

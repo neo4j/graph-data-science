@@ -42,7 +42,7 @@ public class GraphProjectNativeResult extends GraphProjectResult {
         this.relationshipProjection = relationshipProjection;
     }
 
-    public static final class Builder extends GraphProjectResult.Builder {
+    public static final class Builder extends GraphProjectResult.Builder<GraphProjectNativeResult> {
         private final NodeProjections nodeProjections;
         private final RelationshipProjections relationshipProjections;
 

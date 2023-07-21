@@ -21,9 +21,12 @@ package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.applications.graphstorecatalog.CypherProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
+import org.neo4j.gds.applications.graphstorecatalog.GenericProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
+import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacadePreConditionsDecorator;
 import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
@@ -39,6 +42,8 @@ import org.neo4j.gds.catalog.TransactionContextService;
 import org.neo4j.gds.catalog.UserLogServices;
 import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.core.loading.ConfigurationService;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
+import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
@@ -93,7 +98,26 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
         var graphNameValidationService = new GraphNameValidationService();
         var listGraphService = new ListGraphService(graphStoreCatalogService);
-        var nativeProjectService = new NativeProjectService(log, graphDatabaseService, graphStoreCatalogService);
+        var graphProjectMemoryUsage = new GraphProjectMemoryUsage(log, graphDatabaseService);
+        var nativeProjectService = new NativeProjectService(
+            graphProjectMemoryUsage,
+            new GenericProjectService<>(
+                log,
+                graphDatabaseService,
+                graphStoreCatalogService,
+                graphProjectMemoryUsage,
+                GraphProjectNativeResult.Builder::new
+            )
+        );
+        var cypherProjectService = new CypherProjectService(
+            new GenericProjectService<>(
+                log,
+                graphDatabaseService,
+                graphStoreCatalogService,
+                graphProjectMemoryUsage,
+                GraphProjectCypherResult.Builder::new
+            )
+        );
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -102,7 +126,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             graphStoreCatalogService,
             dropGraphService,
             listGraphService,
-            nativeProjectService
+            nativeProjectService,
+            cypherProjectService
         );
 
         // wrap in decorator to enable preconditions checks

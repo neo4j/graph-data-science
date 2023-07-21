@@ -23,6 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
@@ -257,6 +258,39 @@ public class GraphStoreCatalogProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<GraphProjectCypherResult> cypherProject(
+        String graphName,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var transactionContext = transactionContextService.transactionContext(
+            graphDatabaseService,
+            procedureTransactionService
+        );
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.cypherProject(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            userLogRegistryFactory,
+            graphName,
+            nodeQuery,
+            relationshipQuery,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
     /**
      * We have to potentially unstack the placeholder. This is purely a Neo4j Procedure framework concern.
      */
@@ -282,5 +316,4 @@ public class GraphStoreCatalogProcedureFacade {
     private User user() {
         return userServices.getUser(securityContext);
     }
-
 }

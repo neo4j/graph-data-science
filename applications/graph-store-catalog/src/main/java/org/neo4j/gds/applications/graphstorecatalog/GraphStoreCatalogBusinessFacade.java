@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -74,5 +75,18 @@ public interface GraphStoreCatalogBusinessFacade {
         Object nodeProjection,
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
+    );
+
+    GraphProjectCypherResult cypherProject(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> configuration
     );
 }
