@@ -34,6 +34,6 @@ class ConductanceSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/conductance.adoc";
+        return "pages/algorithms/conductance.adoc";
     }
 }

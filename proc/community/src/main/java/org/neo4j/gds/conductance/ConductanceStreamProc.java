@@ -22,6 +22,7 @@ package org.neo4j.gds.conductance;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ConductanceStreamProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.conductance.stream", mode = READ)
+    @Procedure(value = "gds.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -43,6 +44,20 @@ public class ConductanceStreamProc extends BaseProc {
             new ConductanceStreamSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
 
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.conductance.stream", mode = READ, deprecatedBy = "gds.conductance.stream")
+    @Description(CONDUCTANCE_DESCRIPTION)
+    public Stream<StreamResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.conductance.stream` has been deprecated, please use `gds.conductance.stream`.");
+
+        return stream(graphName, configuration);
     }
 }

@@ -32,7 +32,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.alpha.conductance.stream", description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.conductance.stream", aliases = {"gds.alpha.conductance.stream"}, description = CONDUCTANCE_DESCRIPTION, executionMode = STREAM)
 public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, ConductanceResult, ConductanceStreamConfig, Stream<StreamResult>, ConductanceFactory<ConductanceStreamConfig>> {
 
     @Override

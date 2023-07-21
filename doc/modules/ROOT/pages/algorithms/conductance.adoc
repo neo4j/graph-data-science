@@ -1,12 +1,10 @@
-[[alpha-algorithms-conductance]]
-[.alpha]
+:page-aliases: algorithms/alpha/conductance.adoc
+[[algorithms-conductance]]
 = Conductance metric
 :description: This section describes the Conductance algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: conductance
 :algorithm: Conductance
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 :directed:
 :undirected:
@@ -40,7 +38,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Conductance in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.conductance.stream(
+CALL gds.conductance.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -55,7 +53,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/conductance/specific-configuration.adoc[]
+include::partial$/algorithms/conductance/specific-configuration.adoc[]
 |===
 
 .Results
@@ -186,7 +184,7 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 .The following will run the Conductance algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+CALL gds.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
 YIELD community, conductance
 ----
 

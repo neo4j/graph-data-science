@@ -75,7 +75,7 @@
 *** xref:algorithms/modularity-optimization.adoc[]
 *** xref:algorithms/strongly-connected-components.adoc[]
 *** xref:algorithms/sllpa.adoc[]
-*** xref:algorithms/alpha/conductance.adoc[]
+*** xref:algorithms/conductance.adoc[]
 *** xref:algorithms/alpha/modularity.adoc[]
 *** xref:algorithms/kmeans.adoc[]
 *** xref:algorithms/leiden.adoc[]
