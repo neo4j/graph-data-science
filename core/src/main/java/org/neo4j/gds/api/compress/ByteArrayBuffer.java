@@ -24,11 +24,9 @@ public final class ByteArrayBuffer {
     private static final byte[] EMPTY_BUFFER = new byte[0];
 
     public byte[] buffer;
-    public int length;
 
     public ByteArrayBuffer() {
         this.buffer = EMPTY_BUFFER;
-        this.length = 0;
     }
 
     /**

@@ -37,6 +37,9 @@ import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.bytesNee
 /**
  * Compresses values in blocks of {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} using bit-packing.
  * <p>
+ * This strategy compressed the first (usually largest) value separately from the rest of the values and leaves a 0-value in
+ * at the first index. It uses var-length encoding and writes the encoded value after the header, preceding the data.
+ * <p>
  * If a block to compress has less than {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} values,
  * this strategy uses a loop-based packing approach to compress the values in that block.
  */
@@ -79,25 +82,28 @@ final class InlinedHeadPackedTailPacker {
         int length,
         MemoryTracker memoryTracker
     ) {
-        boolean hasTail = length == 0 || length % AdjacencyPacking.BLOCK_SIZE != 0;
         // Number of blocks we need to pack all values.
-        int blockCount = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
-
+        int blockCount;
         byte[] header;
+        int offset;
+
         if (length > 0) {
             // We assume that the first value is the largest exception within the adjacency list.
             // We move it out of the values and compress it separately as part of the header byte
             // array using var-length encoding.
+            blockCount = BitUtil.ceilDiv(length - 1, AdjacencyPacking.BLOCK_SIZE);
             int headSize = VarLongEncoding.encodedVLongSize(values[0]);
             header = new byte[blockCount + headSize];
             VarLongEncoding.encodeVLong(header, values[0], blockCount);
-            values[0] = 0;
+            offset = 1; // skip the first value
         } else {
+            blockCount = BitUtil.ceilDiv(length, AdjacencyPacking.BLOCK_SIZE);
             header = new byte[blockCount];
+            offset = 0;
         }
 
+        boolean hasTail = (length - offset) == 0 || (length - offset) % AdjacencyPacking.BLOCK_SIZE != 0;
         long bytes = 0L;
-        int offset = 0;
         int blockIdx = 0;
         int lastFullBlock = hasTail ? blockCount - 1 : blockCount;
 
@@ -108,11 +114,10 @@ final class InlinedHeadPackedTailPacker {
             header[blockIdx] = (byte) bits;
         }
         // "tail" block, may be smaller than BLOCK_SIZE
-        int tailLength = (length - offset);
         if (hasTail) {
-            int bits = bitsNeeded(values, offset, tailLength);
+            int bits = bitsNeeded(values, offset, length - offset);
             memoryTracker.recordHeaderBits(bits);
-            bytes += bytesNeeded(bits, tailLength);
+            bytes += bytesNeeded(bits, length - offset);
             header[blockIdx] = (byte) bits;
         }
 
@@ -123,7 +128,7 @@ final class InlinedHeadPackedTailPacker {
             header,
             bytes,
             blockCount,
-            tailLength,
+            (length - offset),
             memoryTracker
         );
     }
@@ -161,7 +166,8 @@ final class InlinedHeadPackedTailPacker {
 
         // main packing loop
         boolean hasTail = tailLength > 0;
-        int in = 0;
+        // We always skip the first element, because it's stored in the header
+        int in = 1;
         int fullBlocks = hasTail ? blockCount - 1 : blockCount;
 
         // main packing loop
