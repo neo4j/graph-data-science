@@ -19,20 +19,11 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+public class RemoteMLCatalogTest {
 
-public class RemoteMLCatalog {
-
-    @ValueClass
-    public interface ModelMetricIdentifier {
-        String databaseName();
-        String userName();
-        String modelName();
+    @Test
+    void shouldCreateModelMetricIdentifier() {
     }
-
-    public static final Map<ModelMetricIdentifier, Map<String, Object>> modelMetrics = new HashMap<>();
-
 }
