@@ -22,6 +22,7 @@ package org.neo4j.gds.modularity;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,7 +35,7 @@ public class ModularityStreamProc extends BaseProc {
 
     static final String DESCRIPTION = "TODO: Add modularity description";
 
-    @Procedure(value = "gds.alpha.modularity.stream", mode = READ)
+    @Procedure(value = "gds.modularity.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -44,6 +45,22 @@ public class ModularityStreamProc extends BaseProc {
             new ModularityStreamSpec(),
             executionContext()
         ).compute(graphName, configuration);
+
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.modularity.stream", mode = READ, deprecatedBy = "gds.modularity.stream")
+    @Description(DESCRIPTION)
+    public Stream<StreamResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.modularity.stream` has been deprecated, please use `gds.modularity.stream`.");
+
+        return stream(graphName, configuration);
 
     }
 
