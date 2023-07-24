@@ -22,6 +22,8 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -73,10 +75,11 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void shouldMutateResults() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.alpha.knn.filtered", "gds.knn.filtered"})
+    void shouldMutateResults(String tieredProcedure) {
         String query = GdsCypher.call("filteredKnnGraph")
-            .algo("gds.alpha.knn.filtered")
+            .algo(tieredProcedure)
             .mutateMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -127,7 +130,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
         runQuery(graphCreateQuery);
 
         var query = GdsCypher.call(graphName)
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .mutateMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -175,7 +178,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
         String relationshipProperty = "score";
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
@@ -218,7 +221,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .mutateMode()
             .addParameter("nodeProperties", List.of("age"))
             .addParameter("similarityCutoff", 0.14)
@@ -256,7 +259,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age", "knn"))
