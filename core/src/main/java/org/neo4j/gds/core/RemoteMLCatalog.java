@@ -19,7 +19,12 @@
  */
 package org.neo4j.gds.core;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class RemoteMLCatalog {
 
-    public static double test_acc = 0.0;
+    public static final Map<String, List<Double>> modelMetrics = new HashMap<>();
+
 }
