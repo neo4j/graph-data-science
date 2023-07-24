@@ -43,20 +43,20 @@ import java.util.function.Function;
  * because configurations provide functional elements (services).
  * I'm not a fan, nor actually a fan of generics, but here we achieve some good, DRY code.
  */
-public class GenericProjectService<Result extends GraphProjectResult, Configuration extends GraphProjectConfig, ResultBuilder extends GraphProjectResult.Builder<Result>> {
+public class GenericProjectService<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphProjectMemoryUsage graphProjectMemoryUsage;
 
-    private final Function<Configuration, ResultBuilder> resultBuilderFactory;
+    private final Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory;
 
     public GenericProjectService(
         Log log,
         GraphDatabaseService graphDatabaseService,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphProjectMemoryUsage graphProjectMemoryUsage,
-        Function<Configuration, ResultBuilder> resultBuilderFactory
+        Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory
     ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
@@ -65,13 +65,13 @@ public class GenericProjectService<Result extends GraphProjectResult, Configurat
         this.resultBuilderFactory = resultBuilderFactory;
     }
 
-    public Result project(
+    public RESULT project(
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
         UserLogRegistryFactory userLogRegistryFactory,
-        Configuration configuration
+        CONFIGURATION configuration
     ) {
         try {
             return projectGraph(
@@ -110,13 +110,13 @@ public class GenericProjectService<Result extends GraphProjectResult, Configurat
         return new MemoryEstimateResult(memoryTreeWithDimensions);
     }
 
-    private Result projectGraph(
+    private RESULT projectGraph(
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
         UserLogRegistryFactory userLogRegistryFactory,
-        Configuration configuration
+        CONFIGURATION configuration
     ) {
         graphProjectMemoryUsage.validateMemoryUsage(
             databaseId,
@@ -127,7 +127,7 @@ public class GenericProjectService<Result extends GraphProjectResult, Configurat
             configuration
         );
 
-        ResultBuilder resultBuilder = resultBuilderFactory.apply(configuration);
+        RESULT_BUILDER resultBuilder = resultBuilderFactory.apply(configuration);
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withProjectMillis)) {
             var graphLoaderContext = graphLoaderContext(
