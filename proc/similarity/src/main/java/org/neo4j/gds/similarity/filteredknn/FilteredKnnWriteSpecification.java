@@ -23,6 +23,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
@@ -30,6 +31,14 @@ import org.neo4j.gds.similarity.SimilarityWriteConsumer;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+
+@GdsCallable(
+    name = "gds.knn.filtered.write",
+    aliases = {"gds.alpha.knn.filtered.write"},
+    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
+    executionMode = WRITE_RELATIONSHIP
+)
 public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<FilteredKnnWriteProcResult>, FilteredKnnFactory<FilteredKnnWriteConfig>> {
     @Override
     public String name() {

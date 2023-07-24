@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -38,7 +39,7 @@ public class FilteredKnnWriteProc extends BaseProc {
     @Context
     public RelationshipExporterBuilder relationshipExporterBuilder;
 
-    @Procedure(name = "gds.alpha.knn.filtered.write", mode = WRITE)
+    @Procedure(name = "gds.knn.filtered.write", mode = WRITE)
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
     public Stream<FilteredKnnWriteProcResult> write(
         @Name(value = "graphName") String graphName,
@@ -48,6 +49,17 @@ public class FilteredKnnWriteProc extends BaseProc {
             new FilteredKnnWriteSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.alpha.knn.filtered.write", mode = WRITE, deprecatedBy = "gds.knn.filtered.write")
+    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<FilteredKnnWriteProcResult> alphaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return write(graphName, configuration);
     }
 
     @Override
