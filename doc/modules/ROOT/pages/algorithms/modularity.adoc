@@ -164,7 +164,30 @@ CALL gds.graph.project(
     }
 )
 ----
+=== Memory Estimation
 
+:mode: stats
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stats mode:
+[source, cypher, role=noplay]
+----
+CALL gds.modularity.stats.estimate('myGraph', {
+     communityProperty: 'community',
+     relationshipWeightProperty: 'weight'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6       | 14               | 848     | 848      | "848 Bytes"
+|===
+--
 
 === Stream
 
@@ -181,7 +204,10 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 .The following will run the Modularity algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.modularity.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+CALL gds.modularity.stream('myGraph', {
+     communityProperty: 'community',
+     relationshipWeightProperty: 'weight'
+})
 YIELD communityId, modularity
 RETURN communityId, modularity
 ORDER BY communityId ASC
@@ -211,7 +237,10 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 .The following will run the Modularity algorithm in `stats` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.modularity.stats('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+CALL gds.modularity.stats('myGraph', {
+     communityProperty: 'community',
+     relationshipWeightProperty: 'weight'
+})
 YIELD nodeCount, relationshipCount, communityCount, modularity
 ----
 
