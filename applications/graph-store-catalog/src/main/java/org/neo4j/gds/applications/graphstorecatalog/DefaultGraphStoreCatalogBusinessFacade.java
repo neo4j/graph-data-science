@@ -226,6 +226,33 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         );
     }
 
+    @Override
+    public MemoryEstimateResult estimateCypherProject(
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = configurationService.parseEstimateCypherProjectConfiguration(
+            nodeQuery,
+            relationshipQuery,
+            rawConfiguration
+        );
+
+        return cypherProjectService.estimate(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            userLogRegistryFactory,
+            configuration
+        );
+    }
+
     /**
      * I wonder if other endpoint will also deliver an Object type to parse in this layer - we shall see
      */

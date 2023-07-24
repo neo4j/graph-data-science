@@ -30,18 +30,19 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 
 public class NativeProjectService {
-    private final GraphProjectMemoryUsage graphProjectMemoryUsage;
     private final GenericProjectService<
         GraphProjectNativeResult,
         GraphProjectFromStoreConfig,
         GraphProjectNativeResult.Builder> genericProjectService;
 
+    private final GraphProjectMemoryUsage graphProjectMemoryUsage;
+
     public NativeProjectService(
-        GraphProjectMemoryUsage graphProjectMemoryUsage,
         GenericProjectService<
             GraphProjectNativeResult,
             GraphProjectFromStoreConfig,
-            GraphProjectNativeResult.Builder> genericProjectService
+            GraphProjectNativeResult.Builder> genericProjectService,
+        GraphProjectMemoryUsage graphProjectMemoryUsage
     ) {
         this.graphProjectMemoryUsage = graphProjectMemoryUsage;
         this.genericProjectService = genericProjectService;

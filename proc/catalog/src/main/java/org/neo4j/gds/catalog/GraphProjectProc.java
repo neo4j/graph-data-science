@@ -109,6 +109,15 @@ public class GraphProjectProc extends CatalogProc {
         return facade.cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
     }
 
+    @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> projectCypherEstimate(
+        @Name(value = "nodeQuery") String nodeQuery,
+        @Name(value = "relationshipQuery") String relationshipQuery,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.estimateCypherProject(nodeQuery, relationshipQuery, configuration);
+    }
 
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
@@ -119,28 +128,6 @@ public class GraphProjectProc extends CatalogProc {
         GraphProjectFromCypherConfig.NODE_QUERY_KEY,
         GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY
     );
-
-    @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> projectCypherEstimate(
-        @Name(value = "nodeQuery") String nodeQuery,
-        @Name(value = "relationshipQuery") String relationshipQuery,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        Preconditions.check();
-
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphProjectFromCypherConfig config = GraphProjectFromCypherConfig.of(
-            username(),
-            NO_GRAPH_NAME,
-            nodeQuery,
-            relationshipQuery,
-            cypherConfig
-        );
-
-        validateConfig(cypherConfig, config);
-        return estimateGraph(config);
-    }
 
     @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ)
     @Description(DESCRIPTION)

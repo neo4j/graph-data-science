@@ -291,6 +291,36 @@ public class GraphStoreCatalogProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<MemoryEstimateResult> estimateCypherProject(
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var transactionContext = transactionContextService.transactionContext(
+            graphDatabaseService,
+            procedureTransactionService
+        );
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.estimateCypherProject(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            userLogRegistryFactory,
+            nodeQuery,
+            relationshipQuery,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
     /**
      * We have to potentially unstack the placeholder. This is purely a Neo4j Procedure framework concern.
      */

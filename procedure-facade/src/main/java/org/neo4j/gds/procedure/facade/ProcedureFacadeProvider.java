@@ -100,14 +100,13 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var listGraphService = new ListGraphService(graphStoreCatalogService);
         var graphProjectMemoryUsage = new GraphProjectMemoryUsage(log, graphDatabaseService);
         var nativeProjectService = new NativeProjectService(
-            graphProjectMemoryUsage,
             new GenericProjectService<>(
                 log,
                 graphDatabaseService,
                 graphStoreCatalogService,
                 graphProjectMemoryUsage,
                 GraphProjectNativeResult.Builder::new
-            )
+            ), graphProjectMemoryUsage
         );
         var cypherProjectService = new CypherProjectService(
             new GenericProjectService<>(
@@ -116,7 +115,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
                 graphStoreCatalogService,
                 graphProjectMemoryUsage,
                 GraphProjectCypherResult.Builder::new
-            )
+            ), graphProjectMemoryUsage
         );
 
         // GDS business facade

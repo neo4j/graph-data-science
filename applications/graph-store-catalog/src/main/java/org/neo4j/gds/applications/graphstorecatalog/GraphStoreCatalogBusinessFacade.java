@@ -89,4 +89,15 @@ public interface GraphStoreCatalogBusinessFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     );
+
+    MemoryEstimateResult estimateCypherProject(
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> rawConfiguration
+    );
 }

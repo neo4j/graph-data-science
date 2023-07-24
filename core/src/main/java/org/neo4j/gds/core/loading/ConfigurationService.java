@@ -114,6 +114,29 @@ public class ConfigurationService {
         return configuration;
     }
 
+    public GraphProjectFromCypherConfig parseEstimateCypherProjectConfiguration(
+        String nodeProjection,
+        String relationshipProjection,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        /*
+         * We should mint a type for estimation, instead of relying on this superset of stuff (the unused fields)
+         */
+        var configuration = GraphProjectFromCypherConfig.of(
+            "unused",
+            "unused",
+            nodeProjection,
+            relationshipProjection,
+            cypherConfig
+        );
+
+        validateProjectConfiguration(cypherConfig, configuration, DISALLOWED_CYPHER_PROJECT_CONFIG_KEYS);
+
+        return configuration;
+    }
+
     private void validateProjectConfiguration(
         CypherMapAccess cypherConfig,
         GraphProjectConfig graphProjectConfig,

@@ -170,6 +170,29 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public MemoryEstimateResult estimateCypherProject(
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        TransactionContext transactionContext,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String nodeQuery,
+        String relationshipQuery,
+        Map<String, Object> rawConfiguration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.estimateCypherProject(
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            transactionContext,
+            userLogRegistryFactory,
+            nodeQuery,
+            relationshipQuery,
+            rawConfiguration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 
