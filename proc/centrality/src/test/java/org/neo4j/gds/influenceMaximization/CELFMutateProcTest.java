@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 /**
@@ -117,11 +118,47 @@ class CELFMutateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 5})
-    void mutate(int seedSetSize) {
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void mutate(String tieredProcedure) {
 
         var cypher = GdsCypher.call("celfGraph")
-            .algo("gds.beta.influenceMaximization.celf")
+            .algo(tieredProcedure)
+            .mutateMode()
+            .addParameter("seedSetSize", 10)
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .addParameter("mutateProperty", "celf")
+            .yields();
+        runQueryWithRowConsumer(cypher, resultRow -> {
+            assertThat(resultRow.getNumber("mutateMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0L);
+            assertThat(resultRow.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(NODE_COUNT);
+        });
+
+        LongAdder influentialNodes = new LongAdder();
+        LongAdder notInfluentialNodes = new LongAdder();
+        runQueryWithRowConsumer("CALL gds.graph.streamNodeProperty('celfGraph', 'celf')", resultRow -> {
+            var spreadValue = resultRow.getNumber("propertyValue").doubleValue();
+            if (spreadValue > 0d) {
+                influentialNodes.increment();
+            } else {
+                notInfluentialNodes.increment();
+            }
+        });
+
+        assertThat(influentialNodes.longValue()).isEqualTo(10);
+        assertThat(notInfluentialNodes.longValue()).isEqualTo(NODE_COUNT - 10);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void mutateSmallSets(int seedSetSize) {
+
+        var cypher = GdsCypher.call("celfGraph")
+            .algo("gds.influenceMaximization.celf")
             .mutateMode()
             .addParameter("seedSetSize", seedSetSize)
             .addParameter("propagationProbability", 0.2)
@@ -141,7 +178,7 @@ class CELFMutateProcTest extends BaseProcTest {
         LongAdder notInfluentialNodes = new LongAdder();
         runQueryWithRowConsumer("CALL gds.graph.streamNodeProperty('celfGraph', 'celf')", resultRow -> {
             var spreadValue = resultRow.getNumber("propertyValue").doubleValue();
-            if(spreadValue > 0d) {
+            if (spreadValue > 0d) {
                 influentialNodes.increment();
             } else {
                 notInfluentialNodes.increment();
@@ -150,5 +187,20 @@ class CELFMutateProcTest extends BaseProcTest {
 
         assertThat(influentialNodes.longValue()).isEqualTo(seedSetSize);
         assertThat(notInfluentialNodes.longValue()).isEqualTo(NODE_COUNT - seedSetSize);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void shouldCallMemoryEstimation(String tieredProcedure) {
+        var query = GdsCypher.call("celfGraph")
+            .algo(tieredProcedure)
+            .estimationMode(GdsCypher.ExecutionModes.MUTATE)
+            .addParameter("seedSetSize", 5)
+            .addParameter("mutateProperty", "foo")
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .yields();
+
+        assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 }
