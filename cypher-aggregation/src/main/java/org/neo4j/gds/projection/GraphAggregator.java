@@ -277,7 +277,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
         ));
     }
 
-    private static final class ConfigValidator {
+    public static final class ConfigValidator {
         private static final Set<String> DATA_CONFIG_KEYS = Set.of(
             SOURCE_NODE_PROPERTIES,
             SOURCE_NODE_LABELS,
@@ -293,7 +293,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
 
         private final AtomicBoolean validate = new AtomicBoolean(true);
 
-        void validateConfig(AnyValue dataConfig, AnyValue projectionConfig, AnyValue migrationConfig) {
+        public void validateConfig(AnyValue dataConfig, AnyValue projectionConfig, AnyValue migrationConfig) {
             if (dataConfig instanceof MapValue || projectionConfig instanceof MapValue) {
                 if (this.validate.get()) {
                     if (this.validate.getAndSet(false)) {
