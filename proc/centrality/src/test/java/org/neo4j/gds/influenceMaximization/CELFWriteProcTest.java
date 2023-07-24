@@ -33,6 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 /**
@@ -114,10 +115,57 @@ class CELFWriteProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 5})
-    void write(int seedSetSize) {
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void write(String tieredProcedure) {
         var cypher = GdsCypher.call("celfGraph")
-            .algo("gds.beta.influenceMaximization.celf")
+            .algo(tieredProcedure)
+            .writeMode()
+            .addParameter("seedSetSize", 10)
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .addParameter("writeProperty", "celf")
+            .yields();
+
+        var rowCount = runQueryWithRowConsumer(cypher, resultRow -> {
+            assertThat(resultRow.getNumber("writeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThanOrEqualTo(0L);
+            assertThat(resultRow.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(NODE_COUNT);
+        });
+
+        assertThat(rowCount).isEqualTo(1);
+
+        var influentialQueryRow = runQueryWithRowConsumer(
+            "MATCH (n) WHERE n.celf > 0 RETURN count(n) AS influentialNodes",
+            resultRow -> {
+                assertThat(resultRow.getNumber("influentialNodes"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(10);
+            }
+        );
+
+        assertThat(influentialQueryRow).isEqualTo(1);
+
+        var nonInfluentialQueryRow = runQueryWithRowConsumer(
+            "MATCH (n) WHERE n.celf = 0 RETURN count(n) AS notInfluentialNodes",
+            resultRow -> {
+                assertThat(resultRow.getNumber("notInfluentialNodes"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(NODE_COUNT - 10);
+            }
+        );
+
+        assertThat(nonInfluentialQueryRow).isEqualTo(1);
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void writeSmallSets(int seedSetSize) {
+        var cypher = GdsCypher.call("celfGraph")
+            .algo("gds.influenceMaximization.celf")
             .writeMode()
             .addParameter("seedSetSize", seedSetSize)
             .addParameter("propagationProbability", 0.2)
@@ -136,20 +184,41 @@ class CELFWriteProcTest extends BaseProcTest {
 
         assertThat(rowCount).isEqualTo(1);
 
-        var influentialQueryRow = runQueryWithRowConsumer("MATCH (n) WHERE n.celf > 0 RETURN count(n) AS influentialNodes", resultRow -> {
-            assertThat(resultRow.getNumber("influentialNodes"))
-                .asInstanceOf(LONG)
-                .isEqualTo(seedSetSize);
-        });
+        var influentialQueryRow = runQueryWithRowConsumer(
+            "MATCH (n) WHERE n.celf > 0 RETURN count(n) AS influentialNodes",
+            resultRow -> {
+                assertThat(resultRow.getNumber("influentialNodes"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(seedSetSize);
+            }
+        );
 
         assertThat(influentialQueryRow).isEqualTo(1);
 
-        var nonInfluentialQueryRow = runQueryWithRowConsumer("MATCH (n) WHERE n.celf = 0 RETURN count(n) AS notInfluentialNodes", resultRow -> {
-            assertThat(resultRow.getNumber("notInfluentialNodes"))
-                .asInstanceOf(LONG)
-                .isEqualTo(NODE_COUNT - seedSetSize);
-        });
+        var nonInfluentialQueryRow = runQueryWithRowConsumer(
+            "MATCH (n) WHERE n.celf = 0 RETURN count(n) AS notInfluentialNodes",
+            resultRow -> {
+                assertThat(resultRow.getNumber("notInfluentialNodes"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(NODE_COUNT - seedSetSize);
+            }
+        );
 
         assertThat(nonInfluentialQueryRow).isEqualTo(1);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void shouldCallMemoryEstimation(String tieredProcedure) {
+        var query = GdsCypher.call("celfGraph")
+            .algo(tieredProcedure)
+            .estimationMode(GdsCypher.ExecutionModes.WRITE)
+            .addParameter("seedSetSize", 5)
+            .addParameter("writeProperty", "foo")
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .yields();
+
+        assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 }

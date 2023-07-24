@@ -38,11 +38,16 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.influenceMaximization.celf.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(
+    name = "gds.influenceMaximization.celf.write",
+    aliases = {"gds.beta.influenceMaximization.celf.write"},
+    description = DESCRIPTION,
+    executionMode = WRITE_NODE_PROPERTY
+)
 public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationWriteConfig, Stream<WriteResult>, CELFAlgorithmFactory<InfluenceMaximizationWriteConfig>> {
     @Override
     public String name() {
-        return "CELFStream";
+        return "CELFWrite";
     }
 
     @Override
