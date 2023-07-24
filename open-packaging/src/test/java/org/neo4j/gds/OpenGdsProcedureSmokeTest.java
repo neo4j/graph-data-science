@@ -222,14 +222,14 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.triangles",
         "gds.alpha.ml.splitRelationships.mutate",
 
-        "gds.beta.influenceMaximization.celf.mutate",
-        "gds.beta.influenceMaximization.celf.mutate.estimate",
-        "gds.beta.influenceMaximization.celf.stats",
-        "gds.beta.influenceMaximization.celf.stats.estimate",
-        "gds.beta.influenceMaximization.celf.stream",
-        "gds.beta.influenceMaximization.celf.stream.estimate",
-        "gds.beta.influenceMaximization.celf.write",
-        "gds.beta.influenceMaximization.celf.write.estimate",
+        "gds.influenceMaximization.celf.mutate",
+        "gds.influenceMaximization.celf.mutate.estimate",
+        "gds.influenceMaximization.celf.stats",
+        "gds.influenceMaximization.celf.stats.estimate",
+        "gds.influenceMaximization.celf.stream",
+        "gds.influenceMaximization.celf.stream.estimate",
+        "gds.influenceMaximization.celf.write",
+        "gds.influenceMaximization.celf.write.estimate",
 
 
         "gds.alpha.userLog",
