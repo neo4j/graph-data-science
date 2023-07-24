@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.functions.similairty.OverlapSimilarity;
+import org.neo4j.gds.functions.similarity.OverlapSimilarity;
 
 class OverlapSimilarityComputer implements MetricSimilarityComputer {
     private final double similarityCutoff;

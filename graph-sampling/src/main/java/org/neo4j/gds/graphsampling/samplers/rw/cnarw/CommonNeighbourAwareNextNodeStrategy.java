@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
-import org.neo4j.gds.functions.similairty.OverlapSimilarity;
+import org.neo4j.gds.functions.similarity.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 
 import java.util.Arrays;
