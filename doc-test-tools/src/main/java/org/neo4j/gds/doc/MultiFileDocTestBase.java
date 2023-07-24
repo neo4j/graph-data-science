@@ -32,6 +32,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.doc.syntax.DocQuery;
@@ -83,7 +85,10 @@ public abstract class MultiFileDocTestBase {
         registerProcedures(defaultDb, procedures().toArray(clazzArray));
         registerFunctions(defaultDb, functions().toArray(clazzArray));
 
-        registerAggregationFunctions(defaultDb, aggregationFunctions().toArray(Class<?>[]::new));
+        for (CompatUserAggregationFunction func : aggregationFunctions()) {
+            GraphDatabaseApiProxy.register(defaultDb, Neo4jProxy.callableUserAggregationFunction(func));
+        }
+
 
 
         var treeProcessor = new QueryCollectingTreeProcessor();
