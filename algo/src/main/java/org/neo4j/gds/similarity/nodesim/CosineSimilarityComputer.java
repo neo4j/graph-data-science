@@ -56,16 +56,16 @@ public class CosineSimilarityComputer implements MetricSimilarityComputer {
             double w2 = weights2[offset2];
 
             if (target1 == target2) {
-                above+=w1*w2;
-                vector1SquaredSum+= w1*w1;
-                vector2SquaredSum+= w2*w2;
+                above += w1 * w2;
+                vector1SquaredSum += w1 * w1;
+                vector2SquaredSum += w2 * w2;
                 offset1++;
                 offset2++;
             } else if (target1 < target2) {
-                vector1SquaredSum += w1*w1;
+                vector1SquaredSum += w1 * w1;
                 offset1++;
             } else {
-                vector2SquaredSum += w2*w2;
+                vector2SquaredSum += w2 * w2;
                 offset2++;
             }
         }
