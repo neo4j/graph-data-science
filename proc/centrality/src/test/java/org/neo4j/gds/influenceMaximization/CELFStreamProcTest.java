@@ -21,7 +21,8 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -32,6 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 
 /**
  *     (c)-----|
@@ -109,17 +111,17 @@ class CELFStreamProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testResultStream() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void testResultStream(String tieredProcedure) {
 
         var cypher = GdsCypher.call("celfGraph")
-            .algo("gds.beta.influenceMaximization.celf")
+            .algo(tieredProcedure)
             .streamMode()
             .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
             .yields("nodeId", "spread");
-
 
         var resultRowCount = runQueryWithRowConsumer(cypher, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
@@ -132,4 +134,19 @@ class CELFStreamProcTest extends BaseProcTest {
             .as("There should be five result rows!")
             .isEqualTo(5L);
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void shouldCallMemoryEstimation(String tieredProcedure) {
+        var query = GdsCypher.call("celfGraph")
+            .algo(tieredProcedure)
+            .estimationMode(GdsCypher.ExecutionModes.STREAM)
+            .addParameter("seedSetSize", 5)
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .yields();
+        
+        assertThatNoException().isThrownBy(() -> runQuery(query));
+    }
+
 }
