@@ -22,6 +22,7 @@ package org.neo4j.gds.modularity;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,9 +34,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityStatsProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.modularity.stats", mode = READ)
+    @Procedure(value = "gds.modularity.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StatsResult> stream(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -43,6 +44,21 @@ public class ModularityStatsProc extends BaseProc {
             new ModularityStatsSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.modularity.stats", mode = READ, deprecatedBy = "gds.modularity.stats")
+    @Description(DESCRIPTION)
+    public Stream<StatsResult> statsAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.modularity.stats` has been deprecated, please use `gds.modularity.stats`.");
+
+        return stats(graphName, configuration);
     }
 
 }

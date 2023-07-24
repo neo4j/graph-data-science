@@ -32,7 +32,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.modularity.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.modularity.stream", aliases = {"gds.alpha.modularity.stream"}, description = DESCRIPTION, executionMode = STREAM)
 public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
     @Override
     public String name() {

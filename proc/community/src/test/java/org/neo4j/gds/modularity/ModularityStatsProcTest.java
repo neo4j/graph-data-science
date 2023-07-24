@@ -76,7 +76,7 @@ class ModularityStatsProcTest extends BaseProcTest {
     @Test
     void stats() {
         String statsQuery = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.modularity")
+            .algo("modularity")
             .statsMode()
             .addParameter("communityProperty", "communityId")
             .yields();
