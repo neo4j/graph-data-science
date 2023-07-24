@@ -42,6 +42,11 @@ public class ConfigurationService {
         GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY
     );
 
+    private static final Set<String> DISALLOWED_CYPHER_PROJECT_CONFIG_KEYS = Set.of(
+        GraphProjectFromCypherConfig.NODE_QUERY_KEY,
+        GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY
+    );
+
     public GraphProjectFromStoreConfig parseNativeProjectConfiguration(
         User user,
         GraphName graphName,
@@ -59,7 +64,7 @@ public class ConfigurationService {
             wrappedRawConfiguration
         );
 
-        validateProjectConfiguration(wrappedRawConfiguration, configuration);
+        validateProjectConfiguration(wrappedRawConfiguration, configuration, DISALLOWED_NATIVE_PROJECT_CONFIG_KEYS);
 
         return configuration;
     }
@@ -81,7 +86,7 @@ public class ConfigurationService {
             wrappedRawConfiguration
         );
 
-        validateProjectConfiguration(wrappedRawConfiguration, configuration);
+        validateProjectConfiguration(wrappedRawConfiguration, configuration, DISALLOWED_CYPHER_PROJECT_CONFIG_KEYS);
 
         return configuration;
     }
@@ -104,20 +109,21 @@ public class ConfigurationService {
             cypherConfig
         );
 
-        validateProjectConfiguration(cypherConfig, configuration);
+        validateProjectConfiguration(cypherConfig, configuration, DISALLOWED_NATIVE_PROJECT_CONFIG_KEYS);
 
         return configuration;
     }
 
     private void validateProjectConfiguration(
         CypherMapAccess cypherConfig,
-        GraphProjectConfig graphProjectConfig
+        GraphProjectConfig graphProjectConfig,
+        Collection<String> disallowedConfigurationKeys
     ) {
         var allowedKeys = graphProjectConfig.isFictitiousLoading()
             ? graphProjectConfig.configKeys()
             : graphProjectConfig.configKeys()
                 .stream()
-                .filter(key -> !DISALLOWED_NATIVE_PROJECT_CONFIG_KEYS.contains(key))
+                .filter(key -> !disallowedConfigurationKeys.contains(key))
                 .collect(Collectors.toList());
 
         ensureOnlyAllowedKeysUsed(cypherConfig, allowedKeys);

@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
@@ -34,6 +36,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ConfigurationServiceTest {
     /*
@@ -68,5 +71,79 @@ class ConfigurationServiceTest {
             )
         ));
         assertThat(configuration.username()).isEqualTo("some user");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"nodeProjection", "relationshipProjection", "nodeQuery", "relationshipQuery"})
+    void shouldDisallowNativeProjectConfigurationWithConfigurationCertainKeywordsInIt(String key) {
+        try {
+            new ConfigurationService().parseNativeProjectConfiguration(
+                new User("some user", false),
+                GraphName.parse("some graph"),
+                "some label",
+                "some relationship type",
+                Map.of(key, "yeah, that's not allowed")
+            );
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e).hasMessageContaining("Unexpected configuration key: " + key);
+        }
+    }
+
+    @Test
+    void shouldParseCypherProjectConfiguration() {
+        var configuration = new ConfigurationService().parseCypherProjectConfiguration(
+            new User("some user", false),
+            GraphName.parse("some graph"),
+            "some node query",
+            "some relationship query",
+            emptyMap()
+        );
+
+        assertThat(configuration.creationTime()).isEqualToIgnoringSeconds(ZonedDateTime.now());
+        assertThat(configuration.graphName()).isEqualTo("some graph");
+        assertThat(configuration.nodeCount()).isEqualTo(-1);
+        assertThat(configuration.nodeQuery()).isEqualTo("some node query");
+        assertThat(configuration.logProgress()).isEqualTo(true);
+        assertThat(configuration.readConcurrency()).isEqualTo(4);
+        assertThat(configuration.relationshipCount()).isEqualTo(-1);
+        assertThat(configuration.relationshipQuery()).isEqualTo("some relationship query");
+        assertThat(configuration.username()).isEqualTo("some user");
+    }
+
+    // interesting how native and Cypher are not symmetric
+    @ParameterizedTest
+    @ValueSource(strings = {"nodeQuery", "relationshipQuery"})
+    void shouldDisallowCypherProjectConfigurationWithConfigurationCertainKeywordsInIt(String key) {
+        try {
+            new ConfigurationService().parseCypherProjectConfiguration(
+                new User("some user", false),
+                GraphName.parse("some graph"),
+                "some node query",
+                "some relationship query",
+                Map.of(key, "yeah, that's not allowed")
+            );
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e).hasMessageContaining("Unexpected configuration key: " + key);
+        }
+    }
+
+    // here it is construction of the configuration that has some early validation logic
+    @ParameterizedTest
+    @ValueSource(strings = {"nodeProjection", "relationshipProjection"})
+    void shouldDisallowCypherProjectConfigurationWithConfigurationCertainKeywordsInItButDifferent(String key) {
+        try {
+            new ConfigurationService().parseCypherProjectConfiguration(
+                new User("some user", false),
+                GraphName.parse("some graph"),
+                "some node query",
+                "some relationship query",
+                Map.of(key, "yeah, that's not allowed")
+            );
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessageContaining("Invalid key: " + key);
+        }
     }
 }
