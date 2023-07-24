@@ -22,12 +22,12 @@ package org.neo4j.gds.influenceMaximization;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 
-class CelfNodeProperties implements DoubleNodePropertyValues {
+class CELFNodeProperties implements DoubleNodePropertyValues {
 
     private final LongDoubleScatterMap celfSeedSet;
     private final long totalGraphNodeCount;
 
-    CelfNodeProperties(LongDoubleScatterMap celfSeedSet, long totalGraphNodeCount) {
+    CELFNodeProperties(LongDoubleScatterMap celfSeedSet, long totalGraphNodeCount) {
         this.celfSeedSet = celfSeedSet;
         this.totalGraphNodeCount = totalGraphNodeCount;
     }

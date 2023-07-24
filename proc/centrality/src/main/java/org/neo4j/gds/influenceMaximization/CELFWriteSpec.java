@@ -76,7 +76,7 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
         var celfSeedSet = computationResult.result();
         var graph = computationResult.graph();
 
-        return new CelfNodeProperties(celfSeedSet.orElseGet(() -> new LongDoubleScatterMap(0)), graph.nodeCount());
+        return new CELFNodeProperties(celfSeedSet.orElseGet(() -> new LongDoubleScatterMap(0)), graph.nodeCount());
     }
 
     private AbstractResultBuilder<WriteResult> resultBuilder(

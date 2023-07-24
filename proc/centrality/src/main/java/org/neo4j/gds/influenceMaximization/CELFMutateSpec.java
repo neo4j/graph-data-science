@@ -71,7 +71,7 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
                 var nodeCount = computationResult.graph().nodeCount();
                 var celfSeedSetNodeProperty = ImmutableNodeProperty.of(
                     computationResult.config().mutateProperty(),
-                    new CelfNodeProperties(celfSeedSet, nodeCount)
+                    new CELFNodeProperties(celfSeedSet, nodeCount)
                 );
                 return List.of(celfSeedSetNodeProperty);
             };
