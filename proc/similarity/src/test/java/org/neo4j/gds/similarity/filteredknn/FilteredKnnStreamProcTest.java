@@ -22,6 +22,8 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -64,14 +66,20 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void shouldStreamResults() {
-        String query = "CALL gds.alpha.knn.filtered.stream($graph, {nodeProperties: ['knn'], topK: 1, randomSeed: 19, concurrency: 1})" +
-                       " YIELD node1, node2, similarity" +
-                       " RETURN node1, node2, similarity" +
-                       " ORDER BY node1";
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.alpha.knn.filtered", "gds.knn.filtered"})
+    void shouldStreamResults(String tieredProcedure) {
 
-        assertCypherResult(query, Map.of("graph", "filteredKnnGraph"), List.of(
+        String query = GdsCypher.call("filteredKnnGraph")
+            .algo(tieredProcedure)
+            .streamMode()
+            .addParameter("nodeProperties", List.of("knn"))
+            .addParameter("topK", 1)
+            .addParameter("randomSeed", 19)
+            .addParameter("concurrency", 1)
+            .yields("node1", "node2", "similarity");
+
+        assertCypherResult(query, List.of(
             Map.of("node1", idFunction.of("a"), "node2", idFunction.of("b"), "similarity", 0.5),
             Map.of("node1", idFunction.of("b"), "node2", idFunction.of("a"), "similarity", 0.5),
             Map.of("node1", idFunction.of("c"), "node2", idFunction.of("b"), "similarity", 0.25)
@@ -107,7 +115,7 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
         );
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
@@ -147,7 +155,7 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
@@ -188,7 +196,7 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
         );
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))

@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FilteredKnnStreamProc extends BaseProc {
-    @Procedure(value = "gds.alpha.knn.filtered.stream", mode = READ)
+    @Procedure(value = "gds.knn.filtered.stream", mode = READ)
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
     public Stream<SimilarityResult> stream(
         @Name(value = "graphName") String graphName,
@@ -42,5 +43,20 @@ public class FilteredKnnStreamProc extends BaseProc {
             new FilteredKnnStreamSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.alpha.knn.filtered.stream", mode = READ, deprecatedBy = "gds.knn.filtered.stream")
+    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<SimilarityResult> alphaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.knn.filtered.stream` has been deprecated, please use `gds.knn.filtered.stream`.");
+        return stream(graphName, configuration);
     }
 }

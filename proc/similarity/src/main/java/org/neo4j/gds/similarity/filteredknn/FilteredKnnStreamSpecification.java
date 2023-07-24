@@ -31,7 +31,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
-@GdsCallable(name = "gds.alpha.knn.filtered.stream", executionMode = ExecutionMode.STREAM)
+@GdsCallable(
+    name = "gds.knn.filtered.stream",
+    aliases = {"gds.alpha.knn.filtered.stream"},
+    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
+    executionMode = ExecutionMode.STREAM
+)
 public class FilteredKnnStreamSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStreamConfig, Stream<SimilarityResult>, FilteredKnnFactory<FilteredKnnStreamConfig>> {
 
     @Override
