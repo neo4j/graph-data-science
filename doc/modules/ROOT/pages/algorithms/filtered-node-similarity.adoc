@@ -1,5 +1,5 @@
+:page-aliases: algorithms/alpha/filtered-node-similarity.adoc
 [[algorithms-filtered-node-similarity]]
-[.alpha]
 = Filtered Node Similarity
 :description: This section describes the Filtered Node Similarity algorithm in the Neo4j Graph Data Science library.
 
@@ -7,9 +7,6 @@
 :result: similarity score
 :algorithm: Filtered Node Similarity
 :nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
-
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 :directed:
 :undirected:
@@ -74,7 +71,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Filtered Node Similarity  in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.stream(
+CALL gds.nodeSimilarity.filtered.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -95,7 +92,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 :nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
-include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -112,7 +109,7 @@ include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-simila
 .Run Node Similarity in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.stats(
+CALL gds.nodeSimilarity.filtered.stats(
   graphName: String,
   configuration: Map
 )
@@ -137,7 +134,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
-include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -158,7 +155,7 @@ include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-simila
 .Run Filtered Node Similarity  in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.mutate(
+CALL gds.nodeSimilarity.filtered.mutate(
   graphName: String,
   configuration: Map
 )
@@ -185,7 +182,7 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 :nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
-include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -207,7 +204,7 @@ include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-simila
 .Run Filtered Node Similarity  in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.write(
+CALL gds.nodeSimilarity.filtered.write(
   graphName: String,
   configuration: Map
 )
@@ -234,7 +231,7 @@ include::partial$/algorithms/common-configuration/common-write-configuration-ent
 :nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
-include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -328,7 +325,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.write.estimate('myGraph', {
+CALL gds.nodeSimilarity.filtered.write.estimate('myGraph', {
     writeRelationshipType: 'SIMILAR',
     writeProperty: 'score',
     sourceNodeFilter:'Singer',
@@ -354,7 +351,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 .The following will run the algorithm, and stream the results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.stream('myGraph', {sourceNodeFilter:'Singer' , targetNodeFilter:'Singer' } )
+CALL gds.nodeSimilarity.filtered.stream('myGraph', {sourceNodeFilter:'Singer' , targetNodeFilter:'Singer' } )
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY similarity DESCENDING, Person1, Person2
@@ -383,7 +380,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 .The following will run the Node Similarity algorithm  with the specified filters sand return the result in form of statistical and measurement values
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.stats('myGraph', {sourceNodeFilter:'Singer' , targetNodeFilter:'Singer' } )
+CALL gds.nodeSimilarity.filtered.stats('myGraph', {sourceNodeFilter:'Singer' , targetNodeFilter:'Singer' } )
 YIELD nodesCompared, similarityPairs
 ----
 .Results
@@ -404,7 +401,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm, and write back results to the in-memory graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.mutate('myGraph',{
+CALL gds.nodeSimilarity.filtered.mutate('myGraph',{
     mutateRelationshipType: 'SIMILAR',
     mutateProperty: 'score',
     sourceNodeFilter:'Singer',
@@ -446,7 +443,7 @@ For more details on the `write` mode in general, see xref:common-usage/running-a
 .The following will run the algorithm, and write back results:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.write('myGraph',{
+CALL gds.nodeSimilarity.filtered.write('myGraph',{
     writeRelationshipType: 'SIMILAR',
     writeProperty: 'score',
     sourceNodeFilter:'Singer',

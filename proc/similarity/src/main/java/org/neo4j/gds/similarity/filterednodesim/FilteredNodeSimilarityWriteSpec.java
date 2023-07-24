@@ -41,7 +41,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.write", aliases = {"gds.alpha.nodeSimilarity.filtered.write"}, description = DESCRIPTION, executionMode = ExecutionMode.WRITE_RELATIONSHIP)
 public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,

@@ -81,7 +81,7 @@
 *** xref:algorithms/leiden.adoc[]
 ** xref:algorithms/similarity.adoc[]
 *** xref:algorithms/node-similarity.adoc[]
-*** xref:algorithms/alpha/filtered-node-similarity.adoc[]
+*** xref:algorithms/filtered-node-similarity.adoc[]
 *** xref:algorithms/knn.adoc[]
 *** xref:algorithms/filtered-knn.adoc[]
 *** xref:algorithms/similarity-functions.adoc[]

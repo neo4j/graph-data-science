@@ -79,7 +79,7 @@ class FilteredNodeSimilarityWriteProcTest extends BaseProcTest {
     @Test
     void shouldWorkWithoutFiltering() {
         var query = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .writeMode()
             .addParameter("writeProperty", "score")
             .addParameter("writeRelationshipType", "SIMILAR_TO")
@@ -146,7 +146,7 @@ class FilteredNodeSimilarityWriteProcTest extends BaseProcTest {
         var filter = List.of(0, 3);
 
         var sourceFilteredQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .writeMode()
             .addParameter("writeProperty", "score")
             .addParameter("writeRelationshipType", "SIMILAR_TO")
@@ -180,7 +180,7 @@ class FilteredNodeSimilarityWriteProcTest extends BaseProcTest {
         var filter = List.of(0, 3);
 
         var targetFilteredQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .writeMode()
             .addParameter("writeProperty", "score")
             .addParameter("writeRelationshipType", "SIMILAR_TO")

@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -36,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class FilteredNodeSimilarityMutateProc  extends BaseProc {
 
-    @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate", mode = READ)
+    @Procedure(name = "gds.nodeSimilarity.filtered.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -48,7 +49,7 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate.estimate", mode = READ)
+    @Procedure(name = "gds.nodeSimilarity.filtered.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -59,5 +60,35 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.mutate")
+    @Description(DESCRIPTION)
+    public Stream<SimilarityMutateResult> mutateAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.nodeSimilarity.filtered.mutate` has been deprecated, please use `gds.nodeSimilarity.filtered.mutate`.");
+
+        return mutate(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate.estimate", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.mutate.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateAlpha(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.nodeSimilarity.filtered.mutate.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.mutate.estimate`.");
+
+        return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

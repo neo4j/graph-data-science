@@ -56,7 +56,7 @@ import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.mutate", aliases = {"gds.alpha.nodeSimilarity.filtered.mutate"}, description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
 public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,

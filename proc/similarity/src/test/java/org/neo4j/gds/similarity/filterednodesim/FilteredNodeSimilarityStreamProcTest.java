@@ -82,7 +82,7 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
     @Test
     void shouldWorkWithoutFiltering() {
         var algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .streamMode()
             .yields();
 
@@ -113,7 +113,7 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
         var d = idFunction.of("d");
 
         var sourceFilteredAlgoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .streamMode()
             .addParameter("sourceNodeFilter", List.of(a, d))
             .yields();
@@ -127,7 +127,7 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
         ));
 
         var targetFilteredAlgoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .streamMode()
             .addParameter("targetNodeFilter", List.of(a, d))
             .yields();

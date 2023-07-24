@@ -122,14 +122,14 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.hits.write",
         "gds.alpha.hits.write.estimate",
 
-        "gds.alpha.nodeSimilarity.filtered.mutate",
-        "gds.alpha.nodeSimilarity.filtered.mutate.estimate",
-        "gds.alpha.nodeSimilarity.filtered.stats",
-        "gds.alpha.nodeSimilarity.filtered.stats.estimate",
-        "gds.alpha.nodeSimilarity.filtered.stream",
-        "gds.alpha.nodeSimilarity.filtered.stream.estimate",
-        "gds.alpha.nodeSimilarity.filtered.write",
-        "gds.alpha.nodeSimilarity.filtered.write.estimate",
+        "gds.nodeSimilarity.filtered.mutate",
+        "gds.nodeSimilarity.filtered.mutate.estimate",
+        "gds.nodeSimilarity.filtered.stats",
+        "gds.nodeSimilarity.filtered.stats.estimate",
+        "gds.nodeSimilarity.filtered.stream",
+        "gds.nodeSimilarity.filtered.stream.estimate",
+        "gds.nodeSimilarity.filtered.write",
+        "gds.nodeSimilarity.filtered.write.estimate",
 
        // "gds.alpha.topologicalSort.stream",
 

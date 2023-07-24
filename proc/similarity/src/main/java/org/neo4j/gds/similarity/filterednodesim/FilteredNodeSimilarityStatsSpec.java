@@ -40,7 +40,7 @@ import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.withGraphsizeAndTimings;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.stats", description = DESCRIPTION, executionMode = ExecutionMode.STATS)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.stats", aliases = {"gds.alpha.nodeSimilarity.filtered.stats"}, description = DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
