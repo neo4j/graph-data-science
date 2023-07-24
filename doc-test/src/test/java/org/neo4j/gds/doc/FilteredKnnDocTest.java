@@ -48,6 +48,6 @@ class FilteredKnnDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/filtered-knn.adoc";
+        return "pages/algorithms/filtered-knn.adoc";
     }
 }

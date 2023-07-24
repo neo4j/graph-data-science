@@ -83,7 +83,7 @@
 *** xref:algorithms/node-similarity.adoc[]
 *** xref:algorithms/alpha/filtered-node-similarity.adoc[]
 *** xref:algorithms/knn.adoc[]
-*** xref:algorithms/alpha/filtered-knn.adoc[]
+*** xref:algorithms/filtered-knn.adoc[]
 *** xref:algorithms/similarity-functions.adoc[]
 ** xref:algorithms/pathfinding.adoc[]
 *** xref:algorithms/delta-single-source.adoc[]
