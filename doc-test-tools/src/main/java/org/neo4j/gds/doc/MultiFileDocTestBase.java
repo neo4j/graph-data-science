@@ -57,7 +57,6 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerAggregationFunctions;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerFunctions;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerProcedures;
 
