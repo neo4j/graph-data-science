@@ -50,7 +50,7 @@ public class NodeLabelMappingLoader {
 
     Optional<NodeLabelInverseMapping> load() {
         var file = labelMappingPath.toFile();
-        if (! file.isFile()) {
+        if (!file.isFile()) {
             return Optional.empty();
         }
 
