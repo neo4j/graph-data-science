@@ -22,7 +22,8 @@ package org.neo4j.gds.influenceMaximization;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -33,6 +34,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
@@ -112,11 +114,12 @@ class CELFStatsProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void stats() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void stats(String tieredProcedure) {
 
         var cypher = GdsCypher.call("celfGraph")
-            .algo("gds.beta.influenceMaximization.celf")
+            .algo(tieredProcedure)
             .statsMode()
             .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
@@ -133,5 +136,19 @@ class CELFStatsProcTest extends BaseProcTest {
                 .isCloseTo(6.4, Offset.offset(1e-7));
 
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.influenceMaximization.celf", "gds.influenceMaximization.celf"})
+    void shouldCallMemoryEstimation(String tieredProcedure) {
+        var query = GdsCypher.call("celfGraph")
+            .algo(tieredProcedure)
+            .estimationMode(GdsCypher.ExecutionModes.STATS)
+            .addParameter("seedSetSize", 5)
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .yields();
+
+        assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 }
