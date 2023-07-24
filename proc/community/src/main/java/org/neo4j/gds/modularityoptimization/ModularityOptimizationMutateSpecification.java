@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.modularityOptimization.mutate", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.modularityOptimization.mutate", aliases = {"gds.beta.modularityOptimization.mutate"}, description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig, Stream<ModularityOptimizationMutateResult>, ModularityOptimizationFactory<ModularityOptimizationMutateConfig>> {
 
     @Override

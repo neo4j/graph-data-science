@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -42,7 +43,7 @@ public class ModularityOptimizationWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
+    @Procedure(name = "gds.modularityOptimization.write", mode = WRITE)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<ModularityOptimizationWriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -54,7 +55,7 @@ public class ModularityOptimizationWriteProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
+    @Procedure(value = "gds.modularityOptimization.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -65,6 +66,36 @@ public class ModularityOptimizationWriteProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE, deprecatedBy = "gds.modularityOptimization.write")
+    @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
+    public Stream<ModularityOptimizationWriteResult> writeBeta(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.modularityOptimization.write` has been deprecated, please use `gds.modularityOptimization.write`.");
+
+        return write(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ, deprecatedBy = "gds.modularityOptimization.write.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateBeta(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.modularityOptimization.write.estimate` has been deprecated, please use `gds.modularityOptimization.write.estimate`.");
+
+        return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

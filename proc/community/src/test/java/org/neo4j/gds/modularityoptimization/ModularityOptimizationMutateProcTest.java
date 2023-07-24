@@ -270,6 +270,9 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
+                    if (mutateMethod.getAnnotation(Deprecated.class) != null) {
+                        return;
+                    }
                     Map<String, Object> config = Map.of(
                         "nodeLabels", Collections.singletonList("B"),
                         "mutateProperty", MUTATE_PROPERTY
@@ -357,6 +360,9 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
+                    if (mutateMethod.getAnnotation(Deprecated.class) != null) {
+                        return;
+                    }
                     Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
                     try {
                         // mutate first time
@@ -481,6 +487,9 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
+                    if (mutateMethod.getAnnotation(Deprecated.class) != null) {
+                        return;
+                    }
                     try {
                         mutateMethod.invoke(procedure, graphName, config);
                     } catch (IllegalAccessException | InvocationTargetException e) {
