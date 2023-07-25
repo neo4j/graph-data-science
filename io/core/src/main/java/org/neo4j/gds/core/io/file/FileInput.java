@@ -29,7 +29,6 @@ import org.neo4j.internal.batchimport.InputIterable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 public interface FileInput extends CompatInput {
     InputIterable graphProperties();

@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.io.schema;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 public interface SimpleVisitor<T> extends Closeable {
     void export(T value);
