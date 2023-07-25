@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -59,7 +60,7 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(TriangleCountResult::asNodeProperties)
+                    .map(result -> NodePropertyValuesAdapter.adapt(result.localTriangles()))
                     .orElse(EmptyLongNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder
