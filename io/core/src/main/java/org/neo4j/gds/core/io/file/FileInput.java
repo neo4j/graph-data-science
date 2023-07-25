@@ -23,11 +23,10 @@ import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.compat.CompatInput;
-import org.neo4j.gds.core.io.NodeLabelInverseMapping;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.internal.batchimport.InputIterable;
-import org.neo4j.internal.batchimport.input.Collector;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -37,7 +36,7 @@ public interface FileInput extends CompatInput {
     String userName();
     GraphInfo graphInfo();
     MutableNodeSchema nodeSchema();
-    Optional<NodeLabelInverseMapping> labelMapping();
+    Optional<HashMap<String, String>> labelMapping();
     MutableRelationshipSchema relationshipSchema();
     Map<String, PropertySchema> graphPropertySchema();
     Capabilities capabilities();
