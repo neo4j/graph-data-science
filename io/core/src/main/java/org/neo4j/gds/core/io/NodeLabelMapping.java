@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 
 import java.util.Collection;
@@ -26,15 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class NodeLabelMapping {
     private final HashMap<NodeLabel, String> map;
 
     NodeLabelMapping(Collection<NodeLabel> labels) {
-        var indexGenerator = IntStream.range(0, labels.size()).iterator();
+        MutableInt index = new MutableInt();
         map = new HashMap<>(labels.stream()
-            .collect(Collectors.toMap(label -> label, label -> Integer.toString(indexGenerator.next()))));
+            .collect(Collectors.toMap(label -> label, label -> Integer.toString(index.getAndIncrement()))));
     }
 
     public String get(NodeLabel label) {
