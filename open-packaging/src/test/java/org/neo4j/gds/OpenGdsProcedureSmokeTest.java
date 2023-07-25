@@ -182,10 +182,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
 
-        "gds.alpha.scaleProperties.mutate",
         "gds.scaleProperties.mutate",
         "gds.scaleProperties.mutate.estimate",
-        "gds.alpha.scaleProperties.stream",
         "gds.scaleProperties.stream",
         "gds.scaleProperties.stream.estimate",
         "gds.scaleProperties.stats",
@@ -562,7 +560,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 407;
+        int expectedCount = 405;
         assertEquals(
             expectedCount,
             returnedRows,

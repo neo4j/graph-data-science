@@ -385,7 +385,4 @@
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.2+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
-| `gds.alpha.scaleProperties.mutate` (deprecated)
-| `gds.alpha.scaleProperties.stream` (deprecated)
 |===
