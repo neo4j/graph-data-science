@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.common.Validator;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
