@@ -144,6 +144,37 @@ public class PackedAdjacencyList implements AdjacencyList {
         return new VarLongTailCursor(pages);
     }
 
+    /**
+     * Inlined-head-Packed-tail cursor methods.
+     */
+
+    private static AdjacencyCursor newCursorWithInlinedHeadPackedTail(long offset, int degree, long[] pages) {
+        var cursor = new InlinedHeadPackedTailCursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    private static AdjacencyCursor newReuseCursorWithInlinedHeadPackedTail(
+        @Nullable AdjacencyCursor reuse,
+        long offset,
+        int degree,
+        long[] pages
+    ) {
+        if (reuse instanceof InlinedHeadPackedTailCursor) {
+            reuse.init(offset, degree);
+            return reuse;
+        } else {
+            var cursor = new InlinedHeadPackedTailCursor(pages);
+            cursor.init(offset, degree);
+            return cursor;
+        }
+    }
+
+    private static AdjacencyCursor newRawCursorWithInlinedHeadPackedTail(long[] pages) {
+        return new InlinedHeadPackedTailCursor(pages);
+    }
+
+
     private final NewCursor newCursor;
     private final NewReuseCursor newReuseCursor;
     private final NewRawCursor newRawCursor;
@@ -178,6 +209,11 @@ public class PackedAdjacencyList implements AdjacencyList {
                 this.newCursor = PackedAdjacencyList::newCursorWithBlockAlignedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithBlockAlignedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithBlockAlignedTail;
+                break;
+            case INLINED_HEAD_PACKED_TAIL:
+                this.newCursor = PackedAdjacencyList::newCursorWithInlinedHeadPackedTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithInlinedHeadPackedTail;
+                this.newRawCursor = PackedAdjacencyList::newRawCursorWithInlinedHeadPackedTail;
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported packing strategy: " + adjacencyPackingStrategy);
