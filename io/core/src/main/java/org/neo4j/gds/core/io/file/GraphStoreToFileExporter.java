@@ -73,7 +73,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
-        Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplierVisitorSupplier,
+        Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
         Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier,
         Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
@@ -91,7 +91,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         this.userInfoVisitorSupplier = userInfoVisitorSupplier;
         this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
         this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
-        this.labelMappingVisitorSupplierVisitorSupplier = labelMappingVisitorSupplierVisitorSupplier;
+        this.labelMappingVisitorSupplierVisitorSupplier = labelMappingVisitorSupplier;
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
