@@ -24,23 +24,23 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.neo4j.gds.core.io.NodeLabelInverseMapping;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Optional;
 
 public class NodeLabelMappingLoader {
 
     private final ObjectReader objectReader;
     private final Path labelMappingPath;
-    private final NodeLabelInverseMapping mapping;
+    private final HashMap<String, String> mapping;
 
     NodeLabelMappingLoader(Path csvDirectory) {
-        this.mapping = new NodeLabelInverseMapping();
+        this.mapping = new HashMap();
         this.labelMappingPath = csvDirectory.resolve(CsvNodeLabelMappingVisitor.LABEL_MAPPING_FILE_NAME);
         CsvMapper csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
@@ -48,7 +48,7 @@ public class NodeLabelMappingLoader {
         this.objectReader = csvMapper.readerFor(MappingLine.class).with(schema);
     }
 
-    Optional<NodeLabelInverseMapping> load() {
+    Optional<HashMap<String, String>> load() {
         var file = labelMappingPath.toFile();
         if (!file.isFile()) {
             return Optional.empty();
@@ -58,7 +58,7 @@ public class NodeLabelMappingLoader {
             var linesIterator = objectReader.<MappingLine>readValues(reader);
             while(linesIterator.hasNext()) {
                 var mappingLine = linesIterator.next();
-                mapping.add(mappingLine.index, mappingLine.label);
+                mapping.put(mappingLine.index, mappingLine.label);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

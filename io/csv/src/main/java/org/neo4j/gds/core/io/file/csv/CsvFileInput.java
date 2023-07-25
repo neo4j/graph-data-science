@@ -32,7 +32,6 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.io.GraphStoreInput;
-import org.neo4j.gds.core.io.NodeLabelInverseMapping;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.GraphInfo;
@@ -54,6 +53,7 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,7 +83,7 @@ final class CsvFileInput implements FileInput {
     private final String userName;
     private final GraphInfo graphInfo;
     private final MutableNodeSchema nodeSchema;
-    private final Optional<NodeLabelInverseMapping> labelMapping;
+    private final Optional<HashMap<String, String>> labelMapping;
     private final MutableRelationshipSchema relationshipSchema;
     private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
@@ -168,7 +168,7 @@ final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public Optional<NodeLabelInverseMapping> labelMapping() {
+    public Optional<HashMap<String, String>> labelMapping() {
         return labelMapping;
     }
 
