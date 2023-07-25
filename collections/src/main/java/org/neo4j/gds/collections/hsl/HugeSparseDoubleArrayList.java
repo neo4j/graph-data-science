@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsl;
+
+import org.neo4j.gds.collections.HugeSparseList;
 
 /**
- * A long-indexable version of a list of float arrays that can
+ * A long-indexable version of a list of double arrays that can
  * contain more than 2bn. elements and is growable.
  * <p>
  * It is implemented by paging of smaller arrays where each array, a so-called
@@ -31,16 +33,17 @@ package org.neo4j.gds.collections;
  * The list is mutable and not thread-safe.
  */
 @HugeSparseList(
-    valueType = float[].class,
-    forAllConsumerType = LongFloatArrayConsumer.class
+    valueType = double[].class,
+    forAllConsumerType = LongDoubleArrayConsumer.class
 )
-public interface HugeSparseFloatArrayList extends HugeSparseObjectArrayList<float[], LongFloatArrayConsumer> {
+public interface HugeSparseDoubleArrayList extends HugeSparseObjectArrayList<double[], LongDoubleArrayConsumer> {
 
-    static HugeSparseFloatArrayList of(float[] defaultValue) {
+    static HugeSparseDoubleArrayList of(double[] defaultValue) {
         return of(defaultValue, 0);
     }
 
-    static HugeSparseFloatArrayList of(float[] defaultValue, long initialCapacity) {
-        return new HugeSparseFloatArrayListSon(defaultValue, initialCapacity);
+    static HugeSparseDoubleArrayList of(double[] defaultValue, long initialCapacity) {
+        return new HugeSparseDoubleArrayListSon(defaultValue, initialCapacity);
     }
+
 }

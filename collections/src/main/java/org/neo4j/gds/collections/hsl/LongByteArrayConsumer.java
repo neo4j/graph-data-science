@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsl;
 
 @FunctionalInterface
-public interface LongByteArrayArrayConsumer {
-    void consume(long index, byte[][] value);
+public interface LongByteArrayConsumer {
+    void consume(long index, byte[] value);
 }

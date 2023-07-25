@@ -17,7 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsl;
+
+import org.neo4j.gds.collections.HugeSparseList;
 
 /**
  * A long-indexable version of a list of byte arrays that can
@@ -43,4 +45,5 @@ public interface HugeSparseByteArrayArrayList extends HugeSparseObjectArrayList<
     static HugeSparseByteArrayArrayList of(byte[][] defaultValue, long initialCapacity) {
         return new HugeSparseByteArrayArrayListSon(defaultValue, initialCapacity);
     }
+
 }

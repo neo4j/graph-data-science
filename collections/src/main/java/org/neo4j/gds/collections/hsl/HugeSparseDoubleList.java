@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsl;
 
-import java.util.stream.IntStream;
+import org.neo4j.gds.collections.DrainingIterator;
+import org.neo4j.gds.collections.HugeSparseList;
+
+import java.util.stream.DoubleStream;
 
 /**
- * A long-indexable version of a primitive int list that can
+ * A long-indexable version of a primitive double list that can
  * contain more than 2bn. elements and is growable.
  * <p>
  * It is implemented by paging of smaller arrays where each array, a so-called
@@ -33,17 +36,17 @@ import java.util.stream.IntStream;
  * The list is mutable and not thread-safe.
  */
 @HugeSparseList(
-    valueType = int.class,
-    forAllConsumerType = LongIntConsumer.class
+    valueType = double.class,
+    forAllConsumerType = LongDoubleConsumer.class
 )
-public interface HugeSparseIntList {
+public interface HugeSparseDoubleList {
 
-    static HugeSparseIntList of(int defaultValue) {
+    static HugeSparseDoubleList of(double defaultValue) {
         return of(defaultValue, 0);
     }
 
-    static HugeSparseIntList of(int defaultValue, long initialCapacity) {
-        return new HugeSparseIntListSon(defaultValue, initialCapacity);
+    static HugeSparseDoubleList of(double defaultValue, long initialCapacity) {
+        return new HugeSparseDoubleListSon(defaultValue, initialCapacity);
     }
 
     /**
@@ -57,42 +60,43 @@ public interface HugeSparseIntList {
     boolean contains(long index);
 
     /**
-     * @return the int value at the given index
+     * @return the long value at the given index
      */
-    int get(long index);
+    double get(long index);
 
     /**
      * Sets the value at the given index.
      */
-    void set(long index, int value);
+    void set(long index, double value);
 
     /**
      * Sets the value at the given index iff it has not been set before.
      */
-    boolean setIfAbsent(long index, int value);
+    boolean setIfAbsent(long index, double value);
 
     /**
      * Adds the given value to the value stored at the index. If no value
      * has been stored before, the value is added to the default value.
      */
-    void addTo(long index, int value);
+    void addTo(long index, double value);
 
     /**
      * Applies to given consumer to all non-default values stored in the list.
      */
-    void forAll(LongIntConsumer consumer);
+    void forAll(LongDoubleConsumer consumer);
 
     /**
      * Returns an iterator that consumes the underlying pages of this list.
      * Once the iterator has been consumed, the list is empty and will return
      * the default value for each index.
      */
-    DrainingIterator<int[]> drainingIterator();
+    DrainingIterator<double[]> drainingIterator();
 
     /**
      * Returns a stream of the underlying data.
      * The stream will skip over null pages and will otherwise stream over
      * the full page, potentially containing default values.
      */
-    IntStream stream();
+    DoubleStream stream();
+
 }
