@@ -30,4 +30,5 @@ public interface CommunityModularity {
     static CommunityModularity of(long communityId, double modularity) {
         return ImmutableCommunityModularity.of(communityId, modularity);
     }
+    
 }
