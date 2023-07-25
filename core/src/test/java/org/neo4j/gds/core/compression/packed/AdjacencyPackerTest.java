@@ -137,10 +137,20 @@ class AdjacencyPackerTest {
             .toArray();
 
         TestAllocator.testCursor(strategy, data, data.length, Aggregation.SINGLE, (cursor, slice) -> {
-            int maxBitsPerValues = 6; // packed uses at most 6 bits for any value in this test
-            int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
-            int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
-            int maxBytes = 1 /* header size */ + maxBytesPerBlock;
+            int maxBytes;
+            if (strategy == GdsFeatureToggles.AdjacencyPackingStrategy.VAR_LONG_TAIL) {
+                int maxBitsPerValue = 8; // var-long needs 1 Byte per value in this test
+                int maxBitsPerBlock = maxBitsPerValue * AdjacencyPacking.BLOCK_SIZE;
+                int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
+                maxBytes = 0 /* empty header */ + maxBytesPerBlock;
+            } else {
+                // packing
+                int maxBitsPerValue = 6; // packed uses at most 6 bits for any value in this test
+                int maxBitsPerBlock = maxBitsPerValue * AdjacencyPacking.BLOCK_SIZE;
+                int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
+                maxBytes = 8 /* aligned header size */ + maxBytesPerBlock;
+            }
+
             assertThat(slice.length())
                 .as("compression uses more space than expected, seed = %s", random.seed())
                 .isLessThanOrEqualTo(maxBytes);
