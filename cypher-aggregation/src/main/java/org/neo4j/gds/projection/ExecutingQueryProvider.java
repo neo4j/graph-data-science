@@ -20,7 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.impl.api.StatementInfo;
+import org.neo4j.kernel.impl.api.KernelStatement;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Optional;
@@ -50,15 +50,16 @@ final class TxQuery implements ExecutingQueryProvider {
         if (!(this.transaction instanceof InternalTransaction)) {
             return Optional.empty();
         }
+
         try (var statement = ((InternalTransaction) this.transaction).kernelTransaction().acquireStatement()) {
-            if (!(statement instanceof StatementInfo)) {
+            if (!(statement instanceof KernelStatement)) {
                 return Optional.empty();
             }
 
-            return ((StatementInfo) statement).queryRegistry().executingQuery().flatMap(eq -> {
-                return Optional.ofNullable(eq.rawQueryText());
-//                return eq.snapshot().obfuscatedQueryText().or(() -> Optional.ofNullable(eq.rawQueryText()));
-            });
+            return ((KernelStatement) statement).queryRegistry().executingQuery().flatMap(eq ->
+                eq.snapshot()
+                    .obfuscatedQueryText()
+                    .or(() -> Optional.ofNullable(eq.rawQueryText())));
         }
     }
 }
