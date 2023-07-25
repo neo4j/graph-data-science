@@ -163,18 +163,22 @@ public  final class GraphMemoryUsage {
                     "nativeAllocations", memoryInfo.nativeAllocations().toMap(),
                     "headerAllocations", memoryInfo.headerAllocations().toMap(),
                     "headerBits", memoryInfo.headerBits().toMap(),
-                    "blockStatistics", memoryInfo.blockStatistics().map(stats -> Map.of(
-                        "blockCount", stats.blockCount(),
-                        "blockLengths", stats.blockLengths().toMap(),
-                        "indexOfMaxValue", stats.indexOfMaxValue().toMap(),
-                        "indexOfMinValue", stats.indexOfMinValue().toMap(),
-                        "maxBits", stats.maxBits().toMap(),
-                        "minBits", stats.minBits().toMap(),
-                        "meanBits", stats.meanBits().toMap(),
-                        "medianBits", stats.medianBits().toMap(),
-                        "stdDevBits", stats.stdDevBits().toMap(),
-                        "headTailDiffBits", stats.headTailDiffBits().toMap()
-                    )).orElse(Map.of())
+                    "blockStatistics", memoryInfo.blockStatistics().map(stats -> {
+                        Map<Object, Object> blockStats = new HashMap<>();
+                        blockStats.put("blockCount", stats.blockCount());
+                        blockStats.put("blockLengths", stats.blockLengths().toMap());
+                        blockStats.put("indexOfMaxValue", stats.indexOfMaxValue().toMap());
+                        blockStats.put("indexOfMinValue", stats.indexOfMinValue().toMap());
+                        blockStats.put("maxBits", stats.maxBits().toMap());
+                        blockStats.put("minBits", stats.minBits().toMap());
+                        blockStats.put("meanBits", stats.meanBits().toMap());
+                        blockStats.put("medianBits", stats.medianBits().toMap());
+                        blockStats.put("stdDevBits", stats.stdDevBits().toMap());
+                        blockStats.put("headTailDiffBits", stats.headTailDiffBits().toMap());
+                        blockStats.put("bestMaxDiffBits", stats.bestMaxDiffBits().toMap());
+                        blockStats.put("exceptions", stats.exceptions().toMap());
+                        return blockStats;
+                    }).orElse(Map.of())
                 );
                 adjacencyListDetails.put(relationshipType.name(), listDetail);
             });
