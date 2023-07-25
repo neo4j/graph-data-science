@@ -43,6 +43,7 @@ class GraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -63,6 +64,7 @@ class GraphStoreCatalogBusinessFacadeTest {
             null,
             mock(GraphNameValidationService.class),
             service,
+            null,
             null,
             null,
             null,
@@ -93,6 +95,7 @@ class GraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -107,6 +110,7 @@ class GraphStoreCatalogBusinessFacadeTest {
         var facade = new DefaultGraphStoreCatalogBusinessFacade(
             null,
             validationService,
+            null,
             null,
             null,
             null,

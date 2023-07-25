@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,28 +30,19 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -68,7 +57,6 @@ import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,14 +80,12 @@ import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.getCypherAggregation;
-import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.gds.core.utils.progress.TaskStore.UserTask;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphProjectProcTest extends BaseProcTest {
@@ -191,32 +177,6 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(graphName);
-    }
-
-    @Disabled("The trouble of injecting procedure facade as things stand currently is not worth the value od this test")
-    @Test
-    void testNativeProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
-            var taskStore = new PerDatabaseTaskStore();
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-
-            proc.project("myGraph", "*", "*", Map.of());
-
-            Assertions.assertThat(taskStore.query().map(UserTask::task).map(Task::description)).contains("Loading");
-        });
-    }
-
-    @Disabled("The trouble of injecting procedure facade as things stand currently is not worth the value od this test")
-    @Test
-    void testCypherProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
-            var taskStore = new PerDatabaseTaskStore();
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-
-            proc.projectCypher("myGraph", ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY, Map.of());
-
-            Assertions.assertThat(taskStore.query().map(UserTask::task).map(Task::description)).contains("Loading");
-        });
     }
 
     @Test
@@ -811,76 +771,6 @@ class GraphProjectProcTest extends BaseProcTest {
             "CALL gds.graph.project('g', '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
             "Expected type of default value to be `Double`. But got `double[]`."
         );
-    }
-
-    @Test
-    void shouldFailOnTooBigGraphNative() {
-        assertThatThrownBy(() -> {
-            applyOnProcedure(proc -> {
-                GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
-                    "",
-                    CypherMapWrapper.create(Map.of(
-                        NODE_PROJECTION_KEY, "*",
-                        RELATIONSHIP_PROJECTION_KEY, "*"))
-                );
-                proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-            });
-        }).isInstanceOf(IllegalStateException.class)
-            .hasMessageMatching(
-                "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
-    }
-
-    @Test
-    void shouldNotFailOnTooBigGraphIfInSudoModeNative() {
-        applyOnProcedure(proc -> {
-            GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
-                "",
-                CypherMapWrapper.create(Map.of(
-                    NODE_PROJECTION_KEY, "*",
-                    RELATIONSHIP_PROJECTION_KEY, "*",
-                    SUDO_KEY, true
-                ))
-            );
-            proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-        });
-    }
-
-    @Test
-    void shouldNotFailOnTooBigGraphIfInSudoModeCypher() {
-        applyOnProcedure(proc -> {
-            GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
-                "",
-                CypherMapWrapper.create(Map.of(
-                    NODE_QUERY_KEY, "MATCH (n) RETURN n",
-                    RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
-                    SUDO_KEY, true
-                ))
-            );
-            proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-        });
-    }
-
-    @Test
-    void shouldFailOnTooBigGraphCypher() {
-        assertThatThrownBy(() -> {
-            applyOnProcedure(proc -> {
-                GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
-                    "",
-                    CypherMapWrapper.create(Map.of(
-                        NODE_QUERY_KEY, "MATCH (n) RETURN n",
-                        RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
-                        "sudo", false
-                    ))
-                );
-                proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-            });
-        }).isInstanceOf(IllegalStateException.class)
-            .hasMessageMatching(
-                "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
-    }
-
-    void applyOnProcedure(Consumer<GraphProjectProc> func) {
-        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, func);
     }
 
     @Test

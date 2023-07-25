@@ -32,6 +32,8 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFac
 import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
+import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
+import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
@@ -92,6 +94,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
         // GDS services
         var graphStoreCatalogService = new GraphStoreCatalogService();
+        var graphStoreFilterService = new GraphStoreFilterService();
 
         // GDS applications
         var configurationService = new ConfigurationService();
@@ -117,6 +120,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
                 GraphProjectCypherResult.Builder::new
             ), graphProjectMemoryUsage
         );
+        var subGraphProjectService = new SubGraphProjectService(log, graphStoreFilterService, graphStoreCatalogService);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -126,7 +130,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             dropGraphService,
             listGraphService,
             nativeProjectService,
-            cypherProjectService
+            cypherProjectService,
+            subGraphProjectService
         );
 
         // wrap in decorator to enable preconditions checks

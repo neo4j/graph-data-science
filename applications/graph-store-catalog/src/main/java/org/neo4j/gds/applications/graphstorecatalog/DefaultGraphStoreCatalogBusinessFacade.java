@@ -23,9 +23,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
+import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -67,6 +69,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final ListGraphService listGraphService;
     private final NativeProjectService nativeProjectService;
     private final CypherProjectService cypherProjectService;
+    private final SubGraphProjectService subGraphProjectService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         ConfigurationService configurationService,
@@ -75,7 +78,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         DropGraphService dropGraphService,
         ListGraphService listGraphService,
         NativeProjectService nativeProjectService,
-        CypherProjectService cypherProjectService
+        CypherProjectService cypherProjectService,
+        SubGraphProjectService subGraphProjectService
     ) {
         this.configurationService = configurationService;
         this.graphNameValidationService = graphNameValidationService;
@@ -84,6 +88,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.listGraphService = listGraphService;
         this.nativeProjectService = nativeProjectService;
         this.cypherProjectService = cypherProjectService;
+        this.subGraphProjectService = subGraphProjectService;
     }
 
     @Override
@@ -142,11 +147,9 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
+        var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
-        graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
-
-        var nativeProjectConfiguration = configurationService.parseNativeProjectConfiguration(
+        var configuration = configurationService.parseNativeProjectConfiguration(
             user,
             graphName,
             nodeProjection,
@@ -160,7 +163,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             terminationFlag,
             transactionContext,
             userLogRegistryFactory,
-            nativeProjectConfiguration
+            configuration
         );
     }
 
@@ -202,18 +205,16 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         String graphNameAsString,
         String nodeQuery,
         String relationshipQuery,
-        Map<String, Object> configuration
+        Map<String, Object> rawConfiguration
     ) {
-        var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
+        var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
-        graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
-
-        var cypherProjectConfiguration = configurationService.parseCypherProjectConfiguration(
+        var configuration = configurationService.parseCypherProjectConfiguration(
             user,
             graphName,
             nodeQuery,
             relationshipQuery,
-            configuration
+            rawConfiguration
         );
 
         return cypherProjectService.project(
@@ -222,7 +223,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             terminationFlag,
             transactionContext,
             userLogRegistryFactory,
-            cypherProjectConfiguration
+            configuration
         );
     }
 
@@ -251,6 +252,52 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             userLogRegistryFactory,
             configuration
         );
+    }
+
+    @Override
+    public GraphProjectSubgraphResult subGraphProject(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String originGraphNameAsString,
+        String nodeFilter,
+        String relationshipFilter,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var originGraphName = graphNameValidationService.validate(originGraphNameAsString);
+
+        var originGraphConfiguration = graphStoreCatalogService.get(
+            CatalogRequest.of(user.getUsername(), databaseId),
+            originGraphName
+        );
+
+        var configuration = configurationService.parseSubGraphProjectConfiguration(
+            user,
+            graphName,
+            originGraphName,
+            nodeFilter,
+            relationshipFilter,
+            originGraphConfiguration,
+            rawConfiguration
+        );
+
+        return subGraphProjectService.project(
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            configuration,
+            originGraphConfiguration.graphStore()
+        );
+    }
+
+    private GraphName validateGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {
+        var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
+
+        graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);
+
+        return graphName;
     }
 
     /**

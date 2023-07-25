@@ -12,6 +12,9 @@ dependencies {
     // argh and one more for the time being
     compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
 
+    // graph store filter errors
+    implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
+
     // the necessary GDS things for the extension to construct the application
     implementation project(':algo')
     implementation project(':annotations')
@@ -22,6 +25,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':subgraph-filtering')
     implementation project(':transaction')
 
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'

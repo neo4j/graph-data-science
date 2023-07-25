@@ -25,6 +25,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
+import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -315,6 +316,33 @@ public class GraphStoreCatalogProcedureFacade {
             userLogRegistryFactory,
             nodeQuery,
             relationshipQuery,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<GraphProjectSubgraphResult> subGraphProject(
+        String graphName,
+        String originGraphName,
+        String nodeFilter,
+        String relationshipFilter,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.subGraphProject(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            nodeFilter,
+            relationshipFilter,
             configuration
         );
 

@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
+import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -190,6 +191,31 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             nodeQuery,
             relationshipQuery,
             rawConfiguration
+        ));
+    }
+
+    @Override
+    public GraphProjectSubgraphResult subGraphProject(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String originGraphName,
+        String nodeFilter,
+        String relationshipFilter,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.subGraphProject(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            nodeFilter,
+            relationshipFilter,
+            configuration
         ));
     }
 

@@ -23,11 +23,13 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -133,6 +135,32 @@ public class ConfigurationService {
         );
 
         validateProjectConfiguration(cypherConfig, configuration, DISALLOWED_CYPHER_PROJECT_CONFIG_KEYS);
+
+        return configuration;
+    }
+
+    public GraphProjectFromGraphConfig parseSubGraphProjectConfiguration(
+        User user,
+        GraphName graphName,
+        GraphName originGraphName,
+        String nodeFilter,
+        String relationshipFilter,
+        GraphStoreWithConfig originGraphConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphProjectFromGraphConfig.of(
+            user.getUsername(),
+            graphName.getValue(),
+            originGraphName.getValue(),
+            nodeFilter,
+            relationshipFilter,
+            originGraphConfiguration.config(),
+            cypherConfig
+        );
+
+        validateProjectConfiguration(cypherConfig, configuration, Collections.emptySet());
 
         return configuration;
     }
