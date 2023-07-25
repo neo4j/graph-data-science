@@ -22,7 +22,9 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,6 +34,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class FilteredKnnWriteProc extends BaseProc {
@@ -49,6 +52,19 @@ public class FilteredKnnWriteProc extends BaseProc {
             new FilteredKnnWriteSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.knn.filtered.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return new MemoryEstimationExecutor<>(
+            new FilteredKnnWriteSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.write", mode = WRITE, deprecatedBy = "gds.knn.filtered.write")

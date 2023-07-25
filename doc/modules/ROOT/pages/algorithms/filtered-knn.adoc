@@ -353,6 +353,32 @@ CALL gds.graph.project(
     '*'
 );
 ----
+=== Memory Estimation
+[[algorithms-filtered-knn-examples-mem]]
+=== Filtering source nodes
+:mode: stats
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.knn.filtered.stream.estimate('myGraph', {
+    topK: 1,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 5       | 0               | 2056    | 3112    | "[2056 Bytes \... 3112 Bytes]"
+|===
+--
 
 [[algorithms-filtered-knn-examples-stream]]
 === Filtering source nodes

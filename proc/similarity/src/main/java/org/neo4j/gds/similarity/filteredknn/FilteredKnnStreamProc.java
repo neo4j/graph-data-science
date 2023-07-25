@@ -20,7 +20,9 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -43,6 +45,19 @@ public class FilteredKnnStreamProc extends BaseProc {
             new FilteredKnnStreamSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.knn.filtered.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return new MemoryEstimationExecutor<>(
+            new FilteredKnnStreamSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.alpha.knn.filtered.stream", mode = READ, deprecatedBy = "gds.knn.filtered.stream")
