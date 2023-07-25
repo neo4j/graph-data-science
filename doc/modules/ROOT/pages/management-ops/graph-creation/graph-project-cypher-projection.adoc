@@ -60,6 +60,7 @@ RETURN gds.graph.project(
     nodeCount: Integer,
     relationshipCount: Integer,
     projectMillis: Integer,
+    query: String,
     configuration: Map
 ----
 
@@ -106,6 +107,7 @@ RETURN gds.graph.project(
 | nodeCount              | Integer  | The number of nodes stored in the projected graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | projectMillis          | Integer  | Milliseconds for projecting the graph.
+| query                  | String   | The query used for this projection.
 | configuration          | Integer  | The configuration used for this projection.
 |===
 --
