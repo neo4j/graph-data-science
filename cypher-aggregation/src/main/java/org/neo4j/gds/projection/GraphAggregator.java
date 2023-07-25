@@ -66,6 +66,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
     private final DatabaseId databaseId;
     private final String username;
     private final WriteMode writeMode;
+    private final ExecutingQueryProvider queryProvider;
 
     private final ProgressTimer progressTimer;
     private final ConfigValidator configValidator;
@@ -81,11 +82,13 @@ abstract class GraphAggregator implements CompatUserAggregator {
     GraphAggregator(
         DatabaseId databaseId,
         String username,
-        WriteMode writeMode
+        WriteMode writeMode,
+        ExecutingQueryProvider queryProvider
     ) {
         this.databaseId = databaseId;
         this.username = username;
         this.writeMode = writeMode;
+        this.queryProvider = queryProvider;
         this.progressTimer = ProgressTimer.start();
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
@@ -152,6 +155,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
                 this.importer = data = GraphImporter.of(
                     graphName,
                     this.username,
+                    this.queryProvider.executingQuery().orElse(""),
                     this.databaseId,
                     config,
                     this.writeMode,
@@ -208,6 +212,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
         builder.add("relationshipCount", Values.longValue(result.relationshipCount()));
         builder.add("projectMillis", Values.longValue(result.projectMillis()));
         builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
+        builder.add("query", ValueUtils.asAnyValue(result.query()));
         return builder.build();
     }
 
@@ -288,7 +293,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
         );
 
         private static final Set<String> PROJECTION_CONFIG_KEYS = Set.copyOf(
-            GraphProjectFromCypherAggregationConfig.of("", "", MapValue.EMPTY).configKeys()
+            GraphProjectFromCypherAggregationConfig.of("", "", "", MapValue.EMPTY).configKeys()
         );
 
         private final AtomicBoolean validate = new AtomicBoolean(true);

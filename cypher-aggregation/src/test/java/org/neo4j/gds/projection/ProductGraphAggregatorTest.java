@@ -37,7 +37,12 @@ class ProductGraphAggregatorTest {
         var graphName = "graph";
         var databaseId = DatabaseId.random();
 
-        var aggregator = new ProductGraphAggregator(databaseId, userName, WriteMode.LOCAL);
+        var aggregator = new ProductGraphAggregator(
+            databaseId,
+            userName,
+            WriteMode.LOCAL,
+            ExecutingQueryProvider.empty()
+        );
 
         long source = 1L << 50;
         long target = (1L << 50) + 1;

@@ -65,6 +65,7 @@ public final class GraphImporter {
     private final LazyIdMapBuilder idMapBuilder;
 
     private final WriteMode writeMode;
+    private final String query;
 
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
@@ -74,13 +75,15 @@ public final class GraphImporter {
         List<String> undirectedRelationshipTypes,
         List<String> inverseIndexedRelationshipTypes,
         LazyIdMapBuilder idMapBuilder,
-        WriteMode writeMode
+        WriteMode writeMode,
+        String query
     ) {
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
         this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
         this.idMapBuilder = idMapBuilder;
         this.writeMode = writeMode;
+        this.query = query;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
     }
@@ -88,18 +91,19 @@ public final class GraphImporter {
     static GraphImporter of(
         TextValue graphNameValue,
         String username,
+        String query,
         DatabaseId databaseId,
         AnyValue configMap,
         WriteMode writeMode,
         PropertyState propertyState
     ) {
-
         var graphName = graphNameValue.stringValue();
 
         validateGraphName(graphName, username, databaseId);
         var config = GraphProjectFromCypherAggregationConfig.of(
             username,
             graphName,
+            query,
             (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
         );
 
@@ -110,7 +114,8 @@ public final class GraphImporter {
             config.undirectedRelationshipTypes(),
             config.inverseIndexedRelationshipTypes(),
             idMapBuilder,
-            writeMode
+            writeMode,
+            query
         );
     }
 
@@ -211,6 +216,7 @@ public final class GraphImporter {
             .relationshipCount(graphStore.relationshipCount())
             .projectMillis(projectMillis)
             .configuration(this.config.toMap())
+            .query(this.query)
             .build();
     }
 

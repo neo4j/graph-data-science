@@ -35,9 +35,10 @@ public class AlphaGraphAggregator extends GraphAggregator {
     AlphaGraphAggregator(
         DatabaseId databaseId,
         String username,
-        WriteMode writeMode
+        WriteMode writeMode,
+        ExecutingQueryProvider queryProvider
     ) {
-        super(databaseId, username, writeMode);
+        super(databaseId, username, writeMode, queryProvider);
     }
 
     @Override

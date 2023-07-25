@@ -28,6 +28,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -105,6 +106,8 @@ public class AlphaCypherAggregation implements CompatUserAggregationFunction {
     public CompatUserAggregator create(Context ctx) throws ProcedureException {
         var databaseService = CustomProceduresUtil.lookupSafeComponentProvider(ctx, GraphDatabaseService.class);
         var username = CustomProceduresUtil.lookupSafeComponentProvider(ctx, Username.class);
+        var transaction = CustomProceduresUtil.lookupSafeComponentProvider(ctx, Transaction.class);
+        var queryProvider = ExecutingQueryProvider.fromTransaction(transaction);
 
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
         var writeMode = runsOnCompositeDatabase
@@ -114,7 +117,8 @@ public class AlphaCypherAggregation implements CompatUserAggregationFunction {
         return new AlphaGraphAggregator(
             DatabaseId.of(databaseService),
             username.username(),
-            writeMode
+            writeMode,
+            queryProvider
         );
     }
 }

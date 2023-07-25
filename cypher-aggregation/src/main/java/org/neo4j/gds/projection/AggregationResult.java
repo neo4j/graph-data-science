@@ -41,6 +41,9 @@ public interface AggregationResult {
     @CustomProcedure.ResultField
     Map<String, Object> configuration();
 
+    @CustomProcedure.ResultField
+    String query();
+
     @Configuration.ToMap
     Map<String, Object> toMap();
 }
