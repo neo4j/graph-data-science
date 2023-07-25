@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsa;
+
+import org.neo4j.gds.collections.DrainingIterator;
+import org.neo4j.gds.collections.HugeSparseArray;
 
 /**
  * A long-indexable version of an array of primitive short arrays ({@code
@@ -31,8 +34,8 @@ package org.neo4j.gds.collections;
  * The array is immutable and needs to be constructed using a thread-safe,
  * growing builder.
  */
-@HugeSparseArray(valueType = short.class)
-public interface HugeSparseShortArray {
+@HugeSparseArray(valueType = short[].class)
+public interface HugeSparseShortArrayArray {
 
     /**
      * @return the maximum number of values stored in the array
@@ -40,9 +43,9 @@ public interface HugeSparseShortArray {
     long capacity();
 
     /**
-     * @return the short value at the given index
+     * @return the short[] value at the given index
      */
-    short get(long index);
+    short[] get(long index);
 
     /**
      * @return true, iff the value at the given index is not the default value
@@ -54,42 +57,31 @@ public interface HugeSparseShortArray {
      * Once the iterator has been consumed, the array is empty and will return
      * the default value for each index.
      */
-    DrainingIterator<short[]> drainingIterator();
+    DrainingIterator<short[][]> drainingIterator();
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(short defaultValue) {
+    static Builder builder(short[] defaultValue) {
         return builder(defaultValue, 0);
     }
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(short defaultValue, long initialCapacity) {
-        return new HugeSparseShortArraySon.GrowingBuilder(defaultValue, initialCapacity);
+    static Builder builder(short[] defaultValue, long initialCapacity) {
+        return new HugeSparseShortArrayArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {
         /**
          * Sets the value at the given index.
          */
-        void set(long index, short value);
-
-        /**
-         * Sets the value at the given index iff it has not been set before.
-         */
-        boolean setIfAbsent(long index, short value);
-
-        /**
-         * Adds the given value to the value stored at the index. If no value
-         * has been stored before, the value is added to the default value.
-         */
-        void addTo(long index, short value);
+        void set(long index, short[] value);
 
         /**
          * @return an immutable array
          */
-        HugeSparseShortArray build();
+        HugeSparseShortArrayArray build();
     }
 }

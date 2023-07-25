@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.collections.HugeSparseLongArray;
+import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;

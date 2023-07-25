@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsa;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import static io.qala.datagen.RandomShortApi.integer;
 import static io.qala.datagen.RandomValue.between;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.collections.HugeSparseCollections.DEFAULT_PAGE_SHIFT;
+import static org.neo4j.gds.collections.hsa.HugeSparseCollections.DEFAULT_PAGE_SHIFT;
 
 class HugeSparseCollectionsTest {
 

@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsa;
+
+import org.neo4j.gds.collections.DrainingIterator;
+import org.neo4j.gds.collections.HugeSparseArray;
 
 /**
- * A long-indexable version of a primitive byte array ({@code byte[]}) that can
- * contain more than 2bn. elements.
+ * A long-indexable version of an array of primitive int arrays ({@code
+ * int[][]}) that can contain more than 2bn. elements.
  * <p>
  * It is implemented by paging of smaller arrays where each array, a so-called
  * page, can store up to 4096 elements. Using small pages can lead to fewer
@@ -31,8 +34,8 @@ package org.neo4j.gds.collections;
  * The array is immutable and needs to be constructed using a thread-safe,
  * growing builder.
  */
-@HugeSparseArray(valueType = byte.class)
-public interface HugeSparseByteArray {
+@HugeSparseArray(valueType = int[].class)
+public interface HugeSparseIntArrayArray {
 
     /**
      * @return the maximum number of values stored in the array
@@ -40,9 +43,9 @@ public interface HugeSparseByteArray {
     long capacity();
 
     /**
-     * @return the byte value at the given index
+     * @return the int[] value at the given index
      */
-    byte get(long index);
+    int[] get(long index);
 
     /**
      * @return true, iff the value at the given index is not the default value
@@ -54,42 +57,31 @@ public interface HugeSparseByteArray {
      * Once the iterator has been consumed, the array is empty and will return
      * the default value for each index.
      */
-    DrainingIterator<byte[]> drainingIterator();
+    DrainingIterator<int[][]> drainingIterator();
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(byte defaultValue) {
+    static Builder builder(int[] defaultValue) {
         return builder(defaultValue, 0);
     }
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(byte defaultValue, long initialCapacity) {
-        return new HugeSparseByteArraySon.GrowingBuilder(defaultValue, initialCapacity);
+    static Builder builder(int[] defaultValue, long initialCapacity) {
+        return new HugeSparseIntArrayArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {
         /**
          * Sets the value at the given index.
          */
-        void set(long index, byte value);
-
-        /**
-         * Sets the value at the given index iff it has not been set before.
-         */
-        boolean setIfAbsent(long index, byte value);
-
-        /**
-         * Adds the given value to the value stored at the index. If no value
-         * has been stored before, the value is added to the default value.
-         */
-        void addTo(long index, byte value);
+        void set(long index, int[] value);
 
         /**
          * @return an immutable array
          */
-        HugeSparseByteArray build();
+        HugeSparseIntArrayArray build();
     }
 }

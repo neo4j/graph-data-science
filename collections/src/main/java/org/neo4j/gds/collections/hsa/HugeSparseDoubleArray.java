@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections;
+package org.neo4j.gds.collections.hsa;
+
+import org.neo4j.gds.collections.DrainingIterator;
+import org.neo4j.gds.collections.HugeSparseArray;
 
 /**
- * A long-indexable version of an array of primitive float arrays ({@code
- * float[][]}) that can contain more than 2bn. elements.
+ * A long-indexable version of a primitive double array ({@code double[]}) that
+ * can contain more than 2bn. elements.
  * <p>
  * It is implemented by paging of smaller arrays where each array, a so-called
  * page, can store up to 4096 elements. Using small pages can lead to fewer
@@ -31,8 +34,8 @@ package org.neo4j.gds.collections;
  * The array is immutable and needs to be constructed using a thread-safe,
  * growing builder.
  */
-@HugeSparseArray(valueType = float[].class)
-public interface HugeSparseFloatArrayArray {
+@HugeSparseArray(valueType = double.class)
+public interface HugeSparseDoubleArray {
 
     /**
      * @return the maximum number of values stored in the array
@@ -40,9 +43,9 @@ public interface HugeSparseFloatArrayArray {
     long capacity();
 
     /**
-     * @return the float[] value at the given index
+     * @return the double value at the given index
      */
-    float[] get(long index);
+    double get(long index);
 
     /**
      * @return true, iff the value at the given index is not the default value
@@ -54,31 +57,45 @@ public interface HugeSparseFloatArrayArray {
      * Once the iterator has been consumed, the array is empty and will return
      * the default value for each index.
      */
-    DrainingIterator<float[][]> drainingIterator();
+    DrainingIterator<double[]> drainingIterator();
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(float[] defaultValue) {
+    static HugeSparseDoubleArray.Builder builder(double defaultValue) {
         return builder(defaultValue, 0);
     }
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(float[] defaultValue, long initialCapacity) {
-        return new HugeSparseFloatArrayArraySon.GrowingBuilder(defaultValue, initialCapacity);
+    static HugeSparseDoubleArray.Builder builder(
+        double defaultValue,
+        long initialCapacity
+    ) {
+        return new HugeSparseDoubleArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {
         /**
          * Sets the value at the given index.
          */
-        void set(long index, float[] value);
+        void set(long index, double value);
+
+        /**
+         * Sets the value at the given index iff it has not been set before.
+         */
+        boolean setIfAbsent(long index, double value);
+
+        /**
+         * Adds the given value to the value stored at the index. If no value
+         * has been stored before, the value is added to the default value.
+         */
+        void addTo(long index, double value);
 
         /**
          * @return an immutable array
          */
-        HugeSparseFloatArrayArray build();
+        HugeSparseDoubleArray build();
     }
 }

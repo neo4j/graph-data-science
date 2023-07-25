@@ -20,7 +20,7 @@
 package org.neo4j.gds.conductance;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.HugeSparseDoubleArray;
+import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
 
 @ValueClass
 public interface ConductanceResult {

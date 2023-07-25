@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.HugeSparseByteArrayList;
-import org.neo4j.gds.collections.HugeSparseCollections;
+import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
 import org.neo4j.gds.collections.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
