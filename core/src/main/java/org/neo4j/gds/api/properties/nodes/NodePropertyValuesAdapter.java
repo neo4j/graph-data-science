@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -41,10 +43,18 @@ public final class NodePropertyValuesAdapter {
     }
 
     public static DoubleNodePropertyValues adapt(HugeDoubleArray hugeDoubleArray) {
-        return new DoubleNodePropertyValuesWrapper(hugeDoubleArray);
+        return DoubleNodePropertyValuesWrapper.from(hugeDoubleArray);
     }
 
     public static NodePropertyValues adapt(HugeObjectArray<?> hugeObjectArray) {
         return ObjectNodePropertyValuesAdapter.adapt(hugeObjectArray);
+    }
+
+    public static LongNodePropertyValues adapt(HugeAtomicLongArray hugeAtomicLongArray) {
+        return LongNodePropertyValuesWrapper.from(hugeAtomicLongArray);
+    }
+
+    public static DoubleNodePropertyValues adapt(HugeAtomicDoubleArray hugeAtomicDoubleArray) {
+        return DoubleNodePropertyValuesWrapper.from(hugeAtomicDoubleArray);
     }
 }

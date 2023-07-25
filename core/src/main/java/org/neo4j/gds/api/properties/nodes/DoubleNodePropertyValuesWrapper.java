@@ -19,22 +19,38 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
 public final class DoubleNodePropertyValuesWrapper implements DoubleNodePropertyValues {
-    private final HugeDoubleArray delegate;
+    private final NodeIdToDoubleValue nodeIdValueFunction;
+    private final long size;
 
-    DoubleNodePropertyValuesWrapper(HugeDoubleArray delegate) {
-        this.delegate = delegate;
+    private DoubleNodePropertyValuesWrapper(NodeIdToDoubleValue nodeIdValueFunction, long size) {
+        this.nodeIdValueFunction = nodeIdValueFunction;
+        this.size = size;
+    }
+
+    static DoubleNodePropertyValues from(HugeDoubleArray array) {
+        return new DoubleNodePropertyValuesWrapper(array::get, array.size());
+    }
+
+    static DoubleNodePropertyValues from(HugeAtomicDoubleArray array) {
+        return new DoubleNodePropertyValuesWrapper(array::get, array.size());
     }
 
     @Override
     public double doubleValue(long nodeId) {
-        return delegate.get(nodeId);
+        return nodeIdValueFunction.apply(nodeId);
     }
 
     @Override
     public long nodeCount() {
-        return delegate.size();
+        return size;
+    }
+
+    @FunctionalInterface
+    private interface NodeIdToDoubleValue {
+        double apply(long nodeId);
     }
 }

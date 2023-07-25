@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -33,6 +34,10 @@ public final class LongNodePropertyValuesWrapper implements LongNodePropertyValu
     }
 
     static LongNodePropertyValues from(HugeLongArray array) {
+        return new LongNodePropertyValuesWrapper(array::get, array.size());
+    }
+
+    static LongNodePropertyValues from(HugeAtomicLongArray array) {
         return new LongNodePropertyValuesWrapper(array::get, array.size());
     }
 
