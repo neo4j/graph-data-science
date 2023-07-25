@@ -51,7 +51,8 @@ final class InlinedHeadPackedTailUnpacker {
 
     void copyFrom(InlinedHeadPackedTailUnpacker other) {
         System.arraycopy(other.block, 0, this.block, 0, BLOCK_SIZE);
-        System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.header.length);
+        this.header.ensureCapacity(other.headerLength);
+        System.arraycopy(other.header.buffer, 0, this.header.buffer, 0, other.headerLength);
         this.targetPtr = other.targetPtr;
         this.headerLength = other.headerLength;
         this.idxInBlock = other.idxInBlock;
@@ -61,7 +62,7 @@ final class InlinedHeadPackedTailUnpacker {
     }
 
     void reset(long ptr, int degree) {
-        int blocks = BitUtil.ceilDiv(degree, AdjacencyPacking.BLOCK_SIZE);
+        int blocks = BitUtil.ceilDiv(degree - 1, AdjacencyPacking.BLOCK_SIZE);
         this.header.ensureCapacity(blocks);
         this.headerLength = blocks;
         // Read block information part from header
@@ -71,15 +72,18 @@ final class InlinedHeadPackedTailUnpacker {
         ptr += blocks;
         // Var-length decode head value following the block information.
         ptr = VarLongDecoding.unsafeDecodeVLong(ptr, this.headValue);
+        // We store the head value at the end of the block array.
+        // The first call to next() will read that value and the
+        // subsequent call will decompress the first block.
+        this.block[BLOCK_SIZE - 1] = this.headValue.longValue();
         // Set the last value to the head value for correct
         // delta decoding of the first block.
         this.lastValue = this.headValue.longValue();
         // Align target ptr to read from data block
         this.targetPtr = BitUtil.align(ptr, Long.BYTES);
-        this.idxInBlock = 0;
+        this.idxInBlock = BLOCK_SIZE - 1;
         this.blockId = 0;
-        this.remaining = degree;
-        this.decompressBlock();
+        this.remaining = degree - 1;
     }
 
     long next() {
