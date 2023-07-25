@@ -25,6 +25,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.collections.impl.block.factory.Functions;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -106,7 +107,7 @@ final class CsvFileInput implements FileInput {
             .collect(Collectors.toMap(
                 entry -> CsvImportFileUtil.parseNodeHeader(
                     entry.getKey(),
-                    labelMapping.isPresent() ? labelMapping.get()::get : x -> x
+                    labelMapping.isPresent() ? labelMapping.get()::get : Functions.identity()
                 ),
                 Map.Entry::getValue
             ));
