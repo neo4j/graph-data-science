@@ -44,9 +44,7 @@ public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseCo
 
     @Value.Default
     default boolean useLabelMapping() {
-        // the default should generally be true, however neo4j admin, backwards compatability and maybe some feedback
-        // about this change from field engineers should be taken into account first.
-        // the same is true for BackupConfig
+        // the reason for default false (unlike BackupConfig) is that Neo4j Admin import is not aware of label mapping
         return false;
     }
 
