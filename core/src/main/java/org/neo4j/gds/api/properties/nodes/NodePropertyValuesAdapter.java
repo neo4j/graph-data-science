@@ -31,19 +31,19 @@ public final class NodePropertyValuesAdapter {
     private NodePropertyValuesAdapter() {}
 
     public static LongNodePropertyValues adapt(HugeLongArray hugeLongArray) {
-        return LongNodePropertyValuesWrapper.from(hugeLongArray);
+        return LongNodePropertyValuesAdapter.adapt(hugeLongArray);
     }
 
     public static LongNodePropertyValues adapt(HugeIntArray hugeIntArray) {
-        return LongNodePropertyValuesWrapper.from(hugeIntArray);
+        return LongNodePropertyValuesAdapter.adapt(hugeIntArray);
     }
 
     public static LongNodePropertyValues adapt(HugeByteArray hugeByteArray) {
-        return LongNodePropertyValuesWrapper.from(hugeByteArray);
+        return LongNodePropertyValuesAdapter.adapt(hugeByteArray);
     }
 
     public static DoubleNodePropertyValues adapt(HugeDoubleArray hugeDoubleArray) {
-        return DoubleNodePropertyValuesWrapper.from(hugeDoubleArray);
+        return DoubleNodePropertyValuesAdapter.adapt(hugeDoubleArray);
     }
 
     public static NodePropertyValues adapt(HugeObjectArray<?> hugeObjectArray) {
@@ -51,10 +51,10 @@ public final class NodePropertyValuesAdapter {
     }
 
     public static LongNodePropertyValues adapt(HugeAtomicLongArray hugeAtomicLongArray) {
-        return LongNodePropertyValuesWrapper.from(hugeAtomicLongArray);
+        return LongNodePropertyValuesAdapter.adapt(hugeAtomicLongArray);
     }
 
     public static DoubleNodePropertyValues adapt(HugeAtomicDoubleArray hugeAtomicDoubleArray) {
-        return DoubleNodePropertyValuesWrapper.from(hugeAtomicDoubleArray);
+        return DoubleNodePropertyValuesAdapter.adapt(hugeAtomicDoubleArray);
     }
 }
