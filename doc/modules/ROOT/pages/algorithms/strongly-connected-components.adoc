@@ -48,7 +48,7 @@ Decomposing a directed graph into its strongly connected components is a classic
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.write(
+CALL gds.scc.write(
   graphName: string,
   configuration: map
 )
@@ -92,7 +92,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, setCount, maxSetSize, min
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
+CALL gds.scc.stream(graphName: String, configuration: Map)
 YIELD nodeId, componentId
 ----
 
@@ -154,7 +154,7 @@ CALL gds.graph.project('graph', 'User', 'FOLLOW')
 .The following will run the algorithm and stream back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.stream('graph', {})
+CALL gds.scc.stream('graph', {})
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
 ORDER BY Component DESC
@@ -185,7 +185,7 @@ Charles ends up in his own component because there isn't an outgoing relationshi
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.write('graph', {
+CALL gds.scc.write('graph', {
   writeProperty: 'componentId'
 })
 YIELD setCount, maxSetSize, minSetSize;

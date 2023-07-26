@@ -189,8 +189,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.nodeClassification.train",
         "gds.beta.pipeline.nodeClassification.train.estimate",
 
-        "gds.alpha.scc.write",
-        "gds.alpha.scc.stream",
+        "gds.scc.write",
+        "gds.scc.stream",
 
         "gds.scaleProperties.mutate",
         "gds.scaleProperties.mutate.estimate",

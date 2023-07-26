@@ -52,7 +52,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSccStream() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.scc")
+            .algo("gds.scc")
             .streamMode()
             .yields();
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
@@ -61,7 +61,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSccWrite() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.scc")
+            .algo("gds.scc")
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));

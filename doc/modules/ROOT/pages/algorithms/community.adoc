@@ -15,12 +15,16 @@ The Neo4j GDS library includes the following community detection algorithms, gro
 ** xref:algorithms/k1coloring.adoc[K-1 Coloring]
 ** xref:algorithms/k-core.adoc[K-Core Decomposition]
 ** xref:algorithms/approx-max-k-cut.adoc[Approximate Maximum k-cut]
-** xref:algorithms/modularity.adoc[Modularity metric]
-* Beta
-** xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
-** xref:algorithms/kmeans.adoc[K-Means Clustering]
-** xref:algorithms/leiden.adoc[Leiden]
-* Alpha
-** xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
-** xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
 ** xref:algorithms/conductance.adoc[Conductance metric]
+** xref:algorithms/modularity.adoc[Modularity metric]
+** xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
+** xref:algorithms/leiden.adoc[Leiden]
+** xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
+
+* Beta
+
+** xref:algorithms/kmeans.adoc[K-Means Clustering]
+
+* Alpha
+** xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
+
