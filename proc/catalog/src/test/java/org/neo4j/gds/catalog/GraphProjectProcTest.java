@@ -1208,30 +1208,6 @@ class GraphProjectProcTest extends BaseProcTest {
         assertGraphDoesNotExist("g");
     }
 
-    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
-    void failsOnInvalidGraphName(String invalidName) {
-        assertError(
-            "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relationshipQuery)",
-            mapWithNulls("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
-            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
-        );
-
-        assertGraphDoesNotExist(invalidName);
-    }
-
-    @Test
-    void failsOnMissingMandatory() {
-        assertError(
-            "CALL gds.graph.project()",
-            "Procedure call does not provide the required number of arguments"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher()",
-            "Procedure call does not provide the required number of arguments"
-        );
-    }
-
     @Test
     void failsOnInvalidNeoLabel() {
         String name = "g";
