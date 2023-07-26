@@ -24,7 +24,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
@@ -36,9 +35,6 @@ import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.nio.file.Path;
@@ -49,11 +45,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
-@GdlExtension
 class CsvToGraphStoreImporterIntegrationTest {
 
-    @GdlGraph
-    private static final String GDL =
+    private static final String GRAPH_WITH_PROPERTIES =
         "CREATE" +
         //                                      This triggers jackson wrapping the values in quotes
         "  (a:A:B { averylongpropertynamegreaterthantwentyfour: 0, prop2: 42, prop3: [0.30000001192092896D, 0.20000000298023224D]})" +
@@ -67,18 +61,13 @@ class CsvToGraphStoreImporterIntegrationTest {
         ", (c)-[:REL2 { prop3: 4, prop4: 46 }]->(d)" +
         ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
 
-    @Inject
-    GraphStore graphStore;
-
-    @Inject
-    Graph graph;
-
     @TempDir
     Path graphLocation;
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) {
+        var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
         GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
 
@@ -87,29 +76,30 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         var importedGraphStore = userGraphStore.graphStore();
         var importedGraph = importedGraphStore.getUnion();
-        assertGraphEquals(graph, importedGraph);
+        assertGraphEquals(graphStore.getUnion(), importedGraph);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldImportGraphStoreWithGraphProperties(int concurrency) {
-        addLongGraphProperty();
-        addDoubleArrayGraphProperty();
-        addLongNamedGraphProperty();
+        var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
+
+        addLongGraphProperty(graphStore);
+        addDoubleArrayGraphProperty(graphStore);
+        addLongNamedGraphProperty(graphStore);
 
         GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
-        var userGraphStore = importer.run();
-        var graphStore = userGraphStore.graphStore();
+        var userGraphStore = importer.run().graphStore();
 
-        assertThat(graphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
+        assertThat(userGraphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
             "longProp",
             "doubleArrayProp",
             "thisisaverylongnameintentionallytotriggerquoting"
         );
 
         var expectedLongValues = LongStream.range(0, 10_000).toArray();
-        assertThat(graphStore.graphProperty("longProp").values().longValues().toArray())
+        assertThat(userGraphStore.graphProperty("longProp").values().longValues().toArray())
             .containsExactlyInAnyOrder(expectedLongValues);
 
         var expectedDoubleArrayProperties = LongStream
@@ -117,7 +107,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             .mapToObj(i -> new double[]{(double) i, 42.0})
             .collect(Collectors.toList())
             .toArray(new double[0][0]);
-        assertThat(graphStore.graphProperty("doubleArrayProp").values().doubleArrayValues().collect(Collectors.toList()))
+        assertThat(userGraphStore.graphProperty("doubleArrayProp").values().doubleArrayValues().collect(Collectors.toList()))
             .containsExactlyInAnyOrder(expectedDoubleArrayProperties);
     }
 
@@ -182,7 +172,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build();
     }
 
-    private void addDoubleArrayGraphProperty() {
+    private void addDoubleArrayGraphProperty(GraphStore graphStore) {
         graphStore.addGraphProperty("doubleArrayProp", new DoubleArrayGraphPropertyValues() {
             @Override
             public Stream<double[]> doubleArrayValues() {
@@ -196,7 +186,7 @@ class CsvToGraphStoreImporterIntegrationTest {
         });
     }
 
-    private void addLongGraphProperty() {
+    private void addLongGraphProperty(GraphStore graphStore) {
         graphStore.addGraphProperty("longProp", new LongGraphPropertyValues() {
             @Override
             public LongStream longValues() {
@@ -210,7 +200,7 @@ class CsvToGraphStoreImporterIntegrationTest {
         });
     }
 
-    private void addLongNamedGraphProperty() {
+    private void addLongNamedGraphProperty(GraphStore graphStore) {
         graphStore.addGraphProperty("thisisaverylongnameintentionallytotriggerquoting", new LongGraphPropertyValues() {
             @Override
             public LongStream longValues() {
