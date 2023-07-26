@@ -338,12 +338,12 @@
 | `gds.kmeans.write` label:procedure[Procedure]
 | `gds.kmeans.write.estimate` label:procedure[Procedure]
 .6+<.^|xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
-| `gds.beta.node2vec.mutate` label:procedure[Procedure]
-| `gds.beta.node2vec.mutate.estimate` label:procedure[Procedure]
-| `gds.beta.node2vec.stream` label:procedure[Procedure]
-| `gds.beta.node2vec.stream.estimate` label:procedure[Procedure]
-| `gds.beta.node2vec.write` label:procedure[Procedure]
-| `gds.beta.node2vec.write.estimate` label:procedure[Procedure]
+| `gds.node2vec.mutate` label:procedure[Procedure]
+| `gds.node2vec.mutate.estimate` label:procedure[Procedure]
+| `gds.node2vec.stream` label:procedure[Procedure]
+| `gds.node2vec.stream.estimate` label:procedure[Procedure]
+| `gds.node2vec.write` label:procedure[Procedure]
+| `gds.node2vec.write.estimate` label:procedure[Procedure]
 |===
 
 [[alpha-tier]]
