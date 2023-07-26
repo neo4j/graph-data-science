@@ -2,7 +2,7 @@
 [.alpha]
 = Strongly Connected Components
 :description: This section describes the Strongly Connected Components algorithm in the Neo4j Graph Data Science library.
-
+:result: component
 
 The Strongly Connected Components (SCC) algorithm finds maximal sets of connected nodes in a directed graph.
 A set is considered a strongly connected component if there is a directed path between each pair of nodes within the set.
@@ -44,7 +44,36 @@ Decomposing a directed graph into its strongly connected components is a classic
 
 [[algorithms-strongly-connected-components-syntax]]
 == Syntax
+Decomposition syntax per mode
+[.tabbed-example, caption = ]
+====
+[.include-with-stream]
+======
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.scc.stream(graphName: String, configuration: Map)
+YIELD nodeId, componentId
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID.
+| componentId | Integer | Component ID.
+|===
+======
+[.include-with-write]
+======
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
@@ -55,14 +84,14 @@ CALL gds.scc.write(
 YIELD preProcessingMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
 |===
-| Name             | Type    | Default                | Optional | Description
-| writeProperty    | String  | 'componentId'          | yes      | The property name written back to.
-| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | "componentId"                  | yes       | The node property in the Neo4j database to which the {result} is written.
 |===
 
 .Results
@@ -88,30 +117,9 @@ YIELD preProcessingMillis, computeMillis, writeMillis, setCount, maxSetSize, min
 | writeProperty        | String  | The property name written back to.
 
 |===
+======
 
-.The following will run the algorithm and stream results:
-[source, cypher, role=noplay]
-----
-CALL gds.scc.stream(graphName: String, configuration: Map)
-YIELD nodeId, componentId
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-|===
-
-.Results
-[opts="header"]
-|===
-| Name        | Type    | Description
-| nodeId      | Integer | Node ID.
-| componentId | Integer | Component ID.
-|===
-
+====
 
 [[algorithms-strongly-connected-components-example]]
 == Strongly Connected Components algorithm examples
