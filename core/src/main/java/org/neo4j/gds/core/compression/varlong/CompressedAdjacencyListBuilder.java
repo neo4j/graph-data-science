@@ -77,7 +77,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         return memoryInfoBuilder.build();
     }
 
-    private enum Factory implements BumpAllocator.Factory<byte[]> {
+    enum Factory implements BumpAllocator.Factory<byte[]> {
         INSTANCE;
 
         @Override
@@ -102,9 +102,9 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         }
 
         @Override
-        public long allocate(int length, Slice<byte[]> into) {
-            this.memoryTracker.recordHeapAllocation(length);
-            return allocator.insertInto(length, (ModifiableSlice<byte[]>) into);
+        public long allocate(int allocationSize, Slice<byte[]> into) {
+            this.memoryTracker.recordHeapAllocation(allocationSize);
+            return allocator.insertInto(allocationSize, (ModifiableSlice<byte[]>) into);
         }
 
         @Override

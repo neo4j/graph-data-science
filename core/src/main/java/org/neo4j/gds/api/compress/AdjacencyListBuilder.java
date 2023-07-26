@@ -35,7 +35,7 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
     interface Allocator<PAGE> extends AutoCloseable {
 
-        long allocate(int length, Slice<PAGE> into);
+        long allocate(int allocationSize, Slice<PAGE> into);
 
         @Override
         void close();

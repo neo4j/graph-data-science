@@ -114,9 +114,9 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         }
 
         @Override
-        public long allocate(int length, Slice<Address> into) {
-            this.memoryTracker.recordNativeAllocation(length);
-            return this.allocator.insertInto(length, (ModifiableSlice<Address>) into);
+        public long allocate(int allocationSize, Slice<Address> into) {
+            this.memoryTracker.recordNativeAllocation(allocationSize);
+            return this.allocator.insertInto(allocationSize, (ModifiableSlice<Address>) into);
         }
 
         @Override

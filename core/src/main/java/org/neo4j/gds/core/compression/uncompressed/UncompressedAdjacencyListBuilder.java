@@ -118,9 +118,9 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public long allocate(int length, Slice<long[]> into) {
-            this.memoryTracker.recordHeapAllocation(length);
-            return allocator.insertInto(length, (ModifiableSlice<long[]>) into);
+        public long allocate(int allocationSize, Slice<long[]> into) {
+            this.memoryTracker.recordHeapAllocation(allocationSize);
+            return allocator.insertInto(allocationSize, (ModifiableSlice<long[]>) into);
         }
 
         @Override

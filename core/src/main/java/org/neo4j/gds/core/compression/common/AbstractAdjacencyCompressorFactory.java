@@ -70,6 +70,13 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
     }
 
     @Override
+    public void init(HugeIntArray degrees, HugeLongArray adjacencyOffsets, HugeLongArray propertyOffsets) {
+        this.adjacencyDegrees = degrees;
+        this.adjacencyOffsets = adjacencyOffsets;
+        this.propertyOffsets = propertyOffsets;
+    }
+
+    @Override
     public LongAdder relationshipCounter() {
         return relationshipCounter;
     }

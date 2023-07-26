@@ -40,9 +40,9 @@ import static org.neo4j.gds.core.compression.packed.AdjacencyPackerUtil.bytesNee
  * If a block to compress has less than {@link org.neo4j.gds.core.compression.packed.AdjacencyPacking#BLOCK_SIZE} values,
  * this strategy uses var-long encoding to compress the values in that block.
  */
-final class VarLongTailPacker {
+public final class VarLongTailPacker {
 
-    static long compress(
+    public static long compress(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
@@ -55,7 +55,7 @@ final class VarLongTailPacker {
         return deltaCompress(allocator, slice, values, length, aggregation, degree, memoryTracker);
     }
 
-    static long compressWithProperties(
+    public static long compressWithProperties(
         AdjacencyListBuilder.Allocator<Address> allocator,
         AdjacencyListBuilder.Slice<Address> slice,
         long[] values,
