@@ -75,7 +75,7 @@ class SccWriteProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.scc")
+            .algo("gds.scc")
             .writeMode()
             .addParameter("writeProperty","scc")
             .yields();
