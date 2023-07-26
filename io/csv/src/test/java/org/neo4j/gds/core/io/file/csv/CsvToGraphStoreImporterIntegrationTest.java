@@ -22,7 +22,9 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
@@ -61,15 +63,39 @@ class CsvToGraphStoreImporterIntegrationTest {
         ", (c)-[:REL2 { prop3: 4, prop4: 46 }]->(d)" +
         ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
 
+    private static final String GRAPH_WITH_UNDERSCORE_LABELS =
+        "CREATE" +
+            //                                      This triggers jackson wrapping the values in quotes
+            "  (a:A_B { averylongpropertynamegreaterthantwentyfour: 0, prop2: 42, prop3: [0.30000001192092896D, 0.20000000298023224D]})" +
+            ", (b:A:B { averylongpropertynamegreaterthantwentyfour: 1, prop2: 43})" +
+            ", (c:A:C { averylongpropertynamegreaterthantwentyfour: 2, prop2: 44, prop3: [-0.04D] })" +
+            ", (d:B { averylongpropertynamegreaterthantwentyfour: 3 })" +
+            ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
+            ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +
+            ", (b)-[:REL1 { prop1: 2, prop2: 44 }]->(a)" +
+            ", (b)-[:REL2 { prop3: 3, prop4: 45 }]->(c)" +
+            ", (c)-[:REL2 { prop3: 4, prop4: 46 }]->(d)" +
+            ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
+
+
     @TempDir
     Path graphLocation;
 
+    static Stream<Arguments> concurrencyLabelMappingArgs() {
+        return Stream.of(
+            Arguments.of(1, false),
+            Arguments.of(4, false),
+            Arguments.of(1, true),
+            Arguments.of(4, true)
+        );
+    }
+
     @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void shouldImportProperties(int concurrency) {
+    @MethodSource("concurrencyLabelMappingArgs")
+    void shouldImportProperties(int concurrency, boolean useLabelMapping) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency, useLabelMapping), graphLocation).run();
 
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -80,15 +106,15 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void shouldImportGraphStoreWithGraphProperties(int concurrency) {
+    @MethodSource("concurrencyLabelMappingArgs")
+    void shouldImportGraphStoreWithGraphProperties(int concurrency, boolean useLabelMapping) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
         addLongGraphProperty(graphStore);
         addDoubleArrayGraphProperty(graphStore);
         addLongNamedGraphProperty(graphStore);
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency, useLabelMapping), graphLocation).run();
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run().graphStore();
 
@@ -111,11 +137,26 @@ class CsvToGraphStoreImporterIntegrationTest {
             .containsExactlyInAnyOrder(expectedDoubleArrayProperties);
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldImportGraphWithPropertiesAndUnderscoreLabels(int concurrency) {
+        var graphStore = GdlFactory.of(GRAPH_WITH_UNDERSCORE_LABELS).build();
+
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency, true /* will not work without label mapping */), graphLocation).run();
+
+        var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run();
+
+        var importedGraphStore = userGraphStore.graphStore();
+        var importedGraph = importedGraphStore.getUnion();
+        assertGraphEquals(graphStore.getUnion(), importedGraph);
+    }
+
     @Test
     void shouldImportGraphWithNoLabels() {
         var graphStore = GdlFactory.of("()-[]->()").build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(4), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(4, false), graphLocation).run();
 
         var importer = new CsvToGraphStoreImporter(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -134,7 +175,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
-        GraphStoreToCsvExporter.create(graphStoreWithCapabilities, exportConfig(1), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStoreWithCapabilities, exportConfig(1, false), graphLocation).run();
 
         var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -155,7 +196,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(1), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(1, false), graphLocation).run();
 
         var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -163,12 +204,13 @@ class CsvToGraphStoreImporterIntegrationTest {
         assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
     }
 
-    private GraphStoreToFileExporterConfig exportConfig(int concurrency) {
+    private GraphStoreToFileExporterConfig exportConfig(int concurrency, boolean useLabelMapping) {
         return GraphStoreToFileExporterConfigImpl.builder()
             .exportName("my-export")
             .writeConcurrency(concurrency)
             .username("")
             .includeMetaData(true)
+            .useLabelMapping(useLabelMapping)
             .build();
     }
 
