@@ -1,2 +1,2 @@
-WARNING: The {algorithm} algorithm requires the graph to be created using the `UNDIRECTED` orientation for relationships.
-The xref:management-ops/graph-creation/graph-project.adoc#_relationship_orientation[graph creation] page shows how to set a specific relationship orientation.
+WARNING: The {algorithm} algorithm requires the graph to use the `UNDIRECTED` orientation for relationships.
+You can either xref:management-ops/graph-creation/graph-project.adoc#_relationship_orientation[create] the graph directly with a specific relationship orientation or xref:management-ops/graph-update/to-undirected.adoc[update] it by adding a new relationship with the desired orientation.
