@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecMutateProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.node2vec.mutate", mode = READ)
+    @Procedure(value = "gds.node2vec.mutate", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -46,7 +47,7 @@ public class Node2VecMutateProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.node2vec.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.node2vec.mutate.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -57,5 +58,37 @@ public class Node2VecMutateProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Procedure(value = "gds.beta.node2vec.mutate", mode = READ, deprecatedBy = "gds.node2vec.mutate")
+    @Description(Node2VecCompanion.DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<MutateResult> betaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.node2vec.mutate` has been deprecated, please use `gds.node2vec.mutate`.");
+        return mutate(graphName, configuration);
+    }
+
+    @Procedure(
+        value = "gds.beta.node2vec.mutate.estimate", mode = READ, deprecatedBy = "gds.node2vec.mutate.estimate"
+    )
+    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.node2vec.mutate.estimate` has been deprecated, please use `gds.node2vec.mutate.estimate`.");
+        return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
