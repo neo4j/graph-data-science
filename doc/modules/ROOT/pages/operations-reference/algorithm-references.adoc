@@ -389,7 +389,4 @@
 .1+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangle Listing]
 | `gds.alpha.triangles` label:procedure[Procedure]
 | xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `gds.alpha.linkprediction.totalNeighbors` label:function[Function]
-.2+<.^|xref:machine-learning/pre-processing/scale-properties.adoc[Scale Properties]
-| `gds.alpha.scaleProperties.mutate` label:procedure[Procedure] label:deprecated[Deprecated]
-| `gds.alpha.scaleProperties.stream` label:procedure[Procedure] label:deprecated[Deprecated]
 |===
