@@ -56,7 +56,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier;
     private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
     private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
-    private final Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplierVisitorSupplier;
+    private final Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplier;
 
     private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
     private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
@@ -91,7 +91,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         this.userInfoVisitorSupplier = userInfoVisitorSupplier;
         this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
         this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
-        this.labelMappingVisitorSupplierVisitorSupplier = labelMappingVisitorSupplier;
+        this.labelMappingVisitorSupplier = labelMappingVisitorSupplier;
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
@@ -258,7 +258,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private void exportNodeLabelMapping(GraphStoreInput graphStoreInput) {
         var labelMapping = graphStoreInput.labelMapping();
         if (labelMapping.isPresent()) {
-            try (var labelMappingVisitor = labelMappingVisitorSupplierVisitorSupplier.get()) {
+            try (var labelMappingVisitor = labelMappingVisitorSupplier.get()) {
                 labelMapping.get().entrySet().forEach(entry -> labelMappingVisitor.export(entry));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
