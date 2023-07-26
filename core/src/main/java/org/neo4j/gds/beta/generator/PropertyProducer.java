@@ -42,6 +42,10 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         return new NodeIdProducer(propertyName);
     }
 
+    static PropertyProducer<long[]> fixedLong(String propertyName, long value) {
+        return new FixedLongProducer(propertyName, value);
+    }
+
     static PropertyProducer<long[]> randomLong(String propertyName, long min, long max) {
         return new RandomLongProducer(propertyName, min, max);
     }
@@ -104,6 +108,53 @@ public interface PropertyProducer<PROPERTY_SLICE> {
                    "propertyName='" + propertyName + '\'' +
                    ", value=" + value +
                    '}';
+        }
+    }
+
+    class FixedLongProducer implements PropertyProducer<long[]> {
+        private final String propertyName;
+        private final long value;
+
+        public FixedLongProducer(String propertyName, long value) {
+            this.propertyName = propertyName;
+            this.value = value;
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+            return ValueType.LONG;
+        }
+
+        @Override
+        public void setProperty(long nodeId, long[] longs, int index, Random random) {
+            longs[index] = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FixedLongProducer fixedLongProducer = (FixedLongProducer) o;
+            return fixedLongProducer.value == value &&
+                Objects.equals(propertyName, fixedLongProducer.propertyName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(propertyName, value);
+        }
+
+        @Override
+        public String toString() {
+            return "FixedLongProducer{" +
+                "propertyName='" + propertyName + '\'' +
+                ", value=" + value +
+                '}';
         }
     }
 

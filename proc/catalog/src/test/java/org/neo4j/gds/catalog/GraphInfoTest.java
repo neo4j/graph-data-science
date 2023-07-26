@@ -57,22 +57,12 @@ final class GraphInfoTest {
         PropertyProducer<?> producer,
         @SuppressWarnings("unused") String displayName
     ) {
-        assertThat(
-            create(
-                producer,
-                (graphProjectConfig1, graphStore1) -> GraphInfo.withoutMemoryUsage(
-                    graphProjectConfig1,
-                    graphStore1
-                )
-            )
-        )
+        assertThat(create(producer, GraphInfo::withoutMemoryUsage))
             .returns(-1L, gi -> gi.sizeInBytes)
             .returns("", gi -> gi.memoryUsage);
 
-        var graphInfo = create(
-            producer,
-            (graphProjectConfig, graphStore) -> GraphInfo.withMemoryUsage(graphProjectConfig, graphStore)
-        );
+        var graphInfo = create(producer, GraphInfo::withMemoryUsage);
+
         assertThat(graphInfo)
             .extracting(gi -> gi.sizeInBytes, as(InstanceOfAssertFactories.LONG))
             .isPositive();
@@ -85,7 +75,8 @@ final class GraphInfoTest {
     static Stream<Arguments> producers() {
         return Stream.of(
             arguments(new PropertyProducer.EmptyPropertyProducer(), "emptyProducer"),
-            arguments(PropertyProducer.fixedDouble("singleValue", 42), "singleValueProducer"),
+            arguments(PropertyProducer.fixedDouble("singleDoubleValue", 42), "singleDoubleValueProducer"),
+            arguments(PropertyProducer.fixedLong("singleLongValue", 42), "singleLongValueProducer"),
             arguments(
                 PropertyProducer.randomEmbedding("lotsOfSmallValues", 42, 0.0F, 1.0F),
                 "lotsOfSmallValuesProducer"
