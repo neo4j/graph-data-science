@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -145,11 +146,10 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInNativeProjectParameters() {
-        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphStoreCatalogBusinessFacade(
             new ConfigurationService(),
             new GraphNameValidationService(),
-            graphStoreCatalogService,
+            mock(GraphStoreCatalogService.class),
             null,
             null,
             null,
@@ -218,11 +218,10 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInCypherProjectParameters() {
-        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultGraphStoreCatalogBusinessFacade(
             new ConfigurationService(),
             new GraphNameValidationService(),
-            graphStoreCatalogService,
+            mock(GraphStoreCatalogService.class),
             null,
             null,
             null,
@@ -284,5 +283,55 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             "some relationship projection",
             null
         )).withMessage("No value specified for the mandatory configuration parameter `nodeQuery`");
+    }
+
+    @Test
+    void shouldDoExistenceCheckWhenProjecting() {
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+            null,
+            new GraphNameValidationService(),
+            graphStoreCatalogService,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        var user = new User("some user", false);
+        var databaseId = DatabaseId.from("some database name");
+        doThrow(new IllegalArgumentException("it's alive?!")).when(graphStoreCatalogService).ensureGraphDoesNotExist(
+            user,
+            databaseId,
+            GraphName.parse("some graph")
+        );
+
+        assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
+            user,
+            databaseId,
+            null,
+            null,
+            null,
+            null,
+            "some graph",
+            "some node projection",
+            "some relationship projection",
+            null
+        )).withMessage("it's alive?!");
+
+        assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
+            user,
+            databaseId,
+            null,
+            null,
+            null,
+            null,
+            "some graph",
+            "some node query",
+            "some relationship query",
+            null
+        )).withMessage("it's alive?!");
     }
 }

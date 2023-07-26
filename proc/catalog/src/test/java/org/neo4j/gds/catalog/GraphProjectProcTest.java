@@ -1268,23 +1268,6 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
-    void failsOnExistingGraphName() {
-        String name = "g";
-        runQuery("CALL gds.graph.project($name, '*', '*')", Map.of("name", name));
-        assertError(
-            "CALL gds.graph.project($name, '*', '*')",
-            Map.of("name", name),
-            formatWithLocale("A graph with name '%s' already exists.", name)
-        );
-
-        assertError(
-            "CALL gds.graph.project.cypher($name, '*', '*')",
-            Map.of("name", name),
-            formatWithLocale("A graph with name '%s' already exists.", name)
-        );
-    }
-
-    @Test
     void failOnInvalidGraphName() {
         String invalidName = " na me ";
         String expectedMessage = formatWithLocale(
