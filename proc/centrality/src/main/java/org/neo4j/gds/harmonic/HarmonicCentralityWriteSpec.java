@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.closeness.harmonic.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.closeness.harmonic.write", aliases = {"gds.alpha.closeness.harmonic.write"}, description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig,Stream<WriteResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityWriteConfig>> {
 
     @Override

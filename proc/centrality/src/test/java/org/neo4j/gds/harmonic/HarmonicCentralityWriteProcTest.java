@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +68,7 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
     @Test
     void testWrite() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.closeness.harmonic")
+            .algo("gds.closeness.harmonic")
             .writeMode()
             .addParameter("writeProperty", "centralityScore")
             .yields();
@@ -133,5 +134,22 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
                 "HarmonicCentralityWrite :: WriteNodeProperties"
             );
         });
+    }
+
+    @Test
+    void testAlphaStillWorks() {
+        var alphaQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.alpha.closeness.harmonic")
+            .writeMode()
+            .addParameter("writeProperty", "centralityScore")
+            .yields("nodes", "writeProperty", "centralityDistribution");
+        var nonAlphaQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.closeness.harmonic")
+            .writeMode()
+            .addParameter("writeProperty", "centralityScore")
+            .yields("nodes", "writeProperty", "centralityDistribution");
+        var alphaResult = runQuery(alphaQuery, Result::resultAsString);
+        var nonAlphaResult = runQuery(nonAlphaQuery, Result::resultAsString);
+        assertThat(alphaResult).isEqualTo(nonAlphaResult);
     }
 }

@@ -163,7 +163,7 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 
 [.include-with-mutate]
 ======
-.Run Betweenness Centrality in mutate mode on a named graph.
+.Run Closeness Centrality in mutate mode on a named graph.
 [source,cypher,role=noplay]
 ----
 CALL gds.closeness.mutate(

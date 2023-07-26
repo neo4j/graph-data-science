@@ -1,5 +1,4 @@
 [[algorithms-harmonic-centrality]]
-[.alpha]
 = Harmonic Centrality
 :description: This section describes the Harmonic Centrality algorithm
 

@@ -33,7 +33,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.closeness.harmonic.stream", aliases = {"gds.alpha.closeness.harmonic.stream"}, description = DESCRIPTION, executionMode = STREAM)
 public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<StreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
 
     @Override

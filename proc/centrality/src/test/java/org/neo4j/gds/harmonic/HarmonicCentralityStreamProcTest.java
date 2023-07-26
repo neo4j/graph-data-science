@@ -27,6 +27,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 
@@ -57,7 +58,7 @@ class HarmonicCentralityStreamProcTest  extends BaseProcTest {
     @Test
     void shouldStream() {
         var query = GdsCypher.call("graph")
-            .algo("gds.alpha.closeness.harmonic")
+            .algo("gds.closeness.harmonic")
             .streamMode()
             .yields("nodeId", "centrality");
 
@@ -76,5 +77,20 @@ class HarmonicCentralityStreamProcTest  extends BaseProcTest {
         assertThat( resultMap.get(idFunction.of("c")).doubleValue()).isCloseTo(0.375, Offset.offset(1e-5));
         assertThat( resultMap.get(idFunction.of("d")).doubleValue()).isCloseTo(0.25, Offset.offset(1e-5));
         assertThat( resultMap.get(idFunction.of("e")).doubleValue()).isCloseTo(0.25, Offset.offset(1e-5));
+    }
+
+    @Test
+    void alphaStillWorks() {
+        var alphaQuery = GdsCypher.call("graph")
+            .algo("gds.alpha.closeness.harmonic")
+            .streamMode()
+            .yields("nodeId", "centrality");
+        var nonAlphaQuery = GdsCypher.call("graph")
+            .algo("gds.closeness.harmonic")
+            .streamMode()
+            .yields("nodeId", "centrality");
+        var alphaResult = runQuery(alphaQuery, Result::resultAsString);
+        var nonAlphaResult = runQuery(nonAlphaQuery, Result::resultAsString);
+        assertThat(alphaResult).isEqualTo(nonAlphaResult);
     }
 }
