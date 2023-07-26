@@ -110,7 +110,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
     }
 
     @Test
-    void shouldUseStrictValidationForNativeProject() {
+    void shouldUseStrictValidationWhenProjecting() {
         var validationService = mock(GraphNameValidationService.class);
         var facade = new DefaultGraphStoreCatalogBusinessFacade(
             null,
@@ -125,8 +125,24 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
         );
 
         when(validationService.validateStrictly("   somegraph   ")).thenThrow(new IllegalArgumentException("whitespace!"));
+
         assertThatIllegalArgumentException().isThrownBy(
             () -> facade.nativeProject(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "   somegraph   ",
+                null,
+                null,
+                null
+            )
+        ).withMessage("whitespace!");
+
+        assertThatIllegalArgumentException().isThrownBy(
+            () -> facade.cypherProject(
                 null,
                 null,
                 null,

@@ -1268,18 +1268,6 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
-    void failOnInvalidGraphName() {
-        String invalidName = " na me ";
-        String expectedMessage = formatWithLocale(
-            "`graphName` must not end or begin with whitespace characters, but got `%s`.",
-            invalidName
-        );
-
-        assertError("CALL gds.graph.project.cypher($name, '*', '*')", Map.of("name", invalidName), expectedMessage);
-    }
-
-
-    @Test
     void failsOnWriteQuery() {
         String writeQueryNodes = "CREATE (n) RETURN id(n) AS id";
         String writeQueryRelationships = "CREATE (n)-[r:R]->(m) RETURN id(n) AS source, id(m) AS target";
