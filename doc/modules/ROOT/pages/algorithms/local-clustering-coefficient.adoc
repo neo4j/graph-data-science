@@ -256,7 +256,7 @@ CALL gds.graph.project(
 )
 ----
 
-WARNING: The Local Clustering Coefficient algorithm requires the graph to be created using the `UNDIRECTED` orientation for relationships.
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
 
 In the following examples we will demonstrate using the Local Clustering Coefficient algorithm on 'myGraph'.
 
