@@ -123,23 +123,6 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
     }
 
     @Test
-    void throwsOnExistingGraph() {
-        runQuery(GdsCypher.call("subgraph")
-            .graphProject()
-            .withNodeLabel("A")
-            .withNodeLabel("B")
-            .withAnyRelationshipType()
-            .yields());
-
-        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'n:A', 'true')";
-
-        assertThatThrownBy(() -> runQuery(subGraphQuery))
-            .getRootCause()
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("A graph with name 'subgraph' already exists.");
-    }
-
-    @Test
     void throwsOnParserError() {
         var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'GIMME NODES, JOANNA, GIMME NODES', 'true')";
 

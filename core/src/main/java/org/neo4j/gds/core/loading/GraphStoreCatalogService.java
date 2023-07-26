@@ -78,6 +78,21 @@ public class GraphStoreCatalogService {
         }
     }
 
+    /**
+     * Predicate around @graphExists
+     *
+     * @throws java.lang.IllegalArgumentException if graph does not exist in graph catalog
+     */
+    public void ensureGraphExists(User user, DatabaseId databaseId, GraphName graphName) {
+        if (! graphExists(user, databaseId, graphName)) {
+            String message = formatWithLocale(
+                "The graph '%s' does not exist.",
+                graphName
+            );
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     public Optional<Map<String, Object>> getDegreeDistribution(
         User user,
         DatabaseId databaseId,

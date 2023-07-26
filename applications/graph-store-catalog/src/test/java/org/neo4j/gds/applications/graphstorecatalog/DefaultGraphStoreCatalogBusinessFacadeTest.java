@@ -321,7 +321,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
         doThrow(new IllegalArgumentException("it's alive?!")).when(graphStoreCatalogService).ensureGraphDoesNotExist(
             user,
             databaseId,
-            GraphName.parse("some graph")
+            GraphName.parse("some existing graph")
         );
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
@@ -331,7 +331,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
-            "some graph",
+            "some existing graph",
             "some node projection",
             "some relationship projection",
             null
@@ -344,10 +344,59 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
-            "some graph",
+            "some existing graph",
             "some node query",
             "some relationship query",
             null
         )).withMessage("it's alive?!");
+
+        assertThatIllegalArgumentException().isThrownBy(() -> facade.subGraphProject(
+            user,
+            databaseId,
+            null,
+            null,
+            "some existing graph",
+            null,
+            null,
+            null,
+            null
+        )).withMessage("it's alive?!");
+    }
+
+    @Test
+    void shouldDoPositiveExistenceCheckWhenProjectingSubGraph() {
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+            null,
+            new GraphNameValidationService(),
+            graphStoreCatalogService,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        var user = new User("some user", false);
+        var databaseId = DatabaseId.from("some database name");
+        doThrow(new IllegalArgumentException("Damn you, Jack Sparrow!")).when(graphStoreCatalogService)
+            .ensureGraphExists(
+                user,
+                databaseId,
+                GraphName.parse("some non-existing graph")
+            );
+
+        assertThatIllegalArgumentException().isThrownBy(() -> facade.subGraphProject(
+            user,
+            databaseId,
+            null,
+            null,
+            "some existing graph",
+            "some non-existing graph",
+            null,
+            null,
+            null
+        )).withMessage("Damn you, Jack Sparrow!");
     }
 }

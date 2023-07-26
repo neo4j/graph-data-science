@@ -272,6 +272,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
         var originGraphName = graphNameValidationService.validate(originGraphNameAsString);
 
+        graphStoreCatalogService.ensureGraphExists(user, databaseId, originGraphName);
+
         var originGraphConfiguration = graphStoreCatalogService.get(
             CatalogRequest.of(user.getUsername(), databaseId),
             originGraphName
