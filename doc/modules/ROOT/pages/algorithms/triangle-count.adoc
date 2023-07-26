@@ -33,8 +33,6 @@ This is described in http://chato.cl/papers/becchetti_2007_approximate_count_tri
 
 include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 
-include::partial$/algorithms/shared/undirected-req-note.adoc[]
-
 
 .Triangle Count syntax per mode
 [.tabbed-example, caption = ]
