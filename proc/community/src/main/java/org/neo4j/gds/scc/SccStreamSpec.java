@@ -35,7 +35,12 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scc.Scc.NOT_VALID;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scc.stream", description = SCC_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.scc.stream",
+    aliases = {"gds.alpha.scc.stream"},
+    description = SCC_DESCRIPTION,
+    executionMode = STREAM
+)
 public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
     @Override
     public String name() {

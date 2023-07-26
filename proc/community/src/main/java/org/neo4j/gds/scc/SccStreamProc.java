@@ -22,6 +22,7 @@ package org.neo4j.gds.scc;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SccStreamProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.scc.stream", mode = READ)
+    @Procedure(value = "gds.scc.stream", mode = READ)
     @Description(SCC_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -43,7 +44,21 @@ public class SccStreamProc extends BaseProc {
             new SccStreamSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
 
+    @Procedure(value = "gds.alpha.scc.stream", mode = READ, deprecatedBy = "gds.scc.stream")
+    @Description(SCC_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<StreamResult> alphaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.scc.stream` has been deprecated, please use `gds.scc.stream`.");
+        return stream(graphName, configuration);
     }
 
 
