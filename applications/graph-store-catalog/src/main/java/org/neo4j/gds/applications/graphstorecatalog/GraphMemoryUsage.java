@@ -17,36 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.openjdk.jol.info.GraphWalker;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("unused")
-public  final class GraphMemoryUsage {
-
+public final class GraphMemoryUsage {
     public final String graphName;
     public final String memoryUsage;
     public final long sizeInBytes;
     public final Map<String, Object> detailSizeInBytes;
     public final long nodeCount;
     public final long relationshipCount;
-    static GraphMemoryUsage of(GraphStoreWithConfig graphStoreWithConfig){
+
+    static GraphMemoryUsage of(GraphStoreWithConfig graphStoreWithConfig) {
         var totalSize = new MutableLong();
         var graphStore = graphStoreWithConfig.graphStore();
         var detailMemory = internalSizeOfGraph(graphStore, totalSize);
@@ -61,12 +54,6 @@ public  final class GraphMemoryUsage {
             graphStore.nodeCount(),
             graphStore.relationshipCount()
         );
-    }
-
-    static GraphMemoryUsage of(String graphName, ExecutionContext executionContext) {
-        graphName = Objects.requireNonNull(StringUtils.trimToNull(graphName), "graphName must not be empty");
-        var graphStoreWithConfig = graphStoreFromCatalog(graphName,executionContext);
-        return  of(graphStoreWithConfig);
     }
 
     private static final Pattern ADJ_DEGREES = Pattern.compile("^.relationships.table\\[\\d+].value.degrees.*$");
@@ -187,17 +174,7 @@ public  final class GraphMemoryUsage {
         return Collections.unmodifiableMap(details);
     }
 
-    private static GraphStoreWithConfig graphStoreFromCatalog(String graphName, ExecutionContext executionContext) {
-        var catalogRequest = ImmutableCatalogRequest.of(
-            executionContext.databaseId().databaseName(),
-            executionContext.username(),
-            Optional.empty(),
-            executionContext.isGdsAdmin()
-        );
-        return GraphStoreCatalog.get(catalogRequest, graphName);
-    }
-
-    GraphMemoryUsage(
+    private GraphMemoryUsage(
         String graphName,
         String memoryUsage,
         long sizeInBytes,

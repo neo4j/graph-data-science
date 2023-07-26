@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
@@ -345,6 +346,15 @@ public class GraphStoreCatalogProcedureFacade {
             relationshipFilter,
             configuration
         );
+
+        return Stream.of(result);
+    }
+
+    public Stream<GraphMemoryUsage> sizeOf(String graphName) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var result = businessFacade.sizeOf(user, databaseId, graphName);
 
         return Stream.of(result);
     }

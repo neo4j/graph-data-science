@@ -113,4 +113,6 @@ public interface GraphStoreCatalogBusinessFacade {
         String relationshipFilter,
         Map<String, Object> configuration
     );
+
+    GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName);
 }

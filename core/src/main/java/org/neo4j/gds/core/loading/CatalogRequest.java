@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
 
 import java.util.Optional;
 
@@ -53,6 +54,15 @@ public abstract class CatalogRequest {
         if (!requesterIsAdmin() && usernameOverride().isPresent()) {
             throw new IllegalStateException("Cannot override the username as a non-admin");
         }
+    }
+
+    public static CatalogRequest of(User user, DatabaseId databaseId) {
+        return ImmutableCatalogRequest.of(
+            databaseId.databaseName(),
+            user.getUsername(),
+            Optional.empty(),
+            user.isAdmin()
+        );
     }
 
     public static CatalogRequest of(String username, String databaseName) {

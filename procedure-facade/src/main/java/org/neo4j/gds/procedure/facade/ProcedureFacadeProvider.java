@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CypherProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.GenericProjectService;
+import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
@@ -121,6 +122,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             ), graphProjectMemoryUsage
         );
         var subGraphProjectService = new SubGraphProjectService(log, graphStoreFilterService, graphStoreCatalogService);
+        var graphMemoryUsageService = new GraphMemoryUsageService(graphStoreCatalogService);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -131,7 +133,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             listGraphService,
             nativeProjectService,
             cypherProjectService,
-            subGraphProjectService
+            subGraphProjectService,
+            graphMemoryUsageService
         );
 
         // wrap in decorator to enable preconditions checks

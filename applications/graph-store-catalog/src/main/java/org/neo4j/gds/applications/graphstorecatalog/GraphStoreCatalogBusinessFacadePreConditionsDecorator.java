@@ -219,6 +219,11 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName) {
+        return runWithPreconditionsChecked(() -> delegate.sizeOf(user, databaseId, graphName));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

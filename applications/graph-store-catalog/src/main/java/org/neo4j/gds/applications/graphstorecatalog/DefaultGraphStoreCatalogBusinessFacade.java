@@ -70,6 +70,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final NativeProjectService nativeProjectService;
     private final CypherProjectService cypherProjectService;
     private final SubGraphProjectService subGraphProjectService;
+    private final GraphMemoryUsageService graphMemoryUsageService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         ConfigurationService configurationService,
@@ -79,7 +80,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         ListGraphService listGraphService,
         NativeProjectService nativeProjectService,
         CypherProjectService cypherProjectService,
-        SubGraphProjectService subGraphProjectService
+        SubGraphProjectService subGraphProjectService,
+        GraphMemoryUsageService graphMemoryUsageService
     ) {
         this.configurationService = configurationService;
         this.graphNameValidationService = graphNameValidationService;
@@ -89,6 +91,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.nativeProjectService = nativeProjectService;
         this.cypherProjectService = cypherProjectService;
         this.subGraphProjectService = subGraphProjectService;
+        this.graphMemoryUsageService = graphMemoryUsageService;
     }
 
     @Override
@@ -289,6 +292,21 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             userLogRegistryFactory,
             configuration,
             originGraphConfiguration.graphStore()
+        );
+    }
+
+    @Override
+    public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphNameAsString) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        if (!graphStoreCatalogService.graphExists(user, databaseId, graphName)) {
+            throw new IllegalArgumentException("Graph '" + graphNameAsString + "' does not exist");
+        }
+
+        return graphMemoryUsageService.sizeOf(
+            user,
+            databaseId,
+            graphName
         );
     }
 
