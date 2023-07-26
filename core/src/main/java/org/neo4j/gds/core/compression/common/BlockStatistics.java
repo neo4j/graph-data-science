@@ -44,7 +44,7 @@ public final class BlockStatistics implements AutoCloseable {
     private final BoundedHistogram bestMaxDiffBits;
     private final BoundedHistogram exceptions;
 
-    BlockStatistics() {
+    public BlockStatistics() {
         this.blockCount = 0;
         this.bitsPerValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
         this.stdDevBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
@@ -187,7 +187,7 @@ public final class BlockStatistics implements AutoCloseable {
         this.exceptions.record(bestExceptions);
     }
 
-    void mergeInto(BlockStatistics other) {
+    public void mergeInto(BlockStatistics other) {
         other.blockCount += this.blockCount;
         other.minBits.add(this.minBits);
         other.maxBits.add(this.maxBits);

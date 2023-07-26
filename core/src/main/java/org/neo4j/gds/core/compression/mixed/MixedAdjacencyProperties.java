@@ -19,30 +19,46 @@
  */
 package org.neo4j.gds.core.compression.mixed;
 
+import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.PropertyCursor;
+import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 
 public class MixedAdjacencyProperties implements AdjacencyProperties {
 
-    private final AdjacencyProperties packedAdjacencyProperties;
+    private final AdjacencyList adjacencyList;
 
+    private final AdjacencyProperties packedAdjacencyProperties;
     private final AdjacencyProperties vlongAdjacencyProperties;
 
     MixedAdjacencyProperties(
+        AdjacencyList adjacencyList,
         AdjacencyProperties packedAdjacencyProperties,
         AdjacencyProperties vlongAdjacencyProperties
     ) {
+        this.adjacencyList = adjacencyList;
         this.packedAdjacencyProperties = packedAdjacencyProperties;
         this.vlongAdjacencyProperties = vlongAdjacencyProperties;
     }
 
     @Override
     public PropertyCursor propertyCursor(long node, double fallbackValue) {
-        return null;
+        if (this.adjacencyList.degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+            return this.packedAdjacencyProperties.propertyCursor(node, fallbackValue);
+        }
+        return this.vlongAdjacencyProperties.propertyCursor(node, fallbackValue);
+    }
+
+    @Override
+    public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
+        if (this.adjacencyList.degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+            return this.packedAdjacencyProperties.propertyCursor(node, fallbackValue);
+        }
+        return this.vlongAdjacencyProperties.propertyCursor(reuse, node, fallbackValue);
     }
 
     @Override
     public PropertyCursor rawPropertyCursor() {
-        return null;
+        return this.vlongAdjacencyProperties.rawPropertyCursor();
     }
 }

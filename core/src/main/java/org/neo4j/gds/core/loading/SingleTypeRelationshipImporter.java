@@ -141,7 +141,7 @@ public final class SingleTypeRelationshipImporter {
     }
 
     public AdjacencyListsWithProperties build() {
-        return adjacencyCompressorFactory.build();
+        return adjacencyCompressorFactory.build(true);
     }
 
     @ValueClass

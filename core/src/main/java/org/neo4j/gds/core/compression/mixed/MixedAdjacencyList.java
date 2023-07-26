@@ -22,18 +22,19 @@ package org.neo4j.gds.core.compression.mixed;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 
 public class MixedAdjacencyList implements AdjacencyList {
 
     private final AdjacencyList packedAdjacencyList;
-
     private final AdjacencyList vlongAdjacencyList;
+
+    private final MemoryInfo memoryInfo;
 
     MixedAdjacencyList(AdjacencyList packedAdjacencyList, AdjacencyList vlongAdjacencyList) {
         this.packedAdjacencyList = packedAdjacencyList;
         this.vlongAdjacencyList = vlongAdjacencyList;
+        this.memoryInfo = packedAdjacencyList.memoryInfo().merge(vlongAdjacencyList.memoryInfo());
     }
 
     @Override
@@ -43,6 +44,9 @@ public class MixedAdjacencyList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        if (degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+            return this.packedAdjacencyList.adjacencyCursor(node, fallbackValue);
+        }
         return vlongAdjacencyList.adjacencyCursor(node, fallbackValue);
     }
 
@@ -55,15 +59,14 @@ public class MixedAdjacencyList implements AdjacencyList {
     public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
         // TODO share this constant on the compression side
         if (degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
-            this.packedAdjacencyList.adjacencyCursor(node, fallbackValue);
+            return this.packedAdjacencyList.adjacencyCursor(node, fallbackValue);
         }
         return vlongAdjacencyList.adjacencyCursor(reuse, node, fallbackValue);
     }
 
     @Override
     public MemoryInfo memoryInfo() {
-        // TODO
-        return MemoryInfo.EMPTY;
+        return this.memoryInfo;
     }
 }
 

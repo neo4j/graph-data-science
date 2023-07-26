@@ -108,7 +108,7 @@ public final class MixedCompressor implements AdjacencyCompressor {
         private final AdjacencyCompressorFactory vlongCompressorFactory;
 
 
-        public Factory(
+        Factory(
             LongSupplier nodeCountSupplier,
             LongAdder relationshipCounter,
             AdjacencyCompressorFactory packedCompressorFactory,
@@ -149,17 +149,20 @@ public final class MixedCompressor implements AdjacencyCompressor {
         }
 
         @Override
-        public AdjacencyListsWithProperties build() {
-            var packedAdjacencyList = this.packedCompressorFactory.build();
-            var vlongAdjacencyList = this.vlongCompressorFactory.build();
-            var mixedAdjacencyList = new MixedAdjacencyList(packedAdjacencyList.adjacency(), vlongAdjacencyList.adjacency());
+        public AdjacencyListsWithProperties build(boolean allowReordering) {
+            var packedAdjacencyList = this.packedCompressorFactory.build(false);
+            var vlongAdjacencyList = this.vlongCompressorFactory.build(false);
+            var mixedAdjacencyList = new MixedAdjacencyList(
+                packedAdjacencyList.adjacency(),
+                vlongAdjacencyList.adjacency()
+            );
 
             var mixedAdjacencyProperties = new ArrayList<AdjacencyProperties>(packedAdjacencyList.properties().size());
 
             for (int i = 0; i < packedAdjacencyList.properties().size(); i++) {
                 var left = packedAdjacencyList.properties().get(i);
                 var right = vlongAdjacencyList.properties().get(i);
-                var mixedProperties = new MixedAdjacencyProperties(left, right);
+                var mixedProperties = new MixedAdjacencyProperties(vlongAdjacencyList.adjacency(), left, right);
                 mixedAdjacencyProperties.add(mixedProperties);
             }
 

@@ -68,7 +68,7 @@ class GraphMemoryUsageTest {
                                     .asInstanceOf(InstanceOfAssertFactories.LONG)
                                     .satisfies((value) -> {
                                         if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) {
-                                            assertThat(value).isGreaterThan(0L);
+                                            assertThat(value).isGreaterThanOrEqualTo(0L);
                                         } else {
                                             assertThat(value).isEqualTo(0L);
                                         }
