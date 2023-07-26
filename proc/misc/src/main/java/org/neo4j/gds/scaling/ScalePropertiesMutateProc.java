@@ -26,6 +26,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -65,6 +66,8 @@ public class ScalePropertiesMutateProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
+    @Internal
+    @Deprecated(forRemoval = true)
     @Procedure(value = "gds.alpha.scaleProperties.mutate", deprecatedBy = "gds.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<MutateResult> alphaMutate(
