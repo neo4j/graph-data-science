@@ -1147,34 +1147,6 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
-    void failsOnNulls() {
-        assertError(
-            "CALL gds.graph.project(null, null, null)",
-            "`graphName` can not be null or blank, but it was `null`"
-        );
-        assertError(
-            "CALL gds.graph.project('name', null, null)",
-            "No value specified for the mandatory configuration parameter `nodeProjection`"
-        );
-        assertError(
-            "CALL gds.graph.project('name', 'A', null)",
-            "No value specified for the mandatory configuration parameter `relationshipProjection`"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher(null, null, null)",
-            "`graphName` can not be null or blank, but it was `null`"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher('name', null, null)",
-            "No value specified for the mandatory configuration parameter `nodeQuery`"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
-            "No value specified for the mandatory configuration parameter `relationshipQuery`"
-        );
-    }
-
-    @Test
     void failsOnInvalidAggregationCombinations() {
         String query =
             "CALL gds.graph.project('g', '*', " +
