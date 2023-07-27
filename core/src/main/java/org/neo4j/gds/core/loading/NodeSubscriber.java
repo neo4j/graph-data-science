@@ -21,10 +21,9 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.ErrorCachingQuerySubscriber;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.QueryStatistics;
-import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
-import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.NumberValue;
@@ -34,12 +33,11 @@ import org.neo4j.values.virtual.VirtualValues;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class NodeSubscriber implements QuerySubscriber {
+class NodeSubscriber extends ErrorCachingQuerySubscriber {
 
     private static final String ID_COLUMN = "id";
     private static final int UNINITIALIZED = -1;
@@ -62,8 +60,6 @@ class NodeSubscriber implements QuerySubscriber {
     private int labelOffset = UNINITIALIZED;
     private String[] fieldNames;
 
-    private Optional<RuntimeException> error = Optional.empty();
-
     public NodeSubscriber(
         ProgressTracker progressTracker
     ) {
@@ -81,11 +77,6 @@ class NodeSubscriber implements QuerySubscriber {
                 labelOffset = i;
             }
         }
-    }
-
-    Optional<RuntimeException> error()
-    {
-        return error;
     }
 
     long rows() {
@@ -148,17 +139,6 @@ class NodeSubscriber implements QuerySubscriber {
         }
         rows++;
         progressTracker.logProgress();
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-        if (throwable instanceof RuntimeException) {
-            this.error = Optional.of((RuntimeException) throwable);
-        } else if (throwable instanceof QueryExecutionKernelException) {
-            this.error = Optional.of(((QueryExecutionKernelException) throwable).asUserException());
-        } else {
-            this.error = Optional.of(new RuntimeException(throwable));
-        }
     }
 
     @Override
