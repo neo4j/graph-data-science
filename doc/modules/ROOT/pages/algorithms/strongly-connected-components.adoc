@@ -73,6 +73,91 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | componentId | Integer | Component ID.
 |===
 ======
+[.include-with-stats]
+======
+.The following will run the algorithm in stats mode
+[source, cypher, role=noplay]
+----
+CALL gds.scc.stats(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  componentCount: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  componentDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| componentCount                | Integer | The number of computed strongly connected components.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
+
+|===
+======
+[.include-with-mutate]
+======
+.The following will run the algorithm and mutate the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.scc.mutate(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  componentCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  componentDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+| mutateProperty                                                | String      | n/a                    | no       | The node property in the GDS graph to which the component id is written.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| componentCount                | Integer | The number of computed strongly connected components.
+| nodePropertiesWritten         | Integer | The number of node properties written.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| mutateMillis                   | Integer | Milliseconds for mutating the in-memory graph.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
+
+|===
+======
 [.include-with-write]
 ======
 .The following will run the algorithm and write back results:
@@ -155,7 +240,10 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
+[[algorithms-scc-stream-example]]
 === Stream
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
 
 [role=query-example]
 --
@@ -186,7 +274,54 @@ We have 3 strongly connected components in our sample graph.
 The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
 Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
 
+[[algorithms-scc-stats-example]]
+=== Stats
+:stats-syntax: algorithms-strongly-connected-components-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source,cypher,role=noplay]
+----
+CALL gds.scc.stats('graph')
+YIELD componentCount
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| componentCount
+| 3
+|===
+--
+
+[[algorithms-scc-mutate-example]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and store the results in `graph`:
+[source,cypher,role=noplay]
+----
+CALL gds.scc.mutate('graph', { mutateProperty: 'componentId'})
+YIELD componentCount
+----
+
+.Results
+[opts="header"]
+|===
+| componentCount
+| 3
+|===
+--
+
+[[algorithms-scc-write-example]]
 === Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example, group=writeAndMax]
 --
