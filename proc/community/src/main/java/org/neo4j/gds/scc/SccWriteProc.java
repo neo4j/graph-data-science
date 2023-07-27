@@ -57,7 +57,7 @@ public class SccWriteProc extends BaseProc {
     @Description(SCC_DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<WriteResult> alphaWrite(
+    public Stream<AlphaWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -65,7 +65,10 @@ public class SccWriteProc extends BaseProc {
             .log()
             .warn(
                 "Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");
-        return write(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new AlphaSccWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
 

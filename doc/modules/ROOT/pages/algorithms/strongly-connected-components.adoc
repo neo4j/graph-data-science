@@ -53,7 +53,8 @@ Decomposition syntax per mode
 [source, cypher, role=noplay]
 ----
 CALL gds.scc.stream(graphName: String, configuration: Map)
-YIELD nodeId, componentId
+YIELD  nodeId,
+       componentId
 ----
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
@@ -81,7 +82,15 @@ CALL gds.scc.write(
   graphName: string,
   configuration: map
 )
-YIELD preProcessingMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
+YIELD
+  componentCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  componentDistribution: Map,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -98,23 +107,14 @@ include::partial$/algorithms/common-configuration/common-write-configuration-ent
 [opts="header",cols="1,1,6"]
 |===
 | Name                 | Type    | Description
-| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
-| computeMillis        | Integer | Milliseconds for running the algorithm.
-| writeMillis          | Integer | Milliseconds for writing result data back.
-| postProcessingMillis | Integer | Milliseconds for computing percentiles and community count.
-| nodes                | Integer | The number of nodes considered.
-| communityCount       | Integer | The number of communities found.
-| p1                   | Float   | The 1 percentile of community size.
-| p5                   | Float   | The 5 percentile of community size.
-| p10                  | Float   | The 10 percentile of community size.
-| p25                  | Float   | The 25 percentile of community size.
-| p50                  | Float   | The 50 percentile of community size.
-| p75                  | Float   | The 75 percentile of community size.
-| p90                  | Float   | The 90 percentile of community size.
-| p95                  | Float   | The 95 percentile of community size.
-| p99                  | Float   | The 99 percentile of community size.
-| p100                 | Float   | The 100 percentile of community size.
-| writeProperty        | String  | The property name written back to.
+| componentCount                | Integer | The number of computed strongly connected components.
+| nodePropertiesWritten         | Integer | The number of node properties written.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| writeMillis                   | Integer | Milliseconds for writing result back to Neo4j.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
 
 |===
 ======
@@ -196,13 +196,14 @@ Charles ends up in his own component because there isn't an outgoing relationshi
 CALL gds.scc.write('graph', {
   writeProperty: 'componentId'
 })
-YIELD setCount, maxSetSize, minSetSize;
+YIELD componentCount, componentDistribution
+RETURN componentCount,componentDistribution.max as maxSetSize, componentDistribution.min as minSetSize
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m"]
 |===
-| setCount | maxSetSize | minSetSize
+| componentCount | maxSetSize | minSetSize
 | 3        | 3          | 1
 |===
 --
