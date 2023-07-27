@@ -82,6 +82,8 @@ The `density` is the result of `relationshipCount` divided by the maximal number
 
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS Graph List capabilities we are going to create a small social network graph in Neo4j.
 
 .The following Cypher statement will create the example graph in the Neo4j database:

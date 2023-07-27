@@ -156,6 +156,8 @@ a|
 
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
 image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]

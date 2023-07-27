@@ -81,6 +81,8 @@ Results in GDS often contain node IDs. You can use the following functions to co
 
 === Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 .Example graph:

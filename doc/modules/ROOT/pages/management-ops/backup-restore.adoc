@@ -103,6 +103,8 @@ YIELD
 
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 First we need to create a graph in the corresponding Neo4j database.
 
 .The following Cypher statement will create the example graph in the Neo4j database:

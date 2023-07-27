@@ -98,6 +98,8 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 [[graph-project-examples]]
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS Graph Project capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 

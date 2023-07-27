@@ -363,7 +363,7 @@ The `properties` key can take a similar set of syntax variants as the relationsh
 [[graph-project-examples]]
 == Examples
 
-include::partial$/algorithms/shared/examples-empty-db-note.adoc[]
+include::partial$/common-usage/examples-empty-db-note.adoc[]
 
 In order to demonstrate the GDS Graph Projection capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:

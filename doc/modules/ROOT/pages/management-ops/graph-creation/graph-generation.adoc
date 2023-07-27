@@ -121,6 +121,8 @@ This can be helpful if one wants to examine the behavior or performance of an al
 [[graph-generation-example]]
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In the following we will demonstrate the usage of the random graph generation procedure.
 
 [[graph-generation-unweighted]]

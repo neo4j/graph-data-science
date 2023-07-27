@@ -65,6 +65,8 @@ CALL gds.graph.drop(
 
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In this section we are going to demonstrate the usage of `gds.graph.drop`.
 All the graph names used in these examples are fictive and should be replaced with real values.
 
