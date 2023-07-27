@@ -33,8 +33,6 @@ This is described in http://chato.cl/papers/becchetti_2007_approximate_count_tri
 
 include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 
-WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Triangle Count algorithm.
-
 
 .Triangle Count syntax per mode
 [.tabbed-example, caption = ]
@@ -292,7 +290,7 @@ CALL gds.graph.project(
 )
 ----
 
-WARNING: The Triangle Count algorithm requires the graph to be projected using the `UNDIRECTED` orientation for relationships.
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
 
 In the following examples we will demonstrate using the Triangle Count algorithm on this graph.
 
