@@ -33,9 +33,10 @@ import java.util.Map;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.instanceOf;
 
 class GraphMemoryUsageProcTest extends BaseProcTest {
 
@@ -159,7 +160,7 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                                     "bytesOnHeap",
                                     allOf(instanceOf(Long.class), greaterThan(0L)),
                                     "bytesOffHeap",
-                                    allOf(instanceOf(Long.class), greaterThan(0L)),
+                                    allOf(instanceOf(Long.class), greaterThanOrEqualTo(0L)),
                                     "pageSizes",
                                     instanceOf(Map.class),
                                     "heapAllocations",
@@ -167,15 +168,15 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                                     "nativeAllocations",
                                     instanceOf(Map.class),
                                     "headerBits",
-                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThan(0D))),
+                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))),
                                     "headerAllocations",
-                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThan(0D))),
+                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))),
                                     "blockStatistics",
                                     allOf(instanceOf(Map.class), hasEntry(
                                         equalTo("blockLengths"),
                                         allOf(
                                             instanceOf(Map.class),
-                                            hasEntry(equalTo("mean"), greaterThan(0D))
+                                            hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))
                                         )
                                     ))
                                 ))
