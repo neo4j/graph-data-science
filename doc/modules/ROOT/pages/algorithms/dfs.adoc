@@ -109,6 +109,8 @@ include::partial$/algorithms/dfs/specific-configuration.adoc[]
 [[algorithms-dfs-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description:
 :image-file: traverse-graph.svg

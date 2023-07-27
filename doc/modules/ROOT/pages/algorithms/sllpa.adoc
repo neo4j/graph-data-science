@@ -207,6 +207,8 @@ include::partial$/algorithms/alpha/sllpa/specific-configuration.adoc[]
 [[algorithms-sllpa-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: sllpa.svg

@@ -113,6 +113,8 @@ include::partial$/algorithms/randomWalk/specific-configuration.adoc[]
 [[algorithms-random-walk-example]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=noplay setup-query]

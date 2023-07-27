@@ -148,6 +148,8 @@ include::partial$/algorithms/bfs/specific-configuration.adoc[]
 [[algorithms-bfs-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description:
 :image-file: traverse-graph.svg

@@ -211,6 +211,8 @@ include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
 [[algorithms-minimum-weight-spanning-tree-sample]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: road network
 :image-file: spanning-tree-graph.svg
