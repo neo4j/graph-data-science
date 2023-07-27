@@ -246,6 +246,8 @@ include::partial$/algorithms/betweenness-centrality/specific-configuration.adoc[
 [[algorithms-betweenness-centrality-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: betweenness_centrality.png
@@ -274,8 +276,6 @@ CREATE
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a native projection targeting the `User` nodes and the `FOLLOWS` relationships.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

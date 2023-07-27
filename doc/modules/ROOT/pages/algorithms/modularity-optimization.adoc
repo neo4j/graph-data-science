@@ -176,6 +176,8 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 [[algorithms-modularity-optimization-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=noplay setup-query]
@@ -200,9 +202,6 @@ This graph consists of two center nodes "Alice" and "Bridget" each of which have
 Additionally, each neighbor of "Alice" is connected to one of the neighbors of "Bridget".
 Looking at the weights of the relationships, it can be seen that the connections from the two center nodes to their neighbors are very strong, while connections between those groups are weak.
 Therefore the Modularity Optimization algorithm should detect two communities: "Alice" and "Bob" together with their neighbors respectively.
-
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]

@@ -288,6 +288,8 @@ All other scalers do not support additional, custom configuration.
 [[algorithms-scale-properties-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: hotel
 :image-file: scale-properties.svg
@@ -311,8 +313,6 @@ With the graph in Neo4j we can now project it into the graph catalog to prepare 
 We do this using a native projection targeting the `Hotel` nodes, including their properties.
 Note that no relationships are necessary to scale the node properties.
 Thus we use a star projection ('*') for relationships.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

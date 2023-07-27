@@ -349,6 +349,8 @@ include::partial$/machine-learning/node-embeddings/hashgnn/specific-configuratio
 [[algorithms-embeddings-hashgnn-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: HashGNN node embedding
 :graph-description: social network
 In this section we will show examples of running the {algorithm-name} algorithm on a concrete graph.
@@ -395,8 +397,6 @@ This graph represents seven people who know one another.
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
 For the relationships we will use the `UNDIRECTED` orientation.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]

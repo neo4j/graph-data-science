@@ -260,6 +260,8 @@ include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 [[algorithms-k-means-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: K-Means
 :graph-description: cities
 :image-file: cities.svg
@@ -283,8 +285,6 @@ This graph is composed of various _City_ nodes, in three global locations - Unit
 
 We can now project the graph and store it in the graph catalog.
 We load the `City` node label with `coordinates` node property.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]

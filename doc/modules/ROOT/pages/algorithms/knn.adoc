@@ -433,6 +433,8 @@ To get a deterministic result when running the algorithm:
 [[algorithms-knn-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 In this section we will show examples of running the KNN algorithm on a concrete graph.
 With the _Uniform sampler_, KNN samples initial neighbors uniformly at random, and doesn't take into account graph topology.
 This means KNN can run on a graph of only nodes, without any relationships.
@@ -451,8 +453,6 @@ CREATE (eve:Person {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embedding: [1.
 ----
 
 In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
