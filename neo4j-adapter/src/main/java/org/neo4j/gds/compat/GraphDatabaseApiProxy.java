@@ -40,6 +40,8 @@ import org.neo4j.kernel.impl.factory.DbmsInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -82,7 +84,7 @@ public final class GraphDatabaseApiProxy {
     ) throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
-            procedures.registerProcedure(clazz, overrideCurrentImplementation);
+            registerProcedures(procedures, clazz, overrideCurrentImplementation);
         }
     }
 
@@ -105,7 +107,7 @@ public final class GraphDatabaseApiProxy {
     public static void register(GraphDatabaseService db, CallableUserAggregationFunction function) throws
         KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
-        procedures.register(function, true);
+        registerAggregationFunction(procedures, function);
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {
@@ -188,7 +190,11 @@ public final class GraphDatabaseApiProxy {
         return ((InternalTransaction) tx).kernelTransaction();
     }
 
-    public static InternalTransaction beginTransaction(GraphDatabaseService db, KernelTransaction.Type type, LoginContext loginContext) {
+    public static InternalTransaction beginTransaction(
+        GraphDatabaseService db,
+        KernelTransaction.Type type,
+        LoginContext loginContext
+    ) {
         return cast(db).beginTransaction(type, loginContext);
     }
 
@@ -216,5 +222,58 @@ public final class GraphDatabaseApiProxy {
 
     private GraphDatabaseApiProxy() {
         throw new UnsupportedOperationException("No instances");
+    }
+
+    private static void registerProcedures(
+        GlobalProcedures globalProcedures,
+        Class<?> procedureClass,
+        boolean overrideCurrentImplementation
+    ) {
+        var globalProceduresClass = globalProcedures.getClass();
+        var registerProcedureMethod = Arrays.stream(globalProceduresClass.getDeclaredMethods())
+            .filter(method -> method.getName().equals("registerProcedure"))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Could not find registerProcedure method"));
+
+        try {
+            switch (registerProcedureMethod.getParameterCount()) {
+                case 1:
+                    registerProcedureMethod.invoke(globalProcedures, procedureClass);
+                    break;
+                case 2: {
+                    registerProcedureMethod.invoke(globalProcedures, procedureClass, overrideCurrentImplementation);
+                    break;
+                }
+                default:
+                    throw new RuntimeException("Unexpected number of parameters for registerProcedure method");
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void registerAggregationFunction(GlobalProcedures globalProcedures, CallableUserAggregationFunction function) {
+        var globalProceduresClass = globalProcedures.getClass();
+        var registerProcedureMethod = Arrays.stream(globalProceduresClass.getDeclaredMethods())
+            .filter(method -> method.getName().equals("register"))
+            .filter(method -> method.getParameterCount() == 1 && method.getParameterTypes()[0].equals(CallableUserAggregationFunction.class))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Could not find registerAggregationFunction method"));
+
+        try {
+            switch (registerProcedureMethod.getParameterCount()) {
+                case 1:
+                    registerProcedureMethod.invoke(globalProcedures, function);
+                    break;
+                case 2: {
+                    registerProcedureMethod.invoke(globalProcedures, function, true);
+                    break;
+                }
+                default:
+                    throw new RuntimeException("Unexpected number of parameters for register method");
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
