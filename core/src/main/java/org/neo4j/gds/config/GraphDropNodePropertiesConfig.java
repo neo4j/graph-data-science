@@ -17,21 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
@@ -41,7 +34,7 @@ public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyCo
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Configuration.ConvertWith(method = "org.neo4j.gds.catalog.GraphDropNodePropertiesConfig#parseNodeProperties")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphDropNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
     static List<String> parseNodeProperties(Object userInput) {
@@ -58,21 +51,5 @@ public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyCo
             nodeProperties,
             config
         );
-    }
-
-    @Configuration.Ignore
-    default void validate(GraphStore graphStore) {
-        List<String> invalidProperties = nodeProperties()
-            .stream()
-            .filter(nodeProperty -> !graphStore.hasNodeProperty(nodeProperty))
-            .collect(Collectors.toList());
-
-        if (!invalidProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not find property key(s) %s. Defined keys: %s.",
-                StringJoining.join(invalidProperties),
-                StringJoining.join(graphStore.nodePropertyKeys())
-            ));
-        }
     }
 }

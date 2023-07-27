@@ -24,7 +24,6 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.catalog.UserInputAsStringOrListOfString;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;

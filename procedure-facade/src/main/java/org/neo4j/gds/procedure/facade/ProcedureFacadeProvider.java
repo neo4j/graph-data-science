@@ -24,12 +24,14 @@ import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.applications.graphstorecatalog.CypherProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
+import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesService;
 import org.neo4j.gds.applications.graphstorecatalog.GenericProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacadePreConditionsDecorator;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
@@ -94,11 +96,12 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var transactionContextService = new TransactionContextService();
 
         // GDS services
+        var configurationService = new ConfigurationService();
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var graphStoreFilterService = new GraphStoreFilterService();
+        var graphStoreValidationService = new GraphStoreValidationService();
 
         // GDS applications
-        var configurationService = new ConfigurationService();
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
         var graphNameValidationService = new GraphNameValidationService();
         var listGraphService = new ListGraphService(graphStoreCatalogService);
@@ -123,18 +126,21 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         );
         var subGraphProjectService = new SubGraphProjectService(log, graphStoreFilterService, graphStoreCatalogService);
         var graphMemoryUsageService = new GraphMemoryUsageService(graphStoreCatalogService);
+        var dropNodePropertiesService = new DropNodePropertiesService(log);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
             configurationService,
             graphNameValidationService,
             graphStoreCatalogService,
+            graphStoreValidationService,
             dropGraphService,
             listGraphService,
             nativeProjectService,
             cypherProjectService,
             subGraphProjectService,
-            graphMemoryUsageService
+            graphMemoryUsageService,
+            dropNodePropertiesService
         );
 
         // wrap in decorator to enable preconditions checks

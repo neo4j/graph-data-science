@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.ConfigurationService;
+import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
@@ -38,6 +39,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
@@ -62,36 +64,43 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     // services
     private final ConfigurationService configurationService;
     private final GraphNameValidationService graphNameValidationService;
+    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GraphStoreValidationService graphStoreValidationService;
 
     // business logic
-    private final GraphStoreCatalogService graphStoreCatalogService;
     private final DropGraphService dropGraphService;
     private final ListGraphService listGraphService;
     private final NativeProjectService nativeProjectService;
     private final CypherProjectService cypherProjectService;
     private final SubGraphProjectService subGraphProjectService;
     private final GraphMemoryUsageService graphMemoryUsageService;
+    private final DropNodePropertiesService dropNodePropertiesService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         ConfigurationService configurationService,
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
+        GraphStoreValidationService graphStoreValidationService,
         DropGraphService dropGraphService,
         ListGraphService listGraphService,
         NativeProjectService nativeProjectService,
         CypherProjectService cypherProjectService,
         SubGraphProjectService subGraphProjectService,
-        GraphMemoryUsageService graphMemoryUsageService
+        GraphMemoryUsageService graphMemoryUsageService,
+        DropNodePropertiesService dropNodePropertiesService
     ) {
         this.configurationService = configurationService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.graphStoreValidationService = graphStoreValidationService;
+
         this.dropGraphService = dropGraphService;
         this.listGraphService = listGraphService;
         this.nativeProjectService = nativeProjectService;
         this.cypherProjectService = cypherProjectService;
         this.subGraphProjectService = subGraphProjectService;
         this.graphMemoryUsageService = graphMemoryUsageService;
+        this.dropNodePropertiesService = dropNodePropertiesService;
     }
 
     @Override
@@ -309,6 +318,45 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             user,
             databaseId,
             graphName
+        );
+    }
+
+    @Override
+    public GraphDropNodePropertiesResult dropNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        Object nodeProperties,
+        Map<String, Object> rawConfiguration,
+        Optional<String> deprecationWarning
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = configurationService.parseGraphDropNodePropertiesConfig(
+            graphName,
+            nodeProperties,
+            rawConfiguration
+        );
+
+        // melt this together, so you only obtain the graph store if it is valid? think it over
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureNodePropertiesExist(graphStore, configuration.nodeProperties());
+
+        var numberOfPropertiesRemoved = dropNodePropertiesService.compute(
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            configuration,
+            graphStore,
+            deprecationWarning
+        );
+
+        return new GraphDropNodePropertiesResult(
+            graphName.getValue(),
+            configuration.nodeProperties(),
+            numberOfPropertiesRemoved
         );
     }
 

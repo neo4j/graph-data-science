@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
@@ -34,6 +35,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface GraphStoreCatalogBusinessFacade {
     boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString);
@@ -115,4 +117,15 @@ public interface GraphStoreCatalogBusinessFacade {
     );
 
     GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName);
+
+    GraphDropNodePropertiesResult dropNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        Object nodeProperties,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    );
 }

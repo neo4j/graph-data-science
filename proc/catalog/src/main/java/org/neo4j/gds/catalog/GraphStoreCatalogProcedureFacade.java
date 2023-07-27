@@ -24,6 +24,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
@@ -34,6 +35,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -355,6 +357,31 @@ public class GraphStoreCatalogProcedureFacade {
         var databaseId = databaseId();
 
         var result = businessFacade.sizeOf(user, databaseId, graphName);
+
+        return Stream.of(result);
+    }
+
+    public Stream<GraphDropNodePropertiesResult> dropNodeProperties(
+        String graphName,
+        Object nodeProperties,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.dropNodeProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            nodeProperties,
+            configuration,
+            deprecationWarning
+        );
 
         return Stream.of(result);
     }

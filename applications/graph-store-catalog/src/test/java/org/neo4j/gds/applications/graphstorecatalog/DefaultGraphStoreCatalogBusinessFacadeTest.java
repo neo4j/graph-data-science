@@ -47,6 +47,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
 
@@ -67,6 +69,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             mock(GraphNameValidationService.class),
             service,
+            null,
+            null,
             null,
             null,
             null,
@@ -101,6 +105,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
 
@@ -121,10 +127,13 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
 
-        when(validationService.validateStrictly("   somegraph   ")).thenThrow(new IllegalArgumentException("whitespace!"));
+        when(validationService.validateStrictly("   some graph   "))
+            .thenThrow(new IllegalArgumentException("whitespace!"));
 
         assertThatIllegalArgumentException().isThrownBy(
             () -> facade.nativeProject(
@@ -134,7 +143,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
                 null,
                 null,
                 null,
-                "   somegraph   ",
+                "   some graph   ",
                 null,
                 null,
                 null
@@ -149,7 +158,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
                 null,
                 null,
                 null,
-                "   somegraph   ",
+                "   some graph   ",
                 null,
                 null,
                 null
@@ -166,6 +175,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             new ConfigurationService(),
             new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
+            null,
+            null,
             null,
             null,
             null,
@@ -243,6 +254,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
 
@@ -313,6 +326,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
 
@@ -370,6 +385,8 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             new GraphNameValidationService(),
             graphStoreCatalogService,
+            null,
+            null,
             null,
             null,
             null,

@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
@@ -34,6 +35,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -222,6 +224,29 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
     @Override
     public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName) {
         return runWithPreconditionsChecked(() -> delegate.sizeOf(user, databaseId, graphName));
+    }
+
+    @Override
+    public GraphDropNodePropertiesResult dropNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        Object nodeProperties,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.dropNodeProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            nodeProperties,
+            configuration,
+            deprecationWarning
+        ));
     }
 
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {

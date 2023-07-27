@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.config.UserInputAsStringOrListOfString;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

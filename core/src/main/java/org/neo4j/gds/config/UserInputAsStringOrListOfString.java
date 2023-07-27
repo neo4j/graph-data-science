@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.config;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -57,7 +57,7 @@ public final class UserInputAsStringOrListOfString {
         return new IllegalArgumentException(message);
     }
 
-     static String typeOf(Object userInput) {
+     public static String typeOf(Object userInput) {
          if (userInput instanceof Number) return "number";
          if (userInput instanceof Boolean) return "boolean";
          if (userInput instanceof Node) return "node";

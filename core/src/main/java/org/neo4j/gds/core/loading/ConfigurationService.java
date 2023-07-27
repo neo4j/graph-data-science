@@ -21,6 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.GraphDropNodePropertiesConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
@@ -163,6 +165,28 @@ public class ConfigurationService {
         validateProjectConfiguration(cypherConfig, configuration, Collections.emptySet());
 
         return configuration;
+    }
+
+    public GraphDropNodePropertiesConfig parseGraphDropNodePropertiesConfig(
+        GraphName graphName,
+        Object nodeProperties,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphDropNodePropertiesConfig.of(
+            graphName.getValue(),
+            nodeProperties,
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
+    }
+
+    private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {
+        cypherConfig.requireOnlyKeysFrom(config.configKeys());
     }
 
     private void validateProjectConfiguration(
