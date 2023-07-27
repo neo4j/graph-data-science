@@ -45,4 +45,26 @@ public abstract class ErrorCachingQuerySubscriber implements QuerySubscriber {
             this.error = new RuntimeException(throwable);
         }
     }
+
+    public static final class DoNothingSubscriber extends ErrorCachingQuerySubscriber {
+        @Override
+        public void onResult(int numberOfFields) {
+        }
+
+        @Override
+        public void onRecord() {
+        }
+
+        @Override
+        public void onField(int offset, AnyValue value) {
+        }
+
+        @Override
+        public void onRecordCompleted() {
+        }
+
+        @Override
+        public void onResultCompleted(QueryStatistics statistics) {
+        }
+    }
 }
