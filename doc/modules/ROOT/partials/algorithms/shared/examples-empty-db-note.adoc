@@ -1,0 +1,4 @@
+[NOTE]
+====
+All the examples below should be run in an empty database.
+====
