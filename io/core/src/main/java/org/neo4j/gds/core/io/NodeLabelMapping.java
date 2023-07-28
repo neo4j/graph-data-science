@@ -30,15 +30,23 @@ import java.util.stream.Collectors;
 
 public class NodeLabelMapping {
     private final HashMap<NodeLabel, String> map;
+    private final HashMap<String, NodeLabel> inverseMap;
 
-    NodeLabelMapping(Collection<NodeLabel> labels) {
+    public NodeLabelMapping(Collection<NodeLabel> labels) {
         MutableInt index = new MutableInt();
         map = new HashMap<>(labels.stream()
             .collect(Collectors.toMap(label -> label, label -> Integer.toString(index.getAndIncrement()))));
+        index.setValue(0);
+        inverseMap = new HashMap<>(labels.stream()
+            .collect(Collectors.toMap(label -> Integer.toString(index.getAndIncrement()), label -> label)));
     }
 
     public String get(NodeLabel label) {
         return map.get(label);
+    }
+
+    public NodeLabel get(String labelName) {
+        return inverseMap.get(labelName);
     }
 
     public Set<Map.Entry<NodeLabel, String>> entrySet() {

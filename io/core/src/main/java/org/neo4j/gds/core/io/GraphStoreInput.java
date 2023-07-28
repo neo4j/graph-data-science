@@ -182,10 +182,6 @@ public final class GraphStoreInput implements CompatInput {
         return () -> new RelationshipImporter(relationshipStore, batchSize, idMode.get(), idMapFunction);
     }
 
-    public Optional<NodeLabelMapping> labelMapping() {
-        return nodeStore.labelMapping();
-    }
-
     @Override
     public IdType idType() {
         return idMode.idType;
@@ -222,6 +218,10 @@ public final class GraphStoreInput implements CompatInput {
 
     public InputIterable graphProperties() {
         return () -> new GraphPropertyIterator(graphProperties.iterator(), concurrency);
+    }
+
+    public Optional<NodeLabelMapping> labelMapping() {
+        return nodeStore.labelMapping();
     }
 
     static class GraphPropertyIterator implements InputIterator {
@@ -473,7 +473,7 @@ public final class GraphStoreInput implements CompatInput {
 
                     if (hasProperties) {
                         for (var label : labels) {
-                            nodeStore.nodeProperties
+                            nodeStore.labelToNodeProperties()
                                 .getOrDefault(label, Map.of())
                                 .forEach((propertyKey, properties) -> exportProperty(
                                     visitor,
@@ -483,7 +483,7 @@ public final class GraphStoreInput implements CompatInput {
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
-                    nodeStore.nodeProperties.forEach((label, nodeProperties) -> nodeProperties.forEach((propertyKey, properties) -> exportProperty(
+                    nodeStore.labelToNodeProperties().forEach((label, nodeProperties) -> nodeProperties.forEach((propertyKey, properties) -> exportProperty(
                         visitor,
                         propertyKey,
                         properties::getObject
