@@ -23,22 +23,20 @@ import org.eclipse.collections.api.map.primitive.ObjectDoubleMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.ErrorCachingQuerySubscriber;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.QueryStatistics;
-import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
-import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.TextValue;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsLoaded;
 
-class RelationshipSubscriber implements QuerySubscriber {
+class RelationshipSubscriber extends ErrorCachingQuerySubscriber {
 
     private static final String SOURCE_COLUMN = "source";
     private static final String TARGET_COLUMN = "target";
@@ -66,8 +64,6 @@ class RelationshipSubscriber implements QuerySubscriber {
     private int propertyIndex = 0;
 
     private RelationshipsBuilder allRelationshipsBuilder;
-
-    private Optional<RuntimeException> error = Optional.empty();
 
     RelationshipSubscriber(
         IdMap idMap,
@@ -107,10 +103,6 @@ class RelationshipSubscriber implements QuerySubscriber {
             allRelationshipsBuilder = loaderContext.getOrCreateRelationshipsBuilder(RelationshipType.ALL_RELATIONSHIPS);
         }
         this.propertyValueBuffer = new double[propertyCount];
-    }
-
-    Optional<RuntimeException> error() {
-        return error;
     }
 
     public long rows() {
@@ -188,16 +180,6 @@ class RelationshipSubscriber implements QuerySubscriber {
         }
 
         progressTracker.logProgress();
-    }
-    @Override
-    public void onError(Throwable throwable) {
-        if (throwable instanceof RuntimeException) {
-            this.error = Optional.of((RuntimeException) throwable);
-        } else if (throwable instanceof QueryExecutionKernelException) {
-            this.error = Optional.of(((QueryExecutionKernelException) throwable).asUserException());
-        } else {
-            this.error = Optional.of(new RuntimeException(throwable));
-        }
     }
 
     @Override
