@@ -22,7 +22,6 @@ package org.neo4j.gds.compat._54;
 import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseInternalSettings;
-import org.neo4j.counts.CountsAccessor;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
@@ -35,26 +34,18 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
-import org.neo4j.internal.recordstorage.InMemoryStorageReader54;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
-import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 import static org.neo4j.configuration.GraphDatabaseSettings.db_format;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
-
-    @Override
-    public CommandCreationContext inMemoryCommandCreationContext() {
-        return new InMemoryCommandCreationContextImpl();
-    }
 
     @Override
     public void initRelationshipTraversalCursorForRelType(
@@ -67,13 +58,6 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
             Direction.OUTGOING
         );
         cursor.init(sourceNodeId, -1, relationshipSelection);
-    }
-
-    @Override
-    public StorageReader inMemoryStorageReader(
-        CypherGraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
-    ) {
-        return new InMemoryStorageReader54(graphStore, tokenHolders, counts);
     }
 
     @Override
