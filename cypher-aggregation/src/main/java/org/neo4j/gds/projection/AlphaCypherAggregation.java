@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import com.neo4j.gds.internal.CustomProceduresUtil;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
@@ -103,8 +102,8 @@ public class AlphaCypherAggregation implements CompatUserAggregationFunction {
 
     @Override
     public CompatUserAggregator create(Context ctx) throws ProcedureException {
-        var databaseService = CustomProceduresUtil.lookupSafeComponentProvider(ctx, GraphDatabaseService.class);
-        var username = CustomProceduresUtil.lookupSafeComponentProvider(ctx, Username.class);
+        var databaseService = Neo4jProxy.lookupComponentProvider(ctx, GraphDatabaseService.class, true);
+        var username = Neo4jProxy.lookupComponentProvider(ctx, Username.class, true);
 
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
         var writeMode = runsOnCompositeDatabase
