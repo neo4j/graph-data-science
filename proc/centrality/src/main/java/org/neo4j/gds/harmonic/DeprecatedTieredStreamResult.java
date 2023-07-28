@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+public final class DeprecatedTieredStreamResult {
+    public final long nodeId;
+    public final double centrality;
 
-@Configuration
-public interface HarmonicCentralityWriteConfig extends HarmonicCentralityBaseConfig, WritePropertyConfig {
-
-    static HarmonicCentralityWriteConfig of(CypherMapWrapper config) {
-        return new HarmonicCentralityWriteConfigImpl(config);
+    DeprecatedTieredStreamResult(long nodeId, double centrality) {
+        this.nodeId = nodeId;
+        this.centrality = centrality;
     }
 }

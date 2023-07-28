@@ -37,8 +37,8 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.closeness.harmonic.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig, Stream<WriteResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityWriteConfig>> {
+@GdsCallable(name = "gds.alpha.closeness.harmonic.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<DeprecatedTieredWriteResult>, HarmonicCentralityAlgorithmFactory<DeprecatedTieredHarmonicCentralityWriteConfig>> {
 
     @Override
     public String name() {
@@ -46,17 +46,17 @@ public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentra
     }
 
     @Override
-    public HarmonicCentralityAlgorithmFactory<HarmonicCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+    public HarmonicCentralityAlgorithmFactory<DeprecatedTieredHarmonicCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new HarmonicCentralityAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<HarmonicCentralityWriteConfig> newConfigFunction() {
-        return (___,config) -> HarmonicCentralityWriteConfig.of(config);
+    public NewConfigFunction<DeprecatedTieredHarmonicCentralityWriteConfig> newConfigFunction() {
+        return (___,config) -> DeprecatedTieredHarmonicCentralityWriteConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<DeprecatedTieredWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -70,17 +70,18 @@ public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentra
         );
     }
 
-    private AbstractCentralityResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig> computationResult,
+    private AbstractCentralityResultBuilder<DeprecatedTieredWriteResult> resultBuilder(
+        ComputationResult<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new DeprecatedTieredWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
-        );
+        ).withWriteProperty(computationResult.config().writeProperty());
 
         computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
 
         return builder;
+
     }
 }

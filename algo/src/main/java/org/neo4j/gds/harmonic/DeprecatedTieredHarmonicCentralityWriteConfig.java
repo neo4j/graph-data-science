@@ -19,12 +19,21 @@
  */
 package org.neo4j.gds.harmonic;
 
-public final class StreamResult {
-    public final long nodeId;
-    public final double centrality;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-    StreamResult(long nodeId, double centrality) {
-        this.nodeId = nodeId;
-        this.centrality = centrality;
+@Configuration
+public interface DeprecatedTieredHarmonicCentralityWriteConfig extends HarmonicCentralityBaseConfig, WritePropertyConfig {
+
+    @Override
+    @Value.Default
+    default String writeProperty() {
+        return "centrality";
+    }
+
+    static DeprecatedTieredHarmonicCentralityWriteConfig of(CypherMapWrapper config) {
+        return new DeprecatedTieredHarmonicCentralityWriteConfigImpl(config);
     }
 }

@@ -42,7 +42,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class HarmonicCentralityWriteProcTest extends BaseProcTest {
+class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -67,15 +67,14 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
     @Test
     void testWrite() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.closeness.harmonic")
+            .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .addParameter("writeProperty", "centralityScore")
             .yields();
 
         var rowCount= runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(5L);
-            Map<String, Object> config = (Map<String, Object>) row.get("configuration");
-            assertThat(config).containsEntry("writeProperty", "centralityScore");
+            assertThat(row.getNumber("nodes")).isEqualTo(5L);
+            assertThat(row.getString("writeProperty")).isEqualTo("centralityScore");
 
             assertThat((long)row.getNumber("writeMillis")).isGreaterThan(-1L);
             assertThat((long)row.getNumber("computeMillis")).isGreaterThan(-1L);

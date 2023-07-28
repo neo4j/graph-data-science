@@ -22,48 +22,63 @@ package org.neo4j.gds.harmonic;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class WriteResult extends StandardStatsResult {
+public final class DeprecatedTieredWriteResult {
 
-    public final long nodePropertiesWritten;
+    public final long nodes;
+    public final String writeProperty;
     public final long writeMillis;
+    public final long computeMillis;
+    public final long preProcessingMillis;
     public final Map<String, Object> centralityDistribution;
 
-    private WriteResult(
-        long nodePropertiesWritten,
+    DeprecatedTieredWriteResult(
+        long nodes,
         long preProcessingMillis,
         long computeMillis,
-        long postProcessingMillis,
         long writeMillis,
-        @Nullable Map<String, Object> centralityDistribution,
-        Map<String, Object> config
+        String writeProperty,
+        @Nullable Map<String, Object> centralityDistribution
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, config);
+        this.preProcessingMillis=preProcessingMillis;
+        this.computeMillis=computeMillis;
+        this.writeMillis=writeMillis;
+
+        this.writeProperty = writeProperty;
         this.centralityDistribution = centralityDistribution;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.writeMillis = writeMillis;
+        this.nodes = nodes;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
+    static final class Builder extends AbstractCentralityResultBuilder<DeprecatedTieredWriteResult> {
+        public String writeProperty;
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
+        public Builder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
+            return this;
+        }
+
         @Override
-        public WriteResult buildResult() {
-            return new WriteResult(
-                nodePropertiesWritten,
+        public Builder withNodePropertiesWritten(long nodePropertiesWritten){
+            return this;
+        }
+
+
+        @Override
+        public DeprecatedTieredWriteResult buildResult() {
+            return new DeprecatedTieredWriteResult(
+                nodeCount,
                 preProcessingMillis,
                 computeMillis,
-                postProcessingMillis,
                 writeMillis,
-                centralityHistogram,
-                config.toMap()
+                writeProperty,
+                centralityHistogram
             );
         }
     }

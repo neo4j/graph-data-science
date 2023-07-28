@@ -20,7 +20,6 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -35,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
-public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<CentralityStreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
+public class DeprecatedTieredHarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<DeprecatedTieredStreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
 
     @Override
     public String name() {
@@ -53,7 +52,7 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<DeprecatedTieredStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -64,7 +63,7 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
-                            new CentralityStreamResult(
+                            new DeprecatedTieredStreamResult(
                                 graph.toOriginalNodeId(nodeId),
                                 centralities.get(nodeId)
                             ));

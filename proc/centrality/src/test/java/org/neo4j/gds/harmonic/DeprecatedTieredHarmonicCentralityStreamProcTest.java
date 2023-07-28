@@ -32,7 +32,7 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HarmonicCentralityStreamProcTest  extends BaseProcTest {
+class DeprecatedTieredHarmonicCentralityStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -57,14 +57,14 @@ class HarmonicCentralityStreamProcTest  extends BaseProcTest {
     @Test
     void shouldStream() {
         var query = GdsCypher.call("graph")
-            .algo("gds.closeness.harmonic")
+            .algo("gds.alpha.closeness.harmonic")
             .streamMode()
-            .yields("nodeId", "score");
+            .yields("nodeId", "centrality");
 
         var resultMap = new HashMap<Long, Double>();
-        var rowCount= runQueryWithRowConsumer(query, row -> resultMap.put(
+        var rowCount=runQueryWithRowConsumer(query, row -> resultMap.put(
             row.getNumber("nodeId").longValue(),
-            row.getNumber("score").doubleValue()
+            row.getNumber("centrality").doubleValue()
         ));
 
         assertThat(rowCount).isEqualTo(5);

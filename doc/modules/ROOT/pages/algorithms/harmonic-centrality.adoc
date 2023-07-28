@@ -57,6 +57,99 @@ If we're trying to spread a message on social media we could use the algorithm t
 [[algorithms-harmonic-centrality-syntax]]
 == Syntax
 
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Harmonic Centrality syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-write]
+======
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+| concurrency      | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| writeProperty    | string  | N/A                    | no       | The node property in the Neo4j database to which the centrality score is written.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | Number of properties written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+
+[.include-with-stream]
+======
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.closeness.harmonic.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                          | Type    | Default                | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name   | Type    | Description
+| nodeId | Integer | Node ID.
+| score  | Float   | Harmonic centrality score.
+|===
+
+======
+
+====
+
+
+[.DEPRECATED]
+[[deprecated-algorithms-harmonic-centrality-syntax]]
+== Alpha syntax
+
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
