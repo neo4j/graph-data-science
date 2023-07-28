@@ -84,7 +84,7 @@ public class NodeStore {
         return nodeProperties != null;
     }
 
-    Map<String, Map<String, NodePropertyValues>> labelToNodeProperties () {
+    Map<String, Map<String, NodePropertyValues>> labelToNodeProperties() {
         return nodeLabelMapping.isPresent()
             ? nodeProperties.entrySet()
             .stream()
