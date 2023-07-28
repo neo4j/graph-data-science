@@ -59,12 +59,13 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
+                    var centralities = result.centralities();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
                             new StreamResult(
                                 graph.toOriginalNodeId(nodeId),
-                                result.getCentralityScore(nodeId)
+                                centralities.get(nodeId)
                             ));
                 }).orElseGet(Stream::empty));
     }

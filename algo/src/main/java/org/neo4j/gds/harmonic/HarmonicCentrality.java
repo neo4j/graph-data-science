@@ -22,11 +22,14 @@ package org.neo4j.gds.harmonic;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public class HarmonicCentrality extends Algorithm<HarmonicResult> {
@@ -67,10 +70,18 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
             consumer
         ).run(concurrency, executorService);
 
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            nodeCount,
+            partition -> (Runnable) () -> partition.consume(nodeId -> inverseFarness.update(nodeId, currentValue -> currentValue / (double) (nodeCount - 1))),
+            Optional.empty()
+        );
+
+        ParallelUtil.run(tasks, executorService);
+
         progressTracker.endSubTask();
 
-        return ImmutableHarmonicResult.of(inverseFarness, graph.nodeCount());
+        return ImmutableHarmonicResult.of(inverseFarness);
     }
-
 
 }

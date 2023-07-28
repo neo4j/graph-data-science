@@ -20,7 +20,8 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -58,23 +59,13 @@ public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentra
     public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
-            computationResult -> {
-                var result=computationResult.result().get();
-                var nodeProperties=new DoubleNodePropertyValues(){
-                   @Override
-                   public double doubleValue(long nodeId) {
-                       return result.getCentralityScore(nodeId);
-                   }
-                   @Override
-                   public long nodeCount() {
-                       return computationResult.graph().nodeCount();
-                   }
-               };
-              return   List.of(ImmutableNodeProperty.of(
-                    computationResult.config().writeProperty(),
-                    nodeProperties
-                ));
-            },
+            computationResult -> List.of(ImmutableNodeProperty.of(
+                computationResult.config().writeProperty(),
+                computationResult.result()
+                    .map(HarmonicResult::centralities)
+                    .map(NodePropertyValuesAdapter::adapt)
+                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
+            )),
             name()
         );
     }
@@ -83,11 +74,12 @@ public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentra
         ComputationResult<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
+        var builder = new WriteResult.Builder(
+            executionContext.returnColumns(),
+            computationResult.config().concurrency()
+        ).withWriteProperty(computationResult.config().writeProperty());
 
-        var builder=new WriteResult.Builder(executionContext.returnColumns(),computationResult.config().concurrency())
-            .withWriteProperty(computationResult.config().writeProperty());
-
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction( nodeId-> result.getCentralityScore(nodeId)));
+        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
 
         return builder;
 

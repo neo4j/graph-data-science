@@ -73,11 +73,11 @@ public class HarmonicCentralityTest {
 
         var result = harmonicCentrality.compute();
 
-        assertThat(result.getCentralityScore(mappedId.of("a"))).isEqualTo(0.375, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("b"))).isEqualTo(0.5, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("c"))).isEqualTo(0.375, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("a"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("b"))).isEqualTo(0.5, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("c"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
     }
 
     @Test
