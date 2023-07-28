@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.stream.Collectors;
 
 public class NodeStore {
 
@@ -42,7 +43,8 @@ public class NodeStore {
 
     final IdMap idMap;
 
-    final Map<String, Map<String, NodePropertyValues>> nodeProperties;
+    private final Map<String, Map<String, NodePropertyValues>> nodeProperties;
+
     final Map<String, LongFunction<Object>> additionalProperties;
 
     private final Set<NodeLabel> availableNodeLabels;
@@ -80,6 +82,17 @@ public class NodeStore {
 
     boolean hasProperties() {
         return nodeProperties != null;
+    }
+
+    Map<String, Map<String, NodePropertyValues>> labelToNodeProperties () {
+        return nodeLabelMapping.isPresent()
+            ? nodeProperties.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                entry -> nodeLabelMapping.get().get(NodeLabel.of(entry.getKey())),
+                entry -> entry.getValue()
+            ))
+            : nodeProperties;
     }
 
     int labelCount() {

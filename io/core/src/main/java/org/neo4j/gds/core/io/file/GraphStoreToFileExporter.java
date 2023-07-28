@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.NeoNodeProperties;
+import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
@@ -70,6 +71,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
+        Optional<NodeLabelMapping> nodeLabelMapping,
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
@@ -84,7 +86,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Log log,
         String rootTaskName
     ) {
-        super(graphStore, config, neoNodeProperties, config.useLabelMapping());
+        super(graphStore, config, neoNodeProperties, nodeLabelMapping);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
         this.graphPropertyVisitorSupplier = graphPropertyVisitorSupplier;

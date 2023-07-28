@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.NeoNodeProperties;
+import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -69,11 +70,16 @@ public final class GraphStoreToCsvExporter {
                 .forEach(label -> neoNodeSchema.getOrCreateLabel(label).addProperty(key, ValueType.STRING))
             ));
 
+        Optional<NodeLabelMapping> nodeLabelMapping = config.useLabelMapping()
+            ? Optional.of(new NodeLabelMapping(graphStore.nodeLabels()))
+            : Optional.empty();
+
         return new GraphStoreToFileExporter(
             graphStore,
             config,
             neoNodeProperties,
-            () -> new UserInfoVisitor(exportPath),
+            nodeLabelMapping,
+        () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvNodeLabelMappingVisitor(exportPath),
@@ -84,7 +90,8 @@ public final class GraphStoreToCsvExporter {
                 exportPath,
                 nodeSchema.union(neoNodeSchema),
                 headerFiles,
-                index
+                index,
+                nodeLabelMapping
             ),
             (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index),
             (index) -> new CsvGraphPropertyVisitor(
