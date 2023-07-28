@@ -22,14 +22,13 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphDropNodePropertiesConfig;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 
+import java.util.List;
 import java.util.Optional;
 
 public class DropNodePropertiesService {
@@ -46,44 +45,42 @@ public class DropNodePropertiesService {
         GraphStore graphStore,
         Optional<String> deprecationWarning
     ) {
-        return computeWithProgressTracking(
-            taskRegistryFactory,
-            userLogRegistryFactory,
-            configuration,
-            graphStore,
-            deprecationWarning
-        );
-    }
-
-    private long computeWithProgressTracking(
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
-        GraphDropNodePropertiesConfig configuration,
-        GraphStore graphStore,
-        Optional<String> deprecationWarning
-    ) {
-        var task = Tasks.leaf("Graph :: NodeProperties :: Drop", configuration.nodeProperties().size());
-        var progressTracker = new TaskProgressTracker(
-            task,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
-            1,
-            new JobId(),
+        var progressTrackerFactory = new ProgressTrackerFactory(
+            log,
             taskRegistryFactory,
             userLogRegistryFactory
         );
 
-        deprecationWarning.ifPresent(progressTracker::logWarning);
-
-        return computeWithErrorHandling(graphStore, configuration, progressTracker);
+        return computeWithProgressTracking(
+            graphStore,
+            deprecationWarning,
+            progressTrackerFactory,
+            configuration.nodeProperties()
+        );
     }
 
-    private long computeWithErrorHandling(
+    long computeWithProgressTracking(
         GraphStore graphStore,
-        GraphDropNodePropertiesConfig configuration,
-        ProgressTracker progressTracker
+        Optional<String> deprecationWarning,
+        ProgressTrackerFactory progressTrackerFactory,
+        List<String> nodeProperties
+    ) {
+        var task = Tasks.leaf("Graph :: NodeProperties :: Drop", nodeProperties.size());
+
+        var progressTracker = progressTrackerFactory.create(task, 1);
+
+        deprecationWarning.ifPresent(progressTracker::logWarning);
+
+        return computeWithErrorHandling(graphStore, progressTracker, nodeProperties);
+    }
+
+    long computeWithErrorHandling(
+        GraphStore graphStore,
+        ProgressTracker progressTracker,
+        List<String> nodeProperties
     ) {
         try {
-            return dropNodeProperties(graphStore, configuration, progressTracker);
+            return dropNodeProperties(graphStore, progressTracker, nodeProperties);
         } catch (RuntimeException e) {
             log.warn("Node property removal failed", e);
             throw e;
@@ -92,13 +89,13 @@ public class DropNodePropertiesService {
 
     private Long dropNodeProperties(
         GraphStore graphStore,
-        GraphDropNodePropertiesConfig configuration,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        List<String> nodeProperties
     ) {
         var removedPropertiesCount = new MutableLong(0);
 
         progressTracker.beginSubTask();
-        configuration.nodeProperties().forEach(propertyKey -> {
+        nodeProperties.forEach(propertyKey -> {
             removedPropertiesCount.add(graphStore.nodeProperty(propertyKey).values().nodeCount());
             graphStore.removeNodeProperty(propertyKey);
             progressTracker.logProgress();
