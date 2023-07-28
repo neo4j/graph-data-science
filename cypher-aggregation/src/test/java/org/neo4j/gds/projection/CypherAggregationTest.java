@@ -85,7 +85,7 @@ class CypherAggregationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        GraphDatabaseApiProxy.register(db, Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()));
+        Neo4jProxy.registerUserAggregationFunction(db, Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()));
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 
