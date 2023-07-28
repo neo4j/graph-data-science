@@ -8,7 +8,7 @@ plugins {
 ext {
     // Make sure these are the same as your installation of GDS and Neo4j
     gdsVersion = '2.5.0-alpha03'
-    neo4jVersion = '5.8.0'
+    neo4jVersion = '4.4.22'
 
     // Necessary to generate value classes for Pregel configs
     immutablesVersion = '2.8.1'
@@ -28,6 +28,7 @@ dependencies {
     // We depend on the proc artifact of the GDS library
     compileOnly "org.neo4j.gds:proc:$gdsVersion"
     compileOnly "org.neo4j.gds:core:$gdsVersion"
+    compileOnly "org.neo4j.gds:core-write:$gdsVersion"
     compileOnly "org.neo4j.gds:algo-common:$gdsVersion"
     compileOnly "org.neo4j.gds:executor:$gdsVersion"
     compileOnly "org.neo4j.gds:memory-usage:$gdsVersion"
@@ -40,6 +41,7 @@ dependencies {
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
     compileOnly "org.neo4j:neo4j:$neo4jVersion"
+    compileOnly "org.neo4j:neo4j-procedure-api:$neo4jVersion"
 
     // We need an annotation processor for our K1 configuration
     annotationProcessor "org.immutables:value:$immutablesVersion"

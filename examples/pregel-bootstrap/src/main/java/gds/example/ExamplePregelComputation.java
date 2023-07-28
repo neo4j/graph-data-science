@@ -32,7 +32,7 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@PregelProcedure(name = "pregel.example", modes = {GDSMode.STREAM}, description = "My first Pregel example")
+@PregelProcedure(name = "pregel.example", modes = {GDSMode.STREAM, GDSMode.WRITE}, description = "My first Pregel example")
 public class ExamplePregelComputation implements PregelComputation<ExamplePregelComputation.ExampleConfig> {
 
     public static final String KEY = "key";
