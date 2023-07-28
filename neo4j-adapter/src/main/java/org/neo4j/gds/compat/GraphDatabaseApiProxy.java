@@ -43,10 +43,12 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 
 public final class GraphDatabaseApiProxy {
 
@@ -123,6 +125,7 @@ public final class GraphDatabaseApiProxy {
         register(procedures, CallableUserFunction.class, function);
     }
 
+    @SuppressForbidden(reason = "We're not implementing CallableProcedure, just passing it on")
     public static void register(GlobalProcedures procedures, CallableProcedure procedure) throws
         KernelException {
         register(procedures, CallableProcedure.class, procedure);
@@ -248,49 +251,43 @@ public final class GraphDatabaseApiProxy {
         boolean overrideCurrentImplementation
     ) {
         var globalProceduresClass = globalProcedures.getClass();
-        var registerProcedureMethod = Arrays.stream(globalProceduresClass.getDeclaredMethods())
-            .filter(method -> method.getName().equals("registerProcedure"))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Could not find registerProcedure method"));
 
-        try {
-            switch (registerProcedureMethod.getParameterCount()) {
-                case 1:
-                    registerProcedureMethod.invoke(globalProcedures, procedureClass);
-                    break;
-                case 2: {
-                    registerProcedureMethod.invoke(globalProcedures, procedureClass, overrideCurrentImplementation);
-                    break;
-                }
-                default:
-                    throw new RuntimeException("Unexpected number of parameters for registerProcedure method");
-            }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        var legacySignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class, boolean.class);
+        var newSignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class);
+        if (legacySignatureMethod.isPresent()) {
+            invokeMethod(globalProcedures, legacySignatureMethod.get(), procedureClass, overrideCurrentImplementation);
+        } else if (newSignatureMethod.isPresent()){
+            invokeMethod(globalProcedures, newSignatureMethod.get(), procedureClass);
+        } else {
+            throw new RuntimeException("Could not find registerProcedure method");
         }
     }
 
     private static void register(GlobalProcedures globalProcedures, Class<?> clazz, Object obj) {
         var globalProceduresClass = globalProcedures.getClass();
-        var registerProcedureMethod = Arrays.stream(globalProceduresClass.getDeclaredMethods())
-            .filter(method -> method.getName().equals("register"))
-            .filter(method -> (method.getParameterCount() == 1 || method.getParameterCount() == 2)
-                && method.getParameterTypes()[0].equals(clazz))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Could not find registerAggregationFunction method"));
 
+        var legacySignatureMethod = getMethod(globalProceduresClass, "register", clazz, boolean.class);
+        var newSignatureMethod = getMethod(globalProceduresClass, "register", clazz);
+        if (legacySignatureMethod.isPresent()) {
+            invokeMethod(globalProcedures, legacySignatureMethod.get(), obj, true);
+        } else if (newSignatureMethod.isPresent()){
+            invokeMethod(globalProcedures, newSignatureMethod.get(), obj);
+        } else {
+            throw new RuntimeException("Could not find registerProcedure method");
+        }
+    }
+
+    private static Optional<Method> getMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
-            switch (registerProcedureMethod.getParameterCount()) {
-                case 1:
-                    registerProcedureMethod.invoke(globalProcedures, obj);
-                    break;
-                case 2: {
-                    registerProcedureMethod.invoke(globalProcedures, obj, true);
-                    break;
-                }
-                default:
-                    throw new RuntimeException("Unexpected number of parameters for register method");
-            }
+            return Optional.of(clazz.getMethod(name, parameterTypes));
+        } catch (NoSuchMethodException e) {
+            return Optional.empty();
+        }
+    }
+
+    private static void invokeMethod(Object obj, Method method, Object... arguments) {
+        try {
+            method.invoke(obj, arguments);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
