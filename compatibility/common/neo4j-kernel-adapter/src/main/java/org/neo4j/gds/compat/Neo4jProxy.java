@@ -93,7 +93,6 @@ import org.neo4j.values.virtual.NodeValue;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class Neo4jProxy {
 
@@ -492,18 +491,6 @@ public final class Neo4jProxy {
 
     public static GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
         return IMPL.globalProcedureRegistry(globalProcedures);
-    }
-
-    public static void registerUserAggregationFunction(GraphDatabaseService db, CallableUserAggregationFunction function) throws
-        KernelException {
-        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
-        var alreadyExists = globalProcedureRegistry(globalProcedures).getAllAggregatingFunctions()
-            .collect(Collectors.toSet())
-            .contains(function.signature());
-
-        if (!alreadyExists) {
-            GraphDatabaseApiProxy.register(globalProcedures, function);
-        }
     }
 
     private Neo4jProxy() {

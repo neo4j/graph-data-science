@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
@@ -39,6 +40,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.catalog.GraphListProc;
+import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.RandomGraphTestCase;
@@ -46,8 +48,10 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.util.List;
 import java.util.Map;
@@ -85,7 +89,7 @@ class CypherAggregationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        Neo4jProxy.registerUserAggregationFunction(db, Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()));
+        registerUserAggregationFunction(db, CypherAggregation.newInstance());
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 
@@ -1082,5 +1086,17 @@ class CypherAggregationTest extends BaseProcTest {
         );
         assertThatCode(() -> runQuery(query))
             .doesNotThrowAnyException();
+    }
+
+    private static void registerUserAggregationFunction(GraphDatabaseService db, CompatUserAggregationFunction function) throws
+        KernelException {
+        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
+        var alreadyExists = Neo4jProxy.globalProcedureRegistry(globalProcedures).getAllAggregatingFunctions()
+            .collect(Collectors.toSet())
+            .contains(function.signature());
+
+        if (!alreadyExists) {
+            GraphDatabaseApiProxy.register(globalProcedures, Neo4jProxy.callableUserAggregationFunction(function));
+        }
     }
 }
