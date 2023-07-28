@@ -37,6 +37,7 @@ public class GraphDropNodePropertiesProc {
     @Context
     public GraphStoreCatalogProcedureFacade facade;
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.drop", mode = READ)
     @Description(DROP_NODE_PROPERTIES_DESCRIPTION)
     public Stream<GraphDropNodePropertiesResult> dropNodeProperties(
@@ -47,7 +48,8 @@ public class GraphDropNodePropertiesProc {
         return facade.dropNodeProperties(graphName, nodeProperties, configuration, Optional.empty());
     }
 
-    @Procedure(name = "gds.graph.removeNodeProperties.old", mode = READ, deprecatedBy = "gds.graph.nodeProperties.drop")
+    @SuppressWarnings("unused")
+    @Procedure(name = "gds.graph.removeNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.drop")
     @Description(DROP_NODE_PROPERTIES_DESCRIPTION)
     public Stream<GraphDropNodePropertiesResult> removeNodeProperties(
         @Name(value = "graphName") String graphName,
