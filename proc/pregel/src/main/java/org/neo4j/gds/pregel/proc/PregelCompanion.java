@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class PregelBaseProc {
+public final class PregelCompanion {
 
     public static <CONFIG extends PregelConfig> ValidationConfiguration<CONFIG> ensureIndexValidation(
         Log log, TaskRegistryFactory taskRegistryFactory
@@ -162,7 +162,7 @@ public final class PregelBaseProc {
             }).collect(Collectors.toList());
     }
 
-    private PregelBaseProc() {}
+    private PregelCompanion() {}
 
     static class HugeObjectArrayLongArrayPropertyValues implements LongArrayNodePropertyValues {
         private final HugeObjectArray<long[]> longArrays;

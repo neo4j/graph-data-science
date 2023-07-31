@@ -55,7 +55,7 @@ public class PregelMutateComputationResultConsumer<
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                 if (!computationResult.isGraphEmpty()) {
-                    var nodePropertyList = PregelBaseProc.nodeProperties(
+                    var nodePropertyList = PregelCompanion.nodeProperties(
                         computationResult,
                         config.mutateProperty()
                     );

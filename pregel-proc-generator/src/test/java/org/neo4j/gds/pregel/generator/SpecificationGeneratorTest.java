@@ -140,7 +140,7 @@ class SpecificationGeneratorTest {
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.executor.validation.ValidationConfiguration<org.neo4j.gds.beta.pregel.PregelProcedureConfig> validationConfig(" + NL +
             "    org.neo4j.gds.executor.ExecutionContext executionContext) {" + NL +
-            "  return org.neo4j.gds.pregel.proc.PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());" + NL +
+            "  return org.neo4j.gds.pregel.proc.PregelCompanion.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());" + NL +
             "}" + NL
         );
     }

@@ -33,7 +33,7 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.pregel.proc.PregelBaseProc;
+import org.neo4j.gds.pregel.proc.PregelCompanion;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -160,7 +160,10 @@ public class SpecificationGenerator {
                 typeNames.config()
             ))
             .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
-            .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
+            .addStatement(
+                "return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())",
+                PregelCompanion.class
+            )
             .build();
     }
 
