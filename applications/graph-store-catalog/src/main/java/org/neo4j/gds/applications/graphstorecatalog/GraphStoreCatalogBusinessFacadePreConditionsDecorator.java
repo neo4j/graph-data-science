@@ -269,6 +269,21 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public long dropGraphProperty(
+        User user, DatabaseId databaseId, String graphName,
+        String graphProperty,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.dropGraphProperty(
+            user,
+            databaseId,
+            graphName,
+            graphProperty,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

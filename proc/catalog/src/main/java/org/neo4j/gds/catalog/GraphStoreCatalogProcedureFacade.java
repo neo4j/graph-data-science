@@ -400,12 +400,33 @@ public class GraphStoreCatalogProcedureFacade {
         var result = businessFacade.dropRelationships(
             user,
             databaseId,
-            taskRegistryFactory, userLogRegistryFactory, graphName,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
             relationshipType,
             deprecationWarning
         );
 
         return Stream.of(result);
+    }
+
+    public Stream<GraphDropGraphPropertiesResult> dropGraphProperty(
+        String graphName,
+        String graphProperty,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var numberOfPropertiesRemoved = businessFacade.dropGraphProperty(
+            user,
+            databaseId,
+            graphName,
+            graphProperty,
+            configuration
+        );
+
+        return Stream.of(new GraphDropGraphPropertiesResult(graphName, graphProperty, numberOfPropertiesRemoved));
     }
 
     /**

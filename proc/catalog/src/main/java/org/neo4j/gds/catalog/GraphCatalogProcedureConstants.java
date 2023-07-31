@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 final class GraphCatalogProcedureConstants {
     static final String DROP_DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
+    static final String DROP_GRAPH_PROPERTY_DESCRIPTION = "Removes a graph property from a projected graph.";
     static final String DROP_NODE_PROPERTIES_DESCRIPTION = "Removes node properties from a projected graph.";
     static final String DROP_RELATIONSHIPS_DESCRIPTION = "Delete the relationship type for a given graph stored in the graph-catalog.";
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";

@@ -27,6 +27,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.GraphRemoveGraphPropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -167,7 +168,7 @@ public class ConfigurationService {
         return configuration;
     }
 
-    public GraphDropNodePropertiesConfig parseGraphDropNodePropertiesConfig(
+    public GraphDropNodePropertiesConfig parseGraphDropNodePropertiesConfiguration(
         GraphName graphName,
         Object nodeProperties,
         Map<String, Object> rawConfiguration
@@ -183,6 +184,22 @@ public class ConfigurationService {
         ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
 
         return configuration;
+    }
+
+    public void validateDropGraphPropertiesConfiguration(
+        GraphName graphName,
+        String graphProperty,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphRemoveGraphPropertiesConfig.of(
+            graphName.getValue(),
+            graphProperty,
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
     }
 
     private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {

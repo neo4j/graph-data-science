@@ -35,6 +35,7 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -62,6 +63,8 @@ import java.util.Optional;
  * or behind other facades (oh gosh turtles, turtles everywhere :scream:).
  */
 public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalogBusinessFacade {
+    private final Log log;
+
     // services
     private final ConfigurationService configurationService;
     private final GraphNameValidationService graphNameValidationService;
@@ -79,6 +82,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final DropRelationshipsService dropRelationshipsService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
+        Log log,
         ConfigurationService configurationService,
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -92,6 +96,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         DropNodePropertiesService dropNodePropertiesService,
         DropRelationshipsService dropRelationshipsService
     ) {
+        this.log = log;
+
         this.configurationService = configurationService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -163,7 +169,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
         var configuration = configurationService.parseNativeProjectConfiguration(
             user,
@@ -223,7 +229,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         String relationshipQuery,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
         var configuration = configurationService.parseCypherProjectConfiguration(
             user,
@@ -282,7 +288,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         String relationshipFilter,
         Map<String, Object> rawConfiguration
     ) {
-        var graphName = validateGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
         var originGraphName = graphNameValidationService.validate(originGraphNameAsString);
 
         graphStoreCatalogService.ensureGraphExists(user, databaseId, originGraphName);
@@ -338,7 +344,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphDropNodePropertiesConfig(
+        var configuration = configurationService.parseGraphDropNodePropertiesConfiguration(
             graphName,
             nodeProperties,
             rawConfiguration
@@ -391,7 +397,40 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         return new GraphDropRelationshipResult(graphName.getValue(), relationshipType, result);
     }
 
-    private GraphName validateGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {
+    @Override
+    public long dropGraphProperty(
+        User user,
+        DatabaseId databaseId,
+        String graphNameAsString,
+        String graphProperty,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        // we do this for the side effect of checking for unknown configuration keys, it is a bit naff
+        configurationService.validateDropGraphPropertiesConfiguration(
+            graphName,
+            graphProperty,
+            rawConfiguration
+        );
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
+
+        var numberOfProperties = graphStore.graphPropertyValues(graphProperty).valueCount();
+
+        try {
+            graphStore.removeGraphProperty(graphProperty);
+        } catch (RuntimeException e) {
+            log.warn("Graph property removal failed", e);
+            throw e;
+        }
+
+        return numberOfProperties;
+    }
+
+    private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {
         var graphName = graphNameValidationService.validateStrictly(graphNameAsString);
 
         graphStoreCatalogService.ensureGraphDoesNotExist(user, databaseId, graphName);

@@ -132,6 +132,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
+            log,
             configurationService,
             graphNameValidationService,
             graphStoreCatalogService,

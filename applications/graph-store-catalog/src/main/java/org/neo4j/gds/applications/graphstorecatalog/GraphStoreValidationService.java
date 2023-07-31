@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.StringSimilarity;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -66,5 +67,33 @@ public class GraphStoreValidationService {
                 graphName
             ));
         }
+    }
+
+    public void ensureGraphPropertyExists(GraphStore graphStore, String graphProperty) {
+        if (graphStore.hasGraphProperty(graphProperty)) return;
+
+        var candidates = StringSimilarity.similarStringsIgnoreCase(
+            graphProperty,
+            graphStore.graphPropertyKeys()
+        );
+
+        if (candidates.isEmpty()) {
+            var detailMessage = formatWithLocale(
+                "The following properties exist in the graph %s.",
+                StringJoining.join(graphStore.graphPropertyKeys())
+            );
+            errorOnMissingGraphProperty(graphProperty, detailMessage);
+        }
+
+        var detailMessage = formatWithLocale("Did you mean: %s.", StringJoining.join(candidates));
+        errorOnMissingGraphProperty(graphProperty, detailMessage);
+    }
+
+    private void errorOnMissingGraphProperty(String graphProperty, String detailMessage) {
+        throw new IllegalArgumentException(formatWithLocale(
+            "The specified graph property '%s' does not exist. %s",
+            graphProperty,
+            detailMessage
+        ));
     }
 }

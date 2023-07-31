@@ -137,4 +137,10 @@ public interface GraphStoreCatalogBusinessFacade {
         String relationshipType,
         Optional<String> deprecationWarning
     );
+
+    long dropGraphProperty(
+        User user, DatabaseId databaseId, String graphName,
+        String graphProperty,
+        Map<String, Object> configuration
+    );
 }
