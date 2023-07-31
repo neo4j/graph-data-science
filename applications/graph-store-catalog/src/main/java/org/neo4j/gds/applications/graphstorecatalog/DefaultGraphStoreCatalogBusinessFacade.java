@@ -26,6 +26,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
+import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
@@ -75,6 +76,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final SubGraphProjectService subGraphProjectService;
     private final GraphMemoryUsageService graphMemoryUsageService;
     private final DropNodePropertiesService dropNodePropertiesService;
+    private final DropRelationshipsService dropRelationshipsService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         ConfigurationService configurationService,
@@ -87,7 +89,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         CypherProjectService cypherProjectService,
         SubGraphProjectService subGraphProjectService,
         GraphMemoryUsageService graphMemoryUsageService,
-        DropNodePropertiesService dropNodePropertiesService
+        DropNodePropertiesService dropNodePropertiesService,
+        DropRelationshipsService dropRelationshipsService
     ) {
         this.configurationService = configurationService;
         this.graphNameValidationService = graphNameValidationService;
@@ -101,6 +104,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.subGraphProjectService = subGraphProjectService;
         this.graphMemoryUsageService = graphMemoryUsageService;
         this.dropNodePropertiesService = dropNodePropertiesService;
+        this.dropRelationshipsService = dropRelationshipsService;
     }
 
     @Override
@@ -358,6 +362,33 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             configuration.nodeProperties(),
             numberOfPropertiesRemoved
         );
+    }
+
+    @Override
+    public GraphDropRelationshipResult dropRelationships(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String relationshipType,
+        Optional<String> deprecationWarning
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureRelationshipsMayBeDeleted(graphStore, relationshipType, graphName);
+
+        var result = dropRelationshipsService.compute(
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphStore,
+            relationshipType,
+            deprecationWarning
+        );
+
+        return new GraphDropRelationshipResult(graphName.getValue(), relationshipType, result);
     }
 
     private GraphName validateGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

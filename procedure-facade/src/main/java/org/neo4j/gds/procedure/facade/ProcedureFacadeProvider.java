@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CypherProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesService;
+import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsService;
 import org.neo4j.gds.applications.graphstorecatalog.GenericProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
@@ -127,6 +128,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var subGraphProjectService = new SubGraphProjectService(log, graphStoreFilterService, graphStoreCatalogService);
         var graphMemoryUsageService = new GraphMemoryUsageService(graphStoreCatalogService);
         var dropNodePropertiesService = new DropNodePropertiesService(log);
+        var dropRelationshipsService = new DropRelationshipsService(log);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -140,7 +142,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             cypherProjectService,
             subGraphProjectService,
             graphMemoryUsageService,
-            dropNodePropertiesService
+            dropNodePropertiesService,
+            dropRelationshipsService
         );
 
         // wrap in decorator to enable preconditions checks

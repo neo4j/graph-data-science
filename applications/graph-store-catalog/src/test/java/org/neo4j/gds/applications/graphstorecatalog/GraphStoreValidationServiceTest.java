@@ -20,6 +20,8 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.List;
@@ -52,5 +54,49 @@ class GraphStoreValidationServiceTest {
         assertThatIllegalArgumentException().isThrownBy(() -> {
             service.ensureNodePropertiesExist(graphStore, List.of("foo", "bar"));
         }).withMessage("Could not find property key(s) ['bar']. Defined keys: ['foo'].");
+    }
+
+    @Test
+    void shouldEnsureRelationshipsDeletable() {
+        var service = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+
+        when(graphStore.relationshipTypes()).thenReturn(Set.of(RelationshipType.of("foo"), RelationshipType.of("bar")));
+        when(graphStore.hasNodeProperty("bar")).thenReturn(true);
+        service.ensureRelationshipsMayBeDeleted(graphStore, "foo", GraphName.parse("some graph"));
+
+        // yep it didn't blow up :shrug:
+    }
+
+    @Test
+    void shouldDisallowDeletingLastRelationships() {
+        var service = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.relationshipTypes()).thenReturn(Set.of(RelationshipType.of("foo")));
+        assertThatIllegalArgumentException().isThrownBy(() -> service.ensureRelationshipsMayBeDeleted(
+            graphStore,
+            "foo",
+            GraphName.parse("some graph")
+        )).withMessage(
+            "Deleting the last relationship type ('foo') from a graph ('some graph') is not supported. " +
+                "Use `gds.graph.drop()` to drop the entire graph instead."
+        );
+    }
+
+    @Test
+    void shouldDisallowDeletingUnknownRelationships() {
+        var service = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.relationshipTypes()).thenReturn(Set.of(RelationshipType.of("bar"), RelationshipType.of("baz")));
+        assertThatIllegalArgumentException().isThrownBy(() -> service.ensureRelationshipsMayBeDeleted(
+            graphStore,
+            "foo",
+            GraphName.parse("some graph")
+        )).withMessage(
+            "No relationship type 'foo' found in graph 'some graph'."
+        );
     }
 }

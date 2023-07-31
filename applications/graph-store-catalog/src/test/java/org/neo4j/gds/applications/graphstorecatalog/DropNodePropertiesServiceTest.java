@@ -29,7 +29,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +54,7 @@ class DropNodePropertiesServiceTest {
 
         var progressTrackerFactory = mock(ProgressTrackerFactory.class);
         var progressTracker = mock(ProgressTracker.class);
-        when(progressTrackerFactory.create(any(Task.class), eq(1))).thenReturn(progressTracker);
+        when(progressTrackerFactory.create(any(Task.class))).thenReturn(progressTracker);
         var result = service.computeWithProgressTracking(
             null,
             Optional.of("deprecated!"),

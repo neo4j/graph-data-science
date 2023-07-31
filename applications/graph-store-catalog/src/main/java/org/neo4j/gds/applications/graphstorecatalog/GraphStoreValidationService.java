@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -41,6 +43,27 @@ public class GraphStoreValidationService {
                 "Could not find property key(s) %s. Defined keys: %s.",
                 StringJoining.join(invalidProperties),
                 StringJoining.join(graphStore.nodePropertyKeys())
+            ));
+        }
+    }
+
+    public void ensureRelationshipsMayBeDeleted(GraphStore graphStore, String relationshipType, GraphName graphName) {
+        var relationshipTypes = graphStore.relationshipTypes();
+
+        if (relationshipTypes.size() == 1) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Deleting the last relationship type ('%s') from a graph ('%s') is not supported. " +
+                    "Use `gds.graph.drop()` to drop the entire graph instead.",
+                relationshipType,
+                graphName
+            ));
+        }
+
+        if (!relationshipTypes.contains(RelationshipType.of(relationshipType))) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "No relationship type '%s' found in graph '%s'.",
+                relationshipType,
+                graphName
             ));
         }
     }

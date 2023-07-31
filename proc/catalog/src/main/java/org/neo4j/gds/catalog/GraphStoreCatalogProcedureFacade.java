@@ -25,6 +25,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
+import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
@@ -380,6 +381,27 @@ public class GraphStoreCatalogProcedureFacade {
             graphName,
             nodeProperties,
             configuration,
+            deprecationWarning
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<GraphDropRelationshipResult> dropRelationships(
+        String graphName,
+        String relationshipType,
+        Optional<String> deprecationWarning
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.dropRelationships(
+            user,
+            databaseId,
+            taskRegistryFactory, userLogRegistryFactory, graphName,
+            relationshipType,
             deprecationWarning
         );
 

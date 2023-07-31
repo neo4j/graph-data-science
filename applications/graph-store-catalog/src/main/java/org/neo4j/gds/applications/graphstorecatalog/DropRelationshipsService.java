@@ -19,30 +19,29 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphDropNodePropertiesConfig;
+import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 
-import java.util.List;
 import java.util.Optional;
 
-public class DropNodePropertiesService {
+public class DropRelationshipsService {
     private final Log log;
 
-    public DropNodePropertiesService(Log log) {
+    public DropRelationshipsService(Log log) {
         this.log = log;
     }
 
-    public long compute(
+    public DeletionResult compute(
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
-        GraphDropNodePropertiesConfig configuration,
         GraphStore graphStore,
+        String relationshipType,
         Optional<String> deprecationWarning
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
@@ -50,58 +49,24 @@ public class DropNodePropertiesService {
             taskRegistryFactory,
             userLogRegistryFactory
         );
-
-        return computeWithProgressTracking(
-            graphStore,
-            deprecationWarning,
-            progressTrackerFactory,
-            configuration.nodeProperties()
-        );
-    }
-
-    long computeWithProgressTracking(
-        GraphStore graphStore,
-        Optional<String> deprecationWarning,
-        ProgressTrackerFactory progressTrackerFactory,
-        List<String> nodeProperties
-    ) {
-        var task = Tasks.leaf("Graph :: NodeProperties :: Drop", nodeProperties.size());
-
+        var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
         var progressTracker = progressTrackerFactory.create(task);
 
+        return computeWithProgressTracking(graphStore, relationshipType, deprecationWarning, progressTracker);
+    }
+
+    static DeletionResult computeWithProgressTracking(
+        GraphStore graphStore,
+        String relationshipType,
+        Optional<String> deprecationWarning,
+        ProgressTracker progressTracker
+    ) {
         deprecationWarning.ifPresent(progressTracker::logWarning);
 
-        return computeWithErrorHandling(graphStore, progressTracker, nodeProperties);
-    }
-
-    long computeWithErrorHandling(
-        GraphStore graphStore,
-        ProgressTracker progressTracker,
-        List<String> nodeProperties
-    ) {
-        try {
-            return dropNodeProperties(graphStore, progressTracker, nodeProperties);
-        } catch (RuntimeException e) {
-            log.warn("Node property removal failed", e);
-            throw e;
-        }
-    }
-
-    private Long dropNodeProperties(
-        GraphStore graphStore,
-        ProgressTracker progressTracker,
-        List<String> nodeProperties
-    ) {
-        var removedPropertiesCount = new MutableLong(0);
-
         progressTracker.beginSubTask();
-        nodeProperties.forEach(propertyKey -> {
-            removedPropertiesCount.add(graphStore.nodeProperty(propertyKey).values().nodeCount());
-            graphStore.removeNodeProperty(propertyKey);
-            progressTracker.logProgress();
-        });
-
+        var deletionResult = graphStore.deleteRelationships(RelationshipType.of(relationshipType));
         progressTracker.endSubTask();
-        return removedPropertiesCount.longValue();
+
+        return deletionResult;
     }
 }

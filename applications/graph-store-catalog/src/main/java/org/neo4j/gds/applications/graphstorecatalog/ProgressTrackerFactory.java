@@ -46,11 +46,11 @@ class ProgressTrackerFactory {
         this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
-    ProgressTracker create(Task task, int concurrency) {
+    ProgressTracker create(Task task) {
         return new TaskProgressTracker(
             task,
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            concurrency,
+            1,
             new JobId(),
             taskRegistryFactory,
             userLogRegistryFactory
