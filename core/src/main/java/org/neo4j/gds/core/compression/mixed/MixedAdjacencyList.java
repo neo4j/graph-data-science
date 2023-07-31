@@ -22,7 +22,6 @@ package org.neo4j.gds.core.compression.mixed;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 
 public class MixedAdjacencyList implements AdjacencyList {
 
@@ -44,7 +43,7 @@ public class MixedAdjacencyList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
-        if (degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+        if (MixedCompressor.usePacking(degree(node))) {
             return this.packedAdjacencyList.adjacencyCursor(node, fallbackValue);
         }
         return vlongAdjacencyList.adjacencyCursor(node, fallbackValue);
@@ -57,8 +56,7 @@ public class MixedAdjacencyList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
-        // TODO share this constant on the compression side
-        if (degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+        if (MixedCompressor.usePacking(degree(node))) {
             return this.packedAdjacencyList.adjacencyCursor(node, fallbackValue);
         }
         return vlongAdjacencyList.adjacencyCursor(reuse, node, fallbackValue);

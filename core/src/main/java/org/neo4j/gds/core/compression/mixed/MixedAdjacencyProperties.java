@@ -22,7 +22,6 @@ package org.neo4j.gds.core.compression.mixed;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.PropertyCursor;
-import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 
 public class MixedAdjacencyProperties implements AdjacencyProperties {
 
@@ -43,7 +42,7 @@ public class MixedAdjacencyProperties implements AdjacencyProperties {
 
     @Override
     public PropertyCursor propertyCursor(long node, double fallbackValue) {
-        if (this.adjacencyList.degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+        if (MixedCompressor.usePacking(this.adjacencyList.degree(node))) {
             return this.packedAdjacencyProperties.propertyCursor(node, fallbackValue);
         }
         return this.vlongAdjacencyProperties.propertyCursor(node, fallbackValue);
@@ -51,7 +50,7 @@ public class MixedAdjacencyProperties implements AdjacencyProperties {
 
     @Override
     public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
-        if (this.adjacencyList.degree(node) > AdjacencyPacking.BLOCK_SIZE * 8) {
+        if (MixedCompressor.usePacking(this.adjacencyList.degree(node))) {
             return this.packedAdjacencyProperties.propertyCursor(node, fallbackValue);
         }
         return this.vlongAdjacencyProperties.propertyCursor(reuse, node, fallbackValue);

@@ -42,6 +42,13 @@ import java.util.function.LongSupplier;
 
 public final class MixedCompressor implements AdjacencyCompressor {
 
+    /**
+     * The threshold for when to use packing. Nodes, that have a degree lower than the threshold,
+     * will use var-long compression. We picked 8 blocks, i.e. a degree of 512, based on intense
+     * research ... and by that we mean we tried a few different values and this one seemed to work.
+     */
+    private static final int PACKING_DEGREE_THRESHOLD = AdjacencyPacking.BLOCK_SIZE * 8;
+
     private final AdjacencyCompressor packedCompressor;
     private final AdjacencyCompressor vLongCompressor;
 
@@ -53,9 +60,13 @@ public final class MixedCompressor implements AdjacencyCompressor {
         this.vLongCompressor = vLongCompressor;
     }
 
+    static boolean usePacking(int degree) {
+        return degree > PACKING_DEGREE_THRESHOLD;
+    }
+
     @Override
     public int compress(long nodeId, long[] targets, long[][] properties, int degree) {
-        if (degree > AdjacencyPacking.BLOCK_SIZE * 8) {
+        if (usePacking(degree)) {
             return this.packedCompressor.compress(nodeId, targets, properties, degree);
         } else {
             return this.vLongCompressor.compress(nodeId, targets, properties, degree);
