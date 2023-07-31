@@ -22,6 +22,7 @@ package org.neo4j.gds.core.compression.mixed;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
@@ -163,9 +164,16 @@ public final class MixedCompressor implements AdjacencyCompressor {
         public AdjacencyListsWithProperties build(boolean allowReordering) {
             var packedAdjacencyList = this.packedCompressorFactory.build(false);
             var vlongAdjacencyList = this.vlongCompressorFactory.build(false);
+
+            var memoryInfo = mergeMemoryInfo(
+                packedAdjacencyList.adjacency().memoryInfo(),
+                vlongAdjacencyList.adjacency().memoryInfo()
+            );
+
             var mixedAdjacencyList = new MixedAdjacencyList(
                 packedAdjacencyList.adjacency(),
-                vlongAdjacencyList.adjacency()
+                vlongAdjacencyList.adjacency(),
+                memoryInfo
             );
 
             var mixedAdjacencyProperties = new ArrayList<AdjacencyProperties>(packedAdjacencyList.properties().size());
@@ -182,6 +190,27 @@ public final class MixedCompressor implements AdjacencyCompressor {
                 .adjacency(mixedAdjacencyList)
                 .addAllProperties(mixedAdjacencyProperties)
                 .relationshipCount(relationshipCounter.longValue())
+                .build();
+        }
+
+        private static AdjacencyList.MemoryInfo mergeMemoryInfo(
+            AdjacencyList.MemoryInfo packed,
+            AdjacencyList.MemoryInfo vlong
+        ) {
+            return ImmutableMemoryInfo.builder()
+                .pages(packed.pages() + vlong.pages())
+                .pageSizes(vlong.pageSizes().merge(packed.pageSizes()))
+                // We use the vlong on heap data structures (pages, offsets and degrees),
+                // where offsets and degrees are shared with the packed adjacency list.
+                .bytesOnHeap(vlong.bytesOnHeap())
+                .heapAllocations(vlong.heapAllocations())
+                // We only need to track the off heap data structures of the packed adjacency list.
+                .bytesOffHeap(packed.bytesOffHeap())
+                .nativeAllocations(packed.nativeAllocations())
+                // We only need to track the header statistics of the packed adjacency list.
+                .headerBits(packed.headerBits())
+                .headerAllocations(packed.headerAllocations())
+                .blockStatistics(packed.blockStatistics())
                 .build();
         }
     }

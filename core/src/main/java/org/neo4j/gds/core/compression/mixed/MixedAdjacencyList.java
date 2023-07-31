@@ -30,10 +30,10 @@ public class MixedAdjacencyList implements AdjacencyList {
 
     private final MemoryInfo memoryInfo;
 
-    MixedAdjacencyList(AdjacencyList packedAdjacencyList, AdjacencyList vlongAdjacencyList) {
+    MixedAdjacencyList(AdjacencyList packedAdjacencyList, AdjacencyList vlongAdjacencyList, MemoryInfo memoryInfo) {
         this.packedAdjacencyList = packedAdjacencyList;
         this.vlongAdjacencyList = vlongAdjacencyList;
-        this.memoryInfo = packedAdjacencyList.memoryInfo().merge(vlongAdjacencyList.memoryInfo());
+        this.memoryInfo = memoryInfo;
     }
 
     @Override
