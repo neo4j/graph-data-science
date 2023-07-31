@@ -110,6 +110,8 @@ include::partial$/algorithms/modularity/specific-configuration.adoc[]
 
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: Modularity
 :graph-description: social network
 :image-file: two-user-communities.svg
@@ -144,8 +146,6 @@ The relationships that connect the nodes in each component have a property `weig
 
 We can now project the graph and store it in the graph catalog.
 We load the `LINK` relationships with orientation set to `UNDIRECTED`.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]

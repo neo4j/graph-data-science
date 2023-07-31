@@ -244,6 +244,8 @@ include::partial$/algorithms/leiden/specific-configuration-write.adoc[]
 [[algorithms-leiden-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: Leiden community detection
 :graph-description: social network
 :image-file: two-user-communities.svg
@@ -277,8 +279,6 @@ The relationship property `weight`  determines the strength of each respective r
 
 We can now project the graph and store it in the graph catalog.
 We load the `LINK` relationships with orientation set to `UNDIRECTED` as this works best with the Leiden algorithm.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]

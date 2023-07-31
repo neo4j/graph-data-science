@@ -205,6 +205,8 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 [[alpha-algorithms-celf-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: influence-maximization.svg

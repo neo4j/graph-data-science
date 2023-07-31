@@ -212,6 +212,8 @@ include::partial$/algorithms/wcc/specific-configuration-write.adoc[]
 [[algorithms-wcc-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: user network
 :image-file: wcc-graph.svg
@@ -236,8 +238,6 @@ CREATE
 
 This graph has two connected components, each with three nodes.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

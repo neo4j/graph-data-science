@@ -104,6 +104,8 @@ Note that `concurrency` must be set to 1 when setting this parameter.
 
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 In this section we will demonstrate the usage of the CNARW sampling algorithm on a small toy graph.
 
 
@@ -157,8 +159,6 @@ This graph has two clusters of _Users_, that are closely connected.
 Between those clusters there is bidirectional relationship.
 
 We can now project the graph and store it in the graph catalog.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]

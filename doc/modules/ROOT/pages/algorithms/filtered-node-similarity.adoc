@@ -253,6 +253,8 @@ include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-s
 [[algorithms-filtered-node-similarity-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: knowledge
 :image-file: node-similarity.svg
@@ -289,8 +291,6 @@ The two node sets are connected via LIKES relationships.
 Each relationship starts at a Person node and ends at an Instrument node.
 
 The Filtered Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1. Eve hence shall not be included in the results as her degree is zero.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]

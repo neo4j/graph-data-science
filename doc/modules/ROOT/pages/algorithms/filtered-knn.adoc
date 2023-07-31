@@ -316,6 +316,8 @@ include::partial$/algorithms/filtered-knn/filtered-knn-specific-algo-config.adoc
 [[algorithms-filtered-knn-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 In this section we will show examples of running the Filtered K-Nearest Neighbors algorithm on a concrete graph.
 
 Recall that KNN can run on a graph of only nodes, without any relationships.
@@ -334,8 +336,6 @@ CREATE (eve:Person:Vegan {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embeddin
 ----
 
 In the example, we want to use the Filtered K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]

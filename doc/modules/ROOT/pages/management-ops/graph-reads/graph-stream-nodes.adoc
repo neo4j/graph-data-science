@@ -111,6 +111,8 @@ YIELD
 [[streaming-nodes-examples]]
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS capabilities of streaming node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
 .The following Cypher statement will create the example graph in the Neo4j database:

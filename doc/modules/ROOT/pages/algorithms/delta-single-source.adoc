@@ -55,6 +55,8 @@ Note, that the value might vary depending on the graph topology and the value ra
 [[algorithms-delta-single-source-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: transport network
 :image-file: dijkstra.svg
@@ -83,8 +85,6 @@ CREATE (a:Location {name: 'A'}),
 This graph builds a transportation network with roads between locations.
 Like in the real world, the roads in the graph have different lengths.
 These lengths are represented by the `cost` relationship property.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

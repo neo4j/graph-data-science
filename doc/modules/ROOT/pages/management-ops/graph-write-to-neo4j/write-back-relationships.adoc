@@ -109,6 +109,8 @@ YIELD
 
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 We can write relationships stored in a named in-memory graph back to Neo4j.
 This can be used to write algorithm results (for example from xref:algorithms/node-similarity.adoc[Node Similarity]) or relationships that have been aggregated during graph creation.
 

@@ -90,6 +90,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [[algorithms-split-relationships-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description:
 :image-file: split-relationships.svg

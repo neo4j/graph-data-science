@@ -258,6 +258,8 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 [[algorithms-closeness-centrality-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: sample
 :image-file: closeness-centrality-graph.png
@@ -284,8 +286,6 @@ CREATE (a:Node {id:"A"}),
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a native projection targeting the `Node` nodes and the `LINK` relationships.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

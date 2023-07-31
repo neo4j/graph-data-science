@@ -58,6 +58,8 @@ include::partial$/algorithms/shortest-path/path-syntax.adoc[]
 [[algorithms-astar-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: transport network
 :image-file: astar.svg
@@ -83,8 +85,6 @@ Each station has a geo-coordinate, expressed by `latitude` and `longitude` prope
 Stations are connected via connections.
 We use the `distance` property as relationship weight which represents the distance between stations in kilometers.
 The algorithm will pick the next node in the search based on the already traveled distance and the distance to the target station.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

@@ -179,6 +179,8 @@ include::partial$/algorithms/approx-max-k-cut/specific-configuration.adoc[]
 [[algorithms-approx-max-k-cut-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: Bitcoin transactions
 :image-file: approx-max-k-cut-example.png

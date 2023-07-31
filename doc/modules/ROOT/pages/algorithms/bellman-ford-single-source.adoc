@@ -43,6 +43,8 @@ include::partial$/algorithms/shortest-path/bellman-ford/bellman-ford-syntax.adoc
 [[algorithms-bellman-single-source-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: example network
 :image-file: bellman-ford.svg
@@ -77,8 +79,6 @@ CREATE (a:Node {name: 'A'}),
 
 This graph builds an example network with relationships between nodes having both negative and positive weights.
 These weights are represented by the `cost` relationship property.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

@@ -195,6 +195,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [[algorithms-k1coloring-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=noplay setup-query]
@@ -226,8 +228,6 @@ CALL gds.graph.project(
 )
 ----
 We can now go ahead and project a graph with all the `User` nodes and the `LINK` relationships with `UNDIRECTED` orientation.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay]

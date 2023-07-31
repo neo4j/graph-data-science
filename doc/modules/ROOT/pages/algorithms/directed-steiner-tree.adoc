@@ -218,6 +218,8 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 [[algorithms-directed-steiner-tree-sample]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: road network
 :image-file: steiner-graph.svg

@@ -363,6 +363,8 @@ include::partial$/machine-learning/node-embeddings/graph-sage/specific-configura
 [[algorithms-embeddings-graph-sage-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: friends network
 :image-file: graph-sage-graph.svg

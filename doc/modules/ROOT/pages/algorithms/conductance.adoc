@@ -76,6 +76,8 @@ Nodes with a negative community ID will only take part in the computation to the
 
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: Conductance
 :graph-description: social network
 :image-file: two-user-communities.svg
@@ -109,8 +111,6 @@ The relationships that connect the nodes in each component have a property `weig
 
 We can now project the graph and store it in the graph catalog.
 We load the `LINK` relationships with orientation set to `UNDIRECTED` as this works best with the Louvain algorithm which we will use to create the communities that we evaluate using Conductance.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]

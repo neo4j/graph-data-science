@@ -206,6 +206,8 @@ include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
 [[algorithms-hits-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: hits.svg
