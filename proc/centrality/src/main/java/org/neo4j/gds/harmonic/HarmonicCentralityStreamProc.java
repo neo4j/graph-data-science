@@ -49,7 +49,7 @@ public class HarmonicCentralityStreamProc extends BaseProc {
 
     @Deprecated(forRemoval = true)
     @Internal
-    @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ)
+    @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ, deprecatedBy = "gds.closeness.harmonic.stream")
     @Description(DESCRIPTION)
     public Stream<DeprecatedTieredStreamResult> streamAlpha(
         @Name(value = "graphName") String graphName,

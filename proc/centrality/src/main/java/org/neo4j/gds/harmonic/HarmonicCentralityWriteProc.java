@@ -54,7 +54,7 @@ public class HarmonicCentralityWriteProc extends BaseProc {
 
     @Deprecated(forRemoval = true)
     @Internal
-    @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE)
+    @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE, deprecatedBy = "gds.closeness.harmonic.write")
     @Description(DESCRIPTION)
     public Stream<DeprecatedTieredWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
