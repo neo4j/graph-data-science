@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.ml.models.Features;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;

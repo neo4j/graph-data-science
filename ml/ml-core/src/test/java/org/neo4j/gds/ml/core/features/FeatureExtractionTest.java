@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.core.features;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.ml.core.batch.RangeBatch;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 

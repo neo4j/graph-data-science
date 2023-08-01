@@ -20,7 +20,7 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 
 @ValueClass
 public interface MaxKCutResult {

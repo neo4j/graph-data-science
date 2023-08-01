@@ -24,7 +24,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public class LeidenDendrogramManager {
 

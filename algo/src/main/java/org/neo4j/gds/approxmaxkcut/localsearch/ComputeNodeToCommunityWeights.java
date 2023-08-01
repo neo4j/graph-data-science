@@ -21,7 +21,7 @@ package org.neo4j.gds.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 

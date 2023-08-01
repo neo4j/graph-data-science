@@ -25,7 +25,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 

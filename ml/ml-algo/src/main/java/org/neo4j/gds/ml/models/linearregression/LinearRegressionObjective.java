@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;

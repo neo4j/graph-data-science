@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.cursor.HugeCursorSupport;
@@ -68,28 +68,28 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
      * @return the value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract Box boxedGet(long index);
+    public abstract Box boxedGet(long index);
 
     /**
      * Sets the value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract void boxedSet(long index, Box value);
+    public abstract void boxedSet(long index, Box value);
 
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
      * The behavior is identical to {@link java.util.Arrays#setAll(int[], java.util.function.IntUnaryOperator)}.
      */
-    abstract void boxedSetAll(LongFunction<Box> gen);
+    public abstract void boxedSetAll(LongFunction<Box> gen);
 
     /**
      * Assigns the specified value to each element.
      * <p>
      * The behavior is identical to {@link java.util.Arrays#fill(int[], int)}.
      */
-    abstract void boxedFill(Box value);
+    public abstract void boxedFill(Box value);
 
     /**
      * @return the contents of this array as a flat java primitive array.

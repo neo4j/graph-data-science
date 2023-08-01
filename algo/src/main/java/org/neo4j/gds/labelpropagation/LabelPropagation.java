@@ -30,7 +30,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;

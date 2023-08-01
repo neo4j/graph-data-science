@@ -29,7 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;

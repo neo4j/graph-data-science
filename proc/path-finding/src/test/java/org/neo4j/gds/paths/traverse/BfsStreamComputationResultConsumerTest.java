@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.graphdb.Path;

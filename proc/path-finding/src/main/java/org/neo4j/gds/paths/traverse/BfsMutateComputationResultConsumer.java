@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.MutateResult;

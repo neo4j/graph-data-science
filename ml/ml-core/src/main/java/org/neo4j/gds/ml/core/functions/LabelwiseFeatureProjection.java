@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;

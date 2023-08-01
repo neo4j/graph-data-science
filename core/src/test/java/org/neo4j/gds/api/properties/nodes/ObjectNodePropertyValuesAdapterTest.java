@@ -21,7 +21,7 @@ package org.neo4j.gds.api.properties.nodes;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 import java.util.Arrays;
 

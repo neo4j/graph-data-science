@@ -22,7 +22,7 @@ package org.neo4j.gds.scc;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 

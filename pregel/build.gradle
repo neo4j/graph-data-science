@@ -17,6 +17,7 @@ dependencies {
     compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     implementation project(':config-api')
+    implementation project(":collections-memory-estimation")
     implementation project(":core")
     implementation project(":core-utils")
     implementation project(':annotations')

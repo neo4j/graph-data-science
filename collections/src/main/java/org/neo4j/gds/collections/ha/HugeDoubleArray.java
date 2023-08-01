@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
@@ -62,6 +62,24 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
  * </pre>
  */
 public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDoubleArray> {
+
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
+            return sizeOfInstance(SingleHugeDoubleArray.class) + sizeOfDoubleArray((int) size);
+        }
+        long sizeOfInstance = sizeOfInstance(PagedHugeDoubleArray.class);
+
+        int numPages = numberOfPages(size);
+
+        long memoryUsed = sizeOfObjectArray(numPages);
+        final long pageBytes = sizeOfDoubleArray(PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        final int lastPageSize = exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + sizeOfDoubleArray(lastPageSize);
+    }
 
     /**
      * @return the double value at the given index
@@ -144,7 +162,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
-    final Double boxedGet(final long index) {
+    public final Double boxedGet(final long index) {
         return get(index);
     }
 
@@ -152,7 +170,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
-    final void boxedSet(final long index, final Double value) {
+    public final void boxedSet(final long index, final Double value) {
         set(index, value);
     }
 
@@ -160,7 +178,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
-    final void boxedSetAll(final LongFunction<Double> gen) {
+    public final void boxedSetAll(final LongFunction<Double> gen) {
         setAll(gen::apply);
     }
 
@@ -168,7 +186,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
-    final void boxedFill(final Double value) {
+    public final void boxedFill(final Double value) {
         fill(value);
     }
 
@@ -190,24 +208,6 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         return PagedHugeDoubleArray.of(size);
     }
 
-    public static long memoryEstimation(long size) {
-        assert size >= 0;
-
-        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
-            return sizeOfInstance(SingleHugeDoubleArray.class) + sizeOfDoubleArray((int) size);
-        }
-        long sizeOfInstance = sizeOfInstance(PagedHugeDoubleArray.class);
-
-        int numPages = numberOfPages(size);
-
-        long memoryUsed = sizeOfObjectArray(numPages);
-        final long pageBytes = sizeOfDoubleArray(PAGE_SIZE);
-        memoryUsed += (numPages - 1) * pageBytes;
-        final int lastPageSize = exclusiveIndexOfPage(size);
-
-        return sizeOfInstance + memoryUsed + sizeOfDoubleArray(lastPageSize);
-    }
-
     public static HugeDoubleArray of(final double... values) {
         return new HugeDoubleArray.SingleHugeDoubleArray(values.length, values);
     }
@@ -222,7 +222,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         return SingleHugeDoubleArray.of(size);
     }
 
-    private static final class SingleHugeDoubleArray extends HugeDoubleArray {
+    static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
         private static HugeDoubleArray of(long size) {
             assert size <= HugeArrays.MAX_ARRAY_LENGTH;
@@ -340,7 +340,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         }
     }
 
-    private static final class PagedHugeDoubleArray extends HugeDoubleArray {
+    static final class PagedHugeDoubleArray extends HugeDoubleArray {
 
         private static HugeDoubleArray of(long size) {
             int numPages = numberOfPages(size);

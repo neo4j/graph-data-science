@@ -22,12 +22,13 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionConsumer;
@@ -86,9 +87,9 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
                 "propertyVectors",
                 MemoryUsage.sizeOfFloatArray((long) config.featureProperties().size() * config.propertyDimension())
             )
-            .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
-            .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
-            .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
+            .add("embeddings", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
+            .add("embeddingA", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
+            .add("embeddingB", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .build();
     }
 

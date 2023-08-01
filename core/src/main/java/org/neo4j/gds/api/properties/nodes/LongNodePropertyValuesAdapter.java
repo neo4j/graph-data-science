@@ -20,9 +20,9 @@
 package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public final class LongNodePropertyValuesAdapter {
 

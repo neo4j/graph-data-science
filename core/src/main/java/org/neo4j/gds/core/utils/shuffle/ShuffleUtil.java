@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.shuffle;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.Optional;
 import java.util.SplittableRandom;

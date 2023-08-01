@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 

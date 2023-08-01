@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.traverse;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 

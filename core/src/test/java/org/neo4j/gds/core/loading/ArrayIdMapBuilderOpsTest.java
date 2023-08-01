@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

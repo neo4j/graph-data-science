@@ -21,7 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

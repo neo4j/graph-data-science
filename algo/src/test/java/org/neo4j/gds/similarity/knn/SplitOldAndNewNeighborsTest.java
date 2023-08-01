@@ -24,7 +24,7 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.From;
 import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;

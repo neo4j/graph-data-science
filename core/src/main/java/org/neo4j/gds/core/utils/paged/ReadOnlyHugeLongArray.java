@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public interface ReadOnlyHugeLongArray {
     long get(long index);

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
@@ -26,10 +26,9 @@ import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * A long-indexable version of a primitive long array ({@code long[]}) that can contain more than 2 bn. elements.
@@ -56,6 +55,24 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * </pre>
  */
 public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArray> {
+
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
+            return MemoryUsage.sizeOfInstance(SingleHugeLongArray.class) + MemoryUsage.sizeOfLongArray((int) size);
+        }
+        long sizeOfInstance = MemoryUsage.sizeOfInstance(PagedHugeLongArray.class);
+
+        int numPages = HugeArrays.numberOfPages(size);
+
+        long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
+        final long pageBytes = MemoryUsage.sizeOfLongArray(HugeArrays.PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + MemoryUsage.sizeOfLongArray(lastPageSize);
+    }
 
     /**
      * @return the long value at the given index
@@ -162,7 +179,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final Long boxedGet(final long index) {
+    public final Long boxedGet(final long index) {
         return get(index);
     }
 
@@ -170,7 +187,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSet(final long index, final Long value) {
+    public final void boxedSet(final long index, final Long value) {
         set(index, value);
     }
 
@@ -178,7 +195,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSetAll(final LongFunction<Long> gen) {
+    public final void boxedSetAll(final LongFunction<Long> gen) {
         setAll(gen::apply);
     }
 
@@ -186,7 +203,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedFill(final Long value) {
+    public final void boxedFill(final Long value) {
         fill(value);
     }
 
@@ -208,24 +225,6 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         return PagedHugeLongArray.of(size);
     }
 
-    public static long memoryEstimation(long size) {
-        assert size >= 0;
-
-        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
-            return MemoryUsage.sizeOfInstance(SingleHugeLongArray.class) + MemoryUsage.sizeOfLongArray((int) size);
-        }
-        long sizeOfInstance = MemoryUsage.sizeOfInstance(PagedHugeLongArray.class);
-
-        int numPages = HugeArrays.numberOfPages(size);
-
-        long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
-        final long pageBytes = MemoryUsage.sizeOfLongArray(HugeArrays.PAGE_SIZE);
-        memoryUsed += (numPages - 1) * pageBytes;
-        final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
-
-        return sizeOfInstance + memoryUsed + MemoryUsage.sizeOfLongArray(lastPageSize);
-    }
-
     public static HugeLongArray of(final long... values) {
         return new SingleHugeLongArray(values.length, values);
     }
@@ -233,22 +232,27 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     public static HugeLongArray of(long[][] array, long size) {
         var capacity = PageUtil.capacityFor(array.length, HugeArrays.PAGE_SHIFT);
         if (size > capacity) {
-            throw new IllegalStateException(formatWithLocale("Size should be smaller than or equal to capacity %d, but got size %d", capacity, size));
+            throw new IllegalStateException(String.format(
+                Locale.ENGLISH,
+                "Size should be smaller than or equal to capacity %d, but got size %d",
+                capacity,
+                size
+            ));
         }
         return new PagedHugeLongArray(size, array, PagedHugeLongArray.memoryUsed(array, capacity));
     }
 
     /* test-only */
-    static HugeLongArray newPagedArray(long size) {
+    public static HugeLongArray newPagedArray(long size) {
         return PagedHugeLongArray.of(size);
     }
 
     /* test-only */
-    static HugeLongArray newSingleArray(int size) {
+    public static HugeLongArray newSingleArray(int size) {
         return SingleHugeLongArray.of(size);
     }
 
-    private static final class SingleHugeLongArray extends HugeLongArray {
+    static final class SingleHugeLongArray extends HugeLongArray {
 
         private static HugeLongArray of(long size) {
             assert size <= HugeArrays.MAX_ARRAY_LENGTH;
@@ -378,7 +382,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
     }
 
-    private static final class PagedHugeLongArray extends HugeLongArray {
+    static final class PagedHugeLongArray extends HugeLongArray {
 
         private static HugeLongArray of(long size) {
             int numPages = HugeArrays.numberOfPages(size);

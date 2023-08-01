@@ -21,12 +21,12 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -106,7 +106,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             gsBuilder = gsBuilder.startField(RESIDENT_MEMORY)
                 .add(
                     "resultFeatures",
-                    HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.embeddingDimension()))
+                    HugeObjectArrayEstimation.objectArray(sizeOfDoubleArray(config.embeddingDimension()))
                 ).endField();
         }
 
@@ -115,7 +115,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             .field("this.instance", GraphSage.class)
             .add(
                 "initialFeatures",
-                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.estimationFeatureDimension()))
+                HugeObjectArrayEstimation.objectArray(sizeOfDoubleArray(config.estimationFeatureDimension()))
             )
             .perThread(
                 "concurrentBatches",
@@ -126,7 +126,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         if (!mutate) {
             builder = builder.add(
                 "resultFeatures",
-                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.embeddingDimension()))
+                HugeObjectArrayEstimation.objectArray(sizeOfDoubleArray(config.embeddingDimension()))
             );
         }
         return builder.endField().build();

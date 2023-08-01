@@ -20,7 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 
 import java.util.concurrent.atomic.DoubleAdder;

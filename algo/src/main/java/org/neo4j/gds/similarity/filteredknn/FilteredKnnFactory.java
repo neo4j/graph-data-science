@@ -23,11 +23,11 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.apache.commons.lang3.function.TriFunction;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
@@ -85,7 +85,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
             (dim, concurrency) -> {
                 var boundedK = configuration.boundedK(dim.nodeCount());
                 var sampledK = configuration.sampledK(dim.nodeCount());
-                var tempListEstimation = HugeObjectArray.memoryEstimation(
+                var tempListEstimation = HugeObjectArrayEstimation.objectArray(
                     MemoryEstimations.of("elements", MemoryRange.of(
                         0,
                         sizeOfInstance(LongArrayList.class) + sizeOfLongArray(sampledK)
@@ -95,7 +95,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
                     .builder(FilteredKnn.class)
                     .add(
                         "top-k-neighbors-list",
-                        HugeObjectArray.memoryEstimation(NeighborList.memoryEstimation(boundedK))
+                        HugeObjectArrayEstimation.objectArray(NeighborList.memoryEstimation(boundedK))
                     )
                     .add("old-neighbors", tempListEstimation)
                     .add("new-neighbors", tempListEstimation)

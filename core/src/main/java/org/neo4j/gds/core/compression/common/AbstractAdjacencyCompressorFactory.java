@@ -27,8 +27,8 @@ import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;

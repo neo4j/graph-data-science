@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
-import org.eclipse.collections.api.block.function.primitive.LongToByteFunction;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
 
@@ -61,6 +60,24 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
  * </pre>
  */
 public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArray> {
+
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
+            return sizeOfInstance(SingleHugeByteArray.class) + sizeOfByteArray((int) size);
+        }
+        long sizeOfInstance = sizeOfInstance(PagedHugeByteArray.class);
+
+        int numPages = numberOfPages(size);
+
+        long memoryUsed = sizeOfObjectArray(numPages);
+        long pageBytes = sizeOfByteArray(PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        int lastPageSize = exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + sizeOfByteArray(lastPageSize);
+    }
 
     /**
      * @return the byte value at the given index
@@ -150,7 +167,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * {@inheritDoc}
      */
     @Override
-    final Byte boxedGet(final long index) {
+    public final Byte boxedGet(final long index) {
         return get(index);
     }
 
@@ -158,7 +175,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSet(final long index, final Byte value) {
+    public final void boxedSet(final long index, final Byte value) {
         set(index, value);
     }
 
@@ -166,7 +183,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSetAll(final LongFunction<Byte> gen) {
+    public final void boxedSetAll(final LongFunction<Byte> gen) {
         setAll(gen::apply);
     }
 
@@ -174,7 +191,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedFill(final Byte value) {
+    public final void boxedFill(final Byte value) {
         fill(value);
     }
 
@@ -210,24 +227,6 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
         return new SingleHugeByteArray(values.length, values);
     }
 
-    public static long memoryEstimation(long size) {
-        assert size >= 0;
-
-        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
-            return sizeOfInstance(SingleHugeByteArray.class) + sizeOfByteArray((int) size);
-        }
-        long sizeOfInstance = sizeOfInstance(PagedHugeByteArray.class);
-
-        int numPages = numberOfPages(size);
-
-        long memoryUsed = sizeOfObjectArray(numPages);
-        long pageBytes = sizeOfByteArray(PAGE_SIZE);
-        memoryUsed += (numPages - 1) * pageBytes;
-        int lastPageSize = exclusiveIndexOfPage(size);
-
-        return sizeOfInstance + memoryUsed + sizeOfByteArray(lastPageSize);
-    }
-
     /* test-only */
     static HugeByteArray newPagedArray(long size) {
         return PagedHugeByteArray.of(size);
@@ -238,7 +237,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
         return SingleHugeByteArray.of(size);
     }
 
-    private static final class SingleHugeByteArray extends HugeByteArray {
+    static final class SingleHugeByteArray extends HugeByteArray {
 
         private static HugeByteArray of(long size) {
             assert size <= HugeArrays.MAX_ARRAY_LENGTH;
@@ -375,7 +374,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
         }
     }
 
-    private static final class PagedHugeByteArray extends HugeByteArray {
+    static final class PagedHugeByteArray extends HugeByteArray {
 
         private static HugeByteArray of(long size) {
             int numPages = numberOfPages(size);
@@ -537,5 +536,10 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
         public HugeCursor<byte[]> newCursor() {
             return new HugeCursor.PagedCursor<>(size, pages);
         }
+    }
+
+    @FunctionalInterface
+    public interface LongToByteFunction {
+        byte valueOf(long value);
     }
 }

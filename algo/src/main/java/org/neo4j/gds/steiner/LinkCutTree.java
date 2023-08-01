@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.steiner;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 class LinkCutTree {
 //Look here: https://dl.acm.org/doi/pdf/10.1145/3828.3835

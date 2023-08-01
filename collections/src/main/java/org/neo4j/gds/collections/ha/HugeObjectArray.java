@@ -17,12 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.neo4j.gds.collections.cursor.HugeCursor;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.HugeArrays;
 
 import java.lang.reflect.Array;
@@ -64,6 +61,24 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
  * </pre>
  */
 public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArray<T>> {
+
+    public static long memoryEstimation(long arraySize, long objectSize) {
+        var sizeOfInstance = arraySize <= HugeArrays.MAX_ARRAY_LENGTH
+            ? sizeOfInstance(SingleHugeObjectArray.class)
+            : sizeOfInstance(PagedHugeObjectArray.class);
+
+        int numPages = numberOfPages(arraySize);
+
+        long outArrayMemoryUsage = sizeOfObjectArray(numPages);
+
+        long memoryUsagePerPage = sizeOfObjectArray(PAGE_SIZE) + (PAGE_SIZE * objectSize);
+        long pageMemoryUsage = (numPages - 1) * memoryUsagePerPage;
+
+        int lastPageSize = exclusiveIndexOfPage(arraySize);
+        var lastPageMemoryUsage = sizeOfObjectArray(lastPageSize) + (lastPageSize * objectSize);
+
+        return sizeOfInstance + outArrayMemoryUsage + pageMemoryUsage + lastPageMemoryUsage;
+    }
 
     /**
      * @return the value at the given index
@@ -152,7 +167,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
-    final T boxedGet(final long index) {
+    public final T boxedGet(final long index) {
         return get(index);
     }
 
@@ -160,7 +175,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
-    final void boxedSet(final long index, final T value) {
+    public final void boxedSet(final long index, final T value) {
         set(index, value);
     }
 
@@ -168,7 +183,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
-    final void boxedSetAll(final LongFunction<T> gen) {
+    public final void boxedSetAll(final LongFunction<T> gen) {
         setAll(gen);
     }
 
@@ -176,7 +191,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
-    final void boxedFill(final T value) {
+    public final void boxedFill(final T value) {
         fill(value);
     }
 
@@ -207,7 +222,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     }
 
     /* test-only */
-    static <T> HugeObjectArray<T> newPagedArray(
+    public static <T> HugeObjectArray<T> newPagedArray(
         Class<T> componentClass,
         long size
     ) {
@@ -215,64 +230,14 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     }
 
     /* test-only */
-    static <T> HugeObjectArray<T> newSingleArray(
+    public static <T> HugeObjectArray<T> newSingleArray(
         Class<T> componentClass,
         int size
     ) {
         return SingleHugeObjectArray.of(componentClass, size);
     }
 
-    public static long memoryEstimation(long arraySize, long objectSize) {
-        var sizeOfInstance = arraySize <= HugeArrays.MAX_ARRAY_LENGTH
-            ? sizeOfInstance(SingleHugeObjectArray.class)
-            : sizeOfInstance(PagedHugeObjectArray.class);
-
-        int numPages = numberOfPages(arraySize);
-
-        long outArrayMemoryUsage = sizeOfObjectArray(numPages);
-
-        long memoryUsagePerPage = sizeOfObjectArray(PAGE_SIZE) + (PAGE_SIZE * objectSize);
-        long pageMemoryUsage = (numPages - 1) * memoryUsagePerPage;
-
-        int lastPageSize = exclusiveIndexOfPage(arraySize);
-        var lastPageMemoryUsage = sizeOfObjectArray(lastPageSize) + (lastPageSize * objectSize);
-
-        return sizeOfInstance + outArrayMemoryUsage + pageMemoryUsage + lastPageMemoryUsage;
-    }
-
-    // TODO: let's remove this method
-    public static MemoryEstimation memoryEstimation(MemoryEstimation objectEstimation) {
-        var builder = MemoryEstimations.builder();
-
-        builder.perNode("instance", nodeCount -> {
-            if (nodeCount <= HugeArrays.MAX_ARRAY_LENGTH) {
-                return sizeOfInstance(SingleHugeObjectArray.class);
-            } else {
-                return sizeOfInstance(PagedHugeObjectArray.class);
-            }
-        });
-
-        builder.perNode("data", objectEstimation);
-
-        builder.perNode("pages", nodeCount -> {
-            if (nodeCount <= HugeArrays.MAX_ARRAY_LENGTH) {
-                return sizeOfObjectArray(nodeCount);
-            } else {
-                int numPages = numberOfPages(nodeCount);
-                return sizeOfObjectArray(numPages) + numPages * sizeOfObjectArray(PAGE_SIZE);
-            }
-        });
-        return builder.build();
-    }
-
-    // TODO: lets remove this method
-    public static MemoryEstimation memoryEstimation(long objectEstimation) {
-        return memoryEstimation(
-            MemoryEstimations.of("instance", (dimensions, concurrency) -> MemoryRange.of(objectEstimation))
-        );
-    }
-
-    private static final class SingleHugeObjectArray<T> extends HugeObjectArray<T> {
+    static final class SingleHugeObjectArray<T> extends HugeObjectArray<T> {
 
         private static <T> HugeObjectArray<T> of(
             Class<T> componentClass,
@@ -413,7 +378,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
     }
 
-    private static final class PagedHugeObjectArray<T> extends HugeObjectArray<T> {
+    static final class PagedHugeObjectArray<T> extends HugeObjectArray<T> {
 
         @SuppressWarnings("unchecked")
         private static <T> HugeObjectArray<T> of(

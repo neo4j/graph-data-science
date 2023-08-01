@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;

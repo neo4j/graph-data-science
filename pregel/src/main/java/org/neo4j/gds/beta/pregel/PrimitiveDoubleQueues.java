@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;

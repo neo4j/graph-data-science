@@ -21,7 +21,7 @@ package org.neo4j.gds.influenceMaximization;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

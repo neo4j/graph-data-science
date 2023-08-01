@@ -25,8 +25,8 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.Arrays;
 import java.util.function.LongPredicate;

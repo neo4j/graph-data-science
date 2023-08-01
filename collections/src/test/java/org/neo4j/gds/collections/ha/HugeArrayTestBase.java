@@ -17,13 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -31,15 +35,11 @@ import java.util.function.ObjIntConsumer;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, Huge>> {
 
@@ -180,7 +180,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         long expected = bufferSize(size);
         testArray(size, array -> {
             long freed = array.release();
-            assertThat(freed, anyOf(is(expected), is(expected + 24)));
+            MatcherAssert.assertThat(freed, Matchers.anyOf(Matchers.is(expected), Matchers.is(expected + 24)));
         });
     }
 
@@ -424,8 +424,8 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
                 Array source = newUnderlyingArray(size);
                 array.copyFromArrayIntoSlice(source, 0, targetSize);
             });
-            assertEquals(
-                    formatWithLocale("end expected to be in [0 : %d] but got %d", size, targetSize),
+            Assertions.assertEquals(
+                    String.format(Locale.ENGLISH, "end expected to be in [0 : %d] but got %d", size, targetSize),
                     illegalArgumentException.getMessage()
             );
         });

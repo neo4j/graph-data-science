@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
 

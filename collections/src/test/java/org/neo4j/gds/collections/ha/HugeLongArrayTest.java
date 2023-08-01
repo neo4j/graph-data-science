@@ -17,15 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import static io.qala.datagen.RandomShortApi.integer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntArray> {
+final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongArray> {
 
     @Test
     void shouldBinaryOrValues() {
@@ -52,19 +54,6 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
     }
 
     @Test
-    void shouldGetAndAddValues() {
-        testArray(10, array -> {
-            int index = integer(2, 8);
-            int value = integer(42, 1337);
-            int delta = integer(0, 42);
-            array.set(index, value);
-            var oldValue = array.getAndAdd(index, delta);
-            assertEquals(oldValue, value);
-            assertEquals(value + delta, array.get(index));
-        });
-    }
-
-    @Test
     void shouldAddToValues() {
         testArray(10, array -> {
             int index = integer(2, 8);
@@ -78,38 +67,71 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
 
     @Test
     void shouldComputeMemoryEstimation() {
-        assertEquals(40, HugeIntArray.memoryEstimation(0L));
-        assertEquals(440, HugeIntArray.memoryEstimation(100L));
-        assertEquals(400_122_070_368L, HugeIntArray.memoryEstimation(100_000_000_000L));
+        assertEquals(40, HugeLongArray.memoryEstimation(0L));
+        assertEquals(840, HugeLongArray.memoryEstimation(100L));
+        assertEquals(800_122_070_368L, HugeLongArray.memoryEstimation(100_000_000_000L));
+    }
+
+    @Test
+    void shouldFailForNegativeMemRecSize() {
+        assertThrows(AssertionError.class, () -> HugeLongArray.memoryEstimation(-1L));
+    }
+
+    @Test
+    void shouldBinarySearchInASinglePageArray() {
+        var array = HugeLongArray.newSingleArray(
+            10
+        );
+        for (int i = 0; i < 10; i++) {
+            array.set(i, i);
+        }
+
+        assertEquals(5, array.binarySearch(5));
+        assertEquals(9, array.binarySearch(20));
+        assertEquals(-1, array.binarySearch(-10));
+    }
+
+    @Test
+    void shouldBinarySearchInAPagedArray() {
+        var array = HugeLongArray.newPagedArray(
+            HugeArrays.PAGE_SIZE * 3
+        );
+        for (int i = 0; i < HugeArrays.PAGE_SIZE * 3; i++) {
+            array.set(i, i);
+        }
+
+        assertEquals(20000, array.binarySearch(20000));
+        assertEquals(HugeArrays.PAGE_SIZE * 3 - 1, array.binarySearch(HugeArrays.PAGE_SIZE * 3 + 10));
+        assertEquals(-1, array.binarySearch(-10));
     }
 
     @Override
-    HugeIntArray singleArray(final int size) {
-        return HugeIntArray.newSingleArray(size);
+    HugeLongArray singleArray(final int size) {
+        return HugeLongArray.newSingleArray(size);
     }
 
     @Override
-    HugeIntArray pagedArray(final int size) {
-        return HugeIntArray.newPagedArray(size);
+    HugeLongArray pagedArray(final int size) {
+        return HugeLongArray.newPagedArray(size);
     }
 
     @Override
     long bufferSize(final int size) {
-        return MemoryUsage.sizeOfIntArray(size);
+        return MemoryUsage.sizeOfLongArray(size);
     }
 
     @Override
-    Integer box(final int value) {
-        return value;
+    Long box(final int value) {
+        return (long) value;
     }
 
     @Override
-    int unbox(final Integer value) {
-        return value;
+    int unbox(final Long value) {
+        return value.intValue();
     }
 
     @Override
-    Integer primitiveNull() {
-        return 0;
+    Long primitiveNull() {
+        return 0L;
     }
 }

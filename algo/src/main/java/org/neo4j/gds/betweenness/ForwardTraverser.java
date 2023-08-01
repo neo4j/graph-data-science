@@ -22,9 +22,9 @@ package org.neo4j.gds.betweenness;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 public interface ForwardTraverser {
 

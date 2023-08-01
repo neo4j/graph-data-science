@@ -21,11 +21,11 @@ package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 public final class NodePropertyValuesAdapter {
     private NodePropertyValuesAdapter() {}

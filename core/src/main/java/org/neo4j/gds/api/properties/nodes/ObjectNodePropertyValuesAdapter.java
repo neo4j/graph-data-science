@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 final class ObjectNodePropertyValuesAdapter {
 
