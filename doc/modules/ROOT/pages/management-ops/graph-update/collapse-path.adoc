@@ -31,7 +31,7 @@ Exactly one directed relationship is created for every pair of nodes for which a
 .Run Collapse Path in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.collapsePath.mutate(
+CALL gds.collapsePath.mutate(
   graphName: String,
   configuration: Map
 )
@@ -53,7 +53,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | concurrency       | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.
 |===
 
-include::partial$/algorithms/beta/collapse-path/specific-configuration.adoc[]
+include::partial$/algorithms/collapse-path/specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -127,7 +127,7 @@ Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in t
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.collapsePath.mutate(
+CALL gds.collapsePath.mutate(
   'persons',
   {
     pathTemplates: [['PLAYS', 'PLAYED_BY']],

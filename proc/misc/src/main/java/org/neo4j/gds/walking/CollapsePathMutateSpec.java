@@ -34,7 +34,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.walking.CollapsePathMutateProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.collapsePath.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(
+    name = "gds.collapsePath.mutate",
+    aliases = "gds.beta.collapsePath.mutate",
+    description = DESCRIPTION,
+    executionMode = MUTATE_RELATIONSHIP
+)
 public class CollapsePathMutateSpec implements AlgorithmSpec<CollapsePath, SingleTypeRelationships, CollapsePathConfig,Stream<MutateResult>, CollapsePathAlgorithmFactory> {
 
     @Override

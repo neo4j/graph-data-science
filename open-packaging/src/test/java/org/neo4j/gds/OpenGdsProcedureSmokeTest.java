@@ -68,7 +68,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.bellmanFord.write",
         "gds.bellmanFord.write.estimate",
 
-        "gds.beta.collapsePath.mutate",
+        "gds.collapsePath.mutate",
 
         "gds.conductance.stream",
 

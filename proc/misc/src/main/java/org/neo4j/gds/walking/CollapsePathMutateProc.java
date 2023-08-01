@@ -22,6 +22,7 @@ package org.neo4j.gds.walking;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,7 +35,7 @@ public class CollapsePathMutateProc extends BaseProc {
 
     static final String DESCRIPTION = "Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal";
 
-    @Procedure(name = "gds.beta.collapsePath.mutate", mode = READ)
+    @Procedure(name = "gds.collapsePath.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -44,6 +45,21 @@ public class CollapsePathMutateProc extends BaseProc {
             new CollapsePathMutateSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.beta.collapsePath.mutate", mode = READ, deprecatedBy = "gds.collapsePath.mutate")
+    @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    @Internal
+    public Stream<MutateResult> betaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.collapsePath.mutate` has been deprecated, please use `gds.collapsePath.mutate`.");
+
+        return mutate(graphName, configuration);
     }
 
 

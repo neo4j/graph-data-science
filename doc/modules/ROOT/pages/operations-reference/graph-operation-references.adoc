@@ -64,7 +64,7 @@
 | `gds.graph.relationships.toUndirected` label:procedure[Procedure]
 | `gds.graph.relationships.toUndirected.estimate` label:procedure[Procedure]
 .1+<.^|xref:management-ops/graph-update/collapse-path.adoc[Collapse Path]
-| `gds.beta.collapsePath.mutate` label:procedure[Procedure]
+| `gds.collapsePath.mutate` label:procedure[Procedure]
 |===
 
 
