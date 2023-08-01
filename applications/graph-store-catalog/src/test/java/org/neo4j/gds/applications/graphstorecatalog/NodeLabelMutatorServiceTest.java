@@ -17,45 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.EmptyDependencyResolver;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.TerminationMonitor;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 @ExtendWith(SoftAssertionsExtension.class)
 @GdlExtension
-class NodeLabelMutatorTest {
-
+class NodeLabelMutatorServiceTest {
+    @SuppressWarnings("unused")
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
@@ -78,55 +67,28 @@ class NodeLabelMutatorTest {
             ", (c{longProperty: 3})" +
             ", (d{longProperty:0})";
 
+    @SuppressWarnings("WeakerAccess")
     @Inject
     GraphStore allGraphStore;
 
+    @SuppressWarnings("WeakerAccess")
     @Inject
     IdFunction allIdFunction;
 
-
-    // Only check two scenarios, the rest are covered in NodeFilterParserTest.
-
-    @ParameterizedTest
-    @ValueSource(
-        strings = {
-            "n.floatProperty > 10",
-            "n.longProperty <= 19.6",
-        }
-    )
-    void shouldFailOnIncompatiblePropertyAndValue(String nodeFilter) {
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("user", "graph"), graphStore);
-        var executionContext = executionContextBuilder().build();
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> NodeLabelMutator.mutateNodeLabel(
-                "graph",
-                "TestLabel",
-                Map.of("nodeFilter", nodeFilter),
-                executionContext
-            ).findFirst())
-            .havingCause()
-            .withMessageContaining("Semantic errors while parsing expression")
-            .withMessageContaining("Incompatible types");
-
-    }
-
     @Test
     void mutateNodeLabelMultiLabelProjection(SoftAssertions assertions) {
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("user", "graph"), graphStore);
-        var executionContext = executionContextBuilder().build();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var configuration = GraphProjectFromStoreConfig.emptyWithName("user", "graph");
+        graphStoreCatalogService.set(configuration, graphStore);
+        var service = new NodeLabelMutatorService();
 
-        var resultList = NodeLabelMutator.mutateNodeLabel(
-            "graph",
+        var result = service.compute(
+            graphStore,
+            GraphName.parse("graph"),
             "TestLabel",
-            Map.of("nodeFilter", "n:A AND n.longProperty > 1"),
-            executionContext
-        ).collect(
-            Collectors.toList());
-
-        assertions.assertThat(resultList).hasSize(1);
-
-        var result = resultList.get(0);
+            MutateLabelConfig.of(Map.of("nodeFilter", "n:A AND n.longProperty > 1")),
+            NodeFilterParser.parseAndValidate(graphStore, "n:A AND n.longProperty > 1")
+        );
 
         assertions.assertThat(result.nodeCount)
             .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
@@ -168,26 +130,22 @@ class NodeLabelMutatorTest {
                 return true;
             }
         );
-
     }
 
     @Test
     void shouldWorkWithFloatProperties(SoftAssertions assertions) {
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var configuration = GraphProjectFromStoreConfig.emptyWithName("user", "graph");
+        graphStoreCatalogService.set(configuration, graphStore);
+        var nodeLabelMutatorService = new NodeLabelMutatorService();
 
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("user", "graph"), graphStore);
-        var executionContext = executionContextBuilder().build();
-
-        var resultList = NodeLabelMutator.mutateNodeLabel(
-            "graph",
+        var result = nodeLabelMutatorService.compute(
+            graphStore,
+            GraphName.parse("graph"),
             "TestLabel",
-            Map.of("nodeFilter", "n.floatProperty <= 19.0"),
-            executionContext
-        ).collect(
-            Collectors.toList());
-
-        assertions.assertThat(resultList).hasSize(1);
-
-        var result = resultList.get(0);
+            MutateLabelConfig.of(Map.of("nodeFilter", "n.floatProperty <= 19.0")),
+            NodeFilterParser.parseAndValidate(graphStore, "n.floatProperty <= 19.0")
+        );
 
         assertions.assertThat(result.nodeCount)
             .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
@@ -229,25 +187,22 @@ class NodeLabelMutatorTest {
                 return true;
             }
         );
-
     }
 
     @Test
     void mutateNodeLabelStarProjection(SoftAssertions assertions) {
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("user", "graph"), allGraphStore);
-        var executionContext = executionContextBuilder().build();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var configuration = GraphProjectFromStoreConfig.emptyWithName("user", "graph");
+        graphStoreCatalogService.set(configuration, allGraphStore);
+        var nodeLabelMutatorService = new NodeLabelMutatorService();
 
-        var resultList = NodeLabelMutator.mutateNodeLabel(
-            "graph",
+        var result = nodeLabelMutatorService.compute(
+            allGraphStore,
+            GraphName.parse("graph"),
             "TestLabel",
-            Map.of("nodeFilter", "n.longProperty <= 2"),
-            executionContext
-        ).collect(
-            Collectors.toList());
-
-        assertions.assertThat(resultList).hasSize(1);
-
-        var result = resultList.get(0);
+            MutateLabelConfig.of(Map.of("nodeFilter", "n.longProperty <= 2")),
+            NodeFilterParser.parseAndValidate(graphStore, "n.longProperty <= 2")
+        );
 
         assertions.assertThat(result.nodeCount)
             .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
@@ -290,30 +245,10 @@ class NodeLabelMutatorTest {
                 return true;
             }
         );
-
-    }
-
-
-    private ImmutableExecutionContext.Builder executionContextBuilder() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseId(graphStore.databaseId())
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
-            .returnColumns(ProcedureReturnColumns.EMPTY)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .username("user")
-            .terminationMonitor(TerminationMonitor.EMPTY)
-            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
-            .nodeLookup(NodeLookup.EMPTY)
-            .log(Neo4jProxy.testLog())
-            .isGdsAdmin(false);
     }
 
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
-
 }

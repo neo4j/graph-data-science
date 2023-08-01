@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
@@ -80,6 +81,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final GraphMemoryUsageService graphMemoryUsageService;
     private final DropNodePropertiesService dropNodePropertiesService;
     private final DropRelationshipsService dropRelationshipsService;
+    private final NodeLabelMutatorService nodeLabelMutatorService;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -94,7 +96,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         SubGraphProjectService subGraphProjectService,
         GraphMemoryUsageService graphMemoryUsageService,
         DropNodePropertiesService dropNodePropertiesService,
-        DropRelationshipsService dropRelationshipsService
+        DropRelationshipsService dropRelationshipsService,
+        NodeLabelMutatorService nodeLabelMutatorService
     ) {
         this.log = log;
 
@@ -111,6 +114,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.graphMemoryUsageService = graphMemoryUsageService;
         this.dropNodePropertiesService = dropNodePropertiesService;
         this.dropRelationshipsService = dropRelationshipsService;
+        this.nodeLabelMutatorService = nodeLabelMutatorService;
     }
 
     @Override
@@ -428,6 +432,32 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         }
 
         return numberOfProperties;
+    }
+
+    @Override
+    public MutateLabelResult mutateNodeLabel(
+        User user,
+        DatabaseId databaseId,
+        String graphNameAsString,
+        String nodeLabel,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+
+        // stick in configuration service returning a pair?
+        var configuration = MutateLabelConfig.of(rawConfiguration);
+        var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
+
+        return nodeLabelMutatorService.compute(
+            graphStore,
+            graphName,
+            nodeLabel,
+            configuration,
+            nodeFilter
+        );
     }
 
     private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

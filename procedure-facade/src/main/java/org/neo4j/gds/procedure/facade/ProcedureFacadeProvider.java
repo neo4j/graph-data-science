@@ -35,6 +35,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFac
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
+import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorService;
 import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
@@ -129,6 +130,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var graphMemoryUsageService = new GraphMemoryUsageService(graphStoreCatalogService);
         var dropNodePropertiesService = new DropNodePropertiesService(log);
         var dropRelationshipsService = new DropRelationshipsService(log);
+        var nodeLabelMutatorService = new NodeLabelMutatorService();
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -144,7 +146,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             subGraphProjectService,
             graphMemoryUsageService,
             dropNodePropertiesService,
-            dropRelationshipsService
+            dropRelationshipsService,
+            nodeLabelMutatorService
         );
 
         // wrap in decorator to enable preconditions checks

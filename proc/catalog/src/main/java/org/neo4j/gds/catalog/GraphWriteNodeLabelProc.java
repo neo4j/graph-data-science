@@ -36,7 +36,7 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.NodeFilterParser.parseAndValidate;
+import static org.neo4j.gds.applications.graphstorecatalog.NodeFilterParser.parseAndValidate;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodeLabelProc extends CatalogProc {

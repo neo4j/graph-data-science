@@ -271,7 +271,9 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
 
     @Override
     public long dropGraphProperty(
-        User user, DatabaseId databaseId, String graphName,
+        User user,
+        DatabaseId databaseId,
+        String graphName,
         String graphProperty,
         Map<String, Object> configuration
     ) {
@@ -280,6 +282,23 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             databaseId,
             graphName,
             graphProperty,
+            configuration
+        ));
+    }
+
+    @Override
+    public MutateLabelResult mutateNodeLabel(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        String nodeLabel,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.mutateNodeLabel(
+            user,
+            databaseId,
+            graphName,
+            nodeLabel,
             configuration
         ));
     }

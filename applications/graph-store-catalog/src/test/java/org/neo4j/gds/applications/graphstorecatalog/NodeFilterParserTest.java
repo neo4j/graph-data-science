@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -32,15 +32,16 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @GdlExtension
 class NodeFilterParserTest {
-
+    @SuppressWarnings("unused")
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:A {longProperty: 1, floatProperty: 15.5})" +
-        ", (b:A {longProperty: 2, floatProperty: 23})" +
-        ", (c:A {longProperty: 3, floatProperty: 18.3})" +
-        ", (d:B)";
+            "  (a:A {longProperty: 1, floatProperty: 15.5})" +
+            ", (b:A {longProperty: 2, floatProperty: 23})" +
+            ", (c:A {longProperty: 3, floatProperty: 18.3})" +
+            ", (d:B)";
 
+    @SuppressWarnings("WeakerAccess")
     @Inject
     GraphStore graphStore;
 
@@ -61,8 +62,7 @@ class NodeFilterParserTest {
         }
     )
     void shouldFailOnIncompatiblePropertyAndValue(String nodeFilter) {
-        assertThatIllegalArgumentException()
-            .isThrownBy(() -> NodeFilterParser.parseAndValidate(graphStore, nodeFilter))
+        assertThatIllegalArgumentException().isThrownBy(() -> NodeFilterParser.parseAndValidate(graphStore, nodeFilter))
             .withRootCauseInstanceOf(SemanticErrors.class)
             .havingRootCause()
             .withMessageContaining("Semantic errors while parsing expression")
@@ -89,5 +89,4 @@ class NodeFilterParserTest {
         assertThatNoException()
             .isThrownBy(() -> NodeFilterParser.parseAndValidate(graphStore, nodeFilter));
     }
-
 }

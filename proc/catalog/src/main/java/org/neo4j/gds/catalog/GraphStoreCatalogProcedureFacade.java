@@ -24,6 +24,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
@@ -427,6 +428,19 @@ public class GraphStoreCatalogProcedureFacade {
         );
 
         return Stream.of(new GraphDropGraphPropertiesResult(graphName, graphProperty, numberOfPropertiesRemoved));
+    }
+
+    public Stream<MutateLabelResult> mutateNodeLabel(
+        String graphName,
+        String nodeLabel,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var result = businessFacade.mutateNodeLabel(user, databaseId, graphName, nodeLabel, configuration);
+
+        return Stream.of(result);
     }
 
     /**

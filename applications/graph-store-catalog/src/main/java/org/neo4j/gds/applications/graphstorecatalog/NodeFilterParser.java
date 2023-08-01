@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.api.GraphStore;
@@ -27,11 +27,13 @@ import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
-final class NodeFilterParser {
-
+public final class NodeFilterParser {
     private NodeFilterParser() {}
 
-    static Expression parseAndValidate(GraphStore graphStore, String nodeFilter) throws IllegalArgumentException {
+    /**
+     * @throws IllegalArgumentException if there are parse errors or semantic errors
+     */
+    public static Expression parseAndValidate(GraphStore graphStore, String nodeFilter) {
         try {
             var validationContext = ValidationContext.forNodes(graphStore);
             var filter = ExpressionParser.parse(
@@ -44,5 +46,4 @@ final class NodeFilterParser {
             throw new IllegalArgumentException("Invalid `nodeFilter` expression.", e);
         }
     }
-
 }

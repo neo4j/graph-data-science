@@ -17,40 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.NodesFilter;
+import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.NodeFilterParser.parseAndValidate;
+public class NodeLabelMutatorService {
+    public MutateLabelResult compute(
+        GraphStore graphStore,
+        GraphName graphName,
+        String nodeLabelAsString,
+        MutateLabelConfig configuration,
+        Expression nodeFilter
+    ) {
+        var resultBuilder = MutateLabelResult.builder(graphName.getValue(), nodeLabelAsString)
+            .withConfig(configuration.toMap());
 
-public final class NodeLabelMutator  {
-
-    static Stream<MutateLabelResult> mutateNodeLabel(String graphName, String nodeLabel,Map<String, Object> configuration,ExecutionContext executionContext){
-        var procedureConfig = MutateLabelConfig.of(configuration);
-        var graphStore = graphStoreFromCatalog(graphName,executionContext).graphStore();
-        var nodeFilter = parseAndValidate(graphStore, procedureConfig.nodeFilter());
-        var nodeLabelToMutate = NodeLabel.of(nodeLabel);
-
-        var resultBuilder = MutateLabelResult.builder(graphName, nodeLabel).withConfig(procedureConfig.toMap());
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 nodeFilter,
-                procedureConfig.concurrency(),
+                configuration.concurrency(),
                 Map.of(),
                 Pools.DEFAULT,
                 ProgressTracker.NULL_TRACKER
@@ -58,6 +55,7 @@ public final class NodeLabelMutator  {
 
             var nodeCounter = new LongAdder();
             var idMap = filteredNodes.idMap();
+            var nodeLabelToMutate = NodeLabel.of(nodeLabelAsString);
             graphStore.addNodeLabel(nodeLabelToMutate);
             idMap.forEachNode(
                 nodeId -> {
@@ -74,18 +72,6 @@ public final class NodeLabelMutator  {
                 .withNodeCount(graphStore.nodeCount());
         }
 
-
-        return Stream.of(resultBuilder.build());
+        return resultBuilder.build();
     }
-
-    static GraphStoreWithConfig graphStoreFromCatalog(String graphName, ExecutionContext executionContext) {
-        var catalogRequest = ImmutableCatalogRequest.of(
-            executionContext.databaseId().databaseName(),
-            executionContext.username(),
-            Optional.empty(),
-            executionContext.isGdsAdmin()
-        );
-        return GraphStoreCatalog.get(catalogRequest, graphName);
-    }
-
 }

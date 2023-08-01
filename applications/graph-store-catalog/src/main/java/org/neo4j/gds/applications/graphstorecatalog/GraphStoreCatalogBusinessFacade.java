@@ -143,4 +143,6 @@ public interface GraphStoreCatalogBusinessFacade {
         String graphProperty,
         Map<String, Object> configuration
     );
+
+    MutateLabelResult mutateNodeLabel(User user, DatabaseId databaseId, String graphName, String nodeLabel, Map<String, Object> configuration);
 }
