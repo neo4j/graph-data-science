@@ -53,11 +53,18 @@ To list all available procedures, call the `gds.list()` procedure:
 CALL gds.list();
 ----
 
-If you have installed GDS EE, call the function `gds.isLicensed()`. gds.license.state()` procedure and check that the returned `isLicensed` value is `true`:
+If you have installed GDS EE, call the `gds.isLicensed()` function and check that the returned value is `true`:
 
 [source, cypher, role=noplay]
 ----
 RETURN gds.isLicensed();
+----
+
+For more details, you can call the `gds.license.state()` procedure:
+
+[source, cypher, role=noplay]
+----
+CALL gds.license.state();
 ----
 
 == Additional configuration
