@@ -39,14 +39,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
-class PregelBaseProcTest {
+class PregelCompanionTest {
 
     @GdlGraph
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
     public static String GDL =
         "CREATE " +
-        " ()-[:REL]->()," +
-        " ()-[:REL2]->(),";
+            " ()-[:REL]->()," +
+            " ()-[:REL2]->(),";
 
     @Inject
     GraphStore graphStore;
@@ -66,7 +66,8 @@ class PregelBaseProcTest {
     @ParameterizedTest
     @MethodSource("relTypeCombinations")
     void shouldGenerateInverseIndexes(List<RelationshipType> relTypes) {
-        PregelBaseProc.ensureInverseIndexesExist(graphStore,
+        PregelCompanion.ensureInverseIndexesExist(
+            graphStore,
             relTypes,
             4,
             NullLog.getInstance(),
@@ -77,7 +78,7 @@ class PregelBaseProcTest {
 
     @Test
     void shouldThrowOnUndirectedRelTypes() {
-        assertThatThrownBy(() -> PregelBaseProc.ensureDirectedRelationships(
+        assertThatThrownBy(() -> PregelCompanion.ensureDirectedRelationships(
             undirectedGraphStore,
             RelationshipType.listOf("REL", "REL2")
         )).hasMessage(

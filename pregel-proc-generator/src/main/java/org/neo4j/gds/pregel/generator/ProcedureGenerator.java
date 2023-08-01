@@ -33,7 +33,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.pregel.proc.PregelBaseProc;
+import org.neo4j.gds.pregel.proc.PregelCompanion;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -178,7 +178,10 @@ public class ProcedureGenerator {
                 typeNames.config()
             ))
             .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
-            .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
+            .addStatement(
+                "return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())",
+                PregelCompanion.class
+            )
             .build();
     }
 
