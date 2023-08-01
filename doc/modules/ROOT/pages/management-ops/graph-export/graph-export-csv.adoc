@@ -52,6 +52,7 @@ YIELD
 | writeConcurrency         | Boolean             | 4         | yes      | The number of concurrent threads used for writing the database.
 | defaultRelationshipType  | String              | +__ALL__+ | yes      | Relationship type used for `*` relationship projections.
 | additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the projected graph.
+| useLabelMapping          | Boolean             | false     | yes      | Whether to use node label mapping when exporting the graph
 |===
 
 
@@ -133,6 +134,8 @@ YIELD
 
 The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/[import] command.
 
+GDS does not add a column for node labels and relationship types in the data. In order to import them using Neo4j Admin, the labels and types should be set using the `--nodes` and `--relationship` parameters.
+
 
 === Nodes
 
@@ -161,6 +164,29 @@ nodes_A_B_1.csv
 nodes_A_B_2.csv
 ----
 
+==== Nodes label mapping [[node_label_mapping]]
+When the configuration parameter `useLabelMapping` is set to true, the names of the labels will be mapped to integers during the export. This mapping will be written to a new file named `label-mappings.csv`. This parameter is required when label names contain underscores or special characters that are forbidden in file names by the OS.
+
+Using the example above, if label mapping is enabled, the content of `label-mappings.csv` may be:
+----
+index,label
+0,A
+1,B
+----
+
+In this case, these files will be created for the nodes:
+
+----
+nodes_0_header.csv
+nodes_0_0.csv
+nodes_1_header.csv
+nodes_1_0.csv
+nodes_1_2.csv
+nodes_0_1_header.csv
+nodes_0_1_0.csv
+nodes_0_1_1.csv
+nodes_0_1_2.csv
+----
 
 === Relationships
 
