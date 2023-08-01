@@ -133,8 +133,11 @@ YIELD
 
 The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/[import] command.
 
-GDS does not add a column for node labels and relationship types in the data. In order to import them using Neo4j Admin, the labels and types should be set using the `--nodes` and `--relationship` parameters.
+GDS does not add a column for node labels and relationship types in the data.
+In order to import them using Neo4j Admin, the labels and types should be set using the `--nodes` and `--relationship` parameters.
 
+More details here: using the same https://neo4j.com/docs/operations-manual/current/tutorial/neo4j-admin-import/#_using_the_same_label_for_every_node[label for every node],
+https://neo4j.com/docs/operations-manual/current/tutorial/neo4j-admin-import/#_using_the_same_relationship_type_for_every_relationship[type for every relationship]
 
 === Nodes
 
@@ -164,7 +167,10 @@ nodes_A_B_2.csv
 ----
 
 ==== Nodes label mapping [[node_label_mapping]]
-When the configuration parameter `useLabelMapping` is set to true, the names of the labels will be mapped to integers during the export. This mapping will be written to a new file named `label-mappings.csv`. This parameter is required when label names contain underscores or special characters that are forbidden in file names by the OS.
+
+When the configuration parameter `useLabelMapping` is set to true, the names of the labels will be mapped to integers during the export.
+This mapping will be written to a new file named `label-mappings.csv`.
+This parameter is required when label names contain underscores or special characters that are forbidden in file names by the OS.
 
 Using the example above, if label mapping is enabled, the content of `label-mappings.csv` may be:
 ----
