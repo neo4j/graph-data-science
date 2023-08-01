@@ -443,6 +443,25 @@ public class GraphStoreCatalogProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<StreamGraphPropertyResult> streamGraphProperty(
+        String graphName,
+        String graphProperty,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        Stream<?> result = businessFacade.streamGraphProperty(
+            user,
+            databaseId,
+            graphName,
+            graphProperty,
+            configuration
+        );
+
+        return result.map(StreamGraphPropertyResult::new);
+    }
+
     /**
      * We have to potentially unstack the placeholder. This is purely a Neo4j Procedure framework concern.
      */

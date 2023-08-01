@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * We want to ensure that, no matter which business method is called, then preconditions get checked.
@@ -299,6 +300,23 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             databaseId,
             graphName,
             nodeLabel,
+            configuration
+        ));
+    }
+
+    @Override
+    public Stream<?> streamGraphProperty(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        String graphProperty,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.streamGraphProperty(
+            user,
+            databaseId,
+            graphName,
+            graphProperty,
             configuration
         ));
     }

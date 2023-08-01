@@ -43,6 +43,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
@@ -458,6 +459,27 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             configuration,
             nodeFilter
         );
+    }
+
+    @Override
+    public Stream<?> streamGraphProperty(
+        User user, DatabaseId databaseId, String graphNameAsString,
+        String graphProperty,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        configurationService.validateGraphStreamGraphPropertiesConfig(
+            graphName,
+            graphProperty,
+            rawConfiguration
+        );
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
+
+        return graphStore.graphPropertyValues(graphProperty).objects();
     }
 
     private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

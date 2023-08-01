@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphAccessGraphPropertiesConfig;
-import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,50 +29,18 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphStreamGraphPropertiesProc extends CatalogProc {
+public class GraphStreamGraphPropertiesProc {
+    @Context
+    public GraphStoreCatalogProcedureFacade facade;
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.alpha.graph.graphProperty.stream", mode = READ)
     @Description("Streams the given graph property.")
-    public Stream<PropertyResult> streamProperty(
+    public Stream<StreamGraphPropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        Preconditions.check();
-        validateGraphName(graphName);
-
-        // input
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var config = GraphStreamGraphPropertiesConfig.of(
-            graphName,
-            graphProperty,
-            cypherConfig
-        );
-
-        // validation
-        validateConfig(cypherConfig, config);
-        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
-        config.validate(graphStore);
-
-        return streamGraphProperties(graphStore, config);
-    }
-
-    private Stream<PropertyResult> streamGraphProperties(
-        GraphStore graphStore,
-        GraphAccessGraphPropertiesConfig config
-    ) {
-        return graphStore
-            .graphPropertyValues(config.graphProperty())
-            .objects()
-            .map(PropertyResult::new);
-    }
-
-    @SuppressWarnings("unused")
-    public static class PropertyResult {
-        public final Object propertyValue;
-
-        PropertyResult(Object propertyValue) {
-            this.propertyValue = propertyValue;
-        }
+        return facade.streamGraphProperty(graphName, graphProperty, configuration);
     }
 }
