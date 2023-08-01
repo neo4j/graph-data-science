@@ -54,9 +54,11 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
     }
 
     @Override
-    public PackedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public PackedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
         Address[] intoPages = this.builder.intoPages();
-        reorder(intoPages, offsets, degrees);
+        if (allowReordering) {
+            reorder(intoPages, offsets, degrees);
+        }
         long[] pages = new long[intoPages.length];
         int[] allocationSizes = new int[intoPages.length];
         for (int i = 0; i < intoPages.length; i++) {
@@ -114,9 +116,9 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         }
 
         @Override
-        public long allocate(int length, Slice<Address> into) {
-            this.memoryTracker.recordNativeAllocation(length);
-            return this.allocator.insertInto(length, (ModifiableSlice<Address>) into);
+        public long allocate(int allocationSize, Slice<Address> into) {
+            this.memoryTracker.recordNativeAllocation(allocationSize);
+            return this.allocator.insertInto(allocationSize, (ModifiableSlice<Address>) into);
         }
 
         @Override

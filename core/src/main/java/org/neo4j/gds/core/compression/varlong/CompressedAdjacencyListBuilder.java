@@ -50,9 +50,11 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     }
 
     @Override
-    public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
         byte[][] intoPages = builder.intoPages();
-        reorder(intoPages, offsets, degrees);
+        if (allowReordering) {
+            reorder(intoPages, offsets, degrees);
+        }
         var memoryInfo = memoryInfo(intoPages, degrees, offsets);
 
         return new CompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
@@ -77,7 +79,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         return memoryInfoBuilder.build();
     }
 
-    private enum Factory implements BumpAllocator.Factory<byte[]> {
+    enum Factory implements BumpAllocator.Factory<byte[]> {
         INSTANCE;
 
         @Override
@@ -102,9 +104,9 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         }
 
         @Override
-        public long allocate(int length, Slice<byte[]> into) {
-            this.memoryTracker.recordHeapAllocation(length);
-            return allocator.insertInto(length, (ModifiableSlice<byte[]>) into);
+        public long allocate(int allocationSize, Slice<byte[]> into) {
+            this.memoryTracker.recordHeapAllocation(allocationSize);
+            return allocator.insertInto(allocationSize, (ModifiableSlice<byte[]>) into);
         }
 
         @Override

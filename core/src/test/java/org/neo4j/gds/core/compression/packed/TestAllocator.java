@@ -118,13 +118,13 @@ class TestAllocator implements AdjacencyListBuilder.Allocator<Address> {
     }
 
     @Override
-    public long allocate(int length, AdjacencyListBuilder.Slice<Address> into) {
+    public long allocate(int allocationSize, AdjacencyListBuilder.Slice<Address> into) {
         var slice = (ModifiableSlice<Address>) into;
-        long ptr = UnsafeUtil.allocateMemory(length, EmptyMemoryTracker.INSTANCE);
-        this.address = Address.createAddress(ptr, length);
+        long ptr = UnsafeUtil.allocateMemory(allocationSize, EmptyMemoryTracker.INSTANCE);
+        this.address = Address.createAddress(ptr, allocationSize);
         slice.setSlice(address);
         slice.setOffset(0);
-        slice.setLength(length);
+        slice.setLength(allocationSize);
         return 0;
     }
 

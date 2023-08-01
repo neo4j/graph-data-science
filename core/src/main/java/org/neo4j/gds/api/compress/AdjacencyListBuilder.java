@@ -31,11 +31,11 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
     PositionalAllocator<PAGE> newPositionalAllocator();
 
-    T build(HugeIntArray degrees, HugeLongArray offsets);
+    T build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering);
 
     interface Allocator<PAGE> extends AutoCloseable {
 
-        long allocate(int length, Slice<PAGE> into);
+        long allocate(int allocationSize, Slice<PAGE> into);
 
         @Override
         void close();

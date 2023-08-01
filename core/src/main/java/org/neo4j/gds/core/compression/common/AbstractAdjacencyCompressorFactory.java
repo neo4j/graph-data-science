@@ -70,20 +70,27 @@ public abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_P
     }
 
     @Override
+    public void init(HugeIntArray degrees, HugeLongArray adjacencyOffsets, HugeLongArray propertyOffsets) {
+        this.adjacencyDegrees = degrees;
+        this.adjacencyOffsets = adjacencyOffsets;
+        this.propertyOffsets = propertyOffsets;
+    }
+
+    @Override
     public LongAdder relationshipCounter() {
         return relationshipCounter;
     }
 
     @Override
-    public AdjacencyListsWithProperties build() {
+    public AdjacencyListsWithProperties build(boolean allowReordering) {
         var builder = ImmutableAdjacencyListsWithProperties
             .builder()
-            .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
+            .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets, allowReordering));
 
         var propertyBuilders = this.propertyBuilders;
         var propertyOffsets = this.propertyOffsets;
         for (var propertyBuilder : propertyBuilders) {
-            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets);
+            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets, allowReordering);
             builder.addProperty(properties);
         }
 

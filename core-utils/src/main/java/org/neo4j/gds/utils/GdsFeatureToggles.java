@@ -111,7 +111,7 @@ public enum GdsFeatureToggles {
         INLINED_HEAD_PACKED_TAIL,
     }
 
-    public static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING = AdjacencyPackingStrategy.PACKED_TAIL;
+    public static final AdjacencyPackingStrategy ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING = AdjacencyPackingStrategy.INLINED_HEAD_PACKED_TAIL;
     public static final AtomicReference<AdjacencyPackingStrategy> ADJACENCY_PACKING_STRATEGY =
         new AtomicReference<>(ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING);
 

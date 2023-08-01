@@ -27,6 +27,7 @@ import org.neo4j.gds.core.compression.common.MemoryTracker;
 
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
@@ -217,5 +218,25 @@ public interface AdjacencyList {
          * A collection of histograms that record various statistics for block packing.
          */
         Optional<BlockStatistics> blockStatistics();
+
+        default MemoryInfo merge(MemoryInfo other) {
+            return ImmutableMemoryInfo.builder()
+                .pages(pages() + other.pages())
+                .bytesOnHeap(LongStream.concat(bytesOnHeap().stream(), other.bytesOnHeap().stream()).reduce(Long::sum))
+                .bytesOffHeap(LongStream.concat(bytesOffHeap().stream(), other.bytesOffHeap().stream())
+                    .reduce(Long::sum))
+                .heapAllocations(heapAllocations().merge(other.heapAllocations()))
+                .nativeAllocations(nativeAllocations().merge(other.nativeAllocations()))
+                .pageSizes(pageSizes().merge(other.pageSizes()))
+                .headerBits(headerBits().merge(other.headerBits()))
+                .headerAllocations(headerAllocations().merge(other.headerAllocations()))
+                .blockStatistics(blockStatistics().map(left -> other.blockStatistics().map(right -> {
+                        var union = new BlockStatistics();
+                        left.mergeInto(union);
+                        right.mergeInto(union);
+                        return union;
+                    }).orElse(left)).or(other::blockStatistics)
+                ).build();
+        }
     }
 }

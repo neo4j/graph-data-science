@@ -52,9 +52,11 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
     }
 
     @Override
-    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
         long[][] intoPages = builder.intoPages();
-        reorder(intoPages, offsets, degrees);
+        if (allowReordering) {
+            reorder(intoPages, offsets, degrees);
+        }
         var memoryInfo = memoryInfo(intoPages, degrees, offsets);
 
         return new UncompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
@@ -118,9 +120,9 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public long allocate(int length, Slice<long[]> into) {
-            this.memoryTracker.recordHeapAllocation(length);
-            return allocator.insertInto(length, (ModifiableSlice<long[]>) into);
+        public long allocate(int allocationSize, Slice<long[]> into) {
+            this.memoryTracker.recordHeapAllocation(allocationSize);
+            return allocator.insertInto(allocationSize, (ModifiableSlice<long[]>) into);
         }
 
         @Override
