@@ -22,7 +22,7 @@ package org.neo4j.gds.leiden;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.concurrent.atomic.AtomicLong;
 

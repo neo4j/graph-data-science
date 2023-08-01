@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.msbfs;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {

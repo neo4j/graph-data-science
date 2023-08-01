@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 public interface FeatureFunction {
 

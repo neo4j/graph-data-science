@@ -20,7 +20,7 @@
 package org.neo4j.gds.nodeproperties;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 /**
  * NodePropertyValues backed by HugeLongArray

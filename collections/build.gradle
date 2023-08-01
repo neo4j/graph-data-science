@@ -10,12 +10,13 @@ dependencies {
     implementation project(':annotations')
     implementation project(':memory-usage')
     implementation group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'
-    
+
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
     testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
+    testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: ver.'hamcrest'
 }
 
 sourceSets {

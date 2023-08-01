@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.LabelwiseFeatureProjection;
 import org.neo4j.gds.ml.core.functions.Weights;

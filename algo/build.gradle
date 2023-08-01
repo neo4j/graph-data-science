@@ -28,6 +28,7 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':annotations')
+    implementation project(':collections-memory-estimation')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')

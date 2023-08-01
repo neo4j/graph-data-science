@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics.regression;
 
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.Arrays;

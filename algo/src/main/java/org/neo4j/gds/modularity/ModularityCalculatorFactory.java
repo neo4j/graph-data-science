@@ -21,11 +21,11 @@ package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> extends GraphAlgorithmFactory<ModularityCalculator, CONFIG> {
@@ -54,7 +54,7 @@ public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> ex
             .perNode("Total Community Relationships", HugeAtomicDoubleArray::memoryEstimation)
             .add(
                 "Community Modularity",
-                HugeObjectArray.memoryEstimation(communityModularityEstimator)
+                HugeObjectArrayEstimation.objectArray(communityModularityEstimator)
             )
             .perThread("RelationshipCountCollector", perTask)
             .build();

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Iterator;

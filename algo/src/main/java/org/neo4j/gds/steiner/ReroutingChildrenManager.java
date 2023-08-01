@@ -20,7 +20,7 @@
 package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
  class ReroutingChildrenManager {
 

@@ -20,7 +20,7 @@ import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.IntLongScatterMap;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.collections.ArrayUtil;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 
 /**
  * A PriorityQueue specialized for ints that maintains a partial ordering of

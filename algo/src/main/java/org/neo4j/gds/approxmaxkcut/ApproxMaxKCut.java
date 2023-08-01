@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
 import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;

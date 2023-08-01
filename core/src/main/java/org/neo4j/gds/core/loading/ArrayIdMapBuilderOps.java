@@ -26,7 +26,7 @@ import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.OptionalLong;
 import java.util.stream.LongStream;

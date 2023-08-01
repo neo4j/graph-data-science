@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,6 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
     }
 
     @ParameterizedTest
-    // {42, ArrayUtil.MAX_ARRAY_LENGTH + 42}
     @ValueSource(longs = {42, 268435498})
     void shouldComputeMemoryEstimation(long elementCount) {
         var elementEstimation = sizeOfLongArray(42);

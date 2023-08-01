@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.concurrent.CountedCompleter;

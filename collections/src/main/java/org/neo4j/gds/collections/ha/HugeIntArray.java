@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.paged;
+package org.neo4j.gds.collections.ha;
 
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
@@ -61,6 +61,24 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
  * </pre>
  */
 public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArray> {
+
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
+            return sizeOfInstance(SingleHugeIntArray.class) + sizeOfIntArray((int) size);
+        }
+        long sizeOfInstance = sizeOfInstance(PagedHugeIntArray.class);
+
+        int numPages = numberOfPages(size);
+
+        long memoryUsed = sizeOfObjectArray(numPages);
+        long pageBytes = sizeOfIntArray(PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        int lastPageSize = exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + sizeOfIntArray(lastPageSize);
+    }
 
     /**
      * @return the int value at the given index
@@ -160,7 +178,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * {@inheritDoc}
      */
     @Override
-    final Integer boxedGet(final long index) {
+    public final Integer boxedGet(final long index) {
         return get(index);
     }
 
@@ -168,7 +186,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSet(final long index, final Integer value) {
+    public final void boxedSet(final long index, final Integer value) {
         set(index, value);
     }
 
@@ -176,7 +194,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSetAll(final LongFunction<Integer> gen) {
+    public final void boxedSetAll(final LongFunction<Integer> gen) {
         setAll(gen::apply);
     }
 
@@ -184,7 +202,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedFill(final Integer value) {
+    public final void boxedFill(final Integer value) {
         fill(value);
     }
 
@@ -210,24 +228,6 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
         return new HugeIntArray.SingleHugeIntArray(values.length, values);
     }
 
-    public static long memoryEstimation(long size) {
-        assert size >= 0;
-
-        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
-            return sizeOfInstance(SingleHugeIntArray.class) + sizeOfIntArray((int) size);
-        }
-        long sizeOfInstance = sizeOfInstance(PagedHugeIntArray.class);
-
-        int numPages = numberOfPages(size);
-
-        long memoryUsed = sizeOfObjectArray(numPages);
-        long pageBytes = sizeOfIntArray(PAGE_SIZE);
-        memoryUsed += (numPages - 1) * pageBytes;
-        int lastPageSize = exclusiveIndexOfPage(size);
-
-        return sizeOfInstance + memoryUsed + sizeOfIntArray(lastPageSize);
-    }
-
     /* test-only */
     static HugeIntArray newPagedArray(long size) {
         return PagedHugeIntArray.of(size);
@@ -238,7 +238,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
         return SingleHugeIntArray.of(size);
     }
 
-    private static final class SingleHugeIntArray extends HugeIntArray {
+    static final class SingleHugeIntArray extends HugeIntArray {
 
         private static HugeIntArray of(long size) {
             assert size <= HugeArrays.MAX_ARRAY_LENGTH;
@@ -372,7 +372,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
         }
     }
 
-    private static final class PagedHugeIntArray extends HugeIntArray {
+    static final class PagedHugeIntArray extends HugeIntArray {
 
         private static HugeIntArray of(long size) {
             int numPages = numberOfPages(size);

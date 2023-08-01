@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 public final class LabelsAndClassCountsExtractor {

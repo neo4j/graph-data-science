@@ -34,8 +34,8 @@ import org.neo4j.gds.core.compression.packed.Address;
 import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.LongAdder;
