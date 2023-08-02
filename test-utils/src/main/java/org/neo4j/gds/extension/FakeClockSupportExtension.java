@@ -47,7 +47,9 @@ public class FakeClockSupportExtension implements BeforeEachCallback, AfterEachC
 
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
-        ClockService.setClock(clockBefore);
-        clockBefore = null;
+        if (clockBefore != null) {
+            ClockService.setClock(clockBefore);
+            clockBefore = null;
+        }
     }
 }
