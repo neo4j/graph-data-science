@@ -21,17 +21,14 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
-import org.neo4j.counts.CountsAccessor;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
-import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -51,18 +48,10 @@ public interface StorageEngineProxyApi {
         }
     }
 
-    CommandCreationContext inMemoryCommandCreationContext();
-
     void initRelationshipTraversalCursorForRelType(
         StorageRelationshipTraversalCursor cursor,
         long sourceNodeId,
         int relTypeToken
-    );
-
-    StorageReader inMemoryStorageReader(
-        CypherGraphStore graphStore,
-        TokenHolders tokenHolders,
-        CountsAccessor counts
     );
 
     void createInMemoryDatabase(

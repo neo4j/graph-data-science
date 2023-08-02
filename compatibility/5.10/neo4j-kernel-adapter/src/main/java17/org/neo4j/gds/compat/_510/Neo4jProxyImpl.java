@@ -44,6 +44,7 @@ import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsDatabaseLayout;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxyApi;
@@ -87,6 +88,7 @@ import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
@@ -113,6 +115,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
+import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -148,8 +152,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -915,5 +921,31 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
         var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
         return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService));
+    }
+
+    @Override
+    public <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException {
+        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(ctx.dependencyResolver(), GlobalProcedures.class);
+        return globalProcedures.lookupComponentProvider(component, safe).apply(ctx);
+    }
+
+    @Override
+    public GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
+        return new GlobalProcedureRegistry() {
+            @Override
+            public Set<ProcedureSignature> getAllProcedures() {
+                return globalProcedures.getAllProcedures();
+            }
+
+            @Override
+            public Stream<UserFunctionSignature> getAllNonAggregatingFunctions() {
+                return globalProcedures.getAllNonAggregatingFunctions();
+            }
+
+            @Override
+            public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
+                return globalProcedures.getAllAggregatingFunctions();
+            }
+        };
     }
 }

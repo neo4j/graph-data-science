@@ -29,10 +29,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
+import org.neo4j.kernel.api.procedure.CallableUserFunction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -40,9 +43,13 @@ import org.neo4j.kernel.impl.factory.DbmsInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 
 public final class GraphDatabaseApiProxy {
 
@@ -82,7 +89,7 @@ public final class GraphDatabaseApiProxy {
     ) throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
-            procedures.registerProcedure(clazz, overrideCurrentImplementation);
+            registerProcedures(procedures, clazz, overrideCurrentImplementation);
         }
     }
 
@@ -105,7 +112,24 @@ public final class GraphDatabaseApiProxy {
     public static void register(GraphDatabaseService db, CallableUserAggregationFunction function) throws
         KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
-        procedures.register(function, true);
+        register(procedures, function);
+    }
+
+    @SuppressForbidden(reason = "We're not implementing CallableUserAggregationFunction, just passing it on")
+    public static void register(GlobalProcedures procedures, CallableUserAggregationFunction function) throws
+        KernelException {
+        register(procedures, CallableUserAggregationFunction.class, function);
+    }
+
+    public static void register(GlobalProcedures procedures, CallableUserFunction function) throws
+        KernelException {
+        register(procedures, CallableUserFunction.class, function);
+    }
+
+    @SuppressForbidden(reason = "We're not implementing CallableProcedure, just passing it on")
+    public static void register(GlobalProcedures procedures, CallableProcedure procedure) throws
+        KernelException {
+        register(procedures, CallableProcedure.class, procedure);
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {
@@ -188,7 +212,11 @@ public final class GraphDatabaseApiProxy {
         return ((InternalTransaction) tx).kernelTransaction();
     }
 
-    public static InternalTransaction beginTransaction(GraphDatabaseService db, KernelTransaction.Type type, LoginContext loginContext) {
+    public static InternalTransaction beginTransaction(
+        GraphDatabaseService db,
+        KernelTransaction.Type type,
+        LoginContext loginContext
+    ) {
         return cast(db).beginTransaction(type, loginContext);
     }
 
@@ -216,5 +244,57 @@ public final class GraphDatabaseApiProxy {
 
     private GraphDatabaseApiProxy() {
         throw new UnsupportedOperationException("No instances");
+    }
+
+    private static void registerProcedures(
+        GlobalProcedures globalProcedures,
+        Class<?> procedureClass,
+        boolean overrideCurrentImplementation
+    ) {
+        var globalProceduresClass = globalProcedures.getClass();
+
+        var legacySignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class, boolean.class);
+        var newSignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class);
+        if (legacySignatureMethod.isPresent()) {
+            invokeMethod(globalProcedures, legacySignatureMethod.get(), procedureClass, overrideCurrentImplementation);
+        } else if (newSignatureMethod.isPresent()){
+            invokeMethod(globalProcedures, newSignatureMethod.get(), procedureClass);
+        } else {
+            throw new RuntimeException("Could not find registerProcedure method");
+        }
+    }
+
+    private static void register(GlobalProcedures globalProcedures, Class<?> clazz, Object obj) {
+        var globalProceduresClass = globalProcedures.getClass();
+
+        var legacySignatureMethod = getMethod(globalProceduresClass, "register", clazz, boolean.class);
+        var newSignatureMethod = getMethod(globalProceduresClass, "register", clazz);
+        if (legacySignatureMethod.isPresent()) {
+            invokeMethod(globalProcedures, legacySignatureMethod.get(), obj, true);
+        } else if (newSignatureMethod.isPresent()){
+            invokeMethod(globalProcedures, newSignatureMethod.get(), obj);
+        } else {
+            throw new RuntimeException("Could not find registerProcedure method");
+        }
+    }
+
+    private static Optional<Method> getMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
+        try {
+            return Optional.of(clazz.getMethod(name, parameterTypes));
+        } catch (NoSuchMethodException e) {
+            return Optional.empty();
+        }
+    }
+
+    private static void invokeMethod(Object obj, Method method, Object... arguments) {
+        try {
+            method.invoke(obj, arguments);
+        } catch (InvocationTargetException e) {
+            if (e.getTargetException().getClass() != ProcedureException.class) {
+                throw new RuntimeException(e.getTargetException());
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
