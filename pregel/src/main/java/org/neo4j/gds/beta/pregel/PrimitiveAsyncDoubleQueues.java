@@ -21,12 +21,11 @@ package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.collections.cursor.HugeCursor;
-import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -64,7 +63,10 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
 
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(PrimitiveAsyncDoubleQueues.class)
-            .add("queues", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
+            .perNode(
+                "queues",
+                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY))
+            )
             .perNode("heads", HugeIntArray::memoryEstimation)
             .perNode("tails", HugeAtomicLongArray::memoryEstimation)
             .perNode("reference counts", HugeAtomicLongArray::memoryEstimation)
