@@ -29,6 +29,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -288,7 +289,11 @@ public final class GraphDatabaseApiProxy {
     private static void invokeMethod(Object obj, Method method, Object... arguments) {
         try {
             method.invoke(obj, arguments);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
+            if (e.getTargetException().getClass() != ProcedureException.class) {
+                throw new RuntimeException(e.getTargetException());
+            }
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
