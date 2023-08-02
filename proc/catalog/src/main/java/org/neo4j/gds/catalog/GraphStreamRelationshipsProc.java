@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -41,9 +42,26 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamRelationshipsProc extends CatalogProc {
+    private static final String DESCRIPTION = "Streams the given relationship source/target pairs";
 
-    @Procedure(name = "gds.beta.graph.relationships.stream", mode = READ)
-    @Description("Streams the given relationship source/target pairs")
+    @Procedure(name = "gds.beta.graph.relationships.stream", mode = READ, deprecatedBy = "gds.graph.relationships.stream")
+    @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    @Internal
+    public Stream<TopologyResult> betaStreamRelationships(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.graph.relationships.stream` has been deprecated, please use `gds.graph.relationships.stream`.");
+
+        return streamRelationships(graphName, relationshipTypes, configuration);
+    }
+
+    @Procedure(name = "gds.graph.relationships.stream", mode = READ)
+    @Description(DESCRIPTION)
     public Stream<TopologyResult> streamRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,

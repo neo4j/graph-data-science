@@ -1,7 +1,7 @@
 = Streaming relationships
 :description: This chapter explains how to read relationship properties from a projected graph.
 
-To inspect the relationship topology only, the `gds.beta.graph.relationships.stream` procedure can be used.
+To inspect the relationship topology only, the `gds.graph.relationships.stream` procedure can be used.
 To inspect stored relationship property values, the `relationshipProperties.stream` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
@@ -15,7 +15,7 @@ This is useful if we ran multiple algorithms in `mutate` mode and want to retrie
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.relationships.stream(
+CALL gds.graph.relationships.stream(
     graphName: String,
     relationshipTypes: List of Strings,
     configuration: Map
@@ -238,7 +238,7 @@ In this example below we stream relationship topology for all relationship types
 .Stream all relationships:
 [source, cypher, role=noplay ]
 ----
-CALL gds.beta.graph.relationships.stream(
+CALL gds.graph.relationships.stream(
   'personsAndInstruments'                  // <1>
 )
 YIELD
@@ -284,7 +284,7 @@ This can be achieved by passing a second argument to the procedure as demonstrat
 .Stream a single relationship for specific relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.relationships.stream(
+CALL gds.graph.relationships.stream(
   'personsAndInstruments',                  // <1>
   ['SIMILAR']                               // <2>
 )

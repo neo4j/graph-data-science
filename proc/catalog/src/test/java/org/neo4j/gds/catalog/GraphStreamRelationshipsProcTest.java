@@ -72,7 +72,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
     void shouldStreamAllRelationships() {
         var actualRelationships = new ArrayList<TopologyResult>();
 
-        runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('graph')", row -> actualRelationships.add(
+        runQueryWithRowConsumer("CALL gds.graph.relationships.stream('graph')", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
                 row.getNumber("targetNodeId").longValue(),
@@ -111,7 +111,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
     ) {
         var actualRelationships = new ArrayList<TopologyResult>();
         runQueryWithRowConsumer(
-            "CALL gds.beta.graph.relationships.stream('graph', ['" + relType + "'])",
+            "CALL gds.graph.relationships.stream('graph', ['" + relType + "'])",
             row -> actualRelationships.add(
                 resultContainerFunction.apply(
                     row.getNumber("sourceNodeId").longValue(),
@@ -133,7 +133,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.graph.generate('generatedGraph', 10000, 5)");
 
         var actualRelationships = new ArrayList<TopologyResult>();
-        runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
+        runQueryWithRowConsumer("CALL gds.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
                 row.getNumber("targetNodeId").longValue(),
@@ -155,7 +155,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistentRelationshipType() {
-        assertThatThrownBy(() -> runQuery("CALL gds.beta.graph.relationships.stream('graph', ['NON_EXISTENT'])"))
+        assertThatThrownBy(() -> runQuery("CALL gds.graph.relationships.stream('graph', ['NON_EXISTENT'])"))
             .hasRootCauseInstanceOf(IllegalStateException.class)
             .hasMessageContaining("could not find")
             .hasMessageContaining("'NON_EXISTENT'");

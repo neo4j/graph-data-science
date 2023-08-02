@@ -379,7 +379,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.fastRP.write",
         "gds.fastRP.write.estimate",
 
-        "gds.beta.graph.relationships.stream",
+        "gds.graph.relationships.stream",
         "gds.beta.graph.relationships.toUndirected",
         "gds.beta.graph.relationships.toUndirected.estimate",
 

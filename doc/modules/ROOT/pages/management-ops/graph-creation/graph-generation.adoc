@@ -146,14 +146,14 @@ YIELD name, nodes, relationships, relationshipDistribution
 --
 
 A new in-memory graph called `graph`  with `5` nodes and `10` relationships has been created and added to the graph catalog.
-We can examine its topology  with the `gds.beta.graph.relationships` procedure.
+We can examine its topology  with the `gds.graph.relationships` procedure.
 
 [role=query-example,group=unweighted]
 --
 .The following will show the produced relationships
 [source,cypher,role=noplay]
 ----
-CALL gds.beta.graph.relationships.stream('graph')
+CALL gds.graph.relationships.stream('graph')
 YIELD sourceNodeId,targetNodeId
 RETURN  sourceNodeId as source, targetNodeId as target
 ORDER BY source ASC,target ASC

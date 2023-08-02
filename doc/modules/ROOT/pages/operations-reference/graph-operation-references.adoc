@@ -59,7 +59,7 @@
 .2+<.^|xref:management-ops/graph-export/graph-export-csv.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.beta.graph.export.csv` label:procedure[Procedure]
 | `gds.beta.graph.export.csv.estimate` label:procedure[Procedure]
-|xref:management-ops/graph-reads/graph-stream-relationships.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.beta.graph.relationships.stream` label:procedure[Procedure]
+|xref:management-ops/graph-reads/graph-stream-relationships.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.graph.relationships.stream` label:procedure[Procedure]
 .2+<.^|xref:management-ops/graph-update/to-undirected.adoc#catalog-graph-relationship-to-undirected-example[Convert directed relationships to undirected]
 | `gds.beta.graph.relationships.toUndirected` label:procedure[Procedure]
 | `gds.beta.graph.relationships.toUndirected.estimate` label:procedure[Procedure]
