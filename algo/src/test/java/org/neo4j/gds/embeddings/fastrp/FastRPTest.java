@@ -463,7 +463,7 @@ public class FastRPTest {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertMemoryRange(estimate, 159_736);
+        assertMemoryRange(estimate, 159_808);
     }
 
     @Test
@@ -477,7 +477,7 @@ public class FastRPTest {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertMemoryRange(estimate, 159_736);
+        assertMemoryRange(estimate, 159_808);
     }
 
     @Test
