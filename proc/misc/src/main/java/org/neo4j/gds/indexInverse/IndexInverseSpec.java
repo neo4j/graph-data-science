@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, Map<RelationshipType, SingleTypeRelationships>, InverseRelationshipsConfig, Stream<IndexInverseSpec.MutateResult>, InverseRelationshipsAlgorithmFactory> {
 
     public static final String DESCRIPTION = "The IndexInverse procedure indexes directed relationships to allow an efficient inverse access for other algorithms.";
-    static final String CALLABLE_NAME = "gds.beta.graph.relationships.indexInverse";
+    static final String CALLABLE_NAME = "gds.graph.relationships.indexInverse";
 
     @Override
     public String name() {
