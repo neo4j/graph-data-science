@@ -249,8 +249,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.articleRank.write",
         "gds.articleRank.write.estimate",
 
-        "gds.beta.graph.export.csv",
-        "gds.beta.graph.export.csv.estimate",
+        "gds.graph.export.csv",
+        "gds.graph.export.csv.estimate",
 
         "gds.beta.node2vec.mutate",
         "gds.beta.node2vec.mutate.estimate",
