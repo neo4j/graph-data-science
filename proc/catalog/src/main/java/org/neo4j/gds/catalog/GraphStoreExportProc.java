@@ -42,6 +42,7 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -55,6 +56,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
+
+    private static final String DESCRIPTION = "Exports a named graph to CSV files.";
+    private static final String DESCRIPTION_ESTIMATE = "Estimate the required disk space for exporting a named graph to CSV files.";
 
     @Procedure(name = "gds.graph.export", mode = READ)
     @Description("Exports a named graph into a new offline Neo4j database.")
@@ -120,8 +124,23 @@ public class GraphStoreExportProc extends BaseProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.beta.graph.export.csv", mode = READ)
-    @Description("Exports a named graph to CSV files.")
+    @Internal
+    @Procedure(name = "gds.beta.graph.export.csv", mode = READ, deprecatedBy = "gds.graph.export.csv")
+    @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    public Stream<FileExportResult> csvDeprecated(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.graph.export.csv` has been deprecated, please use `gds.graph.export.csv`.");
+
+        return csv(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.graph.export.csv", mode = READ)
+    @Description(DESCRIPTION)
     public Stream<FileExportResult> csv(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -156,8 +175,23 @@ public class GraphStoreExportProc extends BaseProc {
         ));
     }
 
-    @Procedure(name = "gds.beta.graph.export.csv.estimate", mode = READ)
-    @Description("Estimate the required disk space for exporting a named graph to CSV files.")
+    @Internal
+    @Procedure(name = "gds.beta.graph.export.csv.estimate", mode = READ, deprecatedBy = "gds.graph.export.csv.estimate")
+    @Description(DESCRIPTION_ESTIMATE)
+    @Deprecated(forRemoval = true)
+    public Stream<MemoryEstimateResult> csvEstimateDeprecated(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.graph.export.csv.estimate` has been deprecated, please use `gds.graph.export.csv.estimate`.");
+
+        return csvEstimate(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.graph.export.csv.estimate", mode = READ)
+    @Description(DESCRIPTION_ESTIMATE)
     public Stream<MemoryEstimateResult> csvEstimate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
