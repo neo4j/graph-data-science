@@ -26,10 +26,10 @@ Projecting subgraphs of subgraphs is also possible.
 
 [.project-subgraph-syntax]
 --
-.A new graph can be projected by using the `gds.beta.graph.project.subgraph()` procedure:
+.A new graph can be projected by using the `gds.graph.project.subgraph()` procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.project.subgraph(
+CALL gds.graph.project.subgraph(
   graphName: String,
   fromGraphName: String,
   nodeFilter: String,
@@ -172,7 +172,7 @@ YIELD graphName, nodeCount, relationshipCount, projectMillis
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.project.subgraph(
+CALL gds.graph.project.subgraph(
   'teenagers',
   'social-graph',
   'n.age > 13 AND n.age <= 18',
@@ -197,7 +197,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.project.subgraph(
+CALL gds.graph.project.subgraph(
   'teenagers',
   'social-graph',
   'n.age > 13 AND n.age <= 18',
@@ -221,7 +221,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 .Create a new bipartite graph between books and users connected by the `READS` relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.project.subgraph(
+CALL gds.graph.project.subgraph(
   'teenagers-books',
   'social-graph',
   'n:Book OR n:Person',
@@ -246,7 +246,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 .The previous example can be extended with an additional filter applied only to persons:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.project.subgraph(
+CALL gds.graph.project.subgraph(
   'teenagers-books',
   'social-graph',
   'n:Book OR (n:Person AND n.age > 18)',
@@ -274,7 +274,7 @@ As an example we can rewrite the xref:management-ops/graph-creation/graph-projec
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.project.subgraph(
+CALL gds.graph.project.subgraph(
   'teenagers-parameterized',
   'social-graph',
   'n.age > $lower AND n.age <= $upper',

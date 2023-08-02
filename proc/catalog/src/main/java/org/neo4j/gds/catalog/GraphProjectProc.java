@@ -26,6 +26,7 @@ import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -97,7 +98,22 @@ public class GraphProjectProc {
         return facade.estimateCypherProject(nodeQuery, relationshipQuery, configuration);
     }
 
-    @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ)
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ, deprecatedBy = "gds.graph.project.subgraph")
+    @Description(PROJECT_DESCRIPTION)
+    public Stream<GraphProjectSubgraphResult> projectSubgraphDeprecated(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "nodeFilter") String nodeFilter,
+        @Name(value = "relationshipFilter") String relationshipFilter,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.log().warn("Procedure `gds.graph.project.subgraph` has been deprecated, please use `gds.graph.project.subgraph`.");
+        return facade.subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
+    }
+
+    @Procedure(name = "gds.graph.project.subgraph", mode = READ)
     @Description(PROJECT_DESCRIPTION)
     public Stream<GraphProjectSubgraphResult> projectSubgraph(
         @Name(value = "graphName") String graphName,

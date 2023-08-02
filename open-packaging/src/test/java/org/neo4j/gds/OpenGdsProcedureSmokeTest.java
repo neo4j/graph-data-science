@@ -269,7 +269,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.graphSage.write.estimate",
 
         "gds.beta.graph.generate",
-        "gds.beta.graph.project.subgraph",
+        "gds.graph.project.subgraph",
 
         "gds.k1coloring.mutate",
         "gds.k1coloring.mutate.estimate",

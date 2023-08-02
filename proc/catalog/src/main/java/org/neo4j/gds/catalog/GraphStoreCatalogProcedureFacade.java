@@ -113,6 +113,10 @@ public class GraphStoreCatalogProcedureFacade {
         this.businessFacade = businessFacade;
     }
 
+    public Log log() {
+        return log;
+    }
+
     /**
      * Discussion: this is used by two stubs, with different output marshalling functions.
      * <p>
