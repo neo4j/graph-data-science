@@ -19,23 +19,24 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 class KnnFactoryTest {
@@ -64,8 +65,6 @@ class KnnFactoryTest {
 
         assertEstimation(
             nodeCount,
-            24,
-            sizeOfObjectArray(nodeCount),
             boundedK,
             sampledK,
             initialSampler,
@@ -95,36 +94,32 @@ class KnnFactoryTest {
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
-        int pageSize = 16384;
-        int numPages = (int) ceilDiv(nodeCount, 16384);
-        var sizeOfHugeArray = sizeOfObjectArray(numPages) + numPages * sizeOfObjectArray(pageSize);
-        assertEstimation(nodeCount, 32, sizeOfHugeArray, boundedK, sampledK, initialSampler, actual);
+        assertEstimation(nodeCount, boundedK, sampledK, initialSampler, actual);
     }
 
     private void assertEstimation(
         long nodeCount,
-        int sizeOfHugeArrayInstance,
-        long sizeOfHugeArray,
         int boundedK,
         int sampledK,
         KnnSampler.SamplerType initialSampler,
         MemoryRange actual
     ) {
-        long knnAlgo = /* KNN */ 64;
+        long knnAlgo = MemoryUsage.sizeOfInstance(Knn.class);
 
-        long topKNeighborList = /* NL */ 32 + sizeOfLongArray(boundedK * 2L);
-        long topKNeighborsList = /* HOA */ sizeOfHugeArrayInstance + sizeOfHugeArray + nodeCount * topKNeighborList;
+        long topKNeighborList = MemoryUsage.sizeOfInstance(NeighborList.class) + sizeOfLongArray(boundedK * 2L);
+        long topKNeighborsList = HugeObjectArray.memoryEstimation(nodeCount, topKNeighborList);
 
-        long tempNeighborsListMin = /* HOA */ sizeOfHugeArrayInstance + sizeOfHugeArray;
-        long tempNeighborsListMax = tempNeighborsListMin + nodeCount * (/* LAL */ 24 + sizeOfLongArray(sampledK));
+        long tempNeighborsListMin = HugeObjectArray.memoryEstimation(nodeCount, 0);
+        long tempNeighborsListMax = HugeObjectArray.memoryEstimation(
+            nodeCount,
+            MemoryUsage.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(sampledK)
+        );
 
         var randomList = KnnFactory.initialSamplerMemoryEstimation(initialSampler, boundedK);
         long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(sampledK));
 
-        long neighbourConsumers = 8;
-
-        long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList + neighbourConsumers;
-        long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList + neighbourConsumers;
+        long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList;
+        long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList;
 
         assertEquals(expectedMin, actual.min);
         assertEquals(expectedMax, actual.max);

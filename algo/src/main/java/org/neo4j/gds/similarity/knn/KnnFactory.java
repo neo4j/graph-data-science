@@ -68,7 +68,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return KnnFactory.memoryEstimation(taskName(), configuration);
+        return KnnFactory.memoryEstimation(taskName(), Knn.class, configuration);
     }
 
     public static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
@@ -107,6 +107,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     public static <CONFIG extends KnnBaseConfig>  MemoryEstimation memoryEstimation(
         String taskName,
+        Class<?> clazz,
         CONFIG configuration
     ) {
         return MemoryEstimations.setup(
@@ -133,7 +134,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                 );
 
                 return MemoryEstimations
-                    .builder(FilteredKnn.class)
+                    .builder(clazz)
                     .rangePerNode("top-k-neighbors-list", perNodeNeighborListEstimate)
                     .rangePerNode("old-neighbors", tempListEstimation)
                     .rangePerNode("new-neighbors", tempListEstimation)
