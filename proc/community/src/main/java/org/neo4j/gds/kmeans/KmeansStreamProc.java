@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,13 +35,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansStreamProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.kmeans.stream", mode = READ)
+    @Procedure(value = "gds.kmeans.stream", mode = READ)
     @Description(Kmeans.KMEANS_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
         var streamSpec = new KmeansStreamSpec();
         return new ProcedureExecutor<>(
             streamSpec,
@@ -48,18 +48,44 @@ public class KmeansStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.kmeans.stream.estimate", mode = READ)
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.kmeans.stream", mode = READ, deprecatedBy = "gds.kmeans.stream")
+    @Description(Kmeans.KMEANS_DESCRIPTION)
+    public Stream<StreamResult> betaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.kmeans.stream` has been deprecated, please use `gds.kmeans.stream`.");
+        return stream(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.kmeans.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var writeSpec = new KmeansStreamSpec();
+        var spec = new KmeansStreamSpec();
 
         return new MemoryEstimationExecutor<>(
-            writeSpec,
+            spec,
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.kmeans.stream.estimate", mode = READ, deprecatedBy = "gds.kmeans.stream.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.kmeans.stream.estimate` has been deprecated, please use `gds.kmeans.stream.estimate`.");
+        return estimate(graphName, configuration);
     }
 }

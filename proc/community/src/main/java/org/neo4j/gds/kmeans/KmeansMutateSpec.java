@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.kmeans.mutate", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.kmeans.mutate", aliases = {"gds.beta.kmeans.mutate"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
 public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansMutateConfig, Stream<MutateResult>, KmeansAlgorithmFactory<KmeansMutateConfig>> {
 
     @Override

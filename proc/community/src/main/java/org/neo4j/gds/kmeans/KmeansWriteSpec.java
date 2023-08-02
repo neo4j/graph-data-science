@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.kmeans.write", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.kmeans.write", aliases = {"gds.beta.kmeans.write"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>, KmeansAlgorithmFactory<KmeansWriteConfig>> {
 
     @Override

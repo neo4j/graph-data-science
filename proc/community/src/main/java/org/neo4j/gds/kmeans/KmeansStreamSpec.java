@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.kmeans.stream", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
+@GdsCallable(name = "gds.kmeans.stream", aliases = {"gds.beta.kmeans.stream"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>, KmeansAlgorithmFactory<KmeansStreamConfig>> {
     @Override
     public String name() {

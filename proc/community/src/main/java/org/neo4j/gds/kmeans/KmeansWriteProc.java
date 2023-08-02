@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -56,6 +57,19 @@ public class KmeansWriteProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.kmeans.write", mode = WRITE, deprecatedBy = "gds.beta.kmeans.write")
+    @Description(KMEANS_DESCRIPTION)
+    public Stream<WriteResult> betaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
+        return write(graphName, configuration);
+    }
+
     @Procedure(value = "gds.beta.kmeans.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
@@ -69,6 +83,19 @@ public class KmeansWriteProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.kmeans.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
+        return estimate(graphName, configuration);
     }
 
     @Override
