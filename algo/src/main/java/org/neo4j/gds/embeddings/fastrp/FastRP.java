@@ -22,13 +22,12 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionConsumer;
@@ -81,15 +80,16 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     private List<DegreePartition> partitions;
 
     public static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
+        var sizeOfEmbeddingArray = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
         return MemoryEstimations
             .builder(FastRP.class.getSimpleName())
             .fixed(
                 "propertyVectors",
                 MemoryUsage.sizeOfFloatArray((long) config.featureProperties().size() * config.propertyDimension())
             )
-            .add("embeddings", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
-            .add("embeddingA", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
-            .add("embeddingB", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
+            .perNode("embeddings", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
+            .perNode("embeddingsA", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
+            .perNode("embeddingsB", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
             .build();
     }
 

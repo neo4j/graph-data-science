@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -103,19 +103,21 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         var gsBuilder = MemoryEstimations.builder("GraphSage");
 
         if (mutate) {
-            gsBuilder = gsBuilder.startField(RESIDENT_MEMORY)
-                .add(
+            gsBuilder = gsBuilder
+                .startField(RESIDENT_MEMORY)
+                .perNode(
                     "resultFeatures",
-                    HugeObjectArrayEstimation.objectArray(sizeOfDoubleArray(config.embeddingDimension()))
-                ).endField();
+                    nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.embeddingDimension()))
+                )
+                .endField();
         }
 
         var builder = gsBuilder
             .startField(TEMPORARY_MEMORY)
             .field("this.instance", GraphSage.class)
-            .add(
+            .perNode(
                 "initialFeatures",
-                HugeObjectArrayEstimation.objectArray(sizeOfDoubleArray(config.estimationFeatureDimension()))
+                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.estimationFeatureDimension()))
             )
             .perThread(
                 "concurrentBatches",
@@ -124,9 +126,9 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
                 ).build()
             );
         if (!mutate) {
-            builder = builder.add(
+            builder = builder.perNode(
                 "resultFeatures",
-                HugeObjectArrayEstimation.objectArray(sizeOfDoubleArray(config.embeddingDimension()))
+                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.embeddingDimension()))
             );
         }
         return builder.endField().build();

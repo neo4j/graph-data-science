@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.collections.ha.HugeObjectArrayEstimation;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -57,8 +56,14 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
 
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(PrimitiveSyncDoubleQueues.class)
-            .add("current queues", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
-            .add("previous queues", HugeObjectArrayEstimation.objectArray(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
+            .perNode(
+                "current queues",
+                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY))
+            )
+            .perNode(
+                "previous queues",
+                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY))
+            )
             .perNode("current tails", HugeAtomicLongArray::memoryEstimation)
             .perNode("previous tails", HugeAtomicLongArray::memoryEstimation)
             .perNode("reference counts", HugeAtomicLongArray::memoryEstimation)
