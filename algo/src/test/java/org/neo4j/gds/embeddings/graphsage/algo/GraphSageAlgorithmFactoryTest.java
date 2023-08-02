@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.InjectModelCatalog;
@@ -44,7 +45,6 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.gdl.GdlGraphs;
-import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.logging.NullLog;
 
 import java.util.ArrayList;
@@ -302,9 +302,6 @@ class GraphSageAlgorithmFactoryTest {
             pair(1, TEMPORARY_MEMORY),
             pair(2, "this.instance"),
             pair(2, "initialFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages"),
             pair(2, "concurrentBatches"),
             pair(3, "computationGraph"),
             pair(4, "subgraphs"),
@@ -315,10 +312,7 @@ class GraphSageAlgorithmFactoryTest {
             pair(5, "MEAN 1"),
             pair(5, "MEAN 2"),
             pair(5, "normalizeRows"),
-            pair(2, "resultFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages")
+            pair(2, "resultFeatures")
         );
     }
 
@@ -358,15 +352,9 @@ class GraphSageAlgorithmFactoryTest {
             pair(0, "GraphSage"),
             pair(1, RESIDENT_MEMORY),
             pair(2, "resultFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages"),
             pair(1, TEMPORARY_MEMORY),
             pair(2, "this.instance"),
             pair(2, "initialFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages"),
             pair(2, "concurrentBatches"),
             pair(3, "computationGraph"),
             pair(4, "subgraphs"),
@@ -431,41 +419,34 @@ class GraphSageAlgorithmFactoryTest {
         var smallNodeCounts = List.of(1L, 10L, 100L, 10_000L);
         var largeNodeCounts = List.of(11000000000L, 100000000000L);
         var nodeCounts = Stream.concat(
-            smallNodeCounts.stream().map(nc -> {
-                var hugeObjectArrayPages = sizeOfObjectArray(nc);
-                return Tuples.pair(
-                    nc,
-                    (LongUnaryOperator) new LongUnaryOperator() {
-                        @Override
-                        public long applyAsLong(long innerSize) {
-                            return 24 + hugeObjectArrayPages + nc * innerSize;
-                        }
-
-                        @Override
-                        public String toString() {
-                            return "single page";
-                        }
+            smallNodeCounts.stream().map(nc -> Tuples.pair(
+                nc,
+                (LongUnaryOperator) new LongUnaryOperator() {
+                    @Override
+                    public long applyAsLong(long innerSize) {
+                        return HugeObjectArray.memoryEstimation(nc, innerSize);
                     }
-                );
-            }),
-            largeNodeCounts.stream().map(nc -> {
-                var numPages = BitUtil.ceilDiv(nc, 1L << 14);
-                var hugeObjectArrayPages = sizeOfObjectArray(numPages) + numPages * sizeOfObjectArray(1L << 14);
-                return Tuples.pair(
-                    nc,
-                    (LongUnaryOperator) new LongUnaryOperator() {
-                        @Override
-                        public long applyAsLong(long innerSize) {
-                            return 32 + hugeObjectArrayPages + nc * innerSize;
-                        }
 
-                        @Override
-                        public String toString() {
-                            return "multiple pages";
-                        }
+                    @Override
+                    public String toString() {
+                        return "single page";
                     }
-                );
-            })
+                }
+            )),
+            largeNodeCounts.stream().map(nc -> Tuples.pair(
+                nc,
+                (LongUnaryOperator) new LongUnaryOperator() {
+                    @Override
+                    public long applyAsLong(long innerSize) {
+                        return HugeObjectArray.memoryEstimation(nc, innerSize);
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "multiple pages";
+                    }
+                }
+            ))
         );
 
         var userName = "userName";
@@ -575,12 +556,12 @@ class GraphSageAlgorithmFactoryTest {
 
         MemoryRange actual = actualTree.memoryUsage();
 
-        assertEquals(6861816, actual.min);
-        assertEquals(18593016, actual.max);
+        assertEquals(6861864, actual.min);
+        assertEquals(18593064, actual.max);
 
         assertThat(actualTree.residentMemory())
             .isPresent()
             .map(MemoryTree::memoryUsage)
-            .contains(MemoryRange.of(5320040L));
+            .contains(MemoryRange.of(5320064L));
     }
 }
