@@ -21,21 +21,33 @@ package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryUsage;
 
- class ReroutingChildrenManager {
+class ReroutingChildrenManager {
 
-     private HugeObjectArray<LinkedNode> nodes;
-     private BitSet isTerminal;
-     private long sourceId;
+    private HugeObjectArray<LinkedNode> nodes;
+    private BitSet isTerminal;
+    private long sourceId;
 
-     ReroutingChildrenManager(long nodeCount, BitSet isTerminal, long sourceId) {
-         nodes = HugeObjectArray.newArray(LinkedNode.class, nodeCount);
-         for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
-             nodes.set(nodeId, LinkedNode.createChild(nodeId));
-         }
-         this.sourceId = sourceId;
-         this.isTerminal = isTerminal;
-     }
+    static MemoryEstimation estimation() {
+
+        var linkCutNodeMemoryEstimation = MemoryUsage.sizeOfObject(LinkCutNode.createSingle(0)).getAsLong();
+
+        var memoryEstimationBuilder = MemoryEstimations.builder(LinkCutTree.class)
+            .perNode("nodes", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, linkCutNodeMemoryEstimation));
+        return memoryEstimationBuilder.build();
+    }
+
+    ReroutingChildrenManager(long nodeCount, BitSet isTerminal, long sourceId) {
+        nodes = HugeObjectArray.newArray(LinkedNode.class, nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
+            nodes.set(nodeId, LinkedNode.createChild(nodeId));
+        }
+        this.sourceId = sourceId;
+        this.isTerminal = isTerminal;
+    }
 
     void cut(long index) {
         LinkedNode node = nodes.get(index);

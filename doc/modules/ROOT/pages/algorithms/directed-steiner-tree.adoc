@@ -124,7 +124,7 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 
 [.include-with-mutate]
 ======
-.Run the Spanning Tree algorithm in write mode on a named graph.
+.Run the Spanning Tree algorithm in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.steinerTree.mutate(
@@ -258,6 +258,34 @@ CALL gds.graph.project(
 )
 ----
 
+[[algorithm-steiner-tree-mem-est]]
+=== Memory Estimation
+
+:mode: stats
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stats mode:
+[source, cypher, role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.steinerTree.stats.estimate('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost'
+})
+YIELD nodeCount, relationshipCount, requiredMemory
+RETURN nodeCount, relationshipCount, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | requiredMemory
+| 6         | 7              | "[672 Bytes \... 864 Bytes]"
+|===
+--
 
 [[algorithms-steiner-tree-examples-sream]]
 === Stream
