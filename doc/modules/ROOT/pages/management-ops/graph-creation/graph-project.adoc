@@ -4,8 +4,8 @@
 :page-aliases: management-ops/projections/graph-project.adoc
 
 
-A native projection is the fastest and most scalable way to project a graph from a Neo4j database into the xref:management-ops/index.adoc[GDS Graph Catalog].
-Native projections are recommended for any use case, and for both the development and the production phase (see xref:common-usage/index.adoc[Common usage]).
+A native projection is the fastest and most scalable way to create a xref:management-ops/index.adoc[GDS graph] from a Neo4j database.
+Native projections are recommended for any use case, for both the development and the production phase (see xref:common-usage/index.adoc[Common usage]).
 
 
 == Considerations
@@ -92,7 +92,7 @@ CALL gds.graph.project(
 
 
 [[node-projection-syntax]]
-=== Node Projection
+=== Node projection
 
 The node projection specifies which nodes from the database should be projected into the in-memory GDS graph.
 The projection is based around node labels, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
@@ -110,62 +110,71 @@ Similarly, to project a non-existing property, it is possible to create a node p
 
 ==== Projecting a single label
 
-The simplest syntax is to specify a single node label as a string value.
+The simplest syntax is to specify a single node label as a string value:
 
-.Short-hand String-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`.
-----
-<neo4j-label>
-----
-
-.Example outline:
 ----
 CALL gds.graph.project(
   /* graph name */,
-  'MyLabel',
+  'Label',
   /* relationship projection */
 )
 ----
+
+This syntax does not include any node properties.
 
 
 ==== Projecting multiple labels
 
-To project more than one label, the list syntax is available.
-Specify all labels to be projected as a list of strings.
+Use the list syntax to select more than one label for the projection:
 
-.Short-hand List-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`s.
-----
-[<neo4j-label>, ..., <neo4j-label>]
-----
-
-.Example outline:
 ----
 CALL gds.graph.project(
   /* graph name */,
-  ['MyLabel', 'MySecondLabel', 'AnotherLabel']
+  ['Label 1', 'Label 2', 'Label 3']
   /* relationship projection */
 )
 ----
 
-NOTE: We also support `*` as the neo4j-label to load all nodes. However, this does not keep the label information. To retain the label, we recommend using `CALL db.labels() YIELD label WITH collect(label) AS allLabels`.
+This syntax does not include any node properties.
+
+==== Projecting all the labels
+
+You can use the wildcard operator `*` to select all the labels for the projection.
+However, this does not retain the label information on the projected nodes.
+Use the `db.labels()` to retrieve the list of all the labels, and use it as a value for the `nodeProjection` parameter as in the following example:
+
+----
+CALL db.labels()
+YIELD label
+WITH collect(label) AS allLabels
+CALL gds.graph.project(
+  /* graph name */,
+  allLabels,
+  /* relationship projection */
+)
+YIELD graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
+RETURN *
+----
+
+This syntax does not include any node properties.
 
 
-==== Projecting labels with uniform node properties
+==== Projecting labels with global node properties
 
-In order to project properties in conjunction with the node labels, the `nodeProperties` configuration parameter can be used.
-This is a shorthand syntax to the full map-based syntax described below.
-The node properties specified with the `nodeProperties` parameter will be applied to all node labels specified in the node projection.
+You can use the `nodeProperties` configuration parameter to project node properties from nodes that match any of the labels specified in `nodeProjection`:
 
-.Example outline:
 ----
 CALL gds.graph.project(
   /* graph name */,
-  ['MyLabel', 'MySecondLabel', 'AnotherLabel']
+  ['Label 1', 'Label 2', 'Label 3']
   /* relationship projection */,
-  { nodeProperties: ['prop1', 'prop2] }
+  { nodeProperties: ['prop1', 'prop2'] }
 )
 ----
 
+In this example, `prop1` and `prop2` are projected from any node with label `Label 1`, `Label 2`, or `Label 3`.
 
+// TODO: review
 ==== Projecting multiple labels with name mapping and label-specific properties
 
 The full node projection syntax uses a map.
@@ -223,7 +232,7 @@ The `properties` key can take a similar set of syntax variants as the node proje
 
 
 [[relationship-projection-syntax]]
-=== Relationship Projection
+=== Relationship projection
 
 The relationship projection specifies which relationships from the database should be projected into the in-memory GDS graph.
 The projection is based around relationship types, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
@@ -241,14 +250,8 @@ Similarly, to project a non-existing property, it is possible to create a relati
 
 ==== Projecting a single relationship type
 
-The simplest syntax is to specify a single relationship type as a string value.
+The simplest syntax is to specify a single relationship type as a string value:
 
-.Short-hand String-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`.
-----
-<neo4j-type>
-----
-
-.Example outline:
 ----
 CALL gds.graph.project(
   /* graph name */,
@@ -257,18 +260,13 @@ CALL gds.graph.project(
 )
 ----
 
+This syntax does not include any relationship properties.
+
 
 ==== Projecting multiple relationship types
 
-To project more than one relationship type, the list syntax is available.
-Specify all relationship types to be projected as a list of strings.
+Use the list syntax to select more than one relationship type for the projection:
 
-.Short-hand List-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`s.
-----
-[<neo4j-type>, ..., <neo4j-type>]
-----
-
-.Example outline:
 ----
 CALL gds.graph.project(
   /* graph name */,
@@ -277,26 +275,47 @@ CALL gds.graph.project(
 )
 ----
 
-NOTE: We also support `*` as the neo4j-type to load all relationships. However, this does not keep the type information. To retain the type, we recommend using `CALL db.relationshipTypes() YIELD relationshipType WITH collect(relationshipType) AS allTypes`.
+This syntax does not include any node properties.
 
 
-==== Projecting relationship types with uniform relationship properties
+==== Projecting all the relationship types
+You can use the wildcard operator * to select all the relationship types for the projection.
+However, this does not retain the type information on the projected relationships.
+Use the `db.relationshipTypes()` to retrieve the list of all the relationship types, and use it as a value for the `relationshipProjection` parameter as in the following example:
 
-In order to project properties in conjunction with the relationship types, the `relationshipProperties` configuration parameter can be used.
-This is a shorthand syntax to the full map-based syntax described below.
-The relationship properties specified with the `relationshipProperties` parameter will be applied to all relationship types specified in the relationship projection.
+----
+CALL db.relationshipTypes()
+YIELD relationshipType
+WITH collect(relationshipType) AS allTypes
+CALL gds.graph.project(
+  /* graph name */,
+  /* node projection */
+  allTypes
+)
+YIELD graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
+RETURN *
+----
 
-.Example outline:
+This syntax does not include any relationship properties.
+
+
+==== Projecting relationship types with global relationship properties
+
+You can use the `relationshipProperties` configuration parameter to project relationship types from relationships that match any of the types specified in `relationshipProjection`:
+
 ----
 CALL gds.graph.project(
   /* graph name */,
   /* node projection */,
-  ['MY_TYPE', 'MY_SECOND_TYPE', 'ANOTHER_TYPE'],
+  ['TYPE_1', 'TYPE_2', 'TYPE_3'],
   { relationshipProperties: ['prop1', 'prop2] }
 )
 ----
 
+In this example, `prop1` and `prop2` are projected from any relationship with type `TYPE_1`, `TYPE_2`, or `TYPE_3`.
 
+
+// TODO: review
 ==== Projecting multiple relationship types with name mapping and type-specific properties
 
 The full relationship projection syntax uses a map.
