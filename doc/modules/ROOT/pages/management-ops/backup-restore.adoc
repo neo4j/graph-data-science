@@ -27,7 +27,7 @@ The `gds.export.location` parameter must be configured for this feature.
 .Back-up in-memory graphs and models
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.backup(configuration: Map)
+CALL gds.backup(configuration: Map)
 YIELD
   backupId: String,
   backupTime: LocalDateTime,
@@ -68,7 +68,7 @@ YIELD
 .Restore graphs and models
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.restore(configuration: Map)
+CALL gds.restore(configuration: Map)
 YIELD
   restoredGraph: String,
   restoredModel: String,
@@ -137,7 +137,7 @@ We can now run the back-up procedure in order to store the in-memory graph on di
 .The following will run the back-up procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.backup()
+CALL gds.backup()
 YIELD graphName, status
 ----
 
@@ -165,7 +165,7 @@ If we want to restore the backed-up graph, we can simply run the restore procedu
 .The following will run the restore procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.restore()
+CALL gds.restore()
 YIELD restoredGraph
 ----
 
