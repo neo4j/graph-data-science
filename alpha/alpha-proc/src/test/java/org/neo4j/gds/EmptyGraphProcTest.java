@@ -64,7 +64,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             .algo("gds.scc")
             .writeMode()
             .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodePropertiesWritten")));
     }
 
     @Test
