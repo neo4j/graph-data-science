@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.LocalTimeValue;
@@ -46,12 +47,27 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class ListProgressProc extends BaseProc {
 
     static final int PROGRESS_BAR_LENGTH = 10;
+    private static final String DESCRIPTION = "List progress events for currently running tasks.";
 
     @Context
     public TaskStore taskStore;
 
-    @Procedure("gds.beta.listProgress")
-    @Description("List progress events for currently running tasks.")
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(value = "gds.beta.listProgress", deprecatedBy = "gds.listProgress")
+    @Description(DESCRIPTION)
+    public Stream<ProgressResult> betaListProgress(
+        @Name(value = "jobId", defaultValue = "") String jobId
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.listProgress` has been deprecated, please use `gds.listProgress`.");
+
+        return listProgress(jobId);
+    }
+
+    @Procedure("gds.listProgress")
+    @Description(DESCRIPTION)
     public Stream<ProgressResult> listProgress(
         @Name(value = "jobId", defaultValue = "") String jobId
     ) {

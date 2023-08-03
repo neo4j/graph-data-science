@@ -295,7 +295,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.knn.write",
         "gds.knn.write.estimate",
 
-        "gds.beta.listProgress",
+        "gds.listProgress",
 
         "gds.model.drop",
         "gds.model.exists",
