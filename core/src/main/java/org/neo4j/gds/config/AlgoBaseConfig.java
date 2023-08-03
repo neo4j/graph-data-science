@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
 
@@ -42,6 +43,14 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     }
 
     @Configuration.Ignore
+    default List<RelationshipType> relTypes() {
+        return relationshipTypes().stream()
+            .filter(type -> !type.equals(ElementProjection.PROJECT_ALL))
+            .map(RelationshipType::of)
+            .collect(Collectors.toList());
+    }
+
+    @Configuration.Ignore
     default Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
         return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes());
     }
@@ -51,6 +60,15 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
+
+    @Configuration.Ignore
+    default List<NodeLabel> labels() {
+        return nodeLabels().stream()
+            .filter(label -> !label.equals(ElementProjection.PROJECT_ALL))
+            .map(NodeLabel::of)
+            .collect(Collectors.toList());
+    }
+
 
     @Configuration.Ignore
     default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {

@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.facade.CommunityProcedureFacade;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
@@ -93,6 +94,25 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
             true
         );
         log.info("GDS procedure facade registered");
+
+
+        /*
+         * Now we can register the community procedure facade
+         */
+        var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
+            usernameService,
+            databaseIdService
+        );
+
+        log.info("Registering GDS Community Procedure Facade");
+        dependencies.globalProcedures().registerComponent(
+            CommunityProcedureFacade.class,
+            communityProcedureFacadeProvider,
+            true
+        );
+        log.info("GDS Community procedure facade registered");
+
+
 
         /*
          * This is legacy support. We keep some context-injected things around,

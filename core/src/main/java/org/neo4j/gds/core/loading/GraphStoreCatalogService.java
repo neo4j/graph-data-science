@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 
 import java.util.Map;
@@ -61,6 +64,20 @@ public class GraphStoreCatalogService {
 
     public GraphStoreWithConfig get(CatalogRequest catalogRequest, GraphName graphName) {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
+    }
+
+    public Pair<Graph, GraphStore> getGraphWithGraphStore(GraphName graphName, AlgoBaseConfig config, Optional<String> relationshipProperty, User user, DatabaseId databaseId) {
+        CatalogRequest catalogRequest = CatalogRequest.of(user, databaseId);
+        var graphStoreWithConfig = get(catalogRequest, graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
+
+        var graph = graphStore.getGraph(
+            config.labels(),
+            config.relTypes(),
+            relationshipProperty
+        );
+        return Pair.of(graph, graphStore);
     }
 
     /**

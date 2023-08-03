@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
@@ -27,6 +28,7 @@ import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,15 +41,31 @@ import java.util.stream.Collectors;
 public final class GraphStoreUpdater {
     private GraphStoreUpdater() {}
 
+    @Deprecated(forRemoval = true)
     public static <ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutateNodePropertyConfig> void UpdateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext,
         final List<NodeProperty> nodePropertyList
     ) {
-        var graph = computationResult.graph();
-        MutateNodePropertyConfig mutatePropertyConfig = computationResult.config();
+        updateGraphStore(
+            computationResult.graph(),
+            computationResult.graphStore(),
+            resultBuilder,
+            computationResult.config(),
+            executionContext.log(),
+            nodePropertyList
+        );
+    }
 
+    public static void updateGraphStore(
+        Graph graph,
+        GraphStore graphStore,
+        AbstractResultBuilder<?> resultBuilder,
+        MutateNodePropertyConfig mutatePropertyConfig,
+        Log log,
+        final List<NodeProperty> nodePropertyList
+    ) {
         var maybeTranslatedProperties = graph
             .asNodeFilteredGraph()
             .map(filteredGraph -> nodePropertyList
@@ -62,8 +80,8 @@ public final class GraphStoreUpdater {
                 .collect(Collectors.toList()))
             .orElse(nodePropertyList);
 
-        executionContext.log().debug("Updating in-memory graph store");
-        GraphStore graphStore = computationResult.graphStore();
+        // TODO: stop using Neo4j Log...
+        log.debug("Updating in-memory graph store");
         Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
         maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
@@ -72,8 +90,6 @@ public final class GraphStoreUpdater {
             nodeProperty.properties()
         ));
 
-        resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult
-            .graph()
-            .nodeCount());
+        resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * graph.nodeCount());
     }
 }
