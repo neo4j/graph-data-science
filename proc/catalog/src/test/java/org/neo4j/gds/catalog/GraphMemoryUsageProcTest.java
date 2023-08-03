@@ -58,7 +58,7 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
         var graphName = "g";
         var params = Map.of("name", (Object) graphName);
         runQuery(
-            "CALL gds.beta.graph.generate($name, 100, 2)",
+            "CALL gds.graph.generate($name, 100, 2)",
             params
         );
 
@@ -86,7 +86,7 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
         var params = Map.of("name", (Object) graphName);
         GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.enableAndRun(() -> {
             runQuery(
-                "CALL gds.beta.graph.generate($name, 100, 2)",
+                "CALL gds.graph.generate($name, 100, 2)",
                 params
             );
 
@@ -138,7 +138,7 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
             GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.enableAndRun(() -> {
 
                 runQuery(
-                    "CALL gds.beta.graph.generate($name, 100, 2)",
+                    "CALL gds.graph.generate($name, 100, 2)",
                     params
                 );
 

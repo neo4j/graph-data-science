@@ -32,7 +32,7 @@ The graph generation is parameterized by three dimensions:
 .The following describes the API for running the graph generation procedure
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.generate(
+CALL gds.graph.generate(
     graphName: String,
     nodeCount: Integer,
     averageDegree: Integer,
@@ -133,7 +133,7 @@ In the following we will demonstrate the usage of the random graph generation pr
 .The following will produce a graph with unweighted relationships
 [source,cypher,role=noplay]
 ----
-CALL gds.beta.graph.generate('graph',5,2, {relationshipSeed:19})
+CALL gds.graph.generate('graph',5,2, {relationshipSeed:19})
 YIELD name, nodes, relationships, relationshipDistribution
 ----
 
@@ -186,7 +186,7 @@ To generated graphs with weighted relationships we must specify the `relationshi
 .The following will produce a graph with weighted relationships
 [source,cypher,role=noplay]
 ----
-CALL gds.beta.graph.generate('weightedGraph',5,2, {relationshipSeed:19,
+CALL gds.graph.generate('weightedGraph',5,2, {relationshipSeed:19,
   relationshipProperty: {type: 'RANDOM', min: 5.0, max: 10.0, name: 'score'}})
 YIELD name, nodes, relationships, relationshipDistribution
 ----

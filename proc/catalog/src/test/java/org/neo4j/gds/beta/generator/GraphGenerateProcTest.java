@@ -89,7 +89,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldThrowOnInvalidGraphName() {
-        var generateQuery = "CALL gds.beta.graph.generate('', 10, 5)";
+        var generateQuery = "CALL gds.graph.generate('', 10, 5)";
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
             () -> runQuery(generateQuery)
@@ -102,7 +102,7 @@ class GraphGenerateProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("invalidRelationshipDistributions")
     void shouldThrowOnInvalidRelationshipDistribution(Object distribution, String error) {
-        var generateQuery = formatWithLocale("CALL gds.beta.graph.generate('test', 10, 5, {relationshipDistribution: %s})", distribution);
+        var generateQuery = formatWithLocale("CALL gds.graph.generate('test', 10, 5, {relationshipDistribution: %s})", distribution);
         Assertions.assertThatThrownBy(() -> runQuery(generateQuery))
             .isInstanceOf(QueryExecutionException.class)
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
@@ -111,7 +111,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfGraphAlreadyExists() {
-        var generateQuery = "CALL gds.beta.graph.generate('foo', 10, 5)";
+        var generateQuery = "CALL gds.graph.generate('foo', 10, 5)";
         runQuery(generateQuery);
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
@@ -126,7 +126,7 @@ class GraphGenerateProcTest extends BaseProcTest {
     @MethodSource("estimations")
     void shouldWorkWithEstimate(int nodeCount, int avgDegree, MemoryRange expected) {
         String generateQ =
-            "CALL gds.beta.graph.generate( " +
+            "CALL gds.graph.generate( " +
             "  'g', " +
             "  $nodeCount, " +
             "  $avgDegree " +
@@ -145,7 +145,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldGenerateGraphWithDefaults() {
-        String query = "CALL gds.beta.graph.generate(" +
+        String query = "CALL gds.graph.generate(" +
                        "    'foo', 10, 5 " +
                        ")";
 
@@ -164,7 +164,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldGenerateDefaultEmptySchemaWithoutProperties() {
-        String query = "CALL gds.beta.graph.generate('g', 4, 2, {relationshipDistribution: 'RANDOM'})";
+        String query = "CALL gds.graph.generate('g', 4, 2, {relationshipDistribution: 'RANDOM'})";
         runQuery(query);
 
         var graph = GraphStoreCatalog.get(this.getUsername(), DatabaseId.of(this.db), "g").graphStore();
@@ -210,7 +210,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldGenerateGraphWithRelationshipProperty() {
-        var query = "CALL gds.beta.graph.generate('test', 10, 3, " +
+        var query = "CALL gds.graph.generate('test', 10, 3, " +
                     "{" +
                     "  relationshipDistribution: 'random'," +
                     "  relationshipSeed: 42," +
