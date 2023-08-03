@@ -66,15 +66,17 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
     protected TopologicalSort(
         Graph graph,
-        TopologicalSortBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        int concurrency,
+        boolean computeMaxDistanceFromSource
+
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.concurrency = config.concurrency();
+        this.concurrency = concurrency;
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
-        this.longestPathDistances = config.computeMaxDistanceFromSource()
+        this.longestPathDistances = computeMaxDistanceFromSource
             ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
