@@ -222,7 +222,7 @@ For some procedures the operator matters, and we have the `operator` attribute:
 .Setting a default
 [source, cypher, role=noplay setup-query, operator=Alicia]
 ----
-CALL gds.alpha.config.defaults.set('concurrency', 12, 'Alicia')
+CALL gds.config.defaults.set('concurrency', 12, 'Alicia')
 ----
 ```
 
