@@ -250,7 +250,7 @@ public final class GraphDatabaseApiProxy {
         GlobalProcedures globalProcedures,
         Class<?> procedureClass,
         boolean overrideCurrentImplementation
-    ) {
+    ) throws KernelException {
         var globalProceduresClass = globalProcedures.getClass();
 
         var legacySignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class, boolean.class);
@@ -264,7 +264,7 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    private static void register(GlobalProcedures globalProcedures, Class<?> clazz, Object obj) {
+    private static void register(GlobalProcedures globalProcedures, Class<?> clazz, Object obj) throws KernelException {
         var globalProceduresClass = globalProcedures.getClass();
 
         var legacySignatureMethod = getMethod(globalProceduresClass, "register", clazz, boolean.class);
@@ -286,14 +286,19 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    private static void invokeMethod(Object obj, Method method, Object... arguments) {
+    private static void invokeMethod(Object obj, Method method, Object... arguments)
+    throws KernelException {
         try {
-            method.invoke(obj, arguments);
-        } catch (InvocationTargetException e) {
-            if (e.getTargetException().getClass() != ProcedureException.class) {
-                throw new RuntimeException(e.getTargetException());
+            try {
+                method.invoke(obj, arguments);
+            } catch (InvocationTargetException e) {
+                if (e.getTargetException().getClass() != ProcedureException.class) {
+                    throw e.getTargetException();
+                }
             }
-        } catch (IllegalAccessException e) {
+        } catch (KernelException | RuntimeException e) {
+            throw e;
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
