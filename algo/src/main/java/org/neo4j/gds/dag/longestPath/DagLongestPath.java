@@ -30,11 +30,11 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 /*
  * Uses topological sort to calculate the longest path for the targets
  */
-public class LongestPath extends Algorithm<TopologicalSortResult> {
+public class DagLongestPath extends Algorithm<TopologicalSortResult> {
     private final Graph graph;
-    private final LongestPathBaseConfig config;
+    private final DagLongestPathBaseConfig config;
 
-    protected LongestPath(Graph graph, LongestPathBaseConfig config, ProgressTracker progressTracker) {
+    protected DagLongestPath(Graph graph, DagLongestPathBaseConfig config, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;

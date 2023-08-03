@@ -21,5 +21,5 @@ package org.neo4j.gds.dag.longestPath;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-public interface LongestPathBaseConfig extends AlgoBaseConfig {
+public interface DagLongestPathBaseConfig extends AlgoBaseConfig {
 }

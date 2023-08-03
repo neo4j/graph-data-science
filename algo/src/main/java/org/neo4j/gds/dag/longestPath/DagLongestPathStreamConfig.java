@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.dag.longestPath;
+package org.neo4j.gds.dag.longestPath;
 
-@SuppressWarnings("unused")
-public class LongestPathStreamResult {
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-    public final long targetNodeId;
-    public final double distance;
+@Configuration
+public interface DagLongestPathStreamConfig extends DagLongestPathBaseConfig, RelationshipWeightConfig {
 
-    public LongestPathStreamResult(long targetNodeId, double distance) {
-        this.targetNodeId = targetNodeId;
-        this.distance = distance;
+    static DagLongestPathStreamConfig of(CypherMapWrapper userInput) {
+        return new DagLongestPathStreamConfigImpl(userInput);
     }
 }

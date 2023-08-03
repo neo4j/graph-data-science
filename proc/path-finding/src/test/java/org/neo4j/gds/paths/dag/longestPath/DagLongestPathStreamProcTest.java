@@ -30,7 +30,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class LongestPathStreamProcTest extends BaseProcTest {
+class DagLongestPathStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
@@ -50,7 +50,7 @@ class LongestPathStreamProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            LongestPathStreamProc.class
+            DagLongestPathStreamProc.class
         );
 
         var projectQuery = GdsCypher.call("last")

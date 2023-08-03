@@ -30,8 +30,8 @@ import org.neo4j.gds.extension.TestGraph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
-class WeightedLongestPathTest {
-    private static LongestPathBaseConfig CONFIG = new LongestPathStreamConfigImpl.Builder()
+class WeightedDagLongestPathTest {
+    private static DagLongestPathBaseConfig CONFIG = new DagLongestPathStreamConfigImpl.Builder()
         .concurrency(4)
         .build();
 
@@ -52,7 +52,7 @@ class WeightedLongestPathTest {
 
     @Test
     void basicWeightedLongestPath() {
-        LongestPath ts = new LongestPath(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
+        DagLongestPath ts = new DagLongestPath(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
 
         var longestPathsDistances = result.maxSourceDistances().get();

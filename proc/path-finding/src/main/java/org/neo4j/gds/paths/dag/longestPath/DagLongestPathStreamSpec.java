@@ -20,15 +20,15 @@
 package org.neo4j.gds.paths.dag.longestPath;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.dag.longestPath.LongestPath;
-import org.neo4j.gds.dag.longestPath.LongestPathFactory;
+import org.neo4j.gds.dag.longestPath.DagLongestPath;
+import org.neo4j.gds.dag.longestPath.DagLongestPathFactory;
+import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.dag.longestPath.LongestPathStreamConfig;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 
 import java.util.function.LongFunction;
 import java.util.stream.LongStream;
@@ -37,8 +37,8 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.alpha.longestPath.stream", description = LongestPathStreamProc.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
-public class LongestPathStreamSpec implements AlgorithmSpec<LongestPath, TopologicalSortResult, LongestPathStreamConfig, Stream<LongestPathStreamResult>, LongestPathFactory<LongestPathStreamConfig>> {
+@GdsCallable(name = "gds.alpha.longestPath.stream", description = DagLongestPathStreamProc.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
+public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, TopologicalSortResult, DagLongestPathStreamConfig, Stream<DagLongestPathStreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
 
     @Override
     public String name() {
@@ -46,17 +46,17 @@ public class LongestPathStreamSpec implements AlgorithmSpec<LongestPath, Topolog
     }
 
     @Override
-    public LongestPathFactory<LongestPathStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new LongestPathFactory<>();
+    public DagLongestPathFactory<DagLongestPathStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new DagLongestPathFactory<>();
     }
 
     @Override
-    public NewConfigFunction<LongestPathStreamConfig> newConfigFunction() {
-        return (___, config) -> LongestPathStreamConfig.of(config);
+    public NewConfigFunction<DagLongestPathStreamConfig> newConfigFunction() {
+        return (___, config) -> DagLongestPathStreamConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<LongestPath, TopologicalSortResult, LongestPathStreamConfig, Stream<LongestPathStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DagLongestPath, TopologicalSortResult, DagLongestPathStreamConfig, Stream<DagLongestPathStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -72,7 +72,7 @@ public class LongestPathStreamSpec implements AlgorithmSpec<LongestPath, Topolog
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(index -> {
                             var mappedNodeId = topologicallySortedNodes.get(index);
-                            return new LongestPathStreamResult(
+                            return new DagLongestPathStreamResult(
                                 graph.toOriginalNodeId(mappedNodeId),
                                 distanceFunction.apply(mappedNodeId)
                             );

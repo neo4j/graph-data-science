@@ -31,19 +31,19 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LongestPathStreamProc extends BaseProc {
+public class DagLongestPathStreamProc extends BaseProc {
     static final String LONGEST_PATH_DESCRIPTION =
         "Returns the longest paths ending in given target nodes";
 
     @Procedure(value = "gds.alpha.longestPath.stream", mode = READ)
     @Internal
     @Description(LONGEST_PATH_DESCRIPTION)
-    public Stream<LongestPathStreamResult> stream(
+    public Stream<DagLongestPathStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new LongestPathStreamSpec(),
+            new DagLongestPathStreamSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }

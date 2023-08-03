@@ -27,10 +27,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class LongestPathFactory<CONFIG extends LongestPathBaseConfig> extends GraphAlgorithmFactory<LongestPath, CONFIG> {
+public class DagLongestPathFactory<CONFIG extends DagLongestPathBaseConfig> extends GraphAlgorithmFactory<DagLongestPath, CONFIG> {
     @Override
-    public LongestPath build(Graph graph, LongestPathBaseConfig configuration, ProgressTracker progressTracker) {
-        return new LongestPath(
+    public DagLongestPath build(Graph graph, DagLongestPathBaseConfig configuration, ProgressTracker progressTracker) {
+        return new DagLongestPath(
             graph,
             configuration,
             progressTracker
