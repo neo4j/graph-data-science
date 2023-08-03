@@ -15,7 +15,7 @@ This can be useful to convert relationships produced by algorithms such as path 
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.relationships.toUndirected(
+CALL gds.graph.relationships.toUndirected(
     graphName: String,
     configuration: Map
 )
@@ -118,7 +118,7 @@ The following shows how to convert the relationships of type `LIKES` in the grap
 .Convert relationships from directed to undirected:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.relationships.toUndirected(
+CALL gds.graph.relationships.toUndirected(
   'personsAndInstruments',                                          // <1>
   {relationshipType: 'LIKES', mutateRelationshipType: 'INTERACTS'}  // <2>
 )

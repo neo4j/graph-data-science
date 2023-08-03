@@ -78,7 +78,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Test
     void convertToUndirected() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+        String query = "CALL gds.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
 
         assertCypherResult(query, List.of(Map.of("inputRelationships", 3L,
             "relationshipsWritten", 6L,
@@ -99,7 +99,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Test
     void shouldFailIfMutateRelationshipTypeExists() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL'})";
+        String query = "CALL gds.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL'})";
 
         assertThatThrownBy(() -> runQuery(query))
             .isInstanceOf(QueryExecutionException.class)
@@ -127,7 +127,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Test
     void shouldFailForStarRelationshipTypeIfNotStarProjected() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: '*', mutateRelationshipType: 'REL'})";
+        String query = "CALL gds.graph.relationships.toUndirected('graph', {relationshipType: '*', mutateRelationshipType: 'REL'})";
 
         assertThatThrownBy(() -> runQuery(query)).hasMessageContaining(
             "The 'relationshipType' parameter can only be '*' if '*' was projected. Available types are ['REL']."
@@ -136,7 +136,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Test
     void shouldFailIfRelationshipTypeDoesNotExists() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL2', mutateRelationshipType: 'OTHER_REL'})";
+        String query = "CALL gds.graph.relationships.toUndirected('graph', {relationshipType: 'REL2', mutateRelationshipType: 'OTHER_REL'})";
 
         assertThatThrownBy(() -> runQuery(query))
             .isInstanceOf(QueryExecutionException.class)
@@ -147,7 +147,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Test
     void shouldFailIfRelationshipTypeIsAlreadyUndirected() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected('undirected_graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+        String query = "CALL gds.graph.relationships.toUndirected('undirected_graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
 
 
         assertThatThrownBy(() -> runQuery(query))
@@ -158,7 +158,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Test
     void memoryEstimation() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected.estimate('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+        String query = "CALL gds.graph.relationships.toUndirected.estimate('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
 
         assertCypherResult(query, List.of(Map.of(
             "mapView", instanceOf(Map.class),
