@@ -38,7 +38,7 @@ class SpeakerListenerLPAStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldNotFailWhenRunningOnNonWritableGraph() {
-        runQuery("CALL gds.beta.graph.generate('randomGraph', 5, 2, {relationshipSeed:19}) YIELD name, nodes, relationships, relationshipDistribution");
+        runQuery("CALL gds.graph.generate('randomGraph', 5, 2, {relationshipSeed:19}) YIELD name, nodes, relationships, relationshipDistribution");
 
         assertThatNoException().isThrownBy(
             () -> runQuery("CALL gds.alpha.sllpa.stream('randomGraph', {maxIterations: 4, minAssociationStrength: 0.1})")

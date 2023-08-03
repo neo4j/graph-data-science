@@ -55,7 +55,7 @@
 |===
 |Description                                | Operation
 |xref:management-ops/graph-creation/graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.graph.project.subgraph` label:procedure[Procedure]
-|xref:management-ops/graph-creation/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate` label:procedure[Procedure]
+|xref:management-ops/graph-creation/graph-generation.adoc[Generate Random Graph]| `gds.graph.generate` label:procedure[Procedure]
 .2+<.^|xref:management-ops/graph-export/graph-export-csv.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.graph.export.csv` label:procedure[Procedure]
 | `gds.graph.export.csv.estimate` label:procedure[Procedure]

@@ -31,6 +31,7 @@ import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -48,7 +49,26 @@ import static org.neo4j.procedure.Mode.READ;
 
 public final class GraphGenerateProc extends BaseProc {
 
-    @Procedure(name = "gds.beta.graph.generate", mode = READ)
+    private static final String DESCRIPTION = "Computes a random graph, which will be stored in the graph catalog.";
+
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(name = "gds.beta.graph.generate", mode = READ, deprecatedBy = "gds.graph.generate")
+    @Description(value = DESCRIPTION)
+    public Stream<GraphGenerationStats> generateDeprecated(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeCount") long nodeCount,
+        @Name(value = "averageDegree") long averageDegree,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.graph.generate` has been deprecated, please use `gds.graph.generate`.");
+
+        return generate(graphName, nodeCount, averageDegree, configuration);
+    }
+
+    @Procedure(name = "gds.graph.generate", mode = READ)
     @Description(value = "Computes a random graph, which will be stored in the graph catalog.")
     public Stream<GraphGenerationStats> generate(
         @Name(value = "graphName") String graphName,

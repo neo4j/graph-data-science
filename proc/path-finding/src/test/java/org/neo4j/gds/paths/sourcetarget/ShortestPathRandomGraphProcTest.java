@@ -49,7 +49,7 @@ class ShortestPathRandomGraphProcTest extends BaseProcTest {
     )
     void shouldWorkWithRandomGraph(String query) {
 
-        runQuery("CALL gds.beta.graph.generate('graph',10,10)");
+        runQuery("CALL gds.graph.generate('graph',10,10)");
         assertThatNoException().isThrownBy(() -> {
 
             long rowCount = runQueryWithRowConsumer(query, result -> {

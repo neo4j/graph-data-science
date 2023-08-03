@@ -132,7 +132,7 @@ class ListProgressProcTest extends BaseProgressTest {
     @Test
     void progressLoggerShouldEmitProgressEventsOnActualAlgoButClearProgressEventsOnLogFinish() {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
-            runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
+            runQuery("CALL gds.graph.generate('foo', 100, 5)");
             runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
 
             assertCypherResult(

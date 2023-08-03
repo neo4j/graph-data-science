@@ -39,7 +39,7 @@ class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
 
     @Test
     void shouldFailWhenRunningOnNonWritableGraph() {
-        runQuery("CALL gds.beta.graph.generate('randomGraph', 5, 2, {relationshipSeed:19}) YIELD name, nodes, relationships, relationshipDistribution");
+        runQuery("CALL gds.graph.generate('randomGraph', 5, 2, {relationshipSeed:19}) YIELD name, nodes, relationships, relationshipDistribution");
 
         assertThatExceptionOfType(QueryExecutionException.class)
             .isThrownBy(

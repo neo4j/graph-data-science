@@ -130,7 +130,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
     @Test
     void shouldStreamInParallel() {
-        runQuery("CALL gds.beta.graph.generate('generatedGraph', 10000, 5)");
+        runQuery("CALL gds.graph.generate('generatedGraph', 10000, 5)");
 
         var actualRelationships = new ArrayList<TopologyResult>();
         runQueryWithRowConsumer("CALL gds.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
