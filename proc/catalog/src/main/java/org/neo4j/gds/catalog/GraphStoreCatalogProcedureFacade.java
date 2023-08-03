@@ -29,7 +29,7 @@ import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
+import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -331,7 +331,7 @@ public class GraphStoreCatalogProcedureFacade {
         return Stream.of(result);
     }
 
-    public Stream<GraphProjectSubgraphResult> subGraphProject(
+    public Stream<GraphFilterResult> subGraphProject(
         String graphName,
         String originGraphName,
         String nodeFilter,

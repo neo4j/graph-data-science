@@ -17,25 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.doc;
 
-public class GraphProjectSubgraphResult extends GraphProjectResult {
-    public final String fromGraphName;
-    public final String nodeFilter;
-    public final String relationshipFilter;
+import org.neo4j.gds.catalog.GraphFilterProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
-    public GraphProjectSubgraphResult(
-        String graphName,
-        String fromGraphName,
-        String nodeFilter,
-        String relationshipFilter,
-        long nodeCount,
-        long relationshipCount,
-        long projectMillis
-    ) {
-        super(graphName, nodeCount, relationshipCount, projectMillis);
-        this.fromGraphName = fromGraphName;
-        this.nodeFilter = nodeFilter;
-        this.relationshipFilter = relationshipFilter;
+import java.util.List;
+
+final class GraphFilterDocTest extends SingleFileDocTestBase {
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(GraphProjectProc.class, GraphFilterProc.class);
     }
+
+    @Override
+    protected String adocFile() {
+        return "pages/management-ops/graph-creation/graph-filter.adoc";
+    }
+
 }

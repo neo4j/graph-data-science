@@ -21,7 +21,7 @@
 *** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[]
 *** xref:management-ops/graph-creation/graph-project-cypher-legacy.adoc[]
 *** xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[]
-*** xref:management-ops/graph-creation/graph-project-subgraph.adoc[]
+*** xref:management-ops/graph-creation/graph-filter.adoc[]
 *** xref:management-ops/graph-creation/sampling/index.adoc[]
 **** xref:management-ops/graph-creation/sampling/rwr.adoc[]
 **** xref:management-ops/graph-creation/sampling/cnarw.adoc[]

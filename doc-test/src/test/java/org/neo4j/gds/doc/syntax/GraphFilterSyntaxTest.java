@@ -17,24 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
-
-import org.neo4j.gds.catalog.GraphProjectProc;
+package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-final class GraphProjectSubgraphDocTest extends SingleFileDocTestBase {
+import static org.neo4j.gds.doc.syntax.SyntaxMode.GRAPH_FILTER;
+
+class GraphFilterSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            GraphProjectProc.class
-        );
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(SyntaxModeMeta.of(GRAPH_FILTER));
     }
 
     @Override
     protected String adocFile() {
-        return "pages/management-ops/graph-creation/graph-project-subgraph.adoc";
+        return "pages/management-ops/graph-creation/graph-filter.adoc";
     }
-
 }

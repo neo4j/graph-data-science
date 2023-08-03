@@ -1,4 +1,4 @@
-[[catalog-graph-project-subgraph]]
+[[catalog-graph-filter]]
 [.beta]
 = Filtering
 :description: This section details how to project subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
@@ -24,12 +24,12 @@ Projecting subgraphs of subgraphs is also possible.
 
 == Syntax
 
-[.project-subgraph-syntax]
+[.graph-filter-syntax]
 --
-.A new graph can be projected by using the `gds.graph.project.subgraph()` procedure:
+.A new graph can be projected by using the `gds.graph.filter()` procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.subgraph(
+CALL gds.graph.filter(
   graphName: String,
   fromGraphName: String,
   nodeFilter: String,
@@ -164,7 +164,7 @@ YIELD graphName, nodeCount, relationshipCount, projectMillis
 <4> Project `READS` relationships without any of their properties.
 
 
-[[catalog-graph-project-subgraph-node-filter-example]]
+[[catalog-graph-filter-node-filter-example]]
 === Node filtering
 
 [role=query-example]
@@ -172,7 +172,7 @@ YIELD graphName, nodeCount, relationshipCount, projectMillis
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.subgraph(
+CALL gds.graph.filter(
   'teenagers',
   'social-graph',
   'n.age > 13 AND n.age <= 18',
@@ -197,7 +197,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.subgraph(
+CALL gds.graph.filter(
   'teenagers',
   'social-graph',
   'n.age > 13 AND n.age <= 18',
@@ -221,7 +221,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 .Create a new bipartite graph between books and users connected by the `READS` relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.subgraph(
+CALL gds.graph.filter(
   'teenagers-books',
   'social-graph',
   'n:Book OR n:Person',
@@ -246,7 +246,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 .The previous example can be extended with an additional filter applied only to persons:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.subgraph(
+CALL gds.graph.filter(
   'teenagers-books',
   'social-graph',
   'n:Book OR (n:Person AND n.age > 18)',
@@ -267,14 +267,14 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 === Using query parameters
 
 Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
-As an example we can rewrite the xref:management-ops/graph-creation/graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
+As an example we can rewrite the xref:management-ops/graph-creation/graph-filter.adoc#catalog-graph-filter-node-filter-example[node filter example] from above using parameters instead of integer literals:
 
 [role=query-example]
 --
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.subgraph(
+CALL gds.graph.filter(
   'teenagers-parameterized',
   'social-graph',
   'n.age > $lower AND n.age <= $upper',

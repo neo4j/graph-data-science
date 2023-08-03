@@ -30,7 +30,7 @@ import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
+import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -282,7 +282,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     }
 
     @Override
-    public GraphProjectSubgraphResult subGraphProject(
+    public GraphFilterResult subGraphProject(
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,

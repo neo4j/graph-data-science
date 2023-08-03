@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
+import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -51,7 +51,7 @@ public class SubGraphProjectService {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
-    public GraphProjectSubgraphResult project(
+    public GraphFilterResult project(
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromGraphConfig configuration,
@@ -60,7 +60,7 @@ public class SubGraphProjectService {
         return projectWithErrorsHandled(taskRegistryFactory, userLogRegistryFactory, configuration, originGraphStore);
     }
 
-    private GraphProjectSubgraphResult projectWithErrorsHandled(
+    private GraphFilterResult projectWithErrorsHandled(
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectFromGraphConfig configuration,
@@ -74,7 +74,7 @@ public class SubGraphProjectService {
                 originGraphStore
             );
 
-            return new GraphProjectSubgraphResult(
+            return new GraphFilterResult(
                 configuration.graphName(),
                 configuration.fromGraphName(),
                 configuration.nodeFilter(),

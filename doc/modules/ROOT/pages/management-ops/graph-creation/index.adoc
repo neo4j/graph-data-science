@@ -10,7 +10,7 @@ You can create graphs from different data sources.
 ** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] for more complex projections
 * From external sources via an xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
 * From existing named graphs by either of
-** xref:management-ops/graph-creation/graph-project-subgraph.adoc[Filtering]
+** xref:management-ops/graph-creation/graph-filter.adoc[Filtering]
 ** xref:management-ops/graph-creation/sampling/rwr.adoc[Sampling]
 * From xref:management-ops/graph-creation/graph-generation.adoc[Random data]
 

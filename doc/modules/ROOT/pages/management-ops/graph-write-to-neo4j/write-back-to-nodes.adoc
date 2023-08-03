@@ -88,7 +88,7 @@ YIELD
 [opts="header",cols="1,1,1,7"]
 |===
 | Name                   | Type                  | Default           | Description
-| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-project-subgraph.adoc[Projecting a subgraph].
+| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-filter.adoc[Projecting a subgraph].
 | concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure.
 |===
 

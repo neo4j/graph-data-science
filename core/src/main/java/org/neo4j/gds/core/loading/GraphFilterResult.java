@@ -17,21 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.core.loading;
 
-import java.util.List;
+public class GraphFilterResult extends GraphProjectResult {
+    public final String fromGraphName;
+    public final String nodeFilter;
+    public final String relationshipFilter;
 
-import static org.neo4j.gds.doc.syntax.SyntaxMode.PROJECT_SUBGRAPH;
-
-class ProjectSubgraphSyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(SyntaxModeMeta.of(PROJECT_SUBGRAPH));
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/management-ops/graph-creation/graph-project-subgraph.adoc";
+    public GraphFilterResult(
+        String graphName,
+        String fromGraphName,
+        String nodeFilter,
+        String relationshipFilter,
+        long nodeCount,
+        long relationshipCount,
+        long projectMillis
+    ) {
+        super(graphName, nodeCount, relationshipCount, projectMillis);
+        this.fromGraphName = fromGraphName;
+        this.nodeFilter = nodeFilter;
+        this.relationshipFilter = relationshipFilter;
     }
 }

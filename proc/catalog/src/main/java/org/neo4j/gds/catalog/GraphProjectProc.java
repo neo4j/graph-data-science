@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.loading.GraphProjectSubgraphResult;
+import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -100,28 +100,16 @@ public class GraphProjectProc {
 
     @Internal
     @Deprecated(forRemoval = true)
-    @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ, deprecatedBy = "gds.graph.project.subgraph")
+    @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ, deprecatedBy = "gds.graph.filter")
     @Description(PROJECT_DESCRIPTION)
-    public Stream<GraphProjectSubgraphResult> projectSubgraphDeprecated(
+    public Stream<GraphFilterResult> projectSubgraph(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "nodeFilter") String nodeFilter,
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade.log().warn("Procedure `gds.graph.project.subgraph` has been deprecated, please use `gds.graph.project.subgraph`.");
-        return facade.subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
-    }
-
-    @Procedure(name = "gds.graph.project.subgraph", mode = READ)
-    @Description(PROJECT_DESCRIPTION)
-    public Stream<GraphProjectSubgraphResult> projectSubgraph(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "fromGraphName") String fromGraphName,
-        @Name(value = "nodeFilter") String nodeFilter,
-        @Name(value = "relationshipFilter") String relationshipFilter,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
+        facade.log().warn("Procedure `gds.beta.graph.project.subgraph` has been deprecated, please use `gds.graph.filter`.");
         return facade.subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 }
