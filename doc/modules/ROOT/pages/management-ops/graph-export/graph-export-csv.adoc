@@ -167,7 +167,8 @@ nodes_A_B_1.csv
 nodes_A_B_2.csv
 ----
 
-==== Nodes label mapping [[node_label_mapping]]
+[[node_label_mapping]]
+==== Nodes label mapping
 
 When the configuration parameter `useLabelMapping` is set to true, the names of the labels will be mapped to integers during the export.
 This mapping will be written to a new file named `label-mappings.csv`.
