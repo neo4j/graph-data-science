@@ -30,7 +30,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.function.LongFunction;
+import java.util.function.LongToDoubleFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -63,10 +63,13 @@ public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, T
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var distances = result.maxSourceDistances().orElse(null);
-                    LongFunction<Double> distanceFunction = distances != null
+                    var distances = result.maxSourceDistances().orElseGet(() -> {
+                        executionContext.log().error("maxSourceDistances must be true in DAG Longest Path");
+                        return null;
+                    });
+                    LongToDoubleFunction distanceFunction = distances != null
                     ? (nodeId) -> distances.get(nodeId)
-                    : (nodeId) ->  null;
+                    : (nodeId) ->  0;
                     var topologicallySortedNodes = result.sortedNodes();
 
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
@@ -74,7 +77,7 @@ public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, T
                             var mappedNodeId = topologicallySortedNodes.get(index);
                             return new DagLongestPathStreamResult(
                                 graph.toOriginalNodeId(mappedNodeId),
-                                distanceFunction.apply(mappedNodeId)
+                                distanceFunction.applyAsDouble(mappedNodeId)
                             );
                         });
                 }).orElseGet(Stream::empty)
