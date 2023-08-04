@@ -22,6 +22,7 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,7 +35,7 @@ public class TriangleProc extends BaseProc {
 
     static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
 
-    @Procedure(name = "gds.alpha.triangles", mode = READ)
+    @Procedure(name = "gds.triangles", mode = READ)
     @Description(DESCRIPTION)
     public Stream<TriangleStream.Result> stream(
         @Name(value = "graphName") String graphName,
@@ -44,5 +45,16 @@ public class TriangleProc extends BaseProc {
             new TriangleStreamSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(name = "gds.alpha.triangles", mode = READ, deprecatedBy = "gds.triangles")
+    @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<TriangleStream.Result> alphaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return stream(graphName, configuration);
     }
 }

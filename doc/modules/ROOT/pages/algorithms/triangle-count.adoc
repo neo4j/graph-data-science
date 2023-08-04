@@ -207,14 +207,14 @@ include::partial$/algorithms/triangle-count/specific-configuration.adoc[]
 [[algorithms-triangle-count-syntax-triangles-listing]]
 === Triangles listing
 
-In addition to the standard execution modes there is an `alpha` procedure `gds.alpha.triangles` that can be used to list all triangles in the graph.
+In addition to the standard execution modes there is additionally the procedure `gds.triangles` that can be used to list all triangles in the graph.
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
 .The following will return a stream of node IDs for each triangle:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.triangles(
+CALL gds.triangles(
   graphName: String,
   configuration: Map
 )
@@ -489,7 +489,7 @@ As this node is part of all the triangles in the example graph excluding it resu
 == Triangles listing
 
 It is also possible to list all the triangles in the graph.
-To do this we make use of the `alpha` procedure `gds.alpha.triangles`.
+To do this we make use of the  procedure `gds.triangles`.
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -498,7 +498,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 .The following will compute a stream of node IDs for each triangle and return the name property of the nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.triangles('myGraph')
+CALL gds.triangles('myGraph')
 YIELD nodeA, nodeB, nodeC
 RETURN
   gds.util.asNode(nodeA).name AS nodeA,

@@ -75,7 +75,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
-        String query = "CALL gds.alpha.triangles('undirectedGraph', {})";
+        String query = "CALL gds.triangles('undirectedGraph', {})";
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
