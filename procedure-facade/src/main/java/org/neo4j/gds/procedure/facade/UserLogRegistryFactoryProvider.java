@@ -20,10 +20,10 @@
 package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.catalog.DatabaseIdService;
-import org.neo4j.gds.catalog.UserLogServices;
-import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 

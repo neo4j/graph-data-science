@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.services;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.graphdb.GraphDatabaseService;
