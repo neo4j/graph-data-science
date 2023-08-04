@@ -47,7 +47,7 @@ YIELD
 | Name            | Type    | Default | Description
 | concurrency     | Integer | 4       | The number of concurrent threads used for performing the backup.
 | includeGraphs   | Boolean | true    | Flag to decide whether only models or also graphs should be backed up.
-| useLabelMapping | Boolean | true    | Flag to decide whether to use node label mapping when exporting the graph. See xref:management-ops/graph-export/graph-export-csv.adoc#node_label_mapping[exporting graphs to csv] for details.
+| useLabelMapping | Boolean | true    | Flag to decide whether to use node label mapping when exporting the graph. See xref:graph-catalog-export-ops.adoc#node_label_mapping[exporting graphs to csv] for details.
 |===
 
 .Results
