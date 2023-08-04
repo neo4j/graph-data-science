@@ -52,8 +52,13 @@ class WeightedDagLongestPathTest {
 
     @Test
     void basicWeightedLongestPath() {
-        DagLongestPath ts = new DagLongestPath(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
-        TopologicalSortResult result = ts.compute();
+        DagLongestPath longestPath = new DagLongestPathFactory().build(
+            basicGraph,
+            CONFIG,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        TopologicalSortResult result = longestPath.compute();
 
         var longestPathsDistances = result.maxSourceDistances().get();
         var firstLongestPathDistance = longestPathsDistances.get(0);

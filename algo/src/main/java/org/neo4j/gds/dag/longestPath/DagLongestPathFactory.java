@@ -21,19 +21,32 @@ package org.neo4j.gds.dag.longestPath;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortFactory;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 
 import java.util.List;
 
 public class DagLongestPathFactory<CONFIG extends DagLongestPathBaseConfig> extends GraphAlgorithmFactory<DagLongestPath, CONFIG> {
     @Override
     public DagLongestPath build(Graph graph, DagLongestPathBaseConfig configuration, ProgressTracker progressTracker) {
-        return new DagLongestPath(
+        var topologicalSortConfigMap =
+            CypherMapWrapper
+                .create(configuration.toMap())
+                .withBoolean("computeMaxDistanceFromSource", true);
+
+        var topologicalSort = new TopologicalSortFactory().build(
             graph,
-            configuration,
+            TopologicalSortStreamConfig.of(topologicalSortConfigMap),
             progressTracker
+        );
+
+        return new DagLongestPath(
+            progressTracker,
+            topologicalSort
         );
     }
 

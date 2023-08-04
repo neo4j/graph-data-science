@@ -20,38 +20,26 @@
 package org.neo4j.gds.dag.longestPath;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortFactory;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 
 /*
  * Uses topological sort to calculate the longest path for the targets
  */
 public class DagLongestPath extends Algorithm<TopologicalSortResult> {
-    private final Graph graph;
-    private final DagLongestPathBaseConfig config;
+    private final TopologicalSort topologicalSort;
 
-    protected DagLongestPath(Graph graph, DagLongestPathBaseConfig config, ProgressTracker progressTracker) {
+    protected DagLongestPath(
+        ProgressTracker progressTracker,
+        TopologicalSort topologicalSort
+    ) {
         super(progressTracker);
-        this.graph = graph;
-        this.config = config;
+        this.topologicalSort = topologicalSort;
     }
 
     @Override
     public TopologicalSortResult compute() {
-
-        var topologicalSortConfigMap =
-            CypherMapWrapper
-                .create(config.toMap())
-                .withBoolean("computeMaxDistanceFromSource", true);
-
-        return new TopologicalSortFactory().build(
-            graph,
-            TopologicalSortStreamConfig.of(topologicalSortConfigMap),
-            progressTracker
-        ).compute();
+        return topologicalSort.compute();
     }
 }
