@@ -27,7 +27,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class WeightedDagLongestPathTest {
@@ -66,9 +66,9 @@ class WeightedDagLongestPathTest {
         var thirdLongestPathDistance = longestPathsDistances.get(2);
         var fourthLongestPathDistance = longestPathsDistances.get(3);
 
-        assertEquals(8.0, firstLongestPathDistance);
-        assertEquals(16.0, secondLongestPathDistance);
-        assertEquals(13.0, thirdLongestPathDistance);
-        assertEquals(0.0, fourthLongestPathDistance);
+        assertThat(firstLongestPathDistance).isEqualTo(8.0);
+        assertThat(secondLongestPathDistance).isEqualTo(16.0);
+        assertThat(thirdLongestPathDistance).isEqualTo(13.0);
+        assertThat(fourthLongestPathDistance).isEqualTo(0.0);
     }
 }
