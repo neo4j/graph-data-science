@@ -43,7 +43,7 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
     description = SCC_DESCRIPTION,
     executionMode = ExecutionMode.WRITE_NODE_PROPERTY
 )
-public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteConfig, Stream<AlphaWriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
+public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccAlphaWriteConfig, Stream<AlphaWriteResult>, SccAlgorithmFactory<SccAlphaWriteConfig>> {
 
     @Override
     public String name() {
@@ -51,17 +51,17 @@ public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccW
     }
 
     @Override
-    public SccAlgorithmFactory<SccWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+    public SccAlgorithmFactory<SccAlphaWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new SccAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<SccWriteConfig> newConfigFunction() {
-        return (__, config) -> SccWriteConfig.of(config);
+    public NewConfigFunction<SccAlphaWriteConfig> newConfigFunction() {
+        return (__, config) -> SccAlphaWriteConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccWriteConfig, Stream<AlphaWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccAlphaWriteConfig, Stream<AlphaWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -75,7 +75,7 @@ public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccW
     }
 
     private AbstractResultBuilder<AlphaWriteResult> resultBuilder(
-        ComputationResult<Scc, HugeLongArray, SccWriteConfig> computationResult,
+        ComputationResult<Scc, HugeLongArray, SccAlphaWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var config = computationResult.config();
