@@ -43,6 +43,7 @@ public class AlgorithmsBusinessFacade {
         ProgressTracker progressTracker
     ) {
 
+        // Go get the graph and graph store from the catalog
         var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
             GraphName.parse(graphName),
             config,
@@ -54,13 +55,16 @@ public class AlgorithmsBusinessFacade {
         var graph = graphWithGraphStore.getLeft();
         var graphStore = graphWithGraphStore.getRight();
 
+        // No algorithm execution when the graph is empty
         if (graph.isEmpty()) {
             return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
         }
 
+        // create and run the algorithm
         var factory = new WccAlgorithmFactory<>();
         var wcc = factory.build(graph, config, progressTracker);
         var wccResult = wcc.compute();
+
         return ComputationResult.of(wccResult, graph, config, graphStore);
     }
 
