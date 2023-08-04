@@ -71,6 +71,7 @@ public class K1ColoringWriteProc extends BaseProc {
     @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE, deprecatedBy ="gds.k1coloring.write" )
     @Description(K1_COLORING_DESCRIPTION)
     @Internal
+    @Deprecated(forRemoval = true)
     public Stream<K1ColoringWriteResult> betaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -85,6 +86,7 @@ public class K1ColoringWriteProc extends BaseProc {
     @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ, deprecatedBy = "gds.k1coloring.write.estimate")
     @Description(ESTIMATE_DESCRIPTION)
     @Internal
+    @Deprecated(forRemoval = true)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration

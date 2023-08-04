@@ -63,6 +63,7 @@ public class K1ColoringStreamProc extends BaseProc {
     @Procedure(value = "gds.beta.k1coloring.stream", mode = READ, deprecatedBy = "gds.k1coloring.stream")
     @Description(K1_COLORING_DESCRIPTION)
     @Internal
+    @Deprecated(forRemoval = true)
     public Stream<K1ColoringStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -77,6 +78,7 @@ public class K1ColoringStreamProc extends BaseProc {
     @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ, deprecatedBy = "gds.k1coloring.stream.estimate")
     @Description(ESTIMATE_DESCRIPTION)
     @Internal
+    @Deprecated(forRemoval = true)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
