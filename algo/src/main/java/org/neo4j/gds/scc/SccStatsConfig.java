@@ -17,24 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.scc;
 
-import java.util.List;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-class SccSyntaxTest extends SyntaxTestBase {
+@Configuration
+public interface SccStatsConfig extends SccBaseConfig {
 
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE)
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/strongly-connected-components.adoc";
+    static SccStatsConfig of(CypherMapWrapper userInput) {
+        return new SccStatsConfigImpl(userInput);
     }
 }

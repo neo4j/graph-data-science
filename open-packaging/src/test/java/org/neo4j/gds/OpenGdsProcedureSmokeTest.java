@@ -189,6 +189,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.nodeClassification.train",
         "gds.beta.pipeline.nodeClassification.train.estimate",
 
+        "gds.scc.stats",
+        "gds.scc.mutate",
         "gds.scc.write",
         "gds.scc.stream",
 
@@ -575,7 +577,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 418;
+        int expectedCount = 420;
         assertEquals(
             expectedCount,
             returnedRows,
