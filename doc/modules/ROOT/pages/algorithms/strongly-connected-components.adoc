@@ -103,14 +103,13 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                 | Type    | Description
-| componentCount                | Integer | The number of computed strongly connected components.
-| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
-| computeMillis                 | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
-| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
-| configuration                 | Map     | The configuration used for running the algorithm.
-
+| Name                  | Type    | Description
+| componentCount        | Integer | The number of computed strongly connected components.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 ======
 [.include-with-mutate]
