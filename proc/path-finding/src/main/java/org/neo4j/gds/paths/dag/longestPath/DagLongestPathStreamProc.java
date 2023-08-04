@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.topologicalsort;
+package org.neo4j.gds.paths.dag.longestPath;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -31,19 +31,19 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TopologicalSortStreamProc extends BaseProc {
-    static final String TOPOLOGICAL_SORT_DESCRIPTION =
-        "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
+public class DagLongestPathStreamProc extends BaseProc {
+    static final String LONGEST_PATH_DESCRIPTION =
+        "Returns the longest paths ending in given target nodes";
 
-    @Procedure(value = "gds.alpha.topologicalSort.stream", mode = READ)
+    @Procedure(value = "gds.alpha.longestPath.stream", mode = READ)
     @Internal
-    @Description(TOPOLOGICAL_SORT_DESCRIPTION)
-    public Stream<TopologicalSortStreamResult> stream(
+    @Description(LONGEST_PATH_DESCRIPTION)
+    public Stream<DagLongestPathStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new TopologicalSortStreamSpec(),
+            new DagLongestPathStreamSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }

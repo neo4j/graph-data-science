@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.dag.topologicalsort;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
@@ -32,8 +32,9 @@ public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> ex
     public TopologicalSort build(Graph graph, TopologicalSortBaseConfig configuration, ProgressTracker progressTracker) {
         return new TopologicalSort(
             graph,
-            configuration,
-            progressTracker
+            progressTracker,
+            configuration.concurrency(),
+            configuration.computeMaxDistanceFromSource()
         );
     }
 

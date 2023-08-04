@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.topologicalsort;
+package org.neo4j.gds.paths.dag.longestPath;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class TopologicalSortStreamProcWeightedTest extends BaseProcTest {
+class DagLongestPathStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
@@ -50,7 +50,7 @@ class TopologicalSortStreamProcWeightedTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            TopologicalSortStreamProc.class
+            DagLongestPathStreamProc.class
         );
 
         var projectQuery = GdsCypher.call("last")
@@ -62,27 +62,26 @@ class TopologicalSortStreamProcWeightedTest extends BaseProcTest {
     }
 
     @Test
-    void testStreamWithWeightedLongestPathDistances() {
+    void testStreamWithWeights() {
         String query = GdsCypher.call("last")
-            .algo("gds.alpha.topologicalSort")
+            .algo("gds.alpha.longestPath")
             .streamMode()
-            .addParameter("computeLongestPathDistances", true)
             .addParameter("relationshipWeightProperty", "prop")
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
             var record = result.next();
-            assertEquals(idFunction.of("n0"), record.get("nodeId"));
-            assertEquals(0.0, record.get("longestPathDistance"));
+            assertEquals(idFunction.of("n0"), record.get("targetNodeId"));
+            assertEquals(0.0, record.get("distance"));
             record = result.next();
-            assertEquals(idFunction.of("n2"), record.get("nodeId"));
-            assertEquals(5.0, record.get("longestPathDistance"));
+            assertEquals(idFunction.of("n2"), record.get("targetNodeId"));
+            assertEquals(5.0, record.get("distance"));
             record = result.next();
-            assertEquals(idFunction.of("n1"), record.get("nodeId"));
-            assertEquals(8.0, record.get("longestPathDistance"));
+            assertEquals(idFunction.of("n1"), record.get("targetNodeId"));
+            assertEquals(8.0, record.get("distance"));
             record = result.next();
-            assertEquals(idFunction.of("n3"), record.get("nodeId"));
-            assertEquals(9.0, record.get("longestPathDistance"));
+            assertEquals(idFunction.of("n3"), record.get("targetNodeId"));
+            assertEquals(9.0, record.get("distance"));
             assertFalse(result.hasNext());
         });
     }

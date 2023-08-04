@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.dag.topologicalsort;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
@@ -61,20 +61,22 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final long nodeCount;
     private final int concurrency;
 
-    // Saves the maximal distance from a source node, which is the longest path in DAG
+    // Saves the maximal distance from a source node, which is also the longest path in DAG
     private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
     protected TopologicalSort(
         Graph graph,
-        TopologicalSortBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        int concurrency,
+        boolean computeMaxDistanceFromSource
+
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.concurrency = config.concurrency();
+        this.concurrency = concurrency;
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
-        this.longestPathDistances = config.computeLongestPathDistances()
+        this.longestPathDistances = computeMaxDistanceFromSource
             ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);

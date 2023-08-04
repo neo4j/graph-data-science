@@ -17,16 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.topologicalsort;
+package org.neo4j.gds.dag.topologicalsort;
 
-@SuppressWarnings("unused")
-public class TopologicalSortStreamResult {
+import org.immutables.value.Value;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-    public final long nodeId;
-    public final Double longestPathDistance;
-
-    public TopologicalSortStreamResult(long nodeId, Double longestPathDistance) {
-        this.nodeId = nodeId;
-        this.longestPathDistance = longestPathDistance;
+public interface TopologicalSortBaseConfig extends AlgoBaseConfig {
+    @Value.Default
+    default boolean computeMaxDistanceFromSource() {
+        return false;
     }
 }

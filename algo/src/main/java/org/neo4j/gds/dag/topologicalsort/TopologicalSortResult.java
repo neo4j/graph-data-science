@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.dag.topologicalsort;
 
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -31,19 +31,19 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TopologicalSortResult {
     private final HugeLongArray sortedNodes;
     private final AtomicLong addIndex = new AtomicLong(0);
-    private final Optional<HugeAtomicDoubleArray> longestPathDistances;
+    private final Optional<HugeAtomicDoubleArray> maxSourceDistances;
 
-    TopologicalSortResult(long nodeCount, Optional<HugeAtomicDoubleArray> longestPathDistances) {
+    TopologicalSortResult(long nodeCount, Optional<HugeAtomicDoubleArray> maxSourceDistances) {
         this.sortedNodes = HugeLongArray.newArray(nodeCount);
-        this.longestPathDistances = longestPathDistances;
+        this.maxSourceDistances = maxSourceDistances;
     }
 
     public HugeLongArray sortedNodes() {
         return sortedNodes;
     }
 
-    public Optional<HugeAtomicDoubleArray> longestPathDistances() {
-        return longestPathDistances;
+    public Optional<HugeAtomicDoubleArray> maxSourceDistances() {
+        return maxSourceDistances;
     }
 
     public long size() {

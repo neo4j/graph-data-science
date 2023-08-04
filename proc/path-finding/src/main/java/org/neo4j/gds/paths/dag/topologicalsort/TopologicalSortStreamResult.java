@@ -17,26 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.paths.dag.topologicalsort;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
+@SuppressWarnings("unused")
+public class TopologicalSortStreamResult {
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+    public final long nodeId;
+    public final Double maxDistanceFromSource;
 
-public interface TopologicalSortBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-    @Value.Default
-    default boolean computeLongestPathDistances() {
-        return false;
+    public TopologicalSortStreamResult(long nodeId, Double maxDistanceFromSource) {
+        this.nodeId = nodeId;
+        this.maxDistanceFromSource = maxDistanceFromSource;
     }
-
-    @Value.Check
-    default void validate() {
-        if (relationshipWeightProperty().isPresent() && ! computeLongestPathDistances()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Relationship weight property can only be set when computeLongestPathDistances is true"));
-        }
-    }
-
 }

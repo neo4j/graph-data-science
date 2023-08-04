@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.topologicalsort;
+package org.neo4j.gds.paths.dag.topologicalsort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,10 +63,18 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
-            assertEquals(idFunction.of("n3"), result.next().get("nodeId"));
-            assertEquals(idFunction.of("n0"), result.next().get("nodeId"));
-            assertEquals(idFunction.of("n2"), result.next().get("nodeId"));
-            assertEquals(idFunction.of("n1"), result.next().get("nodeId"));
+            var record = result.next();
+            assertEquals(idFunction.of("n3"), record.get("nodeId"));
+            assertEquals(null, record.get("maxDistanceFromSource"));
+            record = result.next();
+            assertEquals(idFunction.of("n0"), record.get("nodeId"));
+            assertEquals(null, record.get("maxDistanceFromSource"));
+            record = result.next();
+            assertEquals(idFunction.of("n2"), record.get("nodeId"));
+            assertEquals(null, record.get("maxDistanceFromSource"));
+            record = result.next();
+            assertEquals(idFunction.of("n1"), record.get("nodeId"));
+            assertEquals(null, record.get("maxDistanceFromSource"));
             assertFalse(result.hasNext());
         });
     }
@@ -76,22 +84,22 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
         String query = GdsCypher.call("last")
             .algo("gds.alpha.topologicalSort")
             .streamMode()
-            .addParameter("computeLongestPathDistances", true)
+            .addParameter("computeMaxDistanceFromSource", true)
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
             var record = result.next();
             assertEquals(idFunction.of("n3"), record.get("nodeId"));
-            assertEquals(0.0, record.get("longestPathDistance"));
+            assertEquals(0.0, record.get("maxDistanceFromSource"));
             record = result.next();
             assertEquals(idFunction.of("n0"), record.get("nodeId"));
-            assertEquals(1.0, record.get("longestPathDistance"));
+            assertEquals(1.0, record.get("maxDistanceFromSource"));
             record = result.next();
             assertEquals(idFunction.of("n2"), record.get("nodeId"));
-            assertEquals(2.0, record.get("longestPathDistance"));
+            assertEquals(2.0, record.get("maxDistanceFromSource"));
             record = result.next();
             assertEquals(idFunction.of("n1"), record.get("nodeId"));
-            assertEquals(3.0, record.get("longestPathDistance"));
+            assertEquals(3.0, record.get("maxDistanceFromSource"));
             assertFalse(result.hasNext());
         });
     }

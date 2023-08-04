@@ -17,24 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.topologicalsort;
+package org.neo4j.gds.dag.longestPath;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class TopologicalSortWeightedLongestPathTest {
-    private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
+class WeightedDagLongestPathTest {
+    private static DagLongestPathBaseConfig CONFIG = new DagLongestPathStreamConfigImpl.Builder()
         .concurrency(4)
-        .computeLongestPathDistances(true)
-        .relationshipWeightProperty("prop")
         .build();
 
     @GdlGraph(graphNamePrefix = "basic")
@@ -54,19 +52,23 @@ class TopologicalSortWeightedLongestPathTest {
 
     @Test
     void basicWeightedLongestPath() {
-        TopologicalSort ts = new TopologicalSort(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
-        TopologicalSortResult result = ts.compute();
-        HugeLongArray nodes = result.sortedNodes();
+        DagLongestPath longestPath = new DagLongestPathFactory().build(
+            basicGraph,
+            CONFIG,
+            ProgressTracker.NULL_TRACKER
+        );
 
-        var longestPathsDistances = result.longestPathDistances().get();
+        TopologicalSortResult result = longestPath.compute();
+
+        var longestPathsDistances = result.maxSourceDistances().get();
         var firstLongestPathDistance = longestPathsDistances.get(0);
         var secondLongestPathDistance = longestPathsDistances.get(1);
         var thirdLongestPathDistance = longestPathsDistances.get(2);
         var fourthLongestPathDistance = longestPathsDistances.get(3);
 
-        assertEquals(8.0, firstLongestPathDistance);
-        assertEquals(16.0, secondLongestPathDistance);
-        assertEquals(13.0, thirdLongestPathDistance);
-        assertEquals(0.0, fourthLongestPathDistance);
+        assertThat(firstLongestPathDistance).isEqualTo(8.0);
+        assertThat(secondLongestPathDistance).isEqualTo(16.0);
+        assertThat(thirdLongestPathDistance).isEqualTo(13.0);
+        assertThat(fourthLongestPathDistance).isEqualTo(0.0);
     }
 }

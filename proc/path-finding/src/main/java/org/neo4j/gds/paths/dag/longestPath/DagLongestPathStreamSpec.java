@@ -17,64 +17,67 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.topologicalsort;
+package org.neo4j.gds.paths.dag.longestPath;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.dag.longestPath.DagLongestPath;
+import org.neo4j.gds.dag.longestPath.DagLongestPathFactory;
+import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.topologicalsort.TopologicalSort;
-import org.neo4j.gds.topologicalsort.TopologicalSortFactory;
-import org.neo4j.gds.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.topologicalsort.TopologicalSortStreamConfig;
 
-import java.util.function.LongFunction;
+import java.util.function.LongToDoubleFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.alpha.topologicalSort.stream", description = TopologicalSortStreamProc.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
-public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort, TopologicalSortResult, TopologicalSortStreamConfig, Stream<TopologicalSortStreamResult>, TopologicalSortFactory<TopologicalSortStreamConfig>> {
+@GdsCallable(name = "gds.alpha.longestPath.stream", description = DagLongestPathStreamProc.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
+public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, TopologicalSortResult, DagLongestPathStreamConfig, Stream<DagLongestPathStreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
 
     @Override
     public String name() {
-        return "TopologicalSortStream";
+        return "dagLongestPathStream";
     }
 
     @Override
-    public TopologicalSortFactory<TopologicalSortStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new TopologicalSortFactory<>();
+    public DagLongestPathFactory<DagLongestPathStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new DagLongestPathFactory<>();
     }
 
     @Override
-    public NewConfigFunction<TopologicalSortStreamConfig> newConfigFunction() {
-        return (___, config) -> TopologicalSortStreamConfig.of(config);
+    public NewConfigFunction<DagLongestPathStreamConfig> newConfigFunction() {
+        return (___, config) -> DagLongestPathStreamConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<TopologicalSort, TopologicalSortResult, TopologicalSortStreamConfig, Stream<TopologicalSortStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DagLongestPath, TopologicalSortResult, DagLongestPathStreamConfig, Stream<DagLongestPathStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var distances = result.longestPathDistances().orElse(null);
-                    LongFunction<Double> distanceFunction = distances != null
+                    var distances = result.maxSourceDistances().orElseGet(() -> {
+                        executionContext.log().error("maxSourceDistances must be true in DAG Longest Path");
+                        return null;
+                    });
+                    LongToDoubleFunction distanceFunction = distances != null
                     ? (nodeId) -> distances.get(nodeId)
-                    : (nodeId) ->  null;
+                    : (nodeId) ->  0;
                     var topologicallySortedNodes = result.sortedNodes();
 
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(index -> {
                             var mappedNodeId = topologicallySortedNodes.get(index);
-                            return new TopologicalSortStreamResult(
+                            return new DagLongestPathStreamResult(
                                 graph.toOriginalNodeId(mappedNodeId),
-                                distanceFunction.apply(mappedNodeId)
+                                distanceFunction.applyAsDouble(mappedNodeId)
                             );
                         });
                 }).orElseGet(Stream::empty)
