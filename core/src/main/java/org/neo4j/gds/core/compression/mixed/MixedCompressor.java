@@ -22,20 +22,21 @@ package org.neo4j.gds.core.compression.mixed;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.api.ImmutableMemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListBuilderFactory;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.compress.ImmutableAdjacencyListsWithProperties;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.ImmutableMemoryInfo;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.core.compression.packed.Address;
 import org.neo4j.gds.core.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.varlong.DeltaVarLongCompressor;
-import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.LongAdder;
@@ -193,9 +194,9 @@ public final class MixedCompressor implements AdjacencyCompressor {
                 .build();
         }
 
-        private static AdjacencyList.MemoryInfo mergeMemoryInfo(
-            AdjacencyList.MemoryInfo packed,
-            AdjacencyList.MemoryInfo vlong
+        private static MemoryInfo mergeMemoryInfo(
+            MemoryInfo packed,
+            MemoryInfo vlong
         ) {
             return ImmutableMemoryInfo.builder()
                 .pages(packed.pages() + vlong.pages())

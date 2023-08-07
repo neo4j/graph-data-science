@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
@@ -73,10 +73,10 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, memoryInfo);
     }
 
-    private AdjacencyList.MemoryInfo memoryInfo(int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
+    private MemoryInfo memoryInfo(int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
         long bytesOffHeap = Arrays.stream(allocationSizes).peek(this.memoryTracker::recordPageSize).asLongStream().sum();
 
-        var memoryInfoBuilder = AdjacencyList.MemoryInfo
+        var memoryInfoBuilder = MemoryInfo
             .builder(memoryTracker)
             .pages(allocationSizes.length)
             .bytesOffHeap(bytesOffHeap)
