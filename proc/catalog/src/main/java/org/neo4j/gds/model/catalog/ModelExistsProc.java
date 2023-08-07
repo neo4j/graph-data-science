@@ -22,6 +22,7 @@ package org.neo4j.gds.model.catalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,7 +35,7 @@ public class ModelExistsProc extends ModelCatalogProc {
 
     private static final String DESCRIPTION = "Checks if a given model exists in the model catalog.";
 
-    @Procedure(name = "gds.beta.model.exists", mode = READ)
+    @Procedure(name = "gds.model.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelExistsResult> exists(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
@@ -48,16 +49,17 @@ public class ModelExistsProc extends ModelCatalogProc {
         ));
     }
 
-    @SuppressWarnings("unused")
-    public static class ModelExistsResult {
-        public final String modelName;
-        public final String modelType;
-        public final boolean exists;
+    @Procedure(name = "gds.beta.model.exists", mode = READ, deprecatedBy = "gds.model.exists")
+    @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    @Internal
+    public Stream<ModelExistsResult> betaExists(@Name(value = "modelName") String modelName) {
 
-        ModelExistsResult(String modelName, String modelType, boolean exists) {
-            this.modelName = modelName;
-            this.modelType = modelType;
-            this.exists = exists;
-        }
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.model.exists` has been deprecated, please use `gds.model.exists`.");
+
+        return exists(modelName);
     }
+
 }
