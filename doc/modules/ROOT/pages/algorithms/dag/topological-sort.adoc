@@ -1,4 +1,4 @@
-[[alpha-algorithms-topological-sort]]
+[[algorithms-topological-sort]]
 [.alpha]
 = Topological Sort
 :description: This section describes the Topological Sort algorithm in the Neo4j Graph Data Science library.
