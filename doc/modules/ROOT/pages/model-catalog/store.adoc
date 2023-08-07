@@ -125,7 +125,7 @@ YIELD
 ----
 --
 
-To verify if a model is loaded, we can use the xref:model-catalog/list.adoc[`gds.beta.model.list`] procedure.
+To verify if a model is loaded, we can use the xref:model-catalog/list.adoc[`gds.model.list`] procedure.
 The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
 The operation is idempotent, and skips loading if the model is already loaded.
 

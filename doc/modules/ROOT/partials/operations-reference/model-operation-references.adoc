@@ -8,9 +8,9 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                        | Operation
-| xref:model-catalog/exists.adoc[Check if a model exists]  | `gds.beta.model.exists` label:procedure[Procedure]
-| xref:model-catalog/drop.adoc[Remove a model from memory] | `gds.beta.model.drop` label:procedure[Procedure]
-| xref:model-catalog/list.adoc[List models]                | `gds.beta.model.list` label:procedure[Procedure]
+| xref:model-catalog/exists.adoc[Check if a model exists]  | `gds.model.exists` label:procedure[Procedure]
+| xref:model-catalog/drop.adoc[Remove a model from memory] | `gds.model.drop` label:procedure[Procedure]
+| xref:model-catalog/list.adoc[List models]                | `gds.model.list` label:procedure[Procedure]
 |===
 
 === Alpha Tier

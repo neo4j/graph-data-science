@@ -286,7 +286,7 @@ For information about the available training methods in GDS, logistic regression
 
 In xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
-The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+The parameter space of a pipeline can be inspected using `gds.model.list` and optionally yielding only `parameterSpace`.
 
 [NOTE]
 ====

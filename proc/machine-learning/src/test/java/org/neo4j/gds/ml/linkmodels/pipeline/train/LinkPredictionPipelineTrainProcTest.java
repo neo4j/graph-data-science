@@ -283,7 +283,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME));
         var data1 = modelData("trainedModel6");
 
-        runQuery("CALL gds.beta.model.drop('trainedModel6')");
+        runQuery("CALL gds.model.drop('trainedModel6')");
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
 
@@ -308,7 +308,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME));
         var data1 = modelData("trainedModel7");
 
-        runQuery("CALL gds.beta.model.drop('trainedModel7')");
+        runQuery("CALL gds.model.drop('trainedModel7')");
 
         runQuery(trainQuery, Map.of("graphName", "weighted_graph", "relFilter", List.of("*")));
 
