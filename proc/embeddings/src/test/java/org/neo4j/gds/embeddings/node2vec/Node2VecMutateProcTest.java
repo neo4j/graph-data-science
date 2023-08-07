@@ -73,7 +73,7 @@ class Node2VecMutateProcTest extends BaseProcTest {
         runQuery(projectQuery);
 
         var query = GdsCypher.call("existingPropertyGraph")
-            .algo("gds.beta.node2vec")
+            .algo("gds.node2vec")
             .mutateMode()
             .addParameter("embeddingDimension", 42)
             .addParameter("mutateProperty", "dummy")
@@ -92,12 +92,12 @@ class Node2VecMutateProcTest extends BaseProcTest {
         assertThat(graphBeforeMutation.schema().nodeSchema().allProperties()).doesNotContain("testProp");
 
         var rowCount = runQueryWithRowConsumer(
-            "CALL gds.beta.node2vec.mutate('graph', {" +
-            "   embeddingDimension: 42, " +
-            "   mutateProperty: 'testProp', " +
-            "   iterations: 5" +
-            "}) " +
-            " YIELD lossPerIteration",
+            "CALL gds.node2vec.mutate('graph', {" +
+                "   embeddingDimension: 42, " +
+                "   mutateProperty: 'testProp', " +
+                "   iterations: 5" +
+                "}) " +
+                " YIELD lossPerIteration",
             row -> {
                 assertThat(row.get("lossPerIteration"))
                     .as("There should be the same amount of losses as the configured `iterations`.")

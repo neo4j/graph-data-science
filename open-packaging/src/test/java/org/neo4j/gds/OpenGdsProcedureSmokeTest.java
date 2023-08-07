@@ -258,12 +258,12 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.export.csv",
         "gds.graph.export.csv.estimate",
 
-        "gds.beta.node2vec.mutate",
-        "gds.beta.node2vec.mutate.estimate",
-        "gds.beta.node2vec.stream",
-        "gds.beta.node2vec.stream.estimate",
-        "gds.beta.node2vec.write",
-        "gds.beta.node2vec.write.estimate",
+        "gds.node2vec.mutate",
+        "gds.node2vec.mutate.estimate",
+        "gds.node2vec.stream",
+        "gds.node2vec.stream.estimate",
+        "gds.node2vec.write",
+        "gds.node2vec.write.estimate",
 
         "gds.beta.graphSage.mutate",
         "gds.beta.graphSage.mutate.estimate",

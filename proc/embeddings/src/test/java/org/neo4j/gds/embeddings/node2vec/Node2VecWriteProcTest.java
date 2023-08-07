@@ -20,7 +20,8 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -58,10 +59,11 @@ class Node2VecWriteProcTest extends BaseProcTest {
         runQuery("CALL gds.graph.project($graphName, '*', '*')", Map.of("graphName", DEFAULT_GRAPH_NAME));
     }
 
-    @Test
-    void embeddingsShouldHaveTheConfiguredDimension() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.node2vec", "gds.node2vec"})
+    void embeddingsShouldHaveTheConfiguredDimension(String tieredProcedure) {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.node2vec")
+            .algo(tieredProcedure)
             .writeMode()
             .addParameter("writeProperty", "embedding")
             .addParameter("embeddingDimension", 42L)
