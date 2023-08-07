@@ -43,11 +43,11 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     }
 
     @Configuration.Ignore
-    default List<RelationshipType> relTypes() {
+    default Collection<RelationshipType> relationshipTypesFilter() {
         return relationshipTypes().stream()
             .filter(type -> !type.equals(ElementProjection.PROJECT_ALL))
             .map(RelationshipType::of)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     @Configuration.Ignore
@@ -62,11 +62,11 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     }
 
     @Configuration.Ignore
-    default List<NodeLabel> labels() {
+    default Collection<NodeLabel> nodeLabelsFilter() {
         return nodeLabels().stream()
             .filter(label -> !label.equals(ElementProjection.PROJECT_ALL))
             .map(NodeLabel::of)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
 

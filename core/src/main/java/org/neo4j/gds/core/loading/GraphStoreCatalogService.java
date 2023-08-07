@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
@@ -29,7 +28,6 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,23 +66,32 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 
-    public Pair<Graph, GraphStore> getGraphWithGraphStore(GraphName graphName, AlgoBaseConfig config, Optional<String> relationshipProperty, User user, DatabaseId databaseId) {
+    public Pair<Graph, GraphStore> getGraphWithGraphStore(
+        GraphName graphName,
+        AlgoBaseConfig config,
+        Optional<String> relationshipProperty,
+        User user,
+        DatabaseId databaseId
+    ) {
         CatalogRequest catalogRequest = CatalogRequest.of(user, databaseId);
         var graphStoreWithConfig = get(catalogRequest, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
 
+        var relationshipTypes = config.relationshipTypesFilter();
+        var nodeLabels = config.nodeLabelsFilter();
 
-        Graph graph;
-        var relationshipTypes = config.relTypes();
-        var nodeLabels = config.labels();
-
+        // if the relationship types are empty we are getting a graph without relationships which is not what we actually want...
         if (relationshipTypes.isEmpty()) {
-            // if the relationship types are empty we are getting a graph without relationships which is not what we actually want...
-            graph = graphStore.getGraph(nodeLabels, List.of(RelationshipType.ALL_RELATIONSHIPS), relationshipProperty);
-        } else {
-            graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+            relationshipTypes = graphStore.relationshipTypes();
         }
+
+        //if nodeLabels is empty, we are not getting any node properties
+        if (nodeLabels.isEmpty()) {
+            nodeLabels = graphStore.nodeLabels();
+        }
+
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
         return Pair.of(graph, graphStore);
     }
 
