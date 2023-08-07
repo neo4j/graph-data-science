@@ -5,7 +5,9 @@
 :result: core value
 :algorithm: K-Core Decomposition
 
+:no-directed:
 :undirected:
+
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 [[algorithms-k-core-intro]]
