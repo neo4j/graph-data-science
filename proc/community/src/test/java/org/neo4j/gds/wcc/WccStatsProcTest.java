@@ -258,7 +258,7 @@ class WccStatsProcTest extends BaseProcTest {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

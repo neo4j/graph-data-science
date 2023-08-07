@@ -97,7 +97,7 @@ class LeidenWriteProcTest extends BaseProcTest {
         runQuery(loadQuery);
 
 
-        var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "writeGraph").graphStore().getUnion();
+        var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "writeGraph").graphStore().getUnion();
         var communities = writeGraph.nodeProperties("communityId");
         var communitySet = new HashSet<Long>();
         writeGraph.forEachNode(nodeId -> {
@@ -122,7 +122,7 @@ class LeidenWriteProcTest extends BaseProcTest {
         runQuery(loadQuery);
 
 
-        var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "writeGraph").graphStore().getUnion();
+        var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "writeGraph").graphStore().getUnion();
         var communities = writeGraph.nodeProperties("communityId");
         var communitySet = new HashSet<Long>();
         writeGraph.forEachNode(nodeId -> {

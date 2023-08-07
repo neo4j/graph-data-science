@@ -42,7 +42,7 @@ class GraphInfoLoaderTest {
 
     @Test
     void shouldLoadGraphInfo(@TempDir Path exportDir) throws IOException {
-        var databaseId = DatabaseId.from("my-database");
+        var databaseId = DatabaseId.of("my-database");
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
             String.join(", ", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts", "inverseIndexedRelTypes","idMapBuilderType"),
@@ -74,7 +74,7 @@ class GraphInfoLoaderTest {
      */
     @Test
     void shouldLoadGraphInfoWithDatabaseId(@TempDir Path exportDir) throws IOException {
-        var databaseId = DatabaseId.from("my-database");
+        var databaseId = DatabaseId.of("my-database");
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
             String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),

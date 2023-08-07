@@ -62,7 +62,7 @@ class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements D
     public void databaseCreate(DatabaseEventContext eventContext) {
         var databaseName = eventContext.getDatabaseName();
         var db = dbms.database(databaseName);
-        databaseIdMapping.put(databaseName, DatabaseId.of(db));
+        databaseIdMapping.put(databaseName, DatabaseId.of(db.databaseName()));
     }
 
     // The @override is missing for compatibility reasons

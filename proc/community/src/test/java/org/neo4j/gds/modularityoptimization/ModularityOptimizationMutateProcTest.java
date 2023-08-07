@@ -189,7 +189,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_NAME).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
         var communities = mutatedGraph.nodeProperty(MUTATE_PROPERTY).values();
         var seeds = mutatedGraph.nodeProperty("seed1").values();
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
@@ -344,7 +344,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
         runMutation(TEST_GRAPH_NAME, config);
 
-        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), TEST_GRAPH_NAME).graphStore();
+        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
 
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
@@ -379,7 +379,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                     }
                 }));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -497,7 +497,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                     }
                 }));
 
-        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore();
+        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
     }
 
     @NotNull
@@ -505,7 +505,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

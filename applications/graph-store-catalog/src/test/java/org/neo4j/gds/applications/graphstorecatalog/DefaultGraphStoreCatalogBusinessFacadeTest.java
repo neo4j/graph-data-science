@@ -57,10 +57,10 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
 
         when(service.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
         )).thenReturn(true);
-        var graphExists = facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph");
+        var graphExists = facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "someGraph");
 
         assertTrue(graphExists);
     }
@@ -87,12 +87,12 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
 
         when(service.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
         )).thenReturn(false);
         boolean graphExists = facade.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             "someGraph"
         );
 
@@ -120,7 +120,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
         );
 
         assertThatThrownBy(
-            () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "   ")
+            () -> facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "   ")
         ).hasMessage("`graphName` can not be null or blank, but it was `   `");
     }
 
@@ -353,7 +353,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
         );
 
         var user = new User("some user", false);
-        var databaseId = DatabaseId.from("some database name");
+        var databaseId = DatabaseId.of("some database name");
         doThrow(new IllegalArgumentException("it's alive?!")).when(graphStoreCatalogService).ensureGraphDoesNotExist(
             user,
             databaseId,
@@ -420,7 +420,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
         );
 
         var user = new User("some user", false);
-        var databaseId = DatabaseId.from("some database name");
+        var databaseId = DatabaseId.of("some database name");
         doThrow(new IllegalArgumentException("Damn you, Jack Sparrow!")).when(graphStoreCatalogService)
             .ensureGraphExists(
                 user,

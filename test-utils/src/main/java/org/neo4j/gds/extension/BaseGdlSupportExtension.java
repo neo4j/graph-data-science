@@ -52,7 +52,7 @@ import static org.neo4j.gds.extension.ExtensionUtil.setField;
 
 public abstract class BaseGdlSupportExtension {
 
-    public static final DatabaseId DATABASE_ID = DatabaseId.from("GDL");
+    public static final DatabaseId DATABASE_ID = DatabaseId.of("GDL");
 
     void beforeAction(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();

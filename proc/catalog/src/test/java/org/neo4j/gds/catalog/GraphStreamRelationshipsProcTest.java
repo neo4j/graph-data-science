@@ -142,7 +142,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         ));
 
         var expectedRelationships = new ArrayList<TopologyResult>();
-        var generatedGraph = GraphStoreCatalog.get("", DatabaseId.of(db), "generatedGraph").graphStore().getUnion();
+        var generatedGraph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "generatedGraph").graphStore().getUnion();
         generatedGraph.forEachNode(nodeId -> {
             generatedGraph.forEachRelationship(nodeId, (source, target) -> expectedRelationships.add(
                 relationship(source, target, "REL")

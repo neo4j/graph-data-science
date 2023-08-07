@@ -83,7 +83,7 @@ class LeidenMutateProcTest  extends BaseProcTest {
     void mutate() {
         var query = "CALL gds.leiden.mutate('leiden', {mutateProperty: 'communityId', concurrency: 1})";
         assertLeidenMutateQuery(query);
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "leiden").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "leiden").graphStore().getUnion();
         var communities = mutatedGraph.nodeProperties("communityId");
         var communitySet = new HashSet<Long>();
         mutatedGraph.forEachNode(nodeId -> {
@@ -99,7 +99,7 @@ class LeidenMutateProcTest  extends BaseProcTest {
         var query = "CALL gds.leiden.mutate('leiden', {mutateProperty: 'communityId',  consecutiveIds: true})";
 
         assertLeidenMutateQuery(query);
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "leiden").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "leiden").graphStore().getUnion();
         var communities = mutatedGraph.nodeProperties("communityId");
         var communitySet = new HashSet<Long>();
         mutatedGraph.forEachNode(nodeId -> {

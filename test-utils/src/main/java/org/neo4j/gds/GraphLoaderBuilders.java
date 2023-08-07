@@ -191,7 +191,7 @@ public final class GraphLoaderBuilders {
     ) {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(databaseService))
+                .databaseId(DatabaseId.of(databaseService.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
                 .executor(executorService.orElse(Pools.DEFAULT))

@@ -114,7 +114,7 @@ public class AlphaCypherAggregation implements CompatUserAggregationFunction {
             : WriteMode.LOCAL;
 
         return new AlphaGraphAggregator(
-            DatabaseId.of(databaseService),
+            DatabaseId.of(databaseService.databaseName()),
             username.username(),
             writeMode,
             queryProvider

@@ -128,7 +128,7 @@ class LocalClusteringCoefficientMutateProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(1);
 
         Graph mutatedGraph = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "graph")
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore().getGraph(RelationshipType.of("T"));
 
         assertGraphEquals(fromGdl(expectedMutatedGraph), mutatedGraph);

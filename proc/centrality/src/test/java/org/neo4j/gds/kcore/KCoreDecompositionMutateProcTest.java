@@ -123,7 +123,7 @@ class KCoreDecompositionMutateProcTest extends BaseProcTest {
             .as("`mutate` mode should always return one row")
             .isEqualTo(1);
 
-        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph")
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
             .getUnion();
 

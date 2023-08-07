@@ -62,7 +62,7 @@ public class NodePropertyFunc {
         Objects.requireNonNull(nodeLabel);
 
         GraphStore graphStore = GraphStoreCatalog
-            .get(CatalogRequest.of(username.username(), DatabaseId.of(databaseService)), graphName)
+            .get(CatalogRequest.of(username.username(), DatabaseId.of(databaseService.databaseName())), graphName)
             .graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
         var nodeLabelType = projectAll ? NodeLabel.ALL_NODES : NodeLabel.of(nodeLabel);

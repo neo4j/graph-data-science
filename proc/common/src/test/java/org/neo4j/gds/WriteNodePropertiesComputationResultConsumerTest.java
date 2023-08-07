@@ -83,7 +83,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
 
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
-        .databaseId(DatabaseId.from(""))
+        .databaseId(DatabaseId.of(""))
         .dependencyResolver(EmptyDependencyResolver.INSTANCE)
         .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Neo4jProxy.testLog())

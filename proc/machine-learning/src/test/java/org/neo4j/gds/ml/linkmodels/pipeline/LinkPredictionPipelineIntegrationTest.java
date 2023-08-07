@@ -170,7 +170,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog
-            .get("", DatabaseId.of(db), GRAPH_NAME)
+            .get("", DatabaseId.of(db.databaseName()), GRAPH_NAME)
             .graphStore();
 
         runQuery(GdsCypher.call(MULTI_GRAPH_NAME)
@@ -182,7 +182,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             .yields());
 
         multiGraphStore = GraphStoreCatalog
-            .get("", DatabaseId.of(db), MULTI_GRAPH_NAME)
+            .get("", DatabaseId.of(db.databaseName()), MULTI_GRAPH_NAME)
             .graphStore();
     }
 

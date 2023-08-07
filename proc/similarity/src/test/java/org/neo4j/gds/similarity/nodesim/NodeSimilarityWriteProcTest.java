@@ -219,7 +219,7 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
                         0.0
                     )
                 ),
-            GraphStoreCatalog.get(getUsername(), DatabaseId.from(db.databaseName()), resultGraphName).graphStore().getUnion()
+            GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), resultGraphName).graphStore().getUnion()
         );
     }
 

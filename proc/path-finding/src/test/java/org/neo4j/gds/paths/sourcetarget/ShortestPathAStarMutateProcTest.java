@@ -119,7 +119,7 @@ class ShortestPathAStarMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph")
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
             .getUnion();
         var expected = TestSupport.fromGdl(DB_CYPHER + ", (nA)-[:PATH {w: 2979.0D}]->(nX)");

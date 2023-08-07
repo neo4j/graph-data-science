@@ -389,8 +389,8 @@ class GraphStoreCatalogTest {
         GraphProjectFromStoreConfig config0 = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, "graph0");
         GraphProjectFromStoreConfig config1 = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, "graph1");
 
-        DatabaseId databaseId0 = DatabaseId.from("DB_0");
-        DatabaseId databaseId1 = DatabaseId.from("DB_1");
+        DatabaseId databaseId0 = DatabaseId.of("DB_0");
+        DatabaseId databaseId1 = DatabaseId.of("DB_1");
 
         GraphStore graphStore0 = GdlFactory
             .builder()
@@ -439,7 +439,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void shouldThrowOnMissingGraph() {
-        var dummyDatabaseId = DatabaseId.from("mydatabase");
+        var dummyDatabaseId = DatabaseId.of("mydatabase");
 
         // test the get code path
         assertThatExceptionOfType(NoSuchElementException.class)

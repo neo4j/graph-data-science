@@ -180,7 +180,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .withNodeProperties(List.of("scalar", "array"), DefaultValue.DEFAULT)
                 .yields());
 
-            graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
+            graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), GRAPH_NAME).graphStore();
         }
 
         @Test
@@ -318,7 +318,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             runQuery(createQuery);
 
-            var invalidGraphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), graphName).graphStore();
+            var invalidGraphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), graphName).graphStore();
 
             var pipeline = new LinkPredictionTrainingPipeline();
             pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().build());

@@ -37,7 +37,7 @@ class TaskRegistryFactoryServiceTest {
     void shouldHandOutDummiesWhenProgressTrackingEnabled() {
         var service = new TaskRegistryFactoryService(false, null);
 
-        var databaseId = DatabaseId.from("some database");
+        var databaseId = DatabaseId.of("some database");
         var user = new User("some user", false);
         var taskRegistryFactory = service.getTaskRegistryFactory(databaseId, user);
 
@@ -49,7 +49,7 @@ class TaskRegistryFactoryServiceTest {
         var taskStoreService = mock(TaskStoreService.class);
         var service = new TaskRegistryFactoryService(true, taskStoreService);
 
-        var databaseId = DatabaseId.from("some database");
+        var databaseId = DatabaseId.of("some database");
         var user = new User("some user", false);
         when(taskStoreService.getTaskStore(databaseId)).thenReturn(mock(TaskStore.class));
         var factory = service.getTaskRegistryFactory(databaseId, user);
@@ -62,8 +62,8 @@ class TaskRegistryFactoryServiceTest {
         var taskStoreService = mock(TaskStoreService.class);
         var service = new TaskRegistryFactoryService(true, taskStoreService);
 
-        var databaseId1 = DatabaseId.from("some database");
-        var databaseId2 = DatabaseId.from("some other database");
+        var databaseId1 = DatabaseId.of("some database");
+        var databaseId2 = DatabaseId.of("some other database");
         var user1 = new User("some user", false);
         var user2 = new User("some other user", false);
         when(taskStoreService.getTaskStore(databaseId1)).thenReturn(mock(TaskStore.class));

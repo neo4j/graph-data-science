@@ -112,7 +112,7 @@ class HashGNNMutateProcTest extends BaseProcTest {
 
         assertThat(rowCount).isEqualTo(1L);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore().getUnion();
         TestGraph expected = fromGdl(expectedMutatedGraph);
         assertGraphEquals(expected, mutatedGraph);
     }

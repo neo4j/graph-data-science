@@ -195,7 +195,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .yields();
         runQuery(query);
 
-        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore();
+        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore();
         var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("test"), Optional.of(
             EdgeSplitter.RELATIONSHIP_PROPERTY));
         var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("train"), Optional.empty());
@@ -266,7 +266,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .yields();
         runQuery(innerSplitQuery);
 
-        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore();
+        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore();
 
         var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("innerTest"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
         var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("innerTrain"), Optional.empty());
@@ -293,7 +293,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("negativeSamplingRatio", 2.0)
             .yields();
         runQuery(query);
-        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore();
+        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore();
         var remainingGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("remaining"), Optional.of("foo"));
         remainingGraph.forEachNode(nodeId -> {
             remainingGraph.forEachRelationship(nodeId, Double.NaN, (s, t, w) -> {

@@ -400,7 +400,7 @@ class WccMutateProcTest extends BaseProcTest {
 
         runMutation(graphName, filterConfig);
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
 
         var expectedProperties = new ArrayList<String>();
         expectedProperties.add(MUTATE_PROPERTY);
@@ -432,7 +432,7 @@ class WccMutateProcTest extends BaseProcTest {
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), mutatedGraph);
     }
 
@@ -509,7 +509,7 @@ class WccMutateProcTest extends BaseProcTest {
                 })
         );
 
-        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore();
+        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
     }
 
     void applyOnProcedure(Consumer<WccMutateProc> func) {
@@ -540,7 +540,7 @@ class WccMutateProcTest extends BaseProcTest {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

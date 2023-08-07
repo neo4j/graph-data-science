@@ -113,7 +113,7 @@ public class CypherAggregation implements CompatUserAggregationFunction {
             : WriteMode.LOCAL;
 
         return new ProductGraphAggregator(
-            DatabaseId.of(databaseService),
+            DatabaseId.of(databaseService.databaseName()),
             username.username(),
             writeMode,
             queryProvider

@@ -52,13 +52,13 @@ class GraphStoreCatalogServiceTest {
         var configuration = GraphProjectFromStoreConfig.emptyWithName("some user", "some graph");
         // we _could_ write a stub for GraphStore; this is good enough for now tho
         var graphStore = mock(GraphStore.class);
-        when(graphStore.databaseId()).thenReturn(DatabaseId.from("some database"));
+        when(graphStore.databaseId()).thenReturn(DatabaseId.of("some database"));
         GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
         var service = new GraphStoreCatalogService();
 
         assertTrue(service.graphExists(
             new User("some user", false),
-            DatabaseId.from("some database"),
+            DatabaseId.of("some database"),
             GraphName.parse("some graph")
         ));
 
@@ -71,7 +71,7 @@ class GraphStoreCatalogServiceTest {
 
         assertFalse(service.graphExists(
             new User("some user", false),
-            DatabaseId.from("some database"),
+            DatabaseId.of("some database"),
             GraphName.parse("some graph")
         ));
     }

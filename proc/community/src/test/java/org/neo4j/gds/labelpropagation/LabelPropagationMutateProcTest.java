@@ -369,7 +369,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
         runMutation(TEST_GRAPH_NAME, config);
 
-        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), TEST_GRAPH_NAME).graphStore();
+        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
 
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
@@ -397,7 +397,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                         fail(e);
                     }
                 }));
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -471,7 +471,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     }
                 }));
 
-        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore();
+        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
     }
 
     @NotNull
@@ -479,7 +479,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
@@ -524,7 +524,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
             var mutatedGraph = GraphStoreCatalog.get(
                 TEST_USERNAME,
-                DatabaseId.of(LabelPropagationMutateProcTest.this.db),
+                DatabaseId.of(LabelPropagationMutateProcTest.this.db.databaseName()),
                 TEST_GRAPH_NAME
             ).graphStore().getUnion();
             mutatedGraph.forEachNode(nodeId -> {

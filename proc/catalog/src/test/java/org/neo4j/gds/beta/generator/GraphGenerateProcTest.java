@@ -167,7 +167,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         String query = "CALL gds.graph.generate('g', 4, 2, {relationshipDistribution: 'RANDOM'})";
         runQuery(query);
 
-        var graph = GraphStoreCatalog.get(this.getUsername(), DatabaseId.of(this.db), "g").graphStore();
+        var graph = GraphStoreCatalog.get(this.getUsername(), DatabaseId.of(this.db.databaseName()), "g").graphStore();
 
         assertThat(graph.schema().relationshipSchema().hasProperties()).isFalse();
         assertThat(graph.schema().relationshipSchema().get(RelationshipType.of("REL")).properties()).isEmpty();

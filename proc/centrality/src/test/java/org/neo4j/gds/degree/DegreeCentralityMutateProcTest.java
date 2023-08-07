@@ -129,7 +129,7 @@ class DegreeCentralityMutateProcTest extends BaseProcTest {
             .as("`mutate` mode should always return one row")
             .isEqualTo(1);
 
-        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "dcGraph")
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "dcGraph")
             .graphStore()
             .getUnion();
 

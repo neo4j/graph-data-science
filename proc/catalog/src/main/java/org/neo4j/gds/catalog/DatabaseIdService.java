@@ -27,6 +27,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
  */
 public class DatabaseIdService {
     public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
-        return DatabaseId.of(databaseService);
+        return DatabaseId.of(databaseService.databaseName());
     }
 }

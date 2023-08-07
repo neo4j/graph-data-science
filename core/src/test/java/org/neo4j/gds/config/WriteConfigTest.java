@@ -59,7 +59,7 @@ class WriteConfigTest {
             .build();
 
         var testGraphStore = new GraphStoreBuilder()
-            .databaseId(DatabaseId.from("neo4j"))
+            .databaseId(DatabaseId.of("neo4j"))
             .capabilities(ImmutableStaticCapabilities.of(writeMode))
             .schema(GraphSchema.mutable())
             .nodes(nodes)

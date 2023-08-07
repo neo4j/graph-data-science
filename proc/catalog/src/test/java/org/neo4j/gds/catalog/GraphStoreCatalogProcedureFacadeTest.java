@@ -61,12 +61,12 @@ class GraphStoreCatalogProcedureFacadeTest {
         );
 
         when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
-        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("current database"));
+        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.of("current database"));
         procedureFacade.graphExists("some graph");
 
         verify(businessFacade).graphExists(
             new User("current user", false),
-            DatabaseId.from("current database"),
+            DatabaseId.of("current database"),
             "some graph"
         );
     }
@@ -104,7 +104,7 @@ class GraphStoreCatalogProcedureFacadeTest {
             businessFacade
         );
 
-        var databaseId = DatabaseId.from("current database");
+        var databaseId = DatabaseId.of("current database");
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
         var userLogStore = mock(UserLogStore.class);
         when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);

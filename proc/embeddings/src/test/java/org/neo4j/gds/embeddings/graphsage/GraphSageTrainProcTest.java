@@ -286,7 +286,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
             )
         );
 
-        var graphStore = GdlFactory.builder().databaseId(DatabaseId.of(db)).build().build();
+        var graphStore = GdlFactory.builder().databaseId(DatabaseId.of(db.databaseName())).build().build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
             graphStore,
@@ -309,7 +309,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
                 )
             )
         );
-        CSRGraphStore graphStore = GdlFactory.builder().databaseId(DatabaseId.of(db)).build().build();
+        CSRGraphStore graphStore = GdlFactory.builder().databaseId(DatabaseId.of(db.databaseName())).build().build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
             graphStore,

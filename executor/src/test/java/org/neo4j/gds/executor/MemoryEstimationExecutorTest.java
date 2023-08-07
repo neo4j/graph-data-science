@@ -72,7 +72,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
         var executionContext = ImmutableExecutionContext
             .builder()
-            .databaseId(DatabaseId.of(db))
+            .databaseId(DatabaseId.of(db.databaseName()))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .returnColumns(new ProcedureCallContextReturnColumns(new ProcedureCallContext(
                 42,

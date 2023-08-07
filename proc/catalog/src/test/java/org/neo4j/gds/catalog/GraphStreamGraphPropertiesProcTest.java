@@ -57,7 +57,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 
-        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), DEFAULT_GRAPH_NAME).graphStore();
+        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), DEFAULT_GRAPH_NAME).graphStore();
     }
 
     @AfterEach

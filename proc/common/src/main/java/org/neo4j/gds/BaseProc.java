@@ -183,6 +183,6 @@ public abstract class BaseProc {
     }
 
     private DatabaseId databaseId() {
-        return DatabaseId.of(databaseService);
+        return DatabaseId.of(databaseService.databaseName());
     }
 }

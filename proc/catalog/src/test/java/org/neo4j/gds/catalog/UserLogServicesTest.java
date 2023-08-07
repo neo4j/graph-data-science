@@ -31,9 +31,9 @@ class UserLogServicesTest {
     void shouldScopeStoresToDatabase() {
         var service = new UserLogServices();
 
-        var store1 = service.getUserLogStore(DatabaseId.from("some database"));
-        var store2 = service.getUserLogStore(DatabaseId.from("some database"));
-        var store3 = service.getUserLogStore(DatabaseId.from("some other database"));
+        var store1 = service.getUserLogStore(DatabaseId.of("some database"));
+        var store2 = service.getUserLogStore(DatabaseId.of("some database"));
+        var store3 = service.getUserLogStore(DatabaseId.of("some other database"));
 
         assertSame(store1, store2);
         assertNotSame(store1, store3);
@@ -43,8 +43,8 @@ class UserLogServicesTest {
     void shouldScopeFactoriesToDatabaseAndUser() {
         var service = new UserLogServices();
 
-        var databaseId1 = DatabaseId.from("some database");
-        var databaseId2 = DatabaseId.from("some other database");
+        var databaseId1 = DatabaseId.of("some database");
+        var databaseId2 = DatabaseId.of("some other database");
         var username1 = new User("some user", false);
         var username2 = new User("some other user", false);
         var factory1 = service.getUserLogRegistryFactory(databaseId1, username1);
@@ -62,7 +62,7 @@ class UserLogServicesTest {
     void shouldNotCareAboutUserAdminStatus() {
         var service = new UserLogServices();
 
-        var databaseId = DatabaseId.from("some database");
+        var databaseId = DatabaseId.of("some database");
         var username1 = new User("some user", false);
         var username2 = new User("some user", true);
         var factory1 = service.getUserLogRegistryFactory(databaseId, username1);

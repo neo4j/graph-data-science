@@ -54,7 +54,7 @@ class CSRGraphStoreUtilTest {
         assertThat(graph.hasRelationshipProperty()).isTrue();
 
         var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(
-            DatabaseId.from("dummy"),
+            DatabaseId.of("dummy"),
             (HugeGraph) graph,
             Optional.of("prop1"),
             1
@@ -76,7 +76,7 @@ class CSRGraphStoreUtilTest {
         var gdlGraph = gdlGraphStore.getUnion();
 
         var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(
-            DatabaseId.from("dummy"),
+            DatabaseId.of("dummy"),
             (HugeGraph) gdlGraph,
             Optional.empty(),
             1
@@ -92,7 +92,7 @@ class CSRGraphStoreUtilTest {
 
         assertThatThrownBy(() -> {
             CSRGraphStoreUtil.createFromGraph(
-                DatabaseId.from("dummy"),
+                DatabaseId.of("dummy"),
                 (HugeGraph) graph.innerGraph(),
                 Optional.of("prop1"),
                 1

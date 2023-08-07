@@ -44,7 +44,7 @@ class DropGraphServiceTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
 
-        var catalogRequest = CatalogRequest.of("some user", DatabaseId.from("some database"));
+        var catalogRequest = CatalogRequest.of("some user", DatabaseId.of("some database"));
         var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
         var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
         when(graphStoreCatalogService.removeGraph(catalogRequest, GraphName.parse("foo"), false)).thenReturn(
@@ -54,7 +54,7 @@ class DropGraphServiceTest {
         var results = dropGraphService.compute(
             List.of(GraphName.parse("foo"), GraphName.parse("bar")),
             false,
-            DatabaseId.from("some database"),
+            DatabaseId.of("some database"),
             new User("some user", false),
             Optional.empty()
         );
@@ -67,7 +67,7 @@ class DropGraphServiceTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
 
-        var request = CatalogRequest.of("some user", DatabaseId.from("some database"));
+        var request = CatalogRequest.of("some user", DatabaseId.of("some database"));
         var g1 = GraphName.parse("foo");
         var g2 = GraphName.parse("bar");
         var g3 = GraphName.parse("baz");
@@ -80,7 +80,7 @@ class DropGraphServiceTest {
             dropGraphService.compute(
                 List.of(g1, g2, g3, g4),
                 true,
-                DatabaseId.from("some database"),
+                DatabaseId.of("some database"),
                 new User("some user", false),
                 Optional.empty()
             );
@@ -102,7 +102,7 @@ class DropGraphServiceTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var dropGraphService = new DropGraphService(graphStoreCatalogService);
 
-        var request = CatalogRequest.of("some user", DatabaseId.from("some database"));
+        var request = CatalogRequest.of("some user", DatabaseId.of("some database"));
         var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
         var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
         var g1 = GraphName.parse("foo");
@@ -116,7 +116,7 @@ class DropGraphServiceTest {
         var results = dropGraphService.compute(
             List.of(g1, g2, g3, g4),
             false,
-            DatabaseId.from("some database"),
+            DatabaseId.of("some database"),
             new User("some user", false),
             Optional.empty()
         );
@@ -132,7 +132,7 @@ class DropGraphServiceTest {
             service.compute(
                 List.of(GraphName.parse("some graph")),
                 false,
-                DatabaseId.from("some database"),
+                DatabaseId.of("some database"),
                 new User("some user", false),
                 Optional.of("some other user")
             );
