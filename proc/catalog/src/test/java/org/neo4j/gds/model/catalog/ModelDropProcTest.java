@@ -54,7 +54,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
         var trainConfig = TestTrainConfig.of(getUsername(), existingModel);
         modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
 
-        var dropQuery = "CALL gds.beta.model.drop($modelName)";
+        var dropQuery = "CALL gds.model.drop($modelName)";
         assertCypherResult(
             dropQuery,
             Map.of("modelName", existingModel),
@@ -76,7 +76,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
     void failOnDroppingNonExistingModel() {
         String modelName = "foo";
         assertError(
-            "CALL gds.beta.model.drop($modelName)",
+            "CALL gds.model.drop($modelName)",
             Map.of("modelName", modelName),
             formatWithLocale("Model with name `%s` does not exist.", modelName)
         );
@@ -84,6 +84,6 @@ class ModelDropProcTest extends ModelProcBaseTest {
 
     @Test
     void failSilentlyOnDroppingNonExistingModel() {
-        assertCypherResult("CALL gds.beta.model.drop('foo', false)", List.of());
+        assertCypherResult("CALL gds.model.drop('foo', false)", List.of());
     }
 }
