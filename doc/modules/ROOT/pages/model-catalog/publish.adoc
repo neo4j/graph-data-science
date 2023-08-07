@@ -13,7 +13,7 @@ Making a model accessible to other users can be achieved by publishing it.
 .Publish a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.publish(modelName: String)
+CALL gds.model.publish(modelName: String)
 YIELD
     modelInfo: Map,
     trainConfig: Map,
@@ -43,7 +43,7 @@ include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
 .Publishing trained model:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.publish('my-model')
+CALL gds.model.publish('my-model')
 YIELD modelInfo, loaded, shared, stored
 RETURN modelInfo.modelName AS modelName, shared
 ----

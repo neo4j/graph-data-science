@@ -33,7 +33,7 @@ The `gds.model.store_location` parameter must be configured for this feature.
 .Remove a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.store(
+CALL gds.model.store(
     modelName: String,
     failIfUnsupported: Boolean
 )
@@ -67,7 +67,7 @@ YIELD
 .Store a model on disk:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.store('my-model')
+CALL gds.model.store('my-model')
 YIELD
   modelName,
   storeMillis
@@ -89,7 +89,7 @@ In order to use a stored model, it has to be explicitly loaded.
 .Remove a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.load(modelName: String)
+CALL gds.model.load(modelName: String)
 YIELD
     modelName: String,
     loadMillis: Integer
@@ -118,7 +118,7 @@ YIELD
 .Store a model on disk:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.load('my-model')
+CALL gds.model.load('my-model')
 YIELD
   modelName,
   loadMillis
@@ -146,7 +146,7 @@ Deleting a model will remove it from disk, but keep it in the in-memory model ca
 .Remove a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.delete(modelName: String)
+CALL gds.model.delete(modelName: String)
 YIELD
     modelName: String,
     deleteMillis: Integer
@@ -175,7 +175,7 @@ YIELD
 .Store a model on disk:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.delete('my-model')
+CALL gds.model.delete('my-model')
 YIELD
   modelName,
   deleteMillis

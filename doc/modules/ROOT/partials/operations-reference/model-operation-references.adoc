@@ -20,8 +20,8 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                        | Operation
-| xref:model-catalog/store.adoc[Store a model]             | `gds.alpha.model.store` label:procedure[Procedure]
-| xref:model-catalog/store.adoc#catalog-model-load[Load a stored model]        | `gds.alpha.model.load` label:procedure[Procedure]
-| xref:model-catalog/store.adoc#catalog-model-delete[Delete a stored model]    | `gds.alpha.model.delete` label:procedure[Procedure]
-| xref:model-catalog/publish.adoc[Publish a model]         | `gds.alpha.model.publish` label:procedure[Procedure]
+| xref:model-catalog/store.adoc[Store a model]             | `gds.model.store` label:procedure[Procedure]
+| xref:model-catalog/store.adoc#catalog-model-load[Load a stored model]        | `gds.model.load` label:procedure[Procedure]
+| xref:model-catalog/store.adoc#catalog-model-delete[Delete a stored model]    | `gds.model.delete` label:procedure[Procedure]
+| xref:model-catalog/publish.adoc[Publish a model]         | `gds.model.publish` label:procedure[Procedure]
 |===
