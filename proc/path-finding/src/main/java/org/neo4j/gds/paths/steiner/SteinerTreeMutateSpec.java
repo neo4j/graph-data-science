@@ -39,7 +39,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.SteinerTree.mutate", aliases = {"gds.beta.SteinerTree.mutate"}, description = Constants.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.steinerTree.mutate",
+    aliases = {"gds.beta.steinerTree.mutate"},
+    description = Constants.DESCRIPTION,
+    executionMode = STREAM
+)
 public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<MutateResult>, SteinerTreeAlgorithmFactory<SteinerTreeMutateConfig>> {
 
     @Override

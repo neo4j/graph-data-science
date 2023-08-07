@@ -23,14 +23,19 @@ import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
@@ -98,7 +103,27 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.binSizeThreshold = binSizeThreshold;
         this.examinationQueue = createExaminationQueue(graph, applyRerouting, terminals.size());
         this.indexQueue = new LongAdder();
-        
+
+    }
+
+    static MemoryEstimation memoryEstimation(boolean allowRerouting, Optional<Boolean> useInverseRerouter) {
+        var memoryEstimationBuilder = MemoryEstimations.builder()
+            .perNode("terminal bitset", MemoryUsage::sizeOfBitset)
+            .perNode("parent", HugeLongArray::memoryEstimation)
+            .perNode("parent cost ", HugeDoubleArray::memoryEstimation)
+
+            .add(SteinerBasedDeltaStepping.memoryEstimation());
+
+        if (allowRerouting) {
+            memoryEstimationBuilder.perNode("queue", HugeLongArrayQueue::memoryEstimation);
+            if (useInverseRerouter.get()) {
+                memoryEstimationBuilder.add(InverseRerouter.estimation());
+            } else {
+                memoryEstimationBuilder.add(SimpleRerouter.estimation());
+            }
+        }
+
+        return memoryEstimationBuilder.build();
     }
 
     private BitSet createTerminals() {
