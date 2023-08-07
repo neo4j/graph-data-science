@@ -31,7 +31,6 @@ public interface SteinerTreeResult {
 
     HugeDoubleArray relationshipToParentCost();
 
-    
     double totalCost();
 
     long effectiveNodeCount();
