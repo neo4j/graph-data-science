@@ -4,7 +4,7 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
-Information about models in the catalog can be retrieved using the `gds.beta.model.list()` procedure.
+Information about models in the catalog can be retrieved using the `gds.model.list()` procedure.
 
 
 == Syntax
@@ -14,7 +14,7 @@ Information about models in the catalog can be retrieved using the `gds.beta.mod
 .List models from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.list(modelName: String)
+CALL gds.model.list(modelName: String)
 YIELD
     modelInfo: Map,
     trainConfig: Map,
@@ -46,7 +46,7 @@ Once we have trained models in the catalog we can see information about either a
 .Listing detailed information about all models:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.list()
+CALL gds.model.list()
 YIELD modelInfo, loaded, shared, stored
 RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 ----
@@ -66,7 +66,7 @@ RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 .Listing detailed information about specific model:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.list('my-model')
+CALL gds.model.list('my-model')
 YIELD modelInfo, loaded, shared, stored
 RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 ----

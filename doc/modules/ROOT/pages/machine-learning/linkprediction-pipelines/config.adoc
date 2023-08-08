@@ -255,7 +255,7 @@ For example, the `embedding` property could be created by the previous example, 
 Link Prediction training pipelines manage splitting the relationships into several sets and add sampled negative relationships to some of these sets.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
 
-The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
+The splitting configuration of a pipeline can be inspected by using `gds.model.list` and possibly only yielding `splitConfig`.
 
 The splitting of relationships proceeds internally in the following steps:
 
@@ -402,7 +402,7 @@ For information about the available training methods in GDS, logistic regression
 
 In xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
-The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+The parameter space of a pipeline can be inspected using `gds.model.list` and optionally yielding only `parameterSpace`.
 
 [NOTE]
 ====

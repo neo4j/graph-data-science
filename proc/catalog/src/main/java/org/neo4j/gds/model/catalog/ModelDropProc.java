@@ -21,6 +21,7 @@ package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +33,7 @@ public class ModelDropProc extends ModelCatalogProc {
 
     private static final String DESCRIPTION = "Drops a loaded model and frees up the resources it occupies.";
 
-    @Procedure(name = "gds.beta.model.drop", mode = READ)
+    @Procedure(name = "gds.model.drop", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelCatalogResult> drop(
         @Name(value = "modelName") String modelName,
@@ -48,7 +49,20 @@ public class ModelDropProc extends ModelCatalogProc {
         } else {
             model = modelCatalog.drop(username(), modelName);
         }
-
         return Stream.ofNullable(model).map(ModelCatalogResult::new);
+    }
+
+    @Procedure(name = "gds.beta.model.drop", mode = READ, deprecatedBy = "gds.model.drop")
+    @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    @Internal
+    public Stream<ModelCatalogResult> betaDrop(
+        @Name(value = "modelName") String modelName,
+        @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.model.drop` has been deprecated, please use `gds.model.drop`.");
+        return drop(modelName, failIfMissing);
     }
 }

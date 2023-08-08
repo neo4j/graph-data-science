@@ -297,9 +297,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.beta.listProgress",
 
-        "gds.beta.model.drop",
-        "gds.beta.model.exists",
-        "gds.beta.model.list",
+        "gds.model.drop",
+        "gds.model.exists",
+        "gds.model.list",
 
         "gds.modularityOptimization.mutate",
         "gds.modularityOptimization.mutate.estimate",
