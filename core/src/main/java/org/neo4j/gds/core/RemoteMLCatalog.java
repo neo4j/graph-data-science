@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RemoteMLCatalog {
@@ -34,5 +35,6 @@ public class RemoteMLCatalog {
     }
 
     public static final Map<ModelMetricIdentifier, Map<String, Object>> modelMetrics = new HashMap<>();
+    public static final Map<String, List<String>> logs = new HashMap<>();
 
 }
