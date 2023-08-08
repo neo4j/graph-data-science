@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -118,8 +119,6 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                                 "headerBits",
                                 instanceOf(Map.class),
                                 "headerAllocations",
-                                instanceOf(Map.class),
-                                "blockStatistics",
                                 instanceOf(Map.class)
                             ))
                     ),
@@ -142,6 +141,29 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                     params
                 );
 
+                var r = new HashMap<>();
+                r.put("pages", allOf(instanceOf(Long.class), greaterThan(0L)));
+                r.put("bytesTotal", allOf(instanceOf(Long.class), greaterThan(0L)));
+                r.put("bytesOnHeap", allOf(instanceOf(Long.class), greaterThan(0L)));
+                r.put("bytesOffHeap", allOf(instanceOf(Long.class), greaterThanOrEqualTo(0L)));
+                r.put("pageSizes", instanceOf(Map.class));
+                r.put("heapAllocations", allOf(instanceOf(Map.class)));
+                r.put("nativeAllocations", instanceOf(Map.class));
+                r.put("headerBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("headerAllocations", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("blockCount", allOf(instanceOf(Long.class), greaterThan(0L)));
+                r.put("blockLengths", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("meanBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("medianBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("stdDevBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("maxBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("minBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("indexOfMaxValue", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("indexOfMinValue", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("headTailDiffBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("bestMaxDiffBits", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+                r.put("exceptions", allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))));
+
                 assertCypherResult("CALL gds.internal.graph.sizeOf($name)", params, List.of(
                     Map.of(
                         "graphName", graphName,
@@ -151,36 +173,7 @@ class GraphMemoryUsageProcTest extends BaseProcTest {
                             "relationships", instanceOf(Map.class),
                             "total", allOf(instanceOf(Long.class), greaterThan(0L)),
                             "nodes", instanceOf(Map.class),
-                            "adjacencyLists", Map.of(
-                                "REL", Map.of(
-                                    "pages",
-                                    allOf(instanceOf(Long.class), greaterThan(0L)),
-                                    "bytesTotal",
-                                    allOf(instanceOf(Long.class), greaterThan(0L)),
-                                    "bytesOnHeap",
-                                    allOf(instanceOf(Long.class), greaterThan(0L)),
-                                    "bytesOffHeap",
-                                    allOf(instanceOf(Long.class), greaterThanOrEqualTo(0L)),
-                                    "pageSizes",
-                                    instanceOf(Map.class),
-                                    "heapAllocations",
-                                    allOf(instanceOf(Map.class)),
-                                    "nativeAllocations",
-                                    instanceOf(Map.class),
-                                    "headerBits",
-                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))),
-                                    "headerAllocations",
-                                    allOf(instanceOf(Map.class), hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))),
-                                    "blockStatistics",
-                                    allOf(instanceOf(Map.class), hasEntry(
-                                        equalTo("blockLengths"),
-                                        allOf(
-                                            instanceOf(Map.class),
-                                            hasEntry(equalTo("mean"), greaterThanOrEqualTo(0D))
-                                        )
-                                    ))
-                                ))
-                        ),
+                            "adjacencyLists", Map.of("REL", r)),
                         "nodeCount", 100L,
                         "relationshipCount", 200L
                     )

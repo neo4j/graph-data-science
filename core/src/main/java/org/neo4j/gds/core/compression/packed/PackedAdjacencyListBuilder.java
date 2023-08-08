@@ -20,9 +20,10 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
+import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.collections.ha.HugeIntArray;
@@ -32,6 +33,7 @@ import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Address, PackedAdjacencyList> {
 
@@ -73,14 +75,13 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
         return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, memoryInfo);
     }
 
-    private AdjacencyList.MemoryInfo memoryInfo(int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
+    private MemoryInfo memoryInfo(int[] allocationSizes, HugeIntArray degrees, HugeLongArray offsets) {
         long bytesOffHeap = Arrays.stream(allocationSizes).peek(this.memoryTracker::recordPageSize).asLongStream().sum();
 
-        var memoryInfoBuilder = AdjacencyList.MemoryInfo
-            .builder(memoryTracker)
+        var memoryInfoBuilder = MemoryInfoUtil
+            .builder(memoryTracker, Optional.of(this.memoryTracker.blockStatistics()))
             .pages(allocationSizes.length)
-            .bytesOffHeap(bytesOffHeap)
-            .blockStatistics(this.memoryTracker.blockStatistics());
+            .bytesOffHeap(bytesOffHeap);
 
         var sizeOnHeap = new MutableLong();
         MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);

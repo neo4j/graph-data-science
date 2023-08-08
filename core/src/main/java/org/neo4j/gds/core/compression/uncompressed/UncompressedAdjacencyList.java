@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;

@@ -139,35 +139,30 @@ public final class GraphMemoryUsage {
             var csrGraphStore = ((CSRGraphStore) graphStore);
             var unionGraph = csrGraphStore.getUnion();
             unionGraph.relationshipTopologies().forEach((relationshipType, adjacency) -> {
-                var memoryInfo = adjacency.adjacencyList().memoryInfo();
-                var listDetail = Map.of(
-                    "pages", memoryInfo.pages(),
-                    "bytesTotal", memoryInfo.bytesTotal().orElse(0),
-                    "bytesOnHeap", memoryInfo.bytesOnHeap().orElse(0),
-                    "bytesOffHeap", memoryInfo.bytesOffHeap().orElse(0),
-                    "pageSizes", memoryInfo.pageSizes().toMap(),
-                    "heapAllocations", memoryInfo.heapAllocations().toMap(),
-                    "nativeAllocations", memoryInfo.nativeAllocations().toMap(),
-                    "headerAllocations", memoryInfo.headerAllocations().toMap(),
-                    "headerBits", memoryInfo.headerBits().toMap(),
-                    "blockStatistics", memoryInfo.blockStatistics().map(stats -> {
-                        Map<Object, Object> blockStats = new HashMap<>();
-                        blockStats.put("blockCount", stats.blockCount());
-                        blockStats.put("blockLengths", stats.blockLengths().toMap());
-                        blockStats.put("indexOfMaxValue", stats.indexOfMaxValue().toMap());
-                        blockStats.put("indexOfMinValue", stats.indexOfMinValue().toMap());
-                        blockStats.put("maxBits", stats.maxBits().toMap());
-                        blockStats.put("minBits", stats.minBits().toMap());
-                        blockStats.put("meanBits", stats.meanBits().toMap());
-                        blockStats.put("medianBits", stats.medianBits().toMap());
-                        blockStats.put("stdDevBits", stats.stdDevBits().toMap());
-                        blockStats.put("headTailDiffBits", stats.headTailDiffBits().toMap());
-                        blockStats.put("bestMaxDiffBits", stats.bestMaxDiffBits().toMap());
-                        blockStats.put("exceptions", stats.exceptions().toMap());
-                        return blockStats;
-                    }).orElse(Map.of())
-                );
-                adjacencyListDetails.put(relationshipType.name(), listDetail);
+                var mi = adjacency.adjacencyList().memoryInfo();
+                var out = new HashMap<>();
+                out.put("pages", mi.pages());
+                out.put("bytesTotal", mi.bytesTotal().orElse(0));
+                out.put("bytesOnHeap", mi.bytesOnHeap().orElse(0));
+                out.put("bytesOffHeap", mi.bytesOffHeap().orElse(0));
+                out.put("pageSizes", mi.pageSizes().toMap());
+                out.put("heapAllocations", mi.heapAllocations().toMap());
+                out.put("nativeAllocations", mi.nativeAllocations().toMap());
+                out.put("headerAllocations", mi.headerAllocations().toMap());
+                out.put("headerBits", mi.headerBits().toMap());
+                mi.blockCount().ifPresent(blockCount -> out.put("blockCount", blockCount));
+                mi.blockLengths().ifPresent(blockLengths -> out.put("blockLengths", blockLengths.toMap()));
+                mi.indexOfMaxValue().ifPresent(indexOfMaxValue -> out.put("indexOfMaxValue", indexOfMaxValue.toMap()));
+                mi.indexOfMinValue().ifPresent(indexOfMinValue -> out.put("indexOfMinValue", indexOfMinValue.toMap()));
+                mi.maxBits().ifPresent(maxBits -> out.put("maxBits", maxBits.toMap()));
+                mi.minBits().ifPresent(minBits -> out.put("minBits", minBits.toMap()));
+                mi.meanBits().ifPresent(meanBits -> out.put("meanBits", meanBits.toMap()));
+                mi.medianBits().ifPresent(medianBits -> out.put("medianBits", medianBits.toMap()));
+                mi.stdDevBits().ifPresent(stdDevBits -> out.put("stdDevBits", stdDevBits.toMap()));
+                mi.headTailDiffBits().ifPresent(headTailDiffBits -> out.put("headTailDiffBits", headTailDiffBits.toMap()));
+                mi.bestMaxDiffBits().ifPresent(bestMaxDiffBits -> out.put("bestMaxDiffBits", bestMaxDiffBits.toMap()));
+                mi.pforExceptions().ifPresent(pforExceptions -> out.put("exceptions", pforExceptions.toMap()));
+                adjacencyListDetails.put(relationshipType.name(), out);
             });
             details.put("adjacencyLists", adjacencyListDetails);
         }
