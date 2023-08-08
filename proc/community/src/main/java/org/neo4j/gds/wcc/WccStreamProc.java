@@ -46,7 +46,7 @@ public class WccStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.wccStream(graphName, configuration);
+        return facade.wccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
 
     @Procedure(value = "gds.wcc.stream.estimate", mode = READ)

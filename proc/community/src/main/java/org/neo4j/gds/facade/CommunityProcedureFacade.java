@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.facade;
 
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -58,8 +59,15 @@ public class CommunityProcedureFacade {
         this.securityContext = securityContext;
     }
 
-    public Stream<WccStreamResult> wccStream(String graphName, Map<String, Object> configuration) {
+    public Stream<WccStreamResult> wccStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
         var streamConfig = WccStreamConfig.of(CypherMapWrapper.create(configuration));
+
+        // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
+        algorithmMetaDataSetter.set(streamConfig);
 
         var computationResult = algorithmsBusinessFacade.wcc(
             graphName,

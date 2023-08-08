@@ -57,10 +57,14 @@ public abstract class CatalogRequest {
     }
 
     public static CatalogRequest of(User user, DatabaseId databaseId) {
+        return of(user, databaseId, Optional.empty());
+    }
+
+    public static CatalogRequest of(User user, DatabaseId databaseId, Optional<String> usernameOverride) {
         return ImmutableCatalogRequest.of(
             databaseId.databaseName(),
             user.getUsername(),
-            Optional.empty(),
+            usernameOverride,
             user.isAdmin()
         );
     }

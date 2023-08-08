@@ -24,6 +24,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -76,11 +77,15 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         var userLogServices = new UserLogServices();
         var usernameService = new UserServices();
 
+        // GDS services
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+
         /*
          * Now we can register the facade
          */
         var procedureFacadeProvider = new ProcedureFacadeProvider(
             log,
+            graphStoreCatalogService,
             databaseIdService,
             taskRegistryFactoryService,
             userLogServices,
@@ -95,11 +100,11 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         );
         log.info("GDS procedure facade registered");
 
-
         /*
          * Now we can register the community procedure facade
          */
         var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
+            graphStoreCatalogService,
             usernameService,
             databaseIdService
         );

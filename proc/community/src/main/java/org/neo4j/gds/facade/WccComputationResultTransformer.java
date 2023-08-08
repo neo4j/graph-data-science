@@ -59,6 +59,7 @@ final class WccComputationResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
+    // TODO: This might be shared between the clients. Think of a better placement for this transformation...
     static WccMutateResult toMutateResult(
         ComputationResult<WccBaseConfig> computationResult,
         WccMutateConfig mutateConfig

@@ -65,6 +65,7 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphStoreCatalogProcedureFacade, ProcedureException> {
     private final Log log;
+    private final GraphStoreCatalogService graphStoreCatalogService;
     private final DatabaseIdService databaseIdService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
@@ -72,12 +73,14 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
     ProcedureFacadeProvider(
         Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
         DatabaseIdService databaseIdService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
         UserServices userServices
     ) {
         this.log = log;
+        this.graphStoreCatalogService = graphStoreCatalogService;
         this.databaseIdService = databaseIdService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
@@ -100,7 +103,6 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
         // GDS services
         var configurationService = new ConfigurationService();
-        var graphStoreCatalogService = new GraphStoreCatalogService();
         var graphStoreFilterService = new GraphStoreFilterService();
         var graphStoreValidationService = new GraphStoreValidationService();
 

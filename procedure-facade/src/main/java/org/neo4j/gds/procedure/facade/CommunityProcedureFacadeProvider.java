@@ -29,18 +29,23 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class CommunityProcedureFacadeProvider implements ThrowingFunction<Context, CommunityProcedureFacade, ProcedureException> {
+
+    private final GraphStoreCatalogService graphStoreCatalogService;
     private final UserServices usernameService;
     private final DatabaseIdService databaseIdService;
 
-    public CommunityProcedureFacadeProvider(UserServices usernameService, DatabaseIdService databaseIdService) {
+    CommunityProcedureFacadeProvider(
+        GraphStoreCatalogService graphStoreCatalogService,
+        UserServices usernameService,
+        DatabaseIdService databaseIdService
+    ) {
+        this.graphStoreCatalogService = graphStoreCatalogService;
         this.usernameService = usernameService;
-
         this.databaseIdService = databaseIdService;
     }
 
     @Override
     public CommunityProcedureFacade apply(Context context) throws ProcedureException {
-        var graphStoreCatalogService = new GraphStoreCatalogService();
         var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(graphStoreCatalogService);
         return new CommunityProcedureFacade(
             algorithmsBusinessFacade,

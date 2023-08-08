@@ -73,7 +73,7 @@ public class GraphStoreCatalogService {
         User user,
         DatabaseId databaseId
     ) {
-        CatalogRequest catalogRequest = CatalogRequest.of(user, databaseId);
+        CatalogRequest catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
         var graphStoreWithConfig = get(catalogRequest, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
         // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
