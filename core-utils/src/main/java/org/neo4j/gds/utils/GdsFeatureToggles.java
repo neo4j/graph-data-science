@@ -33,6 +33,7 @@ public enum GdsFeatureToggles {
     USE_BIT_ID_MAP(true),
     USE_UNCOMPRESSED_ADJACENCY_LIST(false),
     USE_PACKED_ADJACENCY_LIST(false),
+    USE_MIXED_ADJACENCY_LIST(false),
     USE_REORDERED_ADJACENCY_LIST(false),
     ENABLE_ARROW_DATABASE_IMPORT(true),
     // Makes sure end users algorithms don't fail due to errors in log tracking,
