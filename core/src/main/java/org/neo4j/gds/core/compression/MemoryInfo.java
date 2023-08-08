@@ -20,9 +20,7 @@
 package org.neo4j.gds.core.compression;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.compression.common.BlockStatistics;
 import org.neo4j.gds.core.compression.common.ImmutableHistogram;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -40,15 +38,6 @@ public interface MemoryInfo {
         .headerBits(ImmutableHistogram.EMPTY)
         .headerAllocations(ImmutableHistogram.EMPTY)
         .build();
-
-    static ImmutableMemoryInfo.Builder builder(MemoryTracker memoryTracker) {
-        return ImmutableMemoryInfo.builder()
-            .heapAllocations(memoryTracker.heapAllocations())
-            .nativeAllocations(memoryTracker.nativeAllocations())
-            .pageSizes(memoryTracker.pageSizes())
-            .headerBits(memoryTracker.headerBits())
-            .headerAllocations(memoryTracker.headerAllocations());
-    }
 
     /**
      * Returns the total number of bytes occupied by this adjacency list,
@@ -110,9 +99,65 @@ public interface MemoryInfo {
     ImmutableHistogram headerAllocations();
 
     /**
-     * A collection of histograms that record various statistics for block packing.
+     * Tracks the number of blocks in the adjacency list.
      */
-    Optional<BlockStatistics> blockStatistics();
+    OptionalLong blockCount();
+
+    /**
+     * Tracks the standard deviation of the number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> stdDevBits();
+
+    /**
+     * Tracks the mean of the number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> meanBits();
+
+    /**
+     * Tracks the median of the number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> medianBits();
+
+    /**
+     * Tracks the block lengths.
+     */
+    Optional<ImmutableHistogram> blockLengths();
+
+    /**
+     * Tracks the maximum number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> maxBits();
+
+    /**
+     * Tracks the minimum number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> minBits();
+
+    /**
+     * Tracks the index of the min value within a block of target ids.
+     */
+    Optional<ImmutableHistogram> indexOfMinValue();
+
+    /**
+     * Tracks the index of the max value within a block of target ids.
+     */
+    Optional<ImmutableHistogram> indexOfMaxValue();
+
+    /**
+     * Tracks the absolute difference between the number of bits required
+     * to encode the head value and the average number of bits required for the tail values.
+     */
+    Optional<ImmutableHistogram> headTailDiffBits();
+
+    /**
+     * Tracks the difference between the lowest and highest number of bits to encode any value in a block.
+     */
+    Optional<ImmutableHistogram> bestMaxDiffBits();
+
+    /**
+     * Tracks the number of exceptions within a block according to the PFOR heuristic.
+     */
+    Optional<ImmutableHistogram> pforExceptions();
 
     default MemoryInfo merge(MemoryInfo other) {
         return ImmutableMemoryInfo.builder()
@@ -125,12 +170,43 @@ public interface MemoryInfo {
             .pageSizes(pageSizes().merge(other.pageSizes()))
             .headerBits(headerBits().merge(other.headerBits()))
             .headerAllocations(headerAllocations().merge(other.headerAllocations()))
-            .blockStatistics(blockStatistics().map(left -> other.blockStatistics().map(right -> {
-                    var union = new BlockStatistics();
-                    left.mergeInto(union);
-                    right.mergeInto(union);
-                    return union;
-                }).orElse(left)).or(other::blockStatistics)
-            ).build();
+            .blockCount(LongStream.concat(blockCount().stream(), other.blockCount().stream()).reduce(Long::sum))
+            .blockLengths(blockLengths()
+                .map(left -> other.blockLengths().map(left::merge).orElse(left))
+                .or(other::blockLengths))
+            .stdDevBits(stdDevBits()
+                .map(left -> other.stdDevBits().map(left::merge).orElse(left))
+                .or(other::stdDevBits))
+            .meanBits(meanBits()
+                .map(left -> other.meanBits().map(left::merge).orElse(left))
+                .or(other::meanBits))
+            .medianBits(medianBits()
+                .map(left -> other.medianBits().map(left::merge).orElse(left))
+                .or(other::medianBits))
+            .blockLengths(blockLengths()
+                .map(left -> other.blockLengths().map(left::merge).orElse(left))
+                .or(other::blockLengths))
+            .maxBits(maxBits()
+                .map(left -> other.maxBits().map(left::merge).orElse(left))
+                .or(other::maxBits))
+            .minBits(minBits()
+                .map(left -> other.minBits().map(left::merge).orElse(left))
+                .or(other::minBits))
+            .indexOfMaxValue(indexOfMaxValue()
+                .map(left -> other.indexOfMaxValue().map(left::merge).orElse(left))
+                .or(other::indexOfMaxValue))
+            .indexOfMinValue(indexOfMinValue()
+                .map(left -> other.indexOfMinValue().map(left::merge).orElse(left))
+                .or(other::indexOfMinValue))
+            .headTailDiffBits(headTailDiffBits()
+                .map(left -> other.headTailDiffBits().map(left::merge).orElse(left))
+                .or(other::headTailDiffBits))
+            .bestMaxDiffBits(bestMaxDiffBits()
+                .map(left -> other.bestMaxDiffBits().map(left::merge).orElse(left))
+                .or(other::bestMaxDiffBits))
+            .pforExceptions(pforExceptions()
+                .map(left -> other.pforExceptions().map(left::merge).orElse(left))
+                .or(other::pforExceptions))
+            .build();
     }
 }

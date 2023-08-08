@@ -211,7 +211,16 @@ public final class MixedCompressor implements AdjacencyCompressor {
                 // We only need to track the header statistics of the packed adjacency list.
                 .headerBits(packed.headerBits())
                 .headerAllocations(packed.headerAllocations())
-                .blockStatistics(packed.blockStatistics())
+                .stdDevBits(packed.stdDevBits())
+                .meanBits(packed.meanBits())
+                .medianBits(packed.medianBits())
+                .minBits(packed.minBits())
+                .maxBits(packed.maxBits())
+                .indexOfMinValue(packed.indexOfMinValue())
+                .indexOfMaxValue(packed.indexOfMaxValue())
+                .headTailDiffBits(packed.headTailDiffBits())
+                .bestMaxDiffBits(packed.bestMaxDiffBits())
+                .pforExceptions(packed.pforExceptions())
                 .build();
         }
     }
