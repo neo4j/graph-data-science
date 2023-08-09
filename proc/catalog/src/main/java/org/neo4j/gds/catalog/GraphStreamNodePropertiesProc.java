@@ -22,12 +22,15 @@ package org.neo4j.gds.catalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphStreamNodePropertiesConfig;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesConfig;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResultProducer;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,30 +45,32 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_NODE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
+    @Context
+    public GraphStoreCatalogProcedureFacade facade;
 
     @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
-    @Description("Streams the given node properties.")
-    public Stream<PropertiesResult> streamNodeProperties(
+    @Description(STREAM_NODE_PROPERTIES_DESCRIPTION)
+    public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return streamNodeProperties(
+        return facade.streamNodeProperties(
             graphName,
-            configuration,
             nodeProperties,
             nodeLabels,
-            PropertiesResult::new
+            configuration
         );
     }
 
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.stream")
     @Description("Streams the given node properties.")
-    public Stream<PropertiesResult> streamProperties(
+    public Stream<GraphStreamNodePropertiesResult> streamProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
@@ -77,7 +82,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             configuration,
             nodeProperties,
             nodeLabels,
-            PropertiesResult::new,
+            GraphStreamNodePropertiesResult::new,
             Optional.of(deprecationWarning)
         );
     }
@@ -123,7 +128,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         Map<String, Object> configuration,
         Object nodeProperties,
         Object nodeLabels,
-        ResultProducer<R> producer
+        GraphStreamNodePropertiesResultProducer<R> producer
     ) {
         return streamNodeProperties(graphName, configuration, nodeProperties, nodeLabels, producer,Optional.empty());
     }
@@ -133,7 +138,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         Map<String, Object> configuration,
         Object nodeProperties,
         Object nodeLabels,
-        ResultProducer<R> producer,
+        GraphStreamNodePropertiesResultProducer<R> producer,
         Optional<String> deprecationWarning
     ) {
         Preconditions.check();
@@ -204,21 +209,6 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     }
 
     @SuppressWarnings("unused")
-    public static class PropertiesResult {
-        public final long nodeId;
-        public final String nodeProperty;
-        public final Object propertyValue;
-        public final List<String> nodeLabels;
-
-        PropertiesResult(long nodeId, String nodeProperty, Object propertyValue, List<String> nodeLabels) {
-            this.nodeId = nodeId;
-            this.nodeProperty = nodeProperty;
-            this.propertyValue = propertyValue;
-            this.nodeLabels = nodeLabels;
-        }
-    }
-
-    @SuppressWarnings("unused")
     public static class PropertyResult {
         public final long nodeId;
         public final Object propertyValue;
@@ -230,9 +220,4 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             this.nodeLabels = nodeLabels;
         }
     }
-
-    interface ResultProducer<R> {
-        R produce(long nodeId, String propertyName, Object propertyValue, List<String> nodeLabels);
-    }
-
 }

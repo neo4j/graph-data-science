@@ -17,13 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.UserInputAsStringOrListOfString;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,13 +35,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface GraphNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
-
     @Configuration.Parameter
     Optional<String> graphName();
 
     @Configuration.Parameter
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphNodePropertiesConfig#parseNodeLabels")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphNodePropertiesConfig#parseNodeLabels")
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
@@ -53,6 +55,4 @@ public interface GraphNodePropertiesConfig extends BaseConfig, ConcurrencyConfig
             ? graphStore.nodeLabels()
             : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
     }
-
-
 }

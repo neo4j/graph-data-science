@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -43,6 +42,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             new GraphNameValidationService(),
             service,
+            null,
             null,
             null,
             null,
@@ -73,6 +73,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             mock(GraphNameValidationService.class),
             service,
+            null,
             null,
             null,
             null,
@@ -116,6 +117,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -131,6 +133,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             validationService,
+            null,
             null,
             null,
             null,
@@ -188,6 +191,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             new ConfigurationService(),
             new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
+            null,
             null,
             null,
             null,
@@ -274,6 +278,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -349,6 +354,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -407,6 +413,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             new GraphNameValidationService(),
             graphStoreCatalogService,
+            null,
             null,
             null,
             null,

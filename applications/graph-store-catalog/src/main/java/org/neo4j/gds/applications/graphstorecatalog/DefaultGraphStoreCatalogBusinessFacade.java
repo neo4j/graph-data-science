@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
@@ -83,6 +82,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final DropNodePropertiesService dropNodePropertiesService;
     private final DropRelationshipsService dropRelationshipsService;
     private final NodeLabelMutatorService nodeLabelMutatorService;
+    private final StreamNodePropertiesApplication streamNodePropertiesApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -98,7 +98,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         GraphMemoryUsageService graphMemoryUsageService,
         DropNodePropertiesService dropNodePropertiesService,
         DropRelationshipsService dropRelationshipsService,
-        NodeLabelMutatorService nodeLabelMutatorService
+        NodeLabelMutatorService nodeLabelMutatorService,
+        StreamNodePropertiesApplication streamNodePropertiesApplication
     ) {
         this.log = log;
 
@@ -116,6 +117,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.dropNodePropertiesService = dropNodePropertiesService;
         this.dropRelationshipsService = dropRelationshipsService;
         this.nodeLabelMutatorService = nodeLabelMutatorService;
+        this.streamNodePropertiesApplication = streamNodePropertiesApplication;
     }
 
     @Override
@@ -480,6 +482,41 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         graphStoreValidationService.ensureGraphPropertyExists(graphStore, graphProperty);
 
         return graphStore.graphPropertyValues(graphProperty).objects();
+    }
+
+    @Override
+    public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        Object nodeProperties,
+        Object nodeLabelsAsObject,
+        Map<String, Object> rawConfiguration,
+        boolean usesPropertyNameColumn
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = configurationService.parseGraphStreamNodePropertiesConfiguration(
+            graphName,
+            nodeProperties,
+            nodeLabelsAsObject,
+            rawConfiguration
+        );
+
+        // melt this together, so you only obtain the graph store if it is valid? think it over
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+
+        return streamNodePropertiesApplication.compute(
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphStore,
+            configuration,
+            usesPropertyNameColumn
+        );
     }
 
     private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

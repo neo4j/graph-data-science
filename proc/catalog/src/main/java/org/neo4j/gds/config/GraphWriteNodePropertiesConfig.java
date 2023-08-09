@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.graphstorecatalog.GraphNodePropertiesConfig;
 import org.neo4j.gds.catalog.UserInputWriteProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringJoining;

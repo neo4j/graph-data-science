@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -32,10 +33,13 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.Aggregation;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class ConfigurationServiceTest {
@@ -76,8 +80,10 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"nodeProjection", "relationshipProjection", "nodeQuery", "relationshipQuery"})
     void shouldDisallowNativeProjectConfigurationWithConfigurationCertainKeywordsInIt(String key) {
+        var service = new ConfigurationService();
+
         try {
-            new ConfigurationService().parseNativeProjectConfiguration(
+            service.parseNativeProjectConfiguration(
                 new User("some user", false),
                 GraphName.parse("some graph"),
                 "some label",
@@ -92,7 +98,9 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldParseCypherProjectConfiguration() {
-        var configuration = new ConfigurationService().parseCypherProjectConfiguration(
+        var service = new ConfigurationService();
+
+        var configuration = service.parseCypherProjectConfiguration(
             new User("some user", false),
             GraphName.parse("some graph"),
             "some node query",
@@ -115,8 +123,10 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"nodeQuery", "relationshipQuery"})
     void shouldDisallowCypherProjectConfigurationWithConfigurationCertainKeywordsInIt(String key) {
+        var service = new ConfigurationService();
+
         try {
-            new ConfigurationService().parseCypherProjectConfiguration(
+            service.parseCypherProjectConfiguration(
                 new User("some user", false),
                 GraphName.parse("some graph"),
                 "some node query",
@@ -133,8 +143,10 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"nodeProjection", "relationshipProjection"})
     void shouldDisallowCypherProjectConfigurationWithConfigurationCertainKeywordsInItButDifferent(String key) {
+        var service = new ConfigurationService();
+
         try {
-            new ConfigurationService().parseCypherProjectConfiguration(
+            service.parseCypherProjectConfiguration(
                 new User("some user", false),
                 GraphName.parse("some graph"),
                 "some node query",
@@ -145,5 +157,24 @@ class ConfigurationServiceTest {
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessageContaining("Invalid key: " + key);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("stuffThatIsNotStringOrListOfString")
+    void shouldRejectNodeLabelsThatAreNotStringOrListOfString(Object notStringOrListOfString) {
+        var service = new ConfigurationService();
+
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            service.parseGraphStreamNodePropertiesConfiguration(
+                GraphName.parse("some graph"),
+                "foo",
+                notStringOrListOfString,
+                Map.of()
+            );
+        }).withMessageStartingWith("Type mismatch for nodeLabels: expected List<String> or String, but found");
+    }
+
+    private static Stream<Object> stuffThatIsNotStringOrListOfString() {
+        return Stream.of(42, 3.14, true, List.of(87, 23), Map.of("some", "entry"));
     }
 }

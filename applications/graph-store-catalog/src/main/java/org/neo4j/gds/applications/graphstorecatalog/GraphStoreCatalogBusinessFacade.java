@@ -160,4 +160,16 @@ public interface GraphStoreCatalogBusinessFacade {
         String graphProperty,
         Map<String, Object> configuration
     );
+
+    Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration,
+        boolean usesPropertyNameColumn
+    );
 }

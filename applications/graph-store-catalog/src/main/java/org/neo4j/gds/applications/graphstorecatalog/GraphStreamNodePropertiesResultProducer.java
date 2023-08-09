@@ -17,31 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
+import java.util.List;
 
-import java.util.Optional;
-
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStreamNodePropertiesConfig extends GraphExportNodePropertiesConfig {
-
-    static GraphStreamNodePropertiesConfig of(
-        String graphName,
-        Object nodeProperties,
-        Object nodeLabels,
-        CypherMapWrapper config
-    ) {
-        return new GraphStreamNodePropertiesConfigImpl(
-            nodeProperties,
-            Optional.of(graphName),
-            nodeLabels,
-            config
-        );
-    }
-
+public interface GraphStreamNodePropertiesResultProducer<R> {
+    R produce(long nodeId, String propertyName, Object propertyValue, List<String> nodeLabels);
 }

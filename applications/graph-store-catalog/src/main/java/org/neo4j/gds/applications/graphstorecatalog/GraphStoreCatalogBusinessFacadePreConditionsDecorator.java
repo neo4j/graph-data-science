@@ -321,6 +321,31 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration,
+        boolean usesPropertyNameColumn
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.streamNodeProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration,
+            usesPropertyNameColumn
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

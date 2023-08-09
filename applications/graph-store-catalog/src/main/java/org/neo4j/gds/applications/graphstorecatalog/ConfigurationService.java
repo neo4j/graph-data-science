@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -31,6 +31,7 @@ import org.neo4j.gds.config.GraphRemoveGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -217,6 +218,26 @@ public class ConfigurationService {
         );
 
         ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+    }
+
+    GraphStreamNodePropertiesConfig parseGraphStreamNodePropertiesConfiguration(
+        GraphName graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        GraphStreamNodePropertiesConfig configuration = GraphStreamNodePropertiesConfig.of(
+            graphName.getValue(),
+            nodeProperties,
+            nodeLabels,
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
     }
 
     private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {

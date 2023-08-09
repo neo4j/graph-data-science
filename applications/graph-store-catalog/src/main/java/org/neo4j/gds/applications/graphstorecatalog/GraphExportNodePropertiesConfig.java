@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.UserInputAsStringOrListOfString;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -37,7 +38,7 @@ public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConf
     boolean LIST_NODE_LABELS_DEFAULT_VALUE = false;
 
     @Configuration.Parameter
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
     @Value.Default
