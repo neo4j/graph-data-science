@@ -10,7 +10,7 @@
 | `gds.version` label:procedure[Procedure]
 | `gds.version` label:function[Function]
 | xref:installation/index.adoc#_verifying_the_installation[List all operations in GDS]        | `gds.list` label:procedure[Procedure]
-| xref:common-usage/logging.adoc#logging-progress-logging[List logged progress]              | `gds.beta.listProgress` label:procedure[Procedure]
+| xref:common-usage/logging.adoc#logging-progress-logging[List logged progress]              | `gds.listProgress` label:procedure[Procedure]
 | xref:common-usage/logging.adoc#logging-user-warnings[List warnings]              |       `gds.alpha.userLog` label:procedure[Procedure]
 .2+<.^| xref:installation/index.adoc#_verifying_the_installation[The license state of the installed GDS]         | `gds.license.state` label:procedure[Procedure]
         | `gds.isLicensed` label:function[Function]

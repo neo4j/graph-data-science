@@ -27,7 +27,7 @@ include::partial$/operations-reference/beta-note.adoc[]
 
 Progress is also tracked by the GDS library itself.
 This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
-To access progress information for currently running tasks (also referred to as jobs), we can make use of the list progress procedure: `gds.beta.listProgress`.
+To access progress information for currently running tasks (also referred to as jobs), we can make use of the list progress procedure: `gds.listProgress`.
 A task in the GDS library is defined as a running procedure, such as an algorithm or a graph load procedure.
 
 The list progress procedure has two modes, depending on whether a `jobId` parameter was set:
@@ -50,7 +50,7 @@ For users with administrator privileges, this procedure will list the running ta
 .Getting the progress of tasks:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.listProgress(jobId: String)
+CALL gds.listProgress(jobId: String)
 YIELD
   username,
   jobId,
@@ -87,7 +87,7 @@ YIELD
 [NOTE]
 ====
 Some kinds of jobs that typically take while to run, like graph projections and running algorithms, takes an optional `jobId` in their configuration parameter maps.
-This can make tracking them easier as they will then be listed under the provided `jobId` in the `gds.beta.listProgress` results.
+This can make tracking them easier as they will then be listed under the provided `jobId` in the `gds.listProgress` results.
 For algorithms, see xref:common-usage/running-algos.adoc#common-configuration-jobid[the `jobId` parameter documentation] for more on this.
 ====
 
@@ -99,7 +99,7 @@ Assuming we just started `gds.beta.node2vec.stream` procedure.
 
 [source,cypher,role=noplay]
 ----
-CALL gds.beta.listProgress()
+CALL gds.listProgress()
 YIELD
   jobId,
   taskName,
