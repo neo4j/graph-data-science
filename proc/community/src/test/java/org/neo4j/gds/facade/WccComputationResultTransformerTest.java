@@ -32,7 +32,7 @@ class WccComputationResultTransformerTest {
     @Test
     void shouldReturnEmptyStreamForEmptyGraph() {
         // given
-        var computationResult = ComputationResult.withoutAlgorithmResult(
+        ComputationResult<WccBaseConfig> computationResult = ComputationResult.withoutAlgorithmResult(
             mock(Graph.class),
             mock(WccBaseConfig.class),
             mock(GraphStore.class)
