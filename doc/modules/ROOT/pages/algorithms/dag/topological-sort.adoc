@@ -70,7 +70,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Topological Sort in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.topologicalSort.stream(
+CALL gds.dag.topologicalSort.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -144,7 +144,7 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 .The following will run the Topological Sort algorithm in `stream` mode with max distance from source feature enabled.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.topologicalSort.stream("g", {computeMaxDistanceFromSource: true})
+CALL gds.dag.topologicalSort.stream("g", {computeMaxDistanceFromSource: true})
 YIELD nodeId, maxDistanceFromSource
 RETURN gds.util.asNode(nodeId).name AS name, maxDistanceFromSource
 ----

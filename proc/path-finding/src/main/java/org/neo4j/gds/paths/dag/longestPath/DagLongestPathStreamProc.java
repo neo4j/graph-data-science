@@ -35,7 +35,7 @@ public class DagLongestPathStreamProc extends BaseProc {
     static final String LONGEST_PATH_DESCRIPTION =
         "Returns the longest paths ending in given target nodes";
 
-    @Procedure(value = "gds.alpha.longestPath.stream", mode = READ)
+    @Procedure(value = "gds.dag.longestPath.stream", mode = READ)
     @Internal
     @Description(LONGEST_PATH_DESCRIPTION)
     public Stream<DagLongestPathStreamResult> stream(

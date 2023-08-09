@@ -38,7 +38,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run DAG Longest Path in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.longestPath.stream(
+CALL gds.dag.longestPath.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -116,7 +116,7 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 .The following will run the Longest Path algorithm in `stream` mode with weights:
 [source, cypher, role=noplay setup-query]
 ----
-CALL gds.alpha.longestPath.stream("g", {relationshipWeightProperty: "time"})
+CALL gds.dag.longestPath.stream("g", {relationshipWeightProperty: "time"})
 YIELD targetNodeId as target, distance
 RETURN gds.util.asNode(target).name, distance
 ----

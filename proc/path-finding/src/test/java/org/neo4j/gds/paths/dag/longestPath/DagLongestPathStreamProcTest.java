@@ -64,7 +64,7 @@ class DagLongestPathStreamProcTest extends BaseProcTest {
     @Test
     void testStreamWithWeights() {
         String query = GdsCypher.call("last")
-            .algo("gds.alpha.longestPath")
+            .algo("gds.dag.longestPath")
             .streamMode()
             .addParameter("relationshipWeightProperty", "prop")
             .yields();
