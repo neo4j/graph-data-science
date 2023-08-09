@@ -22,6 +22,7 @@ package org.neo4j.gds.facade;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +33,7 @@ class WccComputationResultTransformerTest {
     @Test
     void shouldReturnEmptyStreamForEmptyGraph() {
         // given
-        ComputationResult<WccBaseConfig> computationResult = ComputationResult.withoutAlgorithmResult(
+        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult = ComputationResult.withoutAlgorithmResult(
             mock(Graph.class),
             mock(WccBaseConfig.class),
             mock(GraphStore.class)
