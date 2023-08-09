@@ -1,0 +1,135 @@
+[[algorithms-dag-longeset-path]]
+[.alpha]
+= Longest Path for DAG
+:description: This section describes the Longest Path algorithm for DAGs in the Neo4j Graph Data Science library.
+:entity: graph
+:result: The distance of the longeset path for each node
+:algorithm: DAG Longest Path
+
+
+:directed:
+:undirected-unsupported:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
+
+
+== Introduction
+
+Finding the longest path that leads to a node in a graph is possible to do in linear time for the special case of DAGs.
+
+GDS implementation for this algorithm is based on topological sort and takes linear time. If the graph is not a DAG, the runtime is still linear, but the results cannot be trusted. You can use xref:algorithms/dag/topological-sort.adoc[topological sort] to make sure the graph is a DAG.
+
+
+=== Usage
+
+One example for usage of this algorithm is in the context of a supply chain graph. If edges indicate the time to supply, then the distance of the longest path to a target node is the time required to manufacture the node from decision to completion.
+
+
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Longest Path syntax per mode
+[.tabbed-example]
+====
+[.include-with-stream]
+======
+.Run DAG Longest Path in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.longestPath.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name          | Type    | Description
+| targetNodeId  | Integer | The ID of the node for which the path is computed
+| distance      | Double  | The distance of the longest path that ends in the target node
+====
+
+[NOTE]
+====
+The current result does not contain the longest path itself, but only the distance of the path.
+====
+
+== Examples
+
+:algorithm-name: DAG Longest Path
+:graph-description: supply chain
+:image-file: longest-path.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+       (n0:Goods {name: 'Timber'}),
+       (n1:Goods {name: 'Lumber'}),
+       (n2:Goods {name: 'Screws'}),
+       (n3:Workshop {name: 'Table Maker Inc.'}),
+       (n4:Product {name: 'Table'}),
+
+       (n0)-[:Processing {time: 1}]->(n1),
+       (n1)-[:Shipment {time: 0}]->(n3),
+       (n2)-[:Shipment {time: 3}]->(n3),
+       (n3)-[:Processing {time: 1}]->(n4)
+----
+
+This graph describes a simple supply chain of constructing a table in the Table Maker workshop.
+In order to have lumber for the table, the workshop process timber, which takes 1 day to complete. Once the lumber is ready, it is already inthe workshop, therefor it takes zero time to ship it. However, the screws take 3 days to be shipped to the workshop. Only after the workshop has all the requirements met, the table can be constructed, a process that takes 1 day.
+
+The longest path to the table node starts with the screws, then the workshop and then the table, in total: 4 days. This is the bottleneck path, and total time that takes to manufacture the table.
+
+.The following Cypher statement will project the graph to GDS:
+[source, cypher, role=noplay setup-query]
+----
+MATCH (n)
+OPTIONAL MATCH (n)-[r:Processing|Shipment]->(target)
+WITH gds.graph.project("g", n, target, {relationshipProperties: r {.time}}) AS g
+RETURN g
+----
+
+
+=== Stream
+The stream procedure streams every node in the graph and the distance of the longest path that leads to it.
+
+For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example]
+--
+.The following will run the Longest Path algorithm in `stream` mode with weights:
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.alpha.longestPath.stream("g", {relationshipWeightProperty: "time"})
+YIELD targetNodeId as target, distance
+RETURN gds.util.asNode(target).name, distance
+----
+We use the utility function asNode to return the name of node instead of its ID to make results more readable.
+
+.Results
+[opts="header"]
+|===
+| name           | distance
+|"Timber"        | 0.0
+|"Screws"        | 0.0
+|"Lumber"        | 1.0
+|"Table Maker"   | 3.0
+|"Table"         | 4.0
+|===
+--
