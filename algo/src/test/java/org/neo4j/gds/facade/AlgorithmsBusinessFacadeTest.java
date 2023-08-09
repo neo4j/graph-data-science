@@ -85,7 +85,10 @@ class AlgorithmsBusinessFacadeTest {
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
 
             var config = mock(WccBaseConfig.class);
-            var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(graphStoreCatalogServiceMock);
+            var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(
+                graphStoreCatalogServiceMock,
+                mock(AlgorithmMemoryValidationService.class)
+            );
 
             // when
             var wccComputationResult = algorithmsBusinessFacade.wcc("meh", config, null, null, ProgressTracker.NULL_TRACKER);
@@ -111,7 +114,7 @@ class AlgorithmsBusinessFacadeTest {
             doReturn(Pair.of(graphMock, mock(GraphStore.class)))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
-            var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(graphStoreCatalogServiceMock);
+            var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(graphStoreCatalogServiceMock, null);
 
             // when
             var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null, null);

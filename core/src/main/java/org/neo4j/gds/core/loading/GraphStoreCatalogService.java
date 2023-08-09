@@ -151,6 +151,10 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.getAllGraphStores();
     }
 
+    public long graphStoreCount() {
+        return GraphStoreCatalog.graphStoreCount();
+    }
+
     public Map<GraphProjectConfig, GraphStore> getGraphStores(User user) {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
     }

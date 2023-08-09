@@ -22,6 +22,7 @@ package org.neo4j.gds.facade;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
@@ -30,9 +31,14 @@ import org.neo4j.gds.wcc.WccBaseConfig;
 public class AlgorithmsBusinessFacade {
 
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final AlgorithmMemoryValidationService memoryUsageValidator;
 
-    public AlgorithmsBusinessFacade(GraphStoreCatalogService graphStoreCatalogService) {
+    public AlgorithmsBusinessFacade(
+        GraphStoreCatalogService graphStoreCatalogService,
+        AlgorithmMemoryValidationService memoryUsageValidator
+    ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.memoryUsageValidator = memoryUsageValidator;
     }
 
     public ComputationResult<WccBaseConfig> wcc(
@@ -62,10 +68,24 @@ public class AlgorithmsBusinessFacade {
 
         // create and run the algorithm
         var factory = new WccAlgorithmFactory<>();
+        var wccEstimator = new AlgorithmMemoryEstimation<>(
+            GraphDimensions.of(
+                graph.nodeCount(),
+                graph.relationshipCount()
+            ),
+            factory
+        );
+
+        memoryUsageValidator.validateAlgorithmCanRunWithTheAvailableMemory(
+            config,
+            wccEstimator::memoryEstimation,
+            graphStoreCatalogService.graphStoreCount()
+        );
         var wcc = factory.build(graph, config, progressTracker);
         var wccResult = wcc.compute();
 
         return ComputationResult.of(wccResult, graph, config, graphStore);
     }
+
 
 }

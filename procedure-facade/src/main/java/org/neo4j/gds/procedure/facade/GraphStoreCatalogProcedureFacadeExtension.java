@@ -106,7 +106,9 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
             graphStoreCatalogService,
             usernameService,
-            databaseIdService
+            databaseIdService,
+            Neo4jProxy.getUserLog(dependencies.logService(), CommunityProcedureFacadeProvider.class),
+            neo4jConfig
         );
 
         log.info("Registering GDS Community Procedure Facade");
@@ -149,7 +151,7 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         log.info("User Log Registry registered");
     }
 
-    interface Dependencies {
+    public interface Dependencies {
         Config config();
 
         GlobalProcedures globalProcedures();
