@@ -81,7 +81,7 @@ public final class GraphStoreUpdater {
             .orElse(nodePropertyList);
 
         // TODO: stop using Neo4j Log...
-        log.debug("Updating in-memory graph store");
+        log.info("Updating in-memory graph store");
         Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
         maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
