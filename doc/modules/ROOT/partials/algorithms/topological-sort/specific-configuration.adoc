@@ -1,0 +1,1 @@
+| computeMaxDistanceFromSource  | Boolean | false | yes      | Whether to enable computation of the maximal distance from source

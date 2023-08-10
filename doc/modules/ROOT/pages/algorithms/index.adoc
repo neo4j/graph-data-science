@@ -14,6 +14,7 @@ This chapter is divided into the following sections:
 * xref:algorithms/community.adoc[Community detection]
 * xref:algorithms/similarity.adoc[Similarity]
 * xref:algorithms/pathfinding.adoc[Path finding]
+* xref:algorithms/dag/dag-algorithms.adoc[DAG algorithms]
 * xref:machine-learning/node-embeddings/index.adoc[Node embeddings]
 * xref:algorithms/linkprediction.adoc[Topological link prediction]
 * xref:algorithms/pregel-api.adoc[Pregel API]

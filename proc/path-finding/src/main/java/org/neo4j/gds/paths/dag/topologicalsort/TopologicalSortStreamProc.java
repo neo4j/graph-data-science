@@ -35,7 +35,7 @@ public class TopologicalSortStreamProc extends BaseProc {
     static final String TOPOLOGICAL_SORT_DESCRIPTION =
         "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
 
-    @Procedure(value = "gds.alpha.topologicalSort.stream", mode = READ)
+    @Procedure(value = "gds.dag.topologicalSort.stream", mode = READ)
     @Internal
     @Description(TOPOLOGICAL_SORT_DESCRIPTION)
     public Stream<TopologicalSortStreamResult> stream(

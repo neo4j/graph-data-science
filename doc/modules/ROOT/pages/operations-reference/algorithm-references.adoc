@@ -375,6 +375,8 @@
 | `gds.alpha.hits.write.estimate` label:procedure[Procedure]
 .1+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
 | `gds.alpha.kSpanningTree.write` label:procedure[Procedure]
+.1+<.^| xref:algorithms/dag/longest-path.adoc[Longest Path for DAGs]
+| `gds.dag.longestPath` label:procedure[Procedure]
 | xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `gds.alpha.linkprediction.preferentialAttachment` label:function[Function]
 | xref:alpha-algorithms/resource-allocation.adoc[Resource Allocation] | `gds.alpha.linkprediction.resourceAllocation` label:function[Function]
 | xref:alpha-algorithms/same-community.adoc[Same Community] | `gds.alpha.linkprediction.sameCommunity` label:function[Function]
@@ -396,5 +398,8 @@
 | `gds.scc.write` label:procedure[Procedure]
 .1+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangle Listing]
 | `gds.triangles` label:procedure[Procedure]
+| `gds.alpha.triangles` label:procedure[Procedure]
+.1+<.^| xref:algorithms/dag/topological-sort.adoc[Topological Sort]
+| `gds.dag.topologicalSort` label:procedure[Procedure]
 | xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors] | `gds.alpha.linkprediction.totalNeighbors` label:function[Function]
 |===

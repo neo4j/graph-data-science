@@ -1,0 +1,165 @@
+[[algorithms-topological-sort]]
+[.alpha]
+= Topological Sort
+:description: This section describes the Topological Sort algorithm in the Neo4j Graph Data Science library.
+:entity: graph
+:result: topological sorting of the nodes
+:algorithm: Topological Sort
+
+:directed:
+:undirected-unsupported:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
+
+
+== Introduction
+
+A topological sorting of nodes in a graph is an ordering of the nodes in the graph where every node appears only after all the nodes pointing to it have appeared.
+For example, for a graph with 4 nodes and these relations: `a->b`, `a->c`, `b->d`, `c->d`, there are two acceptable topological sorts: `a, b, c, d` and `a, c, b, d`.
+
+The topological order of the nodes is defined only for directed acyclic graphs (DAGs). See xref:#topological-sort-cycles[below] for the expected result for graphs with cycles.
+
+GDS provides an efficient parallel implementation for this algorithm.
+
+
+[[topological-sort-cycles]]
+=== Cycles
+
+Running the algorithm on a graph with cycles will cause the omitting of part of the nodes from the sorting. The omitted nodes are:
+
+1. Nodes that are part of a cycle (including self cycles)
+
+2. Nodes that are dependent on a cycle. It means nodes that are reachable from another node which is part of a cycle
+
+All the other nodes in the graph will be ordered in a valid topological order.
+
+For example, in the following graph only node 0 will be part of the sorting.
+Nodes 1 and 2 are part of a cycle, therefore will be excluded from the sorting.
+Node 3 is reachable from node 1, which is part of a cycle, therefore it will also be excluded.
+
+:image-file: topo-sort-cycles.svg
+image::example-graphs/{image-file}[Visualization of the example graph,align="center"]
+
+
+=== Usage
+
+Topological ordering of the nodes is beneficial when you want to guarantee a node will only be processed after its dependencies were processed. This is very useful for dependency related tasks such as scheduling or calculations that derive values from their dependencies.
+
+==== Cycles detection
+
+The algorithm can also be used to determine if the graph contains a cycle or not. If all the nodes in the graph appear in the sorting, there is no cycle in the graph. If some of the nodes are missing from the sorting, there is a cycle. It does not tell which nodes constitute the cycle, but it does give a clue, as described in the xref:#topological-sort-cycles[cycles] section.
+
+==== Maximum distance from source
+
+In addition to the sorted node IDs, the algorithm can return the maximal distance that each node has to a source node (a source is a node without incoming edges). This is similar to running the unweighted xref:algorithms/dag/longest-path.adoc[longest path] algorithm.
+
+In case the nodes model tasks with dependencies between them, this extra information about the nodes enables smarter scheduling of the tasks. Every two nodes that have the same maximal distance from a source are guaranteed to not have dependencies between them, and therefore can be scheduled in parallel.
+
+To use this feature set computeMaxDistanceFromSource to true. Notice that this comes with higher memory usage and slightly longer run time.
+
+
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Topological Sort syntax per mode
+[.tabbed-example]
+====
+[.include-with-stream]
+======
+.Run Topological Sort in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.dag.topologicalSort.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+include::partial$/algorithms/topological-sort/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                   | Type    | Description
+| nodeId                 | Integer | The ID of the current node in the ordering
+| maxDistanceFromSource  | Integer | The maximal number of nodes between the node and a source node
+====
+
+
+== Examples
+
+:algorithm-name: Topological Sort
+:graph-description: supply chain
+:image-file: dependencies.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+       (n0:Part {name: 'Cement'}),
+       (n1:Part {name: 'Base'}),
+       (n2:Part {name: 'Skeleton'}),
+       (n3:Part {name: 'Steel'}),
+       (n4:Part {name: 'Support'}),
+       (n5:Part {name: 'Door'}),
+       (n6:Part {name: 'House'}),
+
+       (n0)-[:REQUIRED]->(n1),
+       (n1)-[:REQUIRED]->(n2),
+       (n3)-[:REQUIRED]->(n4),
+       (n4)-[:REQUIRED]->(n2),
+       (n2)-[:REQUIRED]->(n5),
+       (n5)-[:REQUIRED]->(n6)
+----
+
+This graph describes a simplified supply chain of building a house. Each part of the house cannot be ready before its dependencies are ready. For example, we cannot build support before we get the steel, the skeleton is not ready until  both support and base are ready, and the house in the bottom is only ready when all the other things are done.
+
+.The following Cypher statement will project the graph to GDS:
+[source, cypher, role=noplay setup-query]
+----
+MATCH (n)
+OPTIONAL MATCH (n)-[r:REQUIRED]->(target)
+WITH gds.graph.project("g", n, target, {}) AS g
+RETURN g
+----
+
+=== Stream
+The stream procedure streams the nodes in the graph ordered by a valid topological order. The nodes can then be processed one by one, guaranteeing that each node is processed only after its dependencies were processed.
+
+For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example]
+--
+.The following will run the Topological Sort algorithm in `stream` mode with max distance from source feature enabled.
+[source, cypher, role=noplay]
+----
+CALL gds.dag.topologicalSort.stream("g", {computeMaxDistanceFromSource: true})
+YIELD nodeId, maxDistanceFromSource
+RETURN gds.util.asNode(nodeId).name AS name, maxDistanceFromSource
+----
+We use the utility function asNode to return the name of node instead of its ID to make results more readable.
+
+.Results
+[opts="header"]
+|===
+| name       | maxDistanceFromSource
+|"Steel"     | 0.0
+|"Cement"    | 0.0
+|"Base"      | 1.0
+|"Support"   | 1.0
+|"Skeleton"  | 2.0
+|"Door"      | 3.0
+|"House"     | 4.0
+|===
+--

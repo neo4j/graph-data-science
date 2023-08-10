@@ -58,7 +58,7 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
     @Test
     void testStream() {
         String query = GdsCypher.call("last")
-            .algo("gds.alpha.topologicalSort")
+            .algo("gds.dag.topologicalSort")
             .streamMode()
             .yields();
 
@@ -82,7 +82,7 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
     @Test
     void testStreamWithLongestPathDistances() {
         String query = GdsCypher.call("last")
-            .algo("gds.alpha.topologicalSort")
+            .algo("gds.dag.topologicalSort")
             .streamMode()
             .addParameter("computeMaxDistanceFromSource", true)
             .yields();
