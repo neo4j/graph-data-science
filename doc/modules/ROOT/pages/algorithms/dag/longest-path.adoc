@@ -20,6 +20,8 @@ Finding the longest path that leads to a node in a graph is possible to do in li
 
 GDS implementation for this algorithm is based on topological sort and takes linear time. If the graph is not a DAG, the runtime is still linear, but the results cannot be trusted. You can use xref:algorithms/dag/topological-sort.adoc[topological sort] to make sure the graph is a DAG.
 
+The algorithm supports unweighted graphs and graphs with non negative weights.
+
 
 === Usage
 
