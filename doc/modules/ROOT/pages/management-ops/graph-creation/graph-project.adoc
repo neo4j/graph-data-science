@@ -321,6 +321,42 @@ The used projections are internally expanded to the full `Map` syntax as shown f
 In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
 
 
+[[wildcard-example]]
+=== Graph with all the node labels
+
+You can use the wildcard operator `*` to select all the node labels for the projection.
+However, this does not retain the label information on the projected nodes.
+
+Use the `db.labels()` instead to retrieve the list of all the labels, and use it as a value for the `nodeProjection` parameter as in the following example:
+
+[role=query-example]
+--
+.Project all the labels:
+[source, cypher, role=noplay]
+----
+CALL db.labels() YIELD label
+WITH collect(label) AS allLabels
+CALL gds.graph.project(
+  'allLabelsGraph',
+  allLabels,
+  ['KNOWS', 'READ']
+)
+YIELD graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+RETURN *
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graphName        | nodeProjection                                                           | nodes  | rels
+| "allLabelsGraph" | {"Book": {"label": "Book", "properties": {}}, "Person": {"label": "Person", "properties": {}}} | 5      | 6
+|===
+--
+
+In a similar fashion, you can use the wildcard operator `*` to select all the relationship types for the projection.
+Use the `db.relationshipTypes()` to retrieve the list of all the relationship types, and use it as a value for the `relationshipProjection` parameter in place of `['KNOWS', 'READ']`.
+
+
 === Relationship orientation
 
 By default, relationships are loaded in the same orientation as stored in the Neo4j db.
@@ -671,46 +707,3 @@ org.neo4j.graphdb.QueryExecutionException: Failed to invoke procedure `gds.graph
 
 We can see that the above query resulted in an exception being thrown.
 The exception message will provide information about the specific node id that was missing, which will help debugging underlying problems.
-
-
-[[wildcard-example]]
-=== Wildcard example
-// TODO review text and complete
-
-==== Projecting all the node types
-You can also use the wildcard operator `*` to select all the labels for the projection.
-However, this does not retain the label information on the projected nodes.
-Use the `db.labels()` to retrieve the list of all the labels, and use it as a value for the `nodeProjection` parameter as in the following example:
-
-----
-CALL db.labels()
-YIELD label
-WITH collect(label) AS allLabels
-CALL gds.graph.project(
-  /* graph name */,
-  allLabels,
-  /* relationship projection */
-)
-YIELD graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
-RETURN *
-----
-
-==== Projecting all the relationship types
-You can use the wildcard operator `*` to select all the relationship types for the projection.
-However, this does not retain the type information on the projected relationships.
-Use the `db.relationshipTypes()` to retrieve the list of all the relationship types, and use it as a value for the `relationshipProjection` parameter as in the following example:
-
-----
-CALL db.relationshipTypes()
-YIELD relationshipType
-WITH collect(relationshipType) AS allTypes
-CALL gds.graph.project(
-  /* graph name */,
-  /* node projection */
-  allTypes
-)
-YIELD graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
-RETURN *
-----
-
-This syntax does not include any relationship properties.
