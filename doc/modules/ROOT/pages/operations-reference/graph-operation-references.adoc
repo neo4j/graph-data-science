@@ -75,8 +75,8 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                       | Operation
-|Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop` label:procedure[Procedure]
-|Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream` label:procedure[Procedure]
+|Drop a graph property from a named graph          | `gds.graph.graphProperty.drop` label:procedure[Procedure]
+|Stream a graph property to the procedure caller   | `gds.graph.graphProperty.stream` label:procedure[Procedure]
 |xref:management-ops/graph-creation/sampling/rwr.adoc[Sample a subgraph using random walk with restarts] | `gds.graph.sample.rwr` label:procedure[Procedure]
 .2+<.^|xref:management-ops/graph-creation/sampling/cnarw.adoc[Sample a subgraph using common neighbor aware random walks]
 | `gds.graph.sample.cnarw` label:procedure[Procedure]

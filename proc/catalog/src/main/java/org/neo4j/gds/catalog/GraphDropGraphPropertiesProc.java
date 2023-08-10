@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,7 +35,22 @@ public class GraphDropGraphPropertiesProc {
     @Context
     public GraphStoreCatalogProcedureFacade facade;
 
-    @Procedure(name = "gds.alpha.graph.graphProperty.drop", mode = READ)
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(name = "gds.alpha.graph.graphProperty.drop", mode = READ, deprecatedBy = "gds.graph.graphProperty.drop")
+    @Description(DROP_GRAPH_PROPERTY_DESCRIPTION)
+    public Stream<GraphDropGraphPropertiesResult> alphaRun(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "graphProperty") String graphProperty,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.log()
+            .warn("Procedure `gds.alpha.graph.graphProperty.drop` has been deprecated, please use `gds.graph.graphProperty.drop`.");
+
+        return run(graphName, graphProperty, configuration);
+    }
+
+    @Procedure(name = "gds.graph.graphProperty.drop", mode = READ)
     @Description(DROP_GRAPH_PROPERTY_DESCRIPTION)
     public Stream<GraphDropGraphPropertiesResult> run(
         @Name(value = "graphName") String graphName,

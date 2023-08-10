@@ -76,7 +76,7 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
         graphStore.addGraphProperty("prop", values);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.alpha.graph.graphProperty.drop('%s', 'prop')",
+            "CALL gds.graph.graphProperty.drop('%s', 'prop')",
             DEFAULT_GRAPH_NAME
         );
 

@@ -71,7 +71,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
         graphStore.addGraphProperty("prop", values);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.alpha.graph.graphProperty.stream('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
+            "CALL gds.graph.graphProperty.stream('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
             DEFAULT_GRAPH_NAME
         );
 

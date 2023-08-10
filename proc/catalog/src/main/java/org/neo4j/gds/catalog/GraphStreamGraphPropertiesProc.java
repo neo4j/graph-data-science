@@ -21,12 +21,14 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_GRAPH_PROPERTY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamGraphPropertiesProc {
@@ -34,8 +36,24 @@ public class GraphStreamGraphPropertiesProc {
     public GraphStoreCatalogProcedureFacade facade;
 
     @SuppressWarnings("unused")
-    @Procedure(name = "gds.alpha.graph.graphProperty.stream", mode = READ)
-    @Description("Streams the given graph property.")
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(name = "gds.alpha.graph.graphProperty.stream", mode = READ, deprecatedBy = "gds.graph.graphProperty.stream")
+    @Description(STREAM_GRAPH_PROPERTY_DESCRIPTION)
+    public Stream<StreamGraphPropertyResult> alphaStreamProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "graphProperty") String graphProperty,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.log()
+            .warn("Procedure `gds.alpha.graph.graphProperty.stream` has been deprecated, please use `gds.graph.graphProperty.stream`.");
+
+        return streamProperty(graphName, graphProperty, configuration);
+    }
+
+    @SuppressWarnings("unused")
+    @Procedure(name = "gds.graph.graphProperty.stream", mode = READ)
+    @Description(STREAM_GRAPH_PROPERTY_DESCRIPTION)
     public Stream<StreamGraphPropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "graphProperty") String graphProperty,
