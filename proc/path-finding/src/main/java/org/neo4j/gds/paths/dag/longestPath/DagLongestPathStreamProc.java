@@ -22,7 +22,6 @@ package org.neo4j.gds.paths.dag.longestPath;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -36,7 +35,6 @@ public class DagLongestPathStreamProc extends BaseProc {
         "Returns the longest paths ending in given target nodes";
 
     @Procedure(value = "gds.dag.longestPath.stream", mode = READ)
-    @Internal
     @Description(LONGEST_PATH_DESCRIPTION)
     public Stream<DagLongestPathStreamResult> stream(
         @Name(value = "graphName") String graphName,
