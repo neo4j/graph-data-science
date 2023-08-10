@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
-
     private final AlgorithmsBusinessFacade algorithmsBusinessFacade;
     private final UserServices userServices;
     private final DatabaseIdService databaseIdService;
@@ -139,5 +138,4 @@ public class CommunityProcedureFacade {
     private User user() {
         return userServices.getUser(securityContext);
     }
-
 }

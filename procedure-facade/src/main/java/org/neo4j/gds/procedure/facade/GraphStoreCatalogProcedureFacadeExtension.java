@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.facade.CommunityProcedureFacade;
+import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
@@ -101,25 +102,26 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         log.info("GDS procedure facade registered");
 
         /*
-         * Now we can register the community procedure facade
+         * Now we can register the community algorithms procedure facade
          */
+        boolean useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
+        log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
+
         var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
+            log,
             graphStoreCatalogService,
             usernameService,
             databaseIdService,
-            Neo4jProxy.getUserLog(dependencies.logService(), CommunityProcedureFacadeProvider.class),
-            neo4jConfig
+            useMaxMemoryEstimation
         );
 
-        log.info("Registering GDS Community Procedure Facade");
+        log.info("Registering GDS Community Algorithms Procedure Facade");
         dependencies.globalProcedures().registerComponent(
             CommunityProcedureFacade.class,
             communityProcedureFacadeProvider,
             true
         );
-        log.info("GDS Community procedure facade registered");
-
-
+        log.info("GDS Community Algorithms Procedure Facade registered");
 
         /*
          * This is legacy support. We keep some context-injected things around,

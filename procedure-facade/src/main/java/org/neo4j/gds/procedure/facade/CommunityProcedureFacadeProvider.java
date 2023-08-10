@@ -19,51 +19,53 @@
  */
 package org.neo4j.gds.procedure.facade;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.facade.AlgorithmMemoryValidationService;
 import org.neo4j.gds.facade.AlgorithmsBusinessFacade;
 import org.neo4j.gds.facade.CommunityProcedureFacade;
-import org.neo4j.gds.facade.AlgorithmMemoryValidationService;
-import org.neo4j.gds.internal.MemoryEstimationSettings;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.logging.Log;
 
 public class CommunityProcedureFacadeProvider implements ThrowingFunction<Context, CommunityProcedureFacade, ProcedureException> {
-
+    private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final UserServices usernameService;
     private final DatabaseIdService databaseIdService;
-    private final Log log;
-    private final Config neo4jConfig;
+    private final boolean useMaxMemoryEstimation;
 
     CommunityProcedureFacadeProvider(
+        Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         UserServices usernameService,
         DatabaseIdService databaseIdService,
-        Log log,
-        Config neo4jConfig
+        boolean useMaxMemoryEstimation
     ) {
+        this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.usernameService = usernameService;
         this.databaseIdService = databaseIdService;
-        this.log = log;
-        this.neo4jConfig = neo4jConfig;
+        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
     }
 
     @Override
     public CommunityProcedureFacade apply(Context context) throws ProcedureException {
+        // services
+        var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(
+            log,
+            useMaxMemoryEstimation
+        );
 
+        // business facade
         var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(
             graphStoreCatalogService,
-            new AlgorithmMemoryValidationService(
-                log,
-                neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation)
-            )
+            algorithmMemoryValidationService
         );
+
+        // procedure facade
         return new CommunityProcedureFacade(
             algorithmsBusinessFacade,
             usernameService,
