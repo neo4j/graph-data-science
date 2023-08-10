@@ -88,7 +88,7 @@ class GraphFilterProcTest extends BaseProcTest {
         // are added.
 
         var originalGraphProjectConfig = (GraphProjectFromStoreConfig) GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "graph")
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .config();
         var expectedNodeProjection = originalGraphProjectConfig.nodeProjections().toObject();
         var expectedRelationshipProjection = originalGraphProjectConfig.relationshipProjections().toObject();
@@ -115,7 +115,7 @@ class GraphFilterProcTest extends BaseProcTest {
 
         var subgraphStore = GraphStoreCatalog.get(
             getUsername(),
-            DatabaseId.of(db),
+            DatabaseId.of(db.databaseName()),
             "subgraph"
         ).graphStore();
 
@@ -176,7 +176,7 @@ class GraphFilterProcTest extends BaseProcTest {
 
         runQuery(subGraphQuery, Map.of("weight", 42));
 
-        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), "subgraph").graphStore();
+        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "subgraph").graphStore();
         assertThat(graphStore.relationshipCount()).isEqualTo(expectedRelationships);
     }
 
@@ -193,7 +193,7 @@ class GraphFilterProcTest extends BaseProcTest {
 
         runQuery(subGraphQuery);
 
-        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), "subgraph").graphStore();
+        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "subgraph").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(expectedNodes);
     }
 }

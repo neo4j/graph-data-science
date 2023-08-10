@@ -101,7 +101,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "g").graphStore().getUnion();
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graph);
     }
 

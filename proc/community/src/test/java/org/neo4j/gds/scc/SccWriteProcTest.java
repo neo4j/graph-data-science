@@ -136,7 +136,6 @@ class SccWriteProcTest extends BaseProcTest {
             .call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
-            .addParameter("writeProperty", "scc")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -153,14 +152,14 @@ class SccWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("minSetSize").longValue()).isEqualTo(3L);
             assertThat(row.getNumber("maxSetSize").longValue()).isEqualTo(3L);
 
-            assertThat(row.getString("writeProperty")).isEqualTo("scc");
+            assertThat(row.getString("writeProperty")).isEqualTo("componentId");
             assertThat(preProcessingMillis).isNotEqualTo(-1L);
             assertThat(computeMillis).isNotEqualTo(-1L);
             assertThat(writeMillis).isNotEqualTo(-1L);
 
         });
 
-        String validationQuery = "MATCH (n) RETURN n.scc as c";
+        String validationQuery = "MATCH (n) RETURN n.componentId as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
         runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 

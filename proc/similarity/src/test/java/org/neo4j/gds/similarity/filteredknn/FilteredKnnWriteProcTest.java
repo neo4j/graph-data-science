@@ -133,7 +133,7 @@ class FilteredKnnWriteProcTest extends BaseProcTest {
         assertGraphEquals(
             fromGdl(
                 "(a {id: 1})-[:SIMILAR {w: 0.5}]->(b {id: 2}), (b)-[:SIMILAR {w: 0.5}]->(a), (c {id: 3})-[:SIMILAR {w: 0.25}]->(b)"),
-            GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), resultGraphName).graphStore().getUnion()
+            GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), resultGraphName).graphStore().getUnion()
         );
     }
 

@@ -63,6 +63,7 @@ class EmptyGraphProcTest extends BaseProcTest {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.scc")
             .writeMode()
+            .addParameter("writeProperty", "foo")
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodePropertiesWritten")));
     }

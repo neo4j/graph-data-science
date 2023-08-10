@@ -36,7 +36,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.node2vec.write", description = Node2VecCompanion.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(
+    name = "gds.node2vec.write",
+    aliases = "gds.beta.node2vec.write",
+    description = Node2VecCompanion.DESCRIPTION,
+    executionMode = WRITE_NODE_PROPERTY
+)
 public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, Stream<WriteResult>, Node2VecAlgorithmFactory<Node2VecWriteConfig>> {
     @Override
     public String name() {

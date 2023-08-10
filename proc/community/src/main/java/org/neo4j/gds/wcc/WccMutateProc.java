@@ -37,7 +37,7 @@ public class WccMutateProc extends BaseProc {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<WccMutateSpecification.MutateResult> mutate(
+    public Stream<WccMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

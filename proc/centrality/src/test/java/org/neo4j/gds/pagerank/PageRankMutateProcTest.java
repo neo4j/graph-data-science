@@ -131,7 +131,7 @@ class PageRankMutateProcTest extends BaseProcTest {
         )));
 
         Graph mutatedGraph = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "graph")
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore().getGraph(RelationshipType.ALL_RELATIONSHIPS);
 
         assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);

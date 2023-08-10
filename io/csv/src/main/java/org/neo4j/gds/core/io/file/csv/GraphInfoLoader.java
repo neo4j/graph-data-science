@@ -63,7 +63,7 @@ public class GraphInfoLoader {
             var mappingIterator = objectReader.<GraphInfoLine>readValues(fileReader);
 
             var line = mappingIterator.next();
-            var databaseId = DatabaseId.from(line.databaseName);
+            var databaseId = DatabaseId.of(line.databaseName);
             return ImmutableGraphInfo.builder()
                 .databaseId(databaseId)
                 .idMapBuilderType(line.idMapBuilderType)

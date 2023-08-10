@@ -5,6 +5,14 @@ description = 'Neo4j Graph Data Science :: Graph Store Catalog Applications'
 group = 'org.neo4j.gds'
 
 dependencies {
+    // I want to not have this opaque stuff everywhere. Let's stick it in a leaf module
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+
     // DependencyResolver, which we should get rid of
     compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
     // that one Neo4j thing we haven't abstracted yet: GraphDatabaseService

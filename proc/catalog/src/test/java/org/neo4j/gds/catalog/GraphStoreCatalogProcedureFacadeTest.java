@@ -26,6 +26,9 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFac
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
+import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
@@ -61,12 +64,12 @@ class GraphStoreCatalogProcedureFacadeTest {
         );
 
         when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
-        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.from("current database"));
+        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.of("current database"));
         procedureFacade.graphExists("some graph");
 
         verify(businessFacade).graphExists(
             new User("current user", false),
-            DatabaseId.from("current database"),
+            DatabaseId.of("current database"),
             "some graph"
         );
     }
@@ -104,7 +107,7 @@ class GraphStoreCatalogProcedureFacadeTest {
             businessFacade
         );
 
-        var databaseId = DatabaseId.from("current database");
+        var databaseId = DatabaseId.of("current database");
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
         var userLogStore = mock(UserLogStore.class);
         when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);

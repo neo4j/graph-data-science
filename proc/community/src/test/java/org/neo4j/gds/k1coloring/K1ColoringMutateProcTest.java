@@ -125,7 +125,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         assertThat(rowCount).isEqualTo(1L);
 
-        var graphStore = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), K1COLORING_GRAPH).graphStore();
+        var graphStore = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), K1COLORING_GRAPH).graphStore();
 
         var mutatedGraph=graphStore.getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
@@ -233,7 +233,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), K1COLORING_GRAPH).graphStore();
+        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), K1COLORING_GRAPH).graphStore();
 
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));

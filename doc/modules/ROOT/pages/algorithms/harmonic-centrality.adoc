@@ -57,6 +57,7 @@ If we're trying to spread a message on social media we could use the algorithm t
 [[algorithms-harmonic-centrality-syntax]]
 == Syntax
 
+:algorithm: Harmonic Centrality
 include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 
 .Harmonic Centrality syntax per mode

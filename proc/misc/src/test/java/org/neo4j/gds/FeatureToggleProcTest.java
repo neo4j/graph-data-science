@@ -41,6 +41,7 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY_D
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARTITIONED_SCAN;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
@@ -139,6 +140,31 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(USE_PACKED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @Test
+    void toggleUseMixedAdjacencyList() {
+        var useMixedAdjacencyList = USE_MIXED_ADJACENCY_LIST.isEnabled();
+        runQuery(
+            "CALL gds.features.useMixedAdjacencyList($value)",
+            Map.of("value", !useMixedAdjacencyList)
+        );
+        assertEquals(!useMixedAdjacencyList, USE_MIXED_ADJACENCY_LIST.isEnabled());
+        runQuery(
+            "CALL gds.features.useMixedAdjacencyList($value)",
+            Map.of("value", useMixedAdjacencyList)
+        );
+        assertEquals(useMixedAdjacencyList, USE_MIXED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @Test
+    void resetUseMixedAdjacencyList() {
+        USE_MIXED_ADJACENCY_LIST.reset();
+        assertCypherResult(
+            "CALL gds.features.useMixedAdjacencyList.reset()",
+            List.of(Map.of("enabled", false))
+        );
+        assertFalse(USE_MIXED_ADJACENCY_LIST.isEnabled());
     }
 
     @ParameterizedTest

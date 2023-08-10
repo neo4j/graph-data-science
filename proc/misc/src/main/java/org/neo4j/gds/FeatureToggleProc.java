@@ -112,6 +112,21 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useMixedAdjacencyList")
+    @Description("Toggle whether the adjacency list should use bit packing compression for high degree nodes during graph creation.")
+    public void useMixedAdjacencyList(@Name(value = "useMixedAdjacencyList") boolean useMixedAdjacencyList) {
+        GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.toggle(useMixedAdjacencyList);
+    }
+
+    @Internal
+    @Procedure("gds.features.useMixedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to use bit packing compression for high degree nodes during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUseMixedAdjacencyList() {
+        GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.isEnabled()));
+    }
+
+    @Internal
     @Procedure("gds.features.adjacencyPackingStrategy")
     @Description("If `usePackedAdjacencyList` is enabled, this function allows setting the implementation strategy.")
     public void adjacencyPackingStrategy(@Name(value = "adjacencyPackingStrategy") String adjacencyPackingStrategy) {

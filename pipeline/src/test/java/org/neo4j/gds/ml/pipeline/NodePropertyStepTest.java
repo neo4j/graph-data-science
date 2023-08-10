@@ -95,7 +95,7 @@ class NodePropertyStepTest extends BaseProcTest {
             )
         );
 
-        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), GRAPH_NAME).graphStore();
+        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), GRAPH_NAME).graphStore();
 
         graphStore
             .nodeLabels()

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -52,15 +51,16 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
         when(service.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
         )).thenReturn(true);
-        var graphExists = facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph");
+        var graphExists = facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "someGraph");
 
         assertTrue(graphExists);
     }
@@ -82,17 +82,18 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
         when(service.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
         )).thenReturn(false);
         boolean graphExists = facade.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             "someGraph"
         );
 
@@ -116,11 +117,12 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
         assertThatThrownBy(
-            () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "   ")
+            () -> facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "   ")
         ).hasMessage("`graphName` can not be null or blank, but it was `   `");
     }
 
@@ -131,6 +133,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             validationService,
+            null,
             null,
             null,
             null,
@@ -188,6 +191,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             new ConfigurationService(),
             new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
+            null,
             null,
             null,
             null,
@@ -274,6 +278,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -349,11 +354,12 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
         var user = new User("some user", false);
-        var databaseId = DatabaseId.from("some database name");
+        var databaseId = DatabaseId.of("some database name");
         doThrow(new IllegalArgumentException("it's alive?!")).when(graphStoreCatalogService).ensureGraphDoesNotExist(
             user,
             databaseId,
@@ -416,11 +422,12 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
         var user = new User("some user", false);
-        var databaseId = DatabaseId.from("some database name");
+        var databaseId = DatabaseId.of("some database name");
         doThrow(new IllegalArgumentException("Damn you, Jack Sparrow!")).when(graphStoreCatalogService)
             .ensureGraphExists(
                 user,

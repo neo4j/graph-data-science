@@ -65,7 +65,7 @@ class DummyGraphStore implements GraphStore {
 
     @Override
     public DatabaseId databaseId() {
-        return DatabaseId.from("some database");
+        return DatabaseId.of("some database");
     }
 
     @Override

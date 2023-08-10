@@ -19,19 +19,13 @@
  */
 package org.neo4j.gds.scc;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 public interface SccWriteConfig extends SccBaseConfig, WritePropertyConfig {
-    
-    @Value.Default
-    @Override
-    default String writeProperty() {
-        return "componentId";
-    }
+
     static SccWriteConfig of(CypherMapWrapper userInput) {
         return new SccWriteConfigImpl(userInput);
     }

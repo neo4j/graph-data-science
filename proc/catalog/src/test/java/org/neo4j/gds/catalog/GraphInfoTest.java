@@ -101,7 +101,7 @@ final class GraphInfoTest {
             .relationshipProjections(RelationshipProjections.ALL)
             .build();
         var graphStore = CSRGraphStoreUtil.createFromGraph(
-            DatabaseId.from("test"),
+            DatabaseId.of("test"),
             graph,
             Optional.empty(),
             1

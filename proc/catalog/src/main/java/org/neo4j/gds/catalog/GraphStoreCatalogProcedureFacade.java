@@ -24,6 +24,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -33,6 +34,9 @@ import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
@@ -464,6 +468,39 @@ public class GraphStoreCatalogProcedureFacade {
         );
 
         return result.map(StreamGraphPropertyResult::new);
+    }
+
+    public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        // odd behaviour selection, how can we do better?
+        boolean usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
+
+        var resultStream = businessFacade.streamNodeProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration,
+            usesPropertyNameColumn
+        );
+
+        // neat trick...
+        try (var statement = kernelTransactionService.getKernelTransaction().acquireStatement()) {
+            statement.registerCloseableResource(resultStream);
+            return resultStream;
+        }
     }
 
     /**

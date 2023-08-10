@@ -27,6 +27,7 @@ final class GraphCatalogProcedureConstants {
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
     static final String LIST_DESCRIPTION = "Lists information about named graphs stored in the catalog.";
     static final String PROJECT_DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
+    static final String STREAM_NODE_PROPERTIES_DESCRIPTION = "Streams the given node properties.";
 
     /**
      * This exists because procedures need default values sometimes.

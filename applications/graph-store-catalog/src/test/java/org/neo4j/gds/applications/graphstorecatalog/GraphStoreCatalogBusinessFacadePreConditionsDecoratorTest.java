@@ -39,7 +39,7 @@ class GraphStoreCatalogBusinessFacadePreConditionsDecoratorTest {
         doThrow(new IllegalStateException("call blocked because reasons"))
             .when(preconditionsService).checkPreconditions();
         assertThatThrownBy(
-            () -> facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph")
+            () -> facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "someGraph")
         ).hasMessage("call blocked because reasons");
     }
 
@@ -51,10 +51,10 @@ class GraphStoreCatalogBusinessFacadePreConditionsDecoratorTest {
 
         when(delegate.graphExists(
             new User("someUser", false),
-            DatabaseId.from("someDatabase"),
+            DatabaseId.of("someDatabase"),
             "someGraph"
         )).thenReturn(true);
-        var exists = facade.graphExists(new User("someUser", false), DatabaseId.from("someDatabase"), "someGraph");
+        var exists = facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "someGraph");
 
         assertTrue(exists);
     }

@@ -186,7 +186,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(
@@ -229,7 +229,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore().getUnion();
 
         assertThat(mutatedGraph.relationshipCount()).isEqualTo(6);
 
@@ -269,7 +269,7 @@ class FilteredKnnMutateProcTest extends BaseProcTest {
 
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

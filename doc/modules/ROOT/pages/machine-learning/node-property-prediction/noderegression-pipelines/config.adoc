@@ -279,7 +279,7 @@ For detailed information about the available training methods in GDS, see xref:m
 
 In xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
-The parameter space of a pipeline can be inspected using `gds.beta.model.list` and yielding `parameterSpace`.
+The parameter space of a pipeline can be inspected using `gds.model.list` and yielding `parameterSpace`.
 
 [NOTE]
 ====

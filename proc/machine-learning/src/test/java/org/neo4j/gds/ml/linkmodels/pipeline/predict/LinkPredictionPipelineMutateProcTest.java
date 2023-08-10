@@ -135,7 +135,7 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
             )
         );
 
-        Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore().getGraph(
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "g").graphStore().getGraph(
             NodeLabel.of(nodeLabel), RelationshipType.of("PREDICTED"), Optional.of("probability"));
 
         var relationshipRowsGdl = List.of(
@@ -170,7 +170,7 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
     @Test
     void checkYieldsAndMutatedTypeAndProperty() {
         var graphStore = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "g")
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "g")
             .graphStore();
 
         var query = GdsCypher

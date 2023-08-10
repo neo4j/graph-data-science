@@ -19,20 +19,13 @@
  */
 package org.neo4j.gds.scc;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 public interface SccMutateConfig extends SccBaseConfig, MutateNodePropertyConfig {
-
-    @Value.Default
-    @Override
-    default String mutateProperty() {
-        return "componentId";
-    }
-
+    
     static SccMutateConfig of(CypherMapWrapper userInput) {
         return new SccMutateConfigImpl(userInput);
     }

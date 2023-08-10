@@ -26,27 +26,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DatabaseIdTest {
     @Test
     void shouldOverride() {
-        DatabaseId someId = DatabaseId.from("some database");
+        DatabaseId someId = DatabaseId.of("some database");
         DatabaseId someOtherId = someId.orOverride("some other database");
 
-        assertThat(someOtherId).isEqualTo(DatabaseId.from("some other database"));
+        assertThat(someOtherId).isEqualTo(DatabaseId.of("some other database"));
     }
 
     @Test
     void shouldTrimWhenOverriding() {
-        DatabaseId someId = DatabaseId.from("some database");
+        DatabaseId someId = DatabaseId.of("some database");
         DatabaseId someOtherId = someId.orOverride("   some other database   ");
 
-        assertThat(someOtherId).isEqualTo(DatabaseId.from("some other database"));
+        assertThat(someOtherId).isEqualTo(DatabaseId.of("some other database"));
     }
 
     @Test
     void shouldNotOverrideWhenOverrideIsBlankOrEmpty() {
-        DatabaseId databaseId = DatabaseId.from("some database")
+        DatabaseId databaseId = DatabaseId.of("some database")
             .orOverride(null)
             .orOverride("")
             .orOverride("   ");
 
-        assertThat(databaseId).isEqualTo(DatabaseId.from("some database"));
+        assertThat(databaseId).isEqualTo(DatabaseId.of("some database"));
     }
 }

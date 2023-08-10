@@ -21,9 +21,9 @@ package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.compress.ModifiableSlice;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -66,6 +66,6 @@ class PackedAdjacencyListTest {
         var degrees = HugeIntArray.of(degree.intValue());
         var offsets = HugeLongArray.of(offset);
 
-        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, AdjacencyList.MemoryInfo.EMPTY);
+        return new PackedAdjacencyList(pages, allocationSizes, degrees, offsets, MemoryInfo.EMPTY);
     }
 }

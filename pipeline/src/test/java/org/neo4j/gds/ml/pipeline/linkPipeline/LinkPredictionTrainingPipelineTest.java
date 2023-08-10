@@ -181,7 +181,7 @@ class LinkPredictionTrainingPipelineTest {
     @Test
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
-            .databaseId(DatabaseId.from(""))
+            .databaseId(DatabaseId.of(""))
             .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
@@ -225,7 +225,7 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
-            .databaseId(DatabaseId.from(""))
+            .databaseId(DatabaseId.of(""))
             .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .modelCatalog(modelCatalog)
@@ -269,7 +269,7 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
-            .databaseId(DatabaseId.from(""))
+            .databaseId(DatabaseId.of(""))
             .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .modelCatalog(modelCatalog)

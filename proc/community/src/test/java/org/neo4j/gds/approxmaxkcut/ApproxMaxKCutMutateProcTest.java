@@ -129,7 +129,7 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest {
 
         assertThat(rowCount).isEqualTo(1L);
 
-        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME)
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), GRAPH_NAME)
             .graphStore()
             .getUnion();
 

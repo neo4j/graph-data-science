@@ -58,10 +58,12 @@ public interface AdjacencyListBehavior {
         var noAggregation = Arrays.stream(aggregations).map(Aggregation::resolve).allMatch(Aggregation::equivalentToNone);
 
         return GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()
-            ? mixed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
-            : GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-                ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
-                : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
+            ? packed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+            : GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.isEnabled()
+                ? mixed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+                : GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+                    ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+                    : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
     }
 
     static AdjacencyCompressorFactory compressed(

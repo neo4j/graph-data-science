@@ -156,7 +156,7 @@ class GraphSageIntegrationTest extends BaseProcTest {
 
     private void checkModelExistence(String modelType, boolean exists) {
         assertCypherResult(
-            "CALL gds.beta.model.exists($modelName)",
+            "CALL gds.model.exists($modelName)",
             Map.of("modelName", modelName),
             List.of(
                 Map.of(
@@ -189,7 +189,7 @@ class GraphSageIntegrationTest extends BaseProcTest {
 
     private void dropModel() {
         assertCypherResult(
-            "CALL gds.beta.model.drop($modelName)",
+            "CALL gds.model.drop($modelName)",
             Map.of("modelName", modelName),
             singletonList(
                 Map.of(

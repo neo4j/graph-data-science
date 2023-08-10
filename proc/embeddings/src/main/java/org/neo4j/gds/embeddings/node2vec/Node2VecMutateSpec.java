@@ -36,7 +36,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.node2vec.mutate", description = Node2VecCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(
+    name = "gds.node2vec.mutate",
+    aliases = "gds.beta.node2vec.mutate",
+    description = Node2VecCompanion.DESCRIPTION,
+    executionMode = MUTATE_NODE_PROPERTY
+)
 public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, Stream<MutateResult>, Node2VecAlgorithmFactory<Node2VecMutateConfig>> {
     @Override
     public String name() {

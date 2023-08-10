@@ -86,7 +86,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
         runQuery(createQuery);
 
-        graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
+        graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "g").graphStore();
     }
 
 

@@ -51,7 +51,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
+    @ValueSource(strings = {"gds.model.list()", "gds.model.list(null)"})
     void listsModel(String query) {
         var model1 = Model.of(
             "testAlgo1",
@@ -112,8 +112,8 @@ class ModelListProcTest extends ModelProcBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "CALL gds.beta.model.list()",
-        "CALL gds.beta.model.list('someModel')"
+        "CALL gds.model.list()",
+        "CALL gds.model.list('someModel')"
     })
     void emptyResultOnListQueries(String query) {
         assertCypherResult(
@@ -143,7 +143,7 @@ class ModelListProcTest extends ModelProcBaseTest {
         modelCatalog.set(model2);
 
         assertCypherResult(
-            "CALL gds.beta.model.list('testModel2')",
+            "CALL gds.model.list('testModel2')",
             singletonList(
                 Map.of(
                     "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
@@ -162,7 +162,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     @MethodSource("invalidModelNames")
     void failOnEmptyModelName(String modelName) {
         assertError(
-            "CALL gds.beta.model.list($modelName)",
+            "CALL gds.model.list($modelName)",
             Map.of("modelName", modelName),
             "can not be null or blank"
         );

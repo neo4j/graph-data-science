@@ -20,9 +20,11 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Set;
@@ -139,5 +141,110 @@ class GraphStoreValidationServiceTest {
         )).withMessage("" +
             "The specified graph property 'bar' does not exist. " +
             "Did you mean: ['baz'].");
+    }
+
+    @Test
+    void shouldValidateNodeProjectionHasSpecifiedPropertiesWhenNotSpecifyingLabel() {
+        var service = new GraphStoreValidationService();
+
+        var configuration = GraphStreamNodePropertiesConfig.of(
+            "some graph",
+            List.of("p1", "p2", "p3"),
+            "*",
+            CypherMapWrapper.empty()
+        );
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.nodeLabels()).thenReturn(Set.of(NodeLabel.of("l1"), NodeLabel.of("l2"), NodeLabel.of("l3")));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l1")))).thenReturn(List.of("p1", "p2"));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l2")))).thenReturn(List.of(
+            "p1",
+            "p2",
+            "p3"
+        )); // exact match
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l3")))).thenReturn(List.of("p2", "p3"));
+        service.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+    }
+
+    @Test
+    void shouldValidateNodeProjectionHasAtLeastSpecifiedPropertiesWhenNotSpecifyingLabel() {
+        var service = new GraphStoreValidationService();
+
+        var configuration = GraphStreamNodePropertiesConfig.of(
+            "some graph",
+            List.of("p1", "p2", "p3"),
+            "*",
+            CypherMapWrapper.empty()
+        );
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.nodeLabels()).thenReturn(Set.of(NodeLabel.of("l1"), NodeLabel.of("l2"), NodeLabel.of("l3")));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l1")))).thenReturn(List.of("p1", "p2"));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l2")))).thenReturn(List.of(
+            "p1",
+            "p2",
+            "p3",
+            "p4"
+        )); // subset match
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l3")))).thenReturn(List.of("p2", "p3"));
+        service.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+    }
+
+    @Test
+    void shouldRejectWhenNodeProjectionDoesNotHaveSpecifiedPropertiesWhenNotSpecifyingLabel() {
+        var service = new GraphStoreValidationService();
+
+        var configuration = GraphStreamNodePropertiesConfig.of(
+            "some graph",
+            List.of("p1", "p2", "p3"),
+            "*",
+            CypherMapWrapper.empty()
+        );
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.nodeLabels()).thenReturn(Set.of(NodeLabel.of("l1"), NodeLabel.of("l2"), NodeLabel.of("l3")));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l1")))).thenReturn(List.of("p1", "p2"));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l2")))).thenReturn(List.of("p1", "p3"));
+        when(graphStore.nodePropertyKeys(List.of(NodeLabel.of("l3")))).thenReturn(List.of("p2", "p3"));
+
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            service.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+        }).withMessage("Expecting at least one node projection to contain property key(s) ['p1', 'p2', 'p3'].");
+    }
+
+    @Test
+    void shouldValidateNodeProjectionHasSpecifiedPropertiesWhenSpecifyingLabel() {
+        var service = new GraphStoreValidationService();
+
+        var configuration = GraphStreamNodePropertiesConfig.of(
+            "some graph",
+            List.of("p1", "p2", "p3"),
+            "A",
+            CypherMapWrapper.empty()
+        );
+        GraphStore graphStore = mock(GraphStore.class);
+        when(graphStore.hasNodeProperty(NodeLabel.of("A"), "p1")).thenReturn(true);
+        when(graphStore.hasNodeProperty(NodeLabel.of("A"), "p2")).thenReturn(true);
+        when(graphStore.hasNodeProperty(NodeLabel.of("A"), "p3")).thenReturn(true);
+        service.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+    }
+
+    @Test
+    void shouldRejectNodeProjectionMissingPropertyWhenSpecifyingLabel() {
+        var service = new GraphStoreValidationService();
+
+        var configuration = GraphStreamNodePropertiesConfig.of(
+            "some graph",
+            List.of("p1", "p2", "p3"),
+            "A",
+            CypherMapWrapper.empty()
+        );
+        GraphStore graphStore = mock(GraphStore.class);
+        when(graphStore.hasNodeProperty(NodeLabel.of("A"), "p1")).thenReturn(true);
+        when(graphStore.hasNodeProperty(NodeLabel.of("A"), "p2")).thenReturn(false);
+        when(graphStore.hasNodeProperty(NodeLabel.of("A"), "p3")).thenReturn(true);
+        when(graphStore.nodePropertyKeys(NodeLabel.of("A"))).thenReturn(Set.of("p1", "p3"));
+
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            service.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+        }).withMessage(
+            "Expecting all specified node projections to have all given properties defined. Could not find property key(s) ['p2'] for label A. Defined keys: ['p1', 'p3'].");
     }
 }

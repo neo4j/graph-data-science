@@ -113,7 +113,7 @@ class TriangleCountMutateProcTest extends BaseProcTest {
 
         
         Graph mutatedGraph = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "graph")
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
             .getUnion();
 
@@ -159,7 +159,7 @@ class TriangleCountMutateProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(1L);
 
         Graph mutatedGraph = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "testGraph")
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "testGraph")
             .graphStore()
             .getUnion();
 

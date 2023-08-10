@@ -21,6 +21,7 @@ package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.applications.graphstorecatalog.ConfigurationService;
 import org.neo4j.gds.applications.graphstorecatalog.CypherProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
@@ -37,23 +38,23 @@ import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
 import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
 import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorService;
 import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
+import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
-import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
 import org.neo4j.gds.catalog.ProcedureTransactionService;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
 import org.neo4j.gds.catalog.TerminationFlagService;
 import org.neo4j.gds.catalog.TransactionContextService;
-import org.neo4j.gds.catalog.UserLogServices;
-import org.neo4j.gds.catalog.UserServices;
-import org.neo4j.gds.core.loading.ConfigurationService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -64,6 +65,7 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphStoreCatalogProcedureFacade, ProcedureException> {
     private final Log log;
+    private final GraphStoreCatalogService graphStoreCatalogService;
     private final DatabaseIdService databaseIdService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
@@ -71,12 +73,14 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
     ProcedureFacadeProvider(
         Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
         DatabaseIdService databaseIdService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
         UserServices userServices
     ) {
         this.log = log;
+        this.graphStoreCatalogService = graphStoreCatalogService;
         this.databaseIdService = databaseIdService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
@@ -99,7 +103,6 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
 
         // GDS services
         var configurationService = new ConfigurationService();
-        var graphStoreCatalogService = new GraphStoreCatalogService();
         var graphStoreFilterService = new GraphStoreFilterService();
         var graphStoreValidationService = new GraphStoreValidationService();
 
@@ -131,6 +134,7 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
         var dropNodePropertiesService = new DropNodePropertiesService(log);
         var dropRelationshipsService = new DropRelationshipsService(log);
         var nodeLabelMutatorService = new NodeLabelMutatorService();
+        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -147,7 +151,8 @@ public class ProcedureFacadeProvider implements ThrowingFunction<Context, GraphS
             graphMemoryUsageService,
             dropNodePropertiesService,
             dropRelationshipsService,
-            nodeLabelMutatorService
+            nodeLabelMutatorService,
+            streamNodePropertiesApplication
         );
 
         // wrap in decorator to enable preconditions checks

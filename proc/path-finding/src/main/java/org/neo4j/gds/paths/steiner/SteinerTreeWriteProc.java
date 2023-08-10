@@ -22,7 +22,9 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,6 +34,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class SteinerTreeWriteProc extends BaseProc {
@@ -50,6 +53,20 @@ public class SteinerTreeWriteProc extends BaseProc {
             executionContext()
         ).compute(graphName, configuration);
     }
+
+    @Procedure(value = "gds.steinerTree.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfiguration,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return new MemoryEstimationExecutor<>(
+            new SteinerTreeWriteSpec(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, configuration);
+    }
+
 
     @Deprecated
     @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE, deprecatedBy = "gds.steinerTree.write")

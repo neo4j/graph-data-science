@@ -89,7 +89,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var graphStore = GdlFactory
                 .builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .graphProjectConfig(ImmutableGraphProjectFromGdlConfig
                     .builder()
                     .graphName("foo")
@@ -110,7 +110,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var executionContext = ImmutableExecutionContext
                 .builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

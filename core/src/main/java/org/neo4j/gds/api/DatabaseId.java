@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
@@ -30,16 +28,12 @@ public final class DatabaseId {
 
     public static final DatabaseId EMPTY = new DatabaseId("");
 
-    public static DatabaseId of(GraphDatabaseService databaseService) {
-        return new DatabaseId(normalizeDatabaseName(databaseService.databaseName()));
-    }
-
-    public static DatabaseId from(String databaseName) {
+    public static DatabaseId of(String databaseName) {
         return new DatabaseId(normalizeDatabaseName(databaseName));
     }
 
     public static DatabaseId random() {
-        return from(normalizeDatabaseName(UUID.randomUUID().toString()));
+        return of(normalizeDatabaseName(UUID.randomUUID().toString()));
     }
 
     private static String normalizeDatabaseName(String databaseName) {
@@ -93,6 +87,6 @@ public final class DatabaseId {
         var trimmedDatabaseName = optionalDatabaseName.trim();
         if (trimmedDatabaseName.isBlank()) return this;
 
-        return DatabaseId.from(trimmedDatabaseName);
+        return DatabaseId.of(trimmedDatabaseName);
     }
 }

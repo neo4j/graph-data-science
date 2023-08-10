@@ -146,7 +146,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .databaseId(DatabaseId.of(db))
+            .databaseId(DatabaseId.of(db.databaseName()))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .build();
     }

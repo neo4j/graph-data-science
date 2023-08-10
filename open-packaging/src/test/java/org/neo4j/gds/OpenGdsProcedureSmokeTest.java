@@ -223,9 +223,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.spanningTree.write.estimate",
 
         "gds.steinerTree.mutate",
+        "gds.steinerTree.mutate.estimate",
         "gds.steinerTree.stats",
+        "gds.steinerTree.stats.estimate",
         "gds.steinerTree.stream",
+        "gds.steinerTree.stream.estimate",
         "gds.steinerTree.write",
+        "gds.steinerTree.write.estimate",
 
         "gds.triangles",
         "gds.alpha.ml.splitRelationships.mutate",
@@ -254,12 +258,12 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.export.csv",
         "gds.graph.export.csv.estimate",
 
-        "gds.beta.node2vec.mutate",
-        "gds.beta.node2vec.mutate.estimate",
-        "gds.beta.node2vec.stream",
-        "gds.beta.node2vec.stream.estimate",
-        "gds.beta.node2vec.write",
-        "gds.beta.node2vec.write.estimate",
+        "gds.node2vec.mutate",
+        "gds.node2vec.mutate.estimate",
+        "gds.node2vec.stream",
+        "gds.node2vec.stream.estimate",
+        "gds.node2vec.write",
+        "gds.node2vec.write.estimate",
 
         "gds.beta.graphSage.mutate",
         "gds.beta.graphSage.mutate.estimate",
@@ -291,11 +295,11 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.knn.write",
         "gds.knn.write.estimate",
 
-        "gds.beta.listProgress",
+        "gds.listProgress",
 
-        "gds.beta.model.drop",
-        "gds.beta.model.exists",
-        "gds.beta.model.list",
+        "gds.model.drop",
+        "gds.model.exists",
+        "gds.model.list",
 
         "gds.modularityOptimization.mutate",
         "gds.modularityOptimization.mutate.estimate",
@@ -577,7 +581,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 420;
+        int expectedCount = 424;
         assertEquals(
             expectedCount,
             returnedRows,

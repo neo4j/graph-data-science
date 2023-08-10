@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 @Neo4jModelCatalogExtension
 class ModelExistsProcTest extends ModelProcBaseTest {
 
-    private static final String EXISTS_QUERY = "CALL gds.beta.model.exists($modelName)";
+    private static final String EXISTS_QUERY = "CALL gds.model.exists($modelName)";
 
     @Inject
     private ModelCatalog modelCatalog;

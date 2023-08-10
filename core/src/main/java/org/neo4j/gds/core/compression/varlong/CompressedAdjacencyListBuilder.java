@@ -20,14 +20,17 @@
 package org.neo4j.gds.core.compression.varlong;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.AdjacencyList.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
-import org.neo4j.gds.core.compression.common.BumpAllocator;
-import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.compression.MemoryInfo;
+import org.neo4j.gds.core.compression.MemoryInfoUtil;
+import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.compression.common.MemoryTracker;
 import org.neo4j.gds.mem.MemoryUsage;
+
+import java.util.Optional;
 
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
@@ -65,8 +68,8 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
             this.memoryTracker.recordPageSize(page.length * Byte.BYTES);
         }
 
-        var memoryInfoBuilder = MemoryInfo
-            .builder(memoryTracker)
+        var memoryInfoBuilder = MemoryInfoUtil
+            .builder(memoryTracker, Optional.empty())
             .pages(pages.length)
             .bytesOffHeap(0);
 

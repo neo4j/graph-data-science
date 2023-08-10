@@ -218,6 +218,6 @@ class ShortestPathYensMutateProcTest extends BaseProcTest {
     }
 
     DatabaseId databaseId() {
-        return DatabaseId.of(graphDb());
+        return DatabaseId.of(graphDb().databaseName());
     }
 }
