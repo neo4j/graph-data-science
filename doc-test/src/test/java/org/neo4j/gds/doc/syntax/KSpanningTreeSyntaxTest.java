@@ -33,6 +33,6 @@ class KSpanningTreeSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/k-minimum-weight-spanning-tree.adoc";
+        return "pages/algorithms/k-minimum-weight-spanning-tree.adoc";
     }
 }

@@ -37,7 +37,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.alpha.kSpanningTree.write", description = KSpanningWriteTreeProc.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(
+    name = "gds.kSpanningTree.write",
+    aliases = "gds.alpha.kSpanningTree.write",
+    description = KSpanningTreeWriteProc.DESCRIPTION,
+    executionMode = WRITE_RELATIONSHIP
+)
 public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, SpanningTree, KSpanningTreeWriteConfig, Stream<KSpanningTreeWriteResult>, KSpanningTreeAlgorithmFactory<KSpanningTreeWriteConfig>> {
 
     @Override

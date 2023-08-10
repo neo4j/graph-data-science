@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,15 +34,15 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KSpanningWriteTreeProc extends BaseProc {
+public class KSpanningTreeWriteProc extends BaseProc {
 
     static final String DESCRIPTION =
         "The K-spanning tree algorithm starts from a root node and returns a spanning tree with exactly k nodes";
 
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    
-    @Procedure(value = "gds.alpha.kSpanningTree.write", mode = WRITE)
+
+    @Procedure(value = "gds.kSpanningTree.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<KSpanningTreeWriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -51,6 +52,21 @@ public class KSpanningWriteTreeProc extends BaseProc {
             new KSpanningTreeWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.alpha.kSpanningTree.write", mode = WRITE, deprecatedBy = "gds.kSpanningTree.write")
+    @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<KSpanningTreeWriteResult> alphaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.kSpanningTree.write` has been deprecated, please use `gds.kSpanningTree.write`.");
+
+        return write(graphName, configuration);
     }
 
     @Override

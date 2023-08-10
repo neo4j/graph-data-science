@@ -1,3 +1,4 @@
+:page-aliases: alpha-algorithms/k-minimum-weight-spanning-tree.adoc
 [[alpha-algorithms-k-spanning-tree]]
 [.alpha]
 = Minimum Weight k-Spanning Tree
@@ -44,7 +45,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.kSpanningTree.write(
+CALL gds.kSpanningTree.write(
   graphName: String,
   configuration: Map
 )
@@ -137,7 +138,7 @@ By setting the `k=3`, we define that we want to find a 3-minimum spanning tree t
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'A'})
-CALL gds.alpha.kSpanningTree.write('graph', {
+CALL gds.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
@@ -181,7 +182,7 @@ Nodes A, B, and C form the discovered 3-minimum spanning tree of our graph.
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.kSpanningTree.write('graph', {
+CALL gds.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',

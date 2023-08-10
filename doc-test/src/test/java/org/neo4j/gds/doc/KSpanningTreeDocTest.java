@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.paths.kspanningtree.KSpanningWriteTreeProc;
+import org.neo4j.gds.paths.kspanningtree.KSpanningTreeWriteProc;
 
 import java.util.List;
 
@@ -35,14 +35,14 @@ class KSpanningTreeDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            KSpanningWriteTreeProc.class,
+            KSpanningTreeWriteProc.class,
             GraphProjectProc.class
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/k-minimum-weight-spanning-tree.adoc";
+        return "pages/algorithms/k-minimum-weight-spanning-tree.adoc";
     }
 
 }

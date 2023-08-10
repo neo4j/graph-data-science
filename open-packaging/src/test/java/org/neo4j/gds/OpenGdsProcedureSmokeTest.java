@@ -213,7 +213,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.sllpa.write",
         "gds.alpha.sllpa.write.estimate",
 
-        "gds.alpha.kSpanningTree.write",
+        "gds.kSpanningTree.write",
         "gds.spanningTree.mutate",
         "gds.spanningTree.mutate.estimate",
         "gds.spanningTree.stats",
