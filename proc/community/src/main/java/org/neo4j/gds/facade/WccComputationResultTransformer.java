@@ -39,7 +39,7 @@ final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(ComputationResult<WccBaseConfig> computationResult) {
+    static Stream<WccStreamResult> toStreamResult(ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
 
@@ -61,7 +61,7 @@ final class WccComputationResultTransformer {
 
     // TODO: This might be shared between the clients. Think of a better placement for this transformation...
     static WccMutateResult toMutateResult(
-        ComputationResult<WccBaseConfig> computationResult,
+        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult,
         WccMutateConfig mutateConfig
     ) {
 
@@ -98,7 +98,7 @@ final class WccComputationResultTransformer {
     }
 
     private static AbstractCommunityResultBuilder<WccMutateResult> resultBuilder(
-        ComputationResult<WccBaseConfig> computationResult
+        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult
     ) {
         var mutateREsultBuilder = new WccMutateResult.Builder(
             ProcedureReturnColumns.EMPTY,

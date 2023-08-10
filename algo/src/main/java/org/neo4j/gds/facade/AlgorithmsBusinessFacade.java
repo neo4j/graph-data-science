@@ -19,14 +19,23 @@
  */
 package org.neo4j.gds.facade;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
+import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
+
+import java.util.Optional;
 
 public class AlgorithmsBusinessFacade {
 
@@ -41,51 +50,85 @@ public class AlgorithmsBusinessFacade {
         this.memoryUsageValidator = memoryUsageValidator;
     }
 
-    public ComputationResult<WccBaseConfig> wcc(
+    public ComputationResult<WccBaseConfig, DisjointSetStruct> wcc(
         String graphName,
         WccBaseConfig config,
         User user,
         DatabaseId databaseId,
         ProgressTracker progressTracker
     ) {
-
-        // Go get the graph and graph store from the catalog
-        var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
-            GraphName.parse(graphName),
+        return run(
+            graphName,
             config,
             config.relationshipWeightProperty(),
+            new WccAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            progressTracker
         );
-
-        var graph = graphWithGraphStore.getLeft();
-        var graphStore = graphWithGraphStore.getRight();
-
-        // No algorithm execution when the graph is empty
-        if (graph.isEmpty()) {
-            return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
-        }
-
-        // create and run the algorithm
-        var factory = new WccAlgorithmFactory<>();
-        var wccEstimator = new AlgorithmMemoryEstimation<>(
-            GraphDimensions.of(
-                graph.nodeCount(),
-                graph.relationshipCount()
-            ),
-            factory
-        );
-
-        memoryUsageValidator.validateAlgorithmCanRunWithTheAvailableMemory(
-            config,
-            wccEstimator::memoryEstimation,
-            graphStoreCatalogService.graphStoreCount()
-        );
-        var wcc = factory.build(graph, config, progressTracker);
-        var wccResult = wcc.compute();
-
-        return ComputationResult.of(wccResult, graph, config, graphStore);
     }
 
+    ComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+        String graphName,
+        KCoreDecompositionBaseConfig config,
+        User user,
+        DatabaseId databaseId,
+        ProgressTracker progressTracker
+    ) {
+        return run(
+            graphName,
+            config,
+            Optional.empty(),
+            new KCoreDecompositionAlgorithmFactory<>(),
+            user,
+            databaseId,
+            progressTracker
+        );
+    }
 
+    private <A extends Algorithm<R>, C extends AlgoBaseConfig, R> ComputationResult<C, R> run(
+        String graphName,
+        C config,
+        Optional<String> relationshipProperty,
+        GraphAlgorithmFactory<A, C> algorithmFactory,
+        User user,
+        DatabaseId databaseId,
+        ProgressTracker progressTracker
+    ) {
+            // Go get the graph and graph store from the catalog
+            var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
+                GraphName.parse(graphName),
+                config,
+                relationshipProperty,
+                user,
+                databaseId
+            );
+
+            var graph = graphWithGraphStore.getLeft();
+            var graphStore = graphWithGraphStore.getRight();
+
+            // No algorithm execution when the graph is empty
+            if (graph.isEmpty()) {
+                return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
+            }
+
+            // create and run the algorithm
+            var algorithmEstimator = new AlgorithmMemoryEstimation<>(
+                GraphDimensions.of(
+                    graph.nodeCount(),
+                    graph.relationshipCount()
+                ),
+                algorithmFactory
+            );
+
+            memoryUsageValidator.validateAlgorithmCanRunWithTheAvailableMemory(
+                config,
+                algorithmEstimator::memoryEstimation,
+                graphStoreCatalogService.graphStoreCount()
+            );
+            var algorithm = algorithmFactory.build(graph, config, progressTracker);
+            var algorithmResult = algorithm.compute();
+
+            return ComputationResult.of(algorithmResult, graph, config, graphStore);
+    }
 }

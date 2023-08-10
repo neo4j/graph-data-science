@@ -22,19 +22,18 @@ package org.neo4j.gds.facade;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.Optional;
 
 @ValueClass
-public interface ComputationResult<CONFIG extends WccBaseConfig> {
+public interface ComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
 
     /**
      * Result is empty if no computation happened, which basically means the graph was empty.
      * @return The result if computation happened.
      */
-    Optional<DisjointSetStruct> result();
+    Optional<RESULT> result();
 
     Graph graph();
 
@@ -42,11 +41,11 @@ public interface ComputationResult<CONFIG extends WccBaseConfig> {
 
     GraphStore graphStore();
 
-    static <C extends WccBaseConfig> ComputationResult<C> of(DisjointSetStruct result, Graph graph, C config, GraphStore graphStore) {
+    static <C extends AlgoBaseConfig, R> ComputationResult<C, R> of(R result, Graph graph, C config, GraphStore graphStore) {
         return ImmutableComputationResult.of(result, graph, config, graphStore);
     }
 
-    static <C extends WccBaseConfig> ComputationResult<C> withoutAlgorithmResult(Graph graph, C config, GraphStore graphStore) {
+    static <C extends AlgoBaseConfig, R> ComputationResult<C, R> withoutAlgorithmResult(Graph graph, C config, GraphStore graphStore) {
         return ImmutableComputationResult.of(Optional.empty(), graph, config, graphStore);
     }
 

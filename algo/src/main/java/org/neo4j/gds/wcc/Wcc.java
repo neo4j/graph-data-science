@@ -59,7 +59,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
     private final ExecutorService executorService;
     private final long batchSize;
 
-    private Graph graph;
+    private final Graph graph;
 
     public static MemoryEstimation memoryEstimation(boolean incremental) {
         return MemoryEstimations

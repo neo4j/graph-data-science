@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserServices;
 import org.neo4j.gds.wcc.WccMutateConfig;
@@ -58,6 +59,8 @@ public class CommunityProcedureFacade {
         this.graphDatabaseService = graphDatabaseService;
         this.securityContext = securityContext;
     }
+
+    // WCC
 
     public Stream<WccStreamResult> wccStream(
         String graphName,
@@ -94,6 +97,31 @@ public class CommunityProcedureFacade {
         return Stream.of(WccComputationResultTransformer.toMutateResult(computationResult, config));
     }
 
+    // WCC end
+
+    // K-Core Decomposition
+    public Stream<KCoreStreamResult> kCoreStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = KCoreDecompositionStreamConfig.of(CypherMapWrapper.create(configuration));
+
+        // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
+        algorithmMetaDataSetter.set(streamConfig);
+
+        var computationResult = algorithmsBusinessFacade.kCore(
+            graphName,
+            streamConfig,
+            user(),
+            databaseId(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        return KCoreResultTransformer.toStreamResult(computationResult);
+    }
+
+    // K-Core Decomposition end
 
     /**
      * We need to obtain the database id at this point in time so that we can send it down stream to business logic.
@@ -111,4 +139,5 @@ public class CommunityProcedureFacade {
     private User user() {
         return userServices.getUser(securityContext);
     }
+
 }
