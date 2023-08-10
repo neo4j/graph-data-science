@@ -17,16 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.procedures.community;
 
-public class WccStreamResult {
+public class KCoreStreamResult {
 
     public final long nodeId;
+    public final long coreValue;
 
-    public final long componentId;
-
-    public WccStreamResult(long nodeId, long componentId) {
+    public KCoreStreamResult(long nodeId, int coreValue) {
         this.nodeId = nodeId;
-        this.componentId = componentId;
+        this.coreValue = coreValue;
     }
 }

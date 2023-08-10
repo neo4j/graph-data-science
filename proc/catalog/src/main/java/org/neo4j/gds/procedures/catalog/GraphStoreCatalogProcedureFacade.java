@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.procedures.catalog;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -26,11 +26,20 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
+import org.neo4j.gds.catalog.GraphDropGraphPropertiesResult;
+import org.neo4j.gds.catalog.GraphInfo;
+import org.neo4j.gds.catalog.GraphInfoWithHistogram;
+import org.neo4j.gds.catalog.KernelTransactionService;
+import org.neo4j.gds.catalog.ProcedureTransactionService;
+import org.neo4j.gds.catalog.StreamGraphPropertyResult;
+import org.neo4j.gds.catalog.TaskRegistryFactoryService;
+import org.neo4j.gds.catalog.TerminationFlagService;
+import org.neo4j.gds.catalog.TransactionContextService;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
+import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -139,7 +148,7 @@ public class GraphStoreCatalogProcedureFacade {
         return outputMarshaller.apply(graphExists);
     }
 
-    boolean graphExists(String graphName) {
+    public boolean graphExists(String graphName) {
         // stripping off Neo4j bits
         var user = user();
         var databaseId = databaseId();

@@ -21,7 +21,7 @@ package org.neo4j.gds.userlog;
 
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 

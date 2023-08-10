@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.algorithms;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
@@ -49,7 +49,7 @@ public class AlgorithmMemoryValidationService {
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
     }
 
-    <C extends AlgoBaseConfig> void validateAlgorithmCanRunWithTheAvailableMemory(
+    public <C extends AlgoBaseConfig> void validateAlgorithmCanRunWithTheAvailableMemory(
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation,
         long graphStoreCount

@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedure.facade;
+package org.neo4j.gds.procedures;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.facade.AlgorithmMemoryValidationService;
-import org.neo4j.gds.facade.AlgorithmsBusinessFacade;
-import org.neo4j.gds.facade.CommunityProcedureFacade;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserServices;
@@ -60,7 +60,7 @@ public class CommunityProcedureFacadeProvider implements ThrowingFunction<Contex
         );
 
         // business facade
-        var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(
+        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
             graphStoreCatalogService,
             algorithmMemoryValidationService
         );

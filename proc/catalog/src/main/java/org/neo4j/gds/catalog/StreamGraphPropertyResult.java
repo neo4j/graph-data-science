@@ -23,7 +23,7 @@ package org.neo4j.gds.catalog;
 public class StreamGraphPropertyResult {
     public final Object propertyValue;
 
-    StreamGraphPropertyResult(Object propertyValue) {
+    public StreamGraphPropertyResult(Object propertyValue) {
         this.propertyValue = propertyValue;
     }
 }

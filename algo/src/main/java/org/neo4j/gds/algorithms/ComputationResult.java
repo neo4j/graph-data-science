@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.algorithms;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -28,7 +28,6 @@ import java.util.Optional;
 
 @ValueClass
 public interface ComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
-
     /**
      * Result is empty if no computation happened, which basically means the graph was empty.
      * @return The result if computation happened.
@@ -48,5 +47,4 @@ public interface ComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
     static <C extends AlgoBaseConfig, R> ComputationResult<C, R> withoutAlgorithmResult(Graph graph, C config, GraphStore graphStore) {
         return ImmutableComputationResult.of(Optional.empty(), graph, config, graphStore);
     }
-
 }

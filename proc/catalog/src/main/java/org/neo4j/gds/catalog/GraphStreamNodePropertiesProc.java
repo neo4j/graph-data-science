@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_NODE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.STREAM_NODE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {

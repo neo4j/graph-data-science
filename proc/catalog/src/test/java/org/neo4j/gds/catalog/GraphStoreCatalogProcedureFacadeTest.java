@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFac
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;

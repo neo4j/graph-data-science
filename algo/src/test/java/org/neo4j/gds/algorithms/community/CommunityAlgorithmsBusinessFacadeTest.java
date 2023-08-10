@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.algorithms.community;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class AlgorithmsBusinessFacadeTest {
+class CommunityAlgorithmsBusinessFacadeTest {
 
     @Nested
     @GdlExtension
@@ -85,13 +86,19 @@ class AlgorithmsBusinessFacadeTest {
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
 
             var config = mock(WccBaseConfig.class);
-            var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(
+            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
                 graphStoreCatalogServiceMock,
                 mock(AlgorithmMemoryValidationService.class)
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", config, null, null, ProgressTracker.NULL_TRACKER);
+            var wccComputationResult = algorithmsBusinessFacade.wcc(
+                "meh",
+                config,
+                null,
+                null,
+                ProgressTracker.NULL_TRACKER
+            );
 
             //then
             assertThat(wccComputationResult.result())
@@ -114,7 +121,7 @@ class AlgorithmsBusinessFacadeTest {
             doReturn(Pair.of(graphMock, mock(GraphStore.class)))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
-            var algorithmsBusinessFacade = new AlgorithmsBusinessFacade(graphStoreCatalogServiceMock, null);
+            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(graphStoreCatalogServiceMock, null);
 
             // when
             var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null, null);

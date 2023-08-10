@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;

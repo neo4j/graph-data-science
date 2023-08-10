@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.DROP_NODE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.DROP_NODE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropNodePropertiesProc {

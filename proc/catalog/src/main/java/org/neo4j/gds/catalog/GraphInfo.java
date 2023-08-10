@@ -97,7 +97,7 @@ public class GraphInfo {
         );
     }
 
-    static GraphInfo withoutMemoryUsage(
+    public static GraphInfo withoutMemoryUsage(
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore
     ) {

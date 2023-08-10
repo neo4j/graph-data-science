@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -28,7 +29,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_GRAPH_PROPERTY_DESCRIPTION;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.STREAM_GRAPH_PROPERTY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamGraphPropertiesProc {

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.algorithms;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
@@ -29,12 +29,11 @@ import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 /*
 A copy of `org.neo4j.gds.executor.ProcedureMemoryEstimation` so we don't introduce circular dependency to `:executor`...
  */
-class AlgorithmMemoryEstimation<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
-
+public class AlgorithmMemoryEstimation<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
     private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
     private final GraphDimensions graphDimensions;
 
-    AlgorithmMemoryEstimation(
+    public AlgorithmMemoryEstimation(
         GraphDimensions graphDimensions,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory
     ) {
@@ -42,7 +41,7 @@ class AlgorithmMemoryEstimation<ALGO extends Algorithm<?>, CONFIG extends AlgoBa
         this.algorithmFactory = algorithmFactory;
     }
 
-    MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
+    public MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         var estimationBuilder = MemoryEstimations.builder("Algorithm Memory Estimation");
 
         estimationBuilder.add("Algorithm", algorithmFactory.memoryEstimation(config));

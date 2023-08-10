@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedure.facade;
+package org.neo4j.gds.procedures;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
@@ -41,7 +41,7 @@ import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
-import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.KernelTransactionService;
 import org.neo4j.gds.catalog.ProcedureTransactionService;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;

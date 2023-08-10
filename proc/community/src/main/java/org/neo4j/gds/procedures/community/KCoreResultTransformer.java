@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.ComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;

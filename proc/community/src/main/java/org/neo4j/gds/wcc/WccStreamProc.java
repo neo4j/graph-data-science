@@ -21,8 +21,8 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.facade.CommunityProcedureFacade;
-import org.neo4j.gds.facade.WccStreamResult;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.community.WccStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

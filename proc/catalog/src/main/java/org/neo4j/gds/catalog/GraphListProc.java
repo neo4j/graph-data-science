@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -26,8 +27,8 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.LIST_DESCRIPTION;
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.NO_VALUE_PLACEHOLDER;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.LIST_DESCRIPTION;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.NO_VALUE_PLACEHOLDER;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphListProc {

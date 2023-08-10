@@ -17,36 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedure.facade;
+package org.neo4j.gds.procedures;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 /**
- * While we strangle usages of context-injected {@link org.neo4j.gds.core.utils.progress.TaskStore}s,
- * this plays the role of supplying those.
- *
- * @deprecated This exists only until we stop using context-injected {@link org.neo4j.gds.core.utils.progress.TaskStore}s.
+ * @deprecated Needed until we strangle the last context-injected usages of {@link org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory}
  */
 @Deprecated
-public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
+public class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
     private final DatabaseIdService databaseIdService;
-    private final TaskStoreService taskStoreService;
+    private final UserServices userServices;
+    private final UserLogServices userLogServices;
 
-    TaskStoreProvider(DatabaseIdService databaseIdService, TaskStoreService taskStoreService) {
+    public UserLogRegistryFactoryProvider(
+        DatabaseIdService databaseIdService,
+        UserServices userServices,
+        UserLogServices userLogServices
+    ) {
         this.databaseIdService = databaseIdService;
-        this.taskStoreService = taskStoreService;
+        this.userServices = userServices;
+        this.userLogServices = userLogServices;
     }
 
     @Override
-    public TaskStore apply(Context context) {
-        DatabaseId databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+    public UserLogRegistryFactory apply(Context context) {
+        var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+        var user = userServices.getUser(context.securityContext());
 
-        return taskStoreService.getTaskStore(databaseId);
+        return userLogServices.getUserLogRegistryFactory(databaseId, user);
     }
 }

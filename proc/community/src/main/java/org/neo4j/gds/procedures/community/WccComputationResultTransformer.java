@@ -17,18 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphStoreUpdater;
+import org.neo4j.gds.algorithms.ComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.wcc.WccBaseConfig;
-import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccMutateResult;
 
 import java.util.List;
@@ -62,7 +63,7 @@ final class WccComputationResultTransformer {
     // TODO: This might be shared between the clients. Think of a better placement for this transformation...
     static WccMutateResult toMutateResult(
         ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult,
-        WccMutateConfig mutateConfig
+        MutateNodePropertyConfig mutateConfig
     ) {
 
         var config = computationResult.config();

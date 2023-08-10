@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -29,6 +30,8 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.ComputationResult;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -37,12 +40,11 @@ import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.Optional;
 
-public class AlgorithmsBusinessFacade {
-
+public class CommunityAlgorithmsBusinessFacade {
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final AlgorithmMemoryValidationService memoryUsageValidator;
 
-    public AlgorithmsBusinessFacade(
+    public CommunityAlgorithmsBusinessFacade(
         GraphStoreCatalogService graphStoreCatalogService,
         AlgorithmMemoryValidationService memoryUsageValidator
     ) {
@@ -68,7 +70,7 @@ public class AlgorithmsBusinessFacade {
         );
     }
 
-    ComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+    public ComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
@@ -95,40 +97,40 @@ public class AlgorithmsBusinessFacade {
         DatabaseId databaseId,
         ProgressTracker progressTracker
     ) {
-            // Go get the graph and graph store from the catalog
-            var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
-                GraphName.parse(graphName),
-                config,
-                relationshipProperty,
-                user,
-                databaseId
-            );
+        // Go get the graph and graph store from the catalog
+        var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
+            GraphName.parse(graphName),
+            config,
+            relationshipProperty,
+            user,
+            databaseId
+        );
 
-            var graph = graphWithGraphStore.getLeft();
-            var graphStore = graphWithGraphStore.getRight();
+        var graph = graphWithGraphStore.getLeft();
+        var graphStore = graphWithGraphStore.getRight();
 
-            // No algorithm execution when the graph is empty
-            if (graph.isEmpty()) {
-                return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
-            }
+        // No algorithm execution when the graph is empty
+        if (graph.isEmpty()) {
+            return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
+        }
 
-            // create and run the algorithm
-            var algorithmEstimator = new AlgorithmMemoryEstimation<>(
-                GraphDimensions.of(
-                    graph.nodeCount(),
-                    graph.relationshipCount()
-                ),
-                algorithmFactory
-            );
+        // create and run the algorithm
+        var algorithmEstimator = new AlgorithmMemoryEstimation<>(
+            GraphDimensions.of(
+                graph.nodeCount(),
+                graph.relationshipCount()
+            ),
+            algorithmFactory
+        );
 
-            memoryUsageValidator.validateAlgorithmCanRunWithTheAvailableMemory(
-                config,
-                algorithmEstimator::memoryEstimation,
-                graphStoreCatalogService.graphStoreCount()
-            );
-            var algorithm = algorithmFactory.build(graph, config, progressTracker);
-            var algorithmResult = algorithm.compute();
+        memoryUsageValidator.validateAlgorithmCanRunWithTheAvailableMemory(
+            config,
+            algorithmEstimator::memoryEstimation,
+            graphStoreCatalogService.graphStoreCount()
+        );
+        var algorithm = algorithmFactory.build(graph, config, progressTracker);
+        var algorithmResult = algorithm.compute();
 
-            return ComputationResult.of(algorithmResult, graph, config, graphStore);
+        return ComputationResult.of(algorithmResult, graph, config, graphStore);
     }
 }

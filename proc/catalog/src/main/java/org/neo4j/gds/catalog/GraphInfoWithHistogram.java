@@ -54,7 +54,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
      * @param degreeDistribution null implies not including it
      * @param computeGraphSize   selects what kind of GraphInfo to create
      */
-    static GraphInfoWithHistogram of(
+    public static GraphInfoWithHistogram of(
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
         Map<String, Object> degreeDistribution,

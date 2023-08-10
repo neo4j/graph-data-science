@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.PROJECT_DESCRIPTION;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.PROJECT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphProjectProc {

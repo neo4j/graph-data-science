@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedure.facade;
+package org.neo4j.gds.procedures;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.facade.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.services.DatabaseIdService;

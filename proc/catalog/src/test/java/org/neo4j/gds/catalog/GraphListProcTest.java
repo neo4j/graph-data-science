@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 
 import java.util.stream.Stream;
 

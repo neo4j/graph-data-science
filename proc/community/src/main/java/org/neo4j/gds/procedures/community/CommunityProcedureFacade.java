@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.facade;
+package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -37,7 +38,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
-    private final AlgorithmsBusinessFacade algorithmsBusinessFacade;
+    private final CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade;
     private final UserServices userServices;
     private final DatabaseIdService databaseIdService;
 
@@ -46,7 +47,7 @@ public class CommunityProcedureFacade {
     private final SecurityContext securityContext;
 
     public CommunityProcedureFacade(
-        AlgorithmsBusinessFacade algorithmsBusinessFacade,
+        CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade,
         UserServices userServices,
         DatabaseIdService databaseIdService,
         GraphDatabaseService graphDatabaseService,

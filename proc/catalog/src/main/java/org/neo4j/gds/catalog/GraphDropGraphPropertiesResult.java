@@ -25,7 +25,7 @@ public class GraphDropGraphPropertiesResult {
     @SuppressWarnings("WeakerAccess")
     public final long propertiesRemoved;
 
-    GraphDropGraphPropertiesResult(String graphName, String graphProperty, long propertiesRemoved) {
+    public GraphDropGraphPropertiesResult(String graphName, String graphProperty, long propertiesRemoved) {
         this.graphName = graphName;
         this.graphProperty = graphProperty;
         this.propertiesRemoved = propertiesRemoved;
