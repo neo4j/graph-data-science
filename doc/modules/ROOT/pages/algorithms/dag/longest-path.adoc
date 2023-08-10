@@ -2,8 +2,8 @@
 [.alpha]
 = Longest Path for DAG
 :description: This section describes the Longest Path algorithm for DAGs in the Neo4j Graph Data Science library.
-:entity: graph
-:result: The distance of the longeset path for each node
+:entity: node
+:result: the distance of the longeset path
 :algorithm: DAG Longest Path
 
 
@@ -70,6 +70,7 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 The current result does not contain the longest path itself, but only the distance of the path.
 ====
 
+
 == Examples
 
 :algorithm-name: DAG Longest Path
@@ -94,7 +95,7 @@ CREATE
 ----
 
 This graph describes a simple supply chain of constructing a table in the Table Maker workshop.
-In order to have lumber for the table, the workshop process timber, which takes 1 day to complete. Once the lumber is ready, it is already inthe workshop, therefor it takes zero time to ship it. However, the screws take 3 days to be shipped to the workshop. Only after the workshop has all the requirements met, the table can be constructed, a process that takes 1 day.
+In order to have lumber for the table, the workshop processes timber, which takes 1 day to complete. Once the lumber is ready, it is already in the workshop, therefor it takes zero time to ship it. However, the screws take 3 days to be shipped to the workshop. Only after the workshop has all the requirements met, the table can be constructed, a process that takes 1 day.
 
 The longest path to the table node starts with the screws, then the workshop and then the table, in total: 4 days. This is the bottleneck path, and total time that takes to manufacture the table.
 
@@ -109,6 +110,7 @@ RETURN g
 
 
 === Stream
+
 The stream procedure streams every node in the graph and the distance of the longest path that leads to it.
 
 For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].

@@ -17,7 +17,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 A topological sorting of nodes in a graph is an ordering of the nodes in the graph where every node appears only after all the nodes pointing to it have appeared.
 For example, for a graph with 4 nodes and these relations: `a->b`, `a->c`, `b->d`, `c->d`, there are two acceptable topological sorts: `a, b, c, d` and `a, c, b, d`.
 
-Topological order of the nodes is defined only for directed acyclic graphs (DAGs). See xref:#topological-sort-cycles[below] for the expected result for graphs with cycles.
+The topological order of the nodes is defined only for directed acyclic graphs (DAGs). See xref:#topological-sort-cycles[below] for the expected result for graphs with cycles.
 
 GDS provides an efficient parallel implementation for this algorithm.
 
