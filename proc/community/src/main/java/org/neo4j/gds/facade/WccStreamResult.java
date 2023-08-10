@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.facade;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.graphdb.GraphDatabaseService;
+public class WccStreamResult {
 
-/**
- * Database id is request scoped
- */
-public class DatabaseIdService {
-    public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
-        return DatabaseId.of(databaseService.databaseName());
+    public final long nodeId;
+
+    public final long componentId;
+
+    public WccStreamResult(long nodeId, long componentId) {
+        this.nodeId = nodeId;
+        this.componentId = componentId;
     }
 }

@@ -34,6 +34,9 @@ import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 

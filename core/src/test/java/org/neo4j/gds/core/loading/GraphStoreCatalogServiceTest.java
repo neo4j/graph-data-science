@@ -99,4 +99,5 @@ class GraphStoreCatalogServiceTest {
                 "Graph with name `some graph` does not exist on database `some database`. It might exist on another database.");
         }
     }
+
 }

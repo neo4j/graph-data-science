@@ -26,6 +26,7 @@ dependencies {
     implementation project(':neo4j-api') // ProcedureReturnColumns
     implementation project(':neo4j-kernel-adapter') // Neo4jProxy
     implementation project(':proc-catalog') // this is where the (catalog) procedures facade lives
+    implementation project(':proc-community') // this is where the (community) procedures facade lives
     implementation project(':proc-sysinfo') // this is where the (sysinfo) procedures facade lives
     implementation project(':progress-tracking')
     implementation project(':licensing') // this is where the business facade lives (currently)

@@ -21,18 +21,20 @@ package org.neo4j.gds.procedure.facade;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.catalog.DatabaseIdService;
 import org.neo4j.gds.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.catalog.TaskRegistryFactoryService;
-import org.neo4j.gds.catalog.UserLogServices;
-import org.neo4j.gds.catalog.UserServices;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.facade.CommunityProcedureFacade;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.services.UserServices;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -75,11 +77,15 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         var userLogServices = new UserLogServices();
         var usernameService = new UserServices();
 
+        // GDS services
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+
         /*
          * Now we can register the facade
          */
         var procedureFacadeProvider = new ProcedureFacadeProvider(
             log,
+            graphStoreCatalogService,
             databaseIdService,
             taskRegistryFactoryService,
             userLogServices,
@@ -93,6 +99,27 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
             true
         );
         log.info("GDS procedure facade registered");
+
+        /*
+         * Now we can register the community procedure facade
+         */
+        var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
+            graphStoreCatalogService,
+            usernameService,
+            databaseIdService,
+            Neo4jProxy.getUserLog(dependencies.logService(), CommunityProcedureFacadeProvider.class),
+            neo4jConfig
+        );
+
+        log.info("Registering GDS Community Procedure Facade");
+        dependencies.globalProcedures().registerComponent(
+            CommunityProcedureFacade.class,
+            communityProcedureFacadeProvider,
+            true
+        );
+        log.info("GDS Community procedure facade registered");
+
+
 
         /*
          * This is legacy support. We keep some context-injected things around,
@@ -124,7 +151,7 @@ public class GraphStoreCatalogProcedureFacadeExtension extends ExtensionFactory<
         log.info("User Log Registry registered");
     }
 
-    interface Dependencies {
+    public interface Dependencies {
         Config config();
 
         GlobalProcedures globalProcedures();
