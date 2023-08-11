@@ -6,9 +6,9 @@
 This chapter contains a full listing of all operations in the Neo4j Graph Data Science, divided into the following categories:
 
 * xref:operations-reference/graph-operation-references.adoc[Graph Catalog]
-* xref:operations-reference/machine-learning-references.adoc#appendix-a-pipeline-ops[Pipeline Catalog]
-* xref:operations-reference/machine-learning-references.adoc#appendix-a-model-ops[Model Catalog]
 * xref:operations-reference/algorithm-references.adoc[Graph Algorithms]
 * xref:operations-reference/machine-learning-references.adoc[Machine Learning]
+** xref:operations-reference/machine-learning-references.adoc#appendix-a-pipeline-ops[Pipeline Catalog]
+** xref:operations-reference/machine-learning-references.adoc#appendix-a-model-ops[Model Catalog]
 * xref:operations-reference/additional-operation-references.adoc[Additional Operations]
 * xref:operations-reference/configuration-settings.adoc[Configuration Settings]
