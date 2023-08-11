@@ -109,7 +109,7 @@ class CommunityAlgorithmsBusinessFacadeTest {
                 });
             assertThat(wccComputationResult.graph()).isSameAs(graph);
             assertThat(wccComputationResult.graphStore()).isSameAs(graphStore);
-            assertThat(wccComputationResult.config()).isSameAs(config);
+            assertThat(wccComputationResult.configuration()).isSameAs(config);
         }
 
         @Test

@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphStoreUpdater;
-import org.neo4j.gds.algorithms.ComputationResult;
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
@@ -40,12 +40,12 @@ final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
+    static Stream<WccStreamResult> toStreamResult(AlgorithmComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
 
             var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                computationResult.config(),
+                computationResult.configuration(),
                 wccResult.asNodeProperties()
             );
 
@@ -62,11 +62,11 @@ final class WccComputationResultTransformer {
 
     // TODO: This might be shared between the clients. Think of a better placement for this transformation...
     static WccMutateResult toMutateResult(
-        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult,
+        AlgorithmComputationResult<WccBaseConfig, DisjointSetStruct> computationResult,
         MutateNodePropertyConfig mutateConfig
     ) {
 
-        var config = computationResult.config();
+        var config = computationResult.configuration();
 
         var nodePropertyValues = CommunityProcCompanion.nodeProperties(
             config,
@@ -99,11 +99,11 @@ final class WccComputationResultTransformer {
     }
 
     private static AbstractCommunityResultBuilder<WccMutateResult> resultBuilder(
-        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult
+        AlgorithmComputationResult<WccBaseConfig, DisjointSetStruct> computationResult
     ) {
         var mutateREsultBuilder = new WccMutateResult.Builder(
             ProcedureReturnColumns.EMPTY,
-            computationResult.config().concurrency()
+            computationResult.configuration().concurrency()
         );
 
         computationResult.result().ifPresent(result -> mutateREsultBuilder.withCommunityFunction(result::setIdOf));

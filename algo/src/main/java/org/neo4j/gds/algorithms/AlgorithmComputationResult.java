@@ -27,24 +27,26 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import java.util.Optional;
 
 @ValueClass
-public interface ComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
+public interface AlgorithmComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
+
     /**
      * Result is empty if no computation happened, which basically means the graph was empty.
-     * @return The result if computation happened.
+     * @return Optional.empty() if no computation happened, for example, when the graph was empty,
+     *         otherwise Optional containing the result of the algorithm execution.
      */
     Optional<RESULT> result();
 
-    Graph graph();
+    CONFIG configuration();
 
-    CONFIG config();
+    Graph graph();
 
     GraphStore graphStore();
 
-    static <C extends AlgoBaseConfig, R> ComputationResult<C, R> of(R result, Graph graph, C config, GraphStore graphStore) {
-        return ImmutableComputationResult.of(result, graph, config, graphStore);
+    static <C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> of(R result, Graph graph, C configuration, GraphStore graphStore) {
+        return ImmutableAlgorithmComputationResult.of(result, configuration, graph, graphStore);
     }
 
-    static <C extends AlgoBaseConfig, R> ComputationResult<C, R> withoutAlgorithmResult(Graph graph, C config, GraphStore graphStore) {
-        return ImmutableComputationResult.of(Optional.empty(), graph, config, graphStore);
+    static <C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> withoutAlgorithmResult(Graph graph, C configuration, GraphStore graphStore) {
+        return ImmutableAlgorithmComputationResult.of(Optional.empty(), configuration, graph, graphStore);
     }
 }

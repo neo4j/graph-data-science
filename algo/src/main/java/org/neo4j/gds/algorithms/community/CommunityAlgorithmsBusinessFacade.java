@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
@@ -31,7 +32,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.ComputationResult;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -52,7 +52,7 @@ public class CommunityAlgorithmsBusinessFacade {
         this.memoryUsageValidator = memoryUsageValidator;
     }
 
-    public ComputationResult<WccBaseConfig, DisjointSetStruct> wcc(
+    public AlgorithmComputationResult<WccBaseConfig, DisjointSetStruct> wcc(
         String graphName,
         WccBaseConfig config,
         User user,
@@ -70,7 +70,7 @@ public class CommunityAlgorithmsBusinessFacade {
         );
     }
 
-    public ComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+    public AlgorithmComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
@@ -88,7 +88,7 @@ public class CommunityAlgorithmsBusinessFacade {
         );
     }
 
-    private <A extends Algorithm<R>, C extends AlgoBaseConfig, R> ComputationResult<C, R> run(
+    private <A extends Algorithm<R>, C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> run(
         String graphName,
         C config,
         Optional<String> relationshipProperty,
@@ -111,7 +111,7 @@ public class CommunityAlgorithmsBusinessFacade {
 
         // No algorithm execution when the graph is empty
         if (graph.isEmpty()) {
-            return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
+            return AlgorithmComputationResult.withoutAlgorithmResult(graph, config, graphStore);
         }
 
         // create and run the algorithm
@@ -131,6 +131,6 @@ public class CommunityAlgorithmsBusinessFacade {
         var algorithm = algorithmFactory.build(graph, config, progressTracker);
         var algorithmResult = algorithm.compute();
 
-        return ComputationResult.of(algorithmResult, graph, config, graphStore);
+        return AlgorithmComputationResult.of(algorithmResult, graph, config, graphStore);
     }
 }
