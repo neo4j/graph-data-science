@@ -27,7 +27,7 @@ The `gds.model.store_location` parameter must be configured for this feature.
 
 [.model-store-syntax]
 --
-.Remove a model from the catalog:
+.Store a model from the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.store(
@@ -82,7 +82,7 @@ In order to use a stored model, it has to be explicitly loaded.
 
 [.model-load-syntax]
 --
-.Remove a model from the catalog:
+.Load a model from disk:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.load(modelName: String)
@@ -111,7 +111,7 @@ YIELD
 
 [role=query-example, no-result=true]
 --
-.Store a model on disk:
+.Load a model from disk:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.load('my-model')
@@ -138,7 +138,7 @@ Deleting a model will remove it from disk, but keep it in the in-memory model ca
 
 [.model-delete-syntax]
 --
-.Remove a model from the catalog:
+.Delete a stored model from disk:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.delete(modelName: String)
@@ -151,7 +151,7 @@ YIELD
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name          | Type   | Default | Optional | Description
-| modelName     | String | n/a     | no      | The name of a model.
+| modelName     | String | n/a     | no       | The name of a model.
 |===
 
 .Results
@@ -167,7 +167,7 @@ YIELD
 
 [role=query-example, no-result=true]
 --
-.Store a model on disk:
+.Delete a model from disk:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.delete('my-model')
@@ -181,6 +181,6 @@ YIELD
 [[model-version-compatibility]]
 == Models from older GDS versions
 
-Before GDS 2.4, for node classification ad link prediction models, only Logistic Regression trainer method can be stored.
+Before GDS 2.4, node classification and link prediction models could only be stored if they were trained with a Logistic Regression trainer method.
 
 Any stored models from older GDS versions can be loaded in the most recent GDS version.
