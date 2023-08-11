@@ -28,5 +28,5 @@ This chapter explains the available model catalog operations.
 ====
 Training models is a responsibility of the corresponding algorithm and is provided by a procedure mode - `train`.
 Training, using, listing, and dropping named models are management operations bound to a Neo4j user.
-Models trained by a different Neo4j user are not accessible at any time.
+Models trained by a different Neo4j user are not accessible unless explicitly published.
 ====
