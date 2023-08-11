@@ -21,6 +21,7 @@ package org.neo4j.gds.pipeline.catalog;
 
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +33,7 @@ public class PipelineListProc extends PipelineCatalogProc {
 
     private static final String DESCRIPTION = "Lists all pipelines contained in the pipeline catalog.";
 
-    @Procedure(name = "gds.beta.pipeline.list", mode = READ)
+    @Procedure(name = "gds.pipeline.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<PipelineCatalogResult> list(@Name(value = "pipelineName", defaultValue = NO_VALUE) String pipelineName) {
         if (pipelineName == null || pipelineName.equals(NO_VALUE)) {
@@ -47,5 +48,17 @@ public class PipelineListProc extends PipelineCatalogProc {
                 return Stream.empty();
             }
         }
+    }
+
+    @Procedure(name = "gds.beta.pipeline.list", mode = READ, deprecatedBy = "gds.pipeline.list")
+    @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<PipelineCatalogResult> betaList(@Name(value = "pipelineName", defaultValue = NO_VALUE) String pipelineName) {
+        executionContext()
+            .log()
+            .warn("The procedure `gds.beta.pipeline.list` is deprecated and will be removed in a future release. Please use `gds.pipeline.list` instead.");
+
+        return list(pipelineName);
     }
 }

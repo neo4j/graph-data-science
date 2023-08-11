@@ -311,7 +311,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.pipeline.drop",
         "gds.pipeline.exists",
-        "gds.beta.pipeline.list",
+        "gds.pipeline.list",
 
         "gds.randomWalk.stats",
         "gds.randomWalk.stats.estimate",
