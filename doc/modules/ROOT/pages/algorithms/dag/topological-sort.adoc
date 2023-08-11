@@ -93,8 +93,13 @@ include::partial$/algorithms/topological-sort/specific-configuration.adoc[]
 | Name                   | Type    | Description
 | nodeId                 | Integer | The ID of the current node in the ordering
 | maxDistanceFromSource  | Integer | The maximal number of nodes between the node and a source node
-====
+|===
 
+// include-with-stream
+======
+
+// tabbed-example
+====
 
 == Examples
 

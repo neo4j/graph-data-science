@@ -35,8 +35,10 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Longest Path syntax per mode
 [.tabbed-example]
 ====
+
 [.include-with-stream]
 ======
+
 .Run DAG Longest Path in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
@@ -63,12 +65,16 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 | Name          | Type    | Description
 | targetNodeId  | Integer | The ID of the node for which the path is computed
 | distance      | Double  | The distance of the longest path that ends in the target node
+|===
+
+// include-with-stream
+======
+
+// tabbed-example
 ====
 
 [NOTE]
-====
-The current result does not contain the longest path itself, but only the distance of the path.
-====
+Current result does not contain the longest path itself, but only the distance of the path.
 
 
 == Examples
