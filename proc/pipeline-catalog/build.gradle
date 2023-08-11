@@ -17,6 +17,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':string-formatting')
     implementation project(':pipeline')
+    implementation project(':executor')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

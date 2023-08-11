@@ -1,8 +1,5 @@
-[.beta]
 [[pipeline-catalog-drop]]
 = Removing pipelines
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 If we no longer need a training pipeline, we can remove it from the catalog.
 
@@ -14,7 +11,7 @@ If we no longer need a training pipeline, we can remove it from the catalog.
 .Remove a pipeline from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.drop(pipelineName: String, failIfMissing: Boolean)
+CALL gds.pipeline.drop(pipelineName: String, failIfMissing: Boolean)
 YIELD
     pipelineName: String,
     pipelineType: String,
@@ -36,7 +33,7 @@ include::partial$/machine-learning/pipeline-catalog/shared/pipeline-info-result.
 
 == Example
 
-In this section we are going to demonstrate the usage of `gds.beta.pipeline.drop`.
+In this section we are going to demonstrate the usage of `gds.pipeline.drop`.
 To exemplify this, we first create a xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline].
 
 .Creating a link prediction training pipelines:
@@ -50,7 +47,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 .Remove a pipeline from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.drop('pipe')
+CALL gds.pipeline.drop('pipe')
 YIELD pipelineName, pipelineType
 ----
 
