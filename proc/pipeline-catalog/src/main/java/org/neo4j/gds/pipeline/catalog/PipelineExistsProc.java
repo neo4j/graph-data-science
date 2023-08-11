@@ -54,16 +54,4 @@ public class PipelineExistsProc extends PipelineCatalogProc {
         ));
     }
 
-    @SuppressWarnings("unused")
-    public static class PipelineExistsResult {
-        public final String pipelineName;
-        public final String pipelineType;
-        public final boolean exists;
-
-        PipelineExistsResult(String pipelineName, String pipelineType, boolean exists) {
-            this.pipelineName = pipelineName;
-            this.pipelineType = pipelineType;
-            this.exists = exists;
-        }
-    }
 }
