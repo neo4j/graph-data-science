@@ -1,4 +1,4 @@
-[.enterprise-edition.alpha]
+[.enterprise-edition]
 [[catalog-model-publish]]
 = Publishing models
 

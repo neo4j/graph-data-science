@@ -1,8 +1,5 @@
-[.beta]
 [[catalog-model-list]]
 = Listing models
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 Information about models in the catalog can be retrieved using the `gds.model.list()` procedure.
 

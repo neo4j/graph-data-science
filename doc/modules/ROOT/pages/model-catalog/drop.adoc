@@ -1,8 +1,5 @@
-[.beta]
 [[catalog-model-drop]]
 = Removing models
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 If we no longer need a trained model and want to free up memory, we can remove the model from the catalog.
 

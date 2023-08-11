@@ -1,8 +1,6 @@
-[.enterprise-edition.alpha]
+[.enterprise-edition]
 [[model-catalog-store-ops]]
 = Storing models on disk
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 The model catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, models are no longer available in the catalog and need to be trained again.
@@ -16,7 +14,6 @@ The location must be a directory and writable by the Neo4j process.
 The `gds.model.store_location` parameter must be configured for this feature.
 ====
 
-[.alpha]
 [[catalog-model-store]]
 == Storing models from the catalog on disk
 
@@ -74,7 +71,6 @@ YIELD
 ----
 --
 
-[.alpha]
 [[catalog-model-load]]
 == Loading models from disk
 
@@ -129,7 +125,6 @@ To verify if a model is loaded, we can use the xref:model-catalog/list.adoc[`gds
 The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
 The operation is idempotent, and skips loading if the model is already loaded.
 
-[.alpha]
 [[catalog-model-delete]]
 == Deleting models from disk
 

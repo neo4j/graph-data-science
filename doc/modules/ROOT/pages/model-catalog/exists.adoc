@@ -1,8 +1,5 @@
-[.beta]
 [[catalog-model-exists]]
 = Checking if a model exists
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 We can check if a model is available in the catalog by looking up its name.
 
