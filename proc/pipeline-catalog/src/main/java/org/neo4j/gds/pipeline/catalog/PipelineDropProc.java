@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.procedure.Description;
@@ -30,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineDropProc extends PipelineCatalogProc {
+public class PipelineDropProc extends BaseProc {
 
     private static final String DESCRIPTION = "Drops a pipeline and frees up the resources it occupies.";
 
@@ -40,7 +42,7 @@ public class PipelineDropProc extends PipelineCatalogProc {
         @Name(value = "pipelineName") String pipelineName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        validatePipelineName(pipelineName);
+        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
 
         TrainingPipeline<?> pipeline = null;
 

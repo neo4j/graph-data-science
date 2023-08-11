@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -29,8 +31,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineListProc extends PipelineCatalogProc {
+public class PipelineListProc extends BaseProc {
 
+    private static final String NO_VALUE = "__NO_VALUE";
     private static final String DESCRIPTION = "Lists all pipelines contained in the pipeline catalog.";
 
     @Procedure(name = "gds.pipeline.list", mode = READ)
@@ -40,7 +43,7 @@ public class PipelineListProc extends PipelineCatalogProc {
             var pipelines = PipelineCatalog.getAllPipelines(username());
             return pipelines.map(pipe -> new PipelineCatalogResult(pipe.pipeline(), pipe.pipelineName()));
         } else {
-            validatePipelineName(pipelineName);
+            CypherMapAccess.failOnBlank("pipelineName", pipelineName);
             if (PipelineCatalog.exists(username(), pipelineName)) {
                 var pipeline = PipelineCatalog.get(username(), pipelineName);
                 return Stream.of(new PipelineCatalogResult(pipeline, pipelineName));
