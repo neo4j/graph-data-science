@@ -41,7 +41,7 @@ YIELD
 In this section we are going to demonstrate the usage of `gds.pipeline.exists`.
 To exemplify this, we create a xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline] and check for its existence.
 
-.Creating a link prediction training pipelines:
+.Creating a node classification training pipeline:
 [source, cypher, role=noplay setup-query]
 ----
 CALL gds.beta.pipeline.nodeClassification.create('pipe')
