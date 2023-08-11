@@ -1,8 +1,5 @@
-[.beta]
 [[pipeline-catalog-exists]]
 = Checking if a pipeline exists
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 We can check if a pipeline is available in the catalog by looking up its name.
 
@@ -14,7 +11,7 @@ We can check if a pipeline is available in the catalog by looking up its name.
 .Check if a pipeline exists in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.exists(pipelineName: String)
+CALL gds.pipeline.exists(pipelineName: String)
 YIELD
     pipelineName: String,
     pipelineType: String,
@@ -41,7 +38,7 @@ YIELD
 
 == Example
 
-In this section we are going to demonstrate the usage of `gds.beta.pipeline.exists`.
+In this section we are going to demonstrate the usage of `gds.pipeline.exists`.
 To exemplify this, we create a xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline] and check for its existence.
 
 .Creating a link prediction training pipelines:
@@ -55,7 +52,7 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 .Check if a pipeline exists in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.exists('pipe')
+CALL gds.pipeline.exists('pipe')
 ----
 
 .Results

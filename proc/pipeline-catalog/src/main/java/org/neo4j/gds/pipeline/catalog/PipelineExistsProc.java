@@ -21,6 +21,7 @@ package org.neo4j.gds.pipeline.catalog;
 
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +33,7 @@ public class PipelineExistsProc extends PipelineCatalogProc {
 
     private static final String DESCRIPTION = "Checks if a given pipeline exists in the pipeline catalog.";
 
-    @Procedure(name = "gds.beta.pipeline.exists", mode = READ)
+    @Procedure(name = "gds.pipeline.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<PipelineExistsResult> exists(@Name(value = "pipelineName") String pipelineName) {
         validatePipelineName(pipelineName);
@@ -52,6 +53,18 @@ public class PipelineExistsProc extends PipelineCatalogProc {
             type,
             exists
         ));
+    }
+
+    @Procedure(name = "gds.beta.pipeline.exists", mode = READ, deprecatedBy = "gds.pipeline.exists")
+    @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<PipelineExistsResult> betaExists(@Name(value = "pipelineName") String pipelineName) {
+        executionContext()
+            .log()
+            .warn("The procedure `gds.beta.pipeline.exists` is deprecated and will be removed in a future release. Please use `gds.pipeline.exists` instead.");
+
+        return exists(pipelineName);
     }
 
 }

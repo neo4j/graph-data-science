@@ -17,6 +17,6 @@ This section explains the available pipeline catalog operations:
 |===
 | Name                                                        | Description
 | xref:pipeline-catalog/list.adoc[gds.beta.pipeline.list]     | Prints information about pipelines that are currently available in the catalog.
-| xref:pipeline-catalog/exists.adoc[gds.beta.pipeline.exists] | Checks if a named pipeline is available in the catalog.
+| xref:pipeline-catalog/exists.adoc[gds.pipeline.exists]      | Checks if a named pipeline is available in the catalog.
 | xref:pipeline-catalog/drop.adoc[gds.pipeline.drop]          | Drops a named pipeline from the catalog.
 |===
