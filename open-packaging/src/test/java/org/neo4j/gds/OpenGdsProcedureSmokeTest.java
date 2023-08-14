@@ -57,7 +57,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.ephemeral.database.drop",
         "gds.alpha.drop.cypherdb",
 
-        "gds.alpha.allShortestPaths.stream",
+        "gds.allShortestPaths.stream",
 
         "gds.bellmanFord.stats",
         "gds.bellmanFord.stats.estimate",

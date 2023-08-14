@@ -45,6 +45,6 @@ class AllPairsShortestPathDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/all-pairs-shortest-path.adoc";
+        return "pages/algorithms/all-pairs-shortest-path.adoc";
     }
 }

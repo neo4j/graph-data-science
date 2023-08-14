@@ -34,7 +34,7 @@ class AllPairsShortestPathSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/all-pairs-shortest-path.adoc";
+        return "pages/algorithms/all-pairs-shortest-path.adoc";
     }
 
 }

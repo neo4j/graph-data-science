@@ -356,8 +356,8 @@
 |===
 |Algorithm name | Operation
 | xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `gds.alpha.linkprediction.adamicAdar` label:function[Function]
-.1+<.^|xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
-| `gds.alpha.allShortestPaths.stream` label:procedure[Procedure]
+.1+<.^|xref:algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
+| `gds.allShortestPaths.stream` label:procedure[Procedure]
 | xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `gds.alpha.linkprediction.commonNeighbors` label:function[Function]
 .4+<.^|xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 | `gds.closeness.harmonic.mutate` label:procedure[Procedure]

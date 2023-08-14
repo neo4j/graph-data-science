@@ -1,4 +1,6 @@
-[[alpha-algorithm-all-pairs-shortest-path]]
+:page-aliases: alpha-algorithms/all-pairs-shortest-path.adoc
+
+[[algorithm-all-pairs-shortest-path]]
 [.alpha]
 = All Pairs Shortest Path
 :description: This section describes the All Pairs Shortest Path algorithm in the Neo4j Graph Data Science library.
@@ -49,7 +51,7 @@ Starting with Neo4j 5, the `Infinity` literal is now included in Cypher too.
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.allShortestPaths.stream(
+CALL gds.allShortestPaths.stream(
   graphName: string,
   configuration: map
 )
@@ -126,7 +128,7 @@ YIELD graphName
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay, group=native]
 ----
-CALL gds.alpha.allShortestPaths.stream('nativeGraph', {
+CALL gds.allShortestPaths.stream('nativeGraph', {
   relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance
@@ -182,7 +184,7 @@ RETURN gds.graph.project(
 .The following will run the algorithm, treating the graph as undirected:
 [source, cypher, role=noplay, group=cypher]
 ----
-CALL gds.alpha.allShortestPaths.stream('cypherGraph', {
+CALL gds.allShortestPaths.stream('cypherGraph', {
   relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance
