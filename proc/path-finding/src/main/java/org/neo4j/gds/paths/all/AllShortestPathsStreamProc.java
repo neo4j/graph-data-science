@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsProc extends BaseProc {
+public class AllShortestPathsStreamProc extends BaseProc {
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
     @Description(AllShortestPathsConstants.DESCRIPTION)
     public Stream<AllShortestPathsStreamResult> stream(

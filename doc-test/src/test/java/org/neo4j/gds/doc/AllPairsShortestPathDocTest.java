@@ -22,8 +22,8 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
+import org.neo4j.gds.paths.all.AllShortestPathsStreamProc;
 import org.neo4j.gds.projection.CypherAggregation;
-import org.neo4j.gds.paths.all.AllShortestPathsProc;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ class AllPairsShortestPathDocTest extends SingleFileDocTestBase {
         return List.of(
             GraphProjectProc.class,
             CypherAggregation.class,
-            AllShortestPathsProc.class
+            AllShortestPathsStreamProc.class
         );
     }
 

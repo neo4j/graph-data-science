@@ -44,7 +44,7 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class WeightedAllShortestPathsProcTest extends BaseProcTest {
+final class WeightedAllShortestPathsStreamProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -83,7 +83,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(AllShortestPathsProc.class, GraphProjectProc.class);
+        registerProcedures(AllShortestPathsStreamProc.class, GraphProjectProc.class);
         runInTransaction(db, tx -> {
             startNodeId = tx.findNode(Label.label("Node"), "name", "s").getId();
             targetNodeId = tx.findNode(Label.label("Node"), "name", "x").getId();
