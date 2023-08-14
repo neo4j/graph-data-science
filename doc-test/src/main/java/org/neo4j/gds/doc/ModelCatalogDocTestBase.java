@@ -22,18 +22,17 @@ package org.neo4j.gds.doc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Neo4jModelCatalogExtension
-abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
+public abstract class ModelCatalogDocTestBase extends SingleFileDocTestBase {
 
     @Inject
     ModelCatalog modelCatalog;
@@ -44,15 +43,15 @@ abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
             "example-model-type",
             GraphSchema.empty(),
             new Object(),
-            new ExampleTrainConfig("my-model1"),
-            new ExampleCustomInfo(Map.of("exampleModelInfo", "exampleValue"))
+            TestTrainConfig.of("", "my-model1"),
+            new TestCustomInfo(Map.of("exampleModelInfo", "exampleValue"))
         );
         var exampleModel2 = Model.of(
             "example-model-type",
             GraphSchema.empty(),
             new Object(),
-            new ExampleTrainConfig("my-model2"),
-            new ExampleCustomInfo(Map.of("number", 42L))
+            TestTrainConfig.of("", "my-model2"),
+            new TestCustomInfo(Map.of("number", 42L))
         );
         modelCatalog.set(exampleModel1);
         modelCatalog.set(exampleModel2);
@@ -61,41 +60,5 @@ abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
     @AfterEach
     void afterAll() {
         modelCatalog.removeAllLoadedModels();
-    }
-
-    private static final class ExampleCustomInfo implements Model.CustomInfo {
-
-        private final Map<String, Object> customInfo;
-
-        private ExampleCustomInfo(Map<String, Object> customInfo) {this.customInfo = customInfo;}
-
-        @Override
-        public Map<String, Object> toMap() {
-            return customInfo;
-        }
-    }
-
-    private static final class ExampleTrainConfig implements BaseConfig, ModelConfig {
-
-        private final String modelName;
-
-        ExampleTrainConfig(String modelName) {
-            this.modelName = modelName;
-        }
-
-        @Override
-        public Optional<String> usernameOverride() {
-            return Optional.empty();
-        }
-
-        @Override
-        public String modelName() {
-            return modelName;
-        }
-
-        @Override
-        public String modelUser() {
-            return "";
-        }
     }
 }

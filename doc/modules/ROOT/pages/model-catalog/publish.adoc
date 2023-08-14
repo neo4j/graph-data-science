@@ -40,49 +40,73 @@ include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
 
 == Examples
 
-In this section we will illustrate how to use the `gds.model.publish` procedure to publish a model.
-A pre-requisite for this is that a model has already been trained and stored in the model catalog.
-In this example we will assume that a model called `my-model` exists in the catalog.
+In this section we will illustrate how to publish a model.
+A pre-requisite for this operation is that a model has already been trained and registered in the model catalog.
+We will assume here that two models named `my-model1` and `my-model2` have already been trained and exist in the model catalog.
+Our initial state can be inspected by listing all models in the catalog:
 
-All we need to do is to run the procedure with the name of the model we want to publish.
+[role=query-example]
+--
+.Listing information about all models:
+[source, cypher, role=noplay]
+----
+CALL gds.model.list()
+YIELD modelName, modelType, modelInfo, loaded, stored, published
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m,1m,1m"]
+|===
+| modelName   | modelType            | modelInfo                       | loaded | stored | published
+| "my-model1" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | false
+| "my-model2" | "example-model-type" | {number=42}                     | true   | false  | false
+|===
+--
+
+
+=== Publishing a model
+
+All we need to do is to run the procedure and specify the name of the model we want to publish.
 
 [role=query-example]
 --
 .Publishing a trained model:
 [source, cypher, role=noplay]
 ----
-CALL gds.model.publish('my-model')
-YIELD modelInfo, loaded, published, stored
-RETURN modelInfo.modelName AS modelName, published
+CALL gds.model.publish('my-model1')
+YIELD modelName, modelType, modelInfo, loaded, stored, published
 ----
 
 .Results
 [opts="header"]
 |===
-| modelName          | published
-| "my-model_public"  | true
+| modelName          | modelType            | modelInfo                       | loaded | stored | published
+| "my-model1_public" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | true
 |===
 --
 
 We can see that the model name is modified with the `_public` suffix.
-When we now list the models in the catalog we can see that we only have the published model.
+When we now list the models in the catalog we can see that the published model has changed.
 
 [role=query-example]
 --
-.Listing the published model:
+.Listing all models, including the published model:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.list()
-YIELD modelInfo, published
-RETURN modelInfo.modelName AS modelName, published
+YIELD modelName, modelType, modelInfo, loaded, stored, published
+RETURN modelName, modelType, modelInfo, loaded, stored, published
+  ORDER BY modelName
 ----
 
 .Results
 [opts="header"]
 |===
-| modelName          | published
-| "my-model_public"  | true
+| modelName          | modelType            | modelInfo                       | loaded | stored | published
+| "my-model1_public" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | true
+| "my-model2"        | "example-model-type" | {number=42}                     | true   | false  | false
+
 |===
 --
 
-This model is now accessible to all users.
+The published model is now accessible to all users.

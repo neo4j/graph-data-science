@@ -23,7 +23,7 @@ import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
 
-class ModelCatalogListDocTest extends ModelCatalogDocTest {
+class ModelCatalogListDocTest extends ModelCatalogDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
