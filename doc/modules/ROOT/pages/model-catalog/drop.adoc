@@ -13,12 +13,14 @@ If we no longer need a trained model and want to free up memory, we can drop the
 ----
 CALL gds.model.drop(modelName: String, failIfMissing: Boolean)
 YIELD
+    modelName: String,
+    modelType: String,
     modelInfo: Map,
+    creationTime: DateTime,
     trainConfig: Map,
     graphSchema: Map,
     loaded: Boolean,
     stored: Boolean,
-    creationTime: DateTime,
     published: Boolean
 ----
 
@@ -34,27 +36,71 @@ include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
 --
 
 
-== Example
+== Examples
 
 In this section we are going to demonstrate the usage of `gds.model.drop`.
-Assume we trained a model by running `train` on one of our xref:machine-learning/machine-learning.adoc[Machine learning algorithms].
+For simplicity, we will assume that an example model named `my-model1` has already been trained and exists in the model catalog.
+
+
+=== Dropping a model
+
+To drop a model, we only need to specify its name.
 
 [role=query-example]
 --
 .Drop a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.model.drop('my-model')
-YIELD modelInfo, loaded, published, stored
-RETURN modelInfo.modelName AS modelName, loaded, published, stored
+CALL gds.model.drop('my-model1')
+YIELD modelName, modelType, modelInfo, loaded, stored, published
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m,1m,1m,1m,1m"]
 |===
-| modelName   | loaded  | published | stored
-| "my-model"  |  true   | false     | false
+| modelName   | modelType            | modelInfo                       | loaded | stored | published
+| "my-model1" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | false
 |===
 --
 
-In this example, the dropped model `my-model` loaded in-memory, but neither stored on disk nor published.
+When dropping a model, we get a result that represents its state in the catalog just prior to being dropped.
+The dropped model is now no longer available in the catalog, which we can verify by running `gds.model.list`.
+
+[role=query-example]
+--
+.Listing a dropped model:
+[source, cypher, role=noplay]
+----
+CALL gds.model.list('my-model1')
+YIELD modelName, modelType, modelInfo, loaded, stored, published
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m,1m,1m"]
+|===
+| modelName | modelType | modelInfo | loaded | stored | published
+|===
+--
+
+
+=== Dropping a model that does not exist
+
+If we try to drop a model that does not exist, an error is raised by default.
+To avoid this, we can set `failIfMissing` to `false`.
+
+[role=query-example]
+--
+.Dropping model from the catalog without failing:
+[source, cypher, role=noplay]
+----
+CALL gds.model.drop('my-model1', false)
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m,1m,1m,1m,1m,1m"]
+|===
+| modelName | modelType | modelInfo | creationTime | trainConfig | graphSchema | loaded | stored | published
+|===
+--
+
+As we can see, the procedure returns an empty result instead of raising an error.

@@ -21,6 +21,8 @@ package org.neo4j.gds.model.catalog;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class BetaModelCatalogResult {
@@ -33,12 +35,22 @@ public class BetaModelCatalogResult {
     public final boolean shared;
 
     public BetaModelCatalogResult(ModelCatalogResult result) {
-        this.modelInfo = result.modelInfo;
         this.trainConfig = result.trainConfig;
         this.graphSchema = result.graphSchema;
         this.loaded = result.loaded;
         this.stored = result.stored;
         this.creationTime = result.creationTime;
         this.shared = result.published;
+        this.modelInfo = Stream.concat(
+            Map.of(
+                "modelName", result.modelName,
+                "modelType", result.modelType
+            ).entrySet().stream(),
+            result.modelInfo.entrySet().stream()
+        ).collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue
+            )
+        );
     }
 }

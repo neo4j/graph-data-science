@@ -48,18 +48,20 @@ class ModelDropProcTest extends ModelProcBaseTest {
 
     @Test
     void dropsModel() {
-        String existingModel = "testModel";
-        String testModelType = "testAlgo";
+        var modelName = "testModel";
+        var modelType = "testAlgo";
 
-        var trainConfig = TestTrainConfig.of(getUsername(), existingModel);
-        modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
+        var trainConfig = TestTrainConfig.of(getUsername(), modelName);
+        modelCatalog.set(Model.of(modelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
 
         assertCypherResult(
             "CALL gds.model.drop($modelName)",
-            Map.of("modelName", existingModel),
+            Map.of("modelName", modelName),
             singletonList(
                 Map.of(
-                    "modelInfo", Map.of("modelName", existingModel, "modelType", testModelType),
+                    "modelName", modelName,
+                    "modelType", modelType,
+                    "modelInfo", Map.of(),
                     "trainConfig", trainConfig.toMap(),
                     "loaded", true,
                     "stored", false,

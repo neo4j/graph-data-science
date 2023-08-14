@@ -126,6 +126,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
 
 
     interface CustomInfo extends ToMapConvertible, Serializable{
-        Optional<TrainingMethod> optionalTrainerMethod();
+        default Optional<TrainingMethod> optionalTrainerMethod() { return Optional.empty(); }
     }
 }

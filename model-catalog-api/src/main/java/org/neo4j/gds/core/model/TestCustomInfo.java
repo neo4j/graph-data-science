@@ -26,9 +26,19 @@ import java.util.Optional;
 
 public class TestCustomInfo implements Model.CustomInfo {
 
+    private final Map<String, Object> customFields;
+
+    public TestCustomInfo() {
+        this.customFields = Map.of();
+    }
+
+    public TestCustomInfo(Map<String, Object> customFields) {
+        this.customFields = customFields;
+    }
+
     @Override
     public Map<String, Object> toMap() {
-        return Map.of();
+        return customFields;
     }
 
     @Override

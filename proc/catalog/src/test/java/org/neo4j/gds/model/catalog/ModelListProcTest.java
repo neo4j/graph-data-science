@@ -58,7 +58,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
-            new TestCustomInfo()
+            new TestCustomInfo(Map.of("foo", "bar"))
         );
         var model2 = Model.of(
             "testAlgo2",
@@ -82,14 +82,16 @@ class ModelListProcTest extends ModelProcBaseTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, published " +
-                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, published " +
-                "ORDER BY modelInfo.modelName",
+                "CALL %s YIELD modelName, modelType, modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, published " +
+                "RETURN * " +
+                "ORDER BY modelName",
                 query
             ),
             List.of(
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1"),
+                    "modelName", "testModel1",
+                    "modelType", "testAlgo1",
+                    "modelInfo", Map.of("foo", "bar"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
@@ -98,7 +100,9 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "published", false
                 ),
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "modelName", "testModel2",
+                    "modelType", "testAlgo2",
+                    "modelInfo", Map.of(),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "loaded", true,
@@ -117,7 +121,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
-            new TestCustomInfo()
+            new TestCustomInfo(Map.of("foo", "bar"))
         );
 
         modelCatalog.set(model);
@@ -126,7 +130,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             "CALL gds.beta.model.list()",
             List.of(
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1"),
+                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1", "foo", "bar"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
@@ -165,7 +169,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(getUsername(), "testModel2"),
-            new TestCustomInfo()
+            new TestCustomInfo(Map.of("num", 42L))
         );
         modelCatalog.set(model1);
         modelCatalog.set(model2);
@@ -174,7 +178,9 @@ class ModelListProcTest extends ModelProcBaseTest {
             "CALL gds.model.list('testModel2')",
             singletonList(
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "modelName", "testModel2",
+                    "modelType", "testAlgo2",
+                    "modelInfo", Map.of("num", 42L),
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "graphSchema", EXPECTED_SCHEMA,
                     "loaded", true,

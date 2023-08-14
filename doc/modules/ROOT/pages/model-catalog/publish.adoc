@@ -15,12 +15,14 @@ Making a model accessible to other users can be achieved by publishing it.
 ----
 CALL gds.model.publish(modelName: String)
 YIELD
+    modelName: String,
+    modelType: String,
     modelInfo: Map,
+    creationTime: DateTime,
     trainConfig: Map,
     graphSchema: Map,
     loaded: Boolean,
     stored: Boolean,
-    creationTime: DateTime,
     published: Boolean
 ----
 

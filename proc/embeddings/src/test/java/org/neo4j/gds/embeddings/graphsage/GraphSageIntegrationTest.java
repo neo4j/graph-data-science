@@ -193,9 +193,9 @@ class GraphSageIntegrationTest extends BaseProcTest {
             Map.of("modelName", modelName),
             singletonList(
                 Map.of(
+                    "modelName", modelName,
+                    "modelType", GraphSage.MODEL_TYPE,
                     "modelInfo", allOf(
-                        hasEntry("modelName", modelName),
-                        hasEntry("modelType", GraphSage.MODEL_TYPE),
                         hasEntry(equalTo("metrics"), isA(Map.class))
                     ),
                     "creationTime", isA(ZonedDateTime.class),

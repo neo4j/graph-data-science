@@ -22,16 +22,15 @@ package org.neo4j.gds.doc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.model.ModelConfig;
+
+import java.util.Map;
+import java.util.Optional;
 
 @Neo4jModelCatalogExtension
 abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
@@ -41,22 +40,62 @@ abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
 
     @BeforeEach
     void loadModel() {
-        modelCatalog.set(Model.of(
-            GraphSage.MODEL_TYPE,
+        var exampleModel1 = Model.of(
+            "example-model-type",
             GraphSchema.empty(),
-            ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
-            ImmutableGraphSageTrainConfig
-                .builder()
-                .modelUser(getUsername())
-                .modelName("my-model")
-                .addFeatureProperties("a")
-                .build(),
-            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
-        ));
+            new Object(),
+            new ExampleTrainConfig("my-model1"),
+            new ExampleCustomInfo(Map.of("exampleModelInfo", "exampleValue"))
+        );
+        var exampleModel2 = Model.of(
+            "example-model-type",
+            GraphSchema.empty(),
+            new Object(),
+            new ExampleTrainConfig("my-model2"),
+            new ExampleCustomInfo(Map.of("number", 42L))
+        );
+        modelCatalog.set(exampleModel1);
+        modelCatalog.set(exampleModel2);
     }
 
     @AfterEach
     void afterAll() {
         modelCatalog.removeAllLoadedModels();
+    }
+
+    private static final class ExampleCustomInfo implements Model.CustomInfo {
+
+        private final Map<String, Object> customInfo;
+
+        private ExampleCustomInfo(Map<String, Object> customInfo) {this.customInfo = customInfo;}
+
+        @Override
+        public Map<String, Object> toMap() {
+            return customInfo;
+        }
+    }
+
+    private static final class ExampleTrainConfig implements BaseConfig, ModelConfig {
+
+        private final String modelName;
+
+        ExampleTrainConfig(String modelName) {
+            this.modelName = modelName;
+        }
+
+        @Override
+        public Optional<String> usernameOverride() {
+            return Optional.empty();
+        }
+
+        @Override
+        public String modelName() {
+            return modelName;
+        }
+
+        @Override
+        public String modelUser() {
+            return "";
+        }
     }
 }

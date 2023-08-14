@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.model.catalog.ModelDropProc;
+import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ class ModelCatalogDropDocTest extends ModelCatalogDocTest {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(ModelDropProc.class);
+        return List.of(ModelDropProc.class, ModelListProc.class);
     }
 
     @Override
