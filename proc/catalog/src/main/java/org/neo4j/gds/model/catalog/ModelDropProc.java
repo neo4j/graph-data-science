@@ -56,13 +56,13 @@ public class ModelDropProc extends ModelCatalogProc {
     @Description(DESCRIPTION)
     @Deprecated(forRemoval = true)
     @Internal
-    public Stream<ModelCatalogResult> betaDrop(
+    public Stream<BetaModelCatalogResult> betaDrop(
         @Name(value = "modelName") String modelName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
         executionContext()
             .log()
             .warn("Procedure `gds.beta.model.drop` has been deprecated, please use `gds.model.drop`.");
-        return drop(modelName, failIfMissing);
+        return drop(modelName, failIfMissing).map(BetaModelCatalogResult::new);
     }
 }

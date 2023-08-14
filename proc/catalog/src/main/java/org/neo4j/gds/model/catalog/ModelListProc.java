@@ -53,12 +53,12 @@ public class ModelListProc extends ModelCatalogProc {
     @Description(DESCRIPTION)
     @Deprecated
     @Internal
-    public Stream<ModelCatalogResult> betaList(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
+    public Stream<BetaModelCatalogResult> betaList(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
 
         executionContext()
             .log()
             .warn("Procedure `gds.beta.model.list` has been deprecated, please use `gds.model.list`.");
 
-        return list(modelName);
+        return list(modelName).map(BetaModelCatalogResult::new);
     }
 }

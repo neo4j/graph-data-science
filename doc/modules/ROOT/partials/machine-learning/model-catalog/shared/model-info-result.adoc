@@ -8,5 +8,5 @@
 | loaded        | Boolean  | True, if the model is xref:model-catalog/store.adoc#catalog-model-load[loaded] in the in-memory model catalog.
 | stored        | Boolean  | True, if the model is xref:model-catalog/store.adoc[stored] on disk.
 | creationTime  | Datetime | Time when the model was created.
-| shared        | Boolean  | True, if the model is xref:model-catalog/publish.adoc[shared] between users.
+| published     | Boolean  | True, if the model has been xref:model-catalog/publish.adoc[published].
 |===

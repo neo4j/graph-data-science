@@ -18,8 +18,7 @@ YIELD
     graphSchema: Map,
     loaded: Boolean,
     stored: Boolean,
-    creationTime: DateTime,
-    shared: Boolean
+    published: Boolean
 ----
 
 .Parameters
@@ -44,15 +43,15 @@ Once we have trained models in the catalog we can see information about either a
 [source, cypher, role=noplay]
 ----
 CALL gds.model.list()
-YIELD modelInfo, loaded, shared, stored
-RETURN modelInfo.modelName AS modelName, loaded, shared, stored
+YIELD modelInfo, loaded, published, stored
+RETURN modelInfo.modelName AS modelName, loaded, published, stored
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelName   | loaded  | shared | stored
-| "my-model"  |  true   | false  | false
+| modelName   | loaded  | published | stored
+| "my-model"  |  true   | false     | false
 |===
 --
 
@@ -64,14 +63,14 @@ RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 [source, cypher, role=noplay]
 ----
 CALL gds.model.list('my-model')
-YIELD modelInfo, loaded, shared, stored
-RETURN modelInfo.modelName AS modelName, loaded, shared, stored
+YIELD modelInfo, loaded, published, stored
+RETURN modelInfo.modelName AS modelName, loaded, published, stored
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelName   | loaded  | shared | stored
-| "my-model"  |  true   | false  | false
+| modelName   | loaded  | published | stored
+| "my-model"  |  true   | false     | false
 |===
 --

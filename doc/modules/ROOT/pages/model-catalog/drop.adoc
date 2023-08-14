@@ -19,7 +19,7 @@ YIELD
     loaded: Boolean,
     stored: Boolean,
     creationTime: DateTime,
-    shared: Boolean
+    published: Boolean
 ----
 
 .Parameters
@@ -45,15 +45,15 @@ Assume we trained a model by running `train` on one of our xref:machine-learning
 [source, cypher, role=noplay]
 ----
 CALL gds.model.drop('my-model')
-YIELD modelInfo, loaded, shared, stored
-RETURN modelInfo.modelName AS modelName, loaded, shared, stored
+YIELD modelInfo, loaded, published, stored
+RETURN modelInfo.modelName AS modelName, loaded, published, stored
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelName   | loaded  | shared | stored
-| "my-model"  |  true   | false  | false
+| modelName   | loaded  | published | stored
+| "my-model"  |  true   | false     | false
 |===
 --
 

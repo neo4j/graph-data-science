@@ -82,8 +82,8 @@ class ModelListProcTest extends ModelProcBaseTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, shared " +
-                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, shared " +
+                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, published " +
+                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, published " +
                 "ORDER BY modelInfo.modelName",
                 query
             ),
@@ -95,12 +95,40 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
-                    "shared", false
+                    "published", false
                 ),
                 Map.of(
                     "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
+                    "loaded", true,
+                    "stored", false,
+                    "creationTime", isA(ZonedDateTime.class),
+                    "published", false
+                )
+            )
+        );
+    }
+
+    @Test
+    void betaProcWithOldColumns() {
+        var model = Model.of(
+            "testAlgo1",
+            GRAPH_SCHEMA,
+            "testData",
+            TestTrainConfig.of(getUsername(), "testModel1"),
+            new TestCustomInfo()
+        );
+
+        modelCatalog.set(model);
+
+        assertCypherResult(
+            "CALL gds.beta.model.list()",
+            List.of(
+                Map.of(
+                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1"),
+                    "graphSchema", EXPECTED_SCHEMA,
+                    "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
@@ -152,7 +180,7 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
-                    "shared", false
+                    "published", false
                 )
             )
         );

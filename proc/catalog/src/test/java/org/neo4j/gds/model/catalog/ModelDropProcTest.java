@@ -54,9 +54,33 @@ class ModelDropProcTest extends ModelProcBaseTest {
         var trainConfig = TestTrainConfig.of(getUsername(), existingModel);
         modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
 
-        var dropQuery = "CALL gds.model.drop($modelName)";
         assertCypherResult(
-            dropQuery,
+            "CALL gds.model.drop($modelName)",
+            Map.of("modelName", existingModel),
+            singletonList(
+                Map.of(
+                    "modelInfo", Map.of("modelName", existingModel, "modelType", testModelType),
+                    "trainConfig", trainConfig.toMap(),
+                    "loaded", true,
+                    "stored", false,
+                    "graphSchema", EXPECTED_SCHEMA,
+                    "creationTime", isA(ZonedDateTime.class),
+                    "published", false
+                )
+            )
+        );
+    }
+
+    @Test
+    void betaProcWithOldColumns() {
+        String existingModel = "testModel";
+        String testModelType = "testAlgo";
+
+        var trainConfig = TestTrainConfig.of(getUsername(), existingModel);
+        modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
+
+        assertCypherResult(
+            "CALL gds.beta.model.drop($modelName)",
             Map.of("modelName", existingModel),
             singletonList(
                 Map.of(

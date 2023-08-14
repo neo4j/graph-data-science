@@ -21,7 +21,7 @@ YIELD
     loaded: Boolean,
     stored: Boolean,
     creationTime: DateTime,
-    shared: Boolean
+    published: Boolean
 ----
 
 .Parameters
@@ -44,14 +44,14 @@ include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.model.publish('my-model')
-YIELD modelInfo, loaded, shared, stored
-RETURN modelInfo.modelName AS modelName, shared
+YIELD modelInfo, loaded, published, stored
+RETURN modelInfo.modelName AS modelName, published
 ----
 
 .Results
 [opts="header"]
 |===
-| modelName          | shared
+| modelName          | published
 | "my-model_public"  | true
 |===
 --
