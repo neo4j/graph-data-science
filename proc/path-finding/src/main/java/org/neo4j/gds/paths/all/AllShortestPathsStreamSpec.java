@@ -40,7 +40,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.all.AllShortestPathsConstants.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.allShortestPaths.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.allShortestPaths.stream",
+    aliases = "gds.alpha.allShortestPaths.stream",
+    description = DESCRIPTION,
+    executionMode = STREAM
+)
 public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorithm, Stream<AllShortestPathsStreamResult>, AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, AlgorithmFactory<Graph, MSBFSASPAlgorithm, AllShortestPathsConfig>> {
     @Override
     public String name() {

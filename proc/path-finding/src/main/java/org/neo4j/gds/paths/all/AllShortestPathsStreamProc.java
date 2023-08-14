@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsStreamProc extends BaseProc {
-    @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.stream", mode = READ)
     @Description(AllShortestPathsConstants.DESCRIPTION)
     public Stream<AllShortestPathsStreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -43,4 +44,21 @@ public class AllShortestPathsStreamProc extends BaseProc {
             executionContext()
         ).compute(graphName, configuration);
     }
+
+    @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ, deprecatedBy = "gds.allShortestPaths.stream")
+    @Description(AllShortestPathsConstants.DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<AllShortestPathsStreamResult> alphaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.allShortestPaths.stream` has been deprecated, please use `gds.allShortestPaths.stream`.");
+
+        return stream(graphName, configuration);
+    }
+
 }
