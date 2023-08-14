@@ -87,12 +87,14 @@ class CommunityAlgorithmsBusinessFacadeTest {
 
             var config = mock(WccBaseConfig.class);
             var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-                graphStoreCatalogServiceMock,
-                mock(AlgorithmMemoryValidationService.class)
+                new CommunityAlgorithmsFacade(
+                    graphStoreCatalogServiceMock,
+                    mock(AlgorithmMemoryValidationService.class)
+                ), null
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc(
+            var wccComputationResult = algorithmsBusinessFacade.streamWcc(
                 "meh",
                 config,
                 null,
@@ -121,10 +123,12 @@ class CommunityAlgorithmsBusinessFacadeTest {
             doReturn(Pair.of(graphMock, mock(GraphStore.class)))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
-            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(graphStoreCatalogServiceMock, null);
+            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+                new CommunityAlgorithmsFacade(graphStoreCatalogServiceMock, null), null
+            );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null, null);
+            var wccComputationResult = algorithmsBusinessFacade.streamWcc("meh", mock(WccBaseConfig.class), null, null, null);
 
             //then
             assertThat(wccComputationResult.result()).isEmpty();

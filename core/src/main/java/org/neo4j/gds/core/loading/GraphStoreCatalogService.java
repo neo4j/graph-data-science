@@ -91,6 +91,9 @@ public class GraphStoreCatalogService {
             nodeLabels = graphStore.nodeLabels();
         }
 
+        // Validate the graph store before going any further
+        config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
         return Pair.of(graph, graphStore);
     }

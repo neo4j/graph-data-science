@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.community;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
     private final CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade;
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final UserServices userServices;
     private final DatabaseIdService databaseIdService;
 
@@ -48,12 +50,14 @@ public class CommunityProcedureFacade {
 
     public CommunityProcedureFacade(
         CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade,
+        ProcedureReturnColumns procedureReturnColumns,
         UserServices userServices,
         DatabaseIdService databaseIdService,
         GraphDatabaseService graphDatabaseService,
         SecurityContext securityContext
     ) {
         this.algorithmsBusinessFacade = algorithmsBusinessFacade;
+        this.procedureReturnColumns = procedureReturnColumns;
         this.userServices = userServices;
         this.databaseIdService = databaseIdService;
         this.graphDatabaseService = graphDatabaseService;
@@ -72,7 +76,7 @@ public class CommunityProcedureFacade {
         // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
         algorithmMetaDataSetter.set(streamConfig);
 
-        var computationResult = algorithmsBusinessFacade.wcc(
+        var computationResult = algorithmsBusinessFacade.streamWcc(
             graphName,
             streamConfig,
             user(),
@@ -83,18 +87,23 @@ public class CommunityProcedureFacade {
         return WccComputationResultTransformer.toStreamResult(computationResult);
     }
 
-    public Stream<WccMutateResult> wccMutate(String graphName, Map<String, Object> configuration) {
+    public Stream<WccMutateResult> wccMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
         var config = WccMutateConfig.of(CypherMapWrapper.create(configuration));
 
-        var computationResult = algorithmsBusinessFacade.wcc(
+        var computationResult = algorithmsBusinessFacade.mutateWcc(
             graphName,
             config,
             user(),
             databaseId(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            procedureReturnColumns.contains("componentCount"),
+            procedureReturnColumns.contains("componentDistribution")
         );
 
-        return Stream.of(WccComputationResultTransformer.toMutateResult(computationResult, config));
+        return Stream.of(WccComputationResultTransformer.toMutateResult(computationResult));
     }
 
     // WCC end

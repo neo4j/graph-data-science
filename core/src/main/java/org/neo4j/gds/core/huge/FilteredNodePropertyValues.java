@@ -160,10 +160,14 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     }
 
     // This class is used when the ID space of the wrapped properties is smaller than the id space used to retrieved node properties.
-    public static class OriginalToFilteredNodePropertyValues extends FilteredNodePropertyValues {
+    public static final class OriginalToFilteredNodePropertyValues extends FilteredNodePropertyValues {
 
-        public OriginalToFilteredNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
+        private OriginalToFilteredNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
             super(properties, graph);
+        }
+
+        public static NodePropertyValues create(NodePropertyValues properties, NodeFilteredGraph graph) {
+            return new OriginalToFilteredNodePropertyValues(properties, graph);
         }
 
         @Override

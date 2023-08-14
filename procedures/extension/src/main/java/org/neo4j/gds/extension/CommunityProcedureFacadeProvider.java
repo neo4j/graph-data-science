@@ -20,6 +20,8 @@
 package org.neo4j.gds.extension;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
@@ -59,15 +61,24 @@ public class CommunityProcedureFacadeProvider implements ThrowingFunction<Contex
             useMaxMemoryEstimation
         );
 
-        // business facade
-        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+        // algorithm facade
+        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
             graphStoreCatalogService,
             algorithmMemoryValidationService
         );
 
+        // business facade
+        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+            communityAlgorithmsFacade,
+            log
+        );
+
+        var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+
         // procedure facade
         return new CommunityProcedureFacade(
             algorithmsBusinessFacade,
+            procedureReturnColumns,
             usernameService,
             databaseIdService,
             context.graphDatabaseAPI(),
