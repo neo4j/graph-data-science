@@ -67,6 +67,13 @@ public abstract class PropertyMapping {
         if (neoPropertyKey().equals(ElementProjection.PROJECT_ALL) && aggregation() != Aggregation.COUNT) {
             throw new IllegalArgumentException("A '*' property key can only be used in combination with count aggregation.");
         }
+        validatePropertyKey(propertyKey());
+    }
+
+    public static void validatePropertyKey(String propertyKey) {
+        if (propertyKey.isEmpty()) {
+            throw new IllegalArgumentException("Property key must not be empty.");
+        }
     }
 
     public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {

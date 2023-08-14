@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -54,6 +55,8 @@ public class CypherQueryEstimator {
 
                 var propertyColumns = new ArrayList<>(result.columns());
                 propertyColumns.removeAll(reservedColumns);
+
+                propertyColumns.forEach(property -> PropertyMapping.validatePropertyKey(property));
 
                 return ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
             }

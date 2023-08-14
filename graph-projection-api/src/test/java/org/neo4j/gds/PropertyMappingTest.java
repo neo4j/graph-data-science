@@ -97,4 +97,16 @@ class PropertyMappingTest {
             containsString("Expected the value of 'property' to be of type String, but was 'Integer'.")
         );
     }
+
+    @Test
+    void failsOnEmptyPropertyKey() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class, () -> PropertyMapping.fromObject("", Map.of(
+                "neoKey", 42
+            )));
+        assertThat(
+            ex.getMessage(),
+            containsString("Property key must not be empty")
+        );
+    }
 }
