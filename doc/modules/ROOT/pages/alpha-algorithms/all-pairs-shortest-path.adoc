@@ -44,6 +44,8 @@ Starting with Neo4j 5, the `Infinity` literal is now included in Cypher too.
 
 [[algorithm-all-pairs-shortest-path-syntax]]
 == Syntax
+[.include-with-stream]
+======
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -51,18 +53,30 @@ CALL gds.alpha.allShortestPaths.stream(
   graphName: string,
   configuration: map
 )
-YIELD startNodeId, targetNodeId, distance
+YIELD sourceNodeId, targetNodeId, distance
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
 |===
-| Name                                                                             | Type    | Default                | Optional | Description
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| concurrency                                                                      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
-| readConcurrency                                                                  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+
 |===
 
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type      | Description
+| sourceNodeId               | Integer   | The source node.
+| targetNodeId               | Integer   | The target node.
+| distance  | Float |  The distance of the shortest path from source to target.
+|===
+
+======
 
 [[algorithm-all-pairs-shortest-path-sample]]
 == All Pairs Shortest Path algorithm sample
