@@ -2,7 +2,7 @@
 [[catalog-model-publish]]
 = Publishing models
 
-By default, a trained model is visible to the user that created it.
+By default, a trained model is visible only to the user that created it.
 Making a model accessible to other users can be achieved by publishing it.
 
 
@@ -38,9 +38,15 @@ include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
 
 == Examples
 
+In this section we will illustrate how to use the `gds.model.publish` procedure to publish a model.
+A pre-requisite for this is that a model has already been trained and stored in the model catalog.
+In this example we will assume that a model called `my-model` exists in the catalog.
+
+All we need to do is to run the procedure with the name of the model we want to publish.
+
 [role=query-example]
 --
-.Publishing trained model:
+.Publishing a trained model:
 [source, cypher, role=noplay]
 ----
 CALL gds.model.publish('my-model')
@@ -56,5 +62,25 @@ RETURN modelInfo.modelName AS modelName, published
 |===
 --
 
-We can see that the model is now shared. 
-The shared model has the `_public` suffix.
+We can see that the model name is modified with the `_public` suffix.
+When we now list the models in the catalog we can see that we only have the published model.
+
+[role=query-example]
+--
+.Listing the published model:
+[source, cypher, role=noplay]
+----
+CALL gds.model.list()
+YIELD modelInfo, published
+RETURN modelInfo.modelName AS modelName, published
+----
+
+.Results
+[opts="header"]
+|===
+| modelName          | published
+| "my-model_public"  | true
+|===
+--
+
+This model is now accessible to all users.
