@@ -56,7 +56,7 @@ class PipelineDropProcTest extends BaseProcTest {
             pipe
         );
 
-        var query = "gds.beta.pipeline.drop($pipelineName)";
+        var query = "gds.pipeline.drop($pipelineName)";
         assertCypherResult(
             formatWithLocale(
                 "CALL %s YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
@@ -82,7 +82,7 @@ class PipelineDropProcTest extends BaseProcTest {
     void failOnDroppingNonExistingPipeline() {
         String pipelineName = "foo";
         assertError(
-            "CALL gds.beta.pipeline.drop($pipelineName)",
+            "CALL gds.pipeline.drop($pipelineName)",
             Map.of("pipelineName", pipelineName),
             formatWithLocale("Pipeline with name `%s` does not exist for user `%s`.", pipelineName, getUsername())
         );
@@ -90,6 +90,6 @@ class PipelineDropProcTest extends BaseProcTest {
 
     @Test
     void failSilentlyOnDroppingNonExistingPipeline() {
-        assertCypherResult("CALL gds.beta.pipeline.drop('foo', false)", List.of());
+        assertCypherResult("CALL gds.pipeline.drop('foo', false)", List.of());
     }
 }

@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -28,14 +31,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineExistsProc extends PipelineCatalogProc {
+public class PipelineExistsProc extends BaseProc {
 
     private static final String DESCRIPTION = "Checks if a given pipeline exists in the pipeline catalog.";
 
-    @Procedure(name = "gds.beta.pipeline.exists", mode = READ)
+    @Procedure(name = "gds.pipeline.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<PipelineExistsResult> exists(@Name(value = "pipelineName") String pipelineName) {
-        validatePipelineName(pipelineName);
+        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
 
         String type;
         boolean exists;
@@ -54,16 +57,16 @@ public class PipelineExistsProc extends PipelineCatalogProc {
         ));
     }
 
-    @SuppressWarnings("unused")
-    public static class PipelineExistsResult {
-        public final String pipelineName;
-        public final String pipelineType;
-        public final boolean exists;
+    @Procedure(name = "gds.beta.pipeline.exists", mode = READ, deprecatedBy = "gds.pipeline.exists")
+    @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<PipelineExistsResult> betaExists(@Name(value = "pipelineName") String pipelineName) {
+        executionContext()
+            .log()
+            .warn("The procedure `gds.beta.pipeline.exists` is deprecated and will be removed in a future release. Please use `gds.pipeline.exists` instead.");
 
-        PipelineExistsResult(String pipelineName, String pipelineType, boolean exists) {
-            this.pipelineName = pipelineName;
-            this.pipelineType = pipelineType;
-            this.exists = exists;
-        }
+        return exists(pipelineName);
     }
+
 }

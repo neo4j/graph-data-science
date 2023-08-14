@@ -309,9 +309,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.modularityOptimization.write",
         "gds.modularityOptimization.write.estimate",
 
-        "gds.beta.pipeline.drop",
-        "gds.beta.pipeline.exists",
-        "gds.beta.pipeline.list",
+        "gds.pipeline.drop",
+        "gds.pipeline.exists",
+        "gds.pipeline.list",
 
         "gds.randomWalk.stats",
         "gds.randomWalk.stats.estimate",

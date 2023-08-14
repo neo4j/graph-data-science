@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapAccess;
+@SuppressWarnings("unused")
+public class PipelineExistsResult {
+    public final String pipelineName;
+    public final String pipelineType;
+    public final boolean exists;
 
-abstract class PipelineCatalogProc extends BaseProc {
-
-    static final String NO_VALUE = "__NO_VALUE";
-
-    void validatePipelineName(String pipelineName) {
-        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
+    PipelineExistsResult(String pipelineName, String pipelineType, boolean exists) {
+        this.pipelineName = pipelineName;
+        this.pipelineType = pipelineType;
+        this.exists = exists;
     }
-
 }

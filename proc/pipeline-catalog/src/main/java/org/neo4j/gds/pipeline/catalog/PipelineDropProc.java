@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -29,17 +32,17 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineDropProc extends PipelineCatalogProc {
+public class PipelineDropProc extends BaseProc {
 
     private static final String DESCRIPTION = "Drops a pipeline and frees up the resources it occupies.";
 
-    @Procedure(name = "gds.beta.pipeline.drop", mode = READ)
+    @Procedure(name = "gds.pipeline.drop", mode = READ)
     @Description(DESCRIPTION)
     public Stream<PipelineCatalogResult> drop(
         @Name(value = "pipelineName") String pipelineName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        validatePipelineName(pipelineName);
+        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
 
         TrainingPipeline<?> pipeline = null;
 
@@ -52,5 +55,20 @@ public class PipelineDropProc extends PipelineCatalogProc {
         }
 
         return Stream.ofNullable(pipeline).map(pipe -> new PipelineCatalogResult(pipe, pipelineName));
+    }
+
+    @Procedure(name = "gds.beta.pipeline.drop", mode = READ, deprecatedBy = "gds.pipeline.drop")
+    @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<PipelineCatalogResult> betaDrop(
+        @Name(value = "pipelineName") String pipelineName,
+        @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.pipeline.drop` has been deprecated, please use `gds.pipeline.drop`.");
+
+        return drop(pipelineName, failIfMissing);
     }
 }
