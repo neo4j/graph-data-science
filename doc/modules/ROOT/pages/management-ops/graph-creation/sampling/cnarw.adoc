@@ -82,7 +82,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | samplingRatio           | Float           | 0.15                              | yes      | The fraction of nodes in the original graph to be sampled.
 | restartProbability      | Float           | 0.1                               | yes      | The probability that a sampling random walk restarts from one of the start nodes.
-| startNodes              | List of Integer | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
+| startNodes              | List of Integer or Node | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
 | nodeLabelStratification | Boolean         | false                             | yes      | If true, preserves the node label distribution of the original graph.
 | randomSeed              | Integer         | n/a                               | yes      | The seed value to control the randomness of the algorithm.
 Note that `concurrency` must be set to 1 when setting this parameter.
@@ -182,7 +182,7 @@ MATCH (start:Female {name: 'Juliette'})
 CALL gds.graph.sample.cnarw('sampledGraph', 'graph',
 {
     samplingRatio: 0.5,
-    startNodes: [id(start)]
+    startNodes: [start]
 })
 YIELD nodeCount
 RETURN nodeCount;

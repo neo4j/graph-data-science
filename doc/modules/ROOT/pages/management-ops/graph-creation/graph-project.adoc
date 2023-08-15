@@ -552,7 +552,7 @@ In the following we check if the price was correctly projected:
 [source, cypher, role=noplay]
 ----
 MATCH (n:Book)
-RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', n, 'price') as price
 ORDER BY price
 ----
 

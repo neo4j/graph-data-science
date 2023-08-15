@@ -271,8 +271,8 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stats.estimate('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost'
 })
 YIELD nodeCount, relationshipCount, requiredMemory
@@ -300,8 +300,8 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stream('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost'
 })
 YIELD nodeId,parentId, weight
@@ -340,8 +340,8 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stats('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost'
 })
 YIELD effectiveNodeCount, totalWeight
@@ -369,8 +369,8 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.write('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   writeProperty: 'steinerWeight',
   writeRelationshipType: 'STEINER'
@@ -422,8 +422,8 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.mutate('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   mutateProperty: 'steinerWeight',
   mutateRelationshipType: 'STEINER'
@@ -470,8 +470,8 @@ Note that there is no guarantee that enabling rerouting will always lead to an i
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stream('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   applyRerouting: true
 })
@@ -522,8 +522,8 @@ We know repeat the algorithm; this time with the extended rerouting heuristic.
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stream('inverseGraph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   applyRerouting: true
 })

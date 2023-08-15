@@ -134,11 +134,7 @@ CALL gds.allShortestPaths.stream('nativeGraph', {
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance
 WHERE gds.util.isFinite(distance) = true
-
-MATCH (source:Loc) WHERE id(source) = sourceNodeId
-MATCH (target:Loc) WHERE id(target) = targetNodeId
-WITH source, target, distance WHERE source <> target
-
+WITH gds.util.asNode(sourceNodeId) AS source, gds.util.asNode(targetNodeId) AS target, distance WHERE source <> target
 RETURN source.name AS source, target.name AS target, distance
 ORDER BY distance DESC, source ASC, target ASC
 LIMIT 10
@@ -190,10 +186,7 @@ CALL gds.allShortestPaths.stream('cypherGraph', {
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance
 WHERE gds.util.isFinite(distance) = true
-
-MATCH (source:Loc) WHERE id(source) = sourceNodeId
-MATCH (target:Loc) WHERE id(target) = targetNodeId
-WITH source, target, distance WHERE source <> target
+WITH gds.util.asNode(sourceNodeId) AS source, gds.util.asNode(targetNodeId) AS target, distance WHERE source <> target
 
 RETURN source.name AS source, target.name AS target, distance
 ORDER BY distance DESC, source ASC, target ASC

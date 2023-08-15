@@ -288,7 +288,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.spanningTree.stream('graph', {
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost'
 })
 YIELD nodeId,parentId, weight
@@ -321,7 +321,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.spanningTree.stats('graph', {
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost'
 })
 YIELD effectiveNodeCount, totalWeight
@@ -350,7 +350,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 ----
 MATCH (n:Place {id: 'D'})
 CALL gds.spanningTree.write('graph', {
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost',
   writeProperty: 'writeCost',
   writeRelationshipType: 'MINST'
@@ -403,7 +403,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 ----
 MATCH (n:Place {id: 'D'})
 CALL gds.spanningTree.mutate('graph', {
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost',
   mutateProperty: 'writeCost',
   mutateRelationshipType: 'MINST'
@@ -436,7 +436,7 @@ The maximum weighted tree spanning algorithm is similar to the minimum one, exce
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.spanningTree.stats('graph', {
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost',
   objective: 'maximum'
 })
