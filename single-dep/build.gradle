@@ -1,0 +1,48 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Single Dep'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    // the necessary Neo4j things
+    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-resource', version: ver.'neo4j') { transitive = false }
+
+    testImplementation(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-schema', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-id-generator', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-import-util', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-configuration', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'org.neo4j', name: 'neo4j-io', version: ver.'neo4j') { transitive = false }
+    testImplementation(group: 'com.github.seancfoley', name: 'ipaddress', version: ver.'ipaddress') { transitive = false }
+
+    // the necessary GDS things
+    implementation project(':annotations')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':cypher-aggregation')
+    implementation project(':graph-schema-api')
+    implementation project(':graph-store-catalog-applications')
+    implementation project(':logging')
+    implementation project(':memory-usage')
+    implementation project(':neo4j-api')
+    implementation project(':proc-common')
+    implementation project(':progress-tracking')
+    implementation project(':transaction')
+
+    // test infrastructure
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: ver.'junit5bom'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+}

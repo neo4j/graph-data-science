@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropNodePropertiesProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.drop", mode = READ)
@@ -46,7 +46,7 @@ public class GraphDropNodePropertiesProc {
         @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.dropNodeProperties(graphName, nodeProperties, configuration, Optional.empty());
+        return facade.catalog().dropNodeProperties(graphName, nodeProperties, configuration, Optional.empty());
     }
 
     @SuppressWarnings("unused")
@@ -59,6 +59,11 @@ public class GraphDropNodePropertiesProc {
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.drop`";
 
-        return facade.dropNodeProperties(graphName, nodeProperties, configuration, Optional.of(deprecationWarning));
+        return facade.catalog().dropNodeProperties(
+            graphName,
+            nodeProperties,
+            configuration,
+            Optional.of(deprecationWarning)
+        );
     }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.userlog;
 
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,18 +38,18 @@ public class UserLogProc {
     /**
      * For tests
      */
-    UserLogProc(GraphStoreCatalogProcedureFacade facade) {
+    UserLogProc(GraphDataScienceProcedureFacade facade) {
         this.facade = facade;
     }
 
     @SuppressWarnings("WeakerAccess")
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @SuppressWarnings("unused")
     @Procedure("gds.alpha.userLog")
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> queryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
-        return facade.queryUserLog(jobId);
+        return facade.catalog().queryUserLog(jobId);
     }
 }

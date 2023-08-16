@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.core.loading.GraphFilterResult;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,7 +36,7 @@ public class GraphFilterProc {
     private static final String DESCRIPTION = "Applies node and relationship predicates on a graph and stores the result as a new graph in the catalog.";
 
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @Procedure(name = "gds.graph.filter", mode = READ)
     @Description(DESCRIPTION)
@@ -47,6 +47,12 @@ public class GraphFilterProc {
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
+        return facade.catalog().subGraphProject(
+            graphName,
+            fromGraphName,
+            nodeFilter,
+            relationshipFilter,
+            configuration
+        );
     }
 }

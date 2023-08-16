@@ -23,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -40,12 +40,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphProjectProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     public GraphProjectProc() {
     }
 
-    GraphProjectProc(GraphStoreCatalogProcedureFacade facade) {
+    GraphProjectProc(GraphDataScienceProcedureFacade facade) {
         this.facade = facade;
     }
 
@@ -57,7 +57,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nativeProject(
+        return facade.catalog().nativeProject(
             graphName,
             nodeProjection,
             relationshipProjection,
@@ -72,7 +72,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.estimateNativeProject(nodeProjection, relationshipProjection, configuration);
+        return facade.catalog().estimateNativeProject(nodeProjection, relationshipProjection, configuration);
     }
 
     @Procedure(
@@ -86,7 +86,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
+        return facade.catalog().cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
     }
 
     @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
@@ -96,7 +96,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.estimateCypherProject(nodeQuery, relationshipQuery, configuration);
+        return facade.catalog().estimateCypherProject(nodeQuery, relationshipQuery, configuration);
     }
 
     @Internal
@@ -111,6 +111,6 @@ public class GraphProjectProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.log().warn("Procedure `gds.beta.graph.project.subgraph` has been deprecated, please use `gds.graph.filter`.");
-        return facade.subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
+        return facade.catalog().subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -32,11 +32,11 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMemoryUsageProc extends CatalogProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
-        return facade.sizeOf(graphName);
+        return facade.catalog().sizeOf(graphName);
     }
 }

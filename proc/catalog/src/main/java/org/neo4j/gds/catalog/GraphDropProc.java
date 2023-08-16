@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphInfo;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,12 +33,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     public GraphDropProc() {
     }
 
-    GraphDropProc(GraphStoreCatalogProcedureFacade facade) {
+    GraphDropProc(GraphDataScienceProcedureFacade facade) {
         this.facade = facade;
     }
 
@@ -49,6 +50,6 @@ public class GraphDropProc {
         @Name(value = "dbName", defaultValue = "") String dbName,
         @Name(value = "username", defaultValue = "") String username
     ) {
-        return facade.dropGraph(graphNameOrListOfGraphNames, failIfMissing, dbName, username);
+        return facade.catalog().dropGraph(graphNameOrListOfGraphNames, failIfMissing, dbName, username);
     }
 }

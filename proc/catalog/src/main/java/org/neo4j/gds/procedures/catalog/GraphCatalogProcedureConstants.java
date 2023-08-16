@@ -30,12 +30,5 @@ public final class GraphCatalogProcedureConstants {
     public static final String PROJECT_DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
     public static final String STREAM_NODE_PROPERTIES_DESCRIPTION = "Streams the given node properties.";
 
-    /**
-     * This exists because procedures need default values sometimes.
-     * For example, CALL gds.graph.list() would fail otherwise,
-     * the user would have to do something silly like CALL gds.graph.list("")
-     */
-    public static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
-
     private GraphCatalogProcedureConstants() {}
 }

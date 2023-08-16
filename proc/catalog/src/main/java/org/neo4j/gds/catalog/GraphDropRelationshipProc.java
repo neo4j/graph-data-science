@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropRelationshipProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.relationships.drop", mode = READ)
@@ -43,7 +43,7 @@ public class GraphDropRelationshipProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        return facade.dropRelationships(graphName, relationshipType, Optional.empty());
+        return facade.catalog().dropRelationships(graphName, relationshipType, Optional.empty());
     }
 
     @SuppressWarnings("unused")
@@ -55,6 +55,6 @@ public class GraphDropRelationshipProc {
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationships.drop`";
 
-        return facade.dropRelationships(graphName, relationshipType, Optional.of(deprecationWarning));
+        return facade.catalog().dropRelationships(graphName, relationshipType, Optional.of(deprecationWarning));
     }
 }

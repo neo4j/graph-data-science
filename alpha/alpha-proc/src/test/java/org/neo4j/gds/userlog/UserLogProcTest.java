@@ -21,9 +21,10 @@ package org.neo4j.gds.userlog;
 
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.catalog.CatalogFacade;
 
 import java.util.stream.Stream;
 
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.when;
 class UserLogProcTest {
     @Test
     void shouldLogUserWarnings() {
-        var facade = mock(GraphStoreCatalogProcedureFacade.class);
+        var facade = mock(GraphDataScienceProcedureFacade.class);
         var userLogProc = new UserLogProc(facade);
 
         var expectedWarnings = Stream.of(
@@ -42,7 +43,9 @@ class UserLogProcTest {
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        when(facade.queryUserLog("unused")).thenReturn(expectedWarnings);
+        var catalogFacade = mock(CatalogFacade.class);
+        when(facade.catalog()).thenReturn(catalogFacade);
+        when(catalogFacade.queryUserLog("unused")).thenReturn(expectedWarnings);
         var actualWarnings = userLogProc.queryUserLog("unused");
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);

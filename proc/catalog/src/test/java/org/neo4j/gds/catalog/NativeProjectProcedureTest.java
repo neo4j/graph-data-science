@@ -21,7 +21,8 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.loading.GraphProjectNativeResult;
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.catalog.CatalogFacade;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.when;
 class NativeProjectProcedureTest {
     @Test
     void shouldDelegateToFacade() {
-        var facade = mock(GraphStoreCatalogProcedureFacade.class);
+        var facade = mock(GraphDataScienceProcedureFacade.class);
         var procedure = new GraphProjectProc(facade);
 
         // perhaps a bit elaborate to type these out in detail;
@@ -61,7 +62,9 @@ class NativeProjectProcedureTest {
             87,
             117
         ));
-        when(facade.nativeProject(
+        var catalogFacade = mock(CatalogFacade.class);
+        when(facade.catalog()).thenReturn(catalogFacade);
+        when(catalogFacade.nativeProject(
             "some graph",
             "some label",
             "some relationship type",

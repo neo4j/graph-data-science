@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.catalog.StreamGraphPropertyResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -34,12 +35,14 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamGraphPropertiesProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @SuppressWarnings("unused")
     @Internal
     @Deprecated(forRemoval = true)
-    @Procedure(name = "gds.alpha.graph.graphProperty.stream", mode = READ, deprecatedBy = "gds.graph.graphProperty.stream")
+    @Procedure(
+        name = "gds.alpha.graph.graphProperty.stream", mode = READ, deprecatedBy = "gds.graph.graphProperty.stream"
+    )
     @Description(STREAM_GRAPH_PROPERTY_DESCRIPTION)
     public Stream<StreamGraphPropertyResult> alphaStreamProperty(
         @Name(value = "graphName") String graphName,
@@ -47,7 +50,8 @@ public class GraphStreamGraphPropertiesProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.log()
-            .warn("Procedure `gds.alpha.graph.graphProperty.stream` has been deprecated, please use `gds.graph.graphProperty.stream`.");
+            .warn(
+                "Procedure `gds.alpha.graph.graphProperty.stream` has been deprecated, please use `gds.graph.graphProperty.stream`.");
 
         return streamProperty(graphName, graphProperty, configuration);
     }
@@ -60,6 +64,6 @@ public class GraphStreamGraphPropertiesProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.streamGraphProperty(graphName, graphProperty, configuration);
+        return facade.catalog().streamGraphProperty(graphName, graphProperty, configuration);
     }
 }

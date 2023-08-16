@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.catalog.GraphStoreCatalogProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphDropGraphPropertiesResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -34,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropGraphPropertiesProc {
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScienceProcedureFacade facade;
 
     @Internal
     @Deprecated(forRemoval = true)
@@ -58,6 +59,6 @@ public class GraphDropGraphPropertiesProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.dropGraphProperty(graphName, graphProperty, configuration);
+        return facade.catalog().dropGraphProperty(graphName, graphProperty, configuration);
     }
 }

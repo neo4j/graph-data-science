@@ -238,6 +238,9 @@ project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 include('procedure-facade')
 project(':procedure-facade').projectDir = file('procedure-facade')
 
+include('single-dep')
+project(':single-dep').projectDir = file('single-dep')
+
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
 

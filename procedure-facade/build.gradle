@@ -32,4 +32,6 @@ dependencies {
     implementation project(':licensing') // this is where the business facade lives (currently)
     implementation project(':logging')
     implementation project(':subgraph-filtering')
+
+    implementation project(':single-dep')
 }
