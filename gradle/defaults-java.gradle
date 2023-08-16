@@ -88,6 +88,8 @@ allprojects {
                 includeEngines 'jqwik'
             }
 
+            reports.html.required = !project.hasProperty('disableTestHTMLReports')
+
             // enable verbose test logging
             testLogging {
                 // set options for log level LIFECYCLE (the default)
