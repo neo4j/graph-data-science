@@ -49,7 +49,6 @@ import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.core.Aggregation.COUNT;
 import static org.neo4j.gds.core.Aggregation.SINGLE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -283,7 +282,9 @@ class RelationshipProjectionsTest {
                 .builder()
                 .type("REL")
                 .aggregation(aggregation)
-                .build())
+                .build()
+                .checkAggregation()
+        )
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
                 formatWithLocale("Setting a global `%s` aggregation requires at least one property mapping.", aggregation)

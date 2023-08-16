@@ -71,6 +71,15 @@ public abstract class RelationshipProjection extends ElementProjection {
                 "Indexing the inverse orientation is only allowed for NATURAL and REVERSE."
             );
         }
+    }
+
+    /**
+     * Checks if the projection defines a global aggregation that requires at least one property mapping, such as `MIN`.
+     * This check is independent of the annotated check method, since we normalize projections after they have been created.
+     * (see org.neo4j.gds.config.GraphProjectFromStoreConfig#withNormalizedPropertyMappings()),
+     */
+    public void checkAggregation() {
+        check();
 
         if (properties().isEmpty()) {
             switch (aggregation()) {
