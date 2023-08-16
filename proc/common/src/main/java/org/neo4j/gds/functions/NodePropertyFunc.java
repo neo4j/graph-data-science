@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.NodeConfig;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -52,7 +53,7 @@ public class NodePropertyFunc {
     @Description("Returns a node property value from a named in-memory graph.")
     public Object nodeProperty(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeId") Number nodeId,
+        @Name(value = "nodeId") Object nodeId,
         @Name(value = "propertyKey") String propertyKey,
         @Name(value = "nodeLabel", defaultValue = "*") String nodeLabel
     ) {
@@ -89,10 +90,12 @@ public class NodePropertyFunc {
             }
         }
 
-        long internalId = graphStore.nodes().safeToMappedNodeId(nodeId.longValue());
+        long neoNodeId = NodeConfig.parseNodeId(nodeId, "nodeId");
+
+        long internalId = graphStore.nodes().safeToMappedNodeId(neoNodeId);
 
         if (internalId == -1) {
-            throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", nodeId.longValue()));
+            throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", neoNodeId));
         }
 
         if (!projectAll && !graphStore.nodes().hasLabel(internalId, nodeLabelType)) {

@@ -140,7 +140,7 @@ By setting the `k=3`, we define that we want to find a 3-minimum spanning tree t
 MATCH (n:Place{id: 'A'})
 CALL gds.kSpanningTree.write('graph', {
   k: 3,
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost',
   writeProperty:'kmin'
 })
@@ -184,7 +184,7 @@ Nodes A, B, and C form the discovered 3-minimum spanning tree of our graph.
 MATCH (n:Place{id: 'D'})
 CALL gds.kSpanningTree.write('graph', {
   k: 3,
-  sourceNode: id(n),
+  sourceNode: n,
   relationshipWeightProperty: 'cost',
   writeProperty:'kmax',
   objective: 'maximum'

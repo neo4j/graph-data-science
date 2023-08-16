@@ -292,7 +292,7 @@ GDS offers a function to access the property value of a specific node from an in
 ----
 gds.util.nodeProperty(
   graphName: String,
-  nodeId: Integer,
+  nodeId: Node or Integer,
   propertyKey: String,
   nodeLabel: String
 )
@@ -324,7 +324,7 @@ We use the `socialGraph` with the property `score` introduced xref:management-op
 MATCH (florentin:Person {name: 'Florentin'})
 RETURN
   florentin.name AS name,
-  gds.util.nodeProperty('socialGraph', id(florentin), 'score') AS score
+  gds.util.nodeProperty('socialGraph', florentin, 'score') AS score
 ----
 
 .Results

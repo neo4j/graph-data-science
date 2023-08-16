@@ -181,7 +181,7 @@ Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as
 [source, cypher, role=noplay]
 ----
 MATCH (start:User {name: 'Alice'})
-CALL gds.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
+CALL gds.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [start] })
 YIELD nodeCount, relationshipCount
 RETURN nodeCount, relationshipCount
 ----

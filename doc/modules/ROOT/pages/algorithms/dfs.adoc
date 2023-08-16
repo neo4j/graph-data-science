@@ -199,8 +199,8 @@ image::dfs-full-stream-path.svg[Visualization of Depth First Search stream witho
 .Running the Depth First Search algorithm with target nodes:
 [source, cypher, role=noplay]
 ----
-MATCH (a:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
-WITH id(a) AS source, [id(d), id(e)] AS targetNodes
+MATCH (source:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
+WITH source, [d, e] AS targetNodes
 CALL gds.dfs.stream('myGraph', {
   sourceNode: source,
   targetNodes: targetNodes
