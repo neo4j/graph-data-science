@@ -25,7 +25,6 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
-    implementation project(':graph-store-catalog-applications') // duh
     implementation project(':io-core')
     implementation project(':logging')
     implementation project(':memory-usage')
