@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -33,7 +34,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.NativeFactory;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -103,7 +103,7 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
                     )
                     .build();
 
-                long maxGraphSize = NativeFactory
+                long maxGraphSize = CSRGraphStoreFactory
                     .getMemoryEstimation(NodeProjections.all(), relationshipProjections, false)
                     .estimate(sparseDimensions, concurrency)
                     .memoryUsage()

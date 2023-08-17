@@ -24,22 +24,22 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.NativeFactory;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -84,7 +84,7 @@ class GraphAggregationPhase {
                     )
                     .build();
 
-                var memoryEstimation = NativeFactory.getMemoryEstimation(
+                var memoryEstimation = CSRGraphStoreFactory.getMemoryEstimation(
                     NodeProjections.all(),
                     relationshipProjections,
                     false

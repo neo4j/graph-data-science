@@ -21,11 +21,11 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 

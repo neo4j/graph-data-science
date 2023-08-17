@@ -21,15 +21,15 @@ package org.neo4j.gds.executor;
 
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.util.Map;
 
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryEstimationGraphConfigParser {

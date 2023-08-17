@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.Nullable;
@@ -27,9 +27,18 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.loading.IdMapBuilder;
+import org.neo4j.gds.core.loading.ImportSizing;
+import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
+import org.neo4j.gds.core.loading.NativeNodePropertyImporter;
+import org.neo4j.gds.core.loading.NodeImporterBuilder;
+import org.neo4j.gds.core.loading.NodeReference;
+import org.neo4j.gds.core.loading.NodeScannerFactory;
+import org.neo4j.gds.core.loading.Nodes;
+import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;

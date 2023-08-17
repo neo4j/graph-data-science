@@ -60,7 +60,7 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
     private final IdGeneratorFactory idGeneratorFactory;
     protected T graphProjectConfig;
 
-    GraphDimensionsReader(
+    protected GraphDimensionsReader(
         TransactionContext tx,
         T graphProjectConfig,
         IdGeneratorFactory idGeneratorFactory
@@ -167,11 +167,11 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
         );
     }
 
-    static class TokenElementIdentifierMappings<T extends ElementIdentifier> {
+    public static class TokenElementIdentifierMappings<T extends ElementIdentifier> {
         private final IntObjectMap<List<T>> mappings;
         private final int allToken;
 
-        TokenElementIdentifierMappings(int allToken) {
+         public TokenElementIdentifierMappings(int allToken) {
             this.allToken = allToken;
             this.mappings = new IntObjectHashMap<>();
         }
@@ -201,7 +201,7 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
             return this.mappings;
         }
 
-        void put(int key, T value) {
+        public void put(int key, T value) {
             if (!this.mappings.containsKey(key)) {
                 this.mappings.put(key, new ArrayList<>());
             }

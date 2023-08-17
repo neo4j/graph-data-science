@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.ImmutableRelationshipProjection;
@@ -25,9 +25,16 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.ImmutableSingleTypeRelationshipImportContext;
+import org.neo4j.gds.core.loading.ImportSizing;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.RelationshipReference;
+import org.neo4j.gds.core.loading.RelationshipScanCursorBasedScanner;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
+import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;

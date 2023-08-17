@@ -23,10 +23,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.util.Collections;
 import java.util.Set;

@@ -27,15 +27,15 @@ import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.core.loading.GraphProjectCypherResult;
-import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 

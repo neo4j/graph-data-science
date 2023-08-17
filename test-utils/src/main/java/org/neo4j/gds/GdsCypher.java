@@ -31,9 +31,9 @@ import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;

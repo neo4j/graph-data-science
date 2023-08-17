@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.projection;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.NodeProjections;
@@ -31,9 +31,9 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.NativeFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -165,27 +165,10 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         }
     }
 
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.store(this);
-    }
-
     @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY);
-    }
-
-    static GraphProjectFromStoreConfig emptyWithName(String userName, String graphName) {
-        NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = RelationshipProjections.ALL;
-        return ImmutableGraphProjectFromStoreConfig.of(
-            userName,
-            graphName,
-            nodeProjections,
-            relationshipProjections
-        );
     }
 
     static GraphProjectFromStoreConfig of(
@@ -231,5 +214,30 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             IMPLICIT_GRAPH_NAME,
             config
         );
+    }
+
+    @Override
+    @Configuration.Ignore
+    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
+        if (cases instanceof Cases) {
+            return ((Cases<R>) cases).store(this);
+        }
+        return null;
+    }
+
+    interface Cases<R> extends GraphProjectConfig.Cases<R> {
+
+        R store(GraphProjectFromStoreConfig graphProjectFromStoreConfig);
+    }
+
+    interface Visitor extends Cases<Void>, GraphProjectConfig.Visitor {
+
+        @Override
+        default Void store(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {
+            visit(graphProjectFromStoreConfig);
+            return null;
+        }
+
+        default void visit(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {}
     }
 }

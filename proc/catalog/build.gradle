@@ -29,6 +29,7 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
+    implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':procedure-facade')
     implementation project(':progress-tracking')

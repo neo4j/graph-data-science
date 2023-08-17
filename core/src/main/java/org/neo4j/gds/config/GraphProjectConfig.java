@@ -38,6 +38,13 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     String READ_CONCURRENCY_KEY = "readConcurrency";
     String VALIDATE_RELATIONSHIPS_KEY = "validateRelationships";
 
+    static GraphProjectConfig emptyWithName(String userName, String graphName) {
+        return ImmutableGraphCatalogConfig.builder()
+            .username(userName)
+            .graphName(graphName)
+            .build();
+    }
+
     @Configuration.Parameter
     @Value.Default
     default String username() {
@@ -98,6 +105,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
+    @Value.Auxiliary
     @Configuration.Ignore
     <R> R accept(Cases<R> visitor);
 
@@ -106,7 +114,6 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     }
 
     interface Cases<R> {
-        R store(GraphProjectFromStoreConfig storeConfig);
 
         R cypher(GraphProjectFromCypherConfig cypherConfig);
 
@@ -115,15 +122,11 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         R random(RandomGraphGeneratorConfig randomGraphConfig);
 
         R sample(GraphSampleProcConfig graphSampleProcConfig);
+
+        R catalog(GraphCatalogConfig graphCatalogConfig);
     }
 
     interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void store(GraphProjectFromStoreConfig storeConfig) {
-            visit(storeConfig);
-            return null;
-        }
 
         @Override
         default Void cypher(GraphProjectFromCypherConfig cypherConfig) {
@@ -149,7 +152,11 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             return null;
         }
 
-        default void visit(GraphProjectFromStoreConfig storeConfig) {}
+        @Override
+        default Void catalog(GraphCatalogConfig graphCatalogConfig) {
+            visit(graphCatalogConfig);
+            return null;
+        }
 
         default void visit(GraphProjectFromCypherConfig cypherConfig) {}
 
@@ -158,5 +165,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
 
         default void visit(GraphSampleProcConfig sampleProcConfig) {}
+
+        default void visit(GraphCatalogConfig graphCatalogConfig) {}
     }
 }

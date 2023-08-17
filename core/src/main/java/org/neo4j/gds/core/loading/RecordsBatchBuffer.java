@@ -30,7 +30,7 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
         this.buffer = new long[capacity];
     }
 
-    static final class ScanState {
+    public static final class ScanState {
         private final boolean batchHasData;
         private final boolean batchConsumed;
 
@@ -42,14 +42,14 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
         /**
          * True, if it is safe to advance the underlying scan to the next batch.
          */
-        boolean reserveNextBatch() {
+        public boolean reserveNextBatch() {
             return batchConsumed;
         }
 
         /**
          * True, if the underlying buffers must be flushed before consuming more records.
          */
-        boolean requiresFlush() {
+        public boolean requiresFlush() {
             return batchHasData;
         }
     }

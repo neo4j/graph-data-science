@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.core.GraphDimensionsReader;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.TokenRead;

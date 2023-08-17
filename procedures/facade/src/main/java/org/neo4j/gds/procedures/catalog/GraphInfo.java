@@ -23,12 +23,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -135,7 +135,8 @@ public class GraphInfo {
 
     static final class Visitor implements
         GraphProjectConfig.Visitor,
-        GraphProjectFromCypherAggregationConfig.Visitor {
+        GraphProjectFromCypherAggregationConfig.Visitor,
+        GraphProjectFromStoreConfig.Visitor {
 
         Map<String, Object> configuration = null;
 

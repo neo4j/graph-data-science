@@ -109,7 +109,7 @@ public final class SingleTypeRelationshipImporter {
             .build();
     }
 
-    ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
+    public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
         PartialIdMap idMap,
         int bulkSize,
         KernelTransaction kernelTransaction,

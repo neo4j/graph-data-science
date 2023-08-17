@@ -33,6 +33,7 @@ dependencies {
     implementation project(':executor')
     implementation project(':logging')
     implementation project(':memory-usage')
+    implementation project(':native-projection')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')

@@ -28,9 +28,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;

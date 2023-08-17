@@ -20,9 +20,9 @@
 package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.projection.GraphProjectNativeResult;
 
 import java.util.Map;
 import java.util.stream.Stream;

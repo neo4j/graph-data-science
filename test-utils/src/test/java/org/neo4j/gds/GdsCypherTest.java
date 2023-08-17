@@ -26,9 +26,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.graphdb.Direction;
 
 import java.util.AbstractMap;

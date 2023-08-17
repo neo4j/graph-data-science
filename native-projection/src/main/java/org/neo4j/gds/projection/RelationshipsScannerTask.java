@@ -17,11 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.loading.AdjacencyBuffer;
+import org.neo4j.gds.core.loading.CompositeRelationshipsBatchBufferBuilder;
+import org.neo4j.gds.core.loading.RecordScannerTask;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.RelationshipReference;
+import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.core.loading.StoreScanner;
+import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;

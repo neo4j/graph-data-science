@@ -38,7 +38,7 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -97,8 +97,8 @@ class NodePropertiesWriterTest {
 
     @BeforeEach
     void setUp() {
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("user", "g"), graphStore);
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("user", "propertiesSubsetGraph"), propertiesSubsetGraphStore);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "g"), graphStore);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "propertiesSubsetGraph"), propertiesSubsetGraphStore);
     }
 
     @AfterEach

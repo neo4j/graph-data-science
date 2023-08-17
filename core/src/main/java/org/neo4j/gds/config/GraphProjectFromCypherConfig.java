@@ -44,10 +44,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
     List<String> FORBIDDEN_KEYS = Arrays.asList(
-        GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
-        GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
-        GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY,
-        GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY
+//        GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
+        "nodeProjection",
+//        GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
+        "relationshipProjection",
+//        GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY,
+        "nodeProperties",
+//        GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY
+        "relationshipProperties"
     );
 
     String NODE_QUERY_KEY = "nodeQuery";

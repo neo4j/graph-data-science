@@ -35,13 +35,14 @@ import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
@@ -109,7 +110,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     @Test
     void testMemoryEstimate() {
         var graphName = "memoryEstimateGraph";
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)
             .graphProject()
             .loadEverything()
@@ -133,7 +134,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     @Test
     void failOnMemoryEstimationWithInvalidRelationshipFilterOnExplicitGraphStore() {
         var graphName = "memoryEstimateGraph";
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)
             .graphProject()
             .loadEverything()

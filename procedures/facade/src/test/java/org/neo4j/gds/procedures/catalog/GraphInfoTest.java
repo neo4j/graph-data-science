@@ -32,10 +32,10 @@ import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

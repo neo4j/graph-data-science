@@ -23,6 +23,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':logging')
     implementation project(':memory-usage')
+    implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':proc-common')
     implementation project(':progress-tracking')

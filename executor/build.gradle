@@ -17,6 +17,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':edition-api')
+    implementation project(':native-projection')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ImmutableRelationshipProjections;
@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -48,7 +49,7 @@ class NativeFactoryTest {
 
         var memoryEstimation = new AtomicReference<MemoryEstimation>();
         memoryEstimation.set(
-            NativeFactory.getMemoryEstimation(
+            CSRGraphStoreFactory.getMemoryEstimation(
                 NodeProjections.all(),
                 RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL),
                 false
@@ -81,7 +82,7 @@ class NativeFactoryTest {
             )
             .build();
 
-        MemoryTree estimate = NativeFactory
+        MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
@@ -110,7 +111,7 @@ class NativeFactoryTest {
             )
             .build();
 
-        MemoryTree estimate = NativeFactory
+        MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
@@ -133,7 +134,7 @@ class NativeFactoryTest {
             .putProjection(RelationshipType.of("TYPE2"), RelationshipProjection.of("TYPE2", Orientation.NATURAL))
             .build();
 
-        MemoryTree estimate = NativeFactory
+        MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 

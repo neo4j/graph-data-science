@@ -23,11 +23,11 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

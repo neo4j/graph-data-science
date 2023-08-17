@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.projection;
 
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+
+import org.neo4j.gds.core.GraphDimensions;
 
 import java.util.Map;
 
@@ -30,7 +31,7 @@ import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public final class GraphDimensionsValidation {
+final class GraphDimensionsValidation {
 
     private GraphDimensionsValidation() {}
 

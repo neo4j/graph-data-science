@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.catalog;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

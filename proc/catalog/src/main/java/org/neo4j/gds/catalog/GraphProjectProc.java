@@ -20,11 +20,11 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.loading.GraphProjectCypherResult;
-import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.projection.GraphProjectNativeResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;

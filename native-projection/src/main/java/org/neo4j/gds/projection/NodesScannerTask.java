@@ -17,10 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import com.carrotsearch.hppc.LongSet;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.loading.AdjacencyBuffer;
+import org.neo4j.gds.core.loading.NativeNodePropertyImporter;
+import org.neo4j.gds.core.loading.NodeImporter;
+import org.neo4j.gds.core.loading.NodeReference;
+import org.neo4j.gds.core.loading.NodesBatchBuffer;
+import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
+import org.neo4j.gds.core.loading.RecordScannerTask;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;

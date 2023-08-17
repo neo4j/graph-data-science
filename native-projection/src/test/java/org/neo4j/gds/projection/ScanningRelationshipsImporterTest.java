@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
@@ -33,12 +33,10 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.loading.AdjacencyTestUtils;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

@@ -84,8 +84,8 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphProjectProcTest extends BaseProcTest {
@@ -124,7 +124,7 @@ class GraphProjectProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.graph.project($name, 'A', 'REL')",
             Map.of("name", graphName),
-            singletonList(Map.of(
+            List.of(Map.of(
                 "graphName", graphName,
                 NODE_PROJECTION_KEY, Map.of(
                     "A", Map.of(

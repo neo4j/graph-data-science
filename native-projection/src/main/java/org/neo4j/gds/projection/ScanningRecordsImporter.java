@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.ImportSizing;
+import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 

@@ -39,6 +39,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
 
+    testImplementation project(':native-projection')
     testImplementation project(':memory-usage')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')

@@ -42,7 +42,6 @@ import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplicat
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
-import org.neo4j.gds.core.loading.GraphProjectNativeResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
@@ -53,6 +52,7 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.TransactionContextService;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;

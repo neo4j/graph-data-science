@@ -52,8 +52,6 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -63,6 +61,8 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
