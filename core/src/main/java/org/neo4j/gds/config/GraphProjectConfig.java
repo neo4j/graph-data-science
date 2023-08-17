@@ -24,17 +24,11 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
-
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
 
@@ -109,21 +103,6 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
 
     static @Nullable String validateName(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
-    }
-
-    static GraphProjectConfig createImplicit(String username, CypherMapWrapper config) {
-        CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
-            NODE_PROJECTION_KEY,
-            RELATIONSHIP_PROJECTION_KEY,
-            NODE_QUERY_KEY,
-            RELATIONSHIP_QUERY_KEY,
-            "Missing information for implicit graph creation."
-        );
-        if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
-            return GraphProjectFromStoreConfig.fromProcedureConfig(username, config);
-        } else {
-            return GraphProjectFromCypherConfig.fromProcedureConfig(username, config);
-        }
     }
 
     interface Cases<R> {

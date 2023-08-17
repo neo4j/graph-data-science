@@ -20,10 +20,16 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
 
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryEstimationGraphConfigParser {
@@ -42,7 +48,18 @@ public class MemoryEstimationGraphConfigParser {
         if (graphNameOrConfig instanceof Map) {
             var createConfigMap = (Map<String, Object>) graphNameOrConfig;
             var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
-            return GraphProjectConfig.createImplicit(username(), createConfigMapWrapper);
+            CypherMapWrapper.PairResult result = createConfigMapWrapper.verifyMutuallyExclusivePairs(
+                NODE_PROJECTION_KEY,
+                RELATIONSHIP_PROJECTION_KEY,
+                NODE_QUERY_KEY,
+                RELATIONSHIP_QUERY_KEY,
+                "Missing information for implicit graph creation."
+            );
+            if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
+                return GraphProjectFromStoreConfig.fromProcedureConfig(username(), createConfigMapWrapper);
+            } else {
+                return GraphProjectFromCypherConfig.fromProcedureConfig(username(), createConfigMapWrapper);
+            }
         }
         throw new IllegalArgumentException(formatWithLocale(
             "Could not parse input. Expected a configuration map, but got %s.",
