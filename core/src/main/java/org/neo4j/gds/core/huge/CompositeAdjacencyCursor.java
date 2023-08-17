@@ -51,9 +51,9 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursors;
     }
 
-    void exchangeCursor(AdjacencyCursor oldCursor, AdjacencyCursor newCursor) {
-        cursorQueue.remove(oldCursor); //remove the old cursor
-        cursorQueue.add(newCursor);     // add the new one
+    void updateCursorsQueue() {
+        cursorQueue.clear();
+        cursorQueue.addAll(cursors);
     }
     @Override
     public int size() {
