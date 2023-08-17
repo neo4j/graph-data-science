@@ -52,31 +52,6 @@ class SysInfoProcTest extends BaseProcTest {
         "Neo4j 4.4",
         "Neo4j Settings 4.4",
 
-        "Neo4j 5.1",
-        "Neo4j 5.1 (placeholder)",
-        "Neo4j Settings 5.1",
-        "Neo4j Settings 5.1 (placeholder)",
-
-        "Neo4j 5.2.0",
-        "Neo4j 5.2.0 (placeholder)",
-        "Neo4j Settings 5.2.0",
-        "Neo4j Settings 5.2.0 (placeholder)",
-
-        "Neo4j 5.3",
-        "Neo4j 5.3 (placeholder)",
-        "Neo4j Settings 5.3",
-        "Neo4j Settings 5.3 (placeholder)",
-
-        "Neo4j 5.4",
-        "Neo4j 5.4 (placeholder)",
-        "Neo4j Settings 5.4",
-        "Neo4j Settings 5.4 (placeholder)",
-
-        "Neo4j 5.5",
-        "Neo4j 5.5 (placeholder)",
-        "Neo4j Settings 5.5",
-        "Neo4j Settings 5.5 (placeholder)",
-
         "Neo4j 5.6",
         "Neo4j 5.6 (placeholder)",
         "Neo4j Settings 5.6",
@@ -166,46 +141,6 @@ class SysInfoProcTest extends BaseProcTest {
         switch (neo4jVersion) {
             case V_4_4:
                 expectedCompatibilities = Set.of("Neo4j 4.4", "Neo4j Settings 4.4");
-                break;
-            case V_5_1:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.1 (placeholder)",
-                    "Neo4j Settings 5.1",
-                    "Neo4j 5.1 (placeholder)",
-                    "Neo4j 5.1"
-                );
-                break;
-            case V_5_2:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.2.0 (placeholder)",
-                    "Neo4j Settings 5.2.0",
-                    "Neo4j 5.2.0 (placeholder)",
-                    "Neo4j 5.2.0"
-                );
-                break;
-            case V_5_3:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.3 (placeholder)",
-                    "Neo4j Settings 5.3",
-                    "Neo4j 5.3 (placeholder)",
-                    "Neo4j 5.3"
-                );
-                break;
-            case V_5_4:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.4 (placeholder)",
-                    "Neo4j Settings 5.4",
-                    "Neo4j 5.4 (placeholder)",
-                    "Neo4j 5.4"
-                );
-                break;
-            case V_5_5:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.5 (placeholder)",
-                    "Neo4j Settings 5.5",
-                    "Neo4j 5.5 (placeholder)",
-                    "Neo4j 5.5"
-                );
                 break;
             case V_5_6:
                 expectedCompatibilities = Set.of(

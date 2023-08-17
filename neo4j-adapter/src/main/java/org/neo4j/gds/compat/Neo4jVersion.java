@@ -48,16 +48,6 @@ public enum Neo4jVersion {
         switch (this) {
             case V_4_4:
                 return "4.4";
-            case V_5_1:
-                return "5.1";
-            case V_5_2:
-                return "5.2";
-            case V_5_3:
-                return "5.3";
-            case V_5_4:
-                return "5.4";
-            case V_5_5:
-                return "5.5";
             case V_5_6:
                 return "5.6";
             case V_5_7:
@@ -143,16 +133,6 @@ public enum Neo4jVersion {
             return Neo4jVersion.V_4_4;
         } else if (majorVersion == 5) {
             switch (minorVersion) {
-                case 1:
-                    return Neo4jVersion.V_5_1;
-                case 2:
-                    return Neo4jVersion.V_5_2;
-                case 3:
-                    return Neo4jVersion.V_5_3;
-                case 4:
-                    return Neo4jVersion.V_5_4;
-                case 5:
-                    return Neo4jVersion.V_5_5;
                 case 6:
                     return Neo4jVersion.V_5_6;
                 case 7:
