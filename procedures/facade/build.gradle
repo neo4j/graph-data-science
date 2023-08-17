@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Single Dep'
+description = 'Neo4j Graph Data Science :: Procedure Facade'
 
 group = 'org.neo4j.gds'
 

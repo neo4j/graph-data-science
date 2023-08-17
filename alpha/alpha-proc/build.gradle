@@ -35,10 +35,10 @@ dependencies {
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
+    implementation project(':procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
-    implementation project(':single-dep')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'

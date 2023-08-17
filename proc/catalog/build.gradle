@@ -30,12 +30,11 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
+    implementation project(':procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
     implementation project(':transaction')
-
-    implementation project(':single-dep')
 
     implementation group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'
     implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
