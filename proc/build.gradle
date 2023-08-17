@@ -38,10 +38,7 @@ dependencies {
     api project(':proc-pipeline-catalog')
     api project(':proc-misc')
 
-    // I am uncertain where things should go.
-    // I think we should do some conceptual modeling of our modules.
-    // Because I am not the only one with this problem now, nor in future
-    implementation project(':procedure-facade')
+    implementation project(':procedure-extension')
 
     // TEST DEPENDENCIES
 
