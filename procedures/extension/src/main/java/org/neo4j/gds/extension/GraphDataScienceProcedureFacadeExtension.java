@@ -83,7 +83,7 @@ public class GraphDataScienceProcedureFacadeExtension extends ExtensionFactory<G
         var userLogServices = new UserLogServices();
         var usernameService = new UserServices();
 
-        // GDS services - stared state
+        // GDS services - shared state
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
         // We need a provider to slot into the Neo4j Procedure Framework mechanism
