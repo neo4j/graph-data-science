@@ -86,7 +86,12 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             // check the second node's degree
             int degreeB = degree(nodeB);
             if (degreeFilter.test(degreeB)) {
-                neighboursB = cursorForNode(neighboursB, nodeB, degreeB);
+                neighboursB = cursorForNode(
+                    neighboursB,
+                    nodeB,
+                    degreeB
+                );
+
                 // find first neighbour Cb of B with id > B
                 nodeCFromB = neighboursB.skipUntil(nodeB);
 

@@ -130,7 +130,10 @@ public final class CompositeAdjacencyList implements AdjacencyList {
                 var cursor = iter.next();
                 var newCursor = adjacencyLists.get(index).adjacencyCursor(cursor, node, fallbackValue);
                 if (newCursor != cursor) {
-                    iter.set(adjacencyCursorWrapperFactory.create(newCursor));
+                    var newCursor1 = adjacencyCursorWrapperFactory.create(newCursor);
+                    iter.set(newCursor1);
+                    compositeReuse.exchangeCursor(cursor, newCursor1);
+                    
                 }
             }
             return compositeReuse;
