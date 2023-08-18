@@ -70,7 +70,7 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
 
         // Act
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabelsWritten",
+            "CALL gds.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabelsWritten",
             result -> {
                 assertions.assertThat(result.hasNext()).isTrue();
 

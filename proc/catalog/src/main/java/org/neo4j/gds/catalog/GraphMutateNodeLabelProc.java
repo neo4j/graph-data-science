@@ -23,6 +23,7 @@ import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,13 +36,29 @@ public class GraphMutateNodeLabelProc {
     @Context
     public GraphDataScienceProcedureFacade facade;
 
-    @Procedure(name = "gds.alpha.graph.nodeLabel.mutate", mode = READ)
+    @Procedure(name = "gds.graph.nodeLabel.mutate", mode = READ)
     @Description("Mutates the in-memory graph with the given node Label.")
     public Stream<MutateLabelResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
+
         return facade.catalog().mutateNodeLabel(graphName, nodeLabel, configuration);
+    }
+
+    @Procedure(name = "gds.alpha.graph.nodeLabel.mutate", mode = READ, deprecatedBy = "gds.graph.nodeLabel.mutate")
+    @Description("Mutates the in-memory graph with the given node Label.")
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<MutateLabelResult> alphaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeLabel") String nodeLabel,
+        @Name(value = "configuration") Map<String, Object> configuration
+    ) {
+        facade.log().warn(
+            "Procedure `gds.alpha.graph.nodeLabel.mutate` has been deprecated, please use `gds.graph.nodeLabel.mutate`.");
+
+        return mutate(graphName, nodeLabel, configuration);
     }
 }
