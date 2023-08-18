@@ -13,7 +13,7 @@ The different kinds of pipelines supported by GDS are described elsewhere in xre
 This section explains the available pipeline catalog operations:
 
 [[pipeline-catalog-procs]]
-[opts=header,cols="1m,1"]
+[opts=header,cols="1m,3"]
 |===
 | Name                                                   | Description
 | xref:pipeline-catalog/list.adoc[gds.pipeline.list]     | Prints information about pipelines that are currently available in the catalog.

@@ -12,7 +12,7 @@ The model catalog is a concept within the GDS library that allows storing and ma
 This chapter explains the available model catalog operations.
 
 [[model-catalog-procs]]
-[opts=header,cols="1m,1"]
+[opts=header,cols="1m,3"]
 |===
 | Name                                                                 | Description
 | xref:model-catalog/list.adoc[gds.model.list]                         | Prints information about models that are currently available in the catalog.
