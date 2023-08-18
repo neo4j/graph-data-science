@@ -29,7 +29,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.DROP_RELATIONSHIPS_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.DROP_RELATIONSHIPS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropRelationshipProc {

@@ -174,4 +174,18 @@ public interface GraphStoreCatalogBusinessFacade {
         Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     );
+
+    <T> Stream<T> streamRelationshipProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration,
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning,
+        GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
+    );
 }

@@ -17,25 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures;
+package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.catalog.CatalogFacade;
+@SuppressWarnings("unused")
+public class GraphStreamRelationshipPropertyResult {
+    public final long sourceNodeId;
+    public final long targetNodeId;
+    public final String relationshipType;
+    public final Number propertyValue;
 
-public class GraphDataScienceProcedureFacade {
-    private final Log log;
-    private final CatalogFacade catalogFacade;
-
-    public GraphDataScienceProcedureFacade(Log log, CatalogFacade catalogFacade) {
-        this.log = log;
-        this.catalogFacade = catalogFacade;
-    }
-
-    public CatalogFacade catalog() {
-        return catalogFacade;
-    }
-
-    public Log log() {
-        return log;
+    public GraphStreamRelationshipPropertyResult(
+        long sourceNodeId,
+        long targetNodeId,
+        String relationshipType,
+        Number propertyValue
+    ) {
+        this.sourceNodeId = sourceNodeId;
+        this.targetNodeId = targetNodeId;
+        this.relationshipType = relationshipType;
+        this.propertyValue = propertyValue;
     }
 }

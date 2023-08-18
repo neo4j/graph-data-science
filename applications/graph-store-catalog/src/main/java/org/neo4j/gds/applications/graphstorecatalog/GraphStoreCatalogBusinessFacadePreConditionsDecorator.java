@@ -350,6 +350,35 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public <T> Stream<T> streamRelationshipProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration,
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning,
+        GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.streamRelationshipProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            relationshipProperties,
+            relationshipTypes,
+            configuration,
+            usesPropertyNameColumn,
+            deprecationWarning,
+            outputMarshaller
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

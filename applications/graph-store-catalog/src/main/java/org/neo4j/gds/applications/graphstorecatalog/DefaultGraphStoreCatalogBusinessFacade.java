@@ -83,6 +83,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final DropRelationshipsService dropRelationshipsService;
     private final NodeLabelMutatorService nodeLabelMutatorService;
     private final StreamNodePropertiesApplication streamNodePropertiesApplication;
+    private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -99,7 +100,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         DropNodePropertiesService dropNodePropertiesService,
         DropRelationshipsService dropRelationshipsService,
         NodeLabelMutatorService nodeLabelMutatorService,
-        StreamNodePropertiesApplication streamNodePropertiesApplication
+        StreamNodePropertiesApplication streamNodePropertiesApplication,
+        StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication
     ) {
         this.log = log;
 
@@ -118,6 +120,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.dropRelationshipsService = dropRelationshipsService;
         this.nodeLabelMutatorService = nodeLabelMutatorService;
         this.streamNodePropertiesApplication = streamNodePropertiesApplication;
+        this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
     }
 
     @Override
@@ -515,6 +518,44 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         graphStoreValidationService.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
 
         return streamNodePropertiesApplication.compute(
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphStore,
+            configuration,
+            usesPropertyNameColumn,
+            deprecationWarning,
+            outputMarshaller
+        );
+    }
+
+    @Override
+    public <T> Stream<T> streamRelationshipProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
+        Map<String, Object> rawConfiguration,
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning,
+        GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = configurationService.parseGraphStreamRelationshipPropertiesConfiguration(
+            graphName,
+            relationshipProperties,
+            relationshipTypes,
+            rawConfiguration
+        );
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipTypes(graphStore, configuration);
+
+        return streamRelationshipPropertiesApplication.compute(
             taskRegistryFactory,
             userLogRegistryFactory,
             graphStore,

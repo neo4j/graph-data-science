@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.PROJECT_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.PROJECT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphProjectProc {

@@ -17,25 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures;
+package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.jetbrains.annotations.Nullable;
 
-public class GraphDataScienceProcedureFacade {
-    private final Log log;
-    private final CatalogFacade catalogFacade;
-
-    public GraphDataScienceProcedureFacade(Log log, CatalogFacade catalogFacade) {
-        this.log = log;
-        this.catalogFacade = catalogFacade;
-    }
-
-    public CatalogFacade catalog() {
-        return catalogFacade;
-    }
-
-    public Log log() {
-        return log;
-    }
+public interface GraphStreamRelationshipPropertyOrPropertiesResultProducer<R> {
+    R produce(
+        long sourceId,
+        long targetId,
+        String relationshipType,
+        @Nullable String propertyName,
+        Number propertyValue
+    );
 }
