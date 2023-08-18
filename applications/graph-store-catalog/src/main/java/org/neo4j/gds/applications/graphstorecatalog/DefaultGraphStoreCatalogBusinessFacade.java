@@ -465,7 +465,9 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
 
     @Override
     public Stream<?> streamGraphProperty(
-        User user, DatabaseId databaseId, String graphNameAsString,
+        User user,
+        DatabaseId databaseId,
+        String graphNameAsString,
         String graphProperty,
         Map<String, Object> rawConfiguration
     ) {
@@ -485,7 +487,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     }
 
     @Override
-    public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+    public <T> Stream<T> streamNodeProperties(
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
@@ -495,7 +497,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         Object nodeLabelsAsObject,
         Map<String, Object> rawConfiguration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning
+        Optional<String> deprecationWarning,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
@@ -517,7 +520,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             graphStore,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning
+            deprecationWarning,
+            outputMarshaller
         );
     }
 

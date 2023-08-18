@@ -50,13 +50,14 @@ public class StreamNodePropertiesApplication {
      * Handy-ish interface for caller, and we just do some intrinsic parameter extraction,
      * then call again to a more specific method. Complexity hiding.
      */
-    Stream<GraphStreamNodePropertiesResult> compute(
+    <T> Stream<T> compute(
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
-        GraphStreamNodePropertiesConfig configuration,
+        GraphExportNodePropertiesConfig configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning
+        Optional<String> deprecationWarning,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var nodeLabels = configuration.validNodeLabels(graphStore);
 
@@ -73,18 +74,20 @@ public class StreamNodePropertiesApplication {
             subGraph,
             nodePropertyKeysAndValues,
             usesPropertyNameColumn,
-            deprecationWarning
+            deprecationWarning,
+            outputMarshaller
         );
     }
 
-    private Stream<GraphStreamNodePropertiesResult> _compute(
+    private <T> Stream<T> _compute(
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphExportNodePropertiesConfig configuration,
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning
+        Optional<String> deprecationWarning,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var task = Tasks.leaf(
             "Graph :: NodeProperties :: Stream",
@@ -106,17 +109,19 @@ public class StreamNodePropertiesApplication {
             nodePropertyKeysAndValues,
             usesPropertyNameColumn,
             deprecationWarning,
-            progressTracker
+            progressTracker,
+            outputMarshaller
         );
     }
 
-    Stream<GraphStreamNodePropertiesResult> computeWithProgressTracking(
+    <T> Stream<T> computeWithProgressTracking(
         GraphExportNodePropertiesConfig configuration,
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
         boolean usesPropertyNameColumn,
         Optional<String> deprecationWarning,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         // matches the onclose later - we keep this pair in same scope
         progressTracker.beginSubTask();
@@ -129,17 +134,17 @@ public class StreamNodePropertiesApplication {
             nodePropertyKeysAndValues,
             usesPropertyNameColumn,
             progressTracker,
-            GraphStreamNodePropertiesResult::new
+            outputMarshaller
         ).onClose(progressTracker::endSubTask);
     }
 
-    Stream<GraphStreamNodePropertiesResult> computeNodePropertyStream(
+    <T> Stream<T> computeNodePropertyStream(
         GraphExportNodePropertiesConfig configuration,
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
         boolean usesPropertyNameColumn,
         ProgressTracker progressTracker,
-        GraphStreamNodePropertiesResultProducer<GraphStreamNodePropertiesResult> producer
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         Function<Long, List<String>> nodeLabelsFn = configuration.listNodeLabels()
             ? nodeId -> idMap.nodeLabels(nodeId).stream().map(NodeLabel::name).collect(Collectors.toList())
@@ -153,7 +158,7 @@ public class StreamNodePropertiesApplication {
                     return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> {
                             progressTracker.logProgress();
 
-                            return producer.produce(
+                            return outputMarshaller.produce(
                                 originalId,
                                 usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
                                 propertyKeyAndValues.getValue().getObject(nodeId),

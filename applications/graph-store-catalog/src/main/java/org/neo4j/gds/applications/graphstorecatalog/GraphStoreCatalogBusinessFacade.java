@@ -161,7 +161,7 @@ public interface GraphStoreCatalogBusinessFacade {
         Map<String, Object> configuration
     );
 
-    Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+    <T> Stream<T> streamNodeProperties(
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
@@ -171,6 +171,7 @@ public interface GraphStoreCatalogBusinessFacade {
         Object nodeLabels,
         Map<String, Object> configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning
+        Optional<String> deprecationWarning,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     );
 }

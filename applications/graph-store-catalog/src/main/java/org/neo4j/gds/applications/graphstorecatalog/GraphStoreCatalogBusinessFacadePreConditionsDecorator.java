@@ -322,7 +322,7 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
     }
 
     @Override
-    public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
+    public <T> Stream<T> streamNodeProperties(
         User user,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
@@ -332,7 +332,8 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         Object nodeLabels,
         Map<String, Object> configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning
+        Optional<String> deprecationWarning,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         return runWithPreconditionsChecked(() -> delegate.streamNodeProperties(
             user,
@@ -344,7 +345,8 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             nodeLabels,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning
+            deprecationWarning,
+            outputMarshaller
         ));
     }
 

@@ -37,13 +37,13 @@ class StreamNodePropertiesApplicationTest {
     void shouldTrackProgress() {
         var application = new StreamNodePropertiesApplication(null) {
             @Override
-            Stream<GraphStreamNodePropertiesResult> computeNodePropertyStream(
+            <T> Stream<T> computeNodePropertyStream(
                 GraphExportNodePropertiesConfig configuration,
                 IdMap idMap,
                 Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
                 boolean usesPropertyNameColumn,
                 ProgressTracker progressTracker,
-                GraphStreamNodePropertiesResultProducer<GraphStreamNodePropertiesResult> producer
+                GraphStreamNodePropertyOrPropertiesResultProducer<T> producer
             ) {
                 return Stream.empty();
             }
@@ -56,7 +56,8 @@ class StreamNodePropertiesApplicationTest {
             null,
             false,
             Optional.empty(),
-            progressTracker
+            progressTracker,
+            null
         ).close();
 
         verify(progressTracker).beginSubTask();
@@ -67,13 +68,13 @@ class StreamNodePropertiesApplicationTest {
     void shouldIssueDeprecationWarning() {
         var application = new StreamNodePropertiesApplication(null) {
             @Override
-            Stream<GraphStreamNodePropertiesResult> computeNodePropertyStream(
+            <T> Stream<T> computeNodePropertyStream(
                 GraphExportNodePropertiesConfig configuration,
                 IdMap idMap,
                 Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
                 boolean usesPropertyNameColumn,
                 ProgressTracker progressTracker,
-                GraphStreamNodePropertiesResultProducer<GraphStreamNodePropertiesResult> producer
+                GraphStreamNodePropertyOrPropertiesResultProducer<T> producer
             ) {
                 return Stream.empty();
             }
@@ -86,7 +87,8 @@ class StreamNodePropertiesApplicationTest {
             null,
             false,
             Optional.of("willy nilly"),
-            progressTracker
+            progressTracker,
+            null
         ).close();
 
         verify(progressTracker).beginSubTask();
