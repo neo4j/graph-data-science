@@ -42,6 +42,9 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         return ImmutableGraphCatalogConfig.builder()
             .username(userName)
             .graphName(graphName)
+            .graphStoreFactory(loaderContext -> {
+                throw new UnsupportedOperationException("GraphStoreFactory not set");
+            })
             .build();
     }
 
