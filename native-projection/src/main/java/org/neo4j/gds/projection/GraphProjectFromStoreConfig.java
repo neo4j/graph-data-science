@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.Configuration.ConvertWith;
@@ -137,13 +138,19 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             relationshipProjections().allProperties(),
             "relationship"
         );
-        
+
+        var normalizedNodeProjections = nodeProjections().addPropertyMappings(nodeProperties);
+        var normalizedRelationshipProjections = relationshipProjections().addPropertyMappings(relationshipProperties);
+
+        // We have to trigger the validation of the aggregation here, since the projections might have been updated.
+        normalizedRelationshipProjections.projections().values().forEach(RelationshipProjection::checkAggregation);
+
         return ImmutableGraphProjectFromStoreConfig
             .builder()
             .from(this)
-            .nodeProjections(nodeProjections().addPropertyMappings(nodeProperties))
+            .nodeProjections(normalizedNodeProjections)
             .nodeProperties(PropertyMappings.of())
-            .relationshipProjections(relationshipProjections().addPropertyMappings(relationshipProperties))
+            .relationshipProjections(normalizedRelationshipProjections)
             .relationshipProperties(PropertyMappings.of())
             .build();
     }

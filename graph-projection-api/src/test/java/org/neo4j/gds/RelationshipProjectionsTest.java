@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
@@ -49,6 +50,7 @@ import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.Aggregation.SINGLE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RelationshipProjectionsTest {
 
@@ -267,6 +269,26 @@ class RelationshipProjectionsTest {
         // explicitly unset
         projection = RelationshipProjection.fromMap(Map.of(INDEX_INVERSE_KEY, false), RelationshipType.of("FOO"));
         assertFalse(projection.indexInverse());
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Aggregation.class,
+        mode = EnumSource.Mode.INCLUDE,
+        names = {"SUM", "MIN", "MAX", "COUNT"})
+    void failsWhenAggregationIsUsedWithoutProperties(Aggregation aggregation) {
+        assertThatThrownBy(() ->
+            RelationshipProjection
+                .builder()
+                .type("REL")
+                .aggregation(aggregation)
+                .build()
+                .checkAggregation()
+        )
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                formatWithLocale("Setting a global `%s` aggregation requires at least one property mapping.", aggregation)
+            );
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {
