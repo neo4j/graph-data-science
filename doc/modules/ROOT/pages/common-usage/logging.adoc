@@ -95,7 +95,7 @@ For algorithms, see xref:common-usage/running-algos.adoc#common-configuration-jo
 [[logging-progress-logging-examples]]
 === Examples
 
-Assuming we just started `gds.beta.node2vec.stream` procedure.
+Assuming we just started `gds.node2vec.stream` procedure.
 
 [source,cypher,role=noplay]
 ----

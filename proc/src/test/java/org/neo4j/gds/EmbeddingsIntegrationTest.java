@@ -100,7 +100,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         int node2vecEmbeddingDimension = 3;
         String node2vecQuery = GdsCypher
             .call(TEST_GRAPH)
-            .algo("gds.beta.node2vec")
+            .algo("gds.node2vec")
             .writeMode()
             .addParameter("embeddingDimension", node2vecEmbeddingDimension)
             .addParameter("writeProperty", "node2vec")
