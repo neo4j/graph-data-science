@@ -170,6 +170,7 @@ public interface GraphStoreCatalogBusinessFacade {
         Object nodeProperties,
         Object nodeLabels,
         Map<String, Object> configuration,
-        boolean usesPropertyNameColumn
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning
     );
 }

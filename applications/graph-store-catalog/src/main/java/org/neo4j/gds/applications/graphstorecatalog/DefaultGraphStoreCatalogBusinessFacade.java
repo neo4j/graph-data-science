@@ -494,7 +494,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         Object nodeProperties,
         Object nodeLabelsAsObject,
         Map<String, Object> rawConfiguration,
-        boolean usesPropertyNameColumn
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
@@ -515,7 +516,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             userLogRegistryFactory,
             graphStore,
             configuration,
-            usesPropertyNameColumn
+            usesPropertyNameColumn,
+            deprecationWarning
         );
     }
 

@@ -478,7 +478,8 @@ public class CatalogFacade {
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
-        Map<String, Object> configuration
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
     ) {
         var user = user();
         var databaseId = databaseId();
@@ -497,7 +498,8 @@ public class CatalogFacade {
             nodeProperties,
             nodeLabels,
             configuration,
-            usesPropertyNameColumn
+            usesPropertyNameColumn,
+            deprecationWarning
         );
 
         // neat trick...

@@ -55,7 +55,8 @@ public class StreamNodePropertiesApplication {
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
         GraphStreamNodePropertiesConfig configuration,
-        boolean usesPropertyNameColumn
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning
     ) {
         var nodeLabels = configuration.validNodeLabels(graphStore);
 
@@ -72,7 +73,7 @@ public class StreamNodePropertiesApplication {
             subGraph,
             nodePropertyKeysAndValues,
             usesPropertyNameColumn,
-            Optional.empty() // this will be useful later
+            deprecationWarning
         );
     }
 
@@ -99,12 +100,30 @@ public class StreamNodePropertiesApplication {
             userLogRegistryFactory
         );
 
+        return computeWithProgressTracking(
+            configuration,
+            idMap,
+            nodePropertyKeysAndValues,
+            usesPropertyNameColumn,
+            deprecationWarning,
+            progressTracker
+        );
+    }
+
+    Stream<GraphStreamNodePropertiesResult> computeWithProgressTracking(
+        GraphExportNodePropertiesConfig configuration,
+        IdMap idMap,
+        Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning,
+        ProgressTracker progressTracker
+    ) {
         // matches the onclose later - we keep this pair in same scope
         progressTracker.beginSubTask();
 
         deprecationWarning.ifPresent(progressTracker::logWarning);
 
-        return computeWithProgressTracking(
+        return computeNodePropertyStream(
             configuration,
             idMap,
             nodePropertyKeysAndValues,
@@ -114,7 +133,7 @@ public class StreamNodePropertiesApplication {
         ).onClose(progressTracker::endSubTask);
     }
 
-    private Stream<GraphStreamNodePropertiesResult> computeWithProgressTracking(
+    Stream<GraphStreamNodePropertiesResult> computeNodePropertyStream(
         GraphExportNodePropertiesConfig configuration,
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,

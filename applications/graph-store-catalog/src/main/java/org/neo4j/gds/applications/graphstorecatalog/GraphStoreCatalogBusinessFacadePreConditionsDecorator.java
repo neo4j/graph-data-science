@@ -331,7 +331,8 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         Object nodeProperties,
         Object nodeLabels,
         Map<String, Object> configuration,
-        boolean usesPropertyNameColumn
+        boolean usesPropertyNameColumn,
+        Optional<String> deprecationWarning
     ) {
         return runWithPreconditionsChecked(() -> delegate.streamNodeProperties(
             user,
@@ -342,7 +343,8 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             nodeProperties,
             nodeLabels,
             configuration,
-            usesPropertyNameColumn
+            usesPropertyNameColumn,
+            deprecationWarning
         ));
     }
 

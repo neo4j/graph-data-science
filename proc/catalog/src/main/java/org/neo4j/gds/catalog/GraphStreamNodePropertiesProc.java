@@ -53,6 +53,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     @Context
     public GraphDataScienceProcedureFacade facade;
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
     @Description(STREAM_NODE_PROPERTIES_DESCRIPTION)
     public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
@@ -65,25 +66,27 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             nodeProperties,
             nodeLabels,
-            configuration
+            configuration,
+            Optional.empty()
         );
     }
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.stream")
     @Description("Streams the given node properties.")
-    public Stream<GraphStreamNodePropertiesResult> streamProperties(
+    public Stream<GraphStreamNodePropertiesResult> deprecatedStreamNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.stream`";
-        return streamNodeProperties(
+
+        return facade.catalog().streamNodeProperties(
             graphName,
-            configuration,
             nodeProperties,
             nodeLabels,
-            GraphStreamNodePropertiesResult::new,
+            configuration,
             Optional.of(deprecationWarning)
         );
     }
