@@ -45,8 +45,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.graphProperty.stream",
         "gds.graph.graphProperty.drop",
 
-        "gds.alpha.graph.nodeLabel.mutate",
-        "gds.alpha.graph.nodeLabel.write",
+        "gds.graph.nodeLabel.mutate",
+        "gds.graph.nodeLabel.write",
 
         "gds.graph.sample.rwr",
         "gds.graph.sample.cnarw",

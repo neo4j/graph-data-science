@@ -61,7 +61,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.write(
+CALL gds.graph.nodeLabel.write(
     graphName: String,
     nodeLabel: String,
     configuration: Map
@@ -236,7 +236,7 @@ To write a new node label to the database for nodes with score higher than `0`, 
 .Write the `Reader` node label back to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+CALL gds.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
 YIELD graphName, nodeCount, nodeLabel, nodeLabelsWritten
 ----
 

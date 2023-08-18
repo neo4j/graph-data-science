@@ -10,7 +10,7 @@ As with existing labels, they allow filtering the graph on following operations.
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.mutate(
+CALL gds.graph.nodeLabel.mutate(
     graphName: String,
     nodeLabel: String,
     configuration: Map
@@ -102,7 +102,7 @@ To mutate the in-memory graph by adding a new node label for nodes with score hi
 .Add the `Reader` node label to the in-memory graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.mutate('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+CALL gds.graph.nodeLabel.mutate('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
 YIELD graphName, nodeLabel, nodeLabelsWritten, nodeCount
 ----
 
