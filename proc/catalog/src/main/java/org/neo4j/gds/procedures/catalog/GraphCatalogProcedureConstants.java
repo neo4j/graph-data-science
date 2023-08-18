@@ -29,6 +29,7 @@ public final class GraphCatalogProcedureConstants {
     public static final String LIST_DESCRIPTION = "Lists information about named graphs stored in the catalog.";
     public static final String PROJECT_DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
     public static final String STREAM_NODE_PROPERTIES_DESCRIPTION = "Streams the given node properties.";
+    public static final String STREAM_NODE_PROPERTY_DESCRIPTION = "Streams the given node property.";
 
     private GraphCatalogProcedureConstants() {}
 }
