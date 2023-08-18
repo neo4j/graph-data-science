@@ -25,6 +25,8 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyOrPropertiesResultProducer;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -44,6 +46,7 @@ import org.neo4j.gds.services.UserServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -478,7 +481,48 @@ public class CatalogFacade {
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
-        Map<String, Object> configuration
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        return streamNodePropertyOrProperties(
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration,
+            deprecationWarning,
+            GraphStreamNodePropertiesResult::new
+        );
+    }
+
+    public Stream<GraphStreamNodePropertyResult> streamNodeProperty(
+        String graphName,
+        String nodeProperty,
+        Object nodeLabels,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        return streamNodePropertyOrProperties(
+            graphName,
+            List.of(nodeProperty),
+            nodeLabels,
+            configuration,
+            deprecationWarning,
+            (nodeId, propertyName, propertyValue, nodeLabelList) -> new GraphStreamNodePropertyResult(
+                nodeId,
+                propertyValue,
+                nodeLabelList
+            )
+        );
+    }
+
+    // good generics!
+    private <T> Stream<T> streamNodePropertyOrProperties(
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning,
+        GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var user = user();
         var databaseId = databaseId();
@@ -497,7 +541,9 @@ public class CatalogFacade {
             nodeProperties,
             nodeLabels,
             configuration,
-            usesPropertyNameColumn
+            usesPropertyNameColumn,
+            deprecationWarning,
+            outputMarshaller
         );
 
         // neat trick...

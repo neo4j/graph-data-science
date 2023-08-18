@@ -19,31 +19,16 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesConfig;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResultProducer;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureConstants.STREAM_NODE_PROPERTIES_DESCRIPTION;
@@ -53,6 +38,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     @Context
     public GraphDataScienceProcedureFacade facade;
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
     @Description(STREAM_NODE_PROPERTIES_DESCRIPTION)
     public Stream<GraphStreamNodePropertiesResult> streamNodeProperties(
@@ -65,160 +51,64 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             nodeProperties,
             nodeLabels,
-            configuration
+            configuration,
+            Optional.empty()
         );
     }
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.stream")
     @Description("Streams the given node properties.")
-    public Stream<GraphStreamNodePropertiesResult> streamProperties(
+    public Stream<GraphStreamNodePropertiesResult> deprecatedStreamNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.stream`";
-        return streamNodeProperties(
+
+        return facade.catalog().streamNodeProperties(
             graphName,
-            configuration,
             nodeProperties,
             nodeLabels,
-            GraphStreamNodePropertiesResult::new,
+            configuration,
             Optional.of(deprecationWarning)
         );
     }
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperty.stream", mode = READ)
     @Description("Streams the given node property.")
-    public Stream<PropertyResult> streamNodeProperty(
+    public Stream<GraphStreamNodePropertyResult> streamNodeProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return streamNodeProperties(
+        return facade.catalog().streamNodeProperty(
             graphName,
-            configuration,
-            List.of(nodeProperty),
+            nodeProperty,
             nodeLabels,
-            (nodeId, propertyName, propertyValue, nodeLabelList) -> new PropertyResult(nodeId, propertyValue, nodeLabelList)
+            configuration,
+            Optional.empty()
         );
     }
 
     @Procedure(name = "gds.graph.streamNodeProperty", mode = READ, deprecatedBy = "gds.graph.nodeProperty.stream")
     @Description("Streams the given node property.")
-    public Stream<PropertyResult> streamProperty(
+    public Stream<GraphStreamNodePropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperty.stream`";
-        return streamNodeProperties(
+        return facade.catalog().streamNodeProperty(
             graphName,
-            configuration,
-            List.of(nodeProperty),
+            nodeProperty,
             nodeLabels,
-            (nodeId, propertyName, propertyValue, nodeLabelList) -> new PropertyResult(nodeId, propertyValue, nodeLabelList),
+            configuration,
             Optional.of(deprecationWarning)
         );
-    }
-
-    private <R> Stream<R> streamNodeProperties(
-        String graphName,
-        Map<String, Object> configuration,
-        Object nodeProperties,
-        Object nodeLabels,
-        GraphStreamNodePropertiesResultProducer<R> producer
-    ) {
-        return streamNodeProperties(graphName, configuration, nodeProperties, nodeLabels, producer,Optional.empty());
-    }
-
-    private <R> Stream<R> streamNodeProperties(
-        String graphName,
-        Map<String, Object> configuration,
-        Object nodeProperties,
-        Object nodeLabels,
-        GraphStreamNodePropertiesResultProducer<R> producer,
-        Optional<String> deprecationWarning
-    ) {
-        Preconditions.check();
-        validateGraphName(graphName);
-
-        // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
-            graphName,
-            nodeProperties,
-            nodeLabels,
-            cypherConfig
-        );
-        // validation
-        validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
-        config.validate(graphStore);
-
-        Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
-
-        var subGraph = graphStore.getGraph(validNodeLabels, graphStore.relationshipTypes(), Optional.empty());
-        var nodePropertyKeysAndValues = config.nodeProperties().stream().map(propertyKey -> Pair.of(propertyKey, subGraph.nodeProperties(propertyKey))).collect(Collectors.toList());
-        var usesPropertyNameColumn = executionContext().returnColumns().contains("nodeProperty");
-
-        var task = Tasks.leaf(
-            "Graph :: NodeProperties :: Stream",
-            subGraph.nodeCount() * nodePropertyKeysAndValues.size()
-        );
-
-        var taskProgressTracker = new TaskProgressTracker(
-            task,
-            executionContext().log(),
-            config.concurrency(),
-            new JobId(),
-            executionContext().taskRegistryFactory(),
-            executionContext().userLogRegistryFactory()
-        );
-        taskProgressTracker.beginSubTask();
-
-        deprecationWarning.ifPresent(taskProgressTracker::logWarning);
-
-        Function<Long, List<String>> nodeLabelsFn = config.listNodeLabels()
-            ? nodeId -> subGraph.nodeLabels(nodeId).stream().map(NodeLabel::name).collect(Collectors.toList())
-            : nodeId -> Collections.emptyList();
-
-        var resultStream = LongStream
-            .range(0, subGraph.nodeCount())
-            .boxed()
-            .flatMap(nodeId -> {
-                var originalId = subGraph.toOriginalNodeId(nodeId);
-
-                return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> {
-                    taskProgressTracker.logProgress();
-                    return producer.produce(
-                        originalId,
-                        usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
-                        propertyKeyAndValues.getValue().getObject(nodeId),
-                        nodeLabelsFn.apply(nodeId)
-                    );
-                });
-            })
-            .onClose(taskProgressTracker::endSubTask);
-
-        try (var statement = transaction.acquireStatement()) {
-            statement.registerCloseableResource(resultStream);
-            return resultStream;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class PropertyResult {
-        public final long nodeId;
-        public final Object propertyValue;
-        public final List<String> nodeLabels;
-
-        PropertyResult(long nodeId, Object propertyValue, List<String> nodeLabels) {
-            this.nodeId = nodeId;
-            this.propertyValue = propertyValue;
-            this.nodeLabels = nodeLabels;
-        }
     }
 }

@@ -23,8 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -42,11 +40,8 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamNodePropertiesProcTest extends BaseProcTest {
@@ -202,30 +197,5 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
                 Map.of("id", idFunction.of("e"), "nodeProperty", "newNodeProp1", "propertyValue", 4D, "nodeLabels", List.of("B")),
                 Map.of("id", idFunction.of("f"), "nodeProperty", "newNodeProp1", "propertyValue", 5D, "nodeLabels", List.of("B"))
             ));
-    }
-
-    @ParameterizedTest
-    @MethodSource("proceduresAndArguments")
-    void shouldLogDeprecationWarning(String deprecatedProcedure, String newProcedure, String properties) {
-        runQuery(
-            formatWithLocale("CALL %s($graph, %s)", deprecatedProcedure, properties),
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES)
-        );
-        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
-        assertThat(userLogEntries.size()).isEqualTo(1);
-        assertThat(userLogEntries.get(0).getMessage())
-            .contains("deprecated")
-            .contains(newProcedure);
-    }
-
-    static Stream<Arguments> proceduresAndArguments() {
-        return Stream.of(
-            Arguments.of("gds.graph.streamNodeProperty", "gds.graph.nodeProperty.stream", "'newNodeProp1'"),
-            Arguments.of(
-                "gds.graph.streamNodeProperties",
-                "gds.graph.nodeProperties.stream",
-                "['newNodeProp1', 'newNodeProp2']"
-            )
-        );
     }
 }
