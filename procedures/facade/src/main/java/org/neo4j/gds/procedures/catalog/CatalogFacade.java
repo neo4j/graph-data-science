@@ -27,6 +27,9 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFac
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyOrPropertiesResultProducer;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertiesResult;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyOrPropertiesResultProducer;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -547,6 +550,78 @@ public class CatalogFacade {
         );
 
         // neat trick...
+        try (var statement = kernelTransactionService.getKernelTransaction().acquireStatement()) {
+            statement.registerCloseableResource(resultStream);
+            return resultStream;
+        }
+    }
+
+    public Stream<GraphStreamRelationshipPropertiesResult> streamRelationshipProperties(
+        String graphName,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        return streamRelationshipPropertyOrProperties(
+            graphName,
+            relationshipProperties, relationshipTypes, configuration,
+            deprecationWarning,
+            GraphStreamRelationshipPropertiesResult::new
+        );
+    }
+
+    public Stream<GraphStreamRelationshipPropertyResult> streamRelationshipProperty(
+        String graphName,
+        String relationshipProperty,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        return streamRelationshipPropertyOrProperties(
+            graphName,
+            List.of(relationshipProperty),
+            relationshipTypes,
+            configuration,
+            deprecationWarning,
+            (sourceId, targetId, relationshipType, propertyName, propertyValue) -> new GraphStreamRelationshipPropertyResult(
+                sourceId,
+                targetId,
+                relationshipType,
+                propertyValue
+            )
+        );
+    }
+
+    private <T> Stream<T> streamRelationshipPropertyOrProperties(
+        String graphName,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning,
+        GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        boolean usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
+
+        var resultStream = businessFacade.streamRelationshipProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            relationshipProperties,
+            relationshipTypes,
+            configuration,
+            usesPropertyNameColumn,
+            deprecationWarning,
+            outputMarshaller
+        );
+
         try (var statement = kernelTransactionService.getKernelTransaction().acquireStatement()) {
             statement.registerCloseableResource(resultStream);
             return resultStream;

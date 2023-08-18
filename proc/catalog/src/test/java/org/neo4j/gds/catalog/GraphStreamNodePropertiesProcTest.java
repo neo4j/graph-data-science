@@ -29,13 +29,9 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.warnings.PerDatabaseUserLogStore;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,17 +58,6 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @SuppressWarnings("WeakerAccess")
     @Inject
     IdFunction idFunction;
-
-    PerDatabaseUserLogStore userLogStore;
-
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        this.userLogStore = new PerDatabaseUserLogStore();
-        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
-        builder.addExtension(new UserLogRegistryExtension(__ -> userLogStore));
-    }
 
     @BeforeEach
     void setup() throws Exception {

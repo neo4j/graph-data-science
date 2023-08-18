@@ -23,7 +23,9 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.gds.core.StringSimilarity;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -127,6 +129,45 @@ public class GraphStoreValidationService {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Expecting at least one node projection to contain property key(s) %s.",
                     StringJoining.join(configuration.nodeProperties())
+                ));
+            }
+        }
+    }
+
+    void ensureRelationshipPropertiesMatchRelationshipTypes(
+        GraphStore graphStore,
+        GraphStreamRelationshipPropertiesConfig configuration
+    ) {
+        if (!configuration.relationshipTypes().contains(ElementProjection.PROJECT_ALL)) {
+            // validate that all given labels have all the properties
+            configuration.relationshipTypeIdentifiers(graphStore).forEach(relationshipType -> {
+                    List<String> invalidProperties = configuration.relationshipProperties()
+                        .stream()
+                        .filter(relProperty -> !graphStore.hasRelationshipProperty(relationshipType, relProperty))
+                        .collect(Collectors.toList());
+
+                    if (!invalidProperties.isEmpty()) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Expecting all specified relationship projections to have all given properties defined. " +
+                                "Could not find property key(s) %s for label %s. Defined keys: %s.",
+                            StringJoining.join(invalidProperties),
+                            relationshipType.name,
+                            StringJoining.join(graphStore.relationshipPropertyKeys(relationshipType))
+                        ));
+                    }
+                }
+            );
+        } else {
+            // validate that at least one label has all the properties
+            boolean hasValidType = configuration.relationshipTypeIdentifiers(graphStore).stream()
+                .anyMatch(relationshipType -> graphStore
+                    .relationshipPropertyKeys(relationshipType)
+                    .containsAll(configuration.relationshipProperties()));
+
+            if (!hasValidType) {
+                throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                    "Expecting at least one relationship projection to contain property key(s) %s.",
+                    StringJoining.join(configuration.relationshipProperties())
                 ));
             }
         }
