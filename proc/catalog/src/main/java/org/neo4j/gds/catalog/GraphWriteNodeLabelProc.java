@@ -29,6 +29,7 @@ import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -44,7 +45,7 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
     @Context
     public NodeLabelExporterBuilder nodeLabelExporterBuilder;
 
-    @Procedure(name = "gds.alpha.graph.nodeLabel.write", mode = WRITE)
+    @Procedure(name = "gds.graph.nodeLabel.write", mode = WRITE)
     @Description("Writes the given node Label to an online Neo4j database.")
     public Stream<WriteLabelResult> write(
         @Name(value = "graphName") String graphName,
@@ -89,5 +90,23 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
 
 
         return Stream.of(resultBuilder.build());
+    }
+
+    @Procedure(name = "gds.alpha.graph.nodeLabel.write", mode = WRITE, deprecatedBy = "gds.graph.nodeLabel.write")
+    @Description("Writes the given node Label to an online Neo4j database.")
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<WriteLabelResult> alphaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeLabel") String nodeLabel,
+        @Name(value = "configuration") Map<String, Object> configuration
+    ) throws ParseException {
+        
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.graph.nodeLabel.write` has been deprecated, please use `gds.graph.nodeLabel.write`.");
+
+        return write(graphName, nodeLabel, configuration);
     }
 }
