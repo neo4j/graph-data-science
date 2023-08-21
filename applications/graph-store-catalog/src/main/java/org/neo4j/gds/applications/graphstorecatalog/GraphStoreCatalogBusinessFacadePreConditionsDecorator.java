@@ -254,8 +254,7 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         User user, DatabaseId databaseId, TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         String graphName,
-        String relationshipType,
-        Optional<String> deprecationWarning
+        String relationshipType
     ) {
         return runWithPreconditionsChecked(() -> delegate.dropRelationships(
             user,
@@ -263,8 +262,7 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             taskRegistryFactory,
             userLogRegistryFactory,
             graphName,
-            relationshipType,
-            deprecationWarning
+            relationshipType
         ));
     }
 
@@ -359,7 +357,6 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         List<String> relationshipTypes,
         Map<String, Object> configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         return runWithPreconditionsChecked(() -> delegate.streamRelationshipProperties(
@@ -372,7 +369,6 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             relationshipTypes,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         ));
     }

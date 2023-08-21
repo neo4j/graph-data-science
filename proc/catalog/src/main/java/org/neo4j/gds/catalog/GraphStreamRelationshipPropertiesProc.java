@@ -24,12 +24,12 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPrope
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_RELATIONSHIP_PROPERTIES_DESCRIPTION;
@@ -51,26 +51,30 @@ public class GraphStreamRelationshipPropertiesProc {
     ) {
         return facade.catalog().streamRelationshipProperties(
             graphName,
-            relationshipProperties, relationshipTypes, configuration,
-            Optional.empty()
+            relationshipProperties, relationshipTypes, configuration
         );
     }
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.streamRelationshipProperties", mode = READ, deprecatedBy = "gds.graph.relationshipProperties.stream")
     @Description(STREAM_RELATIONSHIP_PROPERTIES_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<GraphStreamRelationshipPropertiesResult> deprecatedStreamRelationshipProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperties") List<String> relationshipProperties,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationshipProperties.stream`";
+
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.streamRelationshipProperties` has been deprecated, please use `gds.graph.relationshipProperties.stream`.");
 
         return facade.catalog().streamRelationshipProperties(
             graphName,
-            relationshipProperties, relationshipTypes, configuration,
-            Optional.of(deprecationWarning)
+            relationshipProperties, relationshipTypes, configuration
         );
     }
 
@@ -87,8 +91,7 @@ public class GraphStreamRelationshipPropertiesProc {
             graphName,
             relationshipProperty,
             relationshipTypes,
-            configuration,
-            Optional.empty()
+            configuration
         );
     }
 
@@ -101,14 +104,12 @@ public class GraphStreamRelationshipPropertiesProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationshipProperty.stream`";
 
         return facade.catalog().streamRelationshipProperty(
             graphName,
             relationshipProperty,
             relationshipTypes,
-            configuration,
-            Optional.of(deprecationWarning)
+            configuration
         );
     }
 }

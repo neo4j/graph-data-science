@@ -557,13 +557,11 @@ public class CatalogFacade {
         String graphName,
         List<String> relationshipProperties,
         List<String> relationshipTypes,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         return streamRelationshipPropertyOrProperties(
             graphName,
             relationshipProperties, relationshipTypes, configuration,
-            deprecationWarning,
             GraphStreamRelationshipPropertiesResult::new
         );
     }
@@ -572,15 +570,13 @@ public class CatalogFacade {
         String graphName,
         String relationshipProperty,
         List<String> relationshipTypes,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         return streamRelationshipPropertyOrProperties(
             graphName,
             List.of(relationshipProperty),
             relationshipTypes,
             configuration,
-            deprecationWarning,
             (sourceId, targetId, relationshipType, propertyName, propertyValue) -> new GraphStreamRelationshipPropertyResult(
                 sourceId,
                 targetId,
@@ -606,7 +602,6 @@ public class CatalogFacade {
         List<String> relationshipProperties,
         List<String> relationshipTypes,
         Map<String, Object> configuration,
-        Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var user = user();
@@ -626,7 +621,6 @@ public class CatalogFacade {
             relationshipTypes,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         );
 

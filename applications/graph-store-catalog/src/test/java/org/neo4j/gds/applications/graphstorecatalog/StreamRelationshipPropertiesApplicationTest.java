@@ -27,7 +27,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
@@ -52,7 +51,6 @@ class StreamRelationshipPropertiesApplicationTest {
         application.computeWithProgressTracking(
             null,
             false,
-            Optional.empty(),
             null,
             progressTracker,
             null
@@ -61,33 +59,5 @@ class StreamRelationshipPropertiesApplicationTest {
         verify(progressTracker).beginSubTask();
         verify(progressTracker).endSubTask();
     }
-
-    @Test
-    void shouldIssueDeprecationWarning() {
-        var application = new StreamRelationshipPropertiesApplication(null) {
-            @Override
-            <T> Stream<T> computeRelationshipPropertyStream(
-                GraphStore graphStore,
-                boolean usesPropertyNameColumn,
-                GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller,
-                List<Triple<RelationshipType, String, Graph>> relationshipPropertyKeysAndValues
-            ) {
-                return Stream.empty();
-            }
-        };
-
-        var progressTracker = mock(ProgressTracker.class);
-        application.computeWithProgressTracking(
-            null,
-            false,
-            Optional.of("willy nilly"),
-            null,
-            progressTracker,
-            null
-        ).close();
-
-        verify(progressTracker).beginSubTask();
-        verify(progressTracker).logWarning("willy nilly");
-        verify(progressTracker).endSubTask();
-    }
+    
 }

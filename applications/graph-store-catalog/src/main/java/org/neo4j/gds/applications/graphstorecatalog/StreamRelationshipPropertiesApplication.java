@@ -55,7 +55,6 @@ public class StreamRelationshipPropertiesApplication {
         GraphStore graphStore,
         GraphStreamRelationshipPropertiesConfig configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         Collection<RelationshipType> validRelationshipTypes = configuration.validRelationshipTypes(graphStore);
@@ -90,7 +89,6 @@ public class StreamRelationshipPropertiesApplication {
         return computeWithProgressTracking(
             graphStore,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller,
             taskProgressTracker,
             relationshipPropertyKeysAndValues
@@ -100,14 +98,11 @@ public class StreamRelationshipPropertiesApplication {
     <T> Stream<T> computeWithProgressTracking(
         GraphStore graphStore,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller,
         ProgressTracker taskProgressTracker,
         List<Triple<RelationshipType, String, Graph>> relationshipPropertyKeysAndValues
     ) {
         taskProgressTracker.beginSubTask();
-
-        deprecationWarning.ifPresent(taskProgressTracker::logWarning);
 
         return computeRelationshipPropertyStream(
             graphStore,

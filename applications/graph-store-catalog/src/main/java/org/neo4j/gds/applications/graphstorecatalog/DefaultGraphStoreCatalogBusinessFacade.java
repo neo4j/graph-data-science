@@ -538,7 +538,6 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         List<String> relationshipTypes,
         Map<String, Object> rawConfiguration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
@@ -560,7 +559,6 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             graphStore,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         );
     }

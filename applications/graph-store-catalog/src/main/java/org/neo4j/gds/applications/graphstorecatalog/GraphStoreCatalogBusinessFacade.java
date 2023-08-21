@@ -183,7 +183,6 @@ public interface GraphStoreCatalogBusinessFacade {
         List<String> relationshipTypes,
         Map<String, Object> configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     );
 
