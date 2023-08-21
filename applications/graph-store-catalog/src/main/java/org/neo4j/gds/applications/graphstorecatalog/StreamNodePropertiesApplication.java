@@ -56,7 +56,6 @@ public class StreamNodePropertiesApplication {
         GraphStore graphStore,
         GraphExportNodePropertiesConfig configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var nodeLabels = configuration.validNodeLabels(graphStore);
@@ -74,7 +73,6 @@ public class StreamNodePropertiesApplication {
             subGraph,
             nodePropertyKeysAndValues,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         );
     }
@@ -86,7 +84,6 @@ public class StreamNodePropertiesApplication {
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var task = Tasks.leaf(
@@ -108,7 +105,6 @@ public class StreamNodePropertiesApplication {
             idMap,
             nodePropertyKeysAndValues,
             usesPropertyNameColumn,
-            deprecationWarning,
             progressTracker,
             outputMarshaller
         );
@@ -119,14 +115,12 @@ public class StreamNodePropertiesApplication {
         IdMap idMap,
         Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         ProgressTracker progressTracker,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         // matches the onclose later - we keep this pair in same scope
         progressTracker.beginSubTask();
 
-        deprecationWarning.ifPresent(progressTracker::logWarning);
 
         return computeNodePropertyStream(
             configuration,

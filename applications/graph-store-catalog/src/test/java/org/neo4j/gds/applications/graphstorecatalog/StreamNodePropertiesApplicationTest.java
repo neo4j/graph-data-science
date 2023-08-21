@@ -26,7 +26,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
@@ -55,7 +54,6 @@ class StreamNodePropertiesApplicationTest {
             null,
             null,
             false,
-            Optional.empty(),
             progressTracker,
             null
         ).close();
@@ -64,35 +62,4 @@ class StreamNodePropertiesApplicationTest {
         verify(progressTracker).endSubTask();
     }
 
-    @Test
-    void shouldIssueDeprecationWarning() {
-        var application = new StreamNodePropertiesApplication(null) {
-            @Override
-            <T> Stream<T> computeNodePropertyStream(
-                GraphExportNodePropertiesConfig configuration,
-                IdMap idMap,
-                Collection<Pair<String, NodePropertyValues>> nodePropertyKeysAndValues,
-                boolean usesPropertyNameColumn,
-                ProgressTracker progressTracker,
-                GraphStreamNodePropertyOrPropertiesResultProducer<T> producer
-            ) {
-                return Stream.empty();
-            }
-        };
-
-        var progressTracker = mock(ProgressTracker.class);
-        application.computeWithProgressTracking(
-            null,
-            null,
-            null,
-            false,
-            Optional.of("willy nilly"),
-            progressTracker,
-            null
-        ).close();
-
-        verify(progressTracker).beginSubTask();
-        verify(progressTracker).logWarning("willy nilly");
-        verify(progressTracker).endSubTask();
-    }
 }

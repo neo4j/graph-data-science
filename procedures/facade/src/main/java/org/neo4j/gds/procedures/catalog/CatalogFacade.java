@@ -52,7 +52,6 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -481,15 +480,13 @@ public class CatalogFacade {
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         return streamNodePropertyOrProperties(
             graphName,
             nodeProperties,
             nodeLabels,
             configuration,
-            deprecationWarning,
             GraphStreamNodePropertiesResult::new
         );
     }
@@ -498,15 +495,13 @@ public class CatalogFacade {
         String graphName,
         String nodeProperty,
         Object nodeLabels,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         return streamNodePropertyOrProperties(
             graphName,
             List.of(nodeProperty),
             nodeLabels,
             configuration,
-            deprecationWarning,
             (nodeId, propertyName, propertyValue, nodeLabelList) -> new GraphStreamNodePropertyResult(
                 nodeId,
                 propertyValue,
@@ -521,7 +516,6 @@ public class CatalogFacade {
         Object nodeProperties,
         Object nodeLabels,
         Map<String, Object> configuration,
-        Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var user = user();
@@ -542,7 +536,6 @@ public class CatalogFacade {
             nodeLabels,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         );
 

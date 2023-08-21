@@ -396,9 +396,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.project.cypher",
         "gds.graph.project.cypher.estimate",
         "gds.graph.project.estimate",
-        "gds.graph.streamNodeProperties",
         "gds.graph.nodeProperties.stream",
-        "gds.graph.streamNodeProperty",
         "gds.graph.nodeProperty.stream",
         "gds.graph.relationshipProperties.stream",
         "gds.graph.relationshipProperties.write",
@@ -575,7 +573,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 419;
+        int expectedCount = 417;
         assertEquals(
             expectedCount,
             returnedRows,
@@ -591,7 +589,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(PAGE_RANK, listProcs("pageRank"));
-        assertEquals(asList("gds.pageRank.stream", "gds.pageRank.stream.estimate"), listProcs("pageRank.stream"));
+        assertEquals(asList("gds.pageRank.nm", "gds.pageRank.stream.estimate"), listProcs("pageRank.stream"));
         assertEquals(emptyList(), listProcs("foo"));
     }
 

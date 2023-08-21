@@ -24,11 +24,11 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResul
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_NODE_PROPERTIES_DESCRIPTION;
@@ -52,28 +52,31 @@ public class GraphStreamNodePropertiesProc {
             graphName,
             nodeProperties,
             nodeLabels,
-            configuration,
-            Optional.empty()
+            configuration
         );
     }
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.stream")
     @Description(STREAM_NODE_PROPERTIES_DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    @Internal
     public Stream<GraphStreamNodePropertiesResult> deprecatedStreamNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.stream`";
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.streamNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.stream`.");
 
         return facade.catalog().streamNodeProperties(
             graphName,
             nodeProperties,
             nodeLabels,
-            configuration,
-            Optional.of(deprecationWarning)
+            configuration
         );
     }
 
@@ -90,27 +93,30 @@ public class GraphStreamNodePropertiesProc {
             graphName,
             nodeProperty,
             nodeLabels,
-            configuration,
-            Optional.empty()
+            configuration
         );
     }
 
     @Procedure(name = "gds.graph.streamNodeProperty", mode = READ, deprecatedBy = "gds.graph.nodeProperty.stream")
     @Description(STREAM_NODE_PROPERTY_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<GraphStreamNodePropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperty.stream`";
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.streamNodeProperty` has been deprecated, please use `gds.graph.nodeProperty.stream`.");
 
         return facade.catalog().streamNodeProperty(
             graphName,
             nodeProperty,
             nodeLabels,
-            configuration,
-            Optional.of(deprecationWarning)
+            configuration
         );
     }
 }

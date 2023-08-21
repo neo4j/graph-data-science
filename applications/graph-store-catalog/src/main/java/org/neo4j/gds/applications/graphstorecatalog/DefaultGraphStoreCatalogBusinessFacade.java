@@ -41,7 +41,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -499,7 +498,6 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         Object nodeLabelsAsObject,
         Map<String, Object> rawConfiguration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
@@ -522,7 +520,6 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             graphStore,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         );
     }

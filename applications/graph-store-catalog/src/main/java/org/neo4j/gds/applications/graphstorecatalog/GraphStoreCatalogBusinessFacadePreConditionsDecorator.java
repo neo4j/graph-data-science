@@ -36,7 +36,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -328,7 +327,6 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         Object nodeLabels,
         Map<String, Object> configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
         return runWithPreconditionsChecked(() -> delegate.streamNodeProperties(
@@ -341,7 +339,6 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             nodeLabels,
             configuration,
             usesPropertyNameColumn,
-            deprecationWarning,
             outputMarshaller
         ));
     }

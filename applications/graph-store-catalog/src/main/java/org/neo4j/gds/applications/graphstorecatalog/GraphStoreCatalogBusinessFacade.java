@@ -36,7 +36,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface GraphStoreCatalogBusinessFacade {
@@ -169,7 +168,6 @@ public interface GraphStoreCatalogBusinessFacade {
         Object nodeLabels,
         Map<String, Object> configuration,
         boolean usesPropertyNameColumn,
-        Optional<String> deprecationWarning,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     );
 
