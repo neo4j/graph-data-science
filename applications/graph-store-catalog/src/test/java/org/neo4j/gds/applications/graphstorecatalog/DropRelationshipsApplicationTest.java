@@ -23,28 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Optional;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 class DropRelationshipsApplicationTest {
-    @Test
-    void shouldIssueDeprecationWarnings() {
-        var progressTracker = mock(ProgressTracker.class);
-        var ignored = DropRelationshipsApplication.computeWithProgressTracking(
-            mock(GraphStore.class),
-            "some relationship type",
-            Optional.of("deprecated!"),
-            progressTracker
-        );
 
-        verify(progressTracker).logWarning("deprecated!");
-        verify(progressTracker).beginSubTask();
-        verify(progressTracker).endSubTask();
-        verifyNoMoreInteractions(progressTracker);
-    }
 
     @Test
     void shouldNotIssueDeprecationWarningsWhenThereAreNone() {
@@ -52,7 +36,6 @@ class DropRelationshipsApplicationTest {
         var ignored = DropRelationshipsApplication.computeWithProgressTracking(
             mock(GraphStore.class),
             "some relationship type",
-            Optional.empty(),
             progressTracker
         );
 

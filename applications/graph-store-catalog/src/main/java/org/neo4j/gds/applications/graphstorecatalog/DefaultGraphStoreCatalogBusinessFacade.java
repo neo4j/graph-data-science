@@ -388,8 +388,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         String graphNameAsString,
-        String relationshipType,
-        Optional<String> deprecationWarning
+        String relationshipType
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
@@ -401,8 +400,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             taskRegistryFactory,
             userLogRegistryFactory,
             graphStore,
-            relationshipType,
-            deprecationWarning
+            relationshipType
         );
 
         return new GraphDropRelationshipResult(graphName.getValue(), relationshipType, result);

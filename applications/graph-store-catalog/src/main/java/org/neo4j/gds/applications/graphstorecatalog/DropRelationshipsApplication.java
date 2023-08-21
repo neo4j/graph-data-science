@@ -28,8 +28,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Optional;
-
 public class DropRelationshipsApplication {
     private final Log log;
 
@@ -41,8 +39,7 @@ public class DropRelationshipsApplication {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
-        String relationshipType,
-        Optional<String> deprecationWarning
+        String relationshipType
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
@@ -52,16 +49,14 @@ public class DropRelationshipsApplication {
         var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
         var progressTracker = progressTrackerFactory.create(task);
 
-        return computeWithProgressTracking(graphStore, relationshipType, deprecationWarning, progressTracker);
+        return computeWithProgressTracking(graphStore, relationshipType, progressTracker);
     }
 
     static DeletionResult computeWithProgressTracking(
         GraphStore graphStore,
         String relationshipType,
-        Optional<String> deprecationWarning,
         ProgressTracker progressTracker
     ) {
-        deprecationWarning.ifPresent(progressTracker::logWarning);
 
         progressTracker.beginSubTask();
         var deletionResult = graphStore.deleteRelationships(RelationshipType.of(relationshipType));

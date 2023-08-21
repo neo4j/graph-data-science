@@ -388,7 +388,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.relationships.toUndirected",
         "gds.graph.relationships.toUndirected.estimate",
 
-        "gds.graph.deleteRelationships",
         "gds.graph.relationships.drop",
         "gds.graph.drop",
         "gds.graph.exists",
@@ -578,7 +577,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 422;
+        int expectedCount = 421;
         assertEquals(
             expectedCount,
             returnedRows,

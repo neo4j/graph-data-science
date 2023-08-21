@@ -23,10 +23,10 @@ import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.DROP_RELATIONSHIPS_DESCRIPTION;
@@ -43,18 +43,23 @@ public class GraphDropRelationshipProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        return facade.catalog().dropRelationships(graphName, relationshipType, Optional.empty());
+        return facade.catalog().dropRelationships(graphName, relationshipType);
     }
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.deleteRelationships", mode = READ, deprecatedBy = "gds.graph.relationships.drop")
     @Description(DROP_RELATIONSHIPS_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<GraphDropRelationshipResult> deleteRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationships.drop`";
-
-        return facade.catalog().dropRelationships(graphName, relationshipType, Optional.of(deprecationWarning));
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.deleteRelationships` has been deprecated, please use `gds.graph.relationships.drop`.");
+        
+        return facade.catalog().dropRelationships(graphName, relationshipType);
     }
 }

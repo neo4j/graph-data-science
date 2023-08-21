@@ -134,8 +134,7 @@ public interface GraphStoreCatalogBusinessFacade {
         User user, DatabaseId databaseId, TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         String graphName,
-        String relationshipType,
-        Optional<String> deprecationWarning
+        String relationshipType
     );
 
     long dropGraphProperty(

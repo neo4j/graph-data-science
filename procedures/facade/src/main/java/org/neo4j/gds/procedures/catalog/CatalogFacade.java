@@ -407,8 +407,7 @@ public class CatalogFacade {
 
     public Stream<GraphDropRelationshipResult> dropRelationships(
         String graphName,
-        String relationshipType,
-        Optional<String> deprecationWarning
+        String relationshipType
     ) {
         var user = user();
         var databaseId = databaseId();
@@ -421,8 +420,7 @@ public class CatalogFacade {
             taskRegistryFactory,
             userLogRegistryFactory,
             graphName,
-            relationshipType,
-            deprecationWarning
+            relationshipType
         );
 
         return Stream.of(result);
