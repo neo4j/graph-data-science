@@ -25,10 +25,8 @@ import org.neo4j.gds.core.Aggregation;
 
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyMappingTest {
 
@@ -88,25 +86,21 @@ class PropertyMappingTest {
 
     @Test
     void failsOnWrongKeyType() {
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", Map.of(
+        assertThatThrownBy(
+            () -> PropertyMapping.fromObject("transaction_count", Map.of(
                 "property", 42
-            )));
-        assertThat(
-            ex.getMessage(),
-            containsString("Expected the value of 'property' to be of type String, but was 'Integer'.")
-        );
+            )))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Expected the value of 'property' to be of type String, but was 'Integer'.");
     }
 
     @Test
     void failsOnEmptyPropertyKey() {
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class, () -> PropertyMapping.fromObject("", Map.of(
+        assertThatThrownBy(
+            () -> PropertyMapping.fromObject("", Map.of(
                 "neoKey", 42
-            )));
-        assertThat(
-            ex.getMessage(),
-            containsString("Property key must not be empty")
-        );
+            )))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Property key must not be empty");
     }
 }
