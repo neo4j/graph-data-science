@@ -73,7 +73,7 @@ It may still be useful to use Node2Vec node embeddings as features in a pipeline
 .Run Node2Vec in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.stream(
+CALL gds.node2vec.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -105,7 +105,7 @@ include::partial$/machine-learning/node-embeddings/node2vec/specific-configurati
 .Run Node2Vec in mutate mode on a graph stored in the catalog.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.mutate(
+CALL gds.node2vec.mutate(
   graphName: String,
   configuration: Map
 )
@@ -151,7 +151,7 @@ include::partial$/machine-learning/node-embeddings/node2vec/specific-configurati
 .Run Node2Vec in write mode on a graph stored in the catalog.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.write(
+CALL gds.node2vec.write(
   graphName: String,
   configuration: Map
 )
@@ -232,7 +232,7 @@ CALL gds.graph.project('myGraph', ['Person', 'Instrument'], 'LIKES');
 .Run the Node2Vec algorithm on `myGraph`
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2})
+CALL gds.node2vec.stream('myGraph', {embeddingDimension: 2})
 YIELD nodeId, embedding
 RETURN nodeId, embedding
 ----

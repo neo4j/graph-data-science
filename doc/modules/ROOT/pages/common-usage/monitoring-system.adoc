@@ -61,7 +61,7 @@ To inspect the graphs in the graph catalog you can use the xref:management-ops/g
 
 === Example
 
-First let us assume that we just started `gds.beta.node2vec.stream` procedure with some arbitrary parameters.
+First let us assume that we just started `gds.node2vec.stream` procedure with some arbitrary parameters.
 
 We can have a look at the status of the JVM heap.
 

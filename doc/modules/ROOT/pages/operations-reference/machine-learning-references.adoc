@@ -1,8 +1,6 @@
 [[appendix-a-machine-learning]]
 = Machine Learning
 
-Please see xref:algorithms/index.adoc[Graph algorithms] for an introduction to the maturity tiers: production-quality, beta and alpha.
-
 include::partial$/operations-reference/pipeline-operation-references.adoc[]
 
 include::partial$/operations-reference/model-operation-references.adoc[]
