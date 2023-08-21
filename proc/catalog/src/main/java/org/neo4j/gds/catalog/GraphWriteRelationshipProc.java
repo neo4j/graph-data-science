@@ -35,6 +35,7 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.Values;
@@ -60,27 +61,33 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return writeRelationships(graphName, relationshipType, relationshipProperty, configuration, Optional.empty());
+        return writeBackRelationships(graphName, relationshipType, relationshipProperty, configuration);
     }
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE, deprecatedBy = "gds.graph.relationships.write")
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
+    @Deprecated(forRemoval = true)
+    @Internal
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType,
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationship.write`";
-        return writeRelationships(graphName, relationshipType, relationshipProperty, configuration, Optional.of(deprecationWarning));
+
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.graph.writeRelationship` has been deprecated, please use `gds.graph.relationships.write`.");
+
+        return writeBackRelationships(graphName, relationshipType, relationshipProperty, configuration);
     }
 
-    private Stream<Result> writeRelationships(
+    private Stream<Result> writeBackRelationships(
         String graphName,
         String relationshipTypeString,
         String relationshipProperty,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         Preconditions.check();
         validateGraphName(graphName);
@@ -112,7 +119,6 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             executionContext().userLogRegistryFactory()
         );
 
-        deprecationWarning.ifPresent(progressTracker::logWarning);
 
         // writing
         var builder = new Result.Builder(graphName, relationshipTypeString, maybeRelationshipProperty);

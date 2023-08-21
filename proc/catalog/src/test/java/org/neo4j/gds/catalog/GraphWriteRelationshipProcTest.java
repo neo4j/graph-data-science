@@ -39,7 +39,6 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -209,13 +208,4 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             );
     }
 
-    @Test
-    void shouldLogDeprecationWarning() {
-        runQuery("CALL gds.graph.writeRelationship($graph, 'NEW_REL1')", Map.of("graph", TEST_GRAPH_NAME));
-        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
-        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
-        Assertions.assertThat(userLogEntries.get(0).getMessage())
-            .contains("deprecated")
-            .contains("gds.graph.relationship.write");
-    }
 }
