@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -66,9 +67,15 @@ public class DropEphemeralDbProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.drop.cypherdb", mode = WRITE, deprecatedBy = "gds.ephemeral.database.drop")
     @Description(DESCRIPTION)
+    @Internal
+    @Deprecated
     public Stream<DropEphemeralDbResult> dropDb(
         @Name(value = "dbName") String dbName
     ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.drop.cypherdb` has been deprecated, please use `gds.ephemeral.database.drop`.");
+        
         return dropInMemoryDatabase(dbName);
     }
 

@@ -55,7 +55,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.ephemeral.database.create",
         "gds.alpha.create.cypherdb",
         "gds.ephemeral.database.drop",
-        "gds.alpha.drop.cypherdb",
 
         "gds.allShortestPaths.stream",
 
@@ -566,6 +565,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         .flatMap(Function.identity())
         .sorted()
         .collect(Collectors.toList());
+    private int expectedCount;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -582,7 +582,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 426;
+        int expectedCount = expectedCount;
         assertEquals(
             expectedCount,
             returnedRows,
