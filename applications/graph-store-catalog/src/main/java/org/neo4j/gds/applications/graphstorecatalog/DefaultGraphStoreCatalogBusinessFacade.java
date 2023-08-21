@@ -72,16 +72,16 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphStoreValidationService graphStoreValidationService;
 
-    // business logic
-    private final DropGraphService dropGraphService;
-    private final ListGraphService listGraphService;
-    private final NativeProjectService nativeProjectService;
-    private final CypherProjectService cypherProjectService;
-    private final SubGraphProjectService subGraphProjectService;
-    private final GraphMemoryUsageService graphMemoryUsageService;
-    private final DropNodePropertiesService dropNodePropertiesService;
-    private final DropRelationshipsService dropRelationshipsService;
-    private final NodeLabelMutatorService nodeLabelMutatorService;
+    // applications
+    private final DropGraphApplication dropGraphApplication;
+    private final ListGraphApplication listGraphApplication;
+    private final NativeProjectApplication nativeProjectApplication;
+    private final CypherProjectApplication cypherProjectApplication;
+    private final SubGraphProjectApplication subGraphProjectApplication;
+    private final GraphMemoryUsageApplication graphMemoryUsageApplication;
+    private final DropNodePropertiesApplication dropNodePropertiesApplication;
+    private final DropRelationshipsApplication dropRelationshipsApplication;
+    private final NodeLabelMutatorApplication nodeLabelMutatorApplication;
     private final StreamNodePropertiesApplication streamNodePropertiesApplication;
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
     private final StreamRelationshipsApplication streamRelationshipsApplication;
@@ -92,15 +92,15 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreValidationService graphStoreValidationService,
-        DropGraphService dropGraphService,
-        ListGraphService listGraphService,
-        NativeProjectService nativeProjectService,
-        CypherProjectService cypherProjectService,
-        SubGraphProjectService subGraphProjectService,
-        GraphMemoryUsageService graphMemoryUsageService,
-        DropNodePropertiesService dropNodePropertiesService,
-        DropRelationshipsService dropRelationshipsService,
-        NodeLabelMutatorService nodeLabelMutatorService,
+        DropGraphApplication dropGraphApplication,
+        ListGraphApplication listGraphApplication,
+        NativeProjectApplication nativeProjectApplication,
+        CypherProjectApplication cypherProjectApplication,
+        SubGraphProjectApplication subGraphProjectApplication,
+        GraphMemoryUsageApplication graphMemoryUsageApplication,
+        DropNodePropertiesApplication dropNodePropertiesApplication,
+        DropRelationshipsApplication dropRelationshipsApplication,
+        NodeLabelMutatorApplication nodeLabelMutatorApplication,
         StreamNodePropertiesApplication streamNodePropertiesApplication,
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication
@@ -112,15 +112,15 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphStoreValidationService = graphStoreValidationService;
 
-        this.dropGraphService = dropGraphService;
-        this.listGraphService = listGraphService;
-        this.nativeProjectService = nativeProjectService;
-        this.cypherProjectService = cypherProjectService;
-        this.subGraphProjectService = subGraphProjectService;
-        this.graphMemoryUsageService = graphMemoryUsageService;
-        this.dropNodePropertiesService = dropNodePropertiesService;
-        this.dropRelationshipsService = dropRelationshipsService;
-        this.nodeLabelMutatorService = nodeLabelMutatorService;
+        this.dropGraphApplication = dropGraphApplication;
+        this.listGraphApplication = listGraphApplication;
+        this.nativeProjectApplication = nativeProjectApplication;
+        this.cypherProjectApplication = cypherProjectApplication;
+        this.subGraphProjectApplication = subGraphProjectApplication;
+        this.graphMemoryUsageApplication = graphMemoryUsageApplication;
+        this.dropNodePropertiesApplication = dropNodePropertiesApplication;
+        this.dropRelationshipsApplication = dropRelationshipsApplication;
+        this.nodeLabelMutatorApplication = nodeLabelMutatorApplication;
         this.streamNodePropertiesApplication = streamNodePropertiesApplication;
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         this.streamRelationshipsApplication = streamRelationshipsApplication;
@@ -154,7 +154,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         var databaseId = currentDatabase.orOverride(databaseName);
         var usernameOverride = User.parseUsernameOverride(username);
 
-        return dropGraphService.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
+        return dropGraphApplication.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     ) {
         var validatedGraphName = graphNameValidationService.validatePossibleNull(graphName);
 
-        return listGraphService.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
+        return listGraphApplication.list(user, validatedGraphName, includeDegreeDistribution, terminationFlag);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        return nativeProjectService.project(
+        return nativeProjectApplication.project(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -219,7 +219,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        return nativeProjectService.estimate(
+        return nativeProjectApplication.estimate(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -252,7 +252,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        return cypherProjectService.project(
+        return cypherProjectApplication.project(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -279,7 +279,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        return cypherProjectService.estimate(
+        return cypherProjectApplication.estimate(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -321,7 +321,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             rawConfiguration
         );
 
-        return subGraphProjectService.project(
+        return subGraphProjectApplication.project(
             taskRegistryFactory,
             userLogRegistryFactory,
             configuration,
@@ -337,7 +337,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             throw new IllegalArgumentException("Graph '" + graphNameAsString + "' does not exist");
         }
 
-        return graphMemoryUsageService.sizeOf(
+        return graphMemoryUsageApplication.sizeOf(
             user,
             databaseId,
             graphName
@@ -368,7 +368,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureNodePropertiesExist(graphStore, configuration.nodeProperties());
 
-        var numberOfPropertiesRemoved = dropNodePropertiesService.compute(
+        var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
             taskRegistryFactory,
             userLogRegistryFactory,
             configuration,
@@ -399,7 +399,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         var graphStore = graphStoreWithConfig.graphStore();
         graphStoreValidationService.ensureRelationshipsMayBeDeleted(graphStore, relationshipType, graphName);
 
-        var result = dropRelationshipsService.compute(
+        var result = dropRelationshipsApplication.compute(
             taskRegistryFactory,
             userLogRegistryFactory,
             graphStore,
@@ -460,7 +460,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         var configuration = MutateLabelConfig.of(rawConfiguration);
         var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
 
-        return nodeLabelMutatorService.compute(
+        return nodeLabelMutatorApplication.compute(
             graphStore,
             graphName,
             nodeLabel,

@@ -36,11 +36,11 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-public class GraphProjectMemoryUsage {
+public class GraphProjectMemoryUsageService {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
 
-    public GraphProjectMemoryUsage(Log log, GraphDatabaseService graphDatabaseService) {
+    public GraphProjectMemoryUsageService(Log log, GraphDatabaseService graphDatabaseService) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
     }

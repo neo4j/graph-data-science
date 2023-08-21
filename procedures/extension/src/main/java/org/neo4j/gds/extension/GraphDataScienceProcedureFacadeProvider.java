@@ -22,26 +22,26 @@ package org.neo4j.gds.extension;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.applications.graphstorecatalog.ConfigurationService;
-import org.neo4j.gds.applications.graphstorecatalog.CypherProjectService;
+import org.neo4j.gds.applications.graphstorecatalog.CypherProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
-import org.neo4j.gds.applications.graphstorecatalog.DropGraphService;
-import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesService;
-import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsService;
-import org.neo4j.gds.applications.graphstorecatalog.GenericProjectService;
-import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageService;
+import org.neo4j.gds.applications.graphstorecatalog.DropGraphApplication;
+import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsApplication;
+import org.neo4j.gds.applications.graphstorecatalog.GenericProjectApplication;
+import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
-import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsage;
+import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacadePreConditionsDecorator;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreValidationService;
-import org.neo4j.gds.applications.graphstorecatalog.ListGraphService;
-import org.neo4j.gds.applications.graphstorecatalog.NativeProjectService;
-import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorService;
+import org.neo4j.gds.applications.graphstorecatalog.ListGraphApplication;
+import org.neo4j.gds.applications.graphstorecatalog.NativeProjectApplication;
+import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorApplication;
 import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
-import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
+import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -103,16 +103,16 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
 
         // GDS services
         var configurationService = new ConfigurationService();
+        var graphNameValidationService = new GraphNameValidationService();
+        var graphProjectMemoryUsage = new GraphProjectMemoryUsageService(log, graphDatabaseService);
         var graphStoreFilterService = new GraphStoreFilterService();
         var graphStoreValidationService = new GraphStoreValidationService();
 
         // GDS applications
-        var dropGraphService = new DropGraphService(graphStoreCatalogService);
-        var graphNameValidationService = new GraphNameValidationService();
-        var listGraphService = new ListGraphService(graphStoreCatalogService);
-        var graphProjectMemoryUsage = new GraphProjectMemoryUsage(log, graphDatabaseService);
-        var nativeProjectService = new NativeProjectService(
-            new GenericProjectService<>(
+        var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
+        var listGraphApplication = new ListGraphApplication(graphStoreCatalogService);
+        var nativeProjectApplication = new NativeProjectApplication(
+            new GenericProjectApplication<>(
                 log,
                 graphDatabaseService,
                 graphStoreCatalogService,
@@ -120,8 +120,8 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
                 GraphProjectNativeResult.Builder::new
             ), graphProjectMemoryUsage
         );
-        var cypherProjectService = new CypherProjectService(
-            new GenericProjectService<>(
+        var cypherProjectApplication = new CypherProjectApplication(
+            new GenericProjectApplication<>(
                 log,
                 graphDatabaseService,
                 graphStoreCatalogService,
@@ -129,11 +129,11 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
                 GraphProjectCypherResult.Builder::new
             ), graphProjectMemoryUsage
         );
-        var subGraphProjectService = new SubGraphProjectService(log, graphStoreFilterService, graphStoreCatalogService);
-        var graphMemoryUsageService = new GraphMemoryUsageService(graphStoreCatalogService);
-        var dropNodePropertiesService = new DropNodePropertiesService(log);
-        var dropRelationshipsService = new DropRelationshipsService(log);
-        var nodeLabelMutatorService = new NodeLabelMutatorService();
+        var subGraphProjectApplication = new SubGraphProjectApplication(log, graphStoreFilterService, graphStoreCatalogService);
+        var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
+        var dropNodePropertiesApplication = new DropNodePropertiesApplication(log);
+        var dropRelationshipsApplication = new DropRelationshipsApplication(log);
+        var nodeLabelMutatorApplication = new NodeLabelMutatorApplication();
         var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
         var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
@@ -145,15 +145,15 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
             graphNameValidationService,
             graphStoreCatalogService,
             graphStoreValidationService,
-            dropGraphService,
-            listGraphService,
-            nativeProjectService,
-            cypherProjectService,
-            subGraphProjectService,
-            graphMemoryUsageService,
-            dropNodePropertiesService,
-            dropRelationshipsService,
-            nodeLabelMutatorService,
+            dropGraphApplication,
+            listGraphApplication,
+            nativeProjectApplication,
+            cypherProjectApplication,
+            subGraphProjectApplication,
+            graphMemoryUsageApplication,
+            dropNodePropertiesApplication,
+            dropRelationshipsApplication,
+            nodeLabelMutatorApplication,
             streamNodePropertiesApplication,
             streamRelationshipPropertiesApplication,
             streamRelationshipsApplication

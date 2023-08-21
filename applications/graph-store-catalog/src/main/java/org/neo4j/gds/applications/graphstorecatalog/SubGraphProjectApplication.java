@@ -36,12 +36,12 @@ import org.neo4j.gds.logging.Log;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SubGraphProjectService {
+public class SubGraphProjectApplication {
     private final Log log;
     private final GraphStoreFilterService graphStoreFilterService;
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public SubGraphProjectService(
+    public SubGraphProjectApplication(
         Log log,
         GraphStoreFilterService graphStoreFilterService,
         GraphStoreCatalogService graphStoreCatalogService

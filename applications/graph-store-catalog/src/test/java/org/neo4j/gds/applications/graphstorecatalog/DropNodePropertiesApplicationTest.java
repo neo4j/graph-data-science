@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class DropNodePropertiesServiceTest {
+class DropNodePropertiesApplicationTest {
     /**
      * Yep this is convoluted, but bear with: it is still better than starting a Neo4j to demonstrate it!
      * Matryoshka dolls much?
@@ -41,7 +41,7 @@ class DropNodePropertiesServiceTest {
      */
     @Test
     void shouldLogDeprecationWarnings() {
-        var service = new DropNodePropertiesService(null) {
+        var service = new DropNodePropertiesApplication(null) {
             @Override
             long computeWithErrorHandling(
                 GraphStore graphStore,

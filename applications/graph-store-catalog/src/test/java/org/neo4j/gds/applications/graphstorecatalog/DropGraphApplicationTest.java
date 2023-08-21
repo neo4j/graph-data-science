@@ -38,11 +38,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class DropGraphServiceTest {
+class DropGraphApplicationTest {
     @Test
     void shouldDropGraphs() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var dropGraphService = new DropGraphService(graphStoreCatalogService);
+        var dropGraphService = new DropGraphApplication(graphStoreCatalogService);
 
         var catalogRequest = CatalogRequest.of("some user", DatabaseId.of("some database"));
         var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
@@ -65,7 +65,7 @@ class DropGraphServiceTest {
     @Test
     void shouldValidateGraphsExistBeforeRemovingAnyOhAndListThemAllInOneGo() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var dropGraphService = new DropGraphService(graphStoreCatalogService);
+        var dropGraphService = new DropGraphApplication(graphStoreCatalogService);
 
         var request = CatalogRequest.of("some user", DatabaseId.of("some database"));
         var g1 = GraphName.parse("foo");
@@ -100,7 +100,7 @@ class DropGraphServiceTest {
     @Test
     void shouldRespectFailIfMissingFlag() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var dropGraphService = new DropGraphService(graphStoreCatalogService);
+        var dropGraphService = new DropGraphApplication(graphStoreCatalogService);
 
         var request = CatalogRequest.of("some user", DatabaseId.of("some database"));
         var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
@@ -126,7 +126,7 @@ class DropGraphServiceTest {
 
     @Test
     void shouldNotAllowUsernameOverrideForNonAdmins() {
-        var service = new DropGraphService(null);
+        var service = new DropGraphApplication(null);
 
         try {
             service.compute(

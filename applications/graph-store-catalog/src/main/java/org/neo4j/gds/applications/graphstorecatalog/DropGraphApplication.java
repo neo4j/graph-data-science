@@ -36,10 +36,10 @@ import java.util.Optional;
 /**
  * Domain logic for gds.graph.drop
  */
-public class DropGraphService {
+public class DropGraphApplication {
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public DropGraphService(GraphStoreCatalogService graphStoreCatalogService) {
+    public DropGraphApplication(GraphStoreCatalogService graphStoreCatalogService) {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 

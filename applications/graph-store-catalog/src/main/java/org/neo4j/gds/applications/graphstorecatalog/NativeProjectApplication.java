@@ -21,41 +21,42 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 
-public class CypherProjectService {
-    private final GenericProjectService<
-        GraphProjectCypherResult,
-        GraphProjectFromCypherConfig,
-        GraphProjectCypherResult.Builder> genericProjectService;
+public class NativeProjectApplication {
+    private final GenericProjectApplication<
+            GraphProjectNativeResult,
+            GraphProjectFromStoreConfig,
+            GraphProjectNativeResult.Builder> genericProjectApplication;
 
-    private final GraphProjectMemoryUsage graphProjectMemoryUsage;
+    private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
 
-    public CypherProjectService(
-        GenericProjectService<
-            GraphProjectCypherResult,
-            GraphProjectFromCypherConfig,
-            GraphProjectCypherResult.Builder> genericProjectService, GraphProjectMemoryUsage graphProjectMemoryUsage
+    public NativeProjectApplication(
+        GenericProjectApplication<
+                    GraphProjectNativeResult,
+                    GraphProjectFromStoreConfig,
+                    GraphProjectNativeResult.Builder> genericProjectApplication,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService
     ) {
-        this.genericProjectService = genericProjectService;
-        this.graphProjectMemoryUsage = graphProjectMemoryUsage;
+        this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
+        this.genericProjectApplication = genericProjectApplication;
     }
 
-    public GraphProjectCypherResult project(
+    public GraphProjectNativeResult project(
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
         UserLogRegistryFactory userLogRegistryFactory,
-        GraphProjectFromCypherConfig configuration
+        GraphProjectFromStoreConfig configuration
     ) {
-        return genericProjectService.project(
+        return genericProjectApplication.project(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -75,7 +76,7 @@ public class CypherProjectService {
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(configuration);
 
-        var memoryTreeWithDimensions = graphProjectMemoryUsage.getEstimate(
+        var memoryTreeWithDimensions = graphProjectMemoryUsageService.getEstimate(
             databaseId,
             terminationFlag,
             transactionContext,
@@ -91,7 +92,7 @@ public class CypherProjectService {
      * Public because EstimationCLI tests needs it. Should redesign something here I think
      */
     public MemoryEstimateResult estimateButFictitiously(GraphProjectConfig configuration) {
-        var estimate = graphProjectMemoryUsage.getFictitiousEstimate(configuration);
+        var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
 
         return new MemoryEstimateResult(estimate);
     }

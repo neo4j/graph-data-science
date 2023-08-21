@@ -29,11 +29,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-class DropRelationshipsServiceTest {
+class DropRelationshipsApplicationTest {
     @Test
     void shouldIssueDeprecationWarnings() {
         var progressTracker = mock(ProgressTracker.class);
-        var ignored = DropRelationshipsService.computeWithProgressTracking(
+        var ignored = DropRelationshipsApplication.computeWithProgressTracking(
             mock(GraphStore.class),
             "some relationship type",
             Optional.of("deprecated!"),
@@ -49,7 +49,7 @@ class DropRelationshipsServiceTest {
     @Test
     void shouldNotIssueDeprecationWarningsWhenThereAreNone() {
         var progressTracker = mock(ProgressTracker.class);
-        var ignored = DropRelationshipsService.computeWithProgressTracking(
+        var ignored = DropRelationshipsApplication.computeWithProgressTracking(
             mock(GraphStore.class),
             "some relationship type",
             Optional.empty(),

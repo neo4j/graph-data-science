@@ -35,10 +35,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ListGraphService {
+public class ListGraphApplication {
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public ListGraphService(GraphStoreCatalogService graphStoreCatalogService) {
+    public ListGraphApplication(GraphStoreCatalogService graphStoreCatalogService) {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 

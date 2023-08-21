@@ -43,7 +43,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 @ExtendWith(SoftAssertionsExtension.class)
 @GdlExtension
-class NodeLabelMutatorServiceTest {
+class NodeLabelMutatorApplicationTest {
     @SuppressWarnings("unused")
     @GdlGraph
     private static final String DB_CYPHER =
@@ -80,7 +80,7 @@ class NodeLabelMutatorServiceTest {
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var configuration = GraphProjectConfig.emptyWithName("user", "graph");
         graphStoreCatalogService.set(configuration, graphStore);
-        var service = new NodeLabelMutatorService();
+        var service = new NodeLabelMutatorApplication();
 
         var result = service.compute(
             graphStore,
@@ -137,7 +137,7 @@ class NodeLabelMutatorServiceTest {
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var configuration = GraphProjectConfig.emptyWithName("user", "graph");
         graphStoreCatalogService.set(configuration, graphStore);
-        var nodeLabelMutatorService = new NodeLabelMutatorService();
+        var nodeLabelMutatorService = new NodeLabelMutatorApplication();
 
         var result = nodeLabelMutatorService.compute(
             graphStore,
@@ -194,7 +194,7 @@ class NodeLabelMutatorServiceTest {
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var configuration = GraphProjectConfig.emptyWithName("user", "graph");
         graphStoreCatalogService.set(configuration, allGraphStore);
-        var nodeLabelMutatorService = new NodeLabelMutatorService();
+        var nodeLabelMutatorService = new NodeLabelMutatorApplication();
 
         var result = nodeLabelMutatorService.compute(
             allGraphStore,

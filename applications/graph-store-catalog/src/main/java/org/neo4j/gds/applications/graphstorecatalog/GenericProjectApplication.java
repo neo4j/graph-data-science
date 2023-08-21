@@ -43,25 +43,25 @@ import java.util.function.Function;
  * because configurations provide functional elements (services).
  * I'm not a fan, nor actually a fan of generics, but here we achieve some good, DRY code.
  */
-public class GenericProjectService<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
+public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final GraphProjectMemoryUsage graphProjectMemoryUsage;
+    private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
 
     private final Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory;
 
-    public GenericProjectService(
+    public GenericProjectApplication(
         Log log,
         GraphDatabaseService graphDatabaseService,
         GraphStoreCatalogService graphStoreCatalogService,
-        GraphProjectMemoryUsage graphProjectMemoryUsage,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory
     ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.graphProjectMemoryUsage = graphProjectMemoryUsage;
+        this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
         this.resultBuilderFactory = resultBuilderFactory;
     }
 
@@ -98,7 +98,7 @@ public class GenericProjectService<RESULT extends GraphProjectResult, CONFIGURAT
     ) {
         if (configuration.isFictitiousLoading()) return estimateButFictitiously(configuration);
 
-        var memoryTreeWithDimensions = graphProjectMemoryUsage.getEstimate(
+        var memoryTreeWithDimensions = graphProjectMemoryUsageService.getEstimate(
             databaseId,
             terminationFlag,
             transactionContext,
@@ -118,7 +118,7 @@ public class GenericProjectService<RESULT extends GraphProjectResult, CONFIGURAT
         UserLogRegistryFactory userLogRegistryFactory,
         CONFIGURATION configuration
     ) {
-        graphProjectMemoryUsage.validateMemoryUsage(
+        graphProjectMemoryUsageService.validateMemoryUsage(
             databaseId,
             taskRegistryFactory,
             terminationFlag,
@@ -157,7 +157,7 @@ public class GenericProjectService<RESULT extends GraphProjectResult, CONFIGURAT
      * Public because EstimationCLI tests needs it. Should redesign something here I think
      */
     public MemoryEstimateResult estimateButFictitiously(GraphProjectConfig configuration) {
-        var estimate = graphProjectMemoryUsage.getFictitiousEstimate(configuration);
+        var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
 
         return new MemoryEstimateResult(estimate);
     }

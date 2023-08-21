@@ -25,10 +25,10 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
-public class GraphMemoryUsageService {
+public class GraphMemoryUsageApplication {
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    public GraphMemoryUsageService(GraphStoreCatalogService graphStoreCatalogService) {
+    public GraphMemoryUsageApplication(GraphStoreCatalogService graphStoreCatalogService) {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 

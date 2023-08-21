@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
-public class NodeLabelMutatorService {
+public class NodeLabelMutatorApplication {
     public MutateLabelResult compute(
         GraphStore graphStore,
         GraphName graphName,
