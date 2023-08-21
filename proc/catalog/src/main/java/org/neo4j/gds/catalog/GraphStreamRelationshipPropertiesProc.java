@@ -98,12 +98,18 @@ public class GraphStreamRelationshipPropertiesProc {
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.streamRelationshipProperty", mode = READ, deprecatedBy = "gds.graph.relationshipProperty.stream")
     @Description(STREAM_RELATIONSHIP_PROPERTY_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<GraphStreamRelationshipPropertyResult> deprecatedStreamRelationshipProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperties") String relationshipProperty,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.streamRelationshipProperty` has been deprecated, please use `gds.graph.relationshipProperty.stream`.");
 
         return facade.catalog().streamRelationshipProperty(
             graphName,
