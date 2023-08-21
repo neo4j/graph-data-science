@@ -21,19 +21,13 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.warnings.PerDatabaseUserLogStore;
-import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
-
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
@@ -81,21 +75,5 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
-
-
-    @Test
-    void shouldLogDeprecationWarning() {
-        runQuery(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])",
-            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES)
-        );
-
-        assertThat(userLogStore.query(getUsername()))
-            .hasSize(1)
-            .first()
-            .extracting(UserLogEntry::getMessage)
-            .asString()
-            .contains("deprecated")
-            .contains("gds.graph.nodeProperties.write");
-    }
+    
 }

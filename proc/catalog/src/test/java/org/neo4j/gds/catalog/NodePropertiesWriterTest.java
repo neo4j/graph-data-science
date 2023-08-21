@@ -52,7 +52,6 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -124,8 +123,7 @@ class NodePropertiesWriterTest {
             List.of("nodeProp1", "nodeProp2"),
             nodeLabels,
             Map.of(),
-            executionContext,
-            Optional.empty()
+            executionContext
         );
 
         assertThat(writeResult).hasSize(1).satisfiesExactly(
@@ -170,8 +168,7 @@ class NodePropertiesWriterTest {
             List.of("nodeProp1", "nodeProp2"),
             "*",
             Map.of(),
-            executionContext,
-            Optional.empty()
+            executionContext
         );
 
         assertThat(writeResult).hasSize(1).satisfiesExactly(
@@ -208,8 +205,7 @@ class NodePropertiesWriterTest {
             List.of("nodeProp1", "nodeProp2"),
             "A",
             Map.of(),
-            executionContext,
-            Optional.empty()
+            executionContext
         );
 
         assertThat(writeResult).hasSize(1).satisfiesExactly(
@@ -245,8 +241,7 @@ class NodePropertiesWriterTest {
             Map.of("nodeProp1", "foo"),
             "*",
             Map.of(),
-            executionContext,
-            Optional.empty()
+            executionContext
         );
 
         assertThat(writeResult).hasSize(1).satisfiesExactly(
@@ -280,8 +275,7 @@ class NodePropertiesWriterTest {
             List.of(Map.of("nodeProp1", "foo", "nodeProp2", "bar"), "nodeProp1"),
             "A",
             Map.of(),
-            executionContext,
-            Optional.empty()
+            executionContext
         );
 
         assertThat(writeResult).hasSize(1).satisfiesExactly(

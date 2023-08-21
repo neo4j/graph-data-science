@@ -59,8 +59,7 @@ public final class NodePropertiesWriter {
         Object nodeProperties,
         Object nodeLabels,
         Map<String, Object> configuration,
-        ExecutionContext executionContext,
-        Optional<String> deprecationWarning
+        ExecutionContext executionContext
     ) {
         validateGraphName(graphName);
 
@@ -99,9 +98,7 @@ public final class NodePropertiesWriter {
             executionContext.taskRegistryFactory(),
             executionContext.userLogRegistryFactory()
         );
-
-        deprecationWarning.ifPresent(progressTracker::logWarning);
-
+        
         var allNodeProperties = config
             .nodeProperties()
             .stream()
