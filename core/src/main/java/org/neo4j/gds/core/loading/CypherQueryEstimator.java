@@ -56,7 +56,7 @@ public class CypherQueryEstimator {
                 var propertyColumns = new ArrayList<>(result.columns());
                 propertyColumns.removeAll(reservedColumns);
 
-                propertyColumns.forEach(property -> PropertyMapping.validatePropertyKey(property));
+                propertyColumns.forEach(PropertyMapping::validatePropertyKey);
 
                 return ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
             }
