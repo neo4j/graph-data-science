@@ -175,7 +175,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.pipeline.nodeClassification.addMLP",
         "gds.beta.pipeline.nodeClassification.addRandomForest",
         "gds.alpha.pipeline.nodeClassification.configureAutoTuning",
-        "gds.alpha.pipeline.nodeClassification.addRandomForest",  //Deprecated
         "gds.beta.pipeline.nodeClassification.configureSplit",
         "gds.beta.pipeline.nodeClassification.create",
         "gds.beta.pipeline.nodeClassification.predict.mutate",
