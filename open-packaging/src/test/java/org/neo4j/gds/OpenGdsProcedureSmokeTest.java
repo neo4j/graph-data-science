@@ -570,7 +570,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 415;
+        int expectedCount = 414;
         assertEquals(
             expectedCount,
             returnedRows,
@@ -586,7 +586,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(PAGE_RANK, listProcs("pageRank"));
-        assertEquals(asList("gds.pageRank.nm", "gds.pageRank.stream.estimate"), listProcs("pageRank.stream"));
+        assertEquals(asList("gds.pageRank.stream", "gds.pageRank.stream.estimate"), listProcs("pageRank.stream"));
         assertEquals(emptyList(), listProcs("foo"));
     }
 
