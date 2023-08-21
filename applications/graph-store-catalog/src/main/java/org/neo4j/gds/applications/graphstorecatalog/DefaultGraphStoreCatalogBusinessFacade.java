@@ -352,8 +352,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         UserLogRegistryFactory userLogRegistryFactory,
         String graphNameAsString,
         Object nodeProperties,
-        Map<String, Object> rawConfiguration,
-        Optional<String> deprecationWarning
+        Map<String, Object> rawConfiguration
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
@@ -372,8 +371,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             taskRegistryFactory,
             userLogRegistryFactory,
             configuration,
-            graphStore,
-            deprecationWarning
+            graphStore
         );
 
         return new GraphDropNodePropertiesResult(

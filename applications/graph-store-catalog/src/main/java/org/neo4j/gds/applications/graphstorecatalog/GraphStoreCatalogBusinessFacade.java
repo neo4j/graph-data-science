@@ -127,8 +127,7 @@ public interface GraphStoreCatalogBusinessFacade {
         UserLogRegistryFactory userLogRegistryFactory,
         String graphName,
         Object nodeProperties,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     );
 
     GraphDropRelationshipResult dropRelationships(

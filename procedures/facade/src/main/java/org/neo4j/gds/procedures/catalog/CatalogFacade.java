@@ -385,8 +385,7 @@ public class CatalogFacade {
     public Stream<GraphDropNodePropertiesResult> dropNodeProperties(
         String graphName,
         Object nodeProperties,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         var user = user();
         var databaseId = databaseId();
@@ -400,8 +399,7 @@ public class CatalogFacade {
             userLogRegistryFactory,
             graphName,
             nodeProperties,
-            configuration,
-            deprecationWarning
+            configuration
         );
 
         return Stream.of(result);

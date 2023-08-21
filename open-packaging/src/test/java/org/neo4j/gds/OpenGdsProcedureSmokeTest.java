@@ -469,7 +469,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.shortestPath.yens.write",
         "gds.shortestPath.yens.write.estimate",
 
-        "gds.graph.removeNodeProperties",
         "gds.graph.nodeProperties.drop",
 
         "gds.wcc.mutate",
@@ -579,7 +578,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 423;
+        int expectedCount = 422;
         assertEquals(
             expectedCount,
             returnedRows,

@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 
 import java.util.List;
-import java.util.Optional;
 
 public class DropNodePropertiesApplication {
     private final Log log;
@@ -42,8 +41,7 @@ public class DropNodePropertiesApplication {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphDropNodePropertiesConfig configuration,
-        GraphStore graphStore,
-        Optional<String> deprecationWarning
+        GraphStore graphStore
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
@@ -53,7 +51,6 @@ public class DropNodePropertiesApplication {
 
         return computeWithProgressTracking(
             graphStore,
-            deprecationWarning,
             progressTrackerFactory,
             configuration.nodeProperties()
         );
@@ -61,16 +58,13 @@ public class DropNodePropertiesApplication {
 
     long computeWithProgressTracking(
         GraphStore graphStore,
-        Optional<String> deprecationWarning,
         ProgressTrackerFactory progressTrackerFactory,
         List<String> nodeProperties
     ) {
         var task = Tasks.leaf("Graph :: NodeProperties :: Drop", nodeProperties.size());
 
         var progressTracker = progressTrackerFactory.create(task);
-
-        deprecationWarning.ifPresent(progressTracker::logWarning);
-
+        
         return computeWithErrorHandling(graphStore, progressTracker, nodeProperties);
     }
 

@@ -24,11 +24,11 @@ import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.DROP_NODE_PROPERTIES_DESCRIPTION;
@@ -46,24 +46,28 @@ public class GraphDropNodePropertiesProc {
         @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().dropNodeProperties(graphName, nodeProperties, configuration, Optional.empty());
+        return facade.catalog().dropNodeProperties(graphName, nodeProperties, configuration);
     }
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.removeNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.drop")
     @Description(DROP_NODE_PROPERTIES_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<GraphDropNodePropertiesResult> removeNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.drop`";
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.removeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.drop`.");
 
         return facade.catalog().dropNodeProperties(
             graphName,
             nodeProperties,
-            configuration,
-            Optional.of(deprecationWarning)
+            configuration
         );
     }
 }

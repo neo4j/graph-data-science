@@ -236,8 +236,7 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         UserLogRegistryFactory userLogRegistryFactory,
         String graphName,
         Object nodeProperties,
-        Map<String, Object> configuration,
-        Optional<String> deprecationWarning
+        Map<String, Object> configuration
     ) {
         return runWithPreconditionsChecked(() -> delegate.dropNodeProperties(
             user,
@@ -246,8 +245,7 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
             userLogRegistryFactory,
             graphName,
             nodeProperties,
-            configuration,
-            deprecationWarning
+            configuration
         ));
     }
 
