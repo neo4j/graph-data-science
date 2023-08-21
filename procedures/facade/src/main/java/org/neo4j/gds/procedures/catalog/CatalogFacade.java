@@ -31,6 +31,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPrope
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyOrPropertiesResultProducer;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
+import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
@@ -591,6 +592,17 @@ public class CatalogFacade {
                 propertyValue
             )
         );
+    }
+
+    public Stream<TopologyResult> streamRelationships(
+        String graphName,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        return businessFacade.streamRelationships(user, databaseId, graphName, relationshipTypes, configuration);
     }
 
     private <T> Stream<T> streamRelationshipPropertyOrProperties(

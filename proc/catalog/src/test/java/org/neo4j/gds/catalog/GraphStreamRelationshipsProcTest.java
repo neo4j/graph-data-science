@@ -29,22 +29,21 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipsProc.TopologyResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GraphStreamRelationshipsProcTest extends BaseProcTest {
-
-    @Neo4jGraph(offsetIds = true)
+    @SuppressWarnings("unused")
+    @Neo4jGraph
     static String DB_CYPHER = "CREATE" +
                               "  (a:N), (b:N), (c:N)" +
                               ", (a)-[:REL1]->(b)" +
@@ -52,6 +51,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
                               ", (c)-[:REL2]->(b)" +
                               ", (b)-[:REL2]->(a)";
 
+    @SuppressWarnings("WeakerAccess")
     @Inject
     IdFunction idFunction;
 
@@ -151,14 +151,6 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         });
 
         assertThat(actualRelationships).containsExactlyInAnyOrderElementsOf(expectedRelationships);
-    }
-
-    @Test
-    void shouldFailOnNonExistentRelationshipType() {
-        assertThatThrownBy(() -> runQuery("CALL gds.graph.relationships.stream('graph', ['NON_EXISTENT'])"))
-            .hasRootCauseInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("could not find")
-            .hasMessageContaining("'NON_EXISTENT'");
     }
 
     private static TopologyResult relationship(long sourceId, long targetId, String relationshipType) {

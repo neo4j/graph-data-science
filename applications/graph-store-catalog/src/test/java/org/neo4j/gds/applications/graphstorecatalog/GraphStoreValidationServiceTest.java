@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -246,5 +247,26 @@ class GraphStoreValidationServiceTest {
             service.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
         }).withMessage(
             "Expecting all specified node projections to have all given properties defined. Could not find property key(s) ['p2'] for label A. Defined keys: ['p1', 'p3'].");
+    }
+
+    @Test
+    void shouldEnsureRelationshipTypesPresent() {
+        var service = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        var relationshipTypes = List.of(
+            RelationshipType.of("foo"),
+            RelationshipType.of("bar"),
+            RelationshipType.of("baz")
+        );
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.hasRelationshipType(RelationshipType.of("bar"))).thenReturn(false);
+        when(graphStore.hasRelationshipType(RelationshipType.of("baz"))).thenReturn(false);
+
+        assertThatIllegalStateException().isThrownBy(() -> service.ensureRelationshipTypesPresent(
+            graphStore,
+            relationshipTypes
+        )).withMessage(
+            "Expecting all specified relationship types to be present in graph store, but could not find ['bar', 'baz']");
     }
 }

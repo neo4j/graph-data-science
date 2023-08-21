@@ -188,4 +188,12 @@ public interface GraphStoreCatalogBusinessFacade {
         Optional<String> deprecationWarning,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     );
+
+    Stream<TopologyResult> streamRelationships(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration
+    );
 }

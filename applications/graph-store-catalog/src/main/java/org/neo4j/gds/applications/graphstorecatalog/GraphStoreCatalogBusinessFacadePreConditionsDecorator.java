@@ -379,6 +379,23 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public Stream<TopologyResult> streamRelationships(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        List<String> relationshipTypes,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.streamRelationships(
+            user,
+            databaseId,
+            graphName,
+            relationshipTypes,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

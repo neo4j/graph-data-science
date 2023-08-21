@@ -29,6 +29,7 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphRemoveGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
+import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -253,6 +254,24 @@ public class ConfigurationService {
         var configuration = GraphStreamRelationshipPropertiesConfig.of(
             graphName.getValue(),
             relationshipProperties,
+            relationshipTypes,
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
+    }
+
+    GraphStreamRelationshipsConfig parseGraphStreamRelationshipsConfiguration(
+        GraphName graphName,
+        List<String> relationshipTypes,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphStreamRelationshipsConfig.of(
+            graphName.getValue(),
             relationshipTypes,
             cypherConfig
         );

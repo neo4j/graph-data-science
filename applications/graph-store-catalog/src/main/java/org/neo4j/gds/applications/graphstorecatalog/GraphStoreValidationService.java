@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
@@ -28,6 +29,7 @@ import org.neo4j.gds.core.StringSimilarity;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -170,6 +172,24 @@ public class GraphStoreValidationService {
                     StringJoining.join(configuration.relationshipProperties())
                 ));
             }
+        }
+    }
+
+    void ensureRelationshipTypesPresent(
+        GraphStore graphStore, Collection<RelationshipType> relationshipTypes
+    ) {
+        var missingRelationshipTypes = new ArrayList<RelationshipType>();
+        relationshipTypes.forEach(relationshipType -> {
+            if (!graphStore.hasRelationshipType(relationshipType)) {
+                missingRelationshipTypes.add(relationshipType);
+            }
+        });
+
+        if (!missingRelationshipTypes.isEmpty()) {
+            throw new IllegalStateException(formatWithLocale(
+                "Expecting all specified relationship types to be present in graph store, but could not find %s",
+                StringJoining.join(missingRelationshipTypes, ElementIdentifier::name)
+            ));
         }
     }
 

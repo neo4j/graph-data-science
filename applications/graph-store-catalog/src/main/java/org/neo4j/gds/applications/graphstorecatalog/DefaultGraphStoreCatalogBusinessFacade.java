@@ -84,6 +84,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final NodeLabelMutatorService nodeLabelMutatorService;
     private final StreamNodePropertiesApplication streamNodePropertiesApplication;
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
+    private final StreamRelationshipsApplication streamRelationshipsApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -101,7 +102,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         DropRelationshipsService dropRelationshipsService,
         NodeLabelMutatorService nodeLabelMutatorService,
         StreamNodePropertiesApplication streamNodePropertiesApplication,
-        StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication
+        StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
+        StreamRelationshipsApplication streamRelationshipsApplication
     ) {
         this.log = log;
 
@@ -121,6 +123,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.nodeLabelMutatorService = nodeLabelMutatorService;
         this.streamNodePropertiesApplication = streamNodePropertiesApplication;
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
+        this.streamRelationshipsApplication = streamRelationshipsApplication;
     }
 
     @Override
@@ -564,6 +567,32 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             deprecationWarning,
             outputMarshaller
         );
+    }
+
+    @Override
+    public Stream<TopologyResult> streamRelationships(
+        User user,
+        DatabaseId databaseId,
+        String graphNameAsString,
+        List<String> relationshipTypes,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = configurationService.parseGraphStreamRelationshipsConfiguration(
+            graphName,
+            relationshipTypes,
+            rawConfiguration
+        );
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureRelationshipTypesPresent(
+            graphStore,
+            configuration.relationshipTypeIdentifiers(graphStore)
+        );
+
+        return streamRelationshipsApplication.compute(graphStore, configuration);
     }
 
     private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

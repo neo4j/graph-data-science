@@ -27,6 +27,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
+    implementation project(':string-formatting')
     implementation project(':transaction')
 
     // test infrastructure

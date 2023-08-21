@@ -40,6 +40,7 @@ import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorService;
 import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectService;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
@@ -135,6 +136,7 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
         var nodeLabelMutatorService = new NodeLabelMutatorService();
         var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
         var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
+        var streamRelationshipsApplication = new StreamRelationshipsApplication();
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -153,7 +155,8 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
             dropRelationshipsService,
             nodeLabelMutatorService,
             streamNodePropertiesApplication,
-            streamRelationshipPropertiesApplication
+            streamRelationshipPropertiesApplication,
+            streamRelationshipsApplication
         );
 
         // wrap in decorator to enable preconditions checks
