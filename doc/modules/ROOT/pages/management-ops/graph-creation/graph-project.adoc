@@ -4,22 +4,24 @@
 :page-aliases: management-ops/projections/graph-project.adoc
 
 
-A native projection is the fastest and most scalable way to project a graph from a Neo4j database into the xref:management-ops/index.adoc[GDS Graph Catalog].
-Native projections are recommended for any use case, and for both the development and the production phase (see xref:common-usage/index.adoc[Common usage]).
+A native projection is the fastest and most scalable way to create a xref:management-ops/index.adoc[GDS graph] from a Neo4j database.
+
+_Node projections_ and _relationship projections_ describe the way nodes and relationships are loaded (_projected_) from the database into the in-memory graph.
+While node projections are based on node labels, relationship projections are based on relationship types.
+Both can include properties.
+
+Native projections are recommended for any use case, for both the development and the production phase (see xref:common-usage/index.adoc[Common usage]).
 
 
 == Considerations
 
 === Lifecycle
 
-[NOTE]
---
-The projected graphs will reside in the catalog until either:
+Projected graphs reside in memory (in the graph catalog) until any of the following happens:
 
-- the graph is dropped using xref:management-ops/graph-drop.adoc[gds.graph.drop]
-- the Neo4j database from which the graph was projected is stopped or dropped
-- the Neo4j database management system is stopped.
---
+- The graph is dropped with the xref:management-ops/graph-drop.adoc[`gds.graph.drop`] procedure.
+- The Neo4j database from which the graph was projected is stopped or dropped.
+- The Neo4j DBMS is stopped.
 
 
 === Node property support
@@ -31,11 +33,6 @@ Other types of node properties have to be transformed or encoded into one of the
 
 [[graph-project-native-syntax]]
 == Syntax
-
-A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
-In addition, the optional `configuration` parameter allows us to further configure the graph creation.
-
-NOTE: To get information about a previously projected graph, such as its schema, one can use xref:management-ops/graph-list.adoc[gds.graph.list].
 
 [.graph-project-syntax]
 --
@@ -56,13 +53,13 @@ CALL gds.graph.project(
 ----
 
 .Parameters
-[opts="header",cols="1,1,1, 4"]
+[opts="header",cols="1,1,1,4"]
 |===
 | Name                  | Type                | Optional | Description
 | graphName             | String              | no       | The name under which the graph is stored in the catalog.
 | nodeProjection        | String, List or Map | no       | One or more xref:management-ops/graph-creation/graph-project.adoc#node-projection-syntax[node projections].
 | relationshipProjection| String, List or Map | no       | One or more xref:management-ops/graph-creation/graph-project.adoc#relationship-projection-syntax[relationship projections].
-| configuration         | Map                 | yes      | Additional parameters to configure the native projection.
+| configuration         | Map                 | yes      | <<graph-project-native-syntax-configuration, Additional parameters>> to configure the native projection.
 |===
 
 [[graph-project-native-syntax-configuration]]
@@ -71,8 +68,8 @@ CALL gds.graph.project(
 |===
 | Name                   | Type                  | Default              | Description
 | readConcurrency        | Integer               | 4                    | The number of concurrent threads used for creating the graph.
-| nodeProperties         | String, List or Map   | {}                   | The node properties to load for _all_ node projections.
-| relationshipProperties | String, List or Map   | {}                   | The relationship properties to load for _all_ relationship projections.
+| nodeProperties         | String, List or Map   | {}                   | The node properties to load from nodes that match _any_ of the labels specified in `nodeProjection`.
+| relationshipProperties | String, List or Map   | {}                   | The relationship properties to load from relationships that match _any_ of the types specified in `relationshipProjection`.
 | validateRelationships  | Boolean               | false                | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
 | jobId                  | String                | Generated internally | An ID that can be provided to more easily track the projection's progress.
 |===
@@ -92,272 +89,133 @@ CALL gds.graph.project(
 
 
 [[node-projection-syntax]]
-=== Node Projection
+=== Node projection
 
-The node projection specifies which nodes from the database should be projected into the in-memory GDS graph.
-The projection is based around node labels, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
+A node projection can be specified using any of the following forms:
 
-All nodes with any of the specified node labels will be projected to the GDS graph.
-If a node has several labels, it will be projected several times.
-If the nodes have values for the specified properties, these will be projected as well.
-If a node does not have a value for a specified property, a default value will be used.
-Read more about default values <<node-projection-syntax-configuration, below>>.
+* A single string (either a Neo4j node label `<label>` or a wildcard `*`)
+* A list of Neo4j node labels (`[<label_1>, <label_2>, <label_3>]`)
+* A projection map, where each key is a node label in the projected graph and each value is itself a map
 
-All specified node labels and properties must exist in the database.
-To project using a non-existing label, it is possible to create a label without any nodes using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createlabel[the db.createLabel() procedure].
-Similarly, to project a non-existing property, it is possible to create a node property without modifying the database, using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[the db.createProperty() procedure].
+The projection map is specified as follows:
 
-
-==== Projecting a single label
-
-The simplest syntax is to specify a single node label as a string value.
-
-.Short-hand String-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`.
-----
-<neo4j-label>
-----
-
-.Example outline:
-----
-CALL gds.graph.project(
-  /* graph name */,
-  'MyLabel',
-  /* relationship projection */
-)
-----
-
-
-==== Projecting multiple labels
-
-To project more than one label, the list syntax is available.
-Specify all labels to be projected as a list of strings.
-
-.Short-hand List-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`s.
-----
-[<neo4j-label>, ..., <neo4j-label>]
-----
-
-.Example outline:
-----
-CALL gds.graph.project(
-  /* graph name */,
-  ['MyLabel', 'MySecondLabel', 'AnotherLabel']
-  /* relationship projection */
-)
-----
-
-NOTE: We also support `*` as the neo4j-label to load all nodes. However, this does not keep the label information. To retain the label, we recommend using `CALL db.labels() YIELD label WITH collect(label) AS allLabels`.
-
-
-==== Projecting labels with uniform node properties
-
-In order to project properties in conjunction with the node labels, the `nodeProperties` configuration parameter can be used.
-This is a shorthand syntax to the full map-based syntax described below.
-The node properties specified with the `nodeProperties` parameter will be applied to all node labels specified in the node projection.
-
-.Example outline:
-----
-CALL gds.graph.project(
-  /* graph name */,
-  ['MyLabel', 'MySecondLabel', 'AnotherLabel']
-  /* relationship projection */,
-  { nodeProperties: ['prop1', 'prop2] }
-)
-----
-
-
-==== Projecting multiple labels with name mapping and label-specific properties
-
-The full node projection syntax uses a map.
-The keys in the map are the projected labels.
-Each value specifies the projection for that node label.
-The following syntax description and table details the format and expected values.
-Note that it is possible to project node labels to a label in the GDS graph with a different name.
-
-The `properties` key can take a similar set of syntax variants as the node projection itself: a single string for a single property, a list of strings for multiple properties, or a map for the full syntax expressiveness.
-
-.Extended Map-syntax for `nodeProjection`.
 ----
 {
-    <projected-label>: {
-        label: <neo4j-label>,
-        properties: <neo4j-property-key>
+    <projected_label_1>: {                       <1>
+        label: <label_1>,                        <2>
+        properties: <prop_1>                     <3>
     },
-    <projected-label>: {
-        label: <neo4j-label>,
-        properties: [<neo4j-property-key>, <neo4j-property-key>, ...]
+    <projected_label_2>: {
+        label: <label_2>,
+        properties: [<prop_1>, <prop_2>, ...]    <3>
     },
-    ...
-    <projected-label>: {
-        label: <neo4j-label>,
-        properties: {
-            <projected-property-key>: {
-                property: <neo4j-property-key>,
-                defaultValue: <fallback-value>
+    <projected_label_3>: {
+        label: <label_3>,
+        properties: {                            <3>
+            <projected_prop_1>: {                <4>
+                property: <prop_1>,              <5>
+                defaultValue: <default_1>        <6>
+            },
+            <projected_prop_2>: {
+                property: <prop_2>,
+                defaultValue: <default_2>
             },
             ...
-            <projected-property-key>: {
-                property: <neo4j-property-key>,
-                defaultValue: <fallback-value>
-            }
         }
-    }
+    },
+    ...
 }
 ----
+<1> Node label to create in the projected graph. It can be the same as the corresponding Neo4j node label.
+<2> Source Neo4j node label as a string. Default: same as the projected label (`<projected_label_1>` here).
+<3> Node property projection, specified as a single Neo4j node property, a list of Neo4j node properties, or a projection map. Default: empty map.
+<4> Node property to create in the projected graph. It can be the same as the corresponding Neo4j node property.
+<5> Source Neo4j node property as a string. Default: same as the projected property name (`<projected_prop_1>` here).
+<6> Default value if the property is not defined for a node. Default: a xref:management-ops/graph-creation/index.adoc#node-properties-supported[fallback value] depending on the property type.
 
-[[node-projection-syntax-configuration]]
-.Node Projection fields
-[opts="header",cols="1,1,1,2,4"]
-|===
-| Name                     | Type                               | Optional | Default                  | Description
-| <projected-label>        | String                             |  no      | n/a                      | The node label in the projected graph.
-| label                    | String                             |  yes     | `projected-label`        | The node label in the Neo4j graph. If not set, uses the `projected-label`.
-| properties               | Map, List or String                |  yes     | {}                       | The projected node properties for the specified `projected-label`.
-| <projected-property-key> | String                             |  no      | n/a                      | The key for the node property in the projected graph.
-| property                 | String                             |  yes     | `projected-property-key` | The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
-.4+^.^| defaultValue       | Float                        .4+^.^|  yes     | `Double.NaN`          .4+| The default value if the property is not defined for a node.
-|Float[]   | null
-|Integer   |`Integer.MIN_VALUE`
-|Integer[] | null
-|===
+==== Notes
+
+* When specified as a string or a list, the projection does not include any node properties.
+
+* The wildcard form does not retain the labels on the projected nodes.
+Node labels are useful with algorithms that fully support xref:introduction.adoc#introduction-algorithms-traits[heterogeneous nodes].
+The <<all-labels-example>> example shows how to retain all the labels for these cases.
+
+* All nodes with _any_ of the specified node labels are projected into the GDS graph.
+
+* All specified node labels and properties must exist in the database.
+You can use the https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[`db.createProperty()`] procedure to create a new node property without modifying the database.
 
 
 [[relationship-projection-syntax]]
-=== Relationship Projection
+=== Relationship projection
 
-The relationship projection specifies which relationships from the database should be projected into the in-memory GDS graph.
-The projection is based around relationship types, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
+A Relationship projection can be specified using any of the following forms:
 
-All relationships with any of the specified relationship types and with endpoint nodes projected in the <<node-projection-syntax, node projection>> will be projected to the GDS graph.
-The `validateRelationships` <<graph-project-native-syntax-configuration, configuration parameter>> controls whether to fail or silently discard relationships with endpoint nodes not projected by the node projection.
-If the relationships have values for the specified properties, these will be projected as well.
-If a relationship does not have a value for a specified property, a default value will be used.
-Read more about default values <<relationship-projection-syntax-configuration, below>>.
+* A single string (either a Neo4j relationship type `<type>` or a wildcard `*`)
+* A list of Neo4j relationship types (`[<type_1>, <type_2>, <type_3>]`)
+* A projection map, where each key is a relationship type in the projected graph and each value is itself a map
 
-All specified relationship types and properties must exist in the database.
-To project using a non-existing relationship type, it is possible to create a relationship without any relationships using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createrelationshiptype[the db.createRelationshipType() procedure].
-Similarly, to project a non-existing property, it is possible to create a relationship property without modifying the database, using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[the db.createProperty() procedure].
+The projection map is specified as follows:
 
-
-==== Projecting a single relationship type
-
-The simplest syntax is to specify a single relationship type as a string value.
-
-.Short-hand String-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`.
-----
-<neo4j-type>
-----
-
-.Example outline:
-----
-CALL gds.graph.project(
-  /* graph name */,
-  /* node projection */,
-  'MY_TYPE'
-)
-----
-
-
-==== Projecting multiple relationship types
-
-To project more than one relationship type, the list syntax is available.
-Specify all relationship types to be projected as a list of strings.
-
-.Short-hand List-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`s.
-----
-[<neo4j-type>, ..., <neo4j-type>]
-----
-
-.Example outline:
-----
-CALL gds.graph.project(
-  /* graph name */,
-  /* node projection */,
-  ['MY_TYPE', 'MY_SECOND_TYPE', 'ANOTHER_TYPE']
-)
-----
-
-NOTE: We also support `*` as the neo4j-type to load all relationships. However, this does not keep the type information. To retain the type, we recommend using `CALL db.relationshipTypes() YIELD relationshipType WITH collect(relationshipType) AS allTypes`.
-
-
-==== Projecting relationship types with uniform relationship properties
-
-In order to project properties in conjunction with the relationship types, the `relationshipProperties` configuration parameter can be used.
-This is a shorthand syntax to the full map-based syntax described below.
-The relationship properties specified with the `relationshipProperties` parameter will be applied to all relationship types specified in the relationship projection.
-
-.Example outline:
-----
-CALL gds.graph.project(
-  /* graph name */,
-  /* node projection */,
-  ['MY_TYPE', 'MY_SECOND_TYPE', 'ANOTHER_TYPE'],
-  { relationshipProperties: ['prop1', 'prop2] }
-)
-----
-
-
-==== Projecting multiple relationship types with name mapping and type-specific properties
-
-The full relationship projection syntax uses a map.
-The keys in the map are the projected relationship types.
-Each value specifies the projection for that relationship type.
-The following syntax description and table details the format and expected values.
-Note that it is possible to project relationship types to a type in the GDS graph with a different name.
-
-The `properties` key can take a similar set of syntax variants as the relationship projection itself: a single string for a single property, a list of strings for multiple properties, or a map for the full syntax expressiveness.
-
-.Extended Map-syntax for `relationshipProjection`.
 ----
 {
-    <projected-type>: {
-        type: <neo4j-type>,
-        orientation: <orientation>,
-        aggregation: <aggregation-type>,
-        properties: <neo4j-property-key>
+    <projected_type_1>: {                        <1>
+        type: <type_1>,                          <2>
+        orientation: <orientation_1>,            <3>
+        aggregation: <aggregation_1>,            <4>
+        properties: <prop_1>                     <5>
     },
-    <projected-type>: {
-        type: <neo4j-type>,
-        orientation: <orientation>,
-        aggregation: <aggregation-type>,
-        properties: [<neo4j-property-key>, <neo4j-property-key>]
+    <projected_type_2>: {
+        type: <type_2>,
+        orientation: <orientation_2>,
+        aggregation: <aggregation_2>,
+        properties: [<prop_1>, <prop_2>, ...]    <5>
     },
-    ...
-    <projected-type>: {
-        type: <neo4j-type>,
-        orientation: <orientation>,
-        aggregation: <aggregation-type>,
-        properties: {
-            <projected-property-key>: {
-                property: <neo4j-property-key>,
-                defaultValue: <fallback-value>,
-                aggregation: <aggregation-type>
+    <projected_type_3>: {
+        type: <type_3>,
+        orientation: <orientation_3>,
+        aggregation: <aggregation_3>,
+        properties: {                            <5>
+            <projected_prop_1>: {                <6>
+                property: <prop_1>,              <7>
+                defaultValue: <default_1>,       <8>
+                aggregation: <aggregation_1>     <9>
+            },
+            <projected_prop_2>: {
+                property: <prop_2>,
+                defaultValue: <default_2>,
+                aggregation: <aggregation_2>
             },
             ...
-            <projected-property-key>: {
-                property: <neo4j-property-key>,
-                defaultValue: <fallback-value>,
-                aggregation: <aggregation-type>
-            }
         }
-    }
+    },
+    ...
 }
 ----
+<1> Relationship type to create in the projected graph. It can be the same as the corresponding Neo4j relationship type.
+<2> Source Neo4j relationship type as a string. Default: same as the projected type (`<projected_type_1>` here).
+<3> Relationship orientation in the projected graph. Allowed values: `NATURAL` (default, same as orientation in the Neo4j graph), `UNDIRECTED` (makes all relationships undirected), `REVERSE` (reverses the orientation for all relationships).
+<4> Handling of multiple instances of _all_ the relationship properties associated to the relationship. Allowed values: `NONE` (default), `SINGLE`, `COUNT`, `MIN`, `MAX`, `SUM`.
+<5> Relationship property projection, specified as a single Neo4j relationship property, a list of Neo4j relationship properties, or a projection map. Default: empty map.
+<6> Relationship property to create in the projected graph. It can be the same as the corresponding Neo4j relationship property.
+<7> Source Neo4j relationship property as a string. Default: same as the projected property (`<projected_prop_1>` here).
+<8> Default value if the property is not defined for a relationship. Default: `Double.NaN`.
+<9> Handling of multiple instances of a specific relationship property associated to the relationship. Allowed values: `NONE` (default), `SINGLE`, `COUNT`, `MIN`, `MAX`, `SUM`.
 
-[[relationship-projection-syntax-configuration]]
-.Relationship Projection fields
-[opts="header",cols="2,1,1,3,4"]
-|===
-| Name                      | Type                | Optional | Default                  | Description
-| <projected-type>          | String              |  no      | n/a                      | The name of the relationship type in the projected graph.
-| type                      | String              |  yes     | `projected-type`         | The relationship type in the Neo4j graph.
-| orientation               | String              |  yes     |  `NATURAL`               | Denotes how Neo4j relationships are represented in the projected graph. Allowed values are `NATURAL`, `UNDIRECTED`, `REVERSE`.
-| aggregation               | String              |  no      |  `NONE`                  | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`.
-| properties                | Map, List or String |  yes     |  {}                      | The projected relationship properties for the specified `projected-type`.
-| <projected-property-key>  | String              |  no      | n/a                      | The key for the relationship property in the projected graph.
-| property                  | String              |  yes     | `projected-property-key` | The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
-| defaultValue              | Float or Integer    |  yes     |  `Double.NaN`            | The default value if the property is not defined for a node.
-|===
+==== Notes
+
+* When specified as a string or a list, the projection does not include any relationship properties.
+
+* The wildcard form does not retain the types on the projected relationships.
+Relationship types are useful with algorithms that fully support xref:introduction.adoc#introduction-algorithms-traits[heterogeneous relationships].
+The <<all-labels-example>> example shows how to retain all the relationships for these cases.
+
+* All relationships with any of the specified relationship types, and whose endpoint nodes are included in the <<node-projection-syntax, node projection>>, are projected into the GDS graph.
+The `validateRelationships` <<graph-project-native-syntax-configuration, configuration parameter>> controls whether to fail or silently discard relationships whose endpoint nodes are not included in the node projection.
+
+* All specified relationship types and properties must exist in the database.
+You can use the https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[`db.createProperty()`] procedure to create a new relationship property without modifying the database.
 
 
 [[graph-project-examples]]
@@ -810,3 +668,38 @@ org.neo4j.graphdb.QueryExecutionException: Failed to invoke procedure `gds.graph
 
 We can see that the above query resulted in an exception being thrown.
 The exception message will provide information about the specific node id that was missing, which will help debugging underlying problems.
+
+
+[[all-labels-example]]
+=== Graph with all the node labels
+
+You can use the wildcard operator `*` to select all the node labels for the projection.
+However, this does not retain the label information on the projected nodes.
+
+Use the `db.labels()` instead to retrieve the list of all the labels, and use it as a value for the `nodeProjection` parameter as in the following example:
+
+[role=query-example]
+--
+.Project all the labels:
+[source, cypher, role=noplay]
+----
+CALL db.labels() YIELD label
+WITH collect(label) AS allLabels
+CALL gds.graph.project(
+  'allLabelsGraph',
+  allLabels,
+  ['KNOWS', 'READ']
+)
+YIELD graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+RETURN *
+----
+
+.Results
+[opts="header", cols="1,1m,3m,1m,1m"]
+|===
+| allLabels          | graphName        | nodeProjection                                                           | nodes  | rels
+| [Person, Book] | "allLabelsGraph" | {Book={label=Book, properties={}}, Person={label=Person, properties={}}} | 5      | 6
+|===
+--
+
+In a similar fashion, you can select all the relationship types for the projection by using `db.relationshipTypes()` as a value for the `relationshipProjection` parameter in place of `['KNOWS', 'READ']`.
