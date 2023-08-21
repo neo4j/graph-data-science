@@ -103,16 +103,4 @@ class PropertyMappingTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Property key must not be empty");
     }
-
-    @Test
-    void failsOnEmptyPropertyKey() {
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class, () -> PropertyMapping.fromObject("", Map.of(
-                "neoKey", 42
-            )));
-        assertThat(
-            ex.getMessage(),
-            containsString("Property key must not be empty")
-        );
-    }
 }
