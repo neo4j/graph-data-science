@@ -23,6 +23,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -47,9 +48,17 @@ public class UserLogProc {
     public GraphDataScienceProcedureFacade facade;
 
     @SuppressWarnings("unused")
-    @Procedure("gds.alpha.userLog")
+    @Procedure("gds.userLog")
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> queryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
         return facade.catalog().queryUserLog(jobId);
+    }
+
+    @Procedure(value = "gds.alpha.userLog", deprecatedBy = "gds.userLog")
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Description("Log warnings and hints for currently running tasks.")
+    public Stream<UserLogEntry> alphaQueryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
+        return queryUserLog(jobId);
     }
 }

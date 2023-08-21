@@ -122,7 +122,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 Hints and warnings can also be tracked through the GDS library and be accessed via Cypher queries.
 The GDS library keeps track for each user their 100 most recent tasks that have generated hints or warnings and stores them in memory.
-When a user calls procedure `gds.alpha.userLog`, their respective list of generated hints and warnings is returned.
+When a user calls procedure `gds.userLog`, their respective list of generated hints and warnings is returned.
 
 
 [[userlog-syntax]]
@@ -133,7 +133,7 @@ When a user calls procedure `gds.alpha.userLog`, their respective list of genera
 .Getting the hints and warnings for a user:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.userLog()
+CALL gds.userLog()
 YIELD
   taskName,
   timeStarted,
@@ -159,7 +159,7 @@ This generates a warning which can be accessed via the user log as seen below.
 
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.userLog()
+CALL gds.userLog()
 YIELD
   taskName,
   message
