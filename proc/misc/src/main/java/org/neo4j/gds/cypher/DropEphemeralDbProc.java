@@ -68,7 +68,7 @@ public class DropEphemeralDbProc extends BaseProc {
     @Procedure(name = "gds.alpha.drop.cypherdb", mode = WRITE, deprecatedBy = "gds.ephemeral.database.drop")
     @Description(DESCRIPTION)
     @Internal
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public Stream<DropEphemeralDbResult> dropDb(
         @Name(value = "dbName") String dbName
     ) {
