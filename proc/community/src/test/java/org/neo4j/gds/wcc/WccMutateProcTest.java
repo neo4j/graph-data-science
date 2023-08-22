@@ -48,6 +48,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -63,13 +64,11 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.services.DatabaseIdService;
-import org.neo4j.gds.services.UserServices;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
@@ -339,17 +338,18 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService, memoryUsageValidator), logMock
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, Neo4jProxy.testLog()), logMock
         );
 
         applyOnProcedure(procedure -> {
             procedure.facade = new CommunityProcedureFacade(
                 algorithmsBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
-                new UserServices(),
-                new DatabaseIdService(),
-                db,
-                SecurityContext.AUTH_DISABLED
+                DatabaseId.of(db.databaseName()),
+                new User(getUsername(), false)
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -449,12 +449,17 @@ class WccMutateProcTest extends BaseProcTest {
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService, memoryUsageValidator), logMock
+                new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    memoryUsageValidator, Neo4jProxy.testLog()), logMock
             );
 
             procedure.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
-                new UserServices(), new DatabaseIdService(), db, SecurityContext.AUTH_DISABLED);
+                DatabaseId.of(db.databaseName()),
+                new User(getUsername(), false)
+            );
                 ProcedureMethodHelper.mutateMethods(procedure)
                     .forEach(mutateMethod -> {
                         Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
@@ -504,11 +509,16 @@ class WccMutateProcTest extends BaseProcTest {
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService, memoryUsageValidator), logMock
+                new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    memoryUsageValidator, null), logMock
             );
             proc.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
-                new UserServices(), new DatabaseIdService(), db, SecurityContext.AUTH_DISABLED);
+                DatabaseId.of(db.databaseName()),
+                new User(getUsername(), false)
+            );
 
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
 
@@ -559,7 +569,10 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService, memoryUsageValidator), logMock
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, Neo4jProxy.testLog()), logMock
         );
 
         applyOnProcedure(procedure ->
@@ -567,7 +580,9 @@ class WccMutateProcTest extends BaseProcTest {
                 .forEach(mutateMethod -> {
                     procedure.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
                         ProcedureReturnColumns.EMPTY,
-                        new UserServices(), new DatabaseIdService(), db, SecurityContext.AUTH_DISABLED);
+                        DatabaseId.of(db.databaseName()),
+                        new User(getUsername(), false)
+                    );
                     Map<String, Object> config = new HashMap<>(additionalConfig);
                     config.put("mutateProperty", MUTATE_PROPERTY);
                     try {

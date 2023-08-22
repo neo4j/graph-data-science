@@ -20,8 +20,8 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.ComputationResultForStream;
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -54,15 +54,13 @@ public class CommunityAlgorithmsBusinessFacade {
         String graphName,
         WccBaseConfig config,
         User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
+        DatabaseId databaseId
     ) {
         var wccResult = this.communityAlgorithmsFacade.wcc(
             graphName,
             config,
             user,
-            databaseId,
-            progressTracker
+            databaseId
         );
 
         return ComputationResultForStream.of(
@@ -91,8 +89,7 @@ public class CommunityAlgorithmsBusinessFacade {
                 graphName,
                 config,
                 user,
-                databaseId,
-                progressTracker
+                databaseId
             );
         } catch (Exception e) {
             log.warn("Computation failed", e);
@@ -150,10 +147,14 @@ public class CommunityAlgorithmsBusinessFacade {
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
+        DatabaseId databaseId
     ) {
-        return this.communityAlgorithmsFacade.kCore(graphName, config, user, databaseId, progressTracker);
+        return this.communityAlgorithmsFacade.kCore(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
     }
 
 }

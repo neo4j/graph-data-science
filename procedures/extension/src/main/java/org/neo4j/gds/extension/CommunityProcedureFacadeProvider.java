@@ -21,13 +21,15 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.procedures.TaskRegistryFactoryService;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -35,22 +37,31 @@ import org.neo4j.kernel.api.procedure.Context;
 public class CommunityProcedureFacadeProvider implements ThrowingFunction<Context, CommunityProcedureFacade, ProcedureException> {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final UserLogServices userLogServices;
     private final UserServices usernameService;
     private final DatabaseIdService databaseIdService;
     private final boolean useMaxMemoryEstimation;
+    private final org.neo4j.logging.Log neo4jLog;
 
     CommunityProcedureFacadeProvider(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
+        TaskRegistryFactoryService taskRegistryFactoryService,
+        UserLogServices userLogServices,
         UserServices usernameService,
         DatabaseIdService databaseIdService,
-        boolean useMaxMemoryEstimation
+        boolean useMaxMemoryEstimation,
+        org.neo4j.logging.Log neo4jLog
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.userLogServices = userLogServices;
         this.usernameService = usernameService;
         this.databaseIdService = databaseIdService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
+        this.neo4jLog = neo4jLog;
     }
 
     @Override
@@ -61,10 +72,22 @@ public class CommunityProcedureFacadeProvider implements ThrowingFunction<Contex
             useMaxMemoryEstimation
         );
 
+        var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+        var user = usernameService.getUser(context.securityContext());
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
+            databaseId,
+            user
+        );
+
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
         // algorithm facade
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
             graphStoreCatalogService,
-            algorithmMemoryValidationService
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            algorithmMemoryValidationService,
+            neo4jLog
         );
 
         // business facade
@@ -79,10 +102,8 @@ public class CommunityProcedureFacadeProvider implements ThrowingFunction<Contex
         return new CommunityProcedureFacade(
             algorithmsBusinessFacade,
             procedureReturnColumns,
-            usernameService,
-            databaseIdService,
-            context.graphDatabaseAPI(),
-            context.securityContext()
+            databaseId,
+            user
         );
     }
 }

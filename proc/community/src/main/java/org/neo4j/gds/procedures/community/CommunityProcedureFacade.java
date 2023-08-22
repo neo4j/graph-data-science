@@ -27,13 +27,9 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
-import org.neo4j.gds.services.DatabaseIdService;
-import org.neo4j.gds.services.UserServices;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccMutateResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -41,27 +37,19 @@ import java.util.stream.Stream;
 public class CommunityProcedureFacade {
     private final CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final UserServices userServices;
-    private final DatabaseIdService databaseIdService;
-
-    private final GraphDatabaseService graphDatabaseService;
-
-    private final SecurityContext securityContext;
+    private final DatabaseId databaseId;
+    private final User user;
 
     public CommunityProcedureFacade(
         CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns,
-        UserServices userServices,
-        DatabaseIdService databaseIdService,
-        GraphDatabaseService graphDatabaseService,
-        SecurityContext securityContext
+        DatabaseId databaseId,
+        User user
     ) {
         this.algorithmsBusinessFacade = algorithmsBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.userServices = userServices;
-        this.databaseIdService = databaseIdService;
-        this.graphDatabaseService = graphDatabaseService;
-        this.securityContext = securityContext;
+        this.databaseId = databaseId;
+        this.user = user;
     }
 
     // WCC
@@ -79,9 +67,8 @@ public class CommunityProcedureFacade {
         var computationResult = algorithmsBusinessFacade.streamWcc(
             graphName,
             streamConfig,
-            user(),
-            databaseId(),
-            ProgressTracker.NULL_TRACKER
+            user,
+            databaseId
         );
 
         return WccComputationResultTransformer.toStreamResult(computationResult);
@@ -96,8 +83,8 @@ public class CommunityProcedureFacade {
         var computationResult = algorithmsBusinessFacade.mutateWcc(
             graphName,
             config,
-            user(),
-            databaseId(),
+            user,
+            databaseId,
             ProgressTracker.NULL_TRACKER,
             procedureReturnColumns.contains("componentCount"),
             procedureReturnColumns.contains("componentDistribution")
@@ -122,30 +109,12 @@ public class CommunityProcedureFacade {
         var computationResult = algorithmsBusinessFacade.kCore(
             graphName,
             streamConfig,
-            user(),
-            databaseId(),
-            ProgressTracker.NULL_TRACKER
+            user,
+            databaseId
         );
 
         return KCoreResultTransformer.toStreamResult(computationResult);
     }
 
     // K-Core Decomposition end
-
-    /**
-     * We need to obtain the database id at this point in time so that we can send it down stream to business logic.
-     * The database id is specific to the procedure call and/ or timing (note to self, figure out which it is).
-     */
-    private DatabaseId databaseId() {
-        return databaseIdService.getDatabaseId(graphDatabaseService);
-    }
-
-    /**
-     * The user here is request scoped, so we resolve it now and pass it down stream
-     *
-     * @return
-     */
-    private User user() {
-        return userServices.getUser(securityContext);
-    }
 }

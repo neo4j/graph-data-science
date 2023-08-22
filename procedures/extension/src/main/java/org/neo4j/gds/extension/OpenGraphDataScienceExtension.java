@@ -113,9 +113,12 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
             log,
             graphStoreCatalogService,
+            taskRegistryFactoryService,
+            userLogServices,
             usernameService,
             databaseIdService,
-            useMaxMemoryEstimation
+            useMaxMemoryEstimation,
+            Neo4jProxy.getUserLog(dependencies.logService(), getClass())
         );
 
         log.info("Registering GDS Community Algorithms Procedure Facade");

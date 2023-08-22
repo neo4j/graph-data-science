@@ -32,10 +32,12 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.logging.Log;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -43,22 +45,30 @@ import java.util.Optional;
 
 public class CommunityAlgorithmsFacade {
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final TaskRegistryFactory taskRegistryFactory;
+    private final UserLogRegistryFactory userLogRegistryFactory;
     private final AlgorithmMemoryValidationService memoryUsageValidator;
+    private final Log neo4jLog;
 
     public CommunityAlgorithmsFacade(
         GraphStoreCatalogService graphStoreCatalogService,
-        AlgorithmMemoryValidationService memoryUsageValidator
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        AlgorithmMemoryValidationService memoryUsageValidator,
+        Log neo4jLog
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.taskRegistryFactory = taskRegistryFactory;
+        this.userLogRegistryFactory = userLogRegistryFactory;
         this.memoryUsageValidator = memoryUsageValidator;
+        this.neo4jLog = neo4jLog;
     }
 
     <C extends WccBaseConfig> AlgorithmComputationResult<C, DisjointSetStruct> wcc(
         String graphName,
         C config,
         User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
+        DatabaseId databaseId
     ) {
         return run(
             graphName,
@@ -67,7 +77,8 @@ public class CommunityAlgorithmsFacade {
             new WccAlgorithmFactory<>(),
             user,
             databaseId,
-            progressTracker
+            taskRegistryFactory,
+            userLogRegistryFactory
         );
     }
 
@@ -75,8 +86,7 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
+        DatabaseId databaseId
     ) {
         return run(
             graphName,
@@ -85,7 +95,8 @@ public class CommunityAlgorithmsFacade {
             new KCoreDecompositionAlgorithmFactory<>(),
             user,
             databaseId,
-            progressTracker
+            taskRegistryFactory,
+            userLogRegistryFactory
         );
     }
 
@@ -96,7 +107,8 @@ public class CommunityAlgorithmsFacade {
         GraphAlgorithmFactory<A, C> algorithmFactory,
         User user,
         DatabaseId databaseId,
-        ProgressTracker progressTracker
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory
     ) {
         // TODO: Is this the best place to check for preconditions???
         PreconditionsProvider.preconditions().check();
@@ -132,7 +144,7 @@ public class CommunityAlgorithmsFacade {
             algorithmEstimator::memoryEstimation,
             graphStoreCatalogService.graphStoreCount()
         );
-        var algorithm = algorithmFactory.build(graph, config, progressTracker);
+        var algorithm = algorithmFactory.build(graph, config, neo4jLog, taskRegistryFactory, userLogRegistryFactory);
         var algorithmResult = algorithm.compute();
 
         return AlgorithmComputationResult.of(algorithmResult, graph, config, graphStore);
