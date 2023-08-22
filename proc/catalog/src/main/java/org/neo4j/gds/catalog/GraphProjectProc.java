@@ -79,6 +79,7 @@ public class GraphProjectProc {
         name = "gds.graph.project.cypher", mode = READ,
         deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
     )
+    @Deprecated
     @Description(PROJECT_DESCRIPTION)
     public Stream<GraphProjectCypherResult> projectCypher(
         @Name(value = "graphName") String graphName,
@@ -86,16 +87,31 @@ public class GraphProjectProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
+
         return facade.catalog().cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
     }
 
-    @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
+    @Procedure(
+        name = "gds.graph.project.cypher.estimate", mode = READ,
+        deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
+    )
     @Description(ESTIMATE_DESCRIPTION)
+    @Deprecated
+
     public Stream<MemoryEstimateResult> projectCypherEstimate(
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
+
         return facade.catalog().estimateCypherProject(nodeQuery, relationshipQuery, configuration);
     }
 
