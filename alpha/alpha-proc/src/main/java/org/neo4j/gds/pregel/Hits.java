@@ -39,7 +39,7 @@ import org.neo4j.gds.core.StringIdentifierValidations;
 import java.util.concurrent.atomic.DoubleAdder;
 
 @PregelProcedure(
-    name = "gds.alpha.hits",
+    name = "gds.hits",
     description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes"
 )
 public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {

@@ -33,6 +33,7 @@ class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             SpeakerListenerLPAWriteProc.class,
+            DeprecatedAlphaSpeakerListenerLPAWriteProc.class,
             GraphGenerateProc.class
         );
     }
@@ -44,6 +45,12 @@ class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
         assertThatExceptionOfType(QueryExecutionException.class)
             .isThrownBy(
                 () -> runQuery("CALL gds.alpha.sllpa.write('randomGraph', {writeProperty: 'm', maxIterations: 4, minAssociationStrength: 0.1})")
+            )
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("The provided graph does not support `write` execution mode.");
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(
+                () -> runQuery("CALL gds.sllpa.write('randomGraph', {writeProperty: 'm', maxIterations: 4, minAssociationStrength: 0.1})")
             )
             .withRootCauseInstanceOf(IllegalArgumentException.class)
             .withMessageContaining("The provided graph does not support `write` execution mode.");

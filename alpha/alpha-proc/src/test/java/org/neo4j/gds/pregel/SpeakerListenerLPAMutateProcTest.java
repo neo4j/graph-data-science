@@ -32,6 +32,7 @@ class SpeakerListenerLPAMutateProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             SpeakerListenerLPAMutateProc.class,
+            DeprecatedAlphaSpeakerListenerLPAMutateProc.class,
             GraphGenerateProc.class
         );
     }
@@ -42,6 +43,9 @@ class SpeakerListenerLPAMutateProcTest extends BaseProcTest {
 
         assertThatNoException().isThrownBy(
             () -> runQuery("CALL gds.alpha.sllpa.mutate('randomGraph', {mutateProperty: 'm', maxIterations: 4, minAssociationStrength: 0.1})")
+        );
+        assertThatNoException().isThrownBy(
+            () -> runQuery("CALL gds.sllpa.mutate('randomGraph', {mutateProperty: 'm', maxIterations: 4, minAssociationStrength: 0.1})")
         );
     }
 }

@@ -32,6 +32,7 @@ class SpeakerListenerLPAStreamProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             SpeakerListenerLPAStreamProc.class,
+            DeprecatedAlphaSpeakerListenerLPAStreamProc.class,
             GraphGenerateProc.class
         );
     }
@@ -42,6 +43,9 @@ class SpeakerListenerLPAStreamProcTest extends BaseProcTest {
 
         assertThatNoException().isThrownBy(
             () -> runQuery("CALL gds.alpha.sllpa.stream('randomGraph', {maxIterations: 4, minAssociationStrength: 0.1})")
+        );
+        assertThatNoException().isThrownBy(
+            () -> runQuery("CALL gds.sllpa.stream('randomGraph', {maxIterations: 4, minAssociationStrength: 0.1})")
         );
     }
 }
