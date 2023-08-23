@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.catalog;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphCatalogConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
@@ -178,6 +179,11 @@ public class GraphInfo {
                 sampleProcConfig.sampleAlgoConfig().outputFieldDenylist()
             );
             configuration.putAll(cleansedSampleAlgoConfig);
+        }
+
+        @Override
+        public void visit(GraphCatalogConfig catalogConfig) {
+            configuration = cleansed(catalogConfig.toMap(), catalogConfig.outputFieldDenylist());
         }
 
         private Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {
