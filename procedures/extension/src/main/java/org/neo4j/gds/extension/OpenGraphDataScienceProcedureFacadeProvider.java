@@ -47,7 +47,7 @@ import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.OpenGraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionService;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -61,7 +61,7 @@ import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunction<Context, OpenGraphDataScience, ProcedureException> {
+public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final DatabaseIdService databaseIdService;
@@ -86,10 +86,10 @@ public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunc
     }
 
     @Override
-    public OpenGraphDataScience apply(Context context) throws ProcedureException {
+    public GraphDataScience apply(Context context) {
         var graphStoreCatalogProcedureFacade = constructCatalogFacade(context);
 
-        return new OpenGraphDataScience(log, graphStoreCatalogProcedureFacade);
+        return new GraphDataScience(log, graphStoreCatalogProcedureFacade);
     }
 
     private CatalogFacade constructCatalogFacade(Context context) {

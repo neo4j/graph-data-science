@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.OpenGraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.catalog.StreamGraphPropertyResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamGraphPropertiesProc {
     @Context
-    public OpenGraphDataScience facade;
+    public GraphDataScience facade;
 
     @SuppressWarnings("unused")
     @Internal

@@ -34,7 +34,7 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
-import org.neo4j.gds.procedures.OpenGraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -45,7 +45,7 @@ import org.neo4j.logging.internal.LogService;
 
 /**
  * The single (eventually!) extension we provide for Neo4j.
- * We register a single component, @{@link org.neo4j.gds.procedures.OpenGraphDataScience},
+ * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScience},
  * that all GDS procedures can inject and use.
  */
 @SuppressWarnings("unused")
@@ -98,7 +98,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         log.info("Register GDS facade");
         dependencies.globalProcedures().registerComponent(
-            OpenGraphDataScience.class,
+            GraphDataScience.class,
             graphDataScienceFacadeProvider,
             true
         );

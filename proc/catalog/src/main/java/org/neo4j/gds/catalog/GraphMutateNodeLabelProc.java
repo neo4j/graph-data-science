@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
-import org.neo4j.gds.procedures.OpenGraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -34,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMutateNodeLabelProc {
     @Context
-    public OpenGraphDataScience facade;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.graph.nodeLabel.mutate", mode = READ)
     @Description("Mutates the in-memory graph with the given node Label.")

@@ -38,8 +38,6 @@ dependencies {
     api project(':proc-pipeline-catalog')
     api project(':proc-misc')
 
-    implementation project(':opengds-extension')
-
     // TEST DEPENDENCIES
 
     testCompileOnly project(':annotations')

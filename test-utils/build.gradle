@@ -29,7 +29,6 @@ dependencies {
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
     implementation project(':proc-common')
-    implementation project(':opengds-extension')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')

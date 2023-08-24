@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.OpenGraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,7 +32,7 @@ import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.EXISTS_DESCRI
 public class GraphExistsFunc {
     @SuppressWarnings("WeakerAccess")
     @Context
-    public OpenGraphDataScience facade;
+    public GraphDataScience facade;
 
     @SuppressWarnings("unused")
     @UserFunction("gds.graph.exists")

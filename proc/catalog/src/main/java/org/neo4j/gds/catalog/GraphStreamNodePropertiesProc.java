@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
-import org.neo4j.gds.procedures.OpenGraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc {
     @Context
-    public OpenGraphDataScience facade;
+    public GraphDataScience facade;
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
