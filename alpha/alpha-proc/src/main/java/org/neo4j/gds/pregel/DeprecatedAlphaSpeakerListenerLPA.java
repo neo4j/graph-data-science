@@ -23,6 +23,7 @@ import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 
 @PregelProcedure(
     name = "gds.alpha.sllpa",
-    description = "The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph."
+    description = "The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph.",
+    deprecatedBy = "gds.sllpa"
 )
 public class DeprecatedAlphaSpeakerListenerLPA extends SpeakerListenerLPA {}

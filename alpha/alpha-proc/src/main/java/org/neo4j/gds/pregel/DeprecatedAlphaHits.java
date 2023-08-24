@@ -23,6 +23,7 @@ import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 
 @PregelProcedure(
     name = "gds.alpha.hits",
-    description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes"
+    description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes",
+    deprecatedBy = "gds.hits"
 )
 public class DeprecatedAlphaHits extends Hits {}
