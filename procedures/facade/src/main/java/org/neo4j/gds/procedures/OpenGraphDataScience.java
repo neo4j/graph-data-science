@@ -22,11 +22,11 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 
-public class GraphDataScienceProcedureFacade {
+public class OpenGraphDataScience {
     private final Log log;
     private final CatalogFacade catalogFacade;
 
-    public GraphDataScienceProcedureFacade(Log log, CatalogFacade catalogFacade) {
+    public OpenGraphDataScience(Log log, CatalogFacade catalogFacade) {
         this.log = log;
         this.catalogFacade = catalogFacade;
     }

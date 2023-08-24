@@ -1,6 +1,6 @@
-# The GDS extension to Neo4j
+# The OpenGDS extension to Neo4j
 
-Here lives the entrypoint for GDS into Neo4j. We use the extension mechanism to register a [single injectable component](../facade/README.md) with Neo4j.
+Here lives the entrypoint for OpenGDS into Neo4j. We use the extension mechanism to register a [single injectable component](../facade/README.md) with Neo4j.
 
 This module initialises plugin state and constructs the facade. 
 

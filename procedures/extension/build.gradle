@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Procedure Extension'
+description = 'Neo4j Graph Data Science :: OpenGDS Extension'
 
 group = 'org.neo4j.gds'
 
@@ -29,7 +29,7 @@ dependencies {
     implementation project(':proc-catalog')
     implementation project(':proc-community')
     implementation project(':proc-sysinfo')
-    implementation project(':procedure-facade')
+    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':licensing')
     implementation project(':logging')

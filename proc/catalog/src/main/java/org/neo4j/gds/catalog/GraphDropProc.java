@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.OpenGraphDataScience;
 import org.neo4j.gds.procedures.catalog.GraphInfo;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -33,12 +33,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropProc {
     @Context
-    public GraphDataScienceProcedureFacade facade;
+    public OpenGraphDataScience facade;
 
     public GraphDropProc() {
     }
 
-    GraphDropProc(GraphDataScienceProcedureFacade facade) {
+    GraphDropProc(OpenGraphDataScience facade) {
         this.facade = facade;
     }
 

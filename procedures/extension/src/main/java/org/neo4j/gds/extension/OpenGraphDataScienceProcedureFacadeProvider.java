@@ -47,7 +47,7 @@ import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.OpenGraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionService;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -61,7 +61,7 @@ import org.neo4j.gds.services.UserServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction<Context, GraphDataScienceProcedureFacade, ProcedureException> {
+public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunction<Context, OpenGraphDataScience, ProcedureException> {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final DatabaseIdService databaseIdService;
@@ -69,7 +69,7 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
     private final UserLogServices userLogServices;
     private final UserServices userServices;
 
-    GraphDataScienceProcedureFacadeProvider(
+    OpenGraphDataScienceProcedureFacadeProvider(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         DatabaseIdService databaseIdService,
@@ -86,10 +86,10 @@ public class GraphDataScienceProcedureFacadeProvider implements ThrowingFunction
     }
 
     @Override
-    public GraphDataScienceProcedureFacade apply(Context context) throws ProcedureException {
+    public OpenGraphDataScience apply(Context context) throws ProcedureException {
         var graphStoreCatalogProcedureFacade = constructCatalogFacade(context);
 
-        return new GraphDataScienceProcedureFacade(log, graphStoreCatalogProcedureFacade);
+        return new OpenGraphDataScience(log, graphStoreCatalogProcedureFacade);
     }
 
     private CatalogFacade constructCatalogFacade(Context context) {

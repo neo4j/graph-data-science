@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.OpenGraphDataScience;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.catalog.GraphInfoWithHistogram;
 
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class GraphListProcTest {
     @Test
     void shouldDelegateToFacade() {
-        var facade = mock(GraphDataScienceProcedureFacade.class);
+        var facade = mock(OpenGraphDataScience.class);
         var procedure = new GraphListProc(facade);
 
         var expectedResultStream = Stream.of(mock(GraphInfoWithHistogram.class));

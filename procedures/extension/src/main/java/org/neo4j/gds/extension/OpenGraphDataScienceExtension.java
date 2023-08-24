@@ -34,7 +34,7 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
-import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.OpenGraphDataScience;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -45,13 +45,13 @@ import org.neo4j.logging.internal.LogService;
 
 /**
  * The single (eventually!) extension we provide for Neo4j.
- * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScienceProcedureFacade},
+ * We register a single component, @{@link org.neo4j.gds.procedures.OpenGraphDataScience},
  * that all GDS procedures can inject and use.
  */
 @SuppressWarnings("unused")
 @ServiceProvider
-public class GraphDataScienceProcedureFacadeExtension extends ExtensionFactory<GraphDataScienceProcedureFacadeExtension.Dependencies> {
-    public GraphDataScienceProcedureFacadeExtension() {
+public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDataScienceExtension.Dependencies> {
+    public OpenGraphDataScienceExtension() {
         super("gds.procedure_facade");
     }
 
@@ -87,7 +87,7 @@ public class GraphDataScienceProcedureFacadeExtension extends ExtensionFactory<G
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
         // We need a provider to slot into the Neo4j Procedure Framework mechanism
-        var graphDataScienceFacadeProvider = new GraphDataScienceProcedureFacadeProvider(
+        var graphDataScienceFacadeProvider = new OpenGraphDataScienceProcedureFacadeProvider(
             log,
             graphStoreCatalogService,
             databaseIdService,
@@ -98,7 +98,7 @@ public class GraphDataScienceProcedureFacadeExtension extends ExtensionFactory<G
 
         log.info("Register GDS facade");
         dependencies.globalProcedures().registerComponent(
-            GraphDataScienceProcedureFacade.class,
+            OpenGraphDataScience.class,
             graphDataScienceFacadeProvider,
             true
         );

@@ -223,11 +223,11 @@ project(':proc-test').projectDir = file('proc/test')
 include('proc-pipeline-catalog')
 project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 
-include('procedure-extension')
-project(':procedure-extension').projectDir = file('procedures/extension')
+include('opengds-extension')
+project(':opengds-extension').projectDir = file('procedures/extension')
 
-include('procedure-facade')
-project(':procedure-facade').projectDir = file('procedures/facade')
+include('opengds-procedure-facade')
+project(':opengds-procedure-facade').projectDir = file('procedures/facade')
 
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')

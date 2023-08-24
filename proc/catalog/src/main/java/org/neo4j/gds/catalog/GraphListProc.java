@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.OpenGraphDataScience;
 import org.neo4j.gds.procedures.catalog.GraphInfoWithHistogram;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -34,13 +34,13 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphListProc {
     @Context
-    public GraphDataScienceProcedureFacade facade;
+    public OpenGraphDataScience facade;
 
     public GraphListProc() {
 
     }
 
-    GraphListProc(GraphDataScienceProcedureFacade facade) {
+    GraphListProc(OpenGraphDataScience facade) {
         this.facade = facade;
     }
 

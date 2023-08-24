@@ -35,7 +35,7 @@ dependencies {
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
-    implementation project(':procedure-facade')
+    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')

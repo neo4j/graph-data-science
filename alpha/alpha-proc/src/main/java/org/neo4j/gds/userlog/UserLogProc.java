@@ -20,7 +20,7 @@
 package org.neo4j.gds.userlog;
 
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
-import org.neo4j.gds.procedures.GraphDataScienceProcedureFacade;
+import org.neo4j.gds.procedures.OpenGraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -39,13 +39,13 @@ public class UserLogProc {
     /**
      * For tests
      */
-    UserLogProc(GraphDataScienceProcedureFacade facade) {
+    UserLogProc(OpenGraphDataScience facade) {
         this.facade = facade;
     }
 
     @SuppressWarnings("WeakerAccess")
     @Context
-    public GraphDataScienceProcedureFacade facade;
+    public OpenGraphDataScience facade;
 
     @SuppressWarnings("unused")
     @Procedure("gds.userLog")
