@@ -134,7 +134,7 @@ class SpecificationGeneratorTest {
     @Test
     void shouldGenerateInverseIndexValidationOverride() {
         var typeNames = new TypeNames("gds.test", "Bar", TypeName.get(PregelProcedureConfig.class));
-        var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
+        var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty(), Optional.empty());
         var methodSpec = procedureGenerator.inverseIndexValidationOverride();
         assertThat(methodSpec.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +

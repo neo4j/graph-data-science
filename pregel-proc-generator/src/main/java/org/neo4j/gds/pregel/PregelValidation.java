@@ -93,6 +93,7 @@ final class PregelValidation {
         var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
         var maybeDescription = Optional.of(procedure.description()).filter(not(String::isBlank));
+        var maybeDeprecatedBy = Optional.of(procedure.deprecatedBy()).filter(not(String::isBlank));
 
         return Optional.of(ImmutableSpec.of(
             pregelElement,
@@ -102,6 +103,7 @@ final class PregelValidation {
             procedure.name(),
             procedure.modes(),
             maybeDescription,
+            maybeDeprecatedBy,
             requiresInverseIndex(pregelElement)
         ));
     }
@@ -237,6 +239,8 @@ final class PregelValidation {
         GDSMode[] procedureModes();
 
         Optional<String> description();
+
+        Optional<String> deprecatedBy();
 
         boolean requiresInverseIndex();
     }

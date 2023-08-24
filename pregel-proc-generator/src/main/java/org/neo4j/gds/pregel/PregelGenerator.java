@@ -61,7 +61,7 @@ class PregelGenerator {
         typeSpecs.add(withOriginatingElement(algorithmFactorySpec, originatingElement));
 
         var specificationGenerator = new SpecificationGenerator(typeNames, pregelSpec.procedureName(), pregelSpec.description());
-        var procedureGenerator = new ProcedureGenerator(typeNames, pregelSpec.procedureName(), pregelSpec.description());
+        var procedureGenerator = new ProcedureGenerator(typeNames, pregelSpec.procedureName(), pregelSpec.description(), pregelSpec.deprecatedBy());
 
         var requiresInverseIndex = pregelSpec.requiresInverseIndex();
         for (var mode : pregelSpec.procedureModes()) {
