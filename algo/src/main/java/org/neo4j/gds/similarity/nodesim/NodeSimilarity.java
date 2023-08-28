@@ -123,6 +123,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     @Override
     public NodeSimilarityResult compute() {
         progressTracker.beginSubTask();
+
+        prepare();
+
         if (config.computeToStream()) {
             var computeToStream = computeToStream();
             progressTracker.endSubTask();
@@ -140,9 +143,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
     }
 
-    public Stream<SimilarityResult> computeToStream() {
+    private Stream<SimilarityResult> computeToStream() {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
-        prepare();
         terminationFlag.assertRunning();
 
         // Compute similarities
@@ -159,12 +161,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
     }
 
-    public SimilarityGraphResult computeToGraph() {
+    private SimilarityGraphResult computeToGraph() {
         Graph similarityGraph;
         boolean isTopKGraph = false;
 
         if (config.hasTopK() && !config.hasTopN()) {
-            prepare();
             terminationFlag.assertRunning();
 
             TopKMap topKMap = config.isParallel()

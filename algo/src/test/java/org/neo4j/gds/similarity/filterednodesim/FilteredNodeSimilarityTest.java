@@ -84,14 +84,16 @@ class FilteredNodeSimilarityTest {
 
         // no results for nodes that are not specified in the node filter -- nice
         var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
         var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
@@ -114,14 +116,16 @@ class FilteredNodeSimilarityTest {
 
         // no results for nodes that are not specified in the node filter -- nice
         var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
         var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
@@ -146,14 +150,16 @@ class FilteredNodeSimilarityTest {
 
         // no results for nodes that are not specified in the node filter -- nice
         var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node1)))
             .count();
         assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
 
         // nodes outside of the node filter are not present as target nodes either -- not nice
         var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .filter(res -> !sourceNodeFilter.contains(graph.toOriginalNodeId(res.node2)))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);

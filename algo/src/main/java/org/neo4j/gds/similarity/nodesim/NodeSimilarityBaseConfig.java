@@ -26,6 +26,7 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@Configuration
 public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     String TOP_K_KEY = "topK";
