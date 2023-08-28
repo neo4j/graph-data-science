@@ -143,7 +143,10 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
     @SuppressWarnings("immutables:subtype")
     public interface HitsConfig extends PregelProcedureConfig {
 
-        int hitsIterations();
+        @Value.Default
+        default int hitsIterations() {
+            return 20;
+        }
 
         @Override
         @Value.Derived
