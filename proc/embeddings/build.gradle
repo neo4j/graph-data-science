@@ -46,4 +46,6 @@ dependencies {
     testImplementation project(':licensing')
     testImplementation project(':open-licensing')
     testImplementation project(':test-utils')
+
+    testImplementation project(':opengds-extension')
 }

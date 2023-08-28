@@ -35,6 +35,8 @@ dependencies {
     testImplementation project(':ml-algo')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
+
+    testImplementation project(':opengds-extension')
 }
 
 tasks.register('unpackDocs', Copy) {

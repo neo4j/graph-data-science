@@ -53,4 +53,6 @@ dependencies {
     testImplementation project(':proc-community')
 
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+
+    testImplementation project(':opengds-extension')
 }

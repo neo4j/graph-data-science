@@ -45,4 +45,6 @@ dependencies {
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     testCompileOnly group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
+    testImplementation project(':opengds-extension')
 }
