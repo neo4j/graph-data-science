@@ -50,4 +50,6 @@ dependencies {
     testImplementation project(':executor')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
+
+    testImplementation project(':opengds-extension')
 }

@@ -41,4 +41,6 @@ dependencies {
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')
     testImplementation project(':proc-test')
+
+    testImplementation project(':opengds-extension')
 }

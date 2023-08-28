@@ -40,4 +40,6 @@ dependencies {
     testImplementation project(':open-licensing')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
+
+    testImplementation project(':opengds-extension')
 }
