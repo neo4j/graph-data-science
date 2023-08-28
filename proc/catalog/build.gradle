@@ -62,4 +62,5 @@ dependencies {
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     testImplementation group: 'org.mockito', name:'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
 
+    testImplementation project(':opengds-extension')
 }

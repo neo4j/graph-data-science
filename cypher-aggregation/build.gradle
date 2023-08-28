@@ -44,4 +44,6 @@ dependencies {
     testImplementation project(':proc-community')
 
     testImplementation group: 'org.neo4j',  name: 'neo4j-cypher-dsl',  version: ver.'cypher-dsl'
+
+    testImplementation project(':opengds-extension')
 }
