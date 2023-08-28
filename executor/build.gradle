@@ -49,4 +49,6 @@ dependencies {
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+
+    testImplementation project(':opengds-extension')
 }
