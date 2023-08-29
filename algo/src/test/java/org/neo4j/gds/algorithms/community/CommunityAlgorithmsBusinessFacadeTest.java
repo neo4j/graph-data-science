@@ -25,8 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -86,18 +89,23 @@ class CommunityAlgorithmsBusinessFacadeTest {
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
 
             var config = mock(WccBaseConfig.class);
+            when(config.concurrency()).thenReturn(4);
             var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-                graphStoreCatalogServiceMock,
-                mock(AlgorithmMemoryValidationService.class)
+                new CommunityAlgorithmsFacade(
+                    graphStoreCatalogServiceMock,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    mock(AlgorithmMemoryValidationService.class),
+                    Neo4jProxy.testLog()
+                ), null
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc(
+            var wccComputationResult = algorithmsBusinessFacade.streamWcc(
                 "meh",
                 config,
                 null,
-                null,
-                ProgressTracker.NULL_TRACKER
+                null
             );
 
             //then
@@ -109,7 +117,7 @@ class CommunityAlgorithmsBusinessFacadeTest {
                 });
             assertThat(wccComputationResult.graph()).isSameAs(graph);
             assertThat(wccComputationResult.graphStore()).isSameAs(graphStore);
-            assertThat(wccComputationResult.config()).isSameAs(config);
+            assertThat(wccComputationResult.configuration()).isSameAs(config);
         }
 
         @Test
@@ -121,10 +129,15 @@ class CommunityAlgorithmsBusinessFacadeTest {
             doReturn(Pair.of(graphMock, mock(GraphStore.class)))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
-            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(graphStoreCatalogServiceMock, null);
+            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+                new CommunityAlgorithmsFacade(graphStoreCatalogServiceMock,
+                    mock(TaskRegistryFactory.class),
+                    mock(UserLogRegistryFactory.class),
+                    null, null), null
+            );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null, null);
+            var wccComputationResult = algorithmsBusinessFacade.streamWcc("meh", mock(WccBaseConfig.class), null, null);
 
             //then
             assertThat(wccComputationResult.result()).isEmpty();

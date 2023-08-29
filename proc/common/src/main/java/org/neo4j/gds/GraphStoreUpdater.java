@@ -72,7 +72,7 @@ public final class GraphStoreUpdater {
                 .stream()
                 .map(nodeProperty -> ImmutableNodeProperty.of(
                     nodeProperty.propertyKey(),
-                    new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
+                    FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
                         nodeProperty.properties(),
                         filteredGraph
                     )

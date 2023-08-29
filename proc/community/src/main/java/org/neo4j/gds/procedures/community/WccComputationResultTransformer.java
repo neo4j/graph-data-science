@@ -20,19 +20,14 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.GraphStoreUpdater;
-import org.neo4j.gds.algorithms.ComputationResult;
+import org.neo4j.gds.algorithms.ComputationResultForStream;
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMutateResult;
 
-import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -40,12 +35,12 @@ final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
+    static Stream<WccStreamResult> toStreamResult(ComputationResultForStream<WccBaseConfig, DisjointSetStruct> computationResult) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
 
             var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                computationResult.config(),
+                computationResult.configuration(),
                 wccResult.asNodeProperties()
             );
 
@@ -60,54 +55,16 @@ final class WccComputationResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
-    // TODO: This might be shared between the clients. Think of a better placement for this transformation...
-    static WccMutateResult toMutateResult(
-        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult,
-        MutateNodePropertyConfig mutateConfig
-    ) {
-
-        var config = computationResult.config();
-
-        var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-            config,
-            mutateConfig.mutateProperty(),
-            computationResult.result()
-                .map(DisjointSetStruct::asNodeProperties)
-                .orElse(EmptyLongNodePropertyValues.INSTANCE),
-            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
+    static WccMutateResult toMutateResult(NodePropertyMutateResult<WccSpecificFields> computationResult) {
+        return new WccMutateResult(
+            computationResult.algorithmSpecificFields().componentCount(),
+            computationResult.algorithmSpecificFields().componentDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.mutateMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.configuration().toMap()
         );
-
-        var nodeProperties = List.of(
-            NodeProperty.of(
-                mutateConfig.mutateProperty(),
-                nodePropertyValues
-            ));
-
-        var resultBuilder = resultBuilder(computationResult);
-
-        // Go and mutate the graph store...
-        GraphStoreUpdater.updateGraphStore(
-            computationResult.graph(),
-            computationResult.graphStore(),
-            resultBuilder,
-            mutateConfig,
-            null,
-            nodeProperties
-        );
-
-        return resultBuilder.build();
-    }
-
-    private static AbstractCommunityResultBuilder<WccMutateResult> resultBuilder(
-        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult
-    ) {
-        var mutateREsultBuilder = new WccMutateResult.Builder(
-            ProcedureReturnColumns.EMPTY,
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result().ifPresent(result -> mutateREsultBuilder.withCommunityFunction(result::setIdOf));
-
-        return mutateREsultBuilder;
     }
 }

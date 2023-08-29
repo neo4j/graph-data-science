@@ -19,118 +19,142 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.ComputationResultForStream;
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.ComputationResult;
-import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class CommunityAlgorithmsBusinessFacade {
-    private final GraphStoreCatalogService graphStoreCatalogService;
-    private final AlgorithmMemoryValidationService memoryUsageValidator;
+    private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
+    private final Log log;
 
-    public CommunityAlgorithmsBusinessFacade(
-        GraphStoreCatalogService graphStoreCatalogService,
-        AlgorithmMemoryValidationService memoryUsageValidator
-    ) {
-        this.graphStoreCatalogService = graphStoreCatalogService;
-        this.memoryUsageValidator = memoryUsageValidator;
+
+    public CommunityAlgorithmsBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade, Log log) {
+        this.log = log;
+        this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
-    public ComputationResult<WccBaseConfig, DisjointSetStruct> wcc(
+    public ComputationResultForStream<WccBaseConfig, DisjointSetStruct> streamWcc(
         String graphName,
         WccBaseConfig config,
         User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
+        DatabaseId databaseId
     ) {
-        return run(
+        var wccResult = this.communityAlgorithmsFacade.wcc(
             graphName,
             config,
-            config.relationshipWeightProperty(),
-            new WccAlgorithmFactory<>(),
-            user,
-            databaseId,
-            progressTracker
-        );
-    }
-
-    public ComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
-        String graphName,
-        KCoreDecompositionBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
-    ) {
-        return run(
-            graphName,
-            config,
-            Optional.empty(),
-            new KCoreDecompositionAlgorithmFactory<>(),
-            user,
-            databaseId,
-            progressTracker
-        );
-    }
-
-    private <A extends Algorithm<R>, C extends AlgoBaseConfig, R> ComputationResult<C, R> run(
-        String graphName,
-        C config,
-        Optional<String> relationshipProperty,
-        GraphAlgorithmFactory<A, C> algorithmFactory,
-        User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
-    ) {
-        // Go get the graph and graph store from the catalog
-        var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
-            GraphName.parse(graphName),
-            config,
-            relationshipProperty,
             user,
             databaseId
         );
 
-        var graph = graphWithGraphStore.getLeft();
-        var graphStore = graphWithGraphStore.getRight();
+        return ComputationResultForStream.of(
+            wccResult.result(),
+            wccResult.configuration(),
+            wccResult.graph(),
+            wccResult.graphStore()
+        );
+    }
 
-        // No algorithm execution when the graph is empty
-        if (graph.isEmpty()) {
-            return ComputationResult.withoutAlgorithmResult(graph, config, graphStore);
+    public NodePropertyMutateResult<WccSpecificFields> mutateWcc(
+        String graphName,
+        WccMutateConfig config,
+        User user,
+        DatabaseId databaseId,
+        ProgressTracker progressTracker,
+        boolean computeComponentCount,
+        boolean computeComponentDistribution
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var computeMilliseconds = new AtomicLong();
+        AlgorithmComputationResult<WccMutateConfig, DisjointSetStruct> algorithmResult;
+        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+            algorithmResult = this.communityAlgorithmsFacade.wcc(
+                graphName,
+                config,
+                user,
+                databaseId
+            );
+        } catch (Exception e) {
+            log.warn("Computation failed", e);
+            progressTracker.endSubTaskWithFailure();
+            throw e;
         }
 
-        // create and run the algorithm
-        var algorithmEstimator = new AlgorithmMemoryEstimation<>(
-            GraphDimensions.of(
-                graph.nodeCount(),
-                graph.relationshipCount()
-            ),
-            algorithmFactory
+        // 2. Construct NodePropertyValues from the algorithm result
+        // 2.1 Should we measure some post-processing here?
+        var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+            config.isIncremental(),
+            config.consecutiveIds(),
+            algorithmResult.result()
+                .map(DisjointSetStruct::asNodeProperties)
+                .orElse(EmptyLongNodePropertyValues.INSTANCE),
+            Optional.empty(),
+            config.concurrency()
         );
 
-        memoryUsageValidator.validateAlgorithmCanRunWithTheAvailableMemory(
-            config,
-            algorithmEstimator::memoryEstimation,
-            graphStoreCatalogService.graphStoreCount()
+        // 3. Go and mutate the graph store
+        var addNodePropertyResult = GraphStoreUpdater.addNodeProperty(
+            algorithmResult.graph(),
+            algorithmResult.graphStore(),
+            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
+            config.mutateProperty(),
+            nodePropertyValues,
+            this.log
         );
-        var algorithm = algorithmFactory.build(graph, config, progressTracker);
-        var algorithmResult = algorithm.compute();
 
-        return ComputationResult.of(algorithmResult, graph, config, graphStore);
+        // 4. Compute result statistics
+        var communityStatistics = CommunityStatistics.communityStats(
+            nodePropertyValues.nodeCount(),
+            nodePropertyValues::longValue,
+            Pools.DEFAULT,
+            config.concurrency(),
+            computeComponentCount,
+            computeComponentDistribution
+        );
+
+        var componentCount = communityStatistics.componentCount();
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+
+        return NodePropertyMutateResult.<WccSpecificFields>builder()
+            .computeMillis(computeMilliseconds.get())
+            .postProcessingMillis(communityStatistics.computeMilliseconds())
+            .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
+            .mutateMillis(addNodePropertyResult.mutateMilliseconds())
+            .configuration(config)
+            .algorithmSpecificFields(new WccSpecificFields(componentCount, communitySummary))
+            .build();
+
     }
+
+    public AlgorithmComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+        String graphName,
+        KCoreDecompositionBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return this.communityAlgorithmsFacade.kCore(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+    }
+
 }

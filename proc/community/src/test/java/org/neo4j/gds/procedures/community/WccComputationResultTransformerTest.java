@@ -20,11 +20,13 @@
 package org.neo4j.gds.procedures.community;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.ComputationResult;
+import org.neo4j.gds.algorithms.ComputationResultForStream;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccBaseConfig;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -34,9 +36,10 @@ class WccComputationResultTransformerTest {
     @Test
     void shouldReturnEmptyStreamForEmptyGraph() {
         // given
-        ComputationResult<WccBaseConfig, DisjointSetStruct> computationResult = ComputationResult.withoutAlgorithmResult(
-            mock(Graph.class),
+        ComputationResultForStream<WccBaseConfig, DisjointSetStruct> computationResult = ComputationResultForStream.of(
+            Optional.empty(),
             mock(WccBaseConfig.class),
+            mock(Graph.class),
             mock(GraphStore.class)
         );
 

@@ -60,7 +60,7 @@ class OriginalToFilteredNodePropertiesTest {
 
     @Test
     void testDoubleArray() {
-        var filteredNodeProperties = new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
+        var filteredNodeProperties = FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
             graph.nodeProperties("doubleArray"),
             new NodeFilteredGraph(
                 graph,
@@ -77,7 +77,7 @@ class OriginalToFilteredNodePropertiesTest {
 
     @Test
     void testLongArray() {
-        var filteredNodeProperties = new OriginalToFilteredNodePropertyValues(
+        var filteredNodeProperties = OriginalToFilteredNodePropertyValues.create(
             graph.nodeProperties("longArray"),
             new NodeFilteredGraph(
                 graph,
@@ -91,7 +91,7 @@ class OriginalToFilteredNodePropertiesTest {
 
     @Test
     void testFloatArray() {
-        var filteredNodeProperties = new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
+        var filteredNodeProperties = FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
             graph.nodeProperties("floatArray"),
             new NodeFilteredGraph(
                 graph,
@@ -115,7 +115,7 @@ class OriginalToFilteredNodePropertiesTest {
         var propertyArray = HugeLongArray.newArray(1);
         propertyArray.setAll((i) -> 42L);
 
-        var filteredNodeProperties = new OriginalToFilteredNodePropertyValues(
+        var filteredNodeProperties = OriginalToFilteredNodePropertyValues.create(
             LongNodePropertyValuesAdapter.create(propertyArray),
             nodeFilteredGraph
         );

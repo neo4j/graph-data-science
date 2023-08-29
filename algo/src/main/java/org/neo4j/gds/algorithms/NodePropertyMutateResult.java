@@ -19,32 +19,27 @@
  */
 package org.neo4j.gds.algorithms;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-import java.util.Optional;
-
 @ValueClass
-public interface ComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
-    /**
-     * Result is empty if no computation happened, which basically means the graph was empty.
-     * @return The result if computation happened.
-     */
-    Optional<RESULT> result();
+public interface NodePropertyMutateResult<ALGORITHM_SPECIFIC_FIELDS>  {
 
-    Graph graph();
-
-    CONFIG config();
-
-    GraphStore graphStore();
-
-    static <C extends AlgoBaseConfig, R> ComputationResult<C, R> of(R result, Graph graph, C config, GraphStore graphStore) {
-        return ImmutableComputationResult.of(result, graph, config, graphStore);
+    @Value.Default
+    default long preProcessingMillis() {
+        return 0L;
     }
 
-    static <C extends AlgoBaseConfig, R> ComputationResult<C, R> withoutAlgorithmResult(Graph graph, C config, GraphStore graphStore) {
-        return ImmutableComputationResult.of(Optional.empty(), graph, config, graphStore);
+    long computeMillis();
+    long mutateMillis();
+    long postProcessingMillis();
+    long nodePropertiesWritten();
+    AlgoBaseConfig configuration();
+
+    ALGORITHM_SPECIFIC_FIELDS algorithmSpecificFields();
+
+    static <ASF> ImmutableNodePropertyMutateResult.Builder<ASF> builder() {
+        return ImmutableNodePropertyMutateResult.builder();
     }
 }

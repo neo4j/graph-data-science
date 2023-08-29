@@ -29,7 +29,7 @@ public final class WccMutateResult extends WccStatsSpecification.StatsResult {
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 
-    private WccMutateResult(
+    public WccMutateResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
