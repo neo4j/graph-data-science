@@ -542,7 +542,10 @@ CALL gds.graph.project(
 We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
 Multi-label GraphSAGE removes the requirement, that each node in the in-memory graph must have all `featureProperties`.
 However, the projections are independent per label and even if two labels have the same `featureProperty` they are considered as different features before projection.
-The `projectedFeatureDimension` equals the maximum length of the feature-array, i.e., for persons `age` (1) and `heightAndWeight` (2) sum up to a length of 3 and instruments with only cost leads to a length of 1. Thus, the `projectedFeatureDimension` should be set to 3.
+The `projectedFeatureDimension` should equal the maximum length of the feature-array.
+In our example, persons have `age` (1) and `heightAndWeight` (2), summing up to a length of 3.
+Instruments only have `cost` with length of 1. 
+Thus, the `projectedFeatureDimension` should be set to 3.
 For each node its unique labels properties is projected using a label specific projection to vector space of dimension `projectedFeatureDimension`.
 Note that the `cost` feature is only defined for the instrument nodes, while `age` and `heightAndWeight` are only defined for persons.
 
