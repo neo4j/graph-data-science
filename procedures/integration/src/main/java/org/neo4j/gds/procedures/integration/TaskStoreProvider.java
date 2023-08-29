@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.extension;
+package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.api.DatabaseId;
@@ -38,7 +38,7 @@ public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, P
     private final DatabaseIdService databaseIdService;
     private final TaskStoreService taskStoreService;
 
-    TaskStoreProvider(DatabaseIdService databaseIdService, TaskStoreService taskStoreService) {
+    public TaskStoreProvider(DatabaseIdService databaseIdService, TaskStoreService taskStoreService) {
         this.databaseIdService = databaseIdService;
         this.taskStoreService = taskStoreService;
     }

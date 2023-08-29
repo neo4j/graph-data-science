@@ -226,6 +226,9 @@ project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 include('opengds-extension')
 project(':opengds-extension').projectDir = file('procedures/extension')
 
+include('procedure-integration')
+project(':procedure-integration').projectDir = file('procedures/integration')
+
 include('opengds-procedure-facade')
 project(':opengds-procedure-facade').projectDir = file('procedures/facade')
 

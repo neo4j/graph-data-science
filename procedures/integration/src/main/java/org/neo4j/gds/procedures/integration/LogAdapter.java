@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.extension;
+package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.logging.Log;
 
@@ -26,10 +26,10 @@ import org.neo4j.gds.logging.Log;
  * This enables us to not have dependencies on Neo4j everywhere.
  * This class can live at the edge of our software and our domain code will be Neo4j (logging) agnostic.
  */
-class LogAdapter implements Log {
+public class LogAdapter implements Log {
     private final org.neo4j.logging.Log neo4jUserLog;
 
-    LogAdapter(org.neo4j.logging.Log neo4jUserLog) {this.neo4jUserLog = neo4jUserLog;}
+    public LogAdapter(org.neo4j.logging.Log neo4jUserLog) {this.neo4jUserLog = neo4jUserLog;}
 
     @Override
     public void info(String message) {

@@ -33,11 +33,15 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 import static org.neo4j.gds.utils.PriorityServiceLoader.loadService;
 
+/**
+ * Fold this into the main extension
+ */
+@Deprecated
 @SuppressWarnings("unused")
 @ServiceProvider
-public class LicensingStateProcedureFacadeExtension extends ExtensionFactory<LicensingStateProcedureFacadeExtension.Dependencies> {
-    public LicensingStateProcedureFacadeExtension() {
-        super("gds.licensing.procedure_facade");
+public class OpenGDSLicensingStateProcedureFacadeExtension extends ExtensionFactory<OpenGDSLicensingStateProcedureFacadeExtension.Dependencies> {
+    public OpenGDSLicensingStateProcedureFacadeExtension() {
+        super("gds.open.licensing.procedure_facade");
     }
 
     @Override
@@ -61,7 +65,7 @@ public class LicensingStateProcedureFacadeExtension extends ExtensionFactory<Lic
         return licensingServiceBuilder.build(config);
     }
 
-    interface Dependencies {
+    public interface Dependencies {
         Config config();
 
         GlobalProcedures globalProcedures();

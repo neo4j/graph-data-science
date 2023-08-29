@@ -30,12 +30,19 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.integration.CatalogFacadeFactory;
+import org.neo4j.gds.procedures.integration.CommunityProcedureFacadeProvider;
+import org.neo4j.gds.procedures.integration.CommunityProcedureFactory;
+import org.neo4j.gds.procedures.integration.LogAdapter;
+import org.neo4j.gds.procedures.integration.TaskRegistryFactoryProvider;
+import org.neo4j.gds.procedures.integration.TaskStoreProvider;
+import org.neo4j.gds.procedures.integration.UserLogRegistryFactoryProvider;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
-import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -44,32 +51,30 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
 /**
- * The single (eventually!) extension we provide for Neo4j.
+ * The OpenGDS extension for Neo4j.
  * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScience},
- * that all GDS procedures can inject and use.
+ * that all OpenGDS procedures can inject and use.
  */
 @SuppressWarnings("unused")
 @ServiceProvider
 public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDataScienceExtension.Dependencies> {
     public OpenGraphDataScienceExtension() {
-        super("gds.procedure_facade");
+        super("gds.open");
     }
 
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         // We stack off the Neo4j's log and have our own
-        // In terms of migration, this is good enough. We do not need state management,
-        // and we can migrate in vertical chunks.
         var neo4jUserLog = Neo4jProxy.getUserLog(dependencies.logService(), getClass());
         Log gdsLog = new LogAdapter(neo4jUserLog);
-        gdsLog.info("Building GDS application");
+        gdsLog.info("Building OpenGDS application");
 
-        setupProcedureFacade(dependencies, gdsLog);
+        registerComponents(dependencies, gdsLog);
 
         return new LifecycleAdapter();
     }
 
-    private void setupProcedureFacade(Dependencies dependencies, Log log) {
+    private void registerComponents(Dependencies dependencies, Log log) {
         /*
          * Some things are needed both for the procedure facade, but also for legacy stuff, temporarily.
          * They are initialised here.
@@ -81,28 +86,29 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var taskStoreService = new TaskStoreService(progressTrackingEnabled);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
         var userLogServices = new UserLogServices();
-        var usernameService = new UserServices();
+        var userServices = new UserServices();
 
         // GDS services - shared state
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
-        // We need a provider to slot into the Neo4j Procedure Framework mechanism
-        var graphDataScienceFacadeProvider = new OpenGraphDataScienceProcedureFacadeProvider(
+        // sub-interface factories
+        var catalogFacadeFactory = new CatalogFacadeFactory(
             log,
             graphStoreCatalogService,
             databaseIdService,
             taskRegistryFactoryService,
             userLogServices,
-            usernameService
+            userServices
         );
 
-        log.info("Register GDS facade");
+        // We need a provider to slot into the Neo4j Procedure Framework mechanism
+        log.info("Register OpenGDS facade");
         dependencies.globalProcedures().registerComponent(
             GraphDataScience.class,
-            graphDataScienceFacadeProvider,
+            new OpenGraphDataScienceProcedureFacadeProvider(log, catalogFacadeFactory),
             true
         );
-        log.info("GDS facade registered");
+        log.info("OpenGDS facade registered");
 
         /*
          * Now we can register the community algorithms procedure facade
@@ -110,24 +116,24 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         boolean useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
-        var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
+        var communityAlgorithmsProcedureFacadeFactory = new CommunityProcedureFactory(
             log,
-            graphStoreCatalogService,
-            taskRegistryFactoryService,
-            userLogServices,
-            usernameService,
-            databaseIdService,
             useMaxMemoryEstimation,
-            Neo4jProxy.getUserLog(dependencies.logService(), getClass())
+            graphStoreCatalogService,
+            userServices,
+            databaseIdService
+        );
+        var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
+            communityAlgorithmsProcedureFacadeFactory
         );
 
-        log.info("Registering GDS Community Algorithms Procedure Facade");
+        log.info("Registering OpenGDS Community Algorithms Procedure Facade");
         dependencies.globalProcedures().registerComponent(
             CommunityProcedureFacade.class,
             communityProcedureFacadeProvider,
             true
         );
-        log.info("GDS Community Algorithms Procedure Facade registered");
+        log.info("OpenGDS Community Algorithms Procedure Facade registered");
 
         /*
          * This is legacy support. We keep some context-injected things around,
@@ -136,12 +142,12 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var taskStoreProvider = new TaskStoreProvider(databaseIdService, taskStoreService);
         var taskRegistryFactoryProvider = new TaskRegistryFactoryProvider(
             databaseIdService,
-            usernameService,
+            userServices,
             taskRegistryFactoryService
         );
         var userLogRegistryFactoryProvider = new UserLogRegistryFactoryProvider(
             databaseIdService,
-            usernameService,
+            userServices,
             userLogServices
         );
 
