@@ -58,13 +58,22 @@ public class TopKMap {
         int topK,
         Comparator<SimilarityResult> comparator
     ) {
+        this(items, sourceNodes, topK, comparator.equals(SimilarityResult.DESCENDING));
+    }
+
+    public TopKMap(
+        long items,
+        BitSet sourceNodes,
+        int topK,
+        boolean higherIsBetter
+    ) {
         this.sourceNodes = sourceNodes;
         int boundedTopK = (int) Math.min(topK, items);
         topKLists = HugeObjectArray.newArray(TopKList.class, items);
         topKLists.setAll(node1 -> sourceNodes.get(node1)
-            ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
-                ? BoundedLongPriorityQueue.min(boundedTopK)
-                : BoundedLongPriorityQueue.max(boundedTopK)
+                ? new TopKList(higherIsBetter
+                ? BoundedLongPriorityQueue.max(boundedTopK)
+                : BoundedLongPriorityQueue.min(boundedTopK)
             ) : null
         );
     }
