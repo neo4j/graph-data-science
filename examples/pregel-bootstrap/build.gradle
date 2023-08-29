@@ -61,6 +61,9 @@ dependencies {
     testImplementation "org.neo4j.gds:config-api:$gdsVersion"
     testImplementation "org.neo4j.gds:progress-tracking:$gdsVersion"
 
+    // We need this in `testImplementation` in order to get the Facade injected to the procedures.
+    testImplementation "org.neo4j.gds:opengds-extension:$gdsVersion"
+
     // Use JUnit Jupiter API for testing.
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
 
