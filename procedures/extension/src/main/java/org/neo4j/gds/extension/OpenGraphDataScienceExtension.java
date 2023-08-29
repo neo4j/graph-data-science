@@ -121,7 +121,9 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             useMaxMemoryEstimation,
             graphStoreCatalogService,
             userServices,
-            databaseIdService
+            databaseIdService,
+            taskRegistryFactoryService,
+            userLogServices
         );
         var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
             communityAlgorithmsProcedureFacadeFactory

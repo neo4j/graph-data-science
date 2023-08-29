@@ -19,12 +19,16 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -34,40 +38,62 @@ public class CommunityProcedureFactory {
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final UserServices usernameService;
     private final DatabaseIdService databaseIdService;
+    private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final UserLogServices userLogServices;
 
     public CommunityProcedureFactory(
         Log log,
         boolean useMaxMemoryEstimation,
         GraphStoreCatalogService graphStoreCatalogService,
         UserServices usernameService,
-        DatabaseIdService databaseIdService
+        DatabaseIdService databaseIdService,
+        TaskRegistryFactoryService taskRegistryFactoryService,
+        UserLogServices userLogServices
     ) {
         this.log = log;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.usernameService = usernameService;
         this.databaseIdService = databaseIdService;
+        this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.userLogServices = userLogServices;
     }
 
-    public CommunityProcedureFacade createCommunityProcedureFacade(Context context) {
+    CommunityProcedureFacade createCommunityProcedureFacade(Context context) {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(
             log,
             useMaxMemoryEstimation
         );
 
-        // business facade
-        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-            graphStoreCatalogService,
-            algorithmMemoryValidationService
+        var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+        var user = usernameService.getUser(context.securityContext());
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
+            databaseId,
+            user
         );
+
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        // algorithm facade
+        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
+            graphStoreCatalogService,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            algorithmMemoryValidationService,
+            (org.neo4j.logging.Log) log.getNeo4jLog()
+        );
+
+        // business facade
+        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(communityAlgorithmsFacade, log);
+
+        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
         // procedure facade
         return new CommunityProcedureFacade(
             algorithmsBusinessFacade,
-            usernameService,
-            databaseIdService,
-            context.graphDatabaseAPI(),
-            context.securityContext()
+            returnColumns,
+            databaseId,
+            user
         );
     }
 }
