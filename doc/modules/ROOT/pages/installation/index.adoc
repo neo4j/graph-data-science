@@ -31,6 +31,8 @@ On Neo4j Desktop you can install the GDS library directly xref:installation/neo4
 
 * If you run Neo4j in a cluster, you can follow the same instructions for the Neo4j Server with xref:production-deployment/neo4j-cluster.adoc[some additional considerations].
 
+* If you run Neo4j in a Kubernetes cluster, you can add GDS to the https://neo4j.com/docs/operations-manual/current/kubernetes/plugins/#automatic-plugin-download[Neo4j Helm chart deployments].
+
 .GDS Enterprise Edition
 
 The Enterprise Edition (EE) of the library requires a _license key_ as well. You can find more details on requesting and configuring a license key in the xref:installation/installation-enterprise-edition.adoc[] section.
