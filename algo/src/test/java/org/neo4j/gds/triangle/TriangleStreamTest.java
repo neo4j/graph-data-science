@@ -19,79 +19,96 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.graphbuilder.DefaultBuilder;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import java.util.concurrent.atomic.AtomicInteger;
 
-class TriangleStreamTest extends BaseTest {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private static final String LABEL = "Node";
-    private static final String RELATIONSHIP = "REL";
-    private static final int TRIANGLES = 1000;
+@GdlExtension
+class TriangleStreamTest {
+    /*
+     * graph is a  ring  with a center node
+     *          center
+     *        | | | | | |
+     *       a-b-c-d-e-f
+     *       |---------|
+     *
+     */
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String DB_CYPHER =
+        "CREATE " +
+            "  (a0:node)," +
+            "  (a1:node)," +
+            "  (a2:node)," +
+            "  (a3:node)," +
+            "  (a4:node)," +
+            "  (a5:node)," +
+            "  (a6:node)," +
+            "  (a7:node)," +
+            "  (aCenter:node)," + //put in middle so that it doesnt have to do all the work for al triangles
+            "  (a8:node)," +
+            "  (a9:node)," +
+            "  (a10:node)," +
+            "  (a11:node)," +
+            "  (a12:node)," +
+            "  (a0)-[:R ]->(a1)," +
+            "  (a1)-[:R ]->(a2)," +
+            "  (a2)-[:R ]->(a3)," +
+            "  (a3)-[:R ]->(a4)," +
+            "  (a4)-[:R ]->(a5)," +
+            "  (a5)-[:R ]->(a6)," +
+            "  (a6)-[:R ]->(a7)," +
+            "  (a7)-[:R ]->(a8)," +
+            "  (a8)-[:R ]->(a9)," +
+            "  (a9)-[:R ]->(a10)," +
+            "  (a10)-[:R ]->(a11)," +
+            "  (a11)-[:R ]->(a12)," +
+            "  (a12)-[:R ]->(a0)," +
+            "  (aCenter)-[:R ]->(a1)," +
+            "  (aCenter)-[:R ]->(a2)," +
+            "  (aCenter)-[:R ]->(a3)," +
+            "  (aCenter)-[:R ]->(a4)," +
+            "  (aCenter)-[:R ]->(a5)," +
+            "  (aCenter)-[:R ]->(a6)," +
+            "  (aCenter)-[:R ]->(a7)," +
+            "  (aCenter)-[:R ]->(a8)," +
+            "  (aCenter)-[:R ]->(a9)," +
+            "  (aCenter)-[:R ]->(a10)," +
+            "  (aCenter)-[:R ]->(a11)," +
+            "  (aCenter)-[:R ]->(a12)," +
+            "  (aCenter)-[:R ]->(a0)";
 
-    private long centerId;
+    @Inject
     private Graph graph;
 
-    @BeforeEach
-    void setupGraphDb() {
-        RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-        DefaultBuilder builder = GraphBuilder.create(db)
-            .setLabel(LABEL)
-            .setRelationship(RELATIONSHIP)
-            .newDefaultBuilder();
-        Node center = builder.createNode();
-        builder.newRingBuilder()
-            .createRing(TRIANGLES)
-            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
-            .close();
-        centerId = center.getId();
+    @Inject
+    private IdFunction idFunction;
 
-        graph = new StoreLoaderBuilder()
-            .databaseService(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
-    }
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldListTrianglesCorrectly(int concurrency) {
+        var centerId = idFunction.of("aCenter");
+        AtomicInteger centerAppearances = new AtomicInteger();
+        AtomicInteger allAppearances = new AtomicInteger();
 
-    @Test
-    void testSequential() {
-        TripleConsumer mock = mock(TripleConsumer.class);
-
-        TriangleStream.create(graph, Pools.DEFAULT, 1)
+        TriangleStream.create(graph, Pools.DEFAULT, concurrency)
                 .compute()
-                .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
+            .forEach(r -> {
+                if (r.nodeA == centerId || r.nodeB == centerId || r.nodeC == centerId) {
+                    centerAppearances.getAndIncrement();
+                }
+                allAppearances.getAndIncrement();
+            });
 
-        verify(mock, times(TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
-    }
-
-    @Test
-    void testParallel() {
-        TripleConsumer mock = mock(TripleConsumer.class);
-
-        TriangleStream.create(graph, Pools.DEFAULT, 8)
-                .compute()
-                .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
-
-        verify(mock, times(TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
-    }
-
-    interface TripleConsumer {
-        void consume(long nodeA, long nodeB, long nodeC);
+        assertThat(centerAppearances.intValue()).isEqualTo(allAppearances.intValue()).isEqualTo(13);
     }
 }
