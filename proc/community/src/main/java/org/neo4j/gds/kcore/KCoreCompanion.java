@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.api.properties.nodes.IntNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 
 import java.util.Optional;
 
@@ -31,8 +31,8 @@ final class KCoreCompanion {
     static NodePropertyValues nodePropertyValues(Optional<KCoreDecompositionResult> result) {
         return result
             .map(KCoreDecompositionResult::coreValues)
-            .map(IntNodePropertyValues::new)
-            .orElseGet(() -> new IntNodePropertyValues(HugeIntArray.newArray(0)));
+            .map(NodePropertyValuesAdapter::adapt)
+            .orElseGet(() -> EmptyLongNodePropertyValues.INSTANCE);
     }
 
 }

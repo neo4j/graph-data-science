@@ -28,9 +28,8 @@ import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.IntNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -91,8 +90,9 @@ public class CommunityAlgorithmsBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var intermediateResult = computeAlgorithm(
-            () -> communityAlgorithmsFacade.wcc(graphName, config, user, databaseId), progressTracker
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.wcc(graphName, config, user, databaseId),
+            progressTracker
         );
         var algorithmResult = intermediateResult.getSecond();
 
@@ -165,18 +165,19 @@ public class CommunityAlgorithmsBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var intermediateResult = computeAlgorithm(
-            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId), progressTracker
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId),
+            progressTracker
         );
         var algorithmResult = intermediateResult.getSecond();
 
         var nodePropertyValues = algorithmResult.result()
-            .map(result -> new IntNodePropertyValues(result.coreValues()))
-            .orElseGet(() -> new IntNodePropertyValues(HugeIntArray.newArray(0)));
+            .map(result -> NodePropertyValuesAdapter.adapt(result.coreValues()))
+            .orElseGet(() -> EmptyLongNodePropertyValues.INSTANCE);
 
         // 3. Go and mutate the graph store
         var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, config, algorithmResult);
-        
+
         return NodePropertyMutateResult.<KCoreSpecificFields>builder()
             .computeMillis(intermediateResult.getFirst().get())
             .postProcessingMillis(0L)
@@ -190,7 +191,7 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
-    private <C extends AlgoBaseConfig, T> Pair<AtomicLong, T> computeAlgorithm(
+    private <C extends AlgoBaseConfig, T> Pair<AtomicLong, T> runWithTiming(
         Supplier<T> function,
         ProgressTracker progressTracker
     ) {
@@ -207,7 +208,7 @@ public class CommunityAlgorithmsBusinessFacade {
         return new Pair<>(computeMilliseconds, algorithmResult);
     }
 
-    <C extends MutateNodePropertyConfig, T> AddNodePropertyResult mutateNodeProperty(
+    private <C extends MutateNodePropertyConfig, T> AddNodePropertyResult mutateNodeProperty(
         NodePropertyValues nodePropertyValues,
         C config,
         AlgorithmComputationResult<C, T> algorithmResult
