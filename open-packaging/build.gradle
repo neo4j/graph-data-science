@@ -9,6 +9,7 @@ apply from: '../gradle/licensing.gradle'
 dependencies {
     implementation project(':proc')
     implementation project(':proc-sysinfo')
+    implementation project(':opengds-extension')
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
 
