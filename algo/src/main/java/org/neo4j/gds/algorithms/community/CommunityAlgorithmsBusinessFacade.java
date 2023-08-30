@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.apache.commons.math3.util.Pair;
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.ComputationResultForStream;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
@@ -28,8 +29,10 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.IntNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -106,14 +109,7 @@ public class CommunityAlgorithmsBusinessFacade {
         );
 
         // 3. Go and mutate the graph store
-        var addNodePropertyResult = GraphStoreUpdater.addNodeProperty(
-            algorithmResult.graph(),
-            algorithmResult.graphStore(),
-            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
-            config.mutateProperty(),
-            nodePropertyValues,
-            this.log
-        );
+        var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, config, algorithmResult);
 
         // 4. Compute result statistics
         var communityStatistics = CommunityStatistics.communityStats(
@@ -174,23 +170,13 @@ public class CommunityAlgorithmsBusinessFacade {
         );
         var algorithmResult = intermediateResult.getSecond();
 
-
         var nodePropertyValues = algorithmResult.result()
             .map(result -> new IntNodePropertyValues(result.coreValues()))
             .orElseGet(() -> new IntNodePropertyValues(HugeIntArray.newArray(0)));
 
-
         // 3. Go and mutate the graph store
-        var addNodePropertyResult = GraphStoreUpdater.addNodeProperty(
-            algorithmResult.graph(),
-            algorithmResult.graphStore(),
-            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
-            config.mutateProperty(),
-            nodePropertyValues,
-            this.log
-        );
-
-
+        var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, config, algorithmResult);
+        
         return NodePropertyMutateResult.<KCoreSpecificFields>builder()
             .computeMillis(intermediateResult.getFirst().get())
             .postProcessingMillis(0L)
@@ -204,7 +190,7 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
-    <C extends AlgoBaseConfig, T extends Object> Pair<AtomicLong, T> computeAlgorithm(
+    private <C extends AlgoBaseConfig, T> Pair<AtomicLong, T> computeAlgorithm(
         Supplier<T> function,
         ProgressTracker progressTracker
     ) {
@@ -219,6 +205,21 @@ public class CommunityAlgorithmsBusinessFacade {
         }
 
         return new Pair<>(computeMilliseconds, algorithmResult);
+    }
+
+    <C extends MutateNodePropertyConfig, T> AddNodePropertyResult mutateNodeProperty(
+        NodePropertyValues nodePropertyValues,
+        C config,
+        AlgorithmComputationResult<C, T> algorithmResult
+    ) {
+        return GraphStoreUpdater.addNodeProperty(
+            algorithmResult.graph(),
+            algorithmResult.graphStore(),
+            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
+            config.mutateProperty(),
+            nodePropertyValues,
+            this.log
+        );
     }
 
 }
