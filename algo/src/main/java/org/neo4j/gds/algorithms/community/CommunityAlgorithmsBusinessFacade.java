@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.apache.commons.math3.util.Pair;
 import org.neo4j.gds.algorithms.ComputationResultForStream;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
@@ -29,6 +29,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.IntNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -43,6 +44,7 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 public class CommunityAlgorithmsBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
@@ -86,20 +88,10 @@ public class CommunityAlgorithmsBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var computeMilliseconds = new AtomicLong();
-        AlgorithmComputationResult<WccMutateConfig, DisjointSetStruct> algorithmResult;
-        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-            algorithmResult = this.communityAlgorithmsFacade.wcc(
-                graphName,
-                config,
-                user,
-                databaseId
-            );
-        } catch (Exception e) {
-            log.warn("Computation failed", e);
-            progressTracker.endSubTaskWithFailure();
-            throw e;
-        }
+        var intermediateResult = computeAlgorithm(
+            () -> communityAlgorithmsFacade.wcc(graphName, config, user, databaseId), progressTracker
+        );
+        var algorithmResult = intermediateResult.getSecond();
 
         // 2. Construct NodePropertyValues from the algorithm result
         // 2.1 Should we measure some post-processing here?
@@ -137,7 +129,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
 
         return NodePropertyMutateResult.<WccSpecificFields>builder()
-            .computeMillis(computeMilliseconds.get())
+            .computeMillis(intermediateResult.getFirst().get())
             .postProcessingMillis(communityStatistics.computeMilliseconds())
             .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
             .mutateMillis(addNodePropertyResult.mutateMilliseconds())
@@ -177,20 +169,10 @@ public class CommunityAlgorithmsBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var computeMilliseconds = new AtomicLong();
-        AlgorithmComputationResult<KCoreDecompositionMutateConfig, KCoreDecompositionResult> algorithmResult;
-        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-            algorithmResult = this.communityAlgorithmsFacade.kCore(
-                graphName,
-                config,
-                user,
-                databaseId
-            );
-        } catch (Exception e) {
-            log.warn("Computation failed", e);
-            progressTracker.endSubTaskWithFailure();
-            throw e;
-        }
+        var intermediateResult = computeAlgorithm(
+            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId), progressTracker
+        );
+        var algorithmResult = intermediateResult.getSecond();
 
 
         var nodePropertyValues = algorithmResult.result()
@@ -210,7 +192,7 @@ public class CommunityAlgorithmsBusinessFacade {
 
 
         return NodePropertyMutateResult.<KCoreSpecificFields>builder()
-            .computeMillis(computeMilliseconds.get())
+            .computeMillis(intermediateResult.getFirst().get())
             .postProcessingMillis(0L)
             .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
             .mutateMillis(addNodePropertyResult.mutateMilliseconds())
@@ -222,5 +204,21 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
+    <C extends AlgoBaseConfig, T extends Object> Pair<AtomicLong, T> computeAlgorithm(
+        Supplier<T> function,
+        ProgressTracker progressTracker
+    ) {
+        var computeMilliseconds = new AtomicLong();
+        T algorithmResult;
+        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+            algorithmResult = function.get();
+        } catch (Exception e) {
+            log.warn("Computation failed", e);
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        }
+
+        return new Pair<>(computeMilliseconds, algorithmResult);
+    }
 
 }
