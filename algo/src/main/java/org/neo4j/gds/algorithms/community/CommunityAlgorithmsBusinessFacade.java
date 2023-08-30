@@ -143,17 +143,24 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
-    public AlgorithmComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+    public ComputationResultForStream<KCoreDecompositionBaseConfig, KCoreDecompositionResult> streamKCore(
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {
-        return this.communityAlgorithmsFacade.kCore(
+        var kcoreResult = this.communityAlgorithmsFacade.kCore(
             graphName,
             config,
             user,
             databaseId
+        );
+
+        return ComputationResultForStream.of(
+            kcoreResult.result(),
+            kcoreResult.configuration(),
+            kcoreResult.graph(),
+            kcoreResult.graphStore()
         );
     }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.ComputationResultForStream;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -27,11 +27,11 @@ import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-final class KCoreResultTransformer {
+final class KCoreComputationalResultTransformer {
 
-    private KCoreResultTransformer() {}
+    private KCoreComputationalResultTransformer() {}
 
-    static Stream<KCoreStreamResult> toStreamResult(AlgorithmComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> computationResult) {
+    static Stream<KCoreStreamResult> toStreamResult(ComputationResultForStream<KCoreDecompositionBaseConfig, KCoreDecompositionResult> computationResult) {
         return computationResult.result().map(kCoreResult -> {
             var coreValues = kCoreResult.coreValues();
             var graph = computationResult.graph();

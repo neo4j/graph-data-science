@@ -106,14 +106,14 @@ public class CommunityProcedureFacade {
         // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
         algorithmMetaDataSetter.set(streamConfig);
 
-        var computationResult = algorithmsBusinessFacade.kCore(
+        var computationResult = algorithmsBusinessFacade.streamKCore(
             graphName,
             streamConfig,
             user,
             databaseId
         );
 
-        return KCoreResultTransformer.toStreamResult(computationResult);
+        return KCoreComputationalResultTransformer.toStreamResult(computationResult);
     }
 
     // K-Core Decomposition end
