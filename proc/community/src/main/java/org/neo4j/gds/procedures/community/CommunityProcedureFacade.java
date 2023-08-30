@@ -26,6 +26,8 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccMutateResult;
@@ -114,6 +116,23 @@ public class CommunityProcedureFacade {
         );
 
         return KCoreComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<KCoreDecompositionMutateResult> kCoreMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = KCoreDecompositionMutateConfig.of(CypherMapWrapper.create(configuration));
+
+        var computationResult = algorithmsBusinessFacade.mutateΚcore(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
     }
 
     // K-Core Decomposition end

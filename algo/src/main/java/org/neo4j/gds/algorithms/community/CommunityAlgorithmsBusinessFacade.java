@@ -21,16 +21,20 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.ComputationResultForStream;
+import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.IntNodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -163,5 +167,60 @@ public class CommunityAlgorithmsBusinessFacade {
             kcoreResult.graphStore()
         );
     }
+
+    public NodePropertyMutateResult<KCoreSpecificFields> mutateΚcore(
+        String graphName,
+        KCoreDecompositionMutateConfig config,
+        User user,
+        DatabaseId databaseId,
+        ProgressTracker progressTracker
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var computeMilliseconds = new AtomicLong();
+        AlgorithmComputationResult<KCoreDecompositionMutateConfig, KCoreDecompositionResult> algorithmResult;
+        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+            algorithmResult = this.communityAlgorithmsFacade.kCore(
+                graphName,
+                config,
+                user,
+                databaseId
+            );
+        } catch (Exception e) {
+            log.warn("Computation failed", e);
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        }
+
+
+        var nodePropertyValues = algorithmResult.result()
+            .map(result -> new IntNodePropertyValues(result.coreValues()))
+            .orElseGet(() -> new IntNodePropertyValues(HugeIntArray.newArray(0)));
+
+
+        // 3. Go and mutate the graph store
+        var addNodePropertyResult = GraphStoreUpdater.addNodeProperty(
+            algorithmResult.graph(),
+            algorithmResult.graphStore(),
+            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
+            config.mutateProperty(),
+            nodePropertyValues,
+            this.log
+        );
+
+
+        return NodePropertyMutateResult.<KCoreSpecificFields>builder()
+            .computeMillis(computeMilliseconds.get())
+            .postProcessingMillis(0L)
+            .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
+            .mutateMillis(addNodePropertyResult.mutateMilliseconds())
+            .configuration(config)
+            .algorithmSpecificFields(new KCoreSpecificFields(algorithmResult.result()
+                .map(KCoreDecompositionResult::degeneracy)
+                .orElse(0)))
+            .build();
+
+    }
+
 
 }
