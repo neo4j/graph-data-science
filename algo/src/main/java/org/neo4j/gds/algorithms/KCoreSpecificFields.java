@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kcore;
+package org.neo4j.gds.algorithms;
 
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+public class KCoreSpecificFields {
+    private final long degeneracy;
 
-import java.util.Optional;
+    public KCoreSpecificFields(
+        long degeneracy
+    ) {
+        this.degeneracy = degeneracy;
+    }
 
-final class KCoreCompanion {
-    private KCoreCompanion() {}
-
-    static NodePropertyValues nodePropertyValues(Optional<KCoreDecompositionResult> result) {
-        return result
-            .map(KCoreDecompositionResult::coreValues)
-            .map(NodePropertyValuesAdapter::adapt)
-            .orElseGet(() -> EmptyLongNodePropertyValues.INSTANCE);
+    public long degeneracy() {
+        return degeneracy;
     }
 
 }

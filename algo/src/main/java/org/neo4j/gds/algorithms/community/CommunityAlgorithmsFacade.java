@@ -37,9 +37,9 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.logging.Log;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.logging.Log;
 
 import java.util.Optional;
 
@@ -82,9 +82,9 @@ public class CommunityAlgorithmsFacade {
         );
     }
 
-    AlgorithmComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+    <C extends KCoreDecompositionBaseConfig> AlgorithmComputationResult<C, KCoreDecompositionResult> kCore(
         String graphName,
-        KCoreDecompositionBaseConfig config,
+        C config,
         User user,
         DatabaseId databaseId
     ) {

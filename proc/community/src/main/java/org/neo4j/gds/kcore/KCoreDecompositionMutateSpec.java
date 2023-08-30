@@ -37,7 +37,7 @@ import static org.neo4j.gds.kcore.KCoreCompanion.nodePropertyValues;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
 @GdsCallable(name = "gds.kcore.mutate", description = KCORE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<MutateResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionMutateConfig>> {
+public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<KCoreDecompositionMutateResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionMutateConfig>> {
     @Override
     public String name() {
         return "KCoreMutate";
@@ -54,7 +54,7 @@ public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecompos
     }
 
     @Override
-    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<KCoreDecompositionMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -64,11 +64,11 @@ public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecompos
 
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<KCoreDecompositionMutateResult> resultBuilder(
         ComputationResult<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder();
+        var builder = new KCoreDecompositionMutateResult.Builder();
         computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
 
         return builder;

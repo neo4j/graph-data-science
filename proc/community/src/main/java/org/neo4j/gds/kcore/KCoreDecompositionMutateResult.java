@@ -24,12 +24,12 @@ import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
-public class MutateResult extends StandardMutateResult {
+public class KCoreDecompositionMutateResult extends StandardMutateResult {
 
     public final long nodePropertiesWritten;
     public final long degeneracy;
 
-    public MutateResult(
+    public KCoreDecompositionMutateResult(
         long nodePropertiesWritten,
         long degeneracy,
         long preProcessingMillis,
@@ -43,7 +43,7 @@ public class MutateResult extends StandardMutateResult {
         this.degeneracy = degeneracy;
     }
 
-    static final class Builder extends AbstractResultBuilder<MutateResult> {
+    static final class Builder extends AbstractResultBuilder<KCoreDecompositionMutateResult> {
 
         private long degeneracy;
 
@@ -52,8 +52,8 @@ public class MutateResult extends StandardMutateResult {
             return this;
         }
 
-        public MutateResult build() {
-            return new MutateResult(
+        public KCoreDecompositionMutateResult build() {
+            return new KCoreDecompositionMutateResult(
                 nodePropertiesWritten,
                 degeneracy,
                 preProcessingMillis,

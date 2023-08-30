@@ -19,18 +19,25 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.apache.commons.math3.util.Pair;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.ComputationResultForStream;
+import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -39,6 +46,7 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 public class CommunityAlgorithmsBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
@@ -82,20 +90,11 @@ public class CommunityAlgorithmsBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var computeMilliseconds = new AtomicLong();
-        AlgorithmComputationResult<WccMutateConfig, DisjointSetStruct> algorithmResult;
-        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-            algorithmResult = this.communityAlgorithmsFacade.wcc(
-                graphName,
-                config,
-                user,
-                databaseId
-            );
-        } catch (Exception e) {
-            log.warn("Computation failed", e);
-            progressTracker.endSubTaskWithFailure();
-            throw e;
-        }
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.wcc(graphName, config, user, databaseId),
+            progressTracker
+        );
+        var algorithmResult = intermediateResult.getSecond();
 
         // 2. Construct NodePropertyValues from the algorithm result
         // 2.1 Should we measure some post-processing here?
@@ -110,14 +109,7 @@ public class CommunityAlgorithmsBusinessFacade {
         );
 
         // 3. Go and mutate the graph store
-        var addNodePropertyResult = GraphStoreUpdater.addNodeProperty(
-            algorithmResult.graph(),
-            algorithmResult.graphStore(),
-            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
-            config.mutateProperty(),
-            nodePropertyValues,
-            this.log
-        );
+        var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, config, algorithmResult);
 
         // 4. Compute result statistics
         var communityStatistics = CommunityStatistics.communityStats(
@@ -133,7 +125,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
 
         return NodePropertyMutateResult.<WccSpecificFields>builder()
-            .computeMillis(computeMilliseconds.get())
+            .computeMillis(intermediateResult.getFirst().get())
             .postProcessingMillis(communityStatistics.computeMilliseconds())
             .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
             .mutateMillis(addNodePropertyResult.mutateMilliseconds())
@@ -143,17 +135,91 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
-    public AlgorithmComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> kCore(
+    public ComputationResultForStream<KCoreDecompositionBaseConfig, KCoreDecompositionResult> streamKCore(
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {
-        return this.communityAlgorithmsFacade.kCore(
+        var kcoreResult = this.communityAlgorithmsFacade.kCore(
             graphName,
             config,
             user,
             databaseId
+        );
+
+        return ComputationResultForStream.of(
+            kcoreResult.result(),
+            kcoreResult.configuration(),
+            kcoreResult.graph(),
+            kcoreResult.graphStore()
+        );
+    }
+
+    public NodePropertyMutateResult<KCoreSpecificFields> mutateΚcore(
+        String graphName,
+        KCoreDecompositionMutateConfig config,
+        User user,
+        DatabaseId databaseId,
+        ProgressTracker progressTracker
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId),
+            progressTracker
+        );
+        var algorithmResult = intermediateResult.getSecond();
+
+        var nodePropertyValues = algorithmResult.result()
+            .map(result -> NodePropertyValuesAdapter.adapt(result.coreValues()))
+            .orElseGet(() -> EmptyLongNodePropertyValues.INSTANCE);
+
+        // 3. Go and mutate the graph store
+        var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, config, algorithmResult);
+
+        return NodePropertyMutateResult.<KCoreSpecificFields>builder()
+            .computeMillis(intermediateResult.getFirst().get())
+            .postProcessingMillis(0L)
+            .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
+            .mutateMillis(addNodePropertyResult.mutateMilliseconds())
+            .configuration(config)
+            .algorithmSpecificFields(new KCoreSpecificFields(algorithmResult.result()
+                .map(KCoreDecompositionResult::degeneracy)
+                .orElse(0)))
+            .build();
+
+    }
+
+    private <C extends AlgoBaseConfig, T> Pair<AtomicLong, T> runWithTiming(
+        Supplier<T> function,
+        ProgressTracker progressTracker
+    ) {
+        var computeMilliseconds = new AtomicLong();
+        T algorithmResult;
+        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+            algorithmResult = function.get();
+        } catch (Exception e) {
+            log.warn("Computation failed", e);
+            progressTracker.endSubTaskWithFailure();
+            throw e;
+        }
+
+        return new Pair<>(computeMilliseconds, algorithmResult);
+    }
+
+    private <C extends MutateNodePropertyConfig, T> AddNodePropertyResult mutateNodeProperty(
+        NodePropertyValues nodePropertyValues,
+        C config,
+        AlgorithmComputationResult<C, T> algorithmResult
+    ) {
+        return GraphStoreUpdater.addNodeProperty(
+            algorithmResult.graph(),
+            algorithmResult.graphStore(),
+            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
+            config.mutateProperty(),
+            nodePropertyValues,
+            this.log
         );
     }
 
