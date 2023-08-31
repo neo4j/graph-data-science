@@ -21,7 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.apache.commons.math3.util.Pair;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.ComputationResultForStream;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.WccSpecificFields;
@@ -35,48 +34,26 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.result.CommunityStatistics;
-import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-public class CommunityAlgorithmsBusinessFacade {
+public class CommunityAlgorithmsMutateBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
     private final Log log;
 
 
-    public CommunityAlgorithmsBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade, Log log) {
+    public CommunityAlgorithmsMutateBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade, Log log) {
         this.log = log;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
-    public ComputationResultForStream<WccBaseConfig, DisjointSetStruct> streamWcc(
-        String graphName,
-        WccBaseConfig config,
-        User user,
-        DatabaseId databaseId
-    ) {
-        var wccResult = this.communityAlgorithmsFacade.wcc(
-            graphName,
-            config,
-            user,
-            databaseId
-        );
-
-        return ComputationResultForStream.of(
-            wccResult.result(),
-            wccResult.configuration(),
-            wccResult.graph(),
-            wccResult.graphStore()
-        );
-    }
 
     public NodePropertyMutateResult<WccSpecificFields> mutateWcc(
         String graphName,
@@ -132,26 +109,6 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
-    public ComputationResultForStream<KCoreDecompositionBaseConfig, KCoreDecompositionResult> streamKCore(
-        String graphName,
-        KCoreDecompositionBaseConfig config,
-        User user,
-        DatabaseId databaseId
-    ) {
-        var kcoreResult = this.communityAlgorithmsFacade.kCore(
-            graphName,
-            config,
-            user,
-            databaseId
-        );
-
-        return ComputationResultForStream.of(
-            kcoreResult.result(),
-            kcoreResult.configuration(),
-            kcoreResult.graph(),
-            kcoreResult.graphStore()
-        );
-    }
 
     public NodePropertyMutateResult<KCoreSpecificFields> mutateΚcore(
         String graphName,

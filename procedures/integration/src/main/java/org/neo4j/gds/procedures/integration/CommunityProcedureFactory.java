@@ -21,8 +21,9 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -84,13 +85,22 @@ public class CommunityProcedureFactory {
         );
 
         // business facade
-        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(communityAlgorithmsFacade, log);
+        var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
+            communityAlgorithmsFacade
+        );
+
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            communityAlgorithmsFacade,
+            log
+        );
+
 
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
         // procedure facade
         return new CommunityProcedureFacade(
-            algorithmsBusinessFacade,
+            algorithmsStreamBusinessFacade,
+            algorithmsMutateBusinessFacade,
             returnColumns,
             databaseId,
             user

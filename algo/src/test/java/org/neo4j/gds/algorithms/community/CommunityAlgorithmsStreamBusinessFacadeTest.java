@@ -43,7 +43,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class CommunityAlgorithmsBusinessFacadeTest {
+class CommunityAlgorithmsStreamBusinessFacadeTest {
 
     @Nested
     @GdlExtension
@@ -94,14 +94,14 @@ class CommunityAlgorithmsBusinessFacadeTest {
             var logMock = mock(Log.class);
             when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
-            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+            var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     graphStoreCatalogServiceMock,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     mock(AlgorithmMemoryValidationService.class),
                     logMock
-                ), null
+                )
             );
 
             // when
@@ -133,11 +133,12 @@ class CommunityAlgorithmsBusinessFacadeTest {
             doReturn(Pair.of(graphMock, mock(GraphStore.class)))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
-            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+            var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(graphStoreCatalogServiceMock,
                     mock(TaskRegistryFactory.class),
                     mock(UserLogRegistryFactory.class),
-                    null, null), null
+                    null, null
+                )
             );
 
             // when

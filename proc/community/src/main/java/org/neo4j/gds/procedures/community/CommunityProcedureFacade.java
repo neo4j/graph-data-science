@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -36,18 +37,22 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
-    private final CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade;
+    private final CommunityAlgorithmsStreamBusinessFacade algorithmsStreamBusinessFacade;
+    private final CommunityAlgorithmsMutateBusinessFacade algorithmsMutateBusinessFacade;
+
     private final ProcedureReturnColumns procedureReturnColumns;
     private final DatabaseId databaseId;
     private final User user;
 
     public CommunityProcedureFacade(
-        CommunityAlgorithmsBusinessFacade algorithmsBusinessFacade,
+        CommunityAlgorithmsStreamBusinessFacade algorithmsStreamBusinessFacade,
+        CommunityAlgorithmsMutateBusinessFacade algorithmsMutateBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns,
         DatabaseId databaseId,
         User user
     ) {
-        this.algorithmsBusinessFacade = algorithmsBusinessFacade;
+        this.algorithmsStreamBusinessFacade = algorithmsStreamBusinessFacade;
+        this.algorithmsMutateBusinessFacade = algorithmsMutateBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
         this.databaseId = databaseId;
         this.user = user;
@@ -65,7 +70,7 @@ public class CommunityProcedureFacade {
         // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
         algorithmMetaDataSetter.set(streamConfig);
 
-        var computationResult = algorithmsBusinessFacade.streamWcc(
+        var computationResult = algorithmsStreamBusinessFacade.streamWcc(
             graphName,
             streamConfig,
             user,
@@ -81,7 +86,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = WccMutateConfig.of(CypherMapWrapper.create(configuration));
 
-        var computationResult = algorithmsBusinessFacade.mutateWcc(
+        var computationResult = algorithmsMutateBusinessFacade.mutateWcc(
             graphName,
             config,
             user,
@@ -106,7 +111,7 @@ public class CommunityProcedureFacade {
         // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
         algorithmMetaDataSetter.set(streamConfig);
 
-        var computationResult = algorithmsBusinessFacade.streamKCore(
+        var computationResult = algorithmsStreamBusinessFacade.streamKCore(
             graphName,
             streamConfig,
             user,
@@ -122,7 +127,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = KCoreDecompositionMutateConfig.of(CypherMapWrapper.create(configuration));
 
-        var computationResult = algorithmsBusinessFacade.mutateΚcore(
+        var computationResult = algorithmsMutateBusinessFacade.mutateΚcore(
             graphName,
             config,
             user,

@@ -40,8 +40,8 @@ import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -340,7 +340,7 @@ class WccMutateProcTest extends BaseProcTest {
             logMock,
             false
         );
-        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
             new CommunityAlgorithmsFacade(graphStoreCatalogService,
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
@@ -349,7 +349,8 @@ class WccMutateProcTest extends BaseProcTest {
 
         applyOnProcedure(procedure -> {
             procedure.facade = new CommunityProcedureFacade(
-                algorithmsBusinessFacade,
+                null,
+                algorithmsMutateBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
                 DatabaseId.of(db.databaseName()),
                 new User(getUsername(), false)
@@ -452,14 +453,16 @@ class WccMutateProcTest extends BaseProcTest {
                 logMock,
                 false
             );
-            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+            var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
                 new CommunityAlgorithmsFacade(graphStoreCatalogService,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     memoryUsageValidator, logMock), logMock
             );
 
-            procedure.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
+            procedure.facade = new CommunityProcedureFacade(
+                null,
+                algorithmsBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
                 DatabaseId.of(db.databaseName()),
                 new User(getUsername(), false)
@@ -512,13 +515,15 @@ class WccMutateProcTest extends BaseProcTest {
                 logMock,
                 false
             );
-            var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+            var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
                 new CommunityAlgorithmsFacade(graphStoreCatalogService,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     memoryUsageValidator, null), logMock
             );
-            proc.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
+            proc.facade = new CommunityProcedureFacade(
+                null,
+                algorithmsBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
                 DatabaseId.of(db.databaseName()),
                 new User(getUsername(), false)
@@ -573,7 +578,7 @@ class WccMutateProcTest extends BaseProcTest {
             logMock,
             false
         );
-        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
+        var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
             new CommunityAlgorithmsFacade(graphStoreCatalogService,
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
@@ -583,7 +588,9 @@ class WccMutateProcTest extends BaseProcTest {
         applyOnProcedure(procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
-                    procedure.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
+                    procedure.facade = new CommunityProcedureFacade(
+                        null,
+                        algorithmsBusinessFacade,
                         ProcedureReturnColumns.EMPTY,
                         DatabaseId.of(db.databaseName()),
                         new User(getUsername(), false)
