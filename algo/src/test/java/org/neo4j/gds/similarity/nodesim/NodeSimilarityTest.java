@@ -80,44 +80,44 @@ final class NodeSimilarityTest {
     @GdlGraph(graphNamePrefix = "undirected", orientation = UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Person)" +
-        ", (b:Person)" +
-        ", (c:Person)" +
-        ", (d:Person)" +
-        ", (i1:Item)" +
-        ", (i2:Item)" +
-        ", (i3:Item)" +
-        ", (i4:Item)" +
-        ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
-        ", (a)-[:LIKES {prop: 1.0}]->(i2)" +
-        ", (a)-[:LIKES {prop: 2.0}]->(i3)" +
-        ", (b)-[:LIKES {prop: 1.0}]->(i1)" +
-        ", (b)-[:LIKES {prop: 1.0}]->(i2)" +
-        ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
-        ", (d)-[:LIKES {prop: 0.5}]->(i1)" +
-        ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
-        ", (d)-[:LIKES {prop: 1.0}]->(i3)";
+            "  (a:Person)" +
+            ", (b:Person)" +
+            ", (c:Person)" +
+            ", (d:Person)" +
+            ", (i1:Item)" +
+            ", (i2:Item)" +
+            ", (i3:Item)" +
+            ", (i4:Item)" +
+            ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
+            ", (a)-[:LIKES {prop: 1.0}]->(i2)" +
+            ", (a)-[:LIKES {prop: 2.0}]->(i3)" +
+            ", (b)-[:LIKES {prop: 1.0}]->(i1)" +
+            ", (b)-[:LIKES {prop: 1.0}]->(i2)" +
+            ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
+            ", (d)-[:LIKES {prop: 0.5}]->(i1)" +
+            ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
+            ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
     @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL, idOffset = 0)
     private static final String DB_CYPHER_UNION =
         "CREATE" +
-        "  (a:Person)" +
-        ", (b:Person)" +
-        ", (c:Person)" +
-        ", (d:Person)" +
-        ", (i1:Item)" +
-        ", (i2:Item)" +
-        ", (i3:Item)" +
-        ", (i4:Item)" +
-        ", (a)-[:LIKES3 {prop: 1.0}]->(i1)" +
-        ", (a)-[:LIKES2 {prop: 1.0}]->(i2)" +
-        ", (a)-[:LIKES1 {prop: 2.0}]->(i3)" +
-        ", (b)-[:LIKES2 {prop: 1.0}]->(i1)" +
-        ", (b)-[:LIKES1 {prop: 1.0}]->(i2)" +
-        ", (c)-[:LIKES3 {prop: 1.0}]->(i3)" +
-        ", (d)-[:LIKES2 {prop: 0.5}]->(i1)" +
-        ", (d)-[:LIKES3 {prop: 1.0}]->(i2)" +
-        ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
+            "  (a:Person)" +
+            ", (b:Person)" +
+            ", (c:Person)" +
+            ", (d:Person)" +
+            ", (i1:Item)" +
+            ", (i2:Item)" +
+            ", (i3:Item)" +
+            ", (i4:Item)" +
+            ", (a)-[:LIKES3 {prop: 1.0}]->(i1)" +
+            ", (a)-[:LIKES2 {prop: 1.0}]->(i2)" +
+            ", (a)-[:LIKES1 {prop: 2.0}]->(i3)" +
+            ", (b)-[:LIKES2 {prop: 1.0}]->(i1)" +
+            ", (b)-[:LIKES1 {prop: 1.0}]->(i2)" +
+            ", (c)-[:LIKES3 {prop: 1.0}]->(i3)" +
+            ", (d)-[:LIKES2 {prop: 0.5}]->(i1)" +
+            ", (d)-[:LIKES3 {prop: 1.0}]->(i2)" +
+            ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
 
     @Inject
     private TestGraph naturalGraph;
@@ -152,11 +152,17 @@ final class NodeSimilarityTest {
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
 
-    static ImmutableNodeSimilarityWriteConfig.Builder configBuilder() {
+    static ImmutableNodeSimilarityWriteConfig.Builder writeConfigBuilder() {
         return ImmutableNodeSimilarityWriteConfig
             .builder()
             .writeProperty("writeProperty")
             .writeRelationshipType("writeRelationshipType")
+            .similarityCutoff(0.0);
+    }
+
+    static ImmutableNodeSimilarityStreamConfig.Builder streamConfigBuilder() {
+        return ImmutableNodeSimilarityStreamConfig
+            .builder()
             .similarityCutoff(0.0);
     }
 
@@ -290,13 +296,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
+            streamConfigBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -310,13 +317,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            streamConfigBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -330,13 +338,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).topN(1).build(),
+            streamConfigBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -350,17 +359,19 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).bottomN(1).build(),
+            writeConfigBuilder().concurrency(concurrency).bottomN(1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
-        Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
+        Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
 
         assertGraphEquals(
-            orientation == REVERSE ? fromGdl(
-                "(i1:Item)-[:REL {w: 0.50000D}]->(i3:Item), (i2:Item), (i4:Item), (a:Person), (b:Person), (c:Person), (d:Person)") : fromGdl(
-                "(a:Person), (b:Person)-[:REL {w: 0.00000D}]->(c:Person), (d:Person), (i1:Item), (i2:Item), (i3:Item), (i4:Item)"),
+            orientation == REVERSE
+                ? fromGdl(
+                "(i1:Item)-[:REL {w: 0.50000D}]->(i3:Item), (i2:Item), (i4:Item), (a:Person), (b:Person), (c:Person), (d:Person)")
+                : fromGdl(
+                    "(a:Person), (b:Person)-[:REL {w: 0.00000D}]->(c:Person), (d:Person), (i1:Item), (i2:Item), (i3:Item), (i4:Item)"),
             similarityGraph
         );
     }
@@ -372,13 +383,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().topK(1).concurrency(concurrency).build(),
+            streamConfigBuilder().topK(1).concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -392,7 +404,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder()
+            writeConfigBuilder()
                 .concurrency(concurrency)
                 .topK(10)
                 .bottomK(1)
@@ -401,20 +413,20 @@ final class NodeSimilarityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
+        Graph similarityGraph = nodeSimilarity.compute().graphResult().similarityGraph();
 
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl("  (i1:Item)-[:LIKES {w: 0.50000D}]->(i3:Item)" +
-                          ", (i2:Item)-[:LIKES {w: 0.50000D}]->(i3)" +
-                          ", (i3)-[:LIKES {w: 0.500000D}]->(i1)" +
-                          ", (i4:Item)" +
-                          ", (:Person), (:Person), (:Person), (:Person)")
+                ", (i2:Item)-[:LIKES {w: 0.50000D}]->(i3)" +
+                ", (i3)-[:LIKES {w: 0.500000D}]->(i1)" +
+                ", (i4:Item)" +
+                ", (:Person), (:Person), (:Person), (:Person)")
                 : fromGdl("  (a:Person)-[:LIKES {w: 0.333333D}]->(c:Person)" +
-                          ", (b:Person)-[:LIKES {w: 0.00000D}]->(c)" +
-                          ", (c)-[:LIKES {w: 0.000000D}]->(b)" +
-                          ", (d:Person)-[:LIKES {w: 0.333333D}]->(c)" +
-                          ", (:Item), (:Item), (:Item), (:Item)"),
+                    ", (b:Person)-[:LIKES {w: 0.00000D}]->(c)" +
+                    ", (c)-[:LIKES {w: 0.000000D}]->(b)" +
+                    ", (d:Person)-[:LIKES {w: 0.333333D}]->(c)" +
+                    ", (:Item), (:Item), (:Item), (:Item)"),
             similarityGraph
         );
     }
@@ -426,13 +438,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
+            streamConfigBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -449,13 +462,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().degreeCutoff(2).concurrency(concurrency).build(),
+            streamConfigBuilder().degreeCutoff(2).concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -470,11 +484,12 @@ final class NodeSimilarityTest {
     void shouldComputeForUndirectedGraphs(int concurrency) {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             undirectedGraph,
-            configBuilder().concurrency(concurrency).build(),
+            streamConfigBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
+        Set<SimilarityResult> result = nodeSimilarity.compute()
+            .streamResult().collect(Collectors.toSet());
         assertNotEquals(Collections.emptySet(), result);
     }
 
@@ -482,19 +497,21 @@ final class NodeSimilarityTest {
     void shouldComputeForUnionGraphs() {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             naturalGraph,
-            configBuilder().concurrency(1).build(),
+            streamConfigBuilder().concurrency(1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        var result1 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
+        var result1 = nodeSimilarity.compute()
+            .streamResult().collect(Collectors.toSet());
 
         nodeSimilarity = NodeSimilarity.create(
             naturalUnionGraph,
-            configBuilder().concurrency(1).build(),
+            streamConfigBuilder().concurrency(1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        var result2 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
+        var result2 = nodeSimilarity.compute()
+            .streamResult().collect(Collectors.toSet());
 
         assertEquals(result1, result2);
     }
@@ -506,12 +523,12 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            writeConfigBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
-        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
+        SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
@@ -520,28 +537,28 @@ final class NodeSimilarityTest {
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl("  (:Person), (:Person), (:Person), (:Person)" +
-                          ", (:Item)" +
-                          ", (i1:Item)-[:LIKES {property: 1.000000D}]->(i2:Item)" +
-                          ", (i1)-[:LIKES {property: 0.500000D}]->(i3:Item)" +
-                          ", (i2)-[:LIKES {property: 0.500000D}]->(i3)" +
-                          // Add results in reverse direction because topK
-                          ", (i2)-[:LIKES {property: 1.000000D}]->(i1)" +
-                          ", (i3)-[:LIKES {property: 0.500000D}]->(i1)" +
-                          ", (i3)-[:LIKES {property: 0.500000D}]->(i2)")
+                ", (:Item)" +
+                ", (i1:Item)-[:LIKES {property: 1.000000D}]->(i2:Item)" +
+                ", (i1)-[:LIKES {property: 0.500000D}]->(i3:Item)" +
+                ", (i2)-[:LIKES {property: 0.500000D}]->(i3)" +
+                // Add results in reverse direction because topK
+                ", (i2)-[:LIKES {property: 1.000000D}]->(i1)" +
+                ", (i3)-[:LIKES {property: 0.500000D}]->(i1)" +
+                ", (i3)-[:LIKES {property: 0.500000D}]->(i2)")
                 : fromGdl("  (p1:Person)-[:LIKES {property: 0.666667D}]->(p2:Person)" +
-                          ", (p1)-[:LIKES {property: 0.333333D}]->(p3:Person)" +
-                          ", (p1)-[:LIKES {property: 1.000000D}]->(p4:Person)" +
-                          ", (p2)-[:LIKES {property: 0.000000D}]->(p3)" +
-                          ", (p2)-[:LIKES {property: 0.666667D}]->(p4)" +
-                          ", (p3)-[:LIKES {property: 0.333333D}]->(p4)" +
-                          // Add results in reverse direction because topK
-                          "  (p2)-[:LIKES {property: 0.666667D}]->(p1)" +
-                          ", (p3)-[:LIKES {property: 0.333333D}]->(p1)" +
-                          ", (p4)-[:LIKES {property: 1.000000D}]->(p1)" +
-                          ", (p3)-[:LIKES {property: 0.000000D}]->(p2)" +
-                          ", (p4)-[:LIKES {property: 0.666667D}]->(p2)" +
-                          ", (p4)-[:LIKES {property: 0.333333D}]->(p3)" +
-                          ", (:Item), (:Item), (:Item), (:Item)"),
+                    ", (p1)-[:LIKES {property: 0.333333D}]->(p3:Person)" +
+                    ", (p1)-[:LIKES {property: 1.000000D}]->(p4:Person)" +
+                    ", (p2)-[:LIKES {property: 0.000000D}]->(p3)" +
+                    ", (p2)-[:LIKES {property: 0.666667D}]->(p4)" +
+                    ", (p3)-[:LIKES {property: 0.333333D}]->(p4)" +
+                    // Add results in reverse direction because topK
+                    "  (p2)-[:LIKES {property: 0.666667D}]->(p1)" +
+                    ", (p3)-[:LIKES {property: 0.333333D}]->(p1)" +
+                    ", (p4)-[:LIKES {property: 1.000000D}]->(p1)" +
+                    ", (p3)-[:LIKES {property: 0.000000D}]->(p2)" +
+                    ", (p4)-[:LIKES {property: 0.666667D}]->(p2)" +
+                    ", (p4)-[:LIKES {property: 0.333333D}]->(p3)" +
+                    ", (:Item), (:Item), (:Item), (:Item)"),
             resultGraph
         );
     }
@@ -553,7 +570,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder()
+            writeConfigBuilder()
                 .concurrency(concurrency)
                 .topK(100)
                 .topN(1)
@@ -562,7 +579,7 @@ final class NodeSimilarityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
+        SimilarityGraphResult similarityGraphResult = nodeSimilarity.compute().graphResult();
         assertEquals(
             orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
@@ -595,13 +612,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).topN(1).build(),
+            streamConfigBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -613,22 +631,23 @@ final class NodeSimilarityTest {
     void shouldIgnoreParallelEdges(Orientation orientation, int concurrency) {
         // Add parallel edges
         var gdl = DB_CYPHER +
-                  ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
-                  ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
-                  ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
-                  ", (c)-[:LIKES {prop: 1.0}]->(i3)";
+            ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
+            ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
+            ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
+            ", (c)-[:LIKES {prop: 1.0}]->(i3)";
 
         Graph graph = fromGdl(gdl, orientation);
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            streamConfigBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -772,7 +791,7 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {
         var graph = naturalGraph;
-        var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).build();
+        var config = streamConfigBuilder().topN(100).topK(topK).concurrency(concurrency).build();
 
         var progressLog = Neo4jProxy.testLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
@@ -798,7 +817,7 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldNotLogMessagesWhenLoggingIsDisabled(int topK, int concurrency) {
         var graph = naturalGraph;
-        var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
+        var config = streamConfigBuilder().topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
 
         var progressLog = Neo4jProxy.testLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
@@ -864,28 +883,29 @@ final class NodeSimilarityTest {
     void shouldGiveCorrectResultsWithOverlap() {
         var gdl =
             "CREATE" +
-            "  (a:Person)" +
-            ", (c:Person)" +
-            ", (i1:Item)" +
-            ", (i2:Item)" +
-            ", (i3:Item)" +
-            ", (i4:Item)" +
-            ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
-            ", (a)-[:LIKES {prop: 2.0}]->(i4)" +
-            ", (c)-[:LIKES {prop: 3.0}]->(i3)" +
-            ", (c)-[:LIKES {prop: 4.0}]->(i1)";
+                "  (a:Person)" +
+                ", (c:Person)" +
+                ", (i1:Item)" +
+                ", (i2:Item)" +
+                ", (i3:Item)" +
+                ", (i4:Item)" +
+                ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
+                ", (a)-[:LIKES {prop: 2.0}]->(i4)" +
+                ", (c)-[:LIKES {prop: 3.0}]->(i3)" +
+                ", (c)-[:LIKES {prop: 4.0}]->(i1)";
 
         Graph graph = fromGdl(gdl);
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder().concurrency(1).similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
+            streamConfigBuilder().concurrency(1).similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -893,7 +913,7 @@ final class NodeSimilarityTest {
 
         nodeSimilarity = NodeSimilarity.create(
             graph,
-            configBuilder()
+            streamConfigBuilder()
                 .relationshipWeightProperty("LIKES")
                 .concurrency(1)
                 .similarityMetric(MetricSimilarityComputer.parse("ovErLaP"))
@@ -902,7 +922,8 @@ final class NodeSimilarityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        result = nodeSimilarity.computeToStream().map(NodeSimilarityTest::resultString).collect(Collectors.toSet());
+        result = nodeSimilarity.compute()
+            .streamResult().map(NodeSimilarityTest::resultString).collect(Collectors.toSet());
 
         assertThat(result).contains("0,1 0.333333");
 
@@ -911,18 +932,24 @@ final class NodeSimilarityTest {
     static Stream<Arguments> degreeCutoffInput() {
         return Stream.of(
             arguments(2, Integer.MAX_VALUE,
-                new String[]{resultString(0, 1, 0.666667),
+                new String[]{
+                    resultString(0, 1, 0.666667),
                     resultString(3, 0, 1.0), resultString(3, 1, 0.666667),
                     resultString(1, 3, 0.666667), resultString(1, 0, 0.666667),
-                    resultString(0, 3, 1.0)}
+                    resultString(0, 3, 1.0)
+                }
             ),
             arguments(1, 2,
-                new String[]{resultString(1, 2, 0.0),
-                    resultString(2, 1, 0.0)}  //their similarity is zero, but we still return them
+                new String[]{
+                    resultString(1, 2, 0.0),
+                    resultString(2, 1, 0.0)
+                }  //their similarity is zero, but we still return them
             ),
             arguments(3, 3,
-                new String[]{resultString(0, 3, 1.0),
-                    resultString(3, 0, 1.0)}
+                new String[]{
+                    resultString(0, 3, 1.0),
+                    resultString(3, 0, 1.0)
+                }
             )
         );
     }
@@ -933,13 +960,14 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             naturalGraph,
-            configBuilder().upperDegreeCutoff(upperBound).degreeCutoff(lowBound).build(),
+            streamConfigBuilder().upperDegreeCutoff(upperBound).degreeCutoff(lowBound).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream()
+            .compute()
+            .streamResult()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
@@ -948,7 +976,7 @@ final class NodeSimilarityTest {
 
     @Test
     void shouldThrowIfUpperIsSmaller() {
-        assertThatThrownBy(configBuilder().upperDegreeCutoff(3).degreeCutoff(4)::build)
+        assertThatThrownBy(streamConfigBuilder().upperDegreeCutoff(3).degreeCutoff(4)::build)
             .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
     }
 
