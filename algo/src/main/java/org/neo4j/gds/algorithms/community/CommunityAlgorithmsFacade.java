@@ -130,7 +130,7 @@ public class CommunityAlgorithmsFacade {
             return AlgorithmComputationResult.withoutAlgorithmResult(graph, config, graphStore);
         }
 
-        // create and run the algorithm
+        // create the algorithm
         var algorithmEstimator = new AlgorithmMemoryEstimation<>(
             GraphDimensions.of(
                 graph.nodeCount(),
@@ -145,8 +145,16 @@ public class CommunityAlgorithmsFacade {
             graphStoreCatalogService.graphStoreCount()
         );
         var algorithm = algorithmFactory.build(graph, config, neo4jLog, taskRegistryFactory, userLogRegistryFactory);
-        var algorithmResult = algorithm.compute();
 
-        return AlgorithmComputationResult.of(algorithmResult, graph, config, graphStore);
+        // run the algorithm
+        try {
+            var algorithmResult = algorithm.compute();
+
+            return AlgorithmComputationResult.of(algorithmResult, graph, config, graphStore);
+        } catch (Exception e) {
+            neo4jLog.warn("Computation failed", e);
+            algorithm.getProgressTracker().endSubTaskWithFailure();
+            throw e;
+        }
     }
 }

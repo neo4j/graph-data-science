@@ -35,7 +35,6 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -84,15 +83,13 @@ public class CommunityAlgorithmsBusinessFacade {
         WccMutateConfig config,
         User user,
         DatabaseId databaseId,
-        ProgressTracker progressTracker,
         boolean computeComponentCount,
         boolean computeComponentDistribution
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, config, user, databaseId),
-            progressTracker
+            () -> communityAlgorithmsFacade.wcc(graphName, config, user, databaseId)
         );
         var algorithmResult = intermediateResult.getSecond();
 
@@ -160,14 +157,12 @@ public class CommunityAlgorithmsBusinessFacade {
         String graphName,
         KCoreDecompositionMutateConfig config,
         User user,
-        DatabaseId databaseId,
-        ProgressTracker progressTracker
+        DatabaseId databaseId
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId),
-            progressTracker
+            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId)
         );
         var algorithmResult = intermediateResult.getSecond();
 
@@ -191,18 +186,12 @@ public class CommunityAlgorithmsBusinessFacade {
 
     }
 
-    private <C extends AlgoBaseConfig, T> Pair<AtomicLong, T> runWithTiming(
-        Supplier<T> function,
-        ProgressTracker progressTracker
-    ) {
+    private <C extends AlgoBaseConfig, T> Pair<AtomicLong, T> runWithTiming(Supplier<T> function) {
+
         var computeMilliseconds = new AtomicLong();
         T algorithmResult;
         try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
             algorithmResult = function.get();
-        } catch (Exception e) {
-            log.warn("Computation failed", e);
-            progressTracker.endSubTaskWithFailure();
-            throw e;
         }
 
         return new Pair<>(computeMilliseconds, algorithmResult);

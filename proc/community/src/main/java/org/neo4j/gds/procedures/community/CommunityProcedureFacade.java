@@ -25,7 +25,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
@@ -87,7 +86,6 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
-            ProgressTracker.NULL_TRACKER,
             procedureReturnColumns.contains("componentCount"),
             procedureReturnColumns.contains("componentDistribution")
         );
@@ -128,8 +126,7 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId,
-            ProgressTracker.NULL_TRACKER
+            databaseId
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
