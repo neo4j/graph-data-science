@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.algorithms.ComputationResultForStream;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -35,7 +35,7 @@ final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(ComputationResultForStream<WccBaseConfig, DisjointSetStruct> computationResult) {
+    static Stream<WccStreamResult> toStreamResult(StreamComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
 

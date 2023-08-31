@@ -27,7 +27,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import java.util.Optional;
 
 @ValueClass
-public interface ComputationResultForStream<CONFIG extends AlgoBaseConfig, RESULT>  {
+public interface StreamComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
 
     /**
      * Result is empty if no computation happened, which basically means the graph was empty.
@@ -43,12 +43,12 @@ public interface ComputationResultForStream<CONFIG extends AlgoBaseConfig, RESUL
 
     GraphStore graphStore();
 
-    static <C extends AlgoBaseConfig, R> ComputationResultForStream<C, R> of(
+    static <C extends AlgoBaseConfig, R> StreamComputationResult<C, R> of(
         Optional<R> result,
         C configuration,
         Graph graph,
         GraphStore graphStore
     ) {
-        return ImmutableComputationResultForStream.of(result, configuration, graph, graphStore);
+        return ImmutableStreamComputationResult.of(result, configuration, graph, graphStore);
     }
 }
