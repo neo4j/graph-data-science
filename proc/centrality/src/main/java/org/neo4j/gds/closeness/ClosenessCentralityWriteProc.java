@@ -55,7 +55,7 @@ public class ClosenessCentralityWriteProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.closeness.write", mode = WRITE, deprecatedBy = "gds.closeness.write")
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<WriteResult> writeBeta(
+    public Stream<BetaWriteResult> writeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -63,7 +63,11 @@ public class ClosenessCentralityWriteProc extends BaseProc {
             .log()
             .warn("Procedure `gds.beta.closeness.write` has been deprecated, please use `gds.closeness.write`.");
 
-        return write(graphName, configuration);
+        return new ProcedureExecutor<>(
+            new BetaClosenessCentralityWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+
     }
 
     @Override

@@ -30,7 +30,6 @@ import java.util.Map;
 public final class WriteResult extends StandardWriteResult {
 
     public final long nodePropertiesWritten;
-    public final String writeProperty;
     public final Map<String, Object> centralityDistribution;
 
     WriteResult(
@@ -39,26 +38,18 @@ public final class WriteResult extends StandardWriteResult {
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
-        String writeProperty,
         @Nullable Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
-        this.writeProperty = writeProperty;
         this.centralityDistribution = centralityDistribution;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
     static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
-        public String writeProperty;
 
          Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
-        }
-
-        public Builder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
         }
 
         @Override
@@ -69,7 +60,6 @@ public final class WriteResult extends StandardWriteResult {
                 computeMillis,
                 postProcessingMillis,
                 writeMillis,
-                writeProperty,
                 centralityHistogram,
                 config.toMap()
             );

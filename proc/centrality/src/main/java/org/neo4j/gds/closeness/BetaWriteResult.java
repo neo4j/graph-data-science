@@ -22,44 +22,54 @@ package org.neo4j.gds.closeness;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class MutateResult extends StandardMutateResult {
+public final class BetaWriteResult extends StandardWriteResult {
 
     public final long nodePropertiesWritten;
+    public final String writeProperty;
     public final Map<String, Object> centralityDistribution;
 
-    MutateResult(
+    BetaWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
+        long writeMillis,
+        String writeProperty,
         @Nullable Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
+        this.writeProperty = writeProperty;
         this.centralityDistribution = centralityDistribution;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
+    static final class Builder extends AbstractCentralityResultBuilder<BetaWriteResult> {
+        public String writeProperty;
 
          Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
+        public Builder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
+            return this;
+        }
+
         @Override
-        public MutateResult buildResult() {
-            return new MutateResult(
+        public BetaWriteResult buildResult() {
+            return new BetaWriteResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
-                mutateMillis,
+                writeMillis,
+                writeProperty,
                 centralityHistogram,
                 config.toMap()
             );

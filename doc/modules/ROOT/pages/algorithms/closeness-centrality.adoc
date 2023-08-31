@@ -176,7 +176,6 @@ YIELD
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
-  mutateProperty: String,
   centralityDistribution: Map,
   configuration: Map
 ----
@@ -200,7 +199,6 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 | computeMillis          | Integer      | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer      | Milliseconds for computing the statistics.
 | mutateMillis           | Integer      | Milliseconds for mutating the GDS graph.
-| mutateProperty         | String       | The node property updated in the GDS graph.
 | centralityDistribution | Map          | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
 | configuration          | Map          | Configuration used for running the algorithm.
 |===
@@ -222,7 +220,6 @@ YIELD
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
-  writeProperty: String,
   centralityDistribution: Map,
   configuration: Map
 ----
@@ -246,7 +243,6 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 | computeMillis          | Integer      | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer      | Milliseconds for computing the statistics.
 | writeMillis            | Integer      | Milliseconds for mutating the GDS graph.
-| writeProperty          | String       | The node property updated in the GDS graph.
 | centralityDistribution | Map          | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
 | configuration          | Map          | Configuration used for running the algorithm.
 |===

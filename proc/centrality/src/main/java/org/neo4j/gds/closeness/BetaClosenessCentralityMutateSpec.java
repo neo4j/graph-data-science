@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
@@ -35,49 +35,52 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
+@GdsCallable(name = "gds.beta.closeness.mutate", description = CLOSENESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig,Stream<BetaMutateResult>, ClosenessCentralityFactory<ClosenessCentralityMutateConfig>> {
 
     @Override
     public String name() {
-        return "ClosenessCentralityWrite";
+            return "ClosenessCentralityMutate";
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+    public ClosenessCentralityFactory<ClosenessCentralityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ClosenessCentralityFactory<>();
     }
 
     @Override
-    public NewConfigFunction<ClosenessCentralityWriteConfig> newConfigFunction() {
-        return (___, config) -> ClosenessCentralityWriteConfig.of(config);
+    public NewConfigFunction<ClosenessCentralityMutateConfig> newConfigFunction() {
+        return (___, config) -> ClosenessCentralityMutateConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>( this::resultBuilder,
+    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig, Stream<BetaMutateResult>> computationResultConsumer() {
+        return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
+                computationResult.config().mutateProperty(),
                 computationResult.result()
                     .map(ClosenessCentralityResult::centralities)
                     .map(NodePropertyValuesAdapter::adapt)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
-            name());
+            this::resultBuilder
+        );
     }
-    private AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computationResult,
+    private AbstractResultBuilder<BetaMutateResult> resultBuilder(
+        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new BetaMutateResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
+        builder.withMutateProperty(computationResult.config().mutateProperty());
         computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
 
         return builder;
     }
+
 }
