@@ -836,4 +836,19 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             }
         };
     }
+
+    @Override
+    public DependencyResolver emptyDependencyResolver() {
+        return new DependencyResolver.Adapter() {
+            @Override
+            public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                return null;
+            }
+
+            @Override
+            public boolean containsDependency(Class<?> type) {
+                return false;
+            }
+        };
+    }
 }
