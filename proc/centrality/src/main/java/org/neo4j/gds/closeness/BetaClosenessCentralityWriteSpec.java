@@ -37,8 +37,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
+@GdsCallable(name = "gds.beta.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+
+public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaWriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
 
     @Override
     public String name() {
@@ -56,7 +57,7 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>( this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
@@ -67,16 +68,18 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
             )),
             name());
     }
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<BetaWriteResult> resultBuilder(
         ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new BetaWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
         computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+
+        builder.withWriteProperty(computationResult.config().writeProperty());
 
         return builder;
     }

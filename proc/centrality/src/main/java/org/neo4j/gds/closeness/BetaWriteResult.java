@@ -27,39 +27,49 @@ import org.neo4j.gds.results.StandardWriteResult;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class WriteResult extends StandardWriteResult {
+public final class BetaWriteResult extends StandardWriteResult {
 
     public final long nodePropertiesWritten;
+    public final String writeProperty;
     public final Map<String, Object> centralityDistribution;
 
-    WriteResult(
+    BetaWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
+        String writeProperty,
         @Nullable Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
+        this.writeProperty = writeProperty;
         this.centralityDistribution = centralityDistribution;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
+    static final class Builder extends AbstractCentralityResultBuilder<BetaWriteResult> {
+        public String writeProperty;
 
          Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
+        public Builder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
+            return this;
+        }
+
         @Override
-        public WriteResult buildResult() {
-            return new WriteResult(
+        public BetaWriteResult buildResult() {
+            return new BetaWriteResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 writeMillis,
+                writeProperty,
                 centralityHistogram,
                 config.toMap()
             );
