@@ -27,39 +27,49 @@ import org.neo4j.gds.results.StandardMutateResult;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class MutateResult extends StandardMutateResult {
+public final class BetaMutateResult extends StandardMutateResult {
 
     public final long nodePropertiesWritten;
+    public final String mutateProperty;
     public final Map<String, Object> centralityDistribution;
 
-    MutateResult(
+    BetaMutateResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long mutateMillis,
+        String mutateProperty,
         @Nullable Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
+        this.mutateProperty = mutateProperty;
         this.centralityDistribution = centralityDistribution;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
+    static final class Builder extends AbstractCentralityResultBuilder<BetaMutateResult> {
+        public String mutateProperty;
 
          Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
+        public Builder withMutateProperty(String mutateProperty) {
+            this.mutateProperty = mutateProperty;
+            return this;
+        }
+
         @Override
-        public MutateResult buildResult() {
-            return new MutateResult(
+        public BetaMutateResult buildResult() {
+            return new BetaMutateResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 mutateMillis,
+                mutateProperty,
                 centralityHistogram,
                 config.toMap()
             );

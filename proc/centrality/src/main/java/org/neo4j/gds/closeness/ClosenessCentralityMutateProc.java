@@ -52,14 +52,20 @@ public class ClosenessCentralityMutateProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.closeness.mutate", mode = READ, deprecatedBy = "gds.closeness.mutate")
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<MutateResult> mutateBeta(
+    public Stream<BetaMutateResult> mutateBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
             .log()
-            .warn("Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
-        return mutate(graphName, configuration);
+            .warn(
+                "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
+        
+        return new ProcedureExecutor<>(
+            new BetaClosenessCentralityMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+
     }
 
 
