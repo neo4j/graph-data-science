@@ -21,7 +21,9 @@ package org.neo4j.gds.api;
 
 import org.neo4j.common.DependencyResolver;
 
-public final class EmptyDependencyResolver extends DependencyResolver.Adapter {
+import java.util.function.Supplier;
+
+public final class EmptyDependencyResolver implements DependencyResolver {
 
     public static final EmptyDependencyResolver INSTANCE = new EmptyDependencyResolver();
 
@@ -35,5 +37,20 @@ public final class EmptyDependencyResolver extends DependencyResolver.Adapter {
     @Override
     public boolean containsDependency(Class<?> type) {
         return false;
+    }
+
+    @Override
+    public <T> T resolveDependency(Class<T> type) {
+        return null;
+    }
+
+    @Override
+    public <T> Iterable<T> resolveTypeDependencies(Class<T> type) {
+        return null;
+    }
+
+    @Override
+    public <T> Supplier<T> provideDependency(Class<T> type) {
+        return null;
     }
 }
