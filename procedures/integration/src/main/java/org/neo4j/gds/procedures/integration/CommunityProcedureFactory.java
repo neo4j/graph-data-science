@@ -80,7 +80,7 @@ public class CommunityProcedureFactory {
             taskRegistryFactory,
             userLogRegistryFactory,
             algorithmMemoryValidationService,
-            (org.neo4j.logging.Log) log.getNeo4jLog()
+            log
         );
 
         // business facade

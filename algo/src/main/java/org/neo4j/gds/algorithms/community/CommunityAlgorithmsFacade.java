@@ -39,7 +39,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
@@ -48,20 +48,20 @@ public class CommunityAlgorithmsFacade {
     private final TaskRegistryFactory taskRegistryFactory;
     private final UserLogRegistryFactory userLogRegistryFactory;
     private final AlgorithmMemoryValidationService memoryUsageValidator;
-    private final Log neo4jLog;
+    private final Log log;
 
     public CommunityAlgorithmsFacade(
         GraphStoreCatalogService graphStoreCatalogService,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmMemoryValidationService memoryUsageValidator,
-        Log neo4jLog
+        Log log
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.taskRegistryFactory = taskRegistryFactory;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.memoryUsageValidator = memoryUsageValidator;
-        this.neo4jLog = neo4jLog;
+        this.log = log;
     }
 
     <C extends WccBaseConfig> AlgorithmComputationResult<C, DisjointSetStruct> wcc(
@@ -144,7 +144,13 @@ public class CommunityAlgorithmsFacade {
             algorithmEstimator::memoryEstimation,
             graphStoreCatalogService.graphStoreCount()
         );
-        var algorithm = algorithmFactory.build(graph, config, neo4jLog, taskRegistryFactory, userLogRegistryFactory);
+        var algorithm = algorithmFactory.build(
+            graph,
+            config,
+            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
 
         // run the algorithm
         try {
@@ -152,7 +158,7 @@ public class CommunityAlgorithmsFacade {
 
             return AlgorithmComputationResult.of(algorithmResult, graph, config, graphStore);
         } catch (Exception e) {
-            neo4jLog.warn("Computation failed", e);
+            log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
             throw e;
         }

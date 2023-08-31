@@ -95,6 +95,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -332,6 +333,8 @@ class WccMutateProcTest extends BaseProcTest {
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
         final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
             logMock,
@@ -341,7 +344,7 @@ class WccMutateProcTest extends BaseProcTest {
             new CommunityAlgorithmsFacade(graphStoreCatalogService,
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, Neo4jProxy.testLog()), logMock
+                memoryUsageValidator, logMock), logMock
         );
 
         applyOnProcedure(procedure -> {
@@ -443,6 +446,7 @@ class WccMutateProcTest extends BaseProcTest {
 
         applyOnProcedure(procedure -> {
             var logMock = mock(org.neo4j.gds.logging.Log.class);
+            when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
             final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
             final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
                 logMock,
@@ -452,7 +456,7 @@ class WccMutateProcTest extends BaseProcTest {
                 new CommunityAlgorithmsFacade(graphStoreCatalogService,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, Neo4jProxy.testLog()), logMock
+                    memoryUsageValidator, logMock), logMock
             );
 
             procedure.facade = new CommunityProcedureFacade(algorithmsBusinessFacade,
@@ -563,6 +567,7 @@ class WccMutateProcTest extends BaseProcTest {
     @NotNull
     private GraphStore runMutation(String graphName, Map<String, Object> additionalConfig) {
         var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
         final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
             logMock,
@@ -572,7 +577,7 @@ class WccMutateProcTest extends BaseProcTest {
             new CommunityAlgorithmsFacade(graphStoreCatalogService,
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, Neo4jProxy.testLog()), logMock
+                memoryUsageValidator, logMock), logMock
         );
 
         applyOnProcedure(procedure ->

@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,13 +91,16 @@ class CommunityAlgorithmsBusinessFacadeTest {
 
             var config = mock(WccBaseConfig.class);
             when(config.concurrency()).thenReturn(4);
+            var logMock = mock(Log.class);
+            when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
             var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     graphStoreCatalogServiceMock,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     mock(AlgorithmMemoryValidationService.class),
-                    Neo4jProxy.testLog()
+                    logMock
                 ), null
             );
 
