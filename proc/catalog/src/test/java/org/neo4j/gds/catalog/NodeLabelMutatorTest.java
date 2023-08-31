@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -298,7 +297,7 @@ class NodeLabelMutatorTest {
         return ImmutableExecutionContext
             .builder()
             .databaseId(graphStore.databaseId())
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

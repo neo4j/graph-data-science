@@ -27,7 +27,6 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
@@ -77,7 +76,7 @@ class MutatePropertyComputationResultConsumerTest {
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
         .databaseId(DatabaseId.from(""))
-        .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+        .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
         .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

@@ -21,6 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -327,4 +328,6 @@ public interface Neo4jProxyApi {
     <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException;
 
     GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
+
+    DependencyResolver emptyDependencyResolver();
 }

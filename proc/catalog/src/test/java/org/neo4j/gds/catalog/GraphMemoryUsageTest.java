@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -127,7 +126,7 @@ class GraphMemoryUsageTest {
             return ImmutableExecutionContext
                 .builder()
                 .databaseId(graphStore.databaseId())
-                .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+                .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
                 .returnColumns(ProcedureReturnColumns.EMPTY)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
