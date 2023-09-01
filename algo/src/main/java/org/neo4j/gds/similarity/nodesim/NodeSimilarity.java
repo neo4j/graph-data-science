@@ -23,9 +23,9 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
@@ -54,7 +54,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final ExecutorService executorService;
     private final int concurrency;
     private final MetricSimilarityComputer similarityComputer;
-    private HugeObjectArray<long[]> vectors;
+    private HugeObjectArray<long[]> neighbors;
     private HugeObjectArray<double[]> weights;
 
     private final boolean weighted;
@@ -189,7 +189,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private void prepare() {
         progressTracker.beginSubTask();
 
-        vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
+        neighbors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
         if (weighted) {
             weights = HugeObjectArray.newArray(double[].class, graph.nodeCount());
         }
@@ -197,7 +197,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         DegreeComputer degreeComputer = new DegreeComputer();
         VectorComputer vectorComputer = VectorComputer.of(graph, weighted);
         DegreeFilter degreeFilter = new DegreeFilter(config.degreeCutoff(), config.upperDegreeCutoff());
-        vectors.setAll(node -> {
+        neighbors.setAll(node -> {
             graph.forEachRelationship(node, degreeComputer);
             int degree = degreeComputer.degree;
             degreeComputer.reset();
@@ -229,19 +229,21 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private Stream<SimilarityResult> computeSimilarityResultStream() {
-        return (config.hasTopK() && config.hasTopN())
-            ? computeTopN(computeTopKMap())
-            : (config.hasTopK())
-                ? computeTopKMap().stream()
-                : computeAll();
+        if (config.hasTopK()) {
+            var topKMap = computeTopKMap();
+            return config.hasTopN() ? computeTopN(topKMap) : topKMap.stream();
+        } else {
+            return computeAll();
+        }
     }
 
     private Stream<SimilarityResult> computeParallel() {
-        return (config.hasTopK() && config.hasTopN())
-            ? computeTopN(computeTopKMapParallel())
-            : (config.hasTopK())
-                ? computeTopKMapParallel().stream()
-                : computeAllParallel();
+        if (config.hasTopK()) {
+            var topKMap = computeTopKMapParallel();
+            return config.hasTopN() ? computeTopN(topKMap) : topKMap.stream();
+        } else {
+            return computeAllParallel();
+        }
     }
 
     private Stream<SimilarityResult> computeAll() {
@@ -266,36 +268,38 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), sourceNodes, Math.abs(config.normalizedK()), comparator);
+        TopKMap topKMap = new TopKMap(neighbors.size(), sourceNodes, Math.abs(config.normalizedK()), comparator);
         loggableAndTerminatableSourceNodeStream()
-            .forEach(node1 -> {
-                long[] vector1 = vectors.get(node1);
+            .forEach(sourceNodeId -> {
+                long[] sourceNodeNeighbors = neighbors.get(sourceNodeId);
                 if (sourceNodeFilter.equals(NodeFilter.noOp)) {
-                    targetNodesStream(node1 + 1)
-                        .forEach(node2 -> {
+                    targetNodesStream(sourceNodeId + 1)
+                        .forEach(targetNodeId -> {
+                            var targetNodeNeighbors = neighbors.get(targetNodeId);
                             double similarity = weighted
                                 ?
                                 computeWeightedSimilarity(
-                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                    sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId)
                                 )
-                                : computeSimilarity(vector1, vectors.get(node2));
+                                : computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
                             if (!Double.isNaN(similarity)) {
-                                topKMap.put(node1, node2, similarity);
-                                topKMap.put(node2, node1, similarity);
+                                topKMap.put(sourceNodeId, targetNodeId, similarity);
+                                topKMap.put(targetNodeId, sourceNodeId, similarity);
                             }
                         });
                 } else {
                     targetNodesStream()
-                        .filter(node2 -> node1 != node2)
-                        .forEach(node2 -> {
+                        .filter(targetNodeId -> sourceNodeId != targetNodeId)
+                        .forEach(targetNodeId -> {
+                            var targetNodeNeighbors = neighbors.get(targetNodeId);
                             double similarity = weighted
                                 ?
                                 computeWeightedSimilarity(
-                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                    sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId)
                                 )
-                                : computeSimilarity(vector1, vectors.get(node2));
+                                : computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
                             if (!Double.isNaN(similarity)) {
-                                topKMap.put(node1, node2, similarity);
+                                topKMap.put(sourceNodeId, targetNodeId, similarity);
                             }
                         });
                 }
@@ -308,15 +312,15 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), sourceNodes, Math.abs(config.normalizedK()), comparator);
+        TopKMap topKMap = new TopKMap(neighbors.size(), sourceNodes, Math.abs(config.normalizedK()), comparator);
 
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableSourceNodeStream(),
             concurrency,
             terminationFlag,
             stream -> stream
-                .forEach(node1 -> {
-                    long[] vector1 = vectors.get(node1);
+                .forEach(sourceNodeId -> {
+                    long[] sourceNodeNeighbors = neighbors.get(sourceNodeId);
                     // We deliberately compute the full matrix (except the diagonal).
                     // The parallel workload is partitioned based on the outer stream.
                     // The TopKMap stores a priority queue for each node. Writing
@@ -324,16 +328,17 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                     // Hence, we need to ensure that down the stream, exactly one queue
                     // within the TopKMap processes all pairs for a single node.
                     targetNodesStream()
-                        .filter(node2 -> node1 != node2)
-                        .forEach(node2 -> {
+                        .filter(targetNodeId -> sourceNodeId != targetNodeId)
+                        .forEach(targetNodeId -> {
+                            var targetNodeNeighbors = neighbors.get(targetNodeId);
                             double similarity = weighted
                                 ?
                                 computeWeightedSimilarity(
-                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                    sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId)
                                 )
-                                : computeSimilarity(vector1, vectors.get(node2));
+                                : computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
                             if (!Double.isNaN(similarity)) {
-                                topKMap.put(node1, node2, similarity);
+                                topKMap.put(sourceNodeId, targetNodeId, similarity);
                             }
                         });
                 })
@@ -348,34 +353,36 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         TopNList topNList = new TopNList(config.normalizedN());
         loggableAndTerminatableSourceNodeStream()
-            .forEach(node1 -> {
-                long[] vector1 = vectors.get(node1);
+            .forEach(sourceNodeId -> {
+                long[] sourceNodeNeighbors = neighbors.get(sourceNodeId);
 
                 if (sourceNodeFilter.equals(NodeFilter.noOp)) {
-                    targetNodesStream(node1 + 1)
-                        .forEach(node2 -> {
+                    targetNodesStream(sourceNodeId + 1)
+                        .forEach(targetNodeId -> {
+                            var targetNodeNeighbors = neighbors.get(targetNodeId);
                             double similarity = weighted
                                 ?
                                 computeWeightedSimilarity(
-                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                    sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId)
                                 )
-                                : computeSimilarity(vector1, vectors.get(node2));
+                                : computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
                             if (!Double.isNaN(similarity)) {
-                                topNList.add(node1, node2, similarity);
+                                topNList.add(sourceNodeId, targetNodeId, similarity);
                             }
                         });
                 } else {
                     targetNodesStream()
-                        .filter(node2 -> node1 != node2)
-                        .forEach(node2 -> {
+                        .filter(targetNodeId -> sourceNodeId != targetNodeId)
+                        .forEach(targetNodeId -> {
+                            var targetNodeNeighbors = neighbors.get(targetNodeId);
                             double similarity = weighted
                                 ?
                                 computeWeightedSimilarity(
-                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                    sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId)
                                 )
-                                : computeSimilarity(vector1, vectors.get(node2));
+                                : computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
                             if (!Double.isNaN(similarity)) {
-                                topNList.add(node1, node2, similarity);
+                                topNList.add(sourceNodeId, targetNodeId, similarity);
                             }
                         });
                 }
@@ -412,14 +419,24 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return targetNodesStream(0);
     }
 
-    private double computeWeightedSimilarity(long[] vector1, long[] vector2, double[] weights1, double[] weights2) {
-        double similarity = similarityComputer.computeWeightedSimilarity(vector1, vector2, weights1, weights2);
+    private double computeWeightedSimilarity(
+        long[] sourceNodeNeighbors,
+        long[] targetNodeNeighbors,
+        double[] sourceNodeWeights,
+        double[] targetNodeWeights
+    ) {
+        double similarity = similarityComputer.computeWeightedSimilarity(
+            sourceNodeNeighbors,
+            targetNodeNeighbors,
+            sourceNodeWeights,
+            targetNodeWeights
+        );
         progressTracker.logProgress();
         return similarity;
     }
 
-    private double computeSimilarity(long[] vector1, long[] vector2) {
-        double similarity = similarityComputer.computeSimilarity(vector1, vector2);
+    private double computeSimilarity(long[] sourceNodeNeighbors, long[] targetNodeNeighbors) {
+        double similarity = similarityComputer.computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
         progressTracker.logProgress();
         return similarity;
     }
@@ -446,16 +463,17 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return workload;
     }
 
-    private Stream<SimilarityResult> computeSimilaritiesForNode(long node1) {
-        long[] vector1 = vectors.get(node1);
-        return targetNodesStream(node1 + 1)
-            .mapToObj(node2 -> {
+    private Stream<SimilarityResult> computeSimilaritiesForNode(long sourceNodeId) {
+        long[] sourceNodeNeighbors = neighbors.get(sourceNodeId);
+        return targetNodesStream(sourceNodeId + 1)
+            .mapToObj(targetNodeId -> {
+                var targetNodeNeighbors = neighbors.get(targetNodeId);
                 double similarity = weighted
-                    ? computeWeightedSimilarity(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                    : computeSimilarity(vector1, vectors.get(node2));
+                    ? computeWeightedSimilarity(sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId))
+                    : computeSimilarity(sourceNodeNeighbors, targetNodeNeighbors);
                 return Double.isNaN(similarity) ? null : new SimilarityResult(
-                    node1,
-                    node2,
+                    sourceNodeId,
+                    targetNodeId,
                     similarity
                 );
             })
