@@ -37,9 +37,12 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
-import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
@@ -99,6 +102,25 @@ public class CommunityAlgorithmsFacade {
             userLogRegistryFactory
         );
     }
+
+    <C extends LouvainBaseConfig> AlgorithmComputationResult<C, LouvainResult> louvain(
+        String graphName,
+        C config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new LouvainAlgorithmFactory<>(),
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+    }
+
 
     private <A extends Algorithm<R>, C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> run(
         String graphName,

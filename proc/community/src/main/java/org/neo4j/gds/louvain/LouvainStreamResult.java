@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-public final class StreamResult {
+public final class LouvainStreamResult {
     public final long nodeId;
     public final long communityId;
     public final List<Long> intermediateCommunityIds;
 
-    StreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
+    public LouvainStreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
         this.nodeId = nodeId;
         this.intermediateCommunityIds = intermediateCommunityIds == null ? null : Arrays
             .stream(intermediateCommunityIds)

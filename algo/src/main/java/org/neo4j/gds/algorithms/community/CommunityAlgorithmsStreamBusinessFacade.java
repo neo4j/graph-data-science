@@ -27,6 +27,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 public class CommunityAlgorithmsStreamBusinessFacade {
@@ -70,6 +72,23 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         
         return createStreamComputationResult(result);
 
+    }
+
+    public StreamComputationResult<LouvainBaseConfig, LouvainResult> streamLouvain(
+        String graphName,
+        LouvainBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.louvain(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result);
     }
 
     private <C extends AlgoBaseConfig, RESULT> StreamComputationResult<C, RESULT> createStreamComputationResult(

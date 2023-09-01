@@ -29,6 +29,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.louvain.LouvainStreamResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccMutateResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
@@ -135,6 +137,22 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<LouvainStreamResult> louvainStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = LouvainStreamConfig.of(CypherMapWrapper.create(configuration));
+
+        var computationResult = algorithmsStreamBusinessFacade.streamLouvain(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return LouvainComputationResultTransformer.toStreamResult(computationResult);
     }
 
     // K-Core Decomposition end

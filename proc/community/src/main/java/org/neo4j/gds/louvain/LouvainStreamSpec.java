@@ -35,7 +35,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 
 @GdsCallable(name = "gds.louvain.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStreamConfig, Stream<StreamResult>, LouvainAlgorithmFactory<LouvainStreamConfig>> {
+public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStreamConfig, Stream<LouvainStreamResult>, LouvainAlgorithmFactory<LouvainStreamConfig>> {
     @Override
     public String name() {
         return "LouvainStream";
@@ -52,7 +52,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
     }
 
     @Override
-    public ComputationResultConsumer<Louvain, LouvainResult, LouvainStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Louvain, LouvainResult, LouvainStreamConfig, Stream<LouvainStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -74,7 +74,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
                                 ? result.getIntermediateCommunities(nodeId)
                                 : null;
                             var communityId = nodePropertyValues.longValue(nodeId);
-                            return new StreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
+                            return new LouvainStreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
                         });
                 }).orElseGet(Stream::empty)
         );
