@@ -65,6 +65,11 @@ public interface LouvainResult {
         return communities()::get;
     }
 
+    @Value.Derived
+    default long size() {
+        return communities().size();
+    }
+
     static LouvainResult of(
         HugeLongArray communities,
         int ranLevels,

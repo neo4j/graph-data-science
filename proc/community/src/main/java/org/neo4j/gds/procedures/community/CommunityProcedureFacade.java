@@ -29,6 +29,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.louvain.LouvainMutateConfig;
+import org.neo4j.gds.louvain.LouvainMutateResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainStreamResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
@@ -138,16 +140,22 @@ public class CommunityProcedureFacade {
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
     }
+    // K-Core Decomposition end
 
     public Stream<LouvainStreamResult> louvainStream(
         String graphName,
-        Map<String, Object> configuration
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+
     ) {
-        var config = LouvainStreamConfig.of(CypherMapWrapper.create(configuration));
+        var streamConfig = LouvainStreamConfig.of(CypherMapWrapper.create(configuration));
+
+        // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
+        algorithmMetaDataSetter.set(streamConfig);
 
         var computationResult = algorithmsStreamBusinessFacade.streamLouvain(
             graphName,
-            config,
+            streamConfig,
             user,
             databaseId
         );
@@ -155,5 +163,22 @@ public class CommunityProcedureFacade {
         return LouvainComputationResultTransformer.toStreamResult(computationResult);
     }
 
-    // K-Core Decomposition end
+    public Stream<LouvainMutateResult> louvainMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = LouvainMutateConfig.of(CypherMapWrapper.create(configuration));
+
+        var computationResult = algorithmsMutateBusinessFacade.mutateLouvain(
+            graphName,
+            config,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("communityCount"),
+            procedureReturnColumns.contains("communityDistribution")
+        );
+
+        return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
+    }
+
 }

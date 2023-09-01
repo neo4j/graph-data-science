@@ -36,11 +36,11 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
     }
 
     @NotNull
-    static LouvainResultBuilder<MutateResult> createForMutate(
+    static LouvainResultBuilder<LouvainMutateResult> createForMutate(
         ComputationResult<Louvain, LouvainResult, LouvainMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        LouvainResultBuilder<MutateResult> procResultBuilder = new LouvainMutateResultBuilder(
+        LouvainResultBuilder<LouvainMutateResult> procResultBuilder = new LouvainMutateResultBuilder(
             executionContext.returnColumns(),
             computeResult.config().concurrency()
         );

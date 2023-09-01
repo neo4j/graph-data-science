@@ -20,129 +20,42 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
-import org.neo4j.gds.config.CommunitySizeConfig;
-import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.ConsecutiveIdsConfig;
-import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 final class CommunityResultCompanion {
 
     private CommunityResultCompanion() {}
 
-    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
-        CONFIG config,
-        String resultProperty,
-        LongNodePropertyValues nodeProperties,
-        Supplier<NodeProperty> seedPropertySupplier
+    static NodePropertyValues nodePropertyValues(
+        boolean incremental,
+        boolean consecutiveIds,
+        LongNodePropertyValues nodeProperties
     ) {
-        LongNodePropertyValues result = considerSeedProperty(
-            config,
-            resultProperty,
-            nodeProperties,
-            seedPropertySupplier
-        );
-        return considerConsecutiveIdsFlagAndSize(config, result);
+        if (consecutiveIds && !incremental) {
+            return new ConsecutiveLongNodePropertyValues(nodeProperties);
+        }
+
+        return nodeProperties;
     }
 
-    public static NodePropertyValues nodePropertyValues(
-        boolean incremental, boolean consecutiveIds, LongNodePropertyValues nodeProperties, Optional<Long> minCommunitySize, int concurrency
+    static NodePropertyValues nodePropertyValues(
+        boolean incremental,
+        boolean consecutiveIds,
+        LongNodePropertyValues nodeProperties,
+        Optional<Long> minCommunitySize,
+        int concurrency
     ) {
         var resultAfterMinFilter = minCommunitySize
             .map(size -> applySizeFilter(nodeProperties, size, concurrency))
             .orElse(nodeProperties);
-        return considerConsecutiveIdsFlag(consecutiveIds, incremental, resultAfterMinFilter);
-    }
-
-    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
-        CONFIG config,
-        LongNodePropertyValues nodeProperties
-    ) {
-        return considerConsecutiveIdsFlagAndSize(config, nodeProperties);
-    }
-
-    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues considerSizeFilter(
-        CONFIG config,
-        LongNodePropertyValues result
-    ) {
-        if (config instanceof CommunitySizeConfig) {
-            return considerSizeFilter(((CommunitySizeConfig) config).minCommunitySize(), result, config.concurrency());
-        }
-        return result;
-    }
-
-    public static LongNodePropertyValues considerSizeFilter(
-        Optional<Long> minCommunitySize,
-        LongNodePropertyValues result,
-        int concurrency
-    ) {
-        return minCommunitySize
-            .map(size -> applySizeFilter(result, size, concurrency))
-            .orElse(result);
-    }
-
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerSeedProperty(
-        CONFIG config,
-        String resultProperty,
-        LongNodePropertyValues nodeProperties,
-        Supplier<NodeProperty> seedPropertySupplier
-    ) {
-        var consecutiveIds = config.consecutiveIds();
-        var isIncremental = config.isIncremental();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
-
-        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
-        }
-
-        return nodeProperties;
-    }
-
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerConsecutiveIdsFlag(
-        CONFIG config,
-        LongNodePropertyValues nodeProperties
-    ) {
-        var consecutiveIds = config.consecutiveIds();
-        var isIncremental = config.isIncremental();
-        if (consecutiveIds && !isIncremental) {
-            return new ConsecutiveLongNodePropertyValues(nodeProperties);
-        }
-        
-        return nodeProperties;
-    }
-
-    private static LongNodePropertyValues considerConsecutiveIdsFlag(
-        boolean consecutiveIds, boolean isIncremental, LongNodePropertyValues nodeProperties
-    ) {
-        if (consecutiveIds && !isIncremental) {
-            return new ConsecutiveLongNodePropertyValues(nodeProperties);
-        }
-
-        return nodeProperties;
-    }
-
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerConsecutiveIdsFlagAndSize(
-        CONFIG config,
-        LongNodePropertyValues nodeProperties
-    ) {
-        var resultAfterMinFilter = considerSizeFilter(config, nodeProperties);
-        return considerConsecutiveIdsFlag(config, resultAfterMinFilter);
-    }
-
-    private static LongNodePropertyValues considerConsecutiveIdsFlagAndSize(
-        boolean incremental, boolean consecutiveIds, LongNodePropertyValues nodeProperties, Optional<Long> minCommunitySize, int concurrency
-    ) {
-        var resultAfterMinFilter = considerSizeFilter(minCommunitySize, nodeProperties, concurrency);
-        return considerConsecutiveIdsFlag(consecutiveIds, incremental, resultAfterMinFilter);
+        return nodePropertyValues(consecutiveIds, incremental, resultAfterMinFilter);
     }
 
     private static LongNodePropertyValues applySizeFilter(

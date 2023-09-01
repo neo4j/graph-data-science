@@ -20,8 +20,11 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.algorithms.LouvainSpecificFields;
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainMutateResult;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStreamResult;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
@@ -55,6 +58,22 @@ final class LouvainComputationResultTransformer {
                     return new LouvainStreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
                 });
         }).orElseGet(Stream::empty);
+    }
+
+    static LouvainMutateResult toMutateResult(NodePropertyMutateResult<LouvainSpecificFields> computationResult) {
+        return new LouvainMutateResult(
+            computationResult.algorithmSpecificFields().modularity(),
+            computationResult.algorithmSpecificFields().modularities(),
+            computationResult.algorithmSpecificFields().ranLevels(),
+            computationResult.algorithmSpecificFields().componentCount(),
+            computationResult.algorithmSpecificFields().componentDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.mutateMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.configuration().toMap()
+        );
     }
 
 

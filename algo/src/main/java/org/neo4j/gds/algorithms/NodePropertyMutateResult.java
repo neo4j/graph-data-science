@@ -42,4 +42,16 @@ public interface NodePropertyMutateResult<ALGORITHM_SPECIFIC_FIELDS>  {
     static <ASF> ImmutableNodePropertyMutateResult.Builder<ASF> builder() {
         return ImmutableNodePropertyMutateResult.builder();
     }
+
+    static <ASF> NodePropertyMutateResult<ASF> empty(ASF algorithmSpecificFields, AlgoBaseConfig config) {
+        return NodePropertyMutateResult.<ASF>builder()
+            .computeMillis(0)
+            .postProcessingMillis(0)
+            .nodePropertiesWritten(0)
+            .mutateMillis(0)
+            .configuration(config)
+            .algorithmSpecificFields(algorithmSpecificFields)
+            .build();
+    }
+
 }

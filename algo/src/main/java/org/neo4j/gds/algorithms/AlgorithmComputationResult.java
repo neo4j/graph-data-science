@@ -36,6 +36,7 @@ public interface AlgorithmComputationResult<CONFIG extends AlgoBaseConfig, RESUL
      */
     Optional<RESULT> result();
 
+    // FIXME: We pass the configuration as input, do we need to keep it in the result as well?
     CONFIG configuration();
 
     Graph graph();

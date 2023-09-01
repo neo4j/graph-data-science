@@ -22,11 +22,11 @@ package org.neo4j.gds.louvain;
 import java.util.List;
 import java.util.Map;
 
-public final class MutateResult extends StatsResult {
+public final class LouvainMutateResult extends StatsResult {
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 
-    MutateResult(
+    public LouvainMutateResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
