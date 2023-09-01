@@ -649,7 +649,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Bits bits = Bits.bitsFromLongs(new long[]{storeVersion});
         int length = bits.getShort(8);
         if (length == 0 || length > 7) {
-            throw new IllegalArgumentException(format(Locale.ENGLISH, "The read version string length %d is not proper.", length));
+            throw new IllegalArgumentException(format(
+                Locale.ENGLISH,
+                "The read version string length %d is not proper.",
+                length
+            ));
         }
         char[] result = new char[length];
         for (int i = 0; i < length; i++) {
@@ -925,7 +929,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException {
-        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(ctx.dependencyResolver(), GlobalProcedures.class);
+        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
+            ctx.dependencyResolver(),
+            GlobalProcedures.class
+        );
         return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
     }
 
@@ -949,18 +956,20 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         };
     }
 
+    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver.Adapter() {
+        @Override
+        public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+            return null;
+        }
+
+        @Override
+        public boolean containsDependency(Class<?> type) {
+            return false;
+        }
+    };
+
     @Override
     public DependencyResolver emptyDependencyResolver() {
-        return new DependencyResolver.Adapter() {
-            @Override
-            public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-                return null;
-            }
-
-            @Override
-            public boolean containsDependency(Class<?> type) {
-                return false;
-            }
-        };
+        return EMPTY_DEPENDENCY_RESOLVER;
     }
 }
