@@ -40,7 +40,7 @@ import java.util.Arrays;
 import java.util.SplittableRandom;
 
 @PregelProcedure(
-    name = "gds.alpha.sllpa",
+    name = "gds.sllpa",
     description = "The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph."
 )
 public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.SpeakerListenerLPAConfig> {

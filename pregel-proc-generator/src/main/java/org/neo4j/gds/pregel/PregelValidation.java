@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pregel;
 
-import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.annotation.ValueClass;
@@ -36,6 +35,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
@@ -93,6 +93,7 @@ final class PregelValidation {
         var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
         var maybeDescription = Optional.of(procedure.description()).filter(not(String::isBlank));
+        var maybeDeprecatedBy = Optional.of(procedure.deprecatedBy()).filter(not(String::isBlank));
 
         return Optional.of(ImmutableSpec.of(
             pregelElement,
@@ -102,6 +103,7 @@ final class PregelValidation {
             procedure.name(),
             procedure.modes(),
             maybeDescription,
+            maybeDeprecatedBy,
             requiresInverseIndex(pregelElement)
         ));
     }
@@ -118,32 +120,21 @@ final class PregelValidation {
         return isClass;
     }
 
-    private Optional<DeclaredType> pregelComputation(Element pregelElement, TypeMirror computationInterface) {
-        // TODO: this check needs to bubble up the inheritance tree
-        return MoreElements.asType(pregelElement).getInterfaces().stream()
-            .map(MoreTypes::asDeclared)
-            .filter(declaredType -> typeUtils.isSubtype(declaredType, computationInterface))
-            .findFirst();
-    }
-
     private boolean isBasePregelComputation(Element pregelElement) {
-        var pregelTypeElement = MoreElements.asType(pregelElement);
-        var maybeInterface = pregelComputation(pregelElement, basePregelComputation);
-        boolean isPregelComputation = maybeInterface.isPresent();
+        var isPregelComputation = typeUtils.isSubtype(pregelElement.asType(), basePregelComputation);
 
         if (!isPregelComputation) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "The annotated Pregel computation must implement the PregelComputation interface.",
-                pregelTypeElement
+                pregelElement
             );
         }
         return isPregelComputation;
     }
 
     private boolean requiresInverseIndex(Element pregelElement) {
-        var maybeInterface = pregelComputation(pregelElement, bidirectionalPregelComputation);
-        return maybeInterface.isPresent();
+        return typeUtils.isSubtype(pregelElement.asType(), bidirectionalPregelComputation);
     }
 
     private boolean isPregelProcedureConfig(Element pregelElement) {
@@ -163,7 +154,6 @@ final class PregelValidation {
     }
 
     private boolean hasEmptyConstructor(Element pregelElement) {
-        var pregelTypeElement = MoreElements.asType(pregelElement);
         var constructors = ElementFilter.constructorsIn(pregelElement.getEnclosedElements());
 
         var hasDefaultConstructor = constructors.isEmpty() || constructors
@@ -174,7 +164,7 @@ final class PregelValidation {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "The annotated Pregel computation must have an empty constructor.",
-                pregelTypeElement
+                pregelElement
             );
         }
         return hasDefaultConstructor;
@@ -205,16 +195,32 @@ final class PregelValidation {
                     cypherMapWrapperType,
                     configElement
                 ),
-                MoreElements.asType(pregelElement)
+                pregelElement
             );
         }
 
         return maybeHasFactoryMethod;
     }
 
+    /**
+     * Config is a type parameter somewhere in the type hierarchy of {@param pregelElement}.
+     * Find it by traversing type hierarchy to where the {@code BasePregelComputation} interface is implemented.
+     *
+     * @param pregelElement
+     * @return the config type as a {@code TypeMirror}
+     */
     private TypeMirror config(Element pregelElement) {
-        return pregelComputation(pregelElement, basePregelComputation)
-            .map(declaredType -> declaredType.getTypeArguments().get(0))
+        var candidate = pregelElement.asType();
+        var result = Optional.<DeclaredType>empty();
+        while (result.isEmpty() && candidate.getKind() != TypeKind.NONE) {
+            var candidateTypeElement = MoreTypes.asTypeElement(candidate);
+            result = candidateTypeElement.getInterfaces().stream()
+                .map(MoreTypes::asDeclared)
+                .filter(declaredType -> typeUtils.isSubtype(declaredType, basePregelComputation))
+                .findFirst();
+            candidate = candidateTypeElement.getSuperclass();
+        }
+        return result.map(declaredType -> declaredType.getTypeArguments().get(0))
             .orElseThrow(() -> new IllegalStateException("Could not find a pregel computation"));
     }
 
@@ -233,6 +239,8 @@ final class PregelValidation {
         GDSMode[] procedureModes();
 
         Optional<String> description();
+
+        Optional<String> deprecatedBy();
 
         boolean requiresInverseIndex();
     }

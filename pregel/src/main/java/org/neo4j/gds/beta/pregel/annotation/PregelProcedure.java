@@ -49,4 +49,11 @@ public @interface PregelProcedure {
      * @return procedure description
      */
     String description() default "";
+
+    /**
+     * A reference to a replacement if the procedure is deprecated.
+     *
+     * @return procedure description
+     */
+    String deprecatedBy() default "";
 }

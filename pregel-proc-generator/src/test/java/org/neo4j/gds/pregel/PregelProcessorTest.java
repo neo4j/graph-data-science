@@ -29,12 +29,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ResourceUtil;
 
 import javax.tools.JavaFileObject;
+import java.util.List;
 import java.util.Locale;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaFileObjects.forResource;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
+import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @EnableRuleMigrationSupport
@@ -77,6 +79,21 @@ class PregelProcessorTest {
                 loadExpectedFile(formatWithLocale("expected/%sStreamProc.java", className)),
                 loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className)),
                 loadExpectedFile(formatWithLocale("expected/%sAlgorithmFactory.java", className))
+            );
+    }
+
+    @Test
+    void positiveInheritedComputationTest() {
+        var className = "InheritedComputation";
+        assertAbout(javaSources())
+            .that(List.of(forResource("positive/BaseComputation.java"), forResource("positive/" + className + ".java")))
+            .processedWith(new PregelProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(
+                loadExpectedFile("expected/" + className + "StreamProc.java"),
+                loadExpectedFile("expected/" + className + "Algorithm.java"),
+                loadExpectedFile("expected/" + className + "AlgorithmFactory.java")
             );
     }
 
