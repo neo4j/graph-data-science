@@ -21,23 +21,13 @@ package org.neo4j.gds.algorithms;
 
 import java.util.Map;
 
-public class WccSpecificFields implements CommunityStatisticsSpecificFields {
-    private final long componentCount;
-    private final Map<String, Object> componentDistribution;
+/**
+ * Defines the structure of algorithm community statistics.
+ * The implementations may add more methods specific for the particular algorithm.
+ * @see org.neo4j.gds.algorithms.LouvainSpecificFields
+ */
+public interface CommunityStatisticsSpecificFields {
+    long componentCount();
 
-    public WccSpecificFields(
-        long componentCount,
-        Map<String, Object> componentDistribution
-    ) {
-        this.componentCount = componentCount;
-        this.componentDistribution = componentDistribution;
-    }
-
-    public long componentCount() {
-        return componentCount;
-    }
-
-    public Map<String, Object> componentDistribution() {
-        return componentDistribution;
-    }
+    Map<String, Object> componentDistribution();
 }

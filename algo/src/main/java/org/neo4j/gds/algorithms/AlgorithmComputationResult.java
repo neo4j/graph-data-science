@@ -22,12 +22,11 @@ package org.neo4j.gds.algorithms;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.Optional;
 
 @ValueClass
-public interface AlgorithmComputationResult<CONFIG extends AlgoBaseConfig, RESULT> {
+public interface AlgorithmComputationResult<RESULT> {
 
     /**
      * Result is empty if no computation happened, which basically means the graph was empty.
@@ -36,18 +35,15 @@ public interface AlgorithmComputationResult<CONFIG extends AlgoBaseConfig, RESUL
      */
     Optional<RESULT> result();
 
-    // FIXME: We pass the configuration as input, do we need to keep it in the result as well?
-    CONFIG configuration();
-
     Graph graph();
 
     GraphStore graphStore();
 
-    static <C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> of(R result, Graph graph, C configuration, GraphStore graphStore) {
-        return ImmutableAlgorithmComputationResult.of(result, configuration, graph, graphStore);
+    static <R> AlgorithmComputationResult<R> of(R result, Graph graph, GraphStore graphStore) {
+        return ImmutableAlgorithmComputationResult.of(result, graph, graphStore);
     }
 
-    static <C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> withoutAlgorithmResult(Graph graph, C configuration, GraphStore graphStore) {
-        return ImmutableAlgorithmComputationResult.of(Optional.empty(), configuration, graph, graphStore);
+    static <R> AlgorithmComputationResult<R> withoutAlgorithmResult(Graph graph, GraphStore graphStore) {
+        return ImmutableAlgorithmComputationResult.of(Optional.empty(), graph, graphStore);
     }
 }

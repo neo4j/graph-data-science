@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-final class AddNodePropertyResult {
+public final class AddNodePropertyResult {
 
     private final long nodePropertiesAdded;
     private final long mutateMilliseconds;

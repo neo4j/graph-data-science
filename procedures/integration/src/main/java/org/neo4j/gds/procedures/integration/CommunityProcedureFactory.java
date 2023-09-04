@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.community.NodePropertyService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -91,7 +92,7 @@ public class CommunityProcedureFactory {
 
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
             communityAlgorithmsFacade,
-            log
+            new NodePropertyService(log)
         );
 
 

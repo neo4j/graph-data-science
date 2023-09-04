@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
-public class LouvainSpecificFields {
+public final class LouvainSpecificFields implements CommunityStatisticsSpecificFields {
 
     public static final LouvainSpecificFields EMPTY =
         new LouvainSpecificFields(0d, emptyList(), 0L, 0L, emptyMap());
@@ -70,10 +70,12 @@ public class LouvainSpecificFields {
         this.modularity=modularity;
     }
 
+    @Override
     public long componentCount() {
         return componentCount;
     }
 
+    @Override
     public Map<String, Object> componentDistribution() {
         return componentDistribution;
     }

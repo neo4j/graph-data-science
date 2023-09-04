@@ -67,9 +67,9 @@ public class CommunityAlgorithmsFacade {
         this.log = log;
     }
 
-    <C extends WccBaseConfig> AlgorithmComputationResult<C, DisjointSetStruct> wcc(
+    AlgorithmComputationResult<DisjointSetStruct> wcc(
         String graphName,
-        C config,
+        WccBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {
@@ -85,9 +85,9 @@ public class CommunityAlgorithmsFacade {
         );
     }
 
-    <C extends KCoreDecompositionBaseConfig> AlgorithmComputationResult<C, KCoreDecompositionResult> kCore(
+    AlgorithmComputationResult<KCoreDecompositionResult> kCore(
         String graphName,
-        C config,
+        KCoreDecompositionBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {
@@ -103,9 +103,9 @@ public class CommunityAlgorithmsFacade {
         );
     }
 
-    <C extends LouvainBaseConfig> AlgorithmComputationResult<C, LouvainResult> louvain(
+    AlgorithmComputationResult<LouvainResult> louvain(
         String graphName,
-        C config,
+        LouvainBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {
@@ -122,7 +122,7 @@ public class CommunityAlgorithmsFacade {
     }
 
 
-    private <A extends Algorithm<R>, C extends AlgoBaseConfig, R> AlgorithmComputationResult<C, R> run(
+    private <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
         String graphName,
         C config,
         Optional<String> relationshipProperty,
@@ -149,7 +149,7 @@ public class CommunityAlgorithmsFacade {
 
         // No algorithm execution when the graph is empty
         if (graph.isEmpty()) {
-            return AlgorithmComputationResult.withoutAlgorithmResult(graph, config, graphStore);
+            return AlgorithmComputationResult.withoutAlgorithmResult(graph, graphStore);
         }
 
         // create the algorithm
@@ -178,7 +178,7 @@ public class CommunityAlgorithmsFacade {
         try {
             var algorithmResult = algorithm.compute();
 
-            return AlgorithmComputationResult.of(algorithmResult, graph, config, graphStore);
+            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore);
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();

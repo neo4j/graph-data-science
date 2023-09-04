@@ -42,6 +42,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.community.NodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -344,7 +345,8 @@ class WccMutateProcTest extends BaseProcTest {
             new CommunityAlgorithmsFacade(graphStoreCatalogService,
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock), logMock
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
         );
 
         applyOnProcedure(procedure -> {
@@ -457,7 +459,8 @@ class WccMutateProcTest extends BaseProcTest {
                 new CommunityAlgorithmsFacade(graphStoreCatalogService,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, logMock), logMock
+                    memoryUsageValidator, logMock),
+                new NodePropertyService(logMock)
             );
 
             procedure.facade = new CommunityProcedureFacade(
@@ -519,7 +522,8 @@ class WccMutateProcTest extends BaseProcTest {
                 new CommunityAlgorithmsFacade(graphStoreCatalogService,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, null), logMock
+                    memoryUsageValidator, null),
+                new NodePropertyService(logMock)
             );
             proc.facade = new CommunityProcedureFacade(
                 null,
@@ -582,7 +586,8 @@ class WccMutateProcTest extends BaseProcTest {
             new CommunityAlgorithmsFacade(graphStoreCatalogService,
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock), logMock
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
         );
 
         applyOnProcedure(procedure ->

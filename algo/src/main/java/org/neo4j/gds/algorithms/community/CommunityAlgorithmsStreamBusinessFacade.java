@@ -52,7 +52,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result);
+        return createStreamComputationResult(result, config);
     }
 
 
@@ -70,7 +70,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
         
-        return createStreamComputationResult(result);
+        return createStreamComputationResult(result, config);
 
     }
 
@@ -88,16 +88,14 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result);
+        return createStreamComputationResult(result, config);
     }
 
-    private <C extends AlgoBaseConfig, RESULT> StreamComputationResult<C, RESULT> createStreamComputationResult(
-        AlgorithmComputationResult<C, RESULT> result
-    ) {
+    private <C extends AlgoBaseConfig, RESULT> StreamComputationResult<C, RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result, C configuration) {
 
         return StreamComputationResult.of(
             result.result(),
-            result.configuration(),
+            configuration,
             result.graph(),
             result.graphStore()
         );

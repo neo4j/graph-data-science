@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
@@ -33,7 +34,6 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -41,21 +41,22 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
+
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
-    private final Log log;
+    private final NodePropertyService nodePropertyService;
 
-
-    public CommunityAlgorithmsMutateBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade, Log log) {
-        this.log = log;
+    public CommunityAlgorithmsMutateBusinessFacade(
+        CommunityAlgorithmsFacade communityAlgorithmsFacade,
+        NodePropertyService nodePropertyService
+    ) {
+        this.nodePropertyService = nodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
-
 
     public NodePropertyMutateResult<WccSpecificFields> mutateWcc(
         String graphName,
@@ -137,9 +138,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 : CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                    Optional.empty(),
-                    config.concurrency()
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
                 );
         });
 
@@ -164,8 +163,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
     }
 
-    private <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
-        AlgorithmComputationResult<CONFIG, RESULT> algorithmResult,
+    /*
+        By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields
+        to contain the statistics information.
+     */
+    <RESULT, CONFIG extends MutateNodePropertyConfig, ASF extends CommunityStatisticsSpecificFields> NodePropertyMutateResult<ASF> mutateNodeProperty(
+        AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
         NodePropertyValuesMapper<RESULT, CONFIG> nodePropertyValuesMapper,
         CommunityFunctionSupplier<RESULT> communityFunctionSupplier,
@@ -185,7 +188,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             );
 
             // 3. Go and mutate the graph store
-            var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, configuration, algorithmResult);
+            var addNodePropertyResult = nodePropertyService.mutate(
+                configuration.mutateProperty(), nodePropertyValues,
+                configuration.nodeLabelIdentifiers(algorithmResult.graphStore()), algorithmResult.graph(),
+                algorithmResult.graphStore()
+            );
 
             // 4. Compute result statistics
             var communityStatistics = CommunityStatistics.communityStats(
@@ -214,8 +221,8 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
     }
 
-    private <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
-        AlgorithmComputationResult<CONFIG, RESULT> algorithmResult,
+    <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
+        AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
         NodePropertyValuesMapper<RESULT, CONFIG> nodePropertyValuesMapper,
         SpecificFieldsSupplier<RESULT, ASF> specificFieldsSupplier,
@@ -231,7 +238,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             );
 
             // 3. Go and mutate the graph store
-            var addNodePropertyResult = mutateNodeProperty(nodePropertyValues, configuration, algorithmResult);
+            var addNodePropertyResult = nodePropertyService.mutate(
+                configuration.mutateProperty(),
+                nodePropertyValues,
+                configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
+                algorithmResult.graph(), algorithmResult.graphStore()
+            );
 
             var specificFields = specificFieldsSupplier.specificFields(result);
 
@@ -256,21 +268,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         }
 
         return new AlgorithmResultWithTiming<>(algorithmResult, computeMilliseconds.get());
-    }
-
-    private <C extends MutateNodePropertyConfig, T> AddNodePropertyResult mutateNodeProperty(
-        NodePropertyValues nodePropertyValues,
-        C config,
-        AlgorithmComputationResult<C, T> algorithmResult
-    ) {
-        return GraphStoreUpdater.addNodeProperty(
-            algorithmResult.graph(),
-            algorithmResult.graphStore(),
-            config.nodeLabelIdentifiers(algorithmResult.graphStore()),
-            config.mutateProperty(),
-            nodePropertyValues,
-            this.log
-        );
     }
 
     private static LongArrayNodePropertyValues louvainIntermediateCommunitiesNodePropertyValues(LouvainResult result) {
@@ -302,19 +299,19 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     }
 
     // Herein lie some private functional interfaces, so we know what we're doing 🤨
-    private interface NodePropertyValuesMapper<R, C extends MutateNodePropertyConfig> {
+    interface NodePropertyValuesMapper<R, C extends MutateNodePropertyConfig> {
         NodePropertyValues map(R result, C configuration);
     }
 
-    private interface CommunityFunctionSupplier<R> {
+    interface CommunityFunctionSupplier<R> {
         LongUnaryOperator communityFunction(R result);
     }
 
-    private interface SpecificFieldsWithCommunityStatisticsSupplier<R, ASF> {
+    interface SpecificFieldsWithCommunityStatisticsSupplier<R, ASF> {
         ASF specificFields(R result, long componentCount, Map<String, Object> communitySummary);
     }
 
-    private interface SpecificFieldsSupplier<R, ASF> {
+    interface SpecificFieldsSupplier<R, ASF> {
         ASF specificFields(R result);
     }
 
