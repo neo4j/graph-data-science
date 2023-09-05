@@ -81,7 +81,7 @@ ext {
         'mockito-junit-jupiter': '5.4.0',
         'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
         'opencypher-front-end' : '9.0.20210312',
-        'picocli'              : '4.7.4',
+        'picocli'              : '4.7.5',
         'qala-datagen'         : '2.5.1',
         'sb-contrib'           : '7.6.0',
         'scala'                : scalas[neo4j_minor],
