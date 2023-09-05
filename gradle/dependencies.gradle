@@ -50,7 +50,7 @@ ext {
         'assertj'              : '3.24.2',
         'auto-common'          : '1.2.2',
         'auto-service'         : '1.1.1',
-        'bouncycastle-prov'     : '1.75',
+        'bouncycastle-prov'     : '1.76',
         'checkStyle'            : '10.12.1',
         'commons-io'           : '2.13.0',
         'commons-lang3'        : '3.13.0',
