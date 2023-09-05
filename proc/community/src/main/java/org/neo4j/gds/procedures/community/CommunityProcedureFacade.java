@@ -25,6 +25,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateResult;
@@ -38,6 +39,7 @@ import org.neo4j.gds.wcc.WccMutateResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
@@ -69,10 +71,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration,
         AlgorithmMetaDataSetter algorithmMetaDataSetter
     ) {
-        var streamConfig = WccStreamConfig.of(CypherMapWrapper.create(configuration));
-
-        // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
-        algorithmMetaDataSetter.set(streamConfig);
+        var streamConfig = createStreamConfig(configuration, WccStreamConfig::of, algorithmMetaDataSetter);
 
         var computationResult = algorithmsStreamBusinessFacade.streamWcc(
             graphName,
@@ -88,7 +87,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = WccMutateConfig.of(CypherMapWrapper.create(configuration));
+        var config = createMutateConfig(configuration, WccMutateConfig::of);
 
         var computationResult = algorithmsMutateBusinessFacade.mutateWcc(
             graphName,
@@ -110,10 +109,11 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration,
         AlgorithmMetaDataSetter algorithmMetaDataSetter
     ) {
-        var streamConfig = KCoreDecompositionStreamConfig.of(CypherMapWrapper.create(configuration));
-
-        // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
-        algorithmMetaDataSetter.set(streamConfig);
+        var streamConfig = createStreamConfig(
+            configuration,
+            KCoreDecompositionStreamConfig::of,
+            algorithmMetaDataSetter
+        );
 
         var computationResult = algorithmsStreamBusinessFacade.streamKCore(
             graphName,
@@ -129,7 +129,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = KCoreDecompositionMutateConfig.of(CypherMapWrapper.create(configuration));
+        var config = createMutateConfig(configuration, KCoreDecompositionMutateConfig::of);
 
         var computationResult = algorithmsMutateBusinessFacade.mutateΚcore(
             graphName,
@@ -148,10 +148,7 @@ public class CommunityProcedureFacade {
         AlgorithmMetaDataSetter algorithmMetaDataSetter
 
     ) {
-        var streamConfig = LouvainStreamConfig.of(CypherMapWrapper.create(configuration));
-
-        // This is needed because of `com.neo4j.gds.ProcedureSignatureGuard` 🤦
-        algorithmMetaDataSetter.set(streamConfig);
+        var streamConfig = createStreamConfig(configuration, LouvainStreamConfig::of, algorithmMetaDataSetter);
 
         var computationResult = algorithmsStreamBusinessFacade.streamLouvain(
             graphName,
@@ -167,7 +164,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = LouvainMutateConfig.of(CypherMapWrapper.create(configuration));
+        var config = createMutateConfig(configuration, LouvainMutateConfig::of);
 
         var computationResult = algorithmsMutateBusinessFacade.mutateLouvain(
             graphName,
@@ -179,6 +176,24 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    <C extends AlgoBaseConfig> C createStreamConfig(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, C> configCreator,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var config = configCreator.apply(CypherMapWrapper.create(configuration));
+        algorithmMetaDataSetter.set(config);
+        return config;
+    }
+
+    <C extends AlgoBaseConfig> C createMutateConfig(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, C> configCreator
+    ) {
+        return configCreator.apply(CypherMapWrapper.create(configuration));
+
     }
 
 }
