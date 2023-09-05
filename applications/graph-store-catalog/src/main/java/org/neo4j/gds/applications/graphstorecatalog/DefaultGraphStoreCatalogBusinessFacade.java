@@ -41,6 +41,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -84,6 +85,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final StreamNodePropertiesApplication streamNodePropertiesApplication;
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
     private final StreamRelationshipsApplication streamRelationshipsApplication;
+    private final WriteNodePropertiesApplication writeNodePropertiesApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -102,7 +104,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         NodeLabelMutatorApplication nodeLabelMutatorApplication,
         StreamNodePropertiesApplication streamNodePropertiesApplication,
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
-        StreamRelationshipsApplication streamRelationshipsApplication
+        StreamRelationshipsApplication streamRelationshipsApplication,
+        WriteNodePropertiesApplication writeNodePropertiesApplication
     ) {
         this.log = log;
 
@@ -123,6 +126,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.streamNodePropertiesApplication = streamNodePropertiesApplication;
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         this.streamRelationshipsApplication = streamRelationshipsApplication;
+        this.writeNodePropertiesApplication = writeNodePropertiesApplication;
     }
 
     @Override
@@ -494,7 +498,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         String graphNameAsString,
-        Object nodeProperties,
+        Object nodePropertiesAsObject,
         Object nodeLabelsAsObject,
         Map<String, Object> rawConfiguration,
         boolean usesPropertyNameColumn,
@@ -504,7 +508,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
 
         var configuration = configurationService.parseGraphStreamNodePropertiesConfiguration(
             graphName,
-            nodeProperties,
+            nodePropertiesAsObject,
             nodeLabelsAsObject,
             rawConfiguration
         );
@@ -512,7 +516,15 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         // melt this together, so you only obtain the graph store if it is valid? think it over
         var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
         var graphStore = graphStoreWithConfig.graphStore();
-        graphStoreValidationService.ensureNodePropertiesMatchNodeLabels(graphStore, configuration);
+        var nodeLabels = configuration.nodeLabels();
+        var nodeLabelIdentifiers = configuration.nodeLabelIdentifiers(graphStore);
+        var nodeProperties = configuration.nodeProperties();
+        graphStoreValidationService.ensureNodePropertiesMatchNodeLabels(
+            graphStore,
+            nodeLabels,
+            nodeLabelIdentifiers,
+            nodeProperties
+        );
 
         return streamNodePropertiesApplication.compute(
             taskRegistryFactory,
@@ -584,6 +596,51 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         );
 
         return streamRelationshipsApplication.compute(graphStore, configuration);
+    }
+
+    @Override
+    public NodePropertiesWriteResult writeNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        Object nodePropertiesAsObject,
+        Object nodeLabelsAsObject,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = configurationService.parseGraphWriteNodePropertiesConfiguration(
+            graphName,
+            nodePropertiesAsObject,
+            nodeLabelsAsObject,
+            rawConfiguration
+        );
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var nodeLabels = configuration.nodeLabels();
+        var nodeLabelIdentifiers = configuration.nodeLabelIdentifiers(graphStore);
+        var nodeProperties = configuration.nodeProperties().stream()
+            .map(UserInputWriteProperties.PropertySpec::nodeProperty)
+            .collect(Collectors.toList());
+
+        graphStoreValidationService.ensureNodePropertiesMatchNodeLabels(
+            graphStore,
+            nodeLabels, nodeLabelIdentifiers,
+            nodeProperties
+        );
+
+        return writeNodePropertiesApplication.compute(
+            graphName,
+            graphStore,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            configuration
+        );
     }
 
     private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

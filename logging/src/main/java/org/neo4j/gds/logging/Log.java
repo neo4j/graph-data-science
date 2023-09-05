@@ -53,4 +53,46 @@ public interface Log {
      */
     @Deprecated
     Object getNeo4jLog();
+
+    /**
+     * Here is some convenience for daily engineering toil, do not use for realz.
+     */
+    static Log noOpLog() {
+        return new Log() {
+            @Override
+            public void info(String message) {
+
+            }
+
+            @Override
+            public void info(String format, Object... arguments) {
+
+            }
+
+            @Override
+            public void warn(String message, Exception e) {
+
+            }
+
+            @Override
+            public void warn(String format, Object... arguments) {
+
+            }
+
+            @Override
+            public boolean isDebugEnabled() {
+                return false;
+            }
+
+            @Override
+            public void debug(String format, Object... arguments) {
+
+            }
+
+            @Override
+            public Object getNeo4jLog() {
+                throw new UnsupportedOperationException("Not supported for this shunt.");
+            }
+        };
+    }
 }

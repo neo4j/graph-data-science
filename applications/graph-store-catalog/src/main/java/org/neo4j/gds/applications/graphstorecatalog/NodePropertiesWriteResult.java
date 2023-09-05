@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,28 +41,26 @@ public final class NodePropertiesWriteResult {
         this.propertiesWritten = propertiesWritten;
     }
 
-    static class Builder {
+    public static class Builder {
         private final String graphName;
         private final List<String> nodeProperties;
         private long propertiesWritten;
         private long writeMillis;
 
-        Builder(String graphName, List<String> nodeProperties) {
+        public Builder(String graphName, List<String> nodeProperties) {
             this.graphName = graphName;
             this.nodeProperties = nodeProperties;
         }
 
-        Builder withWriteMillis(long writeMillis) {
+        void withWriteMillis(long writeMillis) {
             this.writeMillis = writeMillis;
-            return this;
         }
 
-        Builder withPropertiesWritten(long propertiesWritten) {
+        void withPropertiesWritten(long propertiesWritten) {
             this.propertiesWritten = propertiesWritten;
-            return this;
         }
 
-        NodePropertiesWriteResult build() {
+        public NodePropertiesWriteResult build() {
             return new NodePropertiesWriteResult(writeMillis, graphName, nodeProperties, propertiesWritten);
         }
     }

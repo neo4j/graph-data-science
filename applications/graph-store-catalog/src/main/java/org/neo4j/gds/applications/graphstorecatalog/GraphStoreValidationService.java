@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
@@ -40,7 +41,7 @@ public class GraphStoreValidationService {
     /**
      * @throws java.lang.IllegalArgumentException if at least one key in the list of node properties is not present in the graph store
      */
-    public void ensureNodePropertiesExist(GraphStore graphStore, Collection<String> nodeProperties) {
+    void ensureNodePropertiesExist(GraphStore graphStore, Collection<String> nodeProperties) {
         var invalidProperties = nodeProperties.stream()
             .filter(nodeProperty -> !graphStore.hasNodeProperty(nodeProperty))
             .collect(Collectors.toList());
@@ -54,7 +55,7 @@ public class GraphStoreValidationService {
         }
     }
 
-    public void ensureRelationshipsMayBeDeleted(GraphStore graphStore, String relationshipType, GraphName graphName) {
+    void ensureRelationshipsMayBeDeleted(GraphStore graphStore, String relationshipType, GraphName graphName) {
         var relationshipTypes = graphStore.relationshipTypes();
 
         if (relationshipTypes.size() == 1) {
@@ -75,7 +76,7 @@ public class GraphStoreValidationService {
         }
     }
 
-    public void ensureGraphPropertyExists(GraphStore graphStore, String graphProperty) {
+    void ensureGraphPropertyExists(GraphStore graphStore, String graphProperty) {
         if (graphStore.hasGraphProperty(graphProperty)) return;
 
         var candidates = StringSimilarity.similarStringsIgnoreCase(
@@ -100,11 +101,16 @@ public class GraphStoreValidationService {
      * in which case at least one of your labels must have the listed properties. Or if you specify a label,
      * then we validate that that label has the properties.
      */
-    void ensureNodePropertiesMatchNodeLabels(GraphStore graphStore, GraphExportNodePropertiesConfig configuration) {
-        if (!configuration.nodeLabels().contains(ElementProjection.PROJECT_ALL)) {
+    void ensureNodePropertiesMatchNodeLabels(
+        GraphStore graphStore,
+        Collection<String> nodeLabels,
+        Collection<NodeLabel> nodeLabelIdentifiers,
+        Collection<String> nodeProperties
+    ) {
+        if (!nodeLabels.contains(ElementProjection.PROJECT_ALL)) {
             // validate that all given labels have all the properties
-            configuration.nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
-                    List<String> invalidProperties = configuration.nodeProperties()
+            nodeLabelIdentifiers.forEach(nodeLabel -> {
+                    List<String> invalidProperties = nodeProperties
                         .stream()
                         .filter(nodeProperty -> !graphStore.hasNodeProperty(nodeLabel, nodeProperty))
                         .collect(Collectors.toList());
@@ -122,15 +128,15 @@ public class GraphStoreValidationService {
             );
         } else {
             // validate that at least one label has all the properties
-            boolean hasValidLabel = configuration.nodeLabelIdentifiers(graphStore).stream()
+            var hasValidLabel = nodeLabelIdentifiers.stream()
                 .anyMatch(nodeLabel -> graphStore
                     .nodePropertyKeys(List.of(nodeLabel))
-                    .containsAll(configuration.nodeProperties()));
+                    .containsAll(nodeProperties));
 
             if (!hasValidLabel) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Expecting at least one node projection to contain property key(s) %s.",
-                    StringJoining.join(configuration.nodeProperties())
+                    StringJoining.join(nodeProperties)
                 ));
             }
         }

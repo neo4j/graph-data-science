@@ -281,6 +281,26 @@ public class ConfigurationService {
         return configuration;
     }
 
+    GraphWriteNodePropertiesConfig parseGraphWriteNodePropertiesConfiguration(
+        GraphName graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphWriteNodePropertiesConfig.of(
+            graphName.getValue(),
+            nodeProperties,
+            nodeLabels,
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
+    }
+
     private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {
         cypherConfig.requireOnlyKeysFrom(config.configKeys());
     }

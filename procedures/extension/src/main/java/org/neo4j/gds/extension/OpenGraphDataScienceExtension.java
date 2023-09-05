@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
@@ -88,7 +89,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var userLogServices = new UserLogServices();
         var userServices = new UserServices();
 
-        // GDS services - shared state
+        // GDS services
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
         // sub-interface factories
@@ -96,6 +97,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             log,
             graphStoreCatalogService,
             databaseIdService,
+            __ -> new NativeExportBuildersProvider(), // we always just offer native writes in OpenGDS
             taskRegistryFactoryService,
             userLogServices,
             userServices

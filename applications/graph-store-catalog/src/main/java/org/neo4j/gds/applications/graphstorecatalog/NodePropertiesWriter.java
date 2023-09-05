@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -32,14 +31,18 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,13 +51,76 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
+public class NodePropertiesWriter {
+    private final Log log;
+    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    private final TerminationFlag terminationFlag;
 
-public final class NodePropertiesWriter {
+    NodePropertiesWriter(
+        Log log,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TerminationFlag terminationFlag
+    ) {
+        this.log = log;
+        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
+        this.terminationFlag = terminationFlag;
+    }
 
-    private NodePropertiesWriter() {}
+    NodePropertiesWriteResult write(
+        GraphStore graphStore,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        GraphWriteNodePropertiesConfig configuration
+    ) {
+        var validNodeLabels = configuration.validNodeLabels(graphStore);
+        var task = Tasks.iterativeFixed(
+            "Graph :: NodeProperties :: Write",
+            () -> List.of(
+                NodePropertyExporter.innerTask("Label", Task.UNKNOWN_VOLUME)
+            ),
+            validNodeLabels.size()
+        );
+        var progressTracker = new TaskProgressTracker(
+            task,
+            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            configuration.writeConcurrency(),
+            new JobId(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
 
-    static Stream<NodePropertiesWriteResult> write(
+        var allNodeProperties = configuration
+            .nodeProperties()
+            .stream()
+            .map(UserInputWriteProperties.PropertySpec::writeProperty)
+            .collect(Collectors.toList());
+
+        // writing
+        NodePropertiesWriteResult.Builder builder = new NodePropertiesWriteResult.Builder(graphName, allNodeProperties);
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            try {
+                var propertiesWritten = writeNodeProperties(
+                    graphStore,
+                    configuration,
+                    validNodeLabels,
+                    nodePropertyExporterBuilder,
+                    terminationFlag,
+                    progressTracker
+                );
+
+                builder.withPropertiesWritten(propertiesWritten);
+            } catch (RuntimeException e) {
+                log.warn("Node property writing failed", e);
+                throw e;
+            }
+        }
+
+        return builder.build();
+    }
+
+    // old entry point, will go away
+    public static Stream<NodePropertiesWriteResult> write(
         String graphName,
         Object nodeProperties,
         Object nodeLabels,
@@ -98,7 +164,7 @@ public final class NodePropertiesWriter {
             executionContext.taskRegistryFactory(),
             executionContext.userLogRegistryFactory()
         );
-        
+
         var allNodeProperties = config
             .nodeProperties()
             .stream()
@@ -108,23 +174,54 @@ public final class NodePropertiesWriter {
         // writing
         NodePropertiesWriteResult.Builder builder = new NodePropertiesWriteResult.Builder(graphName, allNodeProperties);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            long propertiesWritten = runWithExceptionLogging(
-                "Node property writing failed",
-                executionContext.log(),
-                () -> writeNodeProperties(graphStore, config, validNodeLabels, executionContext, progressTracker)
-            );
-            builder.withPropertiesWritten(propertiesWritten);
+            try {
+                var propertiesWritten = writeNodeProperties(
+                    graphStore,
+                    config,
+                    validNodeLabels,
+                    executionContext,
+                    progressTracker
+                );
+
+                builder.withPropertiesWritten(propertiesWritten);
+            } catch (RuntimeException e) {
+                executionContext.log().warn("Node property writing failed", e);
+                throw e;
+            }
         }
         // result
         return Stream.of(builder.build());
     }
 
+    // a little bridge from old to new
+    private static long writeNodeProperties(
+        GraphStore graphStore,
+        GraphWriteNodePropertiesConfig config,
+        Iterable<NodeLabel> validNodeLabels,
+        ExecutionContext executionContext,
+        ProgressTracker progressTracker
+    ) {
+        var nodePropertyExporterBuilder = executionContext.nodePropertyExporterBuilder();
+        var terminationMonitor = executionContext.terminationMonitor();
+        var terminationFlag = TerminationFlag.wrap(terminationMonitor);
+
+        return writeNodeProperties(
+            graphStore,
+            config,
+            validNodeLabels,
+            nodePropertyExporterBuilder,
+            terminationFlag,
+            progressTracker
+        );
+    }
 
     private static long writeNodeProperties(
         GraphStore graphStore,
         GraphWriteNodePropertiesConfig config,
         Iterable<NodeLabel> validNodeLabels,
-        ExecutionContext executionContext, ProgressTracker progressTracker
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
         var propertiesWritten = 0L;
 
@@ -137,13 +234,11 @@ public final class NodePropertiesWriter {
                     Optional.empty()
                 );
 
-                var nodePropertyExporterBuilder = executionContext.nodePropertyExporterBuilder();
-
                 assert nodePropertyExporterBuilder != null : "NodePropertyExporterBuilder must be set to the ExecutionContext!";
 
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
-                    .withTerminationFlag(TerminationFlag.wrap(executionContext.terminationMonitor()))
+                    .withTerminationFlag(terminationFlag)
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())

@@ -31,6 +31,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPrope
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyOrPropertiesResultProducer;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
+import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
 import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -588,6 +589,33 @@ public class CatalogFacade {
         var databaseId = databaseId();
 
         return businessFacade.streamRelationships(user, databaseId, graphName, relationshipTypes, configuration);
+    }
+
+    public Stream<NodePropertiesWriteResult> writeNodeProperties(
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.writeNodeProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration
+        );
+
+        return Stream.of(result);
     }
 
     private <T> Stream<T> streamRelationshipPropertyOrProperties(

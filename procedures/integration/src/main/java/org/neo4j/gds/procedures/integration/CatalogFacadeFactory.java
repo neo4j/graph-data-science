@@ -41,9 +41,11 @@ import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplicat
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.KernelTransactionService;
@@ -66,6 +68,7 @@ public class CatalogFacadeFactory {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final DatabaseIdService databaseIdService;
+    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
     private final UserServices userServices;
@@ -74,6 +77,7 @@ public class CatalogFacadeFactory {
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         DatabaseIdService databaseIdService,
+        ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
         UserServices userServices
@@ -81,6 +85,7 @@ public class CatalogFacadeFactory {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.databaseIdService = databaseIdService;
+        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
         this.userServices = userServices;
@@ -101,6 +106,11 @@ public class CatalogFacadeFactory {
         var graphProjectMemoryUsage = new GraphProjectMemoryUsageService(log, graphDatabaseService);
         var graphStoreFilterService = new GraphStoreFilterService();
         var graphStoreValidationService = new GraphStoreValidationService();
+
+        // Exporter builders. These are request scoped, interestingly enough
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
 
         // GDS applications
         var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
@@ -135,6 +145,7 @@ public class CatalogFacadeFactory {
         var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
         var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
+        var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -154,7 +165,8 @@ public class CatalogFacadeFactory {
             nodeLabelMutatorApplication,
             streamNodePropertiesApplication,
             streamRelationshipPropertiesApplication,
-            streamRelationshipsApplication
+            streamRelationshipsApplication,
+            writeNodePropertiesApplication
         );
 
         // wrap in decorator to enable preconditions checks
@@ -180,6 +192,10 @@ public class CatalogFacadeFactory {
         );
     }
 
+    /**
+     * @deprecated Inject this behaviour instead of relying on static state
+     */
+    @Deprecated
     private static PreconditionsService createPreconditionsService() {
         return Preconditions::check;
     }

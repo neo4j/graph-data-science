@@ -387,6 +387,31 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public NodePropertiesWriteResult writeNodeProperties(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.writeNodeProperties(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

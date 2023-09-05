@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.graphstorecatalog.GraphNodePropertiesConfig;
-import org.neo4j.gds.catalog.UserInputWriteProperties;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -42,7 +41,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfig, WriteConfig {
 
     @Configuration.Parameter
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphWriteNodePropertiesConfig#parseNodeProperties")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphWriteNodePropertiesConfig#parseNodeProperties")
     List<UserInputWriteProperties.PropertySpec> nodeProperties();
 
     static List<UserInputWriteProperties.PropertySpec> parseNodeProperties(Object userInput) {
