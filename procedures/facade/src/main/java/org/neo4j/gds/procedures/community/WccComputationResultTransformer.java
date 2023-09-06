@@ -21,8 +21,8 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
@@ -55,7 +55,7 @@ final class WccComputationResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
-    static WccMutateResult toMutateResult(NodePropertyMutateResult<WccSpecificFields> computationResult) {
+    static WccMutateResult toMutateResult(NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> computationResult) {
         return new WccMutateResult(
             computationResult.algorithmSpecificFields().componentCount(),
             computationResult.algorithmSpecificFields().componentDistribution(),

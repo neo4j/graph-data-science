@@ -21,7 +21,7 @@ package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -31,9 +31,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-
-import java.util.Collections;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -109,32 +106,15 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
             configMock,
             nodePropertyValuesMapper,
             ((r) -> r::get),
-            (r, cc, cs) -> new CommunityStatisticsSpecificFields() {
-                @Override
-                public long componentCount() {
-                    return cc;
-                }
-
-                @Override
-                public Map<String, Object> componentDistribution() {
-                    return cs;
-                }
-            },
+            (r, cc, cs) -> new StandardCommunityStatisticsSpecificFields(
+                cc,
+                cs
+            )
+            ,
             true,
             false,
             50L,
-            () -> new CommunityStatisticsSpecificFields() {
-
-                @Override
-                public long componentCount() {
-                    return 0;
-                }
-
-                @Override
-                public Map<String, Object> componentDistribution() {
-                    return Collections.emptyMap();
-                }
-            }
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
 
 

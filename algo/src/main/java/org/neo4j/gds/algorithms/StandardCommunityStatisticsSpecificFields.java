@@ -21,11 +21,15 @@ package org.neo4j.gds.algorithms;
 
 import java.util.Map;
 
-public class WccSpecificFields implements CommunityStatisticsSpecificFields {
+public class StandardCommunityStatisticsSpecificFields implements CommunityStatisticsSpecificFields {
     private final long componentCount;
     private final Map<String, Object> componentDistribution;
+    public static StandardCommunityStatisticsSpecificFields EMPTY = new StandardCommunityStatisticsSpecificFields(
+        0,
+        Map.of()
+    );
 
-    public WccSpecificFields(
+    public StandardCommunityStatisticsSpecificFields(
         long componentCount,
         Map<String, Object> componentDistribution
     ) {

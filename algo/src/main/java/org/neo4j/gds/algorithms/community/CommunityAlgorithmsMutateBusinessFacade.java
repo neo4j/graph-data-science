@@ -24,8 +24,7 @@ import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.SccSpecificFields;
-import org.neo4j.gds.algorithms.WccSpecificFields;
+import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
@@ -41,7 +40,6 @@ import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
@@ -60,7 +58,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
-    public NodePropertyMutateResult<WccSpecificFields> mutateWcc(
+    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> mutateWcc(
         String graphName,
         WccMutateConfig configuration,
         User user,
@@ -84,7 +82,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ),
             (result -> result::setIdOf),
             (result, componentCount, communitySummary) -> {
-                return new WccSpecificFields(
+                return new StandardCommunityStatisticsSpecificFields(
                     componentCount,
                     communitySummary
                 );
@@ -92,7 +90,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             computeComponentCount,
             computeComponentDistribution,
             intermediateResult.computeMilliseconds,
-            () -> new WccSpecificFields(0, Collections.emptyMap())
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
     }
 
@@ -223,7 +221,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
     }
 
-    public NodePropertyMutateResult<SccSpecificFields> mutateScc(
+    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> mutateScc(
         String graphName,
         SccMutateConfig configuration,
         User user,
@@ -243,7 +241,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             (result, config) -> NodePropertyValuesAdapter.adapt(result),
             (result -> result::get),
             (result, componentCount, communitySummary) -> {
-                return new SccSpecificFields(
+                return new StandardCommunityStatisticsSpecificFields(
                     componentCount,
                     communitySummary
                 );
@@ -251,7 +249,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             computeComponentCount,
             computeComponentDistribution,
             intermediateResult.computeMilliseconds,
-            () -> new SccSpecificFields(0, Collections.emptyMap())
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
 
     }
