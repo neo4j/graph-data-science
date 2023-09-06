@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
+import java.util.List;
 import java.util.stream.LongStream;
 
 public class TopKMapComputer extends Algorithm<KGEPredictResult> {
@@ -38,6 +39,8 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private ProgressTracker progressTracker;
     private BitSet sourceNodes;
     private BitSet targetNodes;
+
+    private List<Double> relationshipTypeEmbedding;
     private int concurrency;
 
     private int topK;
@@ -50,6 +53,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         Graph graph,
         BitSet sourceNodes,
         BitSet targetNodes,
+        List<Double> relationshipTypeEmbedding,
         LinkScorerFactory linkScorerFactory,
         LongLongPredicate isCandidateLink,
         int topK,
@@ -61,6 +65,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.progressTracker = progressTracker;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
+        this.relationshipTypeEmbedding = relationshipTypeEmbedding;
         this.concurrency = concurrency;
         this.topK = topK;
         this.linkScorerFactory = linkScorerFactory;
@@ -85,7 +90,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                         terminationFlag.assertRunning();
 
                         LinkScorer similarityComputer = threadLocalSimilarityComputer.get();
-                        similarityComputer.init(embeddings, node1);
+                        similarityComputer.init(embeddings, relationshipTypeEmbedding, node1);
 
                         targetNodesStream()
                             .filter(node2 -> isCandidateLink.apply(node1, node2))

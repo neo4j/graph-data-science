@@ -55,6 +55,7 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
             graph,
             sourceNodes,
             targetNodes,
+            configuration.relationshipTypeEmbedding(),
             EuclideanDistanceLinkScorer::new,
             (s,t) -> s != t, //TODO s-t should not be an existing edge
             configuration.topK(),

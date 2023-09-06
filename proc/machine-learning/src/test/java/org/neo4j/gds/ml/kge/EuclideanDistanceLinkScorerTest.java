@@ -25,6 +25,8 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -41,10 +43,10 @@ public class EuclideanDistanceLinkScorerTest {
         DoubleArrayNodePropertyValues ddnpv = new DoubleArrayTestPropertyValues(hsdaa::get);
 
         LinkScorer linkScorer = new EuclideanDistanceLinkScorer();
-        linkScorer.init(ddnpv, 0);
+        linkScorer.init(ddnpv, List.of(-1.0, 0.0, 0.0, 0.0), 0);
 
-        assertThat(linkScorer.similarity(1)).isCloseTo(2.0, Offset.offset(1e-05));
-        assertThat(linkScorer.similarity(2)).isCloseTo(3.606, Offset.offset(1e-03));
+        assertThat(linkScorer.similarity(1)).isCloseTo(2.65, Offset.offset(1e-02));
+        assertThat(linkScorer.similarity(2)).isCloseTo(4.24, Offset.offset(1e-02));
 
     }
 }

@@ -22,23 +22,32 @@ package org.neo4j.gds.ml.kge;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
+import java.util.List;
+
 import static java.util.Arrays.stream;
 
 public class EuclideanDistanceLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;
 
+    List<Double> relationshipTypeEmbedding;
+
     long currentSourceNode;
 
+    Vector currentCandidateTarget;
+
     @Override
-    public void init(NodePropertyValues embeddings, long sourceNode) {
+    public void init(NodePropertyValues embeddings, List<Double> relationshipTypeEmbedding, long sourceNode) {
         this.embeddings = embeddings;
+        this.relationshipTypeEmbedding = relationshipTypeEmbedding;
         this.currentSourceNode = sourceNode;
+        this.currentCandidateTarget = new Vector(embeddings.doubleArrayValue(currentSourceNode))
+            .add(new Vector(relationshipTypeEmbedding.stream().mapToDouble(Double::doubleValue).toArray()));
     }
 
     @Override
     public double similarity(long targetNode) {
-        Vector translation = (new Vector(embeddings.doubleArrayValue(currentSourceNode))).scalarMultiply(-1)
+        Vector translation = currentCandidateTarget.scalarMultiply(-1)
             .add(new Vector(embeddings.doubleArrayValue(targetNode)));
 
         var simlarity = Math.sqrt(

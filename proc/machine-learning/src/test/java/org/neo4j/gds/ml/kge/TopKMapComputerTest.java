@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +45,7 @@ class TopKMapComputerTest {
             null, //TODO add graph
             sourceNodes,
             targetNodes,
+            List.of(0.1, 0.2, 0.3),
             linkScorerFactory,
             (a, b) -> a != b,
             topK,
@@ -78,7 +80,7 @@ class TopKMapComputerTest {
         long currentSourceNode = 0;
 
         @Override
-        public void init(NodePropertyValues embeddings, long sourceNode) {
+        public void init(NodePropertyValues embeddings, List<Double> relationshipTypeEmbedding, long sourceNode) {
            currentSourceNode = sourceNode;
         }
 
