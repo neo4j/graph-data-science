@@ -19,7 +19,15 @@
  */
 package org.neo4j.gds.ml.kge;
 
-public interface LinkScorerFactory {
-
-    LinkScorer create();
+public class LinkScorerFactory {
+    public static LinkScorer create(String scoreFunction) {
+        switch (scoreFunction) {
+            case "TransE":
+                return new EuclideanDistanceLinkScorer();
+            case "DistMult":
+                return new DistMultLinkScorer();
+            default:
+                throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
+        }
+    }
 }

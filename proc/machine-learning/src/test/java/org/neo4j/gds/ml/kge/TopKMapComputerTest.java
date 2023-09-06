@@ -40,20 +40,18 @@ class TopKMapComputerTest {
         var topK = 1;
         var concurrency = 1;
 
-        LinkScorerFactory linkScorerFactory = TestLinkScorer::new;
-
         var computer = new TopKMapComputer(
             null, //TODO add graph
             sourceNodes,
             targetNodes,
             "embedding",
             List.of(0.1, 0.2, 0.3),
-            linkScorerFactory,
+            "DistMult",
             (a, b) -> a != b,
             topK,
             concurrency,
             ProgressTracker.NULL_TRACKER
-            );
+        );
 
         KGEPredictResult result = computer.compute();
 
@@ -68,7 +66,7 @@ class TopKMapComputerTest {
     private BitSet create(long... ids) {
         long capacity = Arrays.stream(ids).max().orElse(0);
 
-        BitSet bitSet = new BitSet(capacity+1);
+        BitSet bitSet = new BitSet(capacity + 1);
 
         for (long id : ids) {
             bitSet.set(id);
@@ -76,25 +74,4 @@ class TopKMapComputerTest {
 
         return bitSet;
     }
-
-    private class TestLinkScorer implements LinkScorer {
-
-        long currentSourceNode = 0;
-
-        @Override
-        public void init(NodePropertyValues embeddings, List<Double> relationshipTypeEmbedding, long sourceNode) {
-           currentSourceNode = sourceNode;
-        }
-
-        @Override
-        public double similarity(long targetNode) {
-            return currentSourceNode + targetNode;
-        }
-
-        @Override
-        public void close() throws Exception {
-
-        }
-    }
-
 }

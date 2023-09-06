@@ -45,7 +45,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private int concurrency;
 
     private int topK;
-    private LinkScorerFactory linkScorerFactory;
+    private String scoreFunction;
 
     // TODO abstract / merge with LinkFilter?
     private LongLongPredicate isCandidateLink;
@@ -56,7 +56,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         BitSet targetNodes,
         String nodeEmbeddingProperty,
         List<Double> relationshipTypeEmbedding,
-        LinkScorerFactory linkScorerFactory,
+        String scoreFunction,
         LongLongPredicate isCandidateLink,
         int topK,
         int concurrency,
@@ -71,7 +71,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.relationshipTypeEmbedding = relationshipTypeEmbedding;
         this.concurrency = concurrency;
         this.topK = topK;
-        this.linkScorerFactory = linkScorerFactory;
+        this.scoreFunction = scoreFunction;
         this.isCandidateLink = isCandidateLink;
     }
 
@@ -82,7 +82,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
-        try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(linkScorerFactory::create)) {
+//        try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(linkScorerFactory::create)) {
             // TODO exploit symmetry of similarity function if available
             ParallelUtil.parallelStreamConsume(
                 new SetBitsIterable(sourceNodes).stream(),
@@ -92,7 +92,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                     .forEach(node1 -> {
                         terminationFlag.assertRunning();
 
-                        LinkScorer similarityComputer = threadLocalSimilarityComputer.get();
+                        LinkScorer similarityComputer = LinkScorerFactory.create(scoreFunction);
                         similarityComputer.init(embeddings, relationshipTypeEmbedding, node1);
 
                         targetNodesStream()
@@ -107,7 +107,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                             });
                     })
             );
-        }
+//        }
 
         progressTracker.endSubTask();
 

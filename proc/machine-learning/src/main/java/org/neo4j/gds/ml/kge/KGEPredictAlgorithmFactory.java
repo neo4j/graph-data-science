@@ -57,8 +57,8 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
             targetNodes,
             configuration.nodeEmbeddingProperty(),
             configuration.relationshipTypeEmbedding(),
-            EuclideanDistanceLinkScorer::new,
-            (s,t) -> s != t, //TODO s-t should not be an existing edge
+            configuration.scoringFunction(),
+            (s, t) -> s != t, //TODO s-t should not be an existing edge
             configuration.topK(),
             configuration.concurrency(),
             progressTracker
