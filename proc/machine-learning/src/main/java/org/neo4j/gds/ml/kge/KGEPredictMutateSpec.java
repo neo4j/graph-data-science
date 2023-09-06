@@ -32,7 +32,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.ml.kge.predict.mutate", description = "Predicts new relationships using an existing KGE model", executionMode = MUTATE_RELATIONSHIP)
 public class KGEPredictMutateSpec implements AlgorithmSpec<
-    KGEPredictPipelineExecutor,
+    TopKMapComputer,
     KGEPredictResult,
     KGEPredictMutateConfig,
     Stream<MutateResult>,
@@ -44,16 +44,17 @@ public class KGEPredictMutateSpec implements AlgorithmSpec<
 
     @Override
     public KGEPredictAlgorithmFactory<KGEPredictMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return null;
+        return new KGEPredictAlgorithmFactory<>();
     }
 
     @Override
     public NewConfigFunction<KGEPredictMutateConfig> newConfigFunction() {
-        return null;
+        return (__, config) -> KGEPredictMutateConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<KGEPredictPipelineExecutor, KGEPredictResult, KGEPredictMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+        System.out.println("\"in ComputationResultConsumer\" = " + "in ComputationResultConsumer");
         return null;
     }
 }

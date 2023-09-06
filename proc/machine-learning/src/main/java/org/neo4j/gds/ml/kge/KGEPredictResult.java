@@ -20,7 +20,13 @@
 package org.neo4j.gds.ml.kge;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.similarity.nodesim.TopKMap;
 
 @ValueClass
-public class KGEPredictResult {
+public interface KGEPredictResult {
+
+    TopKMap topKMap();
+    static KGEPredictResult of(TopKMap topKMap) {
+        return ImmutableKGEPredictResult.of(topKMap);
+    }
 }

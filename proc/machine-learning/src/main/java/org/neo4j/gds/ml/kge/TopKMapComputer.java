@@ -21,53 +21,58 @@ package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.stream.LongStream;
 
-public class TopKMapComputer {
+public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
+    private Graph graph;
     private ProgressTracker progressTracker;
     private BitSet sourceNodes;
     private BitSet targetNodes;
     private int concurrency;
 
     private int topK;
-    private TerminationFlag terminationFlag;
     private LinkScorerFactory linkScorerFactory;
 
     // TODO abstract / merge with LinkFilter?
-    private LongLongPredicate isInvalidLink;
+    private LongLongPredicate isCandidateLink;
 
     public TopKMapComputer(
+        Graph graph,
         BitSet sourceNodes,
         BitSet targetNodes,
         LinkScorerFactory linkScorerFactory,
-        LongLongPredicate isInvalidLink,
+        LongLongPredicate isCandidateLink,
         int topK,
         int concurrency,
-        TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
+        this.graph = graph;
         this.progressTracker = progressTracker;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.concurrency = concurrency;
         this.topK = topK;
-        this.terminationFlag = terminationFlag;
         this.linkScorerFactory = linkScorerFactory;
-        this.isInvalidLink = isInvalidLink;
+        this.isCandidateLink = isCandidateLink;
     }
 
-    public TopKMap compute() {
+    public KGEPredictResult compute() {
         progressTracker.beginSubTask(estimateWorkload());
 
         TopKMap topKMap = new TopKMap(sourceNodes.capacity(), sourceNodes, Math.abs(topK), true);
+
+        NodePropertyValues embeddings = graph.nodeProperties("emb");
 
         try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(linkScorerFactory::create)) {
             // TODO exploit symmetry of similarity function if available
@@ -80,10 +85,10 @@ public class TopKMapComputer {
                         terminationFlag.assertRunning();
 
                         LinkScorer similarityComputer = threadLocalSimilarityComputer.get();
-                        similarityComputer.init(node1);
+                        similarityComputer.init(embeddings, node1);
 
                         targetNodesStream()
-                            .filter(node2 -> isInvalidLink.apply(node1, node2))
+                            .filter(node2 -> isCandidateLink.apply(node1, node2))
                             .forEach(node2 -> {
                                 double similarity = similarityComputer.similarity(node2);
                                 if (!Double.isNaN(similarity)) {
@@ -97,7 +102,7 @@ public class TopKMapComputer {
 
         progressTracker.endSubTask();
 
-        return topKMap;
+        return KGEPredictResult.of(topKMap);
     }
 
 

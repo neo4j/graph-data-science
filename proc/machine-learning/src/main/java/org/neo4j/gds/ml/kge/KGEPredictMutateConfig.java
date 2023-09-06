@@ -21,12 +21,29 @@ package org.neo4j.gds.ml.kge;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.List;
 
 @ValueClass
 @Configuration
-public interface KGEPredictMutateConfig extends MutateNodePropertyConfig {
+public interface KGEPredictMutateConfig extends MutateRelationshipConfig {
+
+    String sourceNodeLabel();
+
+    String targetNodeLabel();
+
+    String nodeEmbeddingProperty();
+
+    //TODO use HugeList or sth
+    List<Double> relationshipTypeEmbedding();
+
+    String scoringFunction();
+
+    double threshold();
+
+    int topK();
 
     static KGEPredictMutateConfig of(CypherMapWrapper userInput) {
         return new KGEPredictMutateConfigImpl(userInput);

@@ -19,22 +19,73 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
+import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> extends GraphAlgorithmFactory<KGEPredictPipelineExecutor, CONFIG> {
+public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
+
     @Override
-    public KGEPredictPipelineExecutor build(
-        Graph graphOrGraphStore,
+    public TopKMapComputer build(
+        GraphStore graphOrGraphStore,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return null;
+
+        BitSet sourceNodes = new BitSet(graphOrGraphStore.nodeCount());
+        BitSet targetNodes = new BitSet(graphOrGraphStore.nodeCount());
+
+        Graph graph = graphOrGraphStore.getGraph();
+
+        graph.forEachNode(nodeId -> {
+            if (graph.nodeLabels(nodeId).contains(NodeLabel.of(configuration.sourceNodeLabel()))) {
+                sourceNodes.set(nodeId);
+            }
+            if (graph.nodeLabels(nodeId).contains(NodeLabel.of(configuration.targetNodeLabel()))) {
+                targetNodes.set(nodeId);
+            }
+            return true;
+        });
+
+
+        return new TopKMapComputer(
+            graph,
+            sourceNodes,
+            targetNodes,
+            SomeLinkScorer::new,
+            (s,t) -> s != t, //TODO s-t should not be an existing edge
+            configuration.topK(),
+            configuration.concurrency(),
+            progressTracker
+        );
     }
 
     @Override
     public String taskName() {
-        return null;
+        return "KGEPredict";
+    }
+
+    private class SomeLinkScorer implements LinkScorer {
+
+        long currentSourceNode = 0;
+
+        @Override
+        public void init(NodePropertyValues embeddings, long sourceNode) {
+            currentSourceNode = sourceNode;
+        }
+
+        @Override
+        public double similarity(long targetNode) {
+            return currentSourceNode + targetNode;
+        }
+
+        @Override
+        public void close() throws Exception {
+
+        }
     }
 }

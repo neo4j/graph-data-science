@@ -54,6 +54,7 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             ", (m2:M {a: 3.0, emb: [-5.2, -4.4, -5.5, -0.1]})" +
             ", (m3:M {a: 0.0, emb: [-6.2, -4.4, -5.5, -0.1]})" +
             ", (m4:M {a: 1.0, emb: [-7.2, -4.4, -5.5, -0.1]})" +
+            ", (p:P {a: 1.0})" +
             ", (n1)-[:T1]->(n2)" +
             ", (n3)-[:T1]->(n4)" +
             ", (n1)-[:T2]->(n3)" +
@@ -61,7 +62,8 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             ", (m1)-[:T3]->(m2)" +
             ", (m3)-[:T3]->(m4)" +
             ", (m1)-[:T4]->(m3)" +
-            ", (m2)-[:T4]->(m4)";
+            ", (m2)-[:T4]->(m4)" +
+            ", (m2)-[:T4]->(p)";
 
 
     @BeforeEach
@@ -76,7 +78,8 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             "'g', " +
             "{" +
             "  M: { label: 'M', properties: ['a', 'emb'] }, " +
-            "  N: { label: 'N', properties: ['a', 'emb'] }" +
+            "  N: { label: 'N', properties: ['a', 'emb'] }, " +
+            "  P: { label: 'P', properties: ['a'] }" +
             "}, " +
             "{T1: {type: 'T1', orientation: 'NATURAL'}, T2: {type: 'T2', orientation: 'NATURAL'}}" +
             ")";
@@ -95,8 +98,8 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             .algo("gds.ml.kge.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED_T3")
-            .addParameter("sourceNodeSpec", "M")
-            .addParameter("targetNodeSpec", "N")
+            .addParameter("sourceNodeLabel", "M")
+            .addParameter("targetNodeLabel", "N")
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
             .addParameter("scoringFunction", "TransE")

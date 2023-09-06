@@ -21,16 +21,13 @@ package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class TopKMapComputerTest {
 
@@ -44,19 +41,19 @@ class TopKMapComputerTest {
         LinkScorerFactory linkScorerFactory = TestLinkScorer::new;
 
         var computer = new TopKMapComputer(
+            null, //TODO add graph
             sourceNodes,
             targetNodes,
             linkScorerFactory,
             (a, b) -> a != b,
             topK,
             concurrency,
-            TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
             );
 
-        var result = computer.compute();
+        KGEPredictResult result = computer.compute();
 
-        assertThat(result.stream()).containsExactly(
+        assertThat(result.topKMap().stream()).containsExactly(
             // TODO dont return a SimilarityResult here
             new SimilarityResult(1, 6, 7),
             new SimilarityResult(3, 6, 9),
@@ -81,7 +78,7 @@ class TopKMapComputerTest {
         long currentSourceNode = 0;
 
         @Override
-        public void init(long sourceNode) {
+        public void init(NodePropertyValues embeddings, long sourceNode) {
            currentSourceNode = sourceNode;
         }
 
