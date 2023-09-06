@@ -41,7 +41,7 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
     description = SCC_DESCRIPTION,
     executionMode = STREAM
 )
-public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
+public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<SccStreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
     @Override
     public String name() {
         return "SccStream";
@@ -58,7 +58,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccStreamConfig, Stream<SccStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -68,7 +68,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
                     var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(i -> components.get(i) != NOT_VALID)
-                        .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
+                        .mapToObj(i -> new SccStreamResult(graph.toOriginalNodeId(i), components.get(i)));
                 }).orElseGet(Stream::empty)
         );
     }

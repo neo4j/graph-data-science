@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.scc;
 
-public class StreamResult {
+public class SccStreamResult {
 
         public final long nodeId;
         public final long componentId;
-        public StreamResult(long nodeId, long componentId) {
+
+    public SccStreamResult(long nodeId, long componentId) {
             this.nodeId = nodeId;
             this.componentId = componentId;
         }

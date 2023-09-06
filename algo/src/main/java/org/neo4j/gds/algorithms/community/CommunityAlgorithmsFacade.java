@@ -28,6 +28,7 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -41,6 +42,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.scc.SccAlgorithmFactory;
+import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -121,6 +124,23 @@ public class CommunityAlgorithmsFacade {
         );
     }
 
+    AlgorithmComputationResult<HugeLongArray> scc(
+        String graphName,
+        SccBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            Optional.empty(),
+            new SccAlgorithmFactory<>(),
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+    }
 
     private <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
         String graphName,

@@ -23,12 +23,14 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 public class CommunityAlgorithmsStreamBusinessFacade {
@@ -82,6 +84,23 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.louvain(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result, config);
+    }
+
+    public StreamComputationResult<SccBaseConfig, HugeLongArray> streamScc(
+        String graphName,
+        SccBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.scc(
             graphName,
             config,
             user,

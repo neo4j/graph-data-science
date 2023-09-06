@@ -178,6 +178,24 @@ public class CommunityProcedureFacade {
         return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<SccStreamResult> sccStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+
+    ) {
+        var streamConfig = createStreamConfig(configuration, SccStreamConfig::of, algorithmMetaDataSetter);
+
+        var computationResult = algorithmsStreamBusinessFacade.streamScc(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return SccComputationResultTransformer.toStreamResult(computationResult);
+    }
+
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator,
