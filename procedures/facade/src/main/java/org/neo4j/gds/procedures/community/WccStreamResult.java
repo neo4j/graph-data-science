@@ -17,26 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.louvain;
+package org.neo4j.gds.procedures.community;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@SuppressWarnings("unused")
-public final class LouvainStreamResult {
+public class WccStreamResult {
     public final long nodeId;
-    public final long communityId;
-    public final List<Long> intermediateCommunityIds;
+    public final long componentId;
 
-    public LouvainStreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
+    WccStreamResult(long nodeId, long componentId) {
         this.nodeId = nodeId;
-        this.intermediateCommunityIds = intermediateCommunityIds == null ? null : Arrays
-            .stream(intermediateCommunityIds)
-            .boxed()
-            .collect(Collectors.toList());
-        this.communityId = communityId;
+        this.componentId = componentId;
     }
 }

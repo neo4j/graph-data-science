@@ -33,7 +33,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
+import static org.neo4j.gds.procedures.community.wcc.WccSpecification.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.stream", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccStreamConfig, Stream<WccStreamSpecification.StreamResult>, WccAlgorithmFactory<WccStreamConfig>> {

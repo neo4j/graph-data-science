@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.wcc;
+package org.neo4j.gds.procedures.community.wcc;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
@@ -25,13 +25,15 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccBaseConfig;
 
-final class WccSpecification {
+public final class WccSpecification {
 
-    static final String WCC_DESCRIPTION =
+    public static final String WCC_DESCRIPTION =
         "The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.";
 
-    static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
+    public static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
         AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
     ) {
@@ -39,7 +41,7 @@ final class WccSpecification {
         return procResultBuilder;
     }
 
-    static <CONFIG extends WccBaseConfig> NodePropertyValues nodeProperties(
+    public static <CONFIG extends WccBaseConfig> NodePropertyValues nodeProperties(
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
         String resultProperty
     ) {

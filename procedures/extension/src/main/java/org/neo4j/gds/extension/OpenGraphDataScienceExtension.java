@@ -33,9 +33,7 @@ import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.integration.CatalogFacadeFactory;
-import org.neo4j.gds.procedures.integration.CommunityProcedureFacadeProvider;
 import org.neo4j.gds.procedures.integration.CommunityProcedureFactory;
 import org.neo4j.gds.procedures.integration.LogAdapter;
 import org.neo4j.gds.procedures.integration.TaskRegistryFactoryProvider;
@@ -68,9 +66,11 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         // We stack off the Neo4j's log and have our own
         var neo4jUserLog = Neo4jProxy.getUserLog(dependencies.logService(), getClass());
         Log gdsLog = new LogAdapter(neo4jUserLog);
-        gdsLog.info("Building OpenGDS application");
+        gdsLog.info("Building OpenGDS application...");
 
         registerComponents(dependencies, gdsLog);
+
+        gdsLog.info("OpenGDS built and ready to go!");
 
         return new LifecycleAdapter();
     }
@@ -86,6 +86,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));
         var taskStoreService = new TaskStoreService(progressTrackingEnabled);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
+        var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
+        log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
         var userLogServices = new UserLogServices();
         var userServices = new UserServices();
 
@@ -102,23 +104,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             userLogServices,
             userServices
         );
-
-        // We need a provider to slot into the Neo4j Procedure Framework mechanism
-        log.info("Register OpenGDS facade");
-        dependencies.globalProcedures().registerComponent(
-            GraphDataScience.class,
-            new OpenGraphDataScienceProcedureFacadeProvider(log, catalogFacadeFactory),
-            true
-        );
-        log.info("OpenGDS facade registered");
-
-        /*
-         * Now we can register the community algorithms procedure facade
-         */
-        boolean useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
-        log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
-
-        var communityAlgorithmsProcedureFacadeFactory = new CommunityProcedureFactory(
+        var communityProcedureFactory = new CommunityProcedureFactory(
             log,
             useMaxMemoryEstimation,
             graphStoreCatalogService,
@@ -127,17 +113,15 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             taskRegistryFactoryService,
             userLogServices
         );
-        var communityProcedureFacadeProvider = new CommunityProcedureFacadeProvider(
-            communityAlgorithmsProcedureFacadeFactory
-        );
 
-        log.info("Registering OpenGDS Community Algorithms Procedure Facade");
+        // We need a provider to slot into the Neo4j Procedure Framework mechanism
+        log.info("Register OpenGDS facade...");
         dependencies.globalProcedures().registerComponent(
-            CommunityProcedureFacade.class,
-            communityProcedureFacadeProvider,
+            GraphDataScience.class,
+            new OpenGraphDataScienceProcedureFacadeProvider(log, catalogFacadeFactory, communityProcedureFactory),
             true
         );
-        log.info("OpenGDS Community Algorithms Procedure Facade registered");
+        log.info("OpenGDS facade registered.");
 
         /*
          * This is legacy support. We keep some context-injected things around,
@@ -155,18 +139,18 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             userLogServices
         );
 
-        log.info("Register legacy Task Store/ Registry");
+        log.info("Register legacy Task Store/ Registry...");
         dependencies.globalProcedures().registerComponent(TaskStore.class, taskStoreProvider, true);
         dependencies.globalProcedures().registerComponent(TaskRegistryFactory.class, taskRegistryFactoryProvider, true);
-        log.info("Task Registry registered");
+        log.info("Task Registry registered.");
 
-        log.info("Register legacy User Log Registry");
+        log.info("Register legacy User Log Registry...");
         dependencies.globalProcedures().registerComponent(
             UserLogRegistryFactory.class,
             userLogRegistryFactoryProvider,
             true
         );
-        log.info("User Log Registry registered");
+        log.info("User Log Registry registered.");
     }
 
     public interface Dependencies {

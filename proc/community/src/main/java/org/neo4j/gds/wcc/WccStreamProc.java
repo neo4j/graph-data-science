@@ -21,7 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.WccStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -32,13 +32,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
+import static org.neo4j.gds.procedures.community.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class WccStreamProc extends BaseProc {
-
     @Context
-    public CommunityProcedureFacade facade;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.wcc.stream", mode = READ)
     @Description(WCC_DESCRIPTION)
@@ -46,7 +45,7 @@ public class WccStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.wccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().wccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
 
     @Procedure(value = "gds.wcc.stream.estimate", mode = READ)

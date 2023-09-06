@@ -69,6 +69,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
@@ -350,12 +351,16 @@ class WccMutateProcTest extends BaseProcTest {
         );
 
         applyOnProcedure(procedure -> {
-            procedure.facade = new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScience(
+                null,
+                null,
+                new CommunityProcedureFacade(
                 null,
                 algorithmsMutateBusinessFacade,
                 ProcedureReturnColumns.EMPTY,
                 DatabaseId.of(db.databaseName()),
                 new User(getUsername(), false)
+            )
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -463,12 +468,16 @@ class WccMutateProcTest extends BaseProcTest {
                 new NodePropertyService(logMock)
             );
 
-            procedure.facade = new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScience(
                 null,
-                algorithmsBusinessFacade,
-                ProcedureReturnColumns.EMPTY,
-                DatabaseId.of(db.databaseName()),
-                new User(getUsername(), false)
+                null,
+                new CommunityProcedureFacade(
+                    null,
+                    algorithmsBusinessFacade,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
             );
                 ProcedureMethodHelper.mutateMethods(procedure)
                     .forEach(mutateMethod -> {
@@ -525,12 +534,16 @@ class WccMutateProcTest extends BaseProcTest {
                     memoryUsageValidator, null),
                 new NodePropertyService(logMock)
             );
-            proc.facade = new CommunityProcedureFacade(
+            proc.facade = new GraphDataScience(
                 null,
-                algorithmsBusinessFacade,
-                ProcedureReturnColumns.EMPTY,
-                DatabaseId.of(db.databaseName()),
-                new User(getUsername(), false)
+                null,
+                new CommunityProcedureFacade(
+                    null,
+                    algorithmsBusinessFacade,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
             );
 
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
@@ -593,12 +606,16 @@ class WccMutateProcTest extends BaseProcTest {
         applyOnProcedure(procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
-                    procedure.facade = new CommunityProcedureFacade(
+                    procedure.facade = new GraphDataScience(
                         null,
-                        algorithmsBusinessFacade,
-                        ProcedureReturnColumns.EMPTY,
-                        DatabaseId.of(db.databaseName()),
-                        new User(getUsername(), false)
+                        null,
+                        new CommunityProcedureFacade(
+                            null,
+                            algorithmsBusinessFacade,
+                            ProcedureReturnColumns.EMPTY,
+                            DatabaseId.of(db.databaseName()),
+                            new User(getUsername(), false)
+                        )
                     );
                     Map<String, Object> config = new HashMap<>(additionalConfig);
                     config.put("mutateProperty", MUTATE_PROPERTY);

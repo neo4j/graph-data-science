@@ -28,14 +28,14 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
-import org.neo4j.gds.louvain.LouvainMutateResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
-import org.neo4j.gds.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
-import org.neo4j.gds.wcc.WccMutateResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Map;
@@ -131,7 +131,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, KCoreDecompositionMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.mutateΚcore(
+        var computationResult = algorithmsMutateBusinessFacade.mutateKCore(
             graphName,
             config,
             user,
@@ -178,7 +178,7 @@ public class CommunityProcedureFacade {
         return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
     }
 
-    <C extends AlgoBaseConfig> C createStreamConfig(
+    private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator,
         AlgorithmMetaDataSetter algorithmMetaDataSetter
@@ -188,12 +188,11 @@ public class CommunityProcedureFacade {
         return config;
     }
 
-    <C extends AlgoBaseConfig> C createMutateConfig(
+    private <C extends AlgoBaseConfig> C createMutateConfig(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator
     ) {
         return configCreator.apply(CypherMapWrapper.create(configuration));
 
     }
-
 }

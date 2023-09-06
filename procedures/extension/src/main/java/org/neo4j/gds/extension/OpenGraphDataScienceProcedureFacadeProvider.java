@@ -23,6 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.integration.CatalogFacadeFactory;
+import org.neo4j.gds.procedures.integration.CommunityProcedureFactory;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -32,19 +33,23 @@ import org.neo4j.kernel.api.procedure.Context;
 public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
     private final Log log;
     private final CatalogFacadeFactory catalogFacadeFactory;
+    private final CommunityProcedureFactory communityProcedureFactory;
 
     OpenGraphDataScienceProcedureFacadeProvider(
         Log log,
-        CatalogFacadeFactory catalogFacadeFactory
+        CatalogFacadeFactory catalogFacadeFactory,
+        CommunityProcedureFactory communityProcedureFactory
     ) {
         this.log = log;
         this.catalogFacadeFactory = catalogFacadeFactory;
+        this.communityProcedureFactory = communityProcedureFactory;
     }
 
     @Override
     public GraphDataScience apply(Context context) {
         var catalogFacade = catalogFacadeFactory.createCatalogFacade(context);
+        var communityProcedureFacade = communityProcedureFactory.createCommunityProcedureFacade(context);
 
-        return new GraphDataScience(log, catalogFacade);
+        return new GraphDataScience(log, catalogFacade, communityProcedureFacade);
     }
 }

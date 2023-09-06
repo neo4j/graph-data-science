@@ -21,7 +21,8 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -35,16 +36,16 @@ import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LouvainMutateProc extends BaseProc {
-
     @Context
-    public CommunityProcedureFacade facade;
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.louvain.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<LouvainMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.louvainMutate(graphName, configuration);
+        return facade.community().louvainMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.mutate.estimate", mode = READ)

@@ -24,16 +24,15 @@ import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
-import org.neo4j.gds.louvain.LouvainMutateResult;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 final class LouvainComputationResultTransformer {
-
     private LouvainComputationResultTransformer() {}
 
     static Stream<LouvainStreamResult> toStreamResult(StreamComputationResult<LouvainBaseConfig, LouvainResult> computationResult) {
@@ -55,7 +54,7 @@ final class LouvainComputationResultTransformer {
                         ? louvainResult.getIntermediateCommunities(nodeId)
                         : null;
                     var communityId = nodePropertyValues.longValue(nodeId);
-                    return new LouvainStreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
+                    return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
                 });
         }).orElseGet(Stream::empty);
     }

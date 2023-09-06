@@ -17,58 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.wcc;
+package org.neo4j.gds.procedures.community.kcore;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
-public final class WccMutateResult extends WccStatsSpecification.StatsResult {
+public class KCoreDecompositionMutateResult extends StandardMutateResult {
 
-    public final long mutateMillis;
     public final long nodePropertiesWritten;
+    public final long degeneracy;
 
-    public WccMutateResult(
-        long componentCount,
-        Map<String, Object> componentDistribution,
+    public KCoreDecompositionMutateResult(
+        long nodePropertiesWritten,
+        long degeneracy,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long mutateMillis,
-        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            componentCount,
-            componentDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
         this.nodePropertiesWritten = nodePropertiesWritten;
+        this.degeneracy = degeneracy;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<WccMutateResult> {
+    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionMutateResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-            super(returnColumns, concurrency);
+        private long degeneracy;
+
+        public Builder withDegeneracy(long degeneracy) {
+            this.degeneracy = degeneracy;
+            return this;
         }
 
-        @Override
-        protected WccMutateResult buildResult() {
-            return new WccMutateResult(
-                maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
+        public KCoreDecompositionMutateResult build() {
+            return new KCoreDecompositionMutateResult(
+                nodePropertiesWritten,
+                degeneracy,
                 preProcessingMillis,
                 computeMillis,
-                postProcessingDuration,
+                -1L,
                 mutateMillis,
-                nodePropertiesWritten,
                 config.toMap()
             );
         }
     }
+
 }

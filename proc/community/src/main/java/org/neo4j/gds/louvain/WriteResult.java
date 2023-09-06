@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.neo4j.gds.procedures.community.louvain.StatsResult;
+
 import java.util.List;
 import java.util.Map;
 

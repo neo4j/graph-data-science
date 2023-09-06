@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.wcc;
+package org.neo4j.gds.procedures.community.wcc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -31,14 +31,16 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.wcc.stats", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STATS)
+@GdsCallable(name = "gds.wcc.stats", description = WccSpecification.WCC_DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class WccStatsSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccStatsConfig, Stream<WccStatsSpecification.StatsResult>, WccAlgorithmFactory<WccStatsConfig>> {
 
     @Override
@@ -89,7 +91,7 @@ public class WccStatsSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
         public final long componentCount;
         public final Map<String, Object> componentDistribution;
 
-        StatsResult(
+        protected StatsResult(
             long componentCount,
             Map<String, Object> componentDistribution,
             long preProcessingMillis,

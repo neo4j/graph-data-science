@@ -29,13 +29,15 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
+import org.neo4j.gds.procedures.community.wcc.WccSpecification;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
+import static org.neo4j.gds.procedures.community.wcc.WccSpecification.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.mutate", description = WCC_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateResult>, WccAlgorithmFactory<WccMutateConfig>> {

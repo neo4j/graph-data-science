@@ -19,52 +19,45 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.wcc.WccBaseConfig;
-import org.neo4j.gds.wcc.WccMutateResult;
+import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-final class WccComputationResultTransformer {
+final class KCoreComputationalResultTransformer {
 
-    private WccComputationResultTransformer() {}
+    private KCoreComputationalResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(StreamComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
-        return computationResult.result().map(wccResult -> {
+    static Stream<KCoreStreamResult> toStreamResult(StreamComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> computationResult) {
+        return computationResult.result().map(kCoreResult -> {
+            var coreValues = kCoreResult.coreValues();
             var graph = computationResult.graph();
-
-            var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                computationResult.configuration(),
-                wccResult.asNodeProperties()
-            );
-
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId -> new WccStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    nodePropertyValues.longValue(nodeId)
-                ));
-
+                .mapToObj(nodeId ->
+                    new KCoreStreamResult(
+                        graph.toOriginalNodeId(nodeId),
+                        coreValues.get(nodeId)
+                    ));
         }).orElseGet(Stream::empty);
     }
 
-    static WccMutateResult toMutateResult(NodePropertyMutateResult<WccSpecificFields> computationResult) {
-        return new WccMutateResult(
-            computationResult.algorithmSpecificFields().componentCount(),
-            computationResult.algorithmSpecificFields().componentDistribution(),
+    static KCoreDecompositionMutateResult toMutateResult(NodePropertyMutateResult<KCoreSpecificFields> computationResult) {
+        return new KCoreDecompositionMutateResult(
+            computationResult.nodePropertiesWritten(),
+            computationResult.algorithmSpecificFields().degeneracy(),
             computationResult.preProcessingMillis(),
             computationResult.computeMillis(),
             computationResult.postProcessingMillis(),
             computationResult.mutateMillis(),
-            computationResult.nodePropertiesWritten(),
             computationResult.configuration().toMap()
         );
     }
+
 }

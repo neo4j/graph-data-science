@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
+import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -74,7 +75,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
                                 ? result.getIntermediateCommunities(nodeId)
                                 : null;
                             var communityId = nodePropertyValues.longValue(nodeId);
-                            return new LouvainStreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
+                            return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
                         });
                 }).orElseGet(Stream::empty)
         );

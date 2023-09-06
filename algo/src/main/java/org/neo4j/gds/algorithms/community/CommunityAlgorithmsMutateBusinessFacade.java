@@ -95,7 +95,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     }
 
 
-    public NodePropertyMutateResult<KCoreSpecificFields> mutateΚcore(
+    public NodePropertyMutateResult<KCoreSpecificFields> mutateKCore(
         String graphName,
         KCoreDecompositionMutateConfig config,
         User user,

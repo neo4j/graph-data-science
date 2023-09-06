@@ -21,21 +21,28 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 
 public class GraphDataScience {
     private final Log log;
     private final CatalogFacade catalogFacade;
+    private final CommunityProcedureFacade communityProcedureFacade;
 
-    public GraphDataScience(Log log, CatalogFacade catalogFacade) {
+    public GraphDataScience(Log log, CatalogFacade catalogFacade, CommunityProcedureFacade communityProcedureFacade) {
         this.log = log;
         this.catalogFacade = catalogFacade;
+        this.communityProcedureFacade = communityProcedureFacade;
+    }
+
+    public Log log() {
+        return log;
     }
 
     public CatalogFacade catalog() {
         return catalogFacade;
     }
 
-    public Log log() {
-        return log;
+    public CommunityProcedureFacade community() {
+        return communityProcedureFacade;
     }
 }

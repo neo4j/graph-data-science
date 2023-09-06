@@ -20,11 +20,11 @@
 package org.neo4j.gds.procedures.community;
 
 public class KCoreStreamResult {
-
     public final long nodeId;
+    @SuppressWarnings("WeakerAccess")
     public final long coreValue;
 
-    public KCoreStreamResult(long nodeId, int coreValue) {
+    KCoreStreamResult(long nodeId, int coreValue) {
         this.nodeId = nodeId;
         this.coreValue = coreValue;
     }

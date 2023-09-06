@@ -38,7 +38,7 @@ public class CommunityProcedureFactory {
     private final Log log;
     private final boolean useMaxMemoryEstimation;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final UserServices usernameService;
+    private final UserServices userServices;
     private final DatabaseIdService databaseIdService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
@@ -47,7 +47,7 @@ public class CommunityProcedureFactory {
         Log log,
         boolean useMaxMemoryEstimation,
         GraphStoreCatalogService graphStoreCatalogService,
-        UserServices usernameService,
+        UserServices userServices,
         DatabaseIdService databaseIdService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices
@@ -55,20 +55,20 @@ public class CommunityProcedureFactory {
         this.log = log;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.usernameService = usernameService;
+        this.userServices = userServices;
         this.databaseIdService = databaseIdService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
     }
 
-    CommunityProcedureFacade createCommunityProcedureFacade(Context context) {
+    public CommunityProcedureFacade createCommunityProcedureFacade(Context context) {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(
             log,
             useMaxMemoryEstimation
         );
 
         var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
-        var user = usernameService.getUser(context.securityContext());
+        var user = userServices.getUser(context.securityContext());
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
             databaseId,
             user
