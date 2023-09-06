@@ -25,13 +25,13 @@ import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
-public class MutateResult extends StandardMutateResult {
+public class SccMutateResult extends StandardMutateResult {
 
     public final long componentCount;
     public final Map<String, Object> componentDistribution;
     public final long nodePropertiesWritten;
 
-    public MutateResult(
+    public SccMutateResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -48,15 +48,15 @@ public class MutateResult extends StandardMutateResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
+    static class Builder extends AbstractCommunityResultBuilder<SccMutateResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public MutateResult buildResult() {
-            return new MutateResult(
+        public SccMutateResult buildResult() {
+            return new SccMutateResult(
                 maybeCommunityCount.orElse(0L),
                 communityHistogramOrNull(),
                 preProcessingMillis,
@@ -68,12 +68,12 @@ public class MutateResult extends StandardMutateResult {
             );
         }
 
-        public MutateResult.Builder buildHistogram(boolean buildHistogram) {
+        public SccMutateResult.Builder buildHistogram(boolean buildHistogram) {
             this.buildHistogram = buildHistogram;
             return this;
         }
 
-        public MutateResult.Builder buildCommunityCount(boolean buildCommunityCount) {
+        public SccMutateResult.Builder buildCommunityCount(boolean buildCommunityCount) {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }

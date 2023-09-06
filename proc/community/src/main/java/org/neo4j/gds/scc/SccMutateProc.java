@@ -20,7 +20,8 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,16 +34,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SccMutateProc extends BaseProc {
 
+    @Context
+    public CommunityProcedureFacade facade;
+
     @Procedure(value = "gds.scc.mutate", mode = READ)
     @Description(SCC_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<SccMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SccMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.sccMutate(graphName, configuration);
     }
 
 }

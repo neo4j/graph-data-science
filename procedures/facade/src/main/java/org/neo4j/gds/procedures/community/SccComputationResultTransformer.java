@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.SccSpecificFields;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.scc.SccMutateResult;
 import org.neo4j.gds.scc.SccStreamResult;
 
 import java.util.stream.LongStream;
@@ -45,5 +48,17 @@ final class SccComputationResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
+    static SccMutateResult toMutateResult(NodePropertyMutateResult<SccSpecificFields> computationResult) {
+        return new SccMutateResult(
+            computationResult.algorithmSpecificFields().componentCount(),
+            computationResult.algorithmSpecificFields().componentDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.mutateMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.configuration().toMap()
+        );
+    }
 
 }

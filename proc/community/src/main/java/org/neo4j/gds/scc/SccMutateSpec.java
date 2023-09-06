@@ -43,7 +43,7 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
     description = SCC_DESCRIPTION,
     executionMode = ExecutionMode.MUTATE_NODE_PROPERTY
 )
-public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutateConfig, Stream<MutateResult>, SccAlgorithmFactory<SccMutateConfig>> {
+public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutateConfig, Stream<SccMutateResult>, SccAlgorithmFactory<SccMutateConfig>> {
 
     @Override
     public String name() {
@@ -61,7 +61,7 @@ public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutat
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccMutateConfig, Stream<SccMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -72,12 +72,12 @@ public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutat
             this::resultBuilder);
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<SccMutateResult> resultBuilder(
         ComputationResult<Scc, HugeLongArray, SccMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var config = computationResult.config();
-        var mutateBuilder = new MutateResult.Builder(
+        var mutateBuilder = new SccMutateResult.Builder(
             executionContext.returnColumns(),
             config.concurrency()
         )

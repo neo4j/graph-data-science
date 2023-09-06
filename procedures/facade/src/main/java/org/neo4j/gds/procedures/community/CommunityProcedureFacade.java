@@ -33,6 +33,8 @@ import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
+import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
@@ -194,6 +196,24 @@ public class CommunityProcedureFacade {
         );
 
         return SccComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<SccMutateResult> sccMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createMutateConfig(configuration, SccMutateConfig::of);
+
+        var computationResult = algorithmsMutateBusinessFacade.mutateScc(
+            graphName,
+            config,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("componentCount"),
+            procedureReturnColumns.contains("componentDistribution")
+        );
+
+        return Stream.of(SccComputationResultTransformer.toMutateResult(computationResult));
     }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(

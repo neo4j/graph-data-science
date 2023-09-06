@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.SccSpecificFields;
 import org.neo4j.gds.algorithms.WccSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -37,6 +38,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
+import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Collections;
@@ -218,6 +220,39 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 .algorithmSpecificFields(specificFields)
                 .build();
         }).orElseGet(() -> NodePropertyMutateResult.empty(emptyASFSupplier.get(), configuration));
+
+    }
+
+    public NodePropertyMutateResult<SccSpecificFields> mutateScc(
+        String graphName,
+        SccMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeComponentCount,
+        boolean computeComponentDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            (result, config) -> NodePropertyValuesAdapter.adapt(result),
+            (result -> result::get),
+            (result, componentCount, communitySummary) -> {
+                return new SccSpecificFields(
+                    componentCount,
+                    communitySummary
+                );
+            },
+            computeComponentCount,
+            computeComponentDistribution,
+            intermediateResult.computeMilliseconds,
+            () -> new SccSpecificFields(0, Collections.emptyMap())
+        );
 
     }
 
