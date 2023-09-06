@@ -64,7 +64,7 @@ public class Scc extends Algorithm<HugeLongArray> {
      */
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
-        index.fill(-1);
+        index.fill(NOT_VALID);
         connectedComponents.fill(NOT_VALID);
         todo.clear();
         boundaries.clear();
@@ -78,13 +78,14 @@ public class Scc extends Algorithm<HugeLongArray> {
         if (!terminationFlag.running()) {
             return false;
         }
-        if (index.get(nodeId) != -1) {
+        if (index.get(nodeId) != NOT_VALID) {
             return true;
         }
         push(Action.VISIT, nodeId);
         while (!todo.isEmpty()) {
-            final long action = todo.pop();
-            final long node = todo.pop();
+            var action = todo.pop();
+            var node = todo.pop();
+            
             if (action == Action.VISIT.code) {
                 visit(node);
             } else if (action == Action.VISITEDGE.code) {
@@ -98,7 +99,7 @@ public class Scc extends Algorithm<HugeLongArray> {
     }
 
     private void visitEdge(long nodeId) {
-        if (index.get(nodeId) == -1) {
+        if (index.get(nodeId) == NOT_VALID) {
             push(Action.VISIT, nodeId);
         } else if (!visited.get(nodeId)) {
             while (index.get(nodeId) < boundaries.peek()) {
