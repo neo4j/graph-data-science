@@ -57,7 +57,7 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         boolean hasLabelInfo = hasLabelInformation.orElse(false);
         boolean readProps = readProperty.orElse(false);
 
-        return new Checked(
+        return new NodesBatchBuffer(
             // TODO: we probably wanna adjust the capacity here
             capacity,
             highestPossibleNodeCount,
@@ -85,6 +85,10 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
     @Override
     public boolean offer(final NodeReference record) {
+        if (this.isFull()) {
+            return false;
+        }
+
         if (skipOrphans && record.relationshipReference() == NO_ID) {
             return true;
         }
@@ -136,36 +140,5 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
     public long[][] labelIds() {
         return this.labelIds;
-    }
-
-    /**
-     * A version of a nodes batch buffer that checks the buffer
-     * length before inserting a new record. This is necessary
-     * in the case where the number of records offered to this
-     * buffer can exceed the configured batch size. An example
-     * for that is the usage of a partitioned index scan.
-     */
-    private static final class Checked extends NodesBatchBuffer {
-
-        private final long capacity;
-
-        private Checked(
-            int capacity,
-            long highestPossibleNodeCount,
-            LongSet nodeLabelIds,
-            boolean hasLabelInformation,
-            boolean readProperty
-        ) {
-            super(capacity, highestPossibleNodeCount, nodeLabelIds, hasLabelInformation, readProperty);
-            this.capacity = capacity;
-        }
-
-        @Override
-        public boolean offer(NodeReference record) {
-            if (this.length < this.capacity) {
-                super.offer(record);
-            }
-            return !this.isFull();
-        }
     }
 }

@@ -31,7 +31,7 @@ import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsL
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 
-public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
@@ -58,7 +58,7 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
         Optional<Boolean> skipDanglingRelationships
     ) {
         boolean skipDangling = skipDanglingRelationships.orElse(true);
-        return new Checked(idMap, type, capacity, skipDangling);
+        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDangling);
     }
 
     private RelationshipsBatchBuffer(
@@ -81,6 +81,9 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
 
     @Override
     public boolean offer(final RelationshipReference record) {
+        if (this.isFull()) {
+            return false;
+        }
         if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.typeTokenId())) {
             long source = idMap.toMappedNodeId(record.sourceNodeReference());
             long target = idMap.toMappedNodeId(record.targetNodeReference());
@@ -158,29 +161,5 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
 
     public int[] spareInts() {
         return histogram;
-    }
-
-    /**
-     * A version of a relationships batch buffer that checks the
-     * buffer length before inserting a new record. This is necessary
-     * in the case where the number of records offered to this
-     * buffer can exceed the configured batch size.
-     */
-    static final class Checked extends RelationshipsBatchBuffer {
-
-        private final long capacity;
-
-        private Checked(PartialIdMap idMap, int type, int capacity, boolean skipDanglingRelationships) {
-            super(idMap, type, capacity, skipDanglingRelationships);
-            this.capacity = Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity);
-        }
-
-        @Override
-        public boolean offer(RelationshipReference record) {
-            if (this.length < this.capacity) {
-                super.offer(record);
-            }
-            return !this.isFull();
-        }
     }
 }
