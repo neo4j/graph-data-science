@@ -30,7 +30,6 @@ public class EuclideanDistanceLinkScorer implements LinkScorer {
 
     long currentSourceNode;
 
-
     @Override
     public void init(NodePropertyValues embeddings, long sourceNode) {
         this.embeddings = embeddings;
@@ -50,7 +49,6 @@ public class EuclideanDistanceLinkScorer implements LinkScorer {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws Exception { }
 
-    }
 }

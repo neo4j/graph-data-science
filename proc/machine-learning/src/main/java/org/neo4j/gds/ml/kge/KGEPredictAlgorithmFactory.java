@@ -24,7 +24,6 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
@@ -56,7 +55,7 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
             graph,
             sourceNodes,
             targetNodes,
-            SomeLinkScorer::new,
+            EuclideanDistanceLinkScorer::new,
             (s,t) -> s != t, //TODO s-t should not be an existing edge
             configuration.topK(),
             configuration.concurrency(),
@@ -69,23 +68,4 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
         return "KGEPredict";
     }
 
-    private class SomeLinkScorer implements LinkScorer {
-
-        long currentSourceNode = 0;
-
-        @Override
-        public void init(NodePropertyValues embeddings, long sourceNode) {
-            currentSourceNode = sourceNode;
-        }
-
-        @Override
-        public double similarity(long targetNode) {
-            return currentSourceNode + targetNode;
-        }
-
-        @Override
-        public void close() throws Exception {
-
-        }
-    }
 }
