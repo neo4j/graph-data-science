@@ -20,12 +20,14 @@
 package org.neo4j.gds.ml.kge;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.MutateResult;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -54,7 +56,20 @@ public class KGEPredictMutateSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        System.out.println("\"in ComputationResultConsumer\" = " + "in ComputationResultConsumer");
-        return null;
+        return new KGEMutateResultConsumer(this::resultBuilder);
+    }
+
+    private MutateResult.Builder resultBuilder(
+        ComputationResult<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
+        var builder = new MutateResult.Builder().withSamplingStats(
+            Map.of("dummyStats", 4.2)
+        );
+
+        if (executionContext.returnColumns().contains("probabilityDistribution")) {
+            builder.withHistogram();
+        }
+        return builder;
     }
 }

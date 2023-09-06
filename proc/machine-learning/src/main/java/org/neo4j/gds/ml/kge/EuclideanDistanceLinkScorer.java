@@ -41,11 +41,13 @@ public class EuclideanDistanceLinkScorer implements LinkScorer {
         Vector translation = (new Vector(embeddings.doubleArrayValue(currentSourceNode))).scalarMultiply(-1)
             .add(new Vector(embeddings.doubleArrayValue(targetNode)));
 
-        return Math.sqrt(
+        var simlarity = Math.sqrt(
             stream(translation.data())
                 .map(value -> value * value)
                 .sum()
         );
+
+        return simlarity;
     }
 
     @Override

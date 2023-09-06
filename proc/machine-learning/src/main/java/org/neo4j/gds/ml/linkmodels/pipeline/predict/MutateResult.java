@@ -34,7 +34,7 @@ public final class MutateResult extends StandardMutateResult {
     public final Map<String, Object> probabilityDistribution;
     public final Map<String, Object> samplingStats;
 
-    private MutateResult(
+    public MutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -56,7 +56,7 @@ public final class MutateResult extends StandardMutateResult {
         this.samplingStats = samplingStats;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    public static class Builder extends AbstractResultBuilder<MutateResult> {
 
         private Map<String, Object> samplingStats = null;
 
@@ -76,7 +76,7 @@ public final class MutateResult extends StandardMutateResult {
             );
         }
 
-        Builder withHistogram() {
+        public Builder withHistogram() {
             if (histogram != null) {
                 return this;
             }
@@ -85,7 +85,7 @@ public final class MutateResult extends StandardMutateResult {
             return this;
         }
 
-        void recordHistogramValue(double value) {
+        public void recordHistogramValue(double value) {
             if (histogram == null) {
                 return;
             }
@@ -95,7 +95,7 @@ public final class MutateResult extends StandardMutateResult {
             if (value >= 1E-6) histogram.recordValue(value); else histogram.recordValue(1E-6);
         }
 
-        Builder withSamplingStats(Map<String, Object> samplingStats) {
+        public Builder withSamplingStats(Map<String, Object> samplingStats) {
             this.samplingStats = samplingStats;
             return this;
         }

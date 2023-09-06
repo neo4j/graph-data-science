@@ -21,10 +21,8 @@ package org.neo4j.gds.ml.kge;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArrayArray;
-import org.neo4j.gds.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,11 +38,10 @@ public class EuclideanDistanceLinkScorerTest {
         propertyBuilder.set(1, new double[]{2.0, 2.0, 2.0, 0.0});
         propertyBuilder.set(2, new double[]{3.0, 3.0, 3.0, 0.0});
         var hsdaa = propertyBuilder.build();
-        var doubleArrayProperties = new DoubleArrayNodePropertiesBuilder(DefaultValue.forDoubleArray(), 1);
-        DoubleArrayNodePropertyValues doublearrays = new DoubleArrayTestPropertyValues(hsdaa::get);
+        DoubleArrayNodePropertyValues ddnpv = new DoubleArrayTestPropertyValues(hsdaa::get);
 
         LinkScorer linkScorer = new EuclideanDistanceLinkScorer();
-        linkScorer.init(doublearrays, 0);
+        linkScorer.init(ddnpv, 0);
 
         assertThat(linkScorer.similarity(1)).isCloseTo(2.0, Offset.offset(1e-05));
         assertThat(linkScorer.similarity(2)).isCloseTo(3.606, Offset.offset(1e-03));

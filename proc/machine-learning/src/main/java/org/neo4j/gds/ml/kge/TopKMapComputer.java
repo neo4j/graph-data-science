@@ -92,6 +92,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                             .forEach(node2 -> {
                                 double similarity = similarityComputer.similarity(node2);
                                 if (!Double.isNaN(similarity)) {
+                                    System.out.println("similarity = " + similarity);
                                     topKMap.put(node1, node2, similarity);
                                 }
                                 progressTracker.logProgress();

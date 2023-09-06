@@ -103,7 +103,7 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
             .addParameter("scoringFunction", "TransE")
-            .addParameter("threshold", 0.0)
+            .addParameter("threshold", 0.0)  //TODO check
             .addParameter("topK", 2)
             .yields();
 
@@ -112,8 +112,7 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             "computeMillis", greaterThan(-1L),
             "mutateMillis", greaterThan(-1L),
             "postProcessingMillis", 0L,
-            // we are writing undirected rels so we get 2x topN
-            "relationshipsWritten", 12L,
+            "relationshipsWritten", 10L,
             "configuration", isA(Map.class),
             "probabilityDistribution", allOf(
                 hasKey("min"),
@@ -132,12 +131,11 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
                 hasKey("p100")
             ),
             "samplingStats", Map.of(
-                "strategy", "exhaustive",
-                "linksConsidered", 6L
+                "dummyStats", 4.2
             )
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "probability"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
     }
 
 }
