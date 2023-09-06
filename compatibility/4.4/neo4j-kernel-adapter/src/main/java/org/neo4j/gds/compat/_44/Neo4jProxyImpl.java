@@ -294,9 +294,22 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
     }
 
-    @Override
-    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+    private <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
         return new ScanBasedStoreScanImpl<>(scan, batchSize);
+    }
+
+    @Override
+    public StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
+        return new ScanBasedStoreScanImpl<>(ktx.dataRead().allNodesScan(), batchSize);
+    }
+
+    @Override
+    public StoreScan<RelationshipScanCursor> relationshipsScan(
+        KernelTransaction ktx,
+        long relationshipCount,
+        int batchSize
+    ) {
+        return new ScanBasedStoreScanImpl<>(ktx.dataRead().allRelationshipsScan(), batchSize);
     }
 
     @Override

@@ -44,7 +44,6 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -52,7 +51,6 @@ import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -205,8 +203,16 @@ public final class Neo4jProxy {
         return IMPL.nodeLabelIndexScan(transaction, labelId, batchSize, allowPartitionedScan);
     }
 
-    public static <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
-        return IMPL.scanToStoreScan(scan, batchSize);
+    public static StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
+        return IMPL.nodesScan(ktx, nodeCount, batchSize);
+    }
+
+    public static StoreScan<RelationshipScanCursor> relationshipsScan(
+        KernelTransaction ktx,
+        long relationshipCount,
+        int batchSize
+    ) {
+        return IMPL.relationshipsScan(ktx, relationshipCount, batchSize);
     }
 
     public static CompatIndexQuery rangeIndexQuery(

@@ -27,8 +27,11 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCursor> {
 
-    NodeCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
+    private final long nodeCount;
+
+    NodeCursorBasedScanner(int prefetchSize, long nodeCount, TransactionContext transaction) {
         super(prefetchSize, transaction);
+        this.nodeCount = nodeCount;
     }
 
     @Override
@@ -38,7 +41,7 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
 
     @Override
     StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction) {
-        return Neo4jProxy.scanToStoreScan(transaction.dataRead().allNodesScan(), batchSize());
+        return Neo4jProxy.nodesScan(transaction, this.nodeCount, batchSize());
     }
 
     @Override

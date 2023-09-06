@@ -34,6 +34,7 @@ public final class NodeScannerFactory {
 
     public static StoreScanner.Factory<NodeReference> create(
         TransactionContext transactionContext,
+        long nodeCount,
         int[] labelIds,
         Log log
     ) {
@@ -44,7 +45,7 @@ public final class NodeScannerFactory {
         }
 
         if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL) || !hasNodeLabelIndex) {
-            return NodeCursorBasedScanner::new;
+            return (prefetchSize, transaction) -> new NodeCursorBasedScanner(prefetchSize, nodeCount, transaction);
         } else if (labelIds.length == 1) {
             return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(
                 labelIds[0],

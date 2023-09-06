@@ -72,7 +72,6 @@ import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -83,7 +82,6 @@ import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.QueryContext;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
@@ -139,12 +137,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -196,16 +192,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        if (allowPartitionedScan) {
-            return partitionedNodeLabelIndexScan(transaction, batchSize, labelIds);
-        } else {
-            var read = transaction.dataRead();
-            return Arrays
-                .stream(labelIds)
-                .mapToObj(read::nodeLabelScan)
-                .map(scan -> scanToStoreScan(scan, batchSize))
-                .collect(Collectors.toList());
-        }
+        return partitionedNodeLabelIndexScan(transaction, batchSize, labelIds);
     }
 
     @Override
@@ -290,20 +277,26 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        if (allowPartitionedScan) {
-            return partitionedNodeLabelIndexScan(transaction, batchSize, labelId).get(0);
-        } else {
-            var read = transaction.dataRead();
-            return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
-        }
+        return partitionedNodeLabelIndexScan(transaction, batchSize, labelId).get(0);
     }
 
     @Override
-    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
-        return new ScanBasedStoreScanImpl<>(scan, batchSize);
+    public StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, batchSize);
+        return new PartitionedStoreScan<>(ktx.dataRead().allNodesScan(numberOfPartitions, ktx.cursorContext()));
     }
 
-    private List<StoreScan<NodeLabelIndexCursor>> partitionedNodeLabelIndexScan(
+    @Override
+    public StoreScan<RelationshipScanCursor> relationshipsScan(
+        KernelTransaction ktx,
+        long relationshipCount,
+        int batchSize
+    ) {
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(relationshipCount, batchSize);
+        return new PartitionedStoreScan<>(ktx.dataRead().allRelationshipsScan(numberOfPartitions, ktx.cursorContext()));
+    }
+
+    protected List<StoreScan<NodeLabelIndexCursor>> partitionedNodeLabelIndexScan(
         KernelTransaction transaction,
         int batchSize,
         int... labelIds
@@ -352,13 +345,13 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
             );
 
             var scans = new ArrayList<StoreScan<NodeLabelIndexCursor>>(labelIds.length);
-            scans.add(new PartitionedStoreScan(partitionedScan));
+            scans.add(new PartitionedStoreScan<>(partitionedScan));
 
             // Initialize the remaining index scans with the partitioning of the first scan.
             for (int i = 1; i < labelIds.length; i++) {
                 int labelToken = labelIds[i];
                 var scan = read.nodeLabelScan(session, partitionedScan, new TokenPredicate(labelToken));
-                scans.add(new PartitionedStoreScan(scan));
+                scans.add(new PartitionedStoreScan<>(scan));
             }
 
             return scans;

@@ -78,7 +78,11 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         int concurrency
     ) {
         super(
-            RelationshipScanCursorBasedScanner.FACTORY,
+            RelationshipScanCursorBasedScanner.factory(Math.max(dimensions.relationshipCounts()
+                .values()
+                .stream()
+                .mapToLong(Long::longValue)
+                .sum(), dimensions.relCountUpperBound())),
             loadingContext,
             dimensions,
             progressTracker,

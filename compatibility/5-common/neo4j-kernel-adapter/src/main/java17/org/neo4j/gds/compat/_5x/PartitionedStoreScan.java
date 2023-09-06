@@ -20,18 +20,18 @@
 package org.neo4j.gds.compat._5x;
 
 import org.neo4j.gds.compat.StoreScan;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.kernel.api.KernelTransaction;
 
-final class PartitionedStoreScan implements StoreScan<NodeLabelIndexCursor> {
-    private final PartitionedScan<NodeLabelIndexCursor> scan;
+public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C> {
+    private final PartitionedScan<C> scan;
 
-    PartitionedStoreScan(PartitionedScan<NodeLabelIndexCursor> scan) {
+    public PartitionedStoreScan(PartitionedScan<C> scan) {
         this.scan = scan;
     }
 
-    static int getNumberOfPartitions(long nodeCount, int batchSize) {
+    public static int getNumberOfPartitions(long nodeCount, int batchSize) {
         int numberOfPartitions;
         if (nodeCount > 0) {
             // ceil div to try to get enough partitions so a single one does
@@ -52,7 +52,8 @@ final class PartitionedStoreScan implements StoreScan<NodeLabelIndexCursor> {
     }
 
     @Override
-    public boolean reserveBatch(NodeLabelIndexCursor cursor, KernelTransaction ktx) {
+    public boolean reserveBatch(C cursor, KernelTransaction ktx) {
+        //noinspection deprecation, we are doing our own thread management and know that this is a thread-safe usage
         return scan.reservePartition(cursor, ktx.cursorContext(), ktx.securityContext().mode());
     }
 }
