@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -90,7 +89,6 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 .capacity(scanner.bufferSize())
                 .hasLabelInformation(labels.size() > 1)
                 .readProperty(nodePropertyImporter != null)
-                .useCheckedBuffer(GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled())
                 .build();
 
             boolean scanNextBatch = true;

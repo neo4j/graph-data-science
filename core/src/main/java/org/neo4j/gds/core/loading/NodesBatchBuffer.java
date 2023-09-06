@@ -51,24 +51,20 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         long highestPossibleNodeCount,
         Optional<LongSet> nodeLabelIds,
         Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> readProperty,
-        Optional<Boolean> useCheckedBuffer
+        Optional<Boolean> readProperty
     ) {
         LongSet labelIds = nodeLabelIds.orElseGet(LongHashSet::new);
         boolean hasLabelInfo = hasLabelInformation.orElse(false);
         boolean readProps = readProperty.orElse(false);
 
-        if (useCheckedBuffer.orElse(false)) {
-            return new Checked(
-                // TODO: we probably wanna adjust the capacity here
-                capacity,
-                highestPossibleNodeCount,
-                labelIds,
-                hasLabelInfo,
-                readProps
-            );
-        }
-        return new NodesBatchBuffer(capacity, highestPossibleNodeCount, labelIds, hasLabelInfo, readProps);
+        return new Checked(
+            // TODO: we probably wanna adjust the capacity here
+            capacity,
+            highestPossibleNodeCount,
+            labelIds,
+            hasLabelInfo,
+            readProps
+        );
     }
 
     NodesBatchBuffer(

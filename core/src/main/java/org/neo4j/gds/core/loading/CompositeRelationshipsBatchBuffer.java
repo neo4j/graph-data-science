@@ -21,24 +21,18 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
 
-import java.util.Optional;
-
 public class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
     protected final RelationshipsBatchBuffer[] buffers;
 
     @Builder.Factory
     static RecordsBatchBuffer<RelationshipReference> compositeRelationshipsBatchBuffer(
-        RelationshipsBatchBuffer[] buffers,
-        Optional<Boolean> useCheckedBuffer
+        RelationshipsBatchBuffer[] buffers
     ) {
         if (buffers.length == 1) {
             return buffers[0];
         }
-        if (useCheckedBuffer.orElse(false)) {
-            return new Checked(buffers);
-        }
-        return new CompositeRelationshipsBatchBuffer(buffers);
+        return new Checked(buffers);
     }
 
     private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {

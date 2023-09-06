@@ -55,15 +55,10 @@ public class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRef
         PartialIdMap idMap,
         int type,
         int capacity,
-        Optional<Boolean> skipDanglingRelationships,
-        Optional<Boolean> useCheckedBuffer
+        Optional<Boolean> skipDanglingRelationships
     ) {
         boolean skipDangling = skipDanglingRelationships.orElse(true);
-
-        if (useCheckedBuffer.orElse(false)) {
-            return new Checked(idMap, type, capacity, skipDangling);
-        }
-        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDangling);
+        return new Checked(idMap, type, capacity, skipDangling);
     }
 
     private RelationshipsBatchBuffer(

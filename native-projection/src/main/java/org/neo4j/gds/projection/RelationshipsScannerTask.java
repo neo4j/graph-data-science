@@ -21,7 +21,6 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.CompositeRelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordScannerTask;
@@ -57,8 +56,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             idMap,
             scanner,
             singleTypeRelationshipImporters,
-            loadingContext.terminationFlag(),
-            GraphDatabaseApiProxy.isUsingBlockStorageEngine(loadingContext.dependencyResolver())
+            loadingContext.terminationFlag()
         );
     }
 
@@ -69,7 +67,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         private final StoreScanner<RelationshipReference> scanner;
         private final Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters;
         private final TerminationFlag terminationFlag;
-        private final boolean useCheckedBuffers;
 
         Factory(
             TransactionContext tx,
@@ -77,8 +74,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             IdMap idMap,
             StoreScanner<RelationshipReference> scanner,
             Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters,
-            TerminationFlag terminationFlag,
-            boolean useCheckedBuffers
+            TerminationFlag terminationFlag
         ) {
             this.tx = tx;
             this.progressTracker = progressTracker;
@@ -86,7 +82,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             this.scanner = scanner;
             this.singleTypeRelationshipImporters = singleTypeRelationshipImporters;
             this.terminationFlag = terminationFlag;
-            this.useCheckedBuffers = useCheckedBuffers;
         }
 
         @Override
@@ -98,8 +93,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                 idMap,
                 scanner,
                 taskIndex,
-                singleTypeRelationshipImporters,
-                useCheckedBuffers
+                singleTypeRelationshipImporters
             );
         }
 
@@ -117,7 +111,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     private final StoreScanner<RelationshipReference> scanner;
     private final int taskIndex;
     private final Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters;
-    private final boolean useCheckedBuffers;
 
     private long relationshipsImported;
     private long weightsImported;
@@ -129,8 +122,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
         int taskIndex,
-        Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters,
-        boolean useCheckedBuffers
+        Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters
     ) {
         super(tx);
         this.terminationFlag = terminationFlag;
@@ -139,7 +131,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         this.scanner = scanner;
         this.taskIndex = taskIndex;
         this.singleTypeRelationshipImporters = singleTypeRelationshipImporters;
-        this.useCheckedBuffers = useCheckedBuffers;
     }
 
     @Override
@@ -152,7 +143,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.createCursor(transaction)) {
             // create an importer (includes a dedicated batch buffer) for each relationship type that we load
             var importers = this.singleTypeRelationshipImporters.stream()
-                .map(imports -> imports.threadLocalImporter(idMap, scanner.bufferSize(), transaction, useCheckedBuffers))
+                .map(imports -> imports.threadLocalImporter(idMap, scanner.bufferSize(), transaction))
                 .collect(Collectors.toList());
 
             var relationshipBatchBuffers = importers
@@ -162,7 +153,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
             var compositeBuffer = new CompositeRelationshipsBatchBufferBuilder()
                 .buffers(relationshipBatchBuffers)
-                .useCheckedBuffer(useCheckedBuffers)
                 .build();
 
             long allImportedRels = 0L;
