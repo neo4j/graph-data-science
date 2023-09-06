@@ -30,16 +30,14 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.linkmodels.pipeline.predict.MutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 
 import java.util.stream.Stream;
 
-//TODO can we reuse linkmodels.MutateResult
-class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, MutateResult> {
+class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, KGEMutateResult> {
 
-    KGEMutateResultConsumer(ResultBuilderFunction<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, MutateResult> resultBuilderFunction) {
+    KGEMutateResultConsumer(ResultBuilderFunction<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, KGEMutateResult> resultBuilderFunction) {
         super(resultBuilderFunction);
     }
 
@@ -61,12 +59,12 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of("similarityScore"))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateRelationshipProperty()))
             .concurrency(concurrency)
             .executorService(Pools.DEFAULT)
             .build();
 
-        var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;
+        var resultWithHistogramBuilder = (KGEMutateResult.Builder) resultBuilder;
         var similarityResultStream = computationResult.result()
             .map(KGEPredictResult::topKMap)
             .map(TopKMap::stream)
@@ -82,7 +80,6 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
                     graph.toRootNodeId(similarityResult.targetNodeId()),
                     similarityResult.property()
                 );
-                resultWithHistogramBuilder.recordHistogramValue(similarityResult.property());
             }));
 
         var relationships = relationshipsBuilder.build();

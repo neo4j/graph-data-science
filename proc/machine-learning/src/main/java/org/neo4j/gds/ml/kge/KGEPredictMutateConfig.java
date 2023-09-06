@@ -39,6 +39,9 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig {
     //TODO use HugeList or double[]
     List<Double> relationshipTypeEmbedding();
 
+    //TODO do we want to record the similarity/distance score?
+    String mutateRelationshipProperty();
+
     String scoringFunction();
 
     double threshold();

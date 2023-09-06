@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.kge;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.predict.MutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -34,7 +33,7 @@ public class KGEPredictMutateProc extends BaseProc {
 
     @Procedure(name = "gds.ml.kge.predict.mutate", mode = Mode.READ)
     @Description("Predicts new relationships using an existing KGE model.")
-    public Stream<MutateResult> mutate(
+    public Stream<KGEMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

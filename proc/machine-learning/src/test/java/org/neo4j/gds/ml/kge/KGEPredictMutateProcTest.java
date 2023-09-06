@@ -33,13 +33,11 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class KGEPredictMutateProcTest extends BaseProcTest {
+class KGEPredictMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static String DB_QUERY =
@@ -102,6 +100,7 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("targetNodeLabel", "N")
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
+            .addParameter("mutateRelationshipProperty", "similarityScore")
             .addParameter("scoringFunction", "TransE")
             .addParameter("threshold", 0.0)  //TODO check
             .addParameter("topK", 2)
@@ -113,26 +112,7 @@ public class KGEPredictMutateProcTest extends BaseProcTest {
             "mutateMillis", greaterThan(-1L),
             "postProcessingMillis", 0L,
             "relationshipsWritten", 10L,
-            "configuration", isA(Map.class),
-            "probabilityDistribution", allOf(
-                hasKey("min"),
-                hasKey("max"),
-                hasKey("mean"),
-                hasKey("stdDev"),
-                hasKey("p1"),
-                hasKey("p5"),
-                hasKey("p10"),
-                hasKey("p25"),
-                hasKey("p50"),
-                hasKey("p75"),
-                hasKey("p90"),
-                hasKey("p95"),
-                hasKey("p99"),
-                hasKey("p100")
-            ),
-            "samplingStats", Map.of(
-                "dummyStats", 4.2
-            )
+            "configuration", isA(Map.class)
         )));
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));

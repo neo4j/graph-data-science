@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TopKMapComputerTest {
 
+
     @Test
     void shouldComputeTopKMap() {
         var sourceNodes = create(1, 3, 5);
@@ -45,6 +46,7 @@ class TopKMapComputerTest {
             null, //TODO add graph
             sourceNodes,
             targetNodes,
+            "embedding",
             List.of(0.1, 0.2, 0.3),
             linkScorerFactory,
             (a, b) -> a != b,

@@ -40,6 +40,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private BitSet sourceNodes;
     private BitSet targetNodes;
 
+    private String nodeEmbeddingProperty;
     private List<Double> relationshipTypeEmbedding;
     private int concurrency;
 
@@ -53,6 +54,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         Graph graph,
         BitSet sourceNodes,
         BitSet targetNodes,
+        String nodeEmbeddingProperty,
         List<Double> relationshipTypeEmbedding,
         LinkScorerFactory linkScorerFactory,
         LongLongPredicate isCandidateLink,
@@ -65,6 +67,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.progressTracker = progressTracker;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
+        this.nodeEmbeddingProperty = nodeEmbeddingProperty;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding;
         this.concurrency = concurrency;
         this.topK = topK;
@@ -77,7 +80,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         TopKMap topKMap = new TopKMap(sourceNodes.capacity(), sourceNodes, Math.abs(topK), true);
 
-        NodePropertyValues embeddings = graph.nodeProperties("emb");
+        NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
         try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(linkScorerFactory::create)) {
             // TODO exploit symmetry of similarity function if available
