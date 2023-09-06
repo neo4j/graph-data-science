@@ -109,8 +109,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
             (r, cc, cs) -> new StandardCommunityStatisticsSpecificFields(
                 cc,
                 cs
-            )
-            ,
+            ),
             true,
             false,
             50L,

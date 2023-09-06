@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
+import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;

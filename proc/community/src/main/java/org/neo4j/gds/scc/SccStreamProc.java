@@ -20,7 +20,8 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -36,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class SccStreamProc extends BaseProc {
 
     @Context
-    public CommunityProcedureFacade facade;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.scc.stream", mode = READ)
     @Description(SCC_DESCRIPTION)
@@ -44,7 +45,7 @@ public class SccStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.sccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().sccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
     @Procedure(value = "gds.alpha.scc.stream", mode = READ, deprecatedBy = "gds.scc.stream")
     @Description(SCC_DESCRIPTION)

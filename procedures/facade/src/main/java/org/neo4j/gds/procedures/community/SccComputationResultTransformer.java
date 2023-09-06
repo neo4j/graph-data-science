@@ -24,9 +24,9 @@ import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.procedures.community.scc.SccMutateResult;
+import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.scc.SccBaseConfig;
-import org.neo4j.gds.scc.SccMutateResult;
-import org.neo4j.gds.scc.SccStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;

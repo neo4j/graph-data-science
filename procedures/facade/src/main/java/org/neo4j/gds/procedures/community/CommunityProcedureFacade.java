@@ -33,10 +33,12 @@ import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
-import org.neo4j.gds.scc.SccMutateConfig;
-import org.neo4j.gds.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.scc.SccMutateResult;
+import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
+import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
