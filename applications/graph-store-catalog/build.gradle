@@ -19,6 +19,7 @@ dependencies {
     compileOnly(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
     // argh and one more for the time being
     compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
 
     // graph store filter errors
     implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
@@ -32,6 +33,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':executor')
+    implementation project(':graph-projection-api')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':native-projection')

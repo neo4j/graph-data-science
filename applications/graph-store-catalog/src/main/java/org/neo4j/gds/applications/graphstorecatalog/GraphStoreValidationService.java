@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringJoining.join;
 
 public class GraphStoreValidationService {
     /**
@@ -181,10 +182,39 @@ public class GraphStoreValidationService {
         }
     }
 
-    void ensureRelationshipTypesPresent(
-        GraphStore graphStore, Collection<RelationshipType> relationshipTypes
+    void ensureRelationshipPropertiesMatchRelationshipType(
+        GraphStore graphStore,
+        String relationshipType,
+        Collection<String> relationshipProperties
     ) {
+        if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Relationship type `%s` not found. Available types: %s",
+                relationshipType,
+                join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
+            ));
+        }
+
+        var availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipType));
+
+        var missingPropertiesList = relationshipProperties
+            .stream()
+            .filter(relProperty -> !availableProperties.contains(relProperty))
+            .collect(Collectors.toList());
+
+        if (!missingPropertiesList.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Some  properties are missing %s for relationship type '%s'. Available properties: %s",
+                join(missingPropertiesList),
+                relationshipType,
+                join(availableProperties)
+            ));
+        }
+    }
+
+    void ensureRelationshipTypesPresent(GraphStore graphStore, Collection<RelationshipType> relationshipTypes) {
         var missingRelationshipTypes = new ArrayList<RelationshipType>();
+
         relationshipTypes.forEach(relationshipType -> {
             if (!graphStore.hasRelationshipType(relationshipType)) {
                 missingRelationshipTypes.add(relationshipType);

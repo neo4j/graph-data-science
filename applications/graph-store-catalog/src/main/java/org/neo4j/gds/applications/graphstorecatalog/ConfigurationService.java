@@ -30,6 +30,7 @@ import org.neo4j.gds.config.GraphRemoveGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
+import org.neo4j.gds.config.WriteRelationshipPropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -299,6 +300,13 @@ public class ConfigurationService {
         ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
 
         return configuration;
+    }
+
+    WriteRelationshipPropertiesConfig parseWriteRelationshipPropertiesConfiguration(Map<String, Object> rawConfiguration) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        // no extra validation, these are just non-functional flags
+        return WriteRelationshipPropertiesConfig.of(cypherConfig);
     }
 
     private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {

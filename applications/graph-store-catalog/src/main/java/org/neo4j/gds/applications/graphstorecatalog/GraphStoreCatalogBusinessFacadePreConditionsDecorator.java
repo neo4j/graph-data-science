@@ -412,6 +412,27 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public WriteRelationshipPropertiesResult writeRelationshipProperties(
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag,
+        String graphName,
+        String relationshipType,
+        List<String> relationshipProperties,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.writeRelationshipProperties(
+            user,
+            databaseId,
+            terminationFlag,
+            graphName,
+            relationshipType,
+            relationshipProperties,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

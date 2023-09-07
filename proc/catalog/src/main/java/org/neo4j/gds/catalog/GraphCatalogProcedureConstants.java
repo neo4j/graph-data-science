@@ -34,6 +34,7 @@ final class GraphCatalogProcedureConstants {
     static final String STREAM_RELATIONSHIP_PROPERTY_DESCRIPTION = "Streams the given relationship property.";
     static final String STREAM_RELATIONSHIPS_DESCRIPTION = "Streams the given relationship source/target pairs";
     static final String WRITE_NODE_PROPERTIES_DESCRIPTION = "Writes the given node properties to an online Neo4j database.";
+    static final String WRITE_RELATIONSHIP_PROPERTIES_DESCRIPTION = "Writes the given relationship and a list of relationship properties to an online Neo4j database.";
 
     private GraphCatalogProcedureConstants() {}
 }
