@@ -32,6 +32,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
+import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
@@ -122,6 +124,23 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.triangleCount(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result, config);
+    }
+
+    public StreamComputationResult<ModularityBaseConfig, ModularityResult> modularity(
+        String graphName,
+        ModularityBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.modularity(
             graphName,
             config,
             user,

@@ -33,11 +33,13 @@ import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
@@ -300,6 +302,24 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(LabelPropagationComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
+    }
+
+    public Stream<ModularityStreamResult> modularityStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+
+    ) {
+        var streamConfig = createStreamConfig(configuration, ModularityStreamConfig::of, algorithmMetaDataSetter);
+
+        var computationResult = algorithmsStreamBusinessFacade.modularity(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return ModularityComputationResultTransformer.toStreamResult(computationResult);
     }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(

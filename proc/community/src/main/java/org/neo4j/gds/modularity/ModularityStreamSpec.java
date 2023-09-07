@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.modularity.stream", aliases = {"gds.alpha.modularity.stream"}, description = DESCRIPTION, executionMode = STREAM)
-public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
+public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<ModularityStreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
     @Override
     public String name() {
         return "ModularityStream";
@@ -50,7 +51,7 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
     }
 
     @Override
-    public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<ModularityStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -60,7 +61,7 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
                     return LongStream
                         .range(0, result.communityCount())
                         .mapToObj(communityModularities::get)
-                        .map(StreamResult::from);
+                        .map(ModularityStreamResult::from);
                 }).orElseGet(Stream::empty)
         );
     }

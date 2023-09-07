@@ -17,19 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.procedures.community.modularity;
 
-public class StreamResult {
+import org.neo4j.gds.modularity.CommunityModularity;
+
+public class ModularityStreamResult {
 
     public final long communityId;
     public final double modularity;
 
-    private StreamResult(long communityId, double modularity) {
+    private ModularityStreamResult(long communityId, double modularity) {
         this.communityId = communityId;
         this.modularity = modularity;
     }
 
-    static StreamResult from(CommunityModularity communityModularity) {
-        return new StreamResult(communityModularity.communityId(), communityModularity.modularity());
+    public static ModularityStreamResult from(CommunityModularity communityModularity) {
+        return new ModularityStreamResult(communityModularity.communityId(), communityModularity.modularity());
     }
 }

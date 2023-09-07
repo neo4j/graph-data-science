@@ -45,6 +45,9 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
+import org.neo4j.gds.modularity.ModularityCalculatorFactory;
+import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
@@ -167,6 +170,22 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new SccAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
+    AlgorithmComputationResult<ModularityResult> modularity(
+        String graphName,
+        ModularityBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new ModularityCalculatorFactory<>(),
             user,
             databaseId
         );
