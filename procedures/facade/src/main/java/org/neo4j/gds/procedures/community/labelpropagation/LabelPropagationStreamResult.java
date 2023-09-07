@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.labelpropagation;
+package org.neo4j.gds.procedures.community.labelpropagation;
 
-public final class StreamResult {
+public final class LabelPropagationStreamResult {
+
     public final long nodeId;
     public final long communityId;
 
-    StreamResult(long nodeId, long communityId) {
+    public LabelPropagationStreamResult(long nodeId, long communityId) {
         this.nodeId = nodeId;
         this.communityId = communityId;
     }

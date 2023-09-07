@@ -37,6 +37,7 @@ public interface StreamComputationResult<CONFIG extends AlgoBaseConfig, RESULT> 
      */
     Optional<RESULT> result();
 
+    // TODO: remove this from here, it is readily available from the outside
     CONFIG configuration();
 
     Graph graph();

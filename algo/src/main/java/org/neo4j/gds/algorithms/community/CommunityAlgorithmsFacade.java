@@ -38,6 +38,9 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
@@ -85,9 +88,7 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new WccAlgorithmFactory<>(),
             user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistryFactory
+            databaseId
         );
     }
 
@@ -121,9 +122,7 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new KCoreDecompositionAlgorithmFactory<>(),
             user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistryFactory
+            databaseId
         );
     }
 
@@ -139,9 +138,23 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new LouvainAlgorithmFactory<>(),
             user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistryFactory
+            databaseId
+        );
+    }
+
+    AlgorithmComputationResult<LabelPropagationResult> labelPropagation(
+        String graphName,
+        LabelPropagationBaseConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new LabelPropagationFactory<>(),
+            user,
+            databaseId
         );
     }
 
@@ -157,9 +170,7 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new SccAlgorithmFactory<>(),
             user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistryFactory
+            databaseId
         );
     }
 
@@ -169,9 +180,7 @@ public class CommunityAlgorithmsFacade {
         Optional<String> relationshipProperty,
         GraphAlgorithmFactory<A, C> algorithmFactory,
         User user,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        DatabaseId databaseId
     ) {
         // TODO: Is this the best place to check for preconditions???
         PreconditionsProvider.preconditions().check();

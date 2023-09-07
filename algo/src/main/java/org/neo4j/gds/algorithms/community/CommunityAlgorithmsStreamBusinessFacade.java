@@ -28,6 +28,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.scc.SccBaseConfig;
@@ -129,6 +131,25 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result, config);
     }
 
+
+    public StreamComputationResult<LabelPropagationBaseConfig, LabelPropagationResult> labelPropagation(
+        String graphName,
+        LabelPropagationBaseConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.labelPropagation(
+            graphName,
+            configuration,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result, configuration);
+    }
+
+
     private <C extends AlgoBaseConfig, RESULT> StreamComputationResult<C, RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result, C configuration) {
 
         return StreamComputationResult.of(
@@ -139,5 +160,4 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         );
 
     }
-
 }

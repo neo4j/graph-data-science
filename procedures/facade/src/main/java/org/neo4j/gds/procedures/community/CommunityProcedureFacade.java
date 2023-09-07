@@ -29,9 +29,11 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
@@ -256,6 +258,24 @@ public class CommunityProcedureFacade {
         return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<LabelPropagationStreamResult> labelPropagationStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(configuration, LabelPropagationStreamConfig::of, algorithmMetaDataSetter);
+
+        var computationResult = algorithmsStreamBusinessFacade.labelPropagation(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return LabelPropagationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
+    }
+
+
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator,
@@ -273,4 +293,5 @@ public class CommunityProcedureFacade {
         return configCreator.apply(CypherMapWrapper.create(configuration));
 
     }
+
 }
