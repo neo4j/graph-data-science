@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kmeans;
+package org.neo4j.gds.procedures.community.kmeans;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -26,12 +26,12 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import java.util.List;
 import java.util.Map;
 
-public class MutateResult extends StatsResult {
+public class KmeansMutateResult extends StatsResult {
 
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 
-    public MutateResult(
+    public KmeansMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -57,18 +57,19 @@ public class MutateResult extends StatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<KmeansMutateResult> {
         private List<List<Double>> centroids;
         private double averageDistanceToCentroid;
 
         private double averageSilhouette;
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        protected MutateResult buildResult() {
-            return new MutateResult(
+        protected KmeansMutateResult buildResult() {
+            return new KmeansMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,

@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.kmeans.mutate", aliases = {"gds.beta.kmeans.mutate"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
-public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansMutateConfig, Stream<MutateResult>, KmeansAlgorithmFactory<KmeansMutateConfig>> {
+public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansMutateConfig, Stream<KmeansMutateResult>, KmeansAlgorithmFactory<KmeansMutateConfig>> {
 
     @Override
     public String name() {
@@ -58,7 +59,7 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     }
 
     @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansMutateConfig, Stream<KmeansMutateResult>> computationResultConsumer() {
         MutateNodePropertyListFunction<Kmeans, KmeansResult, KmeansMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -74,12 +75,12 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     }
 
     @NotNull
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<KmeansMutateResult> resultBuilder(
         ComputationResult<Kmeans, KmeansResult, KmeansMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var returnColumns = executionContext.returnColumns();
-        var builder = new MutateResult.Builder(
+        var builder = new KmeansMutateResult.Builder(
             returnColumns,
             computationResult.config().concurrency()
         );

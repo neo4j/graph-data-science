@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kmeans;
+package org.neo4j.gds.procedures.community.kmeans;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -50,8 +50,8 @@ public class StatsResult extends StandardStatsResult {
         this.averageSilhouette = averageSilhouette;
     }
 
-    static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+    public static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 

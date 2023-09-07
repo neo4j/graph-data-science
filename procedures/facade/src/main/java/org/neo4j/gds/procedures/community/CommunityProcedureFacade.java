@@ -29,6 +29,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
@@ -36,6 +37,7 @@ import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
@@ -328,6 +330,24 @@ public class CommunityProcedureFacade {
         );
 
         return KmeansComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<KmeansMutateResult> kmeansMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createMutateConfig(configuration, KmeansMutateConfig::of);
+
+        var computationResult = algorithmsMutateBusinessFacade.kmeans(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("communityDistribution"),
+            procedureReturnColumns.contains("centroids")
+        );
+
+        return Stream.of(KmeansComputationResultTransformer.toMutateResult(computationResult));
     }
 
 

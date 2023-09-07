@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
+import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
@@ -36,6 +37,8 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kmeans.KmeansMutateConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -45,6 +48,8 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
@@ -312,6 +317,43 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
     }
 
+    public NodePropertyMutateResult<KmeansSpecificFields> kmeans(
+        String graphName,
+        KmeansMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions,
+        boolean computeListOfCentroids
+        ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        NodePropertyValuesMapper<KmeansResult, KmeansMutateConfig> mapper = ((result, config) ->
+            NodePropertyValuesAdapter.adapt(result.communities()));
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            mapper,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return new KmeansSpecificFields(
+                    communitySummary,
+                    arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
+                    0,
+                    0
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> KmeansSpecificFields.EMPTY
+        );
+    }
+
+
     <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
@@ -375,6 +417,22 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             }
         };
     }
+
+    List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
+        if (shouldCompute) {
+            var result = new ArrayList<List<Double>>();
+
+            for (double[] row : matrix) {
+                List<Double> rowList = new ArrayList<>();
+                result.add(rowList);
+                for (double column : row)
+                    rowList.add(column);
+            }
+            return result;
+        }
+        return null;
+    }
+
 
     private static final class AlgorithmResultWithTiming<T> {
         final T algorithmResult;
