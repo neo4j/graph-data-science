@@ -633,12 +633,12 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             nodeProperties
         );
 
-        return writeNodePropertiesApplication.compute(
-            graphName,
+        return writeNodePropertiesApplication.write(
             graphStore,
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,
+            graphName,
             configuration
         );
     }

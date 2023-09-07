@@ -19,21 +19,17 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
@@ -46,51 +42,6 @@ public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfi
 
     static List<UserInputWriteProperties.PropertySpec> parseNodeProperties(Object userInput) {
         return UserInputWriteProperties.parse(userInput, "nodeProperties");
-    }
-
-    @Configuration.Ignore
-    default void validate(GraphStore graphStore) {
-        if (!nodeLabels().contains(ElementProjection.PROJECT_ALL)) {
-            // validate that all given labels have all the properties
-            nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
-                    List<String> invalidProperties = nodeProperties()
-                        .stream()
-                        .filter(nodeProperty -> !graphStore.hasNodeProperty(
-                            List.of(nodeLabel),
-                            nodeProperty.nodeProperty()
-                        )).map(UserInputWriteProperties.PropertySpec::nodeProperty)
-                        .collect(Collectors.toList());
-
-                    if (!invalidProperties.isEmpty()) {
-                        throw new IllegalArgumentException(formatWithLocale(
-                            "Expecting all specified node projections to have all given properties defined. " +
-                            "Could not find property key(s) %s for label %s. Defined keys: %s.",
-                            StringJoining.join(invalidProperties),
-                            nodeLabel.name,
-                            StringJoining.join(graphStore.nodePropertyKeys(nodeLabel))
-                        ));
-                    }
-                }
-            );
-        } else {
-            // validate that at least one label has all the properties
-
-            List<String> allProperties = nodeProperties()
-                .stream()
-                .map(v -> v.nodeProperty())
-                .collect(Collectors.toList());
-            boolean hasValidLabel = nodeLabelIdentifiers(graphStore).stream()
-                .anyMatch(nodeLabel -> graphStore
-                    .nodePropertyKeys(List.of(nodeLabel))
-                    .containsAll(allProperties));
-
-            if (!hasValidLabel) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Expecting at least one node projection to contain property key(s) %s.",
-                    StringJoining.join(allProperties)
-                ));
-            }
-        }
     }
 
     /**

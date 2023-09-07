@@ -30,24 +30,23 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -62,11 +61,11 @@ import static org.mockito.Mockito.when;
 
 @GdlExtension
 @ExtendWith(MockitoExtension.class)
-class NodePropertiesWriterTest {
-
+class WriteNodePropertiesApplicationTest {
     @Captor
     ArgumentCaptor<List<NodeProperty>> captor;
 
+    @SuppressWarnings("unused")
     @GdlGraph
     private static final String GDL =
         "CREATE" +
@@ -77,9 +76,11 @@ class NodePropertiesWriterTest {
             ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
             ", (f:B {nodeProp1: 5, nodeProp2: 47})";
 
+    @SuppressWarnings("unused")
     @Inject
     private GraphStore graphStore;
 
+    @SuppressWarnings("unused")
     @GdlGraph(graphNamePrefix = "propertiesSubset")
     private static final String GDL_PROPERTIES_SUBSET =
         "CREATE" +
@@ -90,13 +91,17 @@ class NodePropertiesWriterTest {
             ", (e:B {nodeProp1: 4})" +
             ", (f:B {nodeProp1: 5})";
 
+    @SuppressWarnings("unused")
     @Inject
     private GraphStore propertiesSubsetGraphStore;
 
     @BeforeEach
     void setUp() {
         GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "g"), graphStore);
-        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "propertiesSubsetGraph"), propertiesSubsetGraphStore);
+        GraphStoreCatalog.set(
+            GraphProjectConfig.emptyWithName("user", "propertiesSubsetGraph"),
+            propertiesSubsetGraphStore
+        );
     }
 
     @AfterEach
@@ -107,32 +112,33 @@ class NodePropertiesWriterTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("nodeLabels")
     void writeNodeProperties(Object nodeLabels, String displayName) {
-
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(8L, 11L);
 
-        var executionContext = executionContextBuilder()
-            .nodePropertyExporterBuilder(exporterBuilderMock)
-            .build();
-
-        var writeResult = NodePropertiesWriter.write(
-            "g",
-            List.of("nodeProp1", "nodeProp2"),
-            nodeLabels,
-            Map.of(),
-            executionContext
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(
+            new Neo4jBackedLogForTesting(),
+            exporterBuilderMock
+        );
+        var writeResult = nodePropertiesWriter.write(
+            graphStore,
+            EmptyTaskRegistryFactory.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            GraphName.parse("g"),
+            GraphWriteNodePropertiesConfig.of(
+                "g",
+                List.of("nodeProp1", "nodeProp2"),
+                nodeLabels,
+                CypherMapWrapper.empty()
+            )
         );
 
-        assertThat(writeResult).hasSize(1).satisfiesExactly(
-            nodePropertiesWriteResult -> {
-                assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
-                assertThat(nodePropertiesWriteResult.graphName).isEqualTo("g");
-                assertThat(nodePropertiesWriteResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
-                assertThat(nodePropertiesWriteResult.propertiesWritten).isEqualTo(19L);
-            }
-        );
+        assertThat(writeResult.writeMillis).isGreaterThan(-1);
+        assertThat(writeResult.graphName).isEqualTo("g");
+        assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
+        assertThat(writeResult.propertiesWritten).isEqualTo(19L);
 
         verify(nodePropertyExporterMock, times(2)).propertiesWritten();
         verify(nodePropertyExporterMock, times(2)).write(captor.capture());
@@ -152,32 +158,33 @@ class NodePropertiesWriterTest {
 
     @Test
     void writeNodePropertiesForLabel() {
-
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(11L);
 
-        var executionContext = executionContextBuilder()
-            .nodePropertyExporterBuilder(exporterBuilderMock)
-            .build();
-
-        var writeResult = NodePropertiesWriter.write(
-            "propertiesSubsetGraph",
-            List.of("nodeProp1", "nodeProp2"),
-            "*",
-            Map.of(),
-            executionContext
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(
+            new Neo4jBackedLogForTesting(),
+            exporterBuilderMock
+        );
+        var writeResult = nodePropertiesWriter.write(
+            propertiesSubsetGraphStore,
+            EmptyTaskRegistryFactory.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            GraphName.parse("propertiesSubsetGraph"),
+            GraphWriteNodePropertiesConfig.of(
+                "propertiesSubsetGraph",
+                List.of("nodeProp1", "nodeProp2"),
+                List.of("*"),
+                CypherMapWrapper.empty()
+            )
         );
 
-        assertThat(writeResult).hasSize(1).satisfiesExactly(
-            nodePropertiesWriteResult -> {
-                assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
-                assertThat(nodePropertiesWriteResult.graphName).isEqualTo("propertiesSubsetGraph");
-                assertThat(nodePropertiesWriteResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
-                assertThat(nodePropertiesWriteResult.propertiesWritten).isEqualTo(11L);
-            }
-        );
+        assertThat(writeResult.writeMillis).isGreaterThan(-1);
+        assertThat(writeResult.graphName).isEqualTo("propertiesSubsetGraph");
+        assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
+        assertThat(writeResult.propertiesWritten).isEqualTo(11L);
 
         // Only for NodeLabel `A` because it is the one that has all the properties.
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
@@ -195,25 +202,27 @@ class NodePropertiesWriterTest {
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
 
-        var executionContext = executionContextBuilder()
-            .nodePropertyExporterBuilder(exporterBuilderMock)
-            .build();
-
-        var writeResult = NodePropertiesWriter.write(
-            "g",
-            List.of("nodeProp1", "nodeProp2"),
-            "A",
-            Map.of(),
-            executionContext
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(
+            new Neo4jBackedLogForTesting(),
+            exporterBuilderMock
+        );
+        var writeResult = nodePropertiesWriter.write(
+            graphStore,
+            EmptyTaskRegistryFactory.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            GraphName.parse("g"),
+            GraphWriteNodePropertiesConfig.of(
+                "g",
+                List.of("nodeProp1", "nodeProp2"),
+                List.of("A"),
+                CypherMapWrapper.empty()
+            )
         );
 
-        assertThat(writeResult).hasSize(1).satisfiesExactly(
-            nodePropertiesWriteResult -> {
-                assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
-                assertThat(nodePropertiesWriteResult.graphName).isEqualTo("g");
-                assertThat(nodePropertiesWriteResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
-            }
-        );
+        assertThat(writeResult.writeMillis).isGreaterThan(-1);
+        assertThat(writeResult.graphName).isEqualTo("g");
+        assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
 
         // Only for NodeLabel `A` because it is the one that was requested.
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
@@ -231,25 +240,26 @@ class NodePropertiesWriterTest {
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
 
-        var executionContext = executionContextBuilder()
-            .nodePropertyExporterBuilder(exporterBuilderMock)
-            .build();
-
-        var writeResult = NodePropertiesWriter.write(
-            "g",
-            Map.of("nodeProp1", "foo"),
-            "*",
-            Map.of(),
-            executionContext
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(
+            new Neo4jBackedLogForTesting(),
+            exporterBuilderMock
         );
-
-        assertThat(writeResult).hasSize(1).satisfiesExactly(
-            nodePropertiesWriteResult -> {
-                assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
-                assertThat(nodePropertiesWriteResult.graphName).isEqualTo("g");
-                assertThat(nodePropertiesWriteResult.nodeProperties).containsExactly("foo");
-            }
+        var writeResult = nodePropertiesWriter.write(
+            graphStore,
+            EmptyTaskRegistryFactory.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            GraphName.parse("g"),
+            GraphWriteNodePropertiesConfig.of(
+                "g",
+                Map.of("nodeProp1", "foo"),
+                List.of("*"),
+                CypherMapWrapper.empty()
+            )
         );
+        assertThat(writeResult.writeMillis).isGreaterThan(-1);
+        assertThat(writeResult.graphName).isEqualTo("g");
+        assertThat(writeResult.nodeProperties).containsExactly("foo");
 
         verify(nodePropertyExporterMock, times(2)).propertiesWritten();
         verify(nodePropertyExporterMock, times(2)).write(captor.capture());
@@ -265,25 +275,27 @@ class NodePropertiesWriterTest {
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
 
-        var executionContext = executionContextBuilder()
-            .nodePropertyExporterBuilder(exporterBuilderMock)
-            .build();
-
-        var writeResult = NodePropertiesWriter.write(
-            "g",
-            List.of(Map.of("nodeProp1", "foo", "nodeProp2", "bar"), "nodeProp1"),
-            "A",
-            Map.of(),
-            executionContext
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(
+            new Neo4jBackedLogForTesting(),
+            exporterBuilderMock
+        );
+        var writeResult = nodePropertiesWriter.write(
+            graphStore,
+            EmptyTaskRegistryFactory.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            GraphName.parse("g"),
+            GraphWriteNodePropertiesConfig.of(
+                "g",
+                List.of(Map.of("nodeProp1", "foo", "nodeProp2", "bar"), "nodeProp1"),
+                List.of("A"),
+                CypherMapWrapper.empty()
+            )
         );
 
-        assertThat(writeResult).hasSize(1).satisfiesExactly(
-            nodePropertiesWriteResult -> {
-                assertThat(nodePropertiesWriteResult.writeMillis).isGreaterThan(-1);
-                assertThat(nodePropertiesWriteResult.graphName).isEqualTo("g");
-                assertThat(nodePropertiesWriteResult.nodeProperties).containsExactlyInAnyOrder("foo", "bar", "nodeProp1");
-            }
-        );
+        assertThat(writeResult.writeMillis).isGreaterThan(-1);
+        assertThat(writeResult.graphName).isEqualTo("g");
+        assertThat(writeResult.nodeProperties).containsExactlyInAnyOrder("foo", "bar", "nodeProp1");
 
         // Only for NodeLabel `A` because it is the one that was requested.
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
@@ -296,24 +308,49 @@ class NodePropertiesWriterTest {
                 nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("bar"),
                 nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1")
             );
-
     }
 
-    private ImmutableExecutionContext.Builder executionContextBuilder() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseId(graphStore.databaseId())
-            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
-            .returnColumns(ProcedureReturnColumns.EMPTY)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .username("user")
-            .terminationMonitor(TerminationMonitor.EMPTY)
-            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
-            .nodeLookup(NodeLookup.EMPTY)
-            .log(Neo4jProxy.testLog())
-            .isGdsAdmin(false);
-    }
+    /**
+     * @deprecated We need this just long enough that we can drive out usages of Neo4j's log.
+     *     Therefore, I do not want to build general support for this
+     */
+    @Deprecated
+    private static class Neo4jBackedLogForTesting implements Log {
+        private final TestLog neo4jLog = Neo4jProxy.testLog();
 
+        @Override
+        public void info(String message) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void info(String format, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void warn(String message, Exception e) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void warn(String format, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void debug(String format, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public Object getNeo4jLog() {
+            return neo4jLog;
+        }
+    }
 }

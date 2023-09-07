@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriter;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -37,7 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.WRITE_NODE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class GraphWriteNodePropertiesProc extends CatalogProc {
+public class GraphWriteNodePropertiesProc {
     @Context
     public GraphDataScience facade;
 
@@ -53,11 +50,8 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 
-    @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
     @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
-    @Description("Writes the given node properties to an online Neo4j database.")
+    @Description(WRITE_NODE_PROPERTIES_DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<NodePropertiesWriteResult> run(
@@ -68,22 +62,8 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     ) {
         Preconditions.check();
 
-        executionContext()
-            .log()
-            .warn(
-                "Procedure `gds.graph.writeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.write`.");
+        facade.log().warn("Procedure `gds.graph.writeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.write`.");
 
-        return NodePropertiesWriter.write(
-            graphName,
-            nodeProperties,
-            nodeLabels,
-            configuration,
-            executionContext()
-        );
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
+        return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 }

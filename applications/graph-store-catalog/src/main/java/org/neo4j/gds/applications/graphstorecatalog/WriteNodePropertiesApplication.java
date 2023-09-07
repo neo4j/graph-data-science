@@ -19,18 +19,29 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
 
-/**
- * @deprecated collapse either this or NodePropertiesWriter - is this app or generic functionality?
- */
-@Deprecated
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 public class WriteNodePropertiesApplication {
     private final Log log;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
@@ -40,22 +51,108 @@ public class WriteNodePropertiesApplication {
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
     }
 
-    NodePropertiesWriteResult compute(
-        GraphName graphName,
+    NodePropertiesWriteResult write(
         GraphStore graphStore,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
+        GraphName graphName,
         GraphWriteNodePropertiesConfig configuration
     ) {
-        var nodePropertiesWriter = new NodePropertiesWriter(log, nodePropertyExporterBuilder, terminationFlag);
-
-        return nodePropertiesWriter.write(
-            graphStore,
-            taskRegistryFactory,
-            userLogRegistryFactory,
-            graphName.getValue(),
-            configuration
+        var validNodeLabels = configuration.validNodeLabels(graphStore);
+        var task = Tasks.iterativeFixed(
+            "Graph :: NodeProperties :: Write",
+            () -> List.of(
+                NodePropertyExporter.innerTask("Label", Task.UNKNOWN_VOLUME)
+            ),
+            validNodeLabels.size()
         );
+        var progressTracker = new TaskProgressTracker(
+            task,
+            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            configuration.writeConcurrency(),
+            new JobId(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+
+        var allNodeProperties = configuration
+            .nodeProperties()
+            .stream()
+            .map(UserInputWriteProperties.PropertySpec::writeProperty)
+            .collect(Collectors.toList());
+
+        // writing
+        NodePropertiesWriteResult.Builder builder = new NodePropertiesWriteResult.Builder(
+            graphName.getValue(),
+            allNodeProperties
+        );
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            try {
+                var propertiesWritten = writeNodeProperties(
+                    graphStore,
+                    configuration,
+                    validNodeLabels,
+                    nodePropertyExporterBuilder,
+                    terminationFlag,
+                    progressTracker
+                );
+
+                builder.withPropertiesWritten(propertiesWritten);
+            } catch (RuntimeException e) {
+                log.warn("Node property writing failed", e);
+                throw e;
+            }
+        }
+
+        return builder.build();
+    }
+
+    private static long writeNodeProperties(
+        GraphStore graphStore,
+        GraphWriteNodePropertiesConfig config,
+        Iterable<NodeLabel> validNodeLabels,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
+    ) {
+        var propertiesWritten = 0L;
+
+        progressTracker.beginSubTask();
+        try {
+            for (var label : validNodeLabels) {
+                var subGraph = graphStore.getGraph(
+                    Collections.singletonList(label),
+                    graphStore.relationshipTypes(),
+                    Optional.empty()
+                );
+
+                var exporter = nodePropertyExporterBuilder
+                    .withIdMap(subGraph)
+                    .withTerminationFlag(terminationFlag)
+                    .parallel(Pools.DEFAULT, config.writeConcurrency())
+                    .withProgressTracker(progressTracker)
+                    .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())
+                    .build();
+
+                var writeNodeProperties =
+                    config.nodeProperties().stream()
+                        .map(nodePropertyKey ->
+                            ImmutableNodeProperty.of(
+                                nodePropertyKey.writeProperty(),
+                                subGraph.nodeProperties(nodePropertyKey.nodeProperty())
+                            )
+                        )
+                        .collect(Collectors.toList());
+
+                exporter.write(writeNodeProperties);
+
+                propertiesWritten += exporter.propertiesWritten();
+            }
+        } finally {
+            progressTracker.endSubTask();
+        }
+
+        return propertiesWritten;
     }
 }
