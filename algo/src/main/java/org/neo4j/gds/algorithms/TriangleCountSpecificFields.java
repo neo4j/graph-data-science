@@ -17,16 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.algorithms;
 
-@SuppressWarnings("unused")
-public class TriangleCountStreamResult {
+public class TriangleCountSpecificFields {
+    private final long globalTriangleCount;
+    private final long nodeCount;
 
-    public final long nodeId;
-    public final long triangleCount;
-
-    public TriangleCountStreamResult(long nodeId, long triangleCount) {
-        this.nodeId = nodeId;
-        this.triangleCount = triangleCount;
+    public TriangleCountSpecificFields(
+        long globalTriangleCount,
+        long nodeCount
+    ) {
+        this.globalTriangleCount = globalTriangleCount;
+        this.nodeCount=nodeCount;
     }
+
+    public long  nodeCount() {
+        return nodeCount;
+    }
+
+    public long  globalTriangleCount() {
+        return globalTriangleCount;
+    }
+
 }

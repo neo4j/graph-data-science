@@ -31,6 +31,8 @@ import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 public class CommunityAlgorithmsStreamBusinessFacade {
@@ -101,6 +103,23 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.scc(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result, config);
+    }
+
+    public StreamComputationResult<TriangleCountBaseConfig, TriangleCountResult> streamTriangleCount(
+        String graphName,
+        TriangleCountBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.triangleCount(
             graphName,
             config,
             user,
