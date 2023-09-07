@@ -81,7 +81,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
-//        try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(linkScorerFactory::create)) {
+        try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction))) {
             // TODO exploit symmetry of similarity function if available
             ParallelUtil.parallelStreamConsume(
                 new SetBitsIterable(sourceNodes).stream(),
@@ -91,7 +91,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                     .forEach(node1 -> {
                         terminationFlag.assertRunning();
 
-                        LinkScorer similarityComputer = LinkScorerFactory.create(scoreFunction);
+                        LinkScorer similarityComputer = threadLocalSimilarityComputer.get();
                         similarityComputer.init(embeddings, relationshipTypeEmbedding, node1);
 
                         targetNodesStream()
@@ -105,7 +105,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                             });
                     })
             );
-//        }
+        }
 
         progressTracker.endSubTask();
 
