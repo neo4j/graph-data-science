@@ -29,10 +29,12 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
@@ -99,13 +101,15 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, WccMutateConfig::of);
 
+        var statisticsReturnColumns = ComponentStatisticsReturnColumns.from(procedureReturnColumns);
+
         var computationResult = algorithmsMutateBusinessFacade.mutateWcc(
             graphName,
             config,
             user,
             databaseId,
-            procedureReturnColumns.contains("componentCount"),
-            procedureReturnColumns.contains("componentDistribution")
+            statisticsReturnColumns.computeComponentCount,
+            statisticsReturnColumns.computeComponentDistribution
         );
 
         return Stream.of(WccComputationResultTransformer.toMutateResult(computationResult));
@@ -176,13 +180,15 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, LouvainMutateConfig::of);
 
+        var statisticsReturnColumns = CommunityStatisticsReturnColumns.from(procedureReturnColumns);
+
         var computationResult = algorithmsMutateBusinessFacade.mutateLouvain(
             graphName,
             config,
             user,
             databaseId,
-            procedureReturnColumns.contains("communityCount"),
-            procedureReturnColumns.contains("communityDistribution")
+            statisticsReturnColumns.computeCommunityCount,
+            statisticsReturnColumns.computeCommunityDistribution
         );
 
         return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
@@ -211,14 +217,15 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var config = createMutateConfig(configuration, SccMutateConfig::of);
+        var statisticsReturnColumns = ComponentStatisticsReturnColumns.from(procedureReturnColumns);
 
         var computationResult = algorithmsMutateBusinessFacade.mutateScc(
             graphName,
             config,
             user,
             databaseId,
-            procedureReturnColumns.contains("componentCount"),
-            procedureReturnColumns.contains("componentDistribution")
+            statisticsReturnColumns.computeComponentCount,
+            statisticsReturnColumns.computeComponentDistribution
         );
 
         return Stream.of(SccComputationResultTransformer.toMutateResult(computationResult));
@@ -275,6 +282,25 @@ public class CommunityProcedureFacade {
         return LabelPropagationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
+    public Stream<LabelPropagationMutateResult> labelPropagationMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createMutateConfig(configuration, LabelPropagationMutateConfig::of);
+
+        var statisticsReturnColumns = CommunityStatisticsReturnColumns.from(procedureReturnColumns);
+
+        var computationResult = algorithmsMutateBusinessFacade.labelPropagation(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId,
+            statisticsReturnColumns.computeCommunityCount,
+            statisticsReturnColumns.computeCommunityDistribution
+        );
+
+        return Stream.of(LabelPropagationComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
+    }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
@@ -291,7 +317,45 @@ public class CommunityProcedureFacade {
         Function<CypherMapWrapper, C> configCreator
     ) {
         return configCreator.apply(CypherMapWrapper.create(configuration));
-
     }
 
+    private static final class ComponentStatisticsReturnColumns {
+        final boolean computeComponentCount;
+        final boolean computeComponentDistribution;
+
+        static ComponentStatisticsReturnColumns from(ProcedureReturnColumns procedureReturnColumns) {
+            return new ComponentStatisticsReturnColumns(
+                procedureReturnColumns.contains("componentCount"),
+                procedureReturnColumns.contains("componentDistribution")
+            );
+        }
+
+        private ComponentStatisticsReturnColumns(
+            boolean computeComponentCount,
+            boolean computeComponentDistribution
+        ) {
+            this.computeComponentCount = computeComponentCount;
+            this.computeComponentDistribution = computeComponentDistribution;
+        }
+    }
+
+    private static final class CommunityStatisticsReturnColumns {
+        final boolean computeCommunityCount;
+        final boolean computeCommunityDistribution;
+
+        static CommunityStatisticsReturnColumns from(ProcedureReturnColumns procedureReturnColumns) {
+            return new CommunityStatisticsReturnColumns(
+                procedureReturnColumns.contains("communityCount"),
+                procedureReturnColumns.contains("communityDistribution")
+            );
+        }
+
+        private CommunityStatisticsReturnColumns(
+            boolean computeCommunityCount,
+            boolean computeCommunityDistribution
+        ) {
+            this.computeCommunityCount = computeCommunityCount;
+            this.computeCommunityDistribution = computeCommunityDistribution;
+        }
+    }
 }

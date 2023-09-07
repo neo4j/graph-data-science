@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
+import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
@@ -35,6 +36,7 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -165,6 +167,79 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
     }
 
+    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> mutateScc(
+        String graphName,
+        SccMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeComponentCount,
+        boolean computeComponentDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            (result, config) -> NodePropertyValuesAdapter.adapt(result),
+            (result -> result::get),
+            (result, componentCount, communitySummary) -> {
+                return new StandardCommunityStatisticsSpecificFields(
+                    componentCount,
+                    communitySummary
+                );
+            },
+            computeComponentCount,
+            computeComponentDistribution,
+            intermediateResult.computeMilliseconds,
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY
+        );
+
+    }
+
+    public NodePropertyMutateResult<LabelPropagationSpecificFields> labelPropagation(
+        String graphName,
+        LabelPropagationMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeComponentCount,
+        boolean computeComponentDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            ((result1, config) -> {
+                return CommunityResultCompanion.nodePropertyValues(
+                    config.isIncremental(),
+                    config.consecutiveIds(),
+                    NodePropertyValuesAdapter.adapt(result1.labels())
+                );
+            }),
+            (result -> result.labels()::get),
+            (result, componentCount, communitySummary) -> {
+                return LabelPropagationSpecificFields.from(
+                    result.ranIterations(),
+                    result.didConverge(),
+                    componentCount,
+                    communitySummary
+                );
+            },
+            computeComponentCount,
+            computeComponentDistribution,
+            intermediateResult.computeMilliseconds,
+            () -> LabelPropagationSpecificFields.EMPTY
+        );
+    }
+
     /*
         By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields
         to contain the statistics information.
@@ -220,39 +295,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 .algorithmSpecificFields(specificFields)
                 .build();
         }).orElseGet(() -> NodePropertyMutateResult.empty(emptyASFSupplier.get(), configuration));
-
-    }
-
-    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> mutateScc(
-        String graphName,
-        SccMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            (result, config) -> NodePropertyValuesAdapter.adapt(result),
-            (result -> result::get),
-            (result, componentCount, communitySummary) -> {
-                return new StandardCommunityStatisticsSpecificFields(
-                    componentCount,
-                    communitySummary
-                );
-            },
-            computeComponentCount,
-            computeComponentDistribution,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
 
     }
 

@@ -27,7 +27,7 @@ import java.util.Map;
  * @see org.neo4j.gds.algorithms.LouvainSpecificFields
  */
 public interface CommunityStatisticsSpecificFields {
-    long componentCount();
+    long communityCount();
 
-    Map<String, Object> componentDistribution();
+    Map<String, Object> communityDistribution();
 }

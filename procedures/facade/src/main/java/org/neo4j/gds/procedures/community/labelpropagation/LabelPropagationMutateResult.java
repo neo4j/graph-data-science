@@ -28,7 +28,7 @@ public final class LabelPropagationMutateResult extends LabelPropagationStatsRes
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 
-    private LabelPropagationMutateResult(
+    public LabelPropagationMutateResult(
         long ranIterations,
         boolean didConverge,
         long communityCount,

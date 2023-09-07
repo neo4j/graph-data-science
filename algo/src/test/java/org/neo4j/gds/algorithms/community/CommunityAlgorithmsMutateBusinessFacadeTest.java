@@ -117,7 +117,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         );
 
 
-        assertThat(mutateResult.algorithmSpecificFields().componentCount()).isEqualTo(4);
+        assertThat(mutateResult.algorithmSpecificFields().communityCount()).isEqualTo(4);
         assertThat(mutateResult.computeMillis()).isEqualTo(50);
         assertThat(mutateResult.mutateMillis()).isGreaterThanOrEqualTo(0L);
         assertThat(mutateResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);

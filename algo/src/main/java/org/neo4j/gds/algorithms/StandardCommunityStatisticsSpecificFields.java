@@ -22,26 +22,28 @@ package org.neo4j.gds.algorithms;
 import java.util.Map;
 
 public class StandardCommunityStatisticsSpecificFields implements CommunityStatisticsSpecificFields {
-    private final long componentCount;
-    private final Map<String, Object> componentDistribution;
-    public static StandardCommunityStatisticsSpecificFields EMPTY = new StandardCommunityStatisticsSpecificFields(
+
+    public static final StandardCommunityStatisticsSpecificFields EMPTY = new StandardCommunityStatisticsSpecificFields(
         0,
         Map.of()
     );
 
+    private final long communityCount;
+    private final Map<String, Object> communityDistribution;
+
     public StandardCommunityStatisticsSpecificFields(
-        long componentCount,
-        Map<String, Object> componentDistribution
+        long communityCount,
+        Map<String, Object> communityDistribution
     ) {
-        this.componentCount = componentCount;
-        this.componentDistribution = componentDistribution;
+        this.communityCount = communityCount;
+        this.communityDistribution = communityDistribution;
     }
 
-    public long componentCount() {
-        return componentCount;
+    public long communityCount() {
+        return communityCount;
     }
 
-    public Map<String, Object> componentDistribution() {
-        return componentDistribution;
+    public Map<String, Object> communityDistribution() {
+        return communityDistribution;
     }
 }

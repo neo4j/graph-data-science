@@ -57,8 +57,8 @@ final class WccComputationResultTransformer {
 
     static WccMutateResult toMutateResult(NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> computationResult) {
         return new WccMutateResult(
-            computationResult.algorithmSpecificFields().componentCount(),
-            computationResult.algorithmSpecificFields().componentDistribution(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
             computationResult.preProcessingMillis(),
             computationResult.computeMillis(),
             computationResult.postProcessingMillis(),

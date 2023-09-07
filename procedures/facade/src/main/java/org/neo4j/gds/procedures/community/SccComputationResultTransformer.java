@@ -50,8 +50,8 @@ final class SccComputationResultTransformer {
 
     static SccMutateResult toMutateResult(NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> computationResult) {
         return new SccMutateResult(
-            computationResult.algorithmSpecificFields().componentCount(),
-            computationResult.algorithmSpecificFields().componentDistribution(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
             computationResult.preProcessingMillis(),
             computationResult.computeMillis(),
             computationResult.postProcessingMillis(),

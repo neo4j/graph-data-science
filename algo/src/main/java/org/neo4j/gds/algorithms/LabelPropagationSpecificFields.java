@@ -19,55 +19,52 @@
  */
 package org.neo4j.gds.algorithms;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
-public final class LouvainSpecificFields implements CommunityStatisticsSpecificFields {
+public final class LabelPropagationSpecificFields implements CommunityStatisticsSpecificFields {
 
-    public static final LouvainSpecificFields EMPTY =
-        new LouvainSpecificFields(0d, emptyList(), 0L, 0L, emptyMap());
+    public static final LabelPropagationSpecificFields EMPTY =
+        new LabelPropagationSpecificFields(0L, false, 0L, emptyMap());
 
+    private final long ranIterations;
+    private final boolean didConverge;
     private final long communityCount;
     private final Map<String, Object> communityDistribution;
-    private final double modularity;
-    private final List<Double> modularities;
-    private final long ranLevels;
 
-    public static LouvainSpecificFields from(
-        double modularity,
-        double[] modularities,
+    public static LabelPropagationSpecificFields from(
+        long ranIterations,
+        boolean didConverge,
         long componentCount,
-        long ranLevel,
         Map<String, Object> componentDistribution
     ) {
 
-        return new LouvainSpecificFields(
-            modularity,
-            Arrays.stream(modularities).boxed().collect(
-                Collectors.toList()),
-            ranLevel,
+        return new LabelPropagationSpecificFields(
+            ranIterations,
+            didConverge,
             componentCount,
             componentDistribution
         );
     }
 
-    private LouvainSpecificFields(
-        double modularity,
-        List<Double> modularities,
-        long ranLevels,
-        long communityCount,
+    private LabelPropagationSpecificFields(
+        long ranIterations,
+        boolean didConverge, long communityCount,
         Map<String, Object> communityDistribution
     ) {
+        this.didConverge = didConverge;
         this.communityCount = communityCount;
         this.communityDistribution = communityDistribution;
-        this.modularities=modularities;
-        this.ranLevels=ranLevels;
-        this.modularity=modularity;
+        this.ranIterations = ranIterations;
+    }
+
+    public long ranIterations() {
+        return ranIterations;
+    }
+
+    public boolean didConverge() {
+        return didConverge;
     }
 
     @Override
@@ -80,11 +77,4 @@ public final class LouvainSpecificFields implements CommunityStatisticsSpecificF
         return communityDistribution;
     }
 
-    public long ranLevels() {
-        return ranLevels;
-    }
-
-    public List<Double> modularities(){return modularities;}
-
-    public double modularity(){ return  modularity;}
 }

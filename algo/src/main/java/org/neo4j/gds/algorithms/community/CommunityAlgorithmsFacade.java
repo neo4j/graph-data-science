@@ -104,9 +104,7 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new IntersectingTriangleCountFactory<>(),
             user,
-            databaseId,
-            taskRegistryFactory,
-            userLogRegistryFactory
+            databaseId
         );
     }
 
