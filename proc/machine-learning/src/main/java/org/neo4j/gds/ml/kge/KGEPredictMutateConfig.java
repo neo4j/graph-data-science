@@ -19,20 +19,35 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.immutables.value.Value;
+import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Collection;
 import java.util.List;
 
 @ValueClass
 @Configuration
-public interface KGEPredictMutateConfig extends MutateRelationshipConfig {
+public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBaseConfig {
 
-    String sourceNodeLabel();
 
-    String targetNodeLabel();
+    @Value.Default
+    default String sourceNodeLabel() {
+        return ElementProjection.PROJECT_ALL;
+    }
+
+    @Value.Default
+    default String targetNodeLabel() {
+        return ElementProjection.PROJECT_ALL;
+    }
 
     String nodeEmbeddingProperty();
 
@@ -46,9 +61,35 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig {
 
     double threshold();
 
+    @Configuration.IntegerRange(min = 1)
     int topK();
 
     static KGEPredictMutateConfig of(CypherMapWrapper userInput) {
         return new KGEPredictMutateConfigImpl(userInput);
     }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateSourceNodeLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementTypeValidator.resolveAndValidate(graphStore, List.of(sourceNodeLabel()), "`sourceNodeLabel`");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetNodeLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementTypeValidator.resolveAndValidate(graphStore, List.of(targetNodeLabel()), "`targetNodeLabel`");
+    }
+
+    @Value.Check
+    default void validateScoringFunction() {
+
+    }
+
+
 }
