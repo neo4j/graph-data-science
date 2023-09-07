@@ -21,8 +21,10 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -34,16 +36,21 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleCountStreamProc extends BaseProc {
+
+    @Context
+    public GraphDataScience facade;
+
     @Description(TriangleCountCompanion.DESCRIPTION)
     @Procedure(name = "gds.triangleCount.stream", mode = Mode.READ)
     public Stream<TriangleCountStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new TriangleCountStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().triangleCountStream(
+            graphName,
+            configuration,
+            executionContext().algorithmMetaDataSetter()
+        );
     }
 
     @Procedure(value = "gds.triangleCount.stream.estimate", mode = READ)

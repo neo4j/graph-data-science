@@ -44,6 +44,9 @@ import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -81,6 +84,24 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new WccAlgorithmFactory<>(),
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+    }
+
+    AlgorithmComputationResult<TriangleCountResult> triangleCount(
+        String graphName,
+        TriangleCountBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            Optional.empty(),
+            new IntersectingTriangleCountFactory<>(),
             user,
             databaseId,
             taskRegistryFactory,
