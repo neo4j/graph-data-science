@@ -39,7 +39,7 @@ class BellmanFordRandomGraphGenerateStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldWorkWithRandomGraph() {
-        runQuery("CALL gds.graph.generate('graph',10,10)");
+        runQuery("CALL gds.graph.generate('graph',10,10, {relationshipSeed:0})");
         assertThatNoException().isThrownBy(() -> {
 
             long rowCount = runQueryWithRowConsumer("CALL gds.bellmanFord.stream('graph', {sourceNode: 0})", result -> {
