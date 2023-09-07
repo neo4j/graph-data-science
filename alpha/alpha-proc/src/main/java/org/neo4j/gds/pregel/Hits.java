@@ -171,7 +171,9 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
             return "auth";
         }
 
-        @Override
+        @Value.Default
+        @Configuration.ConvertWith(method = "org.neo4j.gds.beta.pregel.Partitioning#parse")
+        @Configuration.ToMapValue("org.neo4j.gds.beta.pregel.Partitioning#toString")
         default Partitioning partitioning() {
             return Partitioning.AUTO;
         }
