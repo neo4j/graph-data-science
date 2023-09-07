@@ -1,6 +1,6 @@
 [appendix]
 [[appendix-d]]
-= MMigrate from Alpha Cypher to Cypher
+= Migrate from Alpha Cypher to Cypher
 :description: If you have been using `gds.alpha.graph.project` Cypher aggregation, you can find the info you will need to migrate to using the new Cypher projection.
 
 
