@@ -86,6 +86,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
     private final StreamRelationshipsApplication streamRelationshipsApplication;
     private final WriteNodePropertiesApplication writeNodePropertiesApplication;
+    private final WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -105,7 +106,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         StreamNodePropertiesApplication streamNodePropertiesApplication,
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication,
-        WriteNodePropertiesApplication writeNodePropertiesApplication
+        WriteNodePropertiesApplication writeNodePropertiesApplication,
+        WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication
     ) {
         this.log = log;
 
@@ -127,6 +129,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         this.streamRelationshipsApplication = streamRelationshipsApplication;
         this.writeNodePropertiesApplication = writeNodePropertiesApplication;
+        this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
     }
 
     @Override
@@ -640,6 +643,39 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             userLogRegistryFactory,
             graphName,
             configuration
+        );
+    }
+
+    @Override
+    public WriteRelationshipPropertiesResult writeRelationshipProperties(
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag,
+        String graphNameAsString,
+        String relationshipType,
+        List<String> relationshipProperties,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        // why graphstore first here?
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipType(
+            graphStore,
+            relationshipType,
+            relationshipProperties
+        );
+
+        // maybe because this configuration is non-functionals only?
+        var configuration = configurationService.parseWriteRelationshipPropertiesConfiguration(rawConfiguration);
+
+        return writeRelationshipPropertiesApplication.compute(
+            terminationFlag,
+            graphStore,
+            graphName,
+            relationshipType,
+            relationshipProperties, configuration
         );
     }
 

@@ -42,6 +42,7 @@ import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipProperties
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -111,6 +112,7 @@ public class CatalogFacadeFactory {
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
+        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(exporterContext);
 
         // GDS applications
         var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
@@ -146,6 +148,7 @@ public class CatalogFacadeFactory {
         var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
+        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log, relationshipPropertiesExporterBuilder);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -166,7 +169,8 @@ public class CatalogFacadeFactory {
             streamNodePropertiesApplication,
             streamRelationshipPropertiesApplication,
             streamRelationshipsApplication,
-            writeNodePropertiesApplication
+            writeNodePropertiesApplication,
+            writeRelationshipPropertiesApplication
         );
 
         // wrap in decorator to enable preconditions checks

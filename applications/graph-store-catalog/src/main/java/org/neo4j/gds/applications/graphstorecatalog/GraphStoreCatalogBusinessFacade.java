@@ -203,4 +203,14 @@ public interface GraphStoreCatalogBusinessFacade {
         Object nodeLabels,
         Map<String, Object> configuration
     );
+
+    WriteRelationshipPropertiesResult writeRelationshipProperties(
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag,
+        String graphName,
+        String relationshipType,
+        List<String> relationshipProperties,
+        Map<String, Object> configuration
+    );
 }
