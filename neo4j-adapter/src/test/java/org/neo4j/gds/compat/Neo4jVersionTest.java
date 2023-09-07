@@ -52,7 +52,8 @@ class Neo4jVersionTest {
         "5.9.0, V_5_9",
         "5.10.0, V_5_10",
         "5.11.0, V_5_11",
-        "5.12.0, V_RC",
+        "5.12.0, V_5_12",
+        "5.13.0, V_RC",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
