@@ -24,6 +24,8 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 
 import java.util.stream.Stream;
 
@@ -31,7 +33,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.labelPropagation.stats", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = STATS)
-public class LabelPropagationStatsSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, Stream<StatsResult>, LabelPropagationFactory<LabelPropagationStatsConfig>> {
+public class LabelPropagationStatsSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, Stream<LabelPropagationStatsResult>, LabelPropagationFactory<LabelPropagationStatsConfig>> {
     @Override
     public String name() {
         return "LabelPropagationStats";
@@ -48,9 +50,9 @@ public class LabelPropagationStatsSpecification implements AlgorithmSpec<LabelPr
     }
 
     @Override
-    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, Stream<LabelPropagationStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var builder = new MutateResult.Builder(
+            var builder = LabelPropagationMutateResult.builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );

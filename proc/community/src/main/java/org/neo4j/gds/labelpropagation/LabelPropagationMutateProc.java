@@ -22,7 +22,10 @@ package org.neo4j.gds.labelpropagation;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,9 +38,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LabelPropagationMutateProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<LabelPropagationMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

@@ -17,26 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.labelpropagation;
+package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
-abstract class LabelPropagationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
-    long ranIterations;
+public abstract class LabelPropagationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
+    protected long ranIterations;
 
-    boolean didConverge;
+    protected boolean didConverge;
 
-    LabelPropagationResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+    public LabelPropagationResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
         super(returnColumns, concurrency);
     }
 
-    LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {
+    public LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {
         this.ranIterations = iterations;
         return this;
     }
 
-    LabelPropagationResultBuilder<PROC_RESULT> didConverge(boolean didConverge) {
+    public LabelPropagationResultBuilder<PROC_RESULT> didConverge(boolean didConverge) {
         this.didConverge = didConverge;
         return this;
     }

@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.labelpropagation;
+package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 
 import java.util.Map;
 
-public final class MutateResult extends StatsResult {
+public final class LabelPropagationMutateResult extends LabelPropagationStatsResult {
 
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 
-    private MutateResult(
+    private LabelPropagationMutateResult(
         long ranIterations,
         boolean didConverge,
         long communityCount,
@@ -54,15 +54,19 @@ public final class MutateResult extends StatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends LabelPropagationResultBuilder<MutateResult> {
+    public static Builder builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        return new Builder(returnColumns, concurrency);
+    }
+
+    public static class Builder extends LabelPropagationResultBuilder<LabelPropagationMutateResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        protected MutateResult buildResult() {
-            return new MutateResult(
+        protected LabelPropagationMutateResult buildResult() {
+            return new LabelPropagationMutateResult(
                 ranIterations,
                 didConverge,
                 maybeCommunityCount.orElse(0L),

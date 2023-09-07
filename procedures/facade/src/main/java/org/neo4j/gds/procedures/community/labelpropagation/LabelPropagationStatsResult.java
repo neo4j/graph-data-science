@@ -17,21 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.labelpropagation;
+package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class LabelPropagationStatsResult extends StandardStatsResult {
 
     public final long ranIterations;
     public final boolean didConverge;
     public final long communityCount;
     public final Map<String, Object> communityDistribution;
 
-    StatsResult(
+    LabelPropagationStatsResult(
         long ranIterations,
         boolean didConverge,
         long communityCount,
@@ -48,15 +48,15 @@ public class StatsResult extends StandardStatsResult {
         this.communityDistribution = communityDistribution;
     }
 
-    static class Builder extends LabelPropagationResultBuilder<StatsResult> {
+    static class Builder extends LabelPropagationResultBuilder<LabelPropagationStatsResult> {
 
         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        protected StatsResult buildResult() {
-            return new StatsResult(
+        protected LabelPropagationStatsResult buildResult() {
+            return new LabelPropagationStatsResult(
                 ranIterations,
                 didConverge,
                 maybeCommunityCount.orElse(0L),

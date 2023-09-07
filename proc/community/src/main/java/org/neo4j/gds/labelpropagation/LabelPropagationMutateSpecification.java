@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -40,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.labelPropagation.mutate", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<MutateResult>, LabelPropagationFactory<LabelPropagationMutateConfig>> {
+public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<LabelPropagationMutateResult>, LabelPropagationFactory<LabelPropagationMutateConfig>> {
     @Override
     public String name() {
         return "LabelPropagationMutate";
@@ -57,7 +58,7 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
     }
 
     @Override
-    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<LabelPropagationMutateResult>> computationResultConsumer() {
 
         return new MutatePropertyComputationResultConsumer<>(
             this::nodeProperties,
@@ -83,11 +84,11 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
     }
 
     @NotNull
-    AbstractResultBuilder<MutateResult> resultBuilder(
+    AbstractResultBuilder<LabelPropagationMutateResult> resultBuilder(
         ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = LabelPropagationMutateResult.builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

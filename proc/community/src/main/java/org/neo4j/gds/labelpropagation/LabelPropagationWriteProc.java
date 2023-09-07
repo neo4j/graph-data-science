@@ -24,6 +24,7 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +45,7 @@ public class LabelPropagationWriteProc extends BaseProc {
 
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<LabelPropagationWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
