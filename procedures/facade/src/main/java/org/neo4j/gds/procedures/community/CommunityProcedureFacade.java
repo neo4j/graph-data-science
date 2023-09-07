@@ -29,12 +29,14 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
@@ -310,6 +312,24 @@ public class CommunityProcedureFacade {
 
         return ModularityComputationResultTransformer.toStreamResult(computationResult);
     }
+
+    public Stream<KmeansStreamResult> kmeansStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(configuration, KmeansStreamConfig::of, algorithmMetaDataSetter);
+
+        var computationResult = algorithmsStreamBusinessFacade.kmeans(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return KmeansComputationResultTransformer.toStreamResult(computationResult);
+    }
+
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,

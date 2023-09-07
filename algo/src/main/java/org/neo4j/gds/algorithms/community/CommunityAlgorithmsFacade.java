@@ -38,6 +38,9 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansAlgorithmFactory;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
@@ -186,6 +189,22 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new ModularityCalculatorFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
+    AlgorithmComputationResult<KmeansResult> kmeans(
+        String graphName,
+        KmeansBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            Optional.empty(),
+            new KmeansAlgorithmFactory<>(),
             user,
             databaseId
         );

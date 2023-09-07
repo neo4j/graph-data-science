@@ -21,8 +21,10 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,24 +37,22 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansStreamProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.kmeans.stream", mode = READ)
     @Description(Kmeans.KMEANS_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<KmeansStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new KmeansStreamSpec();
-        return new ProcedureExecutor<>(
-            streamSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().kmeansStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.kmeans.stream", mode = READ, deprecatedBy = "gds.kmeans.stream")
     @Description(Kmeans.KMEANS_DESCRIPTION)
-    public Stream<StreamResult> betaStream(
+    public Stream<KmeansStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

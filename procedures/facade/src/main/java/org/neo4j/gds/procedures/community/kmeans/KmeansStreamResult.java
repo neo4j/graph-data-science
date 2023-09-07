@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kmeans;
+package org.neo4j.gds.procedures.community.kmeans;
 
-public class StreamResult {
+public class KmeansStreamResult {
 
     public final long nodeId;
 
@@ -29,7 +29,7 @@ public class StreamResult {
     public final double silhouette;
 
 
-    public StreamResult(long nodeId, long communityId, double distanceFromCentroid, double silhouette) {
+    public KmeansStreamResult(long nodeId, long communityId, double distanceFromCentroid, double silhouette) {
         this.nodeId = nodeId;
         this.communityId = communityId;
         this.distanceFromCentroid = distanceFromCentroid;

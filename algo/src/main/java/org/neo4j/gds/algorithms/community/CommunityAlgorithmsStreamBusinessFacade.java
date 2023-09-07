@@ -27,6 +27,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
@@ -167,6 +169,22 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result);
     }
 
+    public StreamComputationResult<KmeansBaseConfig, KmeansResult> kmeans(
+        String graphName,
+        KmeansBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.kmeans(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result, config);
+    }
 
     private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result) {
 
