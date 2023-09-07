@@ -20,31 +20,62 @@
 package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TopKMapComputerTest {
+class TopKMapComputerTest extends BaseTest {
 
+
+    private static final String DB_CYPHER =
+        "CREATE" +
+            "  (a:N {emb: [0.1, 0.2, 0.3]})" +
+            ", (b:N {emb: [0.1, 0.2, 0.3]})" +
+            ", (c:N {emb: [0.1, 0.2, 0.3]})" +
+            ", (d:M {emb: [0.1, 0.2, 0.3]})" +
+            ", (e:M {emb: [0.1, 0.2, 0.3]})" +
+            ", (f:M {emb: [0.1, 0.2, 0.3]})" +
+            ", (a)-[:REL {prop: 1.0}]->(b)" +
+            ", (b)-[:REL {prop: 1.0}]->(a)" +
+            ", (a)-[:REL {prop: 1.0}]->(c)" +
+            ", (c)-[:REL {prop: 1.0}]->(a)" +
+            ", (b)-[:REL {prop: 1.0}]->(c)" +
+            ", (c)-[:REL {prop: 1.0}]->(b)";
+
+    @BeforeEach
+    void setUp() {
+        runQuery(DB_CYPHER);
+    }
 
     @Test
     void shouldComputeTopKMap() {
-        var sourceNodes = create(1, 3, 5);
-        var targetNodes = create(4, 5, 6);
+        Graph graph = new StoreLoaderBuilder().databaseService(db)
+            .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
+            .build()
+            .graph();
+
+        var sourceNodes = create(0, 1, 2);
+        var targetNodes = create(3, 4, 5);
         var topK = 1;
         var concurrency = 1;
 
         var computer = new TopKMapComputer(
-            null, //TODO add graph
+            graph,
             sourceNodes,
             targetNodes,
-            "embedding",
+            "emb",
             List.of(0.1, 0.2, 0.3),
             "DistMult",
             (a, b) -> a != b,
@@ -55,12 +86,8 @@ class TopKMapComputerTest {
 
         KGEPredictResult result = computer.compute();
 
-        assertThat(result.topKMap().stream()).containsExactly(
-            // TODO dont return a SimilarityResult here
-            new SimilarityResult(1, 6, 7),
-            new SimilarityResult(3, 6, 9),
-            new SimilarityResult(5, 6, 11)
-        );
+        var resultSourceNodes = result.topKMap().stream().map(SimilarityResult::sourceNodeId).collect(Collectors.toList());
+        assertThat(resultSourceNodes).containsExactlyInAnyOrder(0L,1L,2L);
     }
 
     private BitSet create(long... ids) {

@@ -28,7 +28,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
-import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
 import java.util.stream.LongStream;
@@ -100,7 +99,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                             .forEach(node2 -> {
                                 double similarity = similarityComputer.similarity(node2);
                                 if (!Double.isNaN(similarity)) {
-                                    System.out.println("similarity = " + similarity);
                                     topKMap.put(node1, node2, similarity);
                                 }
                                 progressTracker.logProgress();
