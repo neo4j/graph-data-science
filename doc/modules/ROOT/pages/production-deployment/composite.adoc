@@ -3,7 +3,7 @@
 [[composite]]
 // Putting "Fabric" in the header might help with searching for the
 // case that users are not familiar with composite databases yet
-= Using GDS and composite databases (formerly known as Fabric)
+= Using GDS and composite databases (Fabric)
 :description: This section describes how the Neo4j Graph Data Science library can be used in a Neo4j composite database deployment.
 
 

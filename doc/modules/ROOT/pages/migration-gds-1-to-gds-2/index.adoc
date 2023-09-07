@@ -1,6 +1,6 @@
 [appendix]
 [[appendix-b]]
-= Migration from Graph Data Science library Version 1.x
+= Migrate from GDS v.1.x
 :description: If you have previously used Graph Data Science library version 1.x, you can find the information you will need to migrate to using version 2.x in this section.
 :page-aliases: appendix-b/index.adoc
 
