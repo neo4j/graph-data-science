@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
@@ -44,5 +47,15 @@ final class TriangleCountComputationResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
-
+    static TriangleCountMutateResult toMutateResult(NodePropertyMutateResult<TriangleCountSpecificFields> computationResult) {
+        return new TriangleCountMutateResult(
+            computationResult.algorithmSpecificFields().globalTriangleCount(),
+            computationResult.algorithmSpecificFields().nodeCount(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.mutateMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.configuration().toMap()
+        );
+    }
 }

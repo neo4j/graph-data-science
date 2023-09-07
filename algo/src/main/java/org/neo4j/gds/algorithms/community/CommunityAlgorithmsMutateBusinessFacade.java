@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
@@ -38,6 +39,7 @@ import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Map;
@@ -253,6 +255,30 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
 
     }
+
+    public NodePropertyMutateResult<TriangleCountSpecificFields> mutateTriangleCount(
+        String graphName,
+        TriangleCountMutateConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            algorithmResult,
+            config,
+            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.localTriangles()),
+            (result) -> new TriangleCountSpecificFields(result.globalTriangles(), algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new TriangleCountSpecificFields(0, 0)
+        );
+    }
+
 
     <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,

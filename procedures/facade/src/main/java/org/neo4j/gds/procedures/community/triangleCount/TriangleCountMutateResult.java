@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.procedures.community.triangleCount;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -29,7 +29,7 @@ public class TriangleCountMutateResult extends TriangleCountStatsResult {
     public long mutateMillis;
     public long nodePropertiesWritten;
 
-    TriangleCountMutateResult(
+    public TriangleCountMutateResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,
@@ -49,11 +49,11 @@ public class TriangleCountMutateResult extends TriangleCountStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractResultBuilder<TriangleCountMutateResult> {
+    public static class Builder extends AbstractResultBuilder<TriangleCountMutateResult> {
 
         long globalTriangleCount = 0;
 
-        Builder withGlobalTriangleCount(long globalTriangleCount) {
+        public Builder withGlobalTriangleCount(long globalTriangleCount) {
             this.globalTriangleCount = globalTriangleCount;
             return this;
         }

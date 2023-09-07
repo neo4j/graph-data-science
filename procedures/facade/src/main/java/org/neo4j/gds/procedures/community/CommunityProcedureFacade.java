@@ -36,10 +36,12 @@ import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
@@ -238,6 +240,21 @@ public class CommunityProcedureFacade {
         return TriangleCountComputationResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<TriangleCountMutateResult> triangleCountMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createMutateConfig(configuration, TriangleCountMutateConfig::of);
+
+        var computationResult = algorithmsMutateBusinessFacade.mutateTriangleCount(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
+    }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
