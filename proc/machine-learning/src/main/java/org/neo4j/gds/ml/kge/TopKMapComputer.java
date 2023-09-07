@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
+import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
 import java.util.stream.LongStream;

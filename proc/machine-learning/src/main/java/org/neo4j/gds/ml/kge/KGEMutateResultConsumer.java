@@ -64,7 +64,6 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
             .executorService(Pools.DEFAULT)
             .build();
 
-        var resultWithHistogramBuilder = (KGEMutateResult.Builder) resultBuilder;
         var similarityResultStream = computationResult.result()
             .map(KGEPredictResult::topKMap)
             .map(TopKMap::stream)
