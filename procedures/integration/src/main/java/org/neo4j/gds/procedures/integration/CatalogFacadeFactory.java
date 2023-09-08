@@ -41,6 +41,7 @@ import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplicat
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteNodeLabelApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
@@ -112,7 +113,9 @@ public class CatalogFacadeFactory {
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
-        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(exporterContext);
+        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(
+            exporterContext);
+        var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
 
         // GDS applications
         var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
@@ -148,7 +151,11 @@ public class CatalogFacadeFactory {
         var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
-        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log, relationshipPropertiesExporterBuilder);
+        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(
+            log,
+            relationshipPropertiesExporterBuilder
+        );
+        var writeNodeLabelApplication = new WriteNodeLabelApplication(log, nodeLabelExporterBuilder);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -170,7 +177,8 @@ public class CatalogFacadeFactory {
             streamRelationshipPropertiesApplication,
             streamRelationshipsApplication,
             writeNodePropertiesApplication,
-            writeRelationshipPropertiesApplication
+            writeRelationshipPropertiesApplication,
+            writeNodeLabelApplication
         );
 
         // wrap in decorator to enable preconditions checks

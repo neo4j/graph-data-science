@@ -433,6 +433,25 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public WriteLabelResult writeNodeLabel(
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag,
+        String graphName,
+        String nodeLabel,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.writeNodeLabel(
+            user,
+            databaseId,
+            terminationFlag,
+            graphName,
+            nodeLabel,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

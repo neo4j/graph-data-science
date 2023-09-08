@@ -19,94 +19,49 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.beta.filter.NodesFilter;
-import org.neo4j.gds.config.WriteLabelConfig;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.applications.graphstorecatalog.WriteLabelResult;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.graphstorecatalog.NodeFilterParser.parseAndValidate;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.WRITE_NODE_LABEL_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class GraphWriteNodeLabelProc extends CatalogProc {
-
+public class GraphWriteNodeLabelProc {
     @Context
-    public NodeLabelExporterBuilder nodeLabelExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.graph.nodeLabel.write", mode = WRITE)
-    @Description("Writes the given node Label to an online Neo4j database.")
+    @Description(WRITE_NODE_LABEL_DESCRIPTION)
     public Stream<WriteLabelResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
-    ) throws ParseException {
-
-        Preconditions.check();
-
-        var procedureConfig = WriteLabelConfig.of(configuration);
-        var graphStore = graphStoreFromCatalog(graphName).graphStore();
-
-        var nodeFilter = parseAndValidate(graphStore, procedureConfig.nodeFilter());
-        var resultBuilder = WriteLabelResult.builder(graphName, nodeLabel)
-            .withConfig(procedureConfig.toMap());
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-            var filteredNodes = NodesFilter.filterNodes(
-                graphStore,
-                nodeFilter,
-                procedureConfig.concurrency(),
-                Map.of(),
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER
-            );
-
-            var nodeLabelExporter = nodeLabelExporterBuilder
-                .withIdMap(filteredNodes.idMap())
-                .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
-                .withArrowConnectionInfo(procedureConfig.arrowConnectionInfo(), graphStore.databaseId().databaseName())
-                .parallel(Pools.DEFAULT, procedureConfig.concurrency())
-                .build();
-
-            runWithExceptionLogging(
-                "Node label writing failed",
-                () -> nodeLabelExporter.write(nodeLabel)
-            );
-
-            resultBuilder
-                .withNodeLabelsWritten(nodeLabelExporter.nodeLabelsWritten())
-                .withNodeCount(graphStore.nodeCount());
-        }
-
-
-        return Stream.of(resultBuilder.build());
+    ) {
+        return facade.catalog().writeNodeLabel(graphName, nodeLabel, configuration);
     }
 
     @Procedure(name = "gds.alpha.graph.nodeLabel.write", mode = WRITE, deprecatedBy = "gds.graph.nodeLabel.write")
-    @Description("Writes the given node Label to an online Neo4j database.")
+    @Description(WRITE_NODE_LABEL_DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<WriteLabelResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
-    ) throws ParseException {
-        
-        executionContext()
+    ) {
+
+        facade
             .log()
             .warn(
                 "Procedure `gds.alpha.graph.nodeLabel.write` has been deprecated, please use `gds.graph.nodeLabel.write`.");
 
-        return write(graphName, nodeLabel, configuration);
+        return facade.catalog().writeNodeLabel(graphName, nodeLabel, configuration);
     }
 }

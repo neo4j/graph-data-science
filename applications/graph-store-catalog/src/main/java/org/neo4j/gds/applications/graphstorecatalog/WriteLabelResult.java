@@ -17,22 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public class WriteLabelResult {
+public final class WriteLabelResult {
     public final long writeMillis;
     public final String graphName;
     public final String nodeLabel;
     public final long nodeCount;
+    @SuppressWarnings("WeakerAccess")
     public final long nodeLabelsWritten;
     public final Map<String, Object> configuration;
 
-
-    WriteLabelResult(
+    private WriteLabelResult(
         long writeMillis,
         String graphName,
         String nodeLabel,
@@ -52,8 +52,7 @@ public class WriteLabelResult {
         return new Builder(graphName, nodeLabel);
     }
 
-
-    static class Builder extends AbstractResultBuilder<WriteLabelResult> {
+    public static class Builder extends AbstractResultBuilder<WriteLabelResult> {
         private final String graphName;
         private final String nodeLabel;
         private long nodeLabelsWritten;
@@ -64,12 +63,12 @@ public class WriteLabelResult {
             this.nodeLabel = nodeLabel;
         }
 
-        Builder withNodeLabelsWritten(long propertiesWritten) {
+        public Builder withNodeLabelsWritten(long propertiesWritten) {
             this.nodeLabelsWritten = propertiesWritten;
             return this;
         }
 
-        Builder withConfig(Map<String, Object> configuration) {
+        public Builder withConfig(Map<String, Object> configuration) {
             this.configuration = configuration;
             return this;
         }

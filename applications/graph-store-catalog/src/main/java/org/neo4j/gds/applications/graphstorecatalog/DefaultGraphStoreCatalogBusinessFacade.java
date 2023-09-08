@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.MutateLabelConfig;
+import org.neo4j.gds.config.WriteLabelConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -87,6 +88,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final StreamRelationshipsApplication streamRelationshipsApplication;
     private final WriteNodePropertiesApplication writeNodePropertiesApplication;
     private final WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
+    private final WriteNodeLabelApplication writeNodeLabelApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -107,7 +109,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication,
         WriteNodePropertiesApplication writeNodePropertiesApplication,
-        WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication
+        WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
+        WriteNodeLabelApplication writeNodeLabelApplication
     ) {
         this.log = log;
 
@@ -130,6 +133,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.streamRelationshipsApplication = streamRelationshipsApplication;
         this.writeNodePropertiesApplication = writeNodePropertiesApplication;
         this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
+        this.writeNodeLabelApplication = writeNodeLabelApplication;
     }
 
     @Override
@@ -675,7 +679,36 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             graphStore,
             graphName,
             relationshipType,
-            relationshipProperties, configuration
+            relationshipProperties,
+            configuration
+        );
+    }
+
+    @Override
+    public WriteLabelResult writeNodeLabel(
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag,
+        String graphNameAsString,
+        String nodeLabel,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = WriteLabelConfig.of(rawConfiguration);
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+
+        var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
+
+        return writeNodeLabelApplication.compute(
+            terminationFlag,
+            graphStore,
+            graphName,
+            nodeLabel,
+            configuration,
+            nodeFilter
         );
     }
 

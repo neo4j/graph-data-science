@@ -33,6 +33,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPrope
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
 import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
+import org.neo4j.gds.applications.graphstorecatalog.WriteLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -625,7 +626,6 @@ public class CatalogFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     ) {
-
         var user = user();
         var databaseId = databaseId();
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
@@ -637,6 +637,27 @@ public class CatalogFacade {
             graphName,
             relationshipType,
             relationshipProperties,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<WriteLabelResult> writeNodeLabel(
+        String graphName,
+        String nodeLabel,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+
+        var result = businessFacade.writeNodeLabel(
+            user,
+            databaseId,
+            terminationFlag,
+            graphName,
+            nodeLabel,
             configuration
         );
 

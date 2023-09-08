@@ -213,4 +213,13 @@ public interface GraphStoreCatalogBusinessFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     );
+
+    WriteLabelResult writeNodeLabel(
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag,
+        String graphName,
+        String nodeLabel,
+        Map<String, Object> configuration
+    );
 }
