@@ -162,6 +162,8 @@ public interface Neo4jProxyApi {
 
     StoreScan<RelationshipScanCursor> relationshipsScan(KernelTransaction ktx, long relationshipCount, int batchSize);
 
+    CompatExecutionContext executionContext(KernelTransaction ktx);
+
     CompatIndexQuery rangeIndexQuery(
         int propertyKeyId,
         double from,

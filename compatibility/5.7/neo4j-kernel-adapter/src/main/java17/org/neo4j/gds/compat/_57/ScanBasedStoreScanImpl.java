@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.compat._57;
 
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.kernel.api.KernelTransaction;
 
 public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
     private final Scan<C> scan;
@@ -34,7 +34,7 @@ public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan
     }
 
     @Override
-    public boolean reserveBatch(C cursor, KernelTransaction ktx) {
-        return scan.reserveBatch(cursor, batchSize, ktx.cursorContext(), ktx.securityContext().mode());
+    public boolean reserveBatch(C cursor, CompatExecutionContext ctx) {
+        return scan.reserveBatch(cursor, batchSize, ctx.cursorContext(), ctx.accessMode());
     }
 }

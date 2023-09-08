@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.compat.CompatExecutionContext;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -33,7 +35,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         private EntityCursor cursor;
         private Reference cursorReference;
         private final StoreScan<EntityCursor> scan;
-        private final KernelTransaction ktx;
+        private final CompatExecutionContext executionContext;
 
         ScanCursor(
             EntityCursor cursor,
@@ -44,12 +46,12 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
             this.cursor = cursor;
             this.cursorReference = reference;
             this.scan = entityCursorScan;
-            this.ktx = ktx;
+            this.executionContext = Neo4jProxy.executionContext(ktx);
         }
 
         @Override
         public boolean reserveBatch() {
-            return scan.reserveBatch(cursor, ktx);
+            return scan.reserveBatch(cursor, executionContext);
         }
 
         @Override
@@ -69,6 +71,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
                 cursorReference = null;
                 cursor.close();
                 cursor = null;
+                executionContext.close();
             }
         }
     }

@@ -21,18 +21,23 @@ package org.neo4j.gds.compat._56;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -197,5 +202,29 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
             cacheTracer,
             EmptyVersionContextSupplier.EMPTY
         )).orElse(CursorContextFactory.NULL_CONTEXT_FACTORY);
+    }
+
+    @Override
+    public CompatExecutionContext executionContext(KernelTransaction ktx) {
+        return new CompatExecutionContext() {
+            @Override
+            public CursorContext cursorContext() {
+                return ktx.cursorContext();
+            }
+
+            @Override
+            public AccessMode accessMode() {
+                return ktx.securityContext().mode();
+            }
+
+            @Override
+            public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor) {
+                return scan.reservePartition(cursor, cursorContext(), accessMode());
+            }
+
+            @Override
+            public void close() {
+            }
+        };
     }
 }

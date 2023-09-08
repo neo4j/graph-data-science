@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.List;
 
@@ -36,12 +36,12 @@ public class CompositeNodeScan implements StoreScan<CompositeNodeCursor> {
 
     // This method needs to be synchronized as we need to make sure that every subscan is processing the same batch
     @Override
-    public synchronized boolean reserveBatch(CompositeNodeCursor cursor, KernelTransaction ktx) {
+    public synchronized boolean reserveBatch(CompositeNodeCursor cursor, CompatExecutionContext ctx) {
         boolean result = false;
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
             if (indexCursor != null) {
-                var batchHasData = scans.get(i).reserveBatch(indexCursor, ktx);
+                var batchHasData = scans.get(i).reserveBatch(indexCursor, ctx);
                 if (batchHasData) {
                     result = true;
                 } else {

@@ -215,6 +215,10 @@ public final class Neo4jProxy {
         return IMPL.relationshipsScan(ktx, relationshipCount, batchSize);
     }
 
+    public static CompatExecutionContext executionContext(KernelTransaction ktx) {
+        return IMPL.executionContext(ktx);
+    }
+
     public static CompatIndexQuery rangeIndexQuery(
         int propertyKeyId,
         double from,

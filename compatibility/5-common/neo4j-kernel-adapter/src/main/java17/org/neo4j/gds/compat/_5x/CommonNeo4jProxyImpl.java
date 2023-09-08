@@ -34,6 +34,7 @@ import org.neo4j.exceptions.KernelException;
 import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
@@ -72,11 +73,13 @@ import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.QueryContext;
@@ -294,6 +297,35 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     ) {
         int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(relationshipCount, batchSize);
         return new PartitionedStoreScan<>(ktx.dataRead().allRelationshipsScan(numberOfPartitions, ktx.cursorContext()));
+    }
+
+    @Override
+    public CompatExecutionContext executionContext(KernelTransaction ktx) {
+        var stmt = ktx.acquireStatement();
+        var ctx = ktx.createExecutionContext();
+        return new CompatExecutionContext() {
+            @Override
+            public CursorContext cursorContext() {
+                return ctx.cursorContext();
+            }
+
+            @Override
+            public AccessMode accessMode() {
+                return ctx.securityContext().mode();
+            }
+
+            @Override
+            public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor) {
+                return scan.reservePartition(cursor, ctx);
+            }
+
+            @Override
+            public void close() {
+                ctx.complete();
+                ctx.close();
+                stmt.close();
+            }
+        };
     }
 
     protected List<StoreScan<NodeLabelIndexCursor>> partitionedNodeLabelIndexScan(

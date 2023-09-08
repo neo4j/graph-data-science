@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.compat;
 
-public interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> {
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.io.pagecache.context.CursorContext;
 
-    /**
-     * Advances the cursor to the next batch of the underlying scan.
-     *
-     * @param cursor a cursor to read the next batch
-     * @param ctx    the execution context of the executing kernel transaction
-     * @return true, iff the current batch contains data that must be consumed.
-     */
-    boolean reserveBatch(Cursor cursor, CompatExecutionContext ctx);
+public interface CompatExecutionContext extends AutoCloseable {
+
+     CursorContext cursorContext();
+
+     AccessMode accessMode();
+
+     <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor);
+
+     @Override
+     void close();
 }

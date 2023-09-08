@@ -19,16 +19,21 @@
  */
 package org.neo4j.gds.compat._5x;
 
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
-import org.neo4j.kernel.api.KernelTransaction;
 
 public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C> {
     private final PartitionedScan<C> scan;
 
     public PartitionedStoreScan(PartitionedScan<C> scan) {
         this.scan = scan;
+    }
+
+    @Override
+    public boolean reserveBatch(C cursor, CompatExecutionContext ctx) {
+        return ctx.reservePartition(scan, cursor);
     }
 
     public static int getNumberOfPartitions(long nodeCount, int batchSize) {
@@ -49,11 +54,5 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
             numberOfPartitions = 1;
         }
         return numberOfPartitions;
-    }
-
-    @Override
-    public boolean reserveBatch(C cursor, KernelTransaction ktx) {
-        //noinspection deprecation, we are doing our own thread management and know that this is a thread-safe usage
-        return scan.reservePartition(cursor, ktx.cursorContext(), ktx.securityContext().mode());
     }
 }
