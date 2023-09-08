@@ -35,12 +35,12 @@ final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(StreamComputationResult<WccBaseConfig, DisjointSetStruct> computationResult) {
+    static Stream<WccStreamResult> toStreamResult(StreamComputationResult<DisjointSetStruct> computationResult, WccBaseConfig configuration) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
 
             var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                computationResult.configuration(),
+                configuration,
                 wccResult.asNodeProperties()
             );
 

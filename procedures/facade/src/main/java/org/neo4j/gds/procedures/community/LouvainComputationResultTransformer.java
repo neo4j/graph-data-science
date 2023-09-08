@@ -35,16 +35,15 @@ import java.util.stream.Stream;
 final class LouvainComputationResultTransformer {
     private LouvainComputationResultTransformer() {}
 
-    static Stream<LouvainStreamResult> toStreamResult(StreamComputationResult<LouvainBaseConfig, LouvainResult> computationResult) {
+    static Stream<LouvainStreamResult> toStreamResult(StreamComputationResult<LouvainResult> computationResult, LouvainBaseConfig configuration) {
         return computationResult.result().map(louvainResult -> {
             var graph = computationResult.graph();
-            var config=computationResult.configuration();
 
             var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                config,
+                configuration,
                 LongNodePropertyValuesAdapter.create(louvainResult.dendrogramManager().getCurrent())
             );
-            var includeIntermediateCommunities = config.includeIntermediateCommunities();
+            var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
 
             return LongStream.range(0, graph.nodeCount())
                 .boxed().

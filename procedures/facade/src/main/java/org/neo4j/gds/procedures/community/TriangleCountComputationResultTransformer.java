@@ -24,7 +24,6 @@ import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
-import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
 import java.util.stream.LongStream;
@@ -34,10 +33,9 @@ final class TriangleCountComputationResultTransformer {
 
     private TriangleCountComputationResultTransformer() {}
 
-    static Stream<TriangleCountStreamResult> toStreamResult(StreamComputationResult<TriangleCountBaseConfig, TriangleCountResult> computationResult) {
-        return computationResult.result().map(triangleCountResult -> {
+    static Stream<TriangleCountStreamResult> toStreamResult(StreamComputationResult<TriangleCountResult> computationResult) {
+        return computationResult.result().map(result -> {
             var graph = computationResult.graph();
-            var result = computationResult.result().get();
             return LongStream.range(0, graph.nodeCount())
                 .mapToObj(i -> new TriangleCountStreamResult(
                     graph.toOriginalNodeId(i),

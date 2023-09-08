@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 
@@ -31,7 +30,7 @@ final class ModularityComputationResultTransformer {
 
     private ModularityComputationResultTransformer() {}
 
-    static Stream<ModularityStreamResult> toStreamResult(StreamComputationResult<ModularityBaseConfig, ModularityResult> computationResult) {
+    static Stream<ModularityStreamResult> toStreamResult(StreamComputationResult<ModularityResult> computationResult) {
         return computationResult.result().map(modularityResult -> {
             var communityModularities = modularityResult.modularityScores();
             return LongStream

@@ -105,7 +105,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.streamWcc(
+            var wccComputationResult = algorithmsBusinessFacade.wcc(
                 "meh",
                 config,
                 null,
@@ -121,7 +121,6 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                 });
             assertThat(wccComputationResult.graph()).isSameAs(graph);
             assertThat(wccComputationResult.graphStore()).isSameAs(graphStore);
-            assertThat(wccComputationResult.configuration()).isSameAs(config);
         }
 
         @Test
@@ -142,7 +141,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.streamWcc("meh", mock(WccBaseConfig.class), null, null);
+            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null);
 
             //then
             assertThat(wccComputationResult.result()).isEmpty();

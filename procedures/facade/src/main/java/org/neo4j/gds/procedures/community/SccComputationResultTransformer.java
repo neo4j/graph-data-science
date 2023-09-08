@@ -26,7 +26,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
-import org.neo4j.gds.scc.SccBaseConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -37,7 +36,7 @@ final class SccComputationResultTransformer {
 
     private SccComputationResultTransformer() {}
 
-    static Stream<SccStreamResult> toStreamResult(StreamComputationResult<SccBaseConfig, HugeLongArray> computationResult) {
+    static Stream<SccStreamResult> toStreamResult(StreamComputationResult<HugeLongArray> computationResult) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
             var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));

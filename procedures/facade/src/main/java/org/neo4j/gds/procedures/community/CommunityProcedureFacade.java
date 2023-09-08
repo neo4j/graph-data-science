@@ -87,14 +87,14 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, WccStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.streamWcc(
+        var computationResult = algorithmsStreamBusinessFacade.wcc(
             graphName,
             streamConfig,
             user,
             databaseId
         );
 
-        return WccComputationResultTransformer.toStreamResult(computationResult);
+        return WccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
     public Stream<WccMutateResult> wccMutate(
@@ -105,7 +105,7 @@ public class CommunityProcedureFacade {
 
         var statisticsReturnColumns = CountAndDistributionStatisticsReturnColumns.forComponents(procedureReturnColumns);
 
-        var computationResult = algorithmsMutateBusinessFacade.mutateWcc(
+        var computationResult = algorithmsMutateBusinessFacade.wcc(
             graphName,
             config,
             user,
@@ -131,7 +131,7 @@ public class CommunityProcedureFacade {
             algorithmMetaDataSetter
         );
 
-        var computationResult = algorithmsStreamBusinessFacade.streamKCore(
+        var computationResult = algorithmsStreamBusinessFacade.kCore(
             graphName,
             streamConfig,
             user,
@@ -147,7 +147,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, KCoreDecompositionMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.mutateKCore(
+        var computationResult = algorithmsMutateBusinessFacade.kCore(
             graphName,
             config,
             user,
@@ -166,14 +166,14 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, LouvainStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.streamLouvain(
+        var computationResult = algorithmsStreamBusinessFacade.louvain(
             graphName,
             streamConfig,
             user,
             databaseId
         );
 
-        return LouvainComputationResultTransformer.toStreamResult(computationResult);
+        return LouvainComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
     public Stream<LouvainMutateResult> louvainMutate(
@@ -184,7 +184,7 @@ public class CommunityProcedureFacade {
 
         var statisticsReturnColumns = CountAndDistributionStatisticsReturnColumns.forCommunities(procedureReturnColumns);
 
-        var computationResult = algorithmsMutateBusinessFacade.mutateLouvain(
+        var computationResult = algorithmsMutateBusinessFacade.louvain(
             graphName,
             config,
             user,
@@ -204,7 +204,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, SccStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.streamScc(
+        var computationResult = algorithmsStreamBusinessFacade.scc(
             graphName,
             streamConfig,
             user,
@@ -221,7 +221,7 @@ public class CommunityProcedureFacade {
         var config = createMutateConfig(configuration, SccMutateConfig::of);
         var statisticsReturnColumns = CountAndDistributionStatisticsReturnColumns.forComponents(procedureReturnColumns);
 
-        var computationResult = algorithmsMutateBusinessFacade.mutateScc(
+        var computationResult = algorithmsMutateBusinessFacade.scc(
             graphName,
             config,
             user,
@@ -241,7 +241,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, TriangleCountStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.streamTriangleCount(
+        var computationResult = algorithmsStreamBusinessFacade.triangleCount(
             graphName,
             streamConfig,
             user,
@@ -257,7 +257,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, TriangleCountMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.mutateTriangleCount(
+        var computationResult = algorithmsMutateBusinessFacade.triangleCount(
             graphName,
             config,
             user,

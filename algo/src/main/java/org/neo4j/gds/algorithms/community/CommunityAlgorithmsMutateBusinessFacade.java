@@ -62,7 +62,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
-    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> mutateWcc(
+    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> wcc(
         String graphName,
         WccMutateConfig configuration,
         User user,
@@ -99,7 +99,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     }
 
 
-    public NodePropertyMutateResult<KCoreSpecificFields> mutateKCore(
+    public NodePropertyMutateResult<KCoreSpecificFields> kCore(
         String graphName,
         KCoreDecompositionMutateConfig config,
         User user,
@@ -122,7 +122,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
     }
 
-    public NodePropertyMutateResult<LouvainSpecificFields> mutateLouvain(
+    public NodePropertyMutateResult<LouvainSpecificFields> louvain(
         String graphName,
         LouvainMutateConfig configuration,
         User user,
@@ -167,7 +167,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
     }
 
-    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> mutateScc(
+    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> scc(
         String graphName,
         SccMutateConfig configuration,
         User user,
@@ -240,6 +240,29 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
     }
 
+    public NodePropertyMutateResult<TriangleCountSpecificFields> triangleCount(
+        String graphName,
+        TriangleCountMutateConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            algorithmResult,
+            config,
+            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.localTriangles()),
+            (result) -> new TriangleCountSpecificFields(result.globalTriangles(), algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new TriangleCountSpecificFields(0, 0)
+        );
+    }
+
     /*
         By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields
         to contain the statistics information.
@@ -297,30 +320,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         }).orElseGet(() -> NodePropertyMutateResult.empty(emptyASFSupplier.get(), configuration));
 
     }
-
-    public NodePropertyMutateResult<TriangleCountSpecificFields> mutateTriangleCount(
-        String graphName,
-        TriangleCountMutateConfig config,
-        User user,
-        DatabaseId databaseId
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutateNodeProperty(
-            algorithmResult,
-            config,
-            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.localTriangles()),
-            (result) -> new TriangleCountSpecificFields(result.globalTriangles(), algorithmResult.graph().nodeCount()),
-            intermediateResult.computeMilliseconds,
-            () -> new TriangleCountSpecificFields(0, 0)
-        );
-    }
-
 
     <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,

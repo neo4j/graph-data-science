@@ -36,15 +36,14 @@ class WccComputationResultTransformerTest {
     @Test
     void shouldReturnEmptyStreamForEmptyGraph() {
         // given
-        StreamComputationResult<WccBaseConfig, DisjointSetStruct> computationResult = StreamComputationResult.of(
+        StreamComputationResult<DisjointSetStruct> computationResult = StreamComputationResult.of(
             Optional.empty(),
-            mock(WccBaseConfig.class),
             mock(Graph.class),
             mock(GraphStore.class)
         );
 
         // when
-        var wccStreamResult = WccComputationResultTransformer.toStreamResult(computationResult);
+        var wccStreamResult = WccComputationResultTransformer.toStreamResult(computationResult, mock(WccBaseConfig.class));
 
         // then
         assertThat(wccStreamResult).isEmpty();

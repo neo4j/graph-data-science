@@ -24,7 +24,6 @@ import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -46,7 +45,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
-    public StreamComputationResult<WccBaseConfig, DisjointSetStruct> streamWcc(
+    public StreamComputationResult<DisjointSetStruct> wcc(
         String graphName,
         WccBaseConfig config,
         User user,
@@ -60,11 +59,11 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
     }
 
 
-    public StreamComputationResult<KCoreDecompositionBaseConfig, KCoreDecompositionResult> streamKCore(
+    public StreamComputationResult<KCoreDecompositionResult> kCore(
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
@@ -78,11 +77,11 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
         
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
 
     }
 
-    public StreamComputationResult<LouvainBaseConfig, LouvainResult> streamLouvain(
+    public StreamComputationResult<LouvainResult> louvain(
         String graphName,
         LouvainBaseConfig config,
         User user,
@@ -96,10 +95,10 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
     }
 
-    public StreamComputationResult<SccBaseConfig, HugeLongArray> streamScc(
+    public StreamComputationResult<HugeLongArray> scc(
         String graphName,
         SccBaseConfig config,
         User user,
@@ -113,10 +112,10 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
     }
 
-    public StreamComputationResult<TriangleCountBaseConfig, TriangleCountResult> streamTriangleCount(
+    public StreamComputationResult<TriangleCountResult> triangleCount(
         String graphName,
         TriangleCountBaseConfig config,
         User user,
@@ -130,10 +129,10 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
     }
 
-    public StreamComputationResult<ModularityBaseConfig, ModularityResult> modularity(
+    public StreamComputationResult<ModularityResult> modularity(
         String graphName,
         ModularityBaseConfig config,
         User user,
@@ -147,11 +146,11 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
     }
 
 
-    public StreamComputationResult<LabelPropagationBaseConfig, LabelPropagationResult> labelPropagation(
+    public StreamComputationResult<LabelPropagationResult> labelPropagation(
         String graphName,
         LabelPropagationBaseConfig configuration,
         User user,
@@ -165,15 +164,14 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, configuration);
+        return createStreamComputationResult(result);
     }
 
 
-    private <C extends AlgoBaseConfig, RESULT> StreamComputationResult<C, RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result, C configuration) {
+    private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result) {
 
         return StreamComputationResult.of(
             result.result(),
-            configuration,
             result.graph(),
             result.graphStore()
         );

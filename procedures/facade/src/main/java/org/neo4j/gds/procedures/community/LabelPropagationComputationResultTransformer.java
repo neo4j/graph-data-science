@@ -38,7 +38,7 @@ final class LabelPropagationComputationResultTransformer {
     private LabelPropagationComputationResultTransformer() {}
 
     static Stream<LabelPropagationStreamResult> toStreamResult(
-        StreamComputationResult<LabelPropagationBaseConfig, LabelPropagationResult> computationResult,
+        StreamComputationResult<LabelPropagationResult> computationResult,
         LabelPropagationBaseConfig configuration
     ) {
         return computationResult.result().map(result -> {
