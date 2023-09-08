@@ -324,14 +324,20 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         // of all other partitioned index scans will be aligned to that one.
         int maxToken = labelIds[0];
         long maxCount = read.countsForNodeWithoutTxState(labelIds[0]);
+        int maxIndex = 0;
 
         for (int i = 1; i < labelIds.length; i++) {
             long count = read.countsForNodeWithoutTxState(labelIds[i]);
             if (count > maxCount) {
                 maxCount = count;
                 maxToken = labelIds[i];
+                maxIndex = i;
             }
         }
+
+        // swap the first label with the max count label
+        labelIds[maxIndex] = labelIds[0];
+        labelIds[0] = maxToken;
 
         int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(maxCount, batchSize);
 
@@ -349,11 +355,10 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
             scans.add(new PartitionedStoreScan(partitionedScan));
 
             // Initialize the remaining index scans with the partitioning of the first scan.
-            for (int labelToken : labelIds) {
-                if (labelToken != maxToken) {
-                    var scan = read.nodeLabelScan(session, partitionedScan, new TokenPredicate(labelToken));
-                    scans.add(new PartitionedStoreScan(scan));
-                }
+            for (int i = 1; i < labelIds.length; i++) {
+                int labelToken = labelIds[i];
+                var scan = read.nodeLabelScan(session, partitionedScan, new TokenPredicate(labelToken));
+                scans.add(new PartitionedStoreScan(scan));
             }
 
             return scans;
