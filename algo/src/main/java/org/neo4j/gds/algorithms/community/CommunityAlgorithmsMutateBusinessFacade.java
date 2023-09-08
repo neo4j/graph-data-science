@@ -40,6 +40,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
+import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
@@ -67,8 +68,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         WccMutateConfig configuration,
         User user,
         DatabaseId databaseId,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution
+        StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
@@ -91,8 +91,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                     communitySummary
                 );
             },
-            computeComponentCount,
-            computeComponentDistribution,
+            statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
@@ -127,8 +126,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         LouvainMutateConfig configuration,
         User user,
         DatabaseId databaseId,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution
+        StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
@@ -160,8 +158,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                     communitySummary
                 );
             },
-            computeComponentCount,
-            computeComponentDistribution,
+            statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY
         );
@@ -172,8 +169,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         SccMutateConfig configuration,
         User user,
         DatabaseId databaseId,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution
+        StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
@@ -192,8 +188,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                     communitySummary
                 );
             },
-            computeComponentCount,
-            computeComponentDistribution,
+            statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
@@ -205,8 +200,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         LabelPropagationMutateConfig configuration,
         User user,
         DatabaseId databaseId,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution
+        StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
@@ -233,8 +227,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                     communitySummary
                 );
             },
-            computeComponentCount,
-            computeComponentDistribution,
+            statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LabelPropagationSpecificFields.EMPTY
         );
@@ -273,8 +266,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         NodePropertyValuesMapper<RESULT, CONFIG> nodePropertyValuesMapper,
         CommunityFunctionSupplier<RESULT> communityFunctionSupplier,
         SpecificFieldsWithCommunityStatisticsSupplier<RESULT, ASF> specificFieldsSupplier,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution,
+        StatisticsComputationInstructions statisticsComputationInstructions,
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier
     ) {
@@ -300,8 +292,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 communityFunctionSupplier.communityFunction(result),
                 Pools.DEFAULT,
                 configuration.concurrency(),
-                computeComponentCount,
-                computeComponentDistribution
+                statisticsComputationInstructions
             );
 
             var componentCount = communityStatistics.componentCount();

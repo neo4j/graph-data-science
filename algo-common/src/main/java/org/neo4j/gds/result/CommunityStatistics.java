@@ -144,14 +144,13 @@ public final class CommunityStatistics {
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
         int concurrency,
-        boolean computeComponentCount,
-        boolean computeComponentDistribution
+        StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         long componentCount = 0;
         Optional<Histogram> maybeHistogram = Optional.empty();
         var computeMilliseconds = new AtomicLong(0);
         try(var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-            if (computeComponentDistribution) {
+            if (statisticsComputationInstructions.computeCountAndDistribution()) {
                 var communityStatistics = CommunityStatistics.communityCountAndHistogram(
                     nodeCount,
                     communityFunction,
@@ -161,7 +160,7 @@ public final class CommunityStatistics {
 
                 componentCount = communityStatistics.componentCount();
                 maybeHistogram = Optional.of(communityStatistics.histogram());
-            } else if (computeComponentCount) {
+            } else if (statisticsComputationInstructions.computeCountOnly()) {
                 componentCount = CommunityStatistics.communityCount(
                     nodeCount,
                     communityFunction,

@@ -31,6 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -98,6 +99,9 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         result.setAll(graph::toOriginalNodeId);
         var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore);
 
+        var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
+        when(statisticsComputationInstructionsMock.computeCountOnly()).thenReturn(true);
+
         CommunityAlgorithmsMutateBusinessFacade.NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
             (r, c) -> NodePropertyValuesAdapter.adapt(r);
 
@@ -110,8 +114,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
                 cc,
                 cs
             ),
-            true,
-            false,
+            statisticsComputationInstructionsMock,
             50L,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
