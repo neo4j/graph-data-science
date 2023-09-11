@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -97,7 +97,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                 propertyTokens,
                 terminationFlag
             );
-            var consumer = ExecutorServices.DEFAULT.submit(writer);
+            var consumer = DefaultPool.INSTANCE.submit(writer);
 
             var bufferRef = new AtomicReference<>(bufferPool.poll());
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.result;
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 
 import java.util.Map;
@@ -54,7 +54,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         ProcedureReturnColumns returnColumns,
         int concurrency
     ) {
-        this(returnColumns, ExecutorServices.DEFAULT, concurrency);
+        this(returnColumns, DefaultPool.INSTANCE, concurrency);
     }
 
     protected AbstractCommunityResultBuilder(

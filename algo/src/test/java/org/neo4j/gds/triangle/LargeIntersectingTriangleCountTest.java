@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
@@ -71,7 +71,7 @@ class LargeIntersectingTriangleCountTest extends BaseTest {
         var result = IntersectingTriangleCount.create(
             graph,
             defaultConfigBuilder().build(),
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());
@@ -83,7 +83,7 @@ class LargeIntersectingTriangleCountTest extends BaseTest {
         var result = IntersectingTriangleCount.create(
             graph,
             defaultConfigBuilder().concurrency(4).build(),
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());

@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.pregel.pr;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -130,7 +130,7 @@ class WeightedPageRankPregelAlgoTest {
             graph,
             config,
             new PageRankPregel(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
@@ -98,7 +98,7 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
             config,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -119,7 +119,7 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
             config,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -148,7 +148,7 @@ class MultiLabelGraphSageTrainTest {
         var graphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
             graphSageTrainConfig,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -191,7 +191,7 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             unequalGraph,
             config,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -216,7 +216,7 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );

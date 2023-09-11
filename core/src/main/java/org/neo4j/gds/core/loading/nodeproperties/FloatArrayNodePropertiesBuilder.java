@@ -24,7 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseFloatArrayArray;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
@@ -90,7 +90,7 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
             }
         }).collect(Collectors.toList());
 
-        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
         return new FloatArrayStoreNodePropertyValues(propertyValues, size);

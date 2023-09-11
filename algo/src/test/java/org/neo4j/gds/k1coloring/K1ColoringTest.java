@@ -32,7 +32,7 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -69,7 +69,7 @@ class K1ColoringTest {
             1000,
             DEFAULT_BATCH_SIZE,
             1,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -110,7 +110,7 @@ class K1ColoringTest {
             100,
             DEFAULT_BATCH_SIZE,
             8,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -177,7 +177,7 @@ class K1ColoringTest {
             100,
             DEFAULT_BATCH_SIZE,
             8,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -214,7 +214,7 @@ class K1ColoringTest {
             config.maxIterations(),
             DEFAULT_BATCH_SIZE,
             config.concurrency(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 

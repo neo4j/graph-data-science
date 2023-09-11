@@ -22,7 +22,7 @@ package org.neo4j.gds.kmeans;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -61,7 +61,7 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
         return Kmeans.createKmeans(graph, configuration, ImmutableKmeansContext
             .builder()
             .progressTracker(progressTracker)
-            .executor(ExecutorServices.DEFAULT)
+            .executor(DefaultPool.INSTANCE)
             .build());
     }
 

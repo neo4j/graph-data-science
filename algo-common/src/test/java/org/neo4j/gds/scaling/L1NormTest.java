@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -62,7 +62,7 @@ class L1NormTest {
             nodeCount,
             1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         assertThat(scaler.l1Norm).isEqualTo(l1norm);
@@ -79,7 +79,7 @@ class L1NormTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         for (int i = 0; i < 10; i++) {
@@ -95,7 +95,7 @@ class L1NormTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         var l1norm = 40D;

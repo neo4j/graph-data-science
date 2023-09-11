@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.filterednodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -59,7 +59,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
             configuration.sourceNodeFilter().toNodeFilter(graph),
             configuration.targetNodeFilter().toNodeFilter(graph),
             configuration.concurrency(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }

@@ -22,7 +22,7 @@ package org.neo4j.gds.degree;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -45,7 +45,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new DegreeCentrality(graph, ExecutorServices.DEFAULT, configuration, progressTracker);
+        return new DegreeCentrality(graph, DefaultPool.INSTANCE, configuration, progressTracker);
     }
 
     @Override

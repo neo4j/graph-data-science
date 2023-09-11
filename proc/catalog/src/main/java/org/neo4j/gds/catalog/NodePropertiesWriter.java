@@ -27,7 +27,7 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -147,7 +147,7 @@ public final class NodePropertiesWriter {
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(TerminationFlag.wrap(executionContext.terminationMonitor()))
-                    .parallel(ExecutorServices.DEFAULT, config.writeConcurrency())
+                    .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())
                     .build();

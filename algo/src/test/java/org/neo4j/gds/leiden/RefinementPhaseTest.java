@@ -21,7 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -80,7 +80,7 @@ class RefinementPhaseTest {
             0.01,
             19L,
             1,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         var refinementResult = refinement.run();

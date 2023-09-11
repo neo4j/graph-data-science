@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -66,7 +66,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             graph,
             strategy,
             traverserFactory,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             configuration.concurrency(),
             progressTracker
         );

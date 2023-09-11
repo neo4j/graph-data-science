@@ -27,7 +27,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -79,7 +79,7 @@ class InverseRelationshipsTest {
             graphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         ).compute();
 
         assertThat(inverseRelationshipsPerType).hasSize(1);
@@ -110,7 +110,7 @@ class InverseRelationshipsTest {
             graphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         ).compute();
 
         assertThat(inverseRelationshipsPerType).hasSize(internalTypes.size());

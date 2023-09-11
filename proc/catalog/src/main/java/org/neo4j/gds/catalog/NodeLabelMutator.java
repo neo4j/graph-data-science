@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.config.MutateLabelConfig;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
@@ -52,7 +52,7 @@ public final class NodeLabelMutator  {
                 nodeFilter,
                 procedureConfig.concurrency(),
                 Map.of(),
-                ExecutorServices.DEFAULT,
+                DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
             );
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.pregel.lp;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -73,7 +73,7 @@ class LabelPropagationPregelAlgoTest {
             graph,
             config,
             new LabelPropagationPregel(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -111,7 +111,7 @@ class LabelPropagationPregelAlgoTest {
             graph,
             config,
             weightedLabelPropagation,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

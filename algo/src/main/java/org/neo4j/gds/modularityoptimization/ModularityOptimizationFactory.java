@@ -25,7 +25,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -106,7 +106,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             seedProperty,
             configuration.concurrency(),
             configuration.batchSize(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }

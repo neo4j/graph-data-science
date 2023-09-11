@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.knn;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -59,7 +59,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
             ImmutableKnnContext
                 .builder()
                 .progressTracker(progressTracker)
-                .executor(ExecutorServices.DEFAULT)
+                .executor(DefaultPool.INSTANCE)
                 .build()
         );
     }

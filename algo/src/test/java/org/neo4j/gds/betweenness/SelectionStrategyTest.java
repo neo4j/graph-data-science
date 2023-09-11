@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -62,7 +62,7 @@ class SelectionStrategyTest {
     @Test
     void selectAll() {
         SelectionStrategy selectionStrategy = new FullSelectionStrategy();
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(graph.nodeCount(), samplingSize(selectionStrategy));
     }
 
@@ -70,7 +70,7 @@ class SelectionStrategyTest {
     @ValueSource(longs = {0, 1, 2, 10, 11})
     void selectSamplingSize(long samplingSize) {
         SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(samplingSize);
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(samplingSize, samplingSize(selectionStrategy));
     }
 
@@ -84,16 +84,16 @@ class SelectionStrategyTest {
             .build()
             .generate();
         SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(samplingSize, Optional.of(42L));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 4);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 4);
         assertEquals(samplingSize, samplingSize(selectionStrategy));
     }
 
     @Test
     void selectSamplingSizeWithSeed() {
         SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(3, Optional.of(42L));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(3, samplingSize(selectionStrategy));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
 
         Assertions.assertThat(LongStream.range(0, 3).map(__ -> selectionStrategy.next())).containsExactly(
             graph.toMappedNodeId("a"),
@@ -107,9 +107,9 @@ class SelectionStrategyTest {
         TestGraph graph = fromGdl("(), (), (), (), (), (a)-->(), (), (), ()");
 
         SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(1);
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(1, samplingSize(selectionStrategy));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(graph.toMappedNodeId("a"), selectionStrategy.next());
     }
 
@@ -118,18 +118,18 @@ class SelectionStrategyTest {
         TestGraph graph = fromGdl("(a)-->(b), (b)-->(c), (b)-->(d)");
 
         SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(1, Optional.of(42L));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(1, samplingSize(selectionStrategy));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(graph.toMappedNodeId("b"), selectionStrategy.next());
     }
 
     @Test
     void selectHighDegreeNode() {
         SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(1);
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         assertEquals(1, samplingSize(selectionStrategy));
-        selectionStrategy.init(graph, ExecutorServices.DEFAULT, 1);
+        selectionStrategy.init(graph, DefaultPool.INSTANCE, 1);
         var isA = selectionStrategy.next();
         var isB = selectionStrategy.next();
         assertTrue(isA != SelectionStrategy.NONE_SELECTED || isB != SelectionStrategy.NONE_SELECTED);

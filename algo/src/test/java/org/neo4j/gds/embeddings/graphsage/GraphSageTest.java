@@ -35,7 +35,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -146,7 +146,7 @@ class GraphSageTest {
         var trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
             trainConfig,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -180,7 +180,7 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER, testGdsVersion);
+        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, testGdsVersion);
         var model = graphSageTrain.compute();
 
 
@@ -205,7 +205,7 @@ class GraphSageTest {
             .batchSize(2)
             .build();
 
-        var graphSage = new GraphSage(trainGraph, model, streamConfig, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var graphSage = new GraphSage(trainGraph, model, streamConfig, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         assertThat(graphSage.compute().embeddings().size()).isEqualTo(predictNodeCount);
     }

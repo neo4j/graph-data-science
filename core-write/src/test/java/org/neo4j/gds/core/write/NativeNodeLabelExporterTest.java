@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -58,7 +58,7 @@ class NativeNodeLabelExporterTest extends BaseTest {
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,
             concurrency,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         exporter.write("GeneratedLabel");

@@ -32,7 +32,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -291,7 +291,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -311,7 +311,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -331,7 +331,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).topN(1).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -351,7 +351,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).bottomN(1).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -373,7 +373,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().topK(1).concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -397,7 +397,7 @@ final class NodeSimilarityTest {
                 .topK(10)
                 .bottomK(1)
                 .build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -427,7 +427,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -450,7 +450,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().degreeCutoff(2).concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -471,7 +471,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             undirectedGraph,
             configBuilder().concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
@@ -483,7 +483,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             naturalGraph,
             configBuilder().concurrency(1).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         var result1 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
@@ -491,7 +491,7 @@ final class NodeSimilarityTest {
         nodeSimilarity = NodeSimilarity.create(
             naturalUnionGraph,
             configBuilder().concurrency(1).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         var result2 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
@@ -507,7 +507,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -558,7 +558,7 @@ final class NodeSimilarityTest {
                 .topK(100)
                 .topN(1)
                 .build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -596,7 +596,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).topN(1).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -623,7 +623,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(concurrency).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -840,7 +840,7 @@ final class NodeSimilarityTest {
         NodeSimilarity.create(
             graph,
             config,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
 
@@ -880,7 +880,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             configBuilder().concurrency(1).similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -898,7 +898,7 @@ final class NodeSimilarityTest {
                 .concurrency(1)
                 .similarityMetric(MetricSimilarityComputer.parse("ovErLaP"))
                 .build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -934,7 +934,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             naturalGraph,
             configBuilder().upperDegreeCutoff(upperBound).degreeCutoff(lowBound).build(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
