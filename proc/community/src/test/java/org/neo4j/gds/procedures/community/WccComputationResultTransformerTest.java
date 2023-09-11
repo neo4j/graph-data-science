@@ -24,7 +24,7 @@ import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
 
@@ -43,7 +43,10 @@ class WccComputationResultTransformerTest {
         );
 
         // when
-        var wccStreamResult = WccComputationResultTransformer.toStreamResult(computationResult, mock(WccBaseConfig.class));
+        var wccStreamResult = WccComputationResultTransformer.toStreamResult(
+            computationResult,
+            mock(WccStreamConfig.class)
+        );
 
         // then
         assertThat(wccStreamResult).isEmpty();

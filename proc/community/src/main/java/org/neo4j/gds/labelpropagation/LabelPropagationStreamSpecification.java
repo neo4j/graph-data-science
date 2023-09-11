@@ -21,12 +21,12 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 
 import java.util.stream.LongStream;
@@ -63,7 +63,7 @@ public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelP
                     var graph = computationResult.graph();
                     var nodePropertyValues = CommunityProcCompanion.nodeProperties(
                         computationResult.config(),
-                        LongNodePropertyValuesAdapter.create(result.labels())
+                        NodePropertyValuesAdapter.adapt(result.labels())
                     );
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())

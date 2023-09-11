@@ -23,9 +23,9 @@ import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 
@@ -45,7 +45,7 @@ final class LeidenComputationResultTransformer {
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
                 false,
                 configuration.consecutiveIds(),
-                LongNodePropertyValuesAdapter.create(leidenResult.dendrogramManager().getCurrent()),
+                NodePropertyValuesAdapter.adapt(leidenResult.dendrogramManager().getCurrent()),
                 configuration.minCommunitySize(),
                 configuration.concurrency()
             );

@@ -24,10 +24,10 @@ import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 
@@ -49,7 +49,7 @@ final class LabelPropagationComputationResultTransformer {
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
                 false,
                 configuration.consecutiveIds(),
-                LongNodePropertyValuesAdapter.create(result.labels()),
+                NodePropertyValuesAdapter.adapt(result.labels()),
                 configuration.minCommunitySize(),
                 configuration.concurrency()
             );

@@ -23,9 +23,9 @@ import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 
@@ -45,7 +45,7 @@ final class LouvainComputationResultTransformer {
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
                 false,
                 configuration.consecutiveIds(),
-                LongNodePropertyValuesAdapter.create(louvainResult.dendrogramManager().getCurrent()),
+                NodePropertyValuesAdapter.adapt(louvainResult.dendrogramManager().getCurrent()),
                 configuration.minCommunitySize(),
                 configuration.concurrency()
             );

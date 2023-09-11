@@ -20,12 +20,12 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 
 import java.util.stream.LongStream;
@@ -63,7 +63,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
                     var config = computationResult.config();
                     var nodePropertyValues = CommunityProcCompanion.nodeProperties(
                         config,
-                        LongNodePropertyValuesAdapter.create(result.dendrogramManager().getCurrent())
+                        NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
                     );
                     var includeIntermediateCommunities = config.includeIntermediateCommunities();
 

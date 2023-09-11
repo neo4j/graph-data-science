@@ -21,6 +21,7 @@ package org.neo4j.gds.scc;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -30,7 +31,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -67,7 +67,7 @@ public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutat
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(LongNodePropertyValuesAdapter::create)
+                    .map(NodePropertyValuesAdapter::adapt)
                     .orElse(EmptyLongNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder);

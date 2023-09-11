@@ -23,12 +23,12 @@ import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -70,7 +70,7 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
                     var nodePropertyValues = (NodePropertyValues) CommunityProcCompanion.considerSizeFilter(
                         config,
                         computationResult.result()
-                            .map(k1ColoringResult -> LongNodePropertyValuesAdapter.create(k1ColoringResult.colors()))
+                            .map(k1ColoringResult -> NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()))
                             .orElse(EmptyLongNodePropertyValues.INSTANCE)
                     );
                     return LongStream

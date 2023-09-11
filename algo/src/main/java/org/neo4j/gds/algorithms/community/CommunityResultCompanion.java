@@ -38,6 +38,7 @@ public final class CommunityResultCompanion {
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties
     ) {
+
         if (consecutiveIds && !incremental) {
             return new ConsecutiveLongNodePropertyValues(nodeProperties);
         }
@@ -55,7 +56,8 @@ public final class CommunityResultCompanion {
         var resultAfterMinFilter = minCommunitySize
             .map(size -> applySizeFilter(nodeProperties, size, concurrency))
             .orElse(nodeProperties);
-        return nodePropertyValues(consecutiveIds, incremental, resultAfterMinFilter);
+
+        return nodePropertyValues(incremental, consecutiveIds, resultAfterMinFilter);
     }
 
     private static LongNodePropertyValues applySizeFilter(
