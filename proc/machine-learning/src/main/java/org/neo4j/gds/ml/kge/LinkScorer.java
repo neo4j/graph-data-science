@@ -28,5 +28,5 @@ interface LinkScorer extends AutoCloseable {
 
     void init(NodePropertyValues embeddings, List<Double> relationshipTypeEmbedding, long sourceNode);
 
-    double similarity(long targetNode);
+    double computeScore(long targetNode);
 }

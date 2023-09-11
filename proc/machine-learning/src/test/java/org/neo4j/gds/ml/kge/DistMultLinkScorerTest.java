@@ -42,8 +42,8 @@ class DistMultLinkScorerTest {
         LinkScorer linkScorer = new DistMultLinkScorer();
         linkScorer.init(ddnpv, List.of(0.1, 0.1, 0.1, 0.1), 0);
 
-        assertThat(linkScorer.similarity(1)).isCloseTo(0.6, Offset.offset(1e-02));
-        assertThat(linkScorer.similarity(2)).isCloseTo(0.9, Offset.offset(1e-02));
+        assertThat(linkScorer.computeScore(1)).isCloseTo(0.6, Offset.offset(1e-02));
+        assertThat(linkScorer.computeScore(2)).isCloseTo(0.9, Offset.offset(1e-02));
 
     }
 }

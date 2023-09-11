@@ -46,7 +46,7 @@ public class DistMultLinkScorer implements LinkScorer {
     }
 
     @Override
-    public double similarity(long targetNode) {
+    public double computeScore(long targetNode) {
         return currentCandidateTarget.elementwiseProduct(new Vector(embeddings.doubleArrayValue(targetNode)))
             .aggregateSum();
     }

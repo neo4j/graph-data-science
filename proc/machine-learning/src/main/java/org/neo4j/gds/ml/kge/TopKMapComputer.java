@@ -77,10 +77,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         ScoreFunction scoreFunctionEnum = ScoreFunction.valueOf(scoreFunction.toUpperCase(Locale.ROOT));
         this.scoreFunction = scoreFunctionEnum;
         this.isCandidateLink = isCandidateLink;
-        this.higherIsBetter = switch (scoreFunctionEnum) {
-            case TRANSE -> false;
-            case DISTMULT -> true;
-        };
+        this.higherIsBetter = scoreFunctionEnum == ScoreFunction.DISTMULT;
     }
 
     public KGEPredictResult compute() {
@@ -90,7 +87,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
-        try (var threadLocalSimilarityComputer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction))) {
+        try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction))) {
             // TODO exploit symmetry of similarity function if available
             ParallelUtil.parallelStreamConsume(
                 new SetBitsIterable(sourceNodes).stream(),
@@ -100,13 +97,13 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                     .forEach(node1 -> {
                         terminationFlag.assertRunning();
 
-                        LinkScorer similarityComputer = threadLocalSimilarityComputer.get();
-                        similarityComputer.init(embeddings, relationshipTypeEmbedding, node1);
+                        LinkScorer linkScorer = threadLocalScorer.get();
+                        linkScorer.init(embeddings, relationshipTypeEmbedding, node1);
 
                         targetNodesStream()
                             .filter(node2 -> isCandidateLink.apply(node1, node2))
                             .forEach(node2 -> {
-                                double similarity = similarityComputer.similarity(node2);
+                                double similarity = linkScorer.computeScore(node2);
                                 if (!Double.isNaN(similarity)) {
                                     topKMap.put(node1, node2, similarity);
                                 }

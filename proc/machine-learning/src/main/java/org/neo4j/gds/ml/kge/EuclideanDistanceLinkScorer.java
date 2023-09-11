@@ -46,7 +46,7 @@ public class EuclideanDistanceLinkScorer implements LinkScorer {
     }
 
     @Override
-    public double similarity(long targetNode) {
+    public double computeScore(long targetNode) {
         Vector translation = currentCandidateTarget.scalarMultiply(-1)
             .add(new Vector(embeddings.doubleArrayValue(targetNode)));
 

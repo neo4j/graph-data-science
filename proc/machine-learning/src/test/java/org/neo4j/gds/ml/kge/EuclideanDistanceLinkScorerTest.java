@@ -45,8 +45,8 @@ public class EuclideanDistanceLinkScorerTest {
         LinkScorer linkScorer = new EuclideanDistanceLinkScorer();
         linkScorer.init(ddnpv, List.of(-1.0, 0.0, 0.0, 0.0), 0);
 
-        assertThat(linkScorer.similarity(1)).isCloseTo(2.65, Offset.offset(1e-02));
-        assertThat(linkScorer.similarity(2)).isCloseTo(4.24, Offset.offset(1e-02));
+        assertThat(linkScorer.computeScore(1)).isCloseTo(2.65, Offset.offset(1e-02));
+        assertThat(linkScorer.computeScore(2)).isCloseTo(4.24, Offset.offset(1e-02));
 
     }
 }
