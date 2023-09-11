@@ -23,7 +23,7 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -45,7 +45,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         InverseRelationshipsConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return new InverseRelationships(graphStore, configuration, progressTracker, Pools.DEFAULT);
+        return new InverseRelationships(graphStore, configuration, progressTracker, DefaultPool.INSTANCE);
     }
 
     @Override

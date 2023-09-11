@@ -21,7 +21,7 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -101,7 +101,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                         executionContext
                     ))
                     .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
-                    .parallel(Pools.DEFAULT, writeConcurrency)
+                    .parallel(DefaultPool.INSTANCE, writeConcurrency)
                     .build();
 
                 LongNodePropertyValues properties;

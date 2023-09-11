@@ -21,7 +21,7 @@ package org.neo4j.gds.pregel;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -65,7 +65,7 @@ class HitsTest {
             graph,
             config,
             new Hits(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.labelpropagation;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -53,7 +53,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
         return new LabelPropagation(
             graph,
             configuration,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }

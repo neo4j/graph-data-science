@@ -31,7 +31,7 @@ import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 
@@ -85,7 +85,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                     new long[]{0, 1}
                 );
 
-                msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+                msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
                 verify(bfsConsumerMock).accept(1, 0, toList(1));
                 verify(bfsConsumerMock).accept(2, 0, toList(2));
@@ -126,7 +126,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                 new long[]{0, 1}
             );
 
-            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
             verify(mock).accept(3, 1, toList(1, 2));
             verify(mock).accept(4, 1, toList(1, 2));
@@ -148,7 +148,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1))
             );
 
-            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
             verify(mock).accept(1, 3, 1, toList(3));
             verify(mock).accept(1, 4, 1, toList(4));
@@ -199,7 +199,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
             );
 
-            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
             verify(mock).accept(1, 1, toList(3, 4));
             verify(mock).accept(2, 1, toList(3, 4));
@@ -270,7 +270,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                                 }
                             }
                     );
-                    msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+                    msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
                 });
 
         for (int i = 0; i < maxNodes; i++) {
@@ -382,7 +382,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                     }
                 },
             sources);
-        msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+        msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
         for (int i = 0; i < seen.length; i++) {
             final int[] nodeSeen = seen[i];

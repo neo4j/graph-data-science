@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.yens;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -113,7 +113,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
             RunWithConcurrency.builder()
                 .concurrency(config.concurrency())
                 .tasks(tasks)
-                .executor(Pools.DEFAULT)
+                .executor(DefaultPool.INSTANCE)
                 .run();
             progressTracker.logProgress();
 

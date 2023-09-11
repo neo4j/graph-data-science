@@ -25,7 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -189,7 +189,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             false,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResult.totalCost()).isEqualTo(7.0);
@@ -203,7 +203,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
@@ -223,7 +223,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
@@ -242,7 +242,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         var parent = steinerResult.parentArray().toArray();
@@ -267,7 +267,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         var parent = steinerResult.parentArray().toArray();
@@ -294,7 +294,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 2.0,
                 1,
                 true,
-                Pools.DEFAULT,
+                DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
             ).compute();
             assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(2);
@@ -315,7 +315,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 2.0,
                 1,
                 true,
-                Pools.DEFAULT,
+                DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
             ).compute();
             assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(0);
@@ -473,7 +473,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(25.0);
@@ -498,7 +498,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(22.0);
@@ -522,7 +522,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(170.0 - 19);
@@ -546,7 +546,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(20);
@@ -554,5 +554,3 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
     }
 
 }
-
-

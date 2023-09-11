@@ -47,9 +47,9 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -895,7 +895,7 @@ class GraphProjectProcTest extends BaseProcTest {
         // block all available threads
         for (int i = 0; i < ConcurrencyConfig.DEFAULT_CONCURRENCY; i++) {
             futures.add(
-                Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
+                DefaultPool.INSTANCE.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
             );
         }
 

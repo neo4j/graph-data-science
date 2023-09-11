@@ -24,7 +24,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -136,7 +136,7 @@ class CELFOnTreeGraphTest {
             5,
             0.51,
             3,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             1,
             10,
             DEFAULT_BATCH_SIZE,

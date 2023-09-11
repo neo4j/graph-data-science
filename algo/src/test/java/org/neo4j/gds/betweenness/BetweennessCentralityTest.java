@@ -29,7 +29,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -141,7 +141,7 @@ class BetweennessCentralityTest {
             graph,
             new RandomDegreeSelectionStrategy(samplingSize, Optional.of(42L)),
             ForwardTraverser.Factory.unweighted(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
@@ -160,7 +160,7 @@ class BetweennessCentralityTest {
             graph,
             new FullSelectionStrategy(),
             ForwardTraverser.Factory.unweighted(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();

@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -86,7 +86,7 @@ class WeightedBetweennessCentralityTest {
             equallyWeightedGraph,
             new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
             ForwardTraverser.Factory.weighted(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             8,
             ProgressTracker.NULL_TRACKER
         );
@@ -94,7 +94,7 @@ class WeightedBetweennessCentralityTest {
             equallyWeightedGraph,
             new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
             ForwardTraverser.Factory.unweighted(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             8,
             ProgressTracker.NULL_TRACKER
         );
@@ -119,7 +119,7 @@ class WeightedBetweennessCentralityTest {
              weightedGraph,
              new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
              ForwardTraverser.Factory.weighted(),
-             Pools.DEFAULT,
+             DefaultPool.INSTANCE,
              8,
              ProgressTracker.NULL_TRACKER
          );

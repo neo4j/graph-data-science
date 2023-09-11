@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -74,7 +74,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var features = GraphSageHelper.initializeSingleLabelFeatures(weightedGraph, config);
 
-        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(weightedGraph, features);
 
@@ -84,7 +84,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.concurrency(),
             new SingleLabelFeatureFunction(),
             config.randomSeed(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -112,7 +112,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var trainer = new MultiLabelGraphSageTrain(
             weightedGraph,
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -125,7 +125,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.concurrency(),
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -167,7 +167,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var trainer = new SingleLabelGraphSageTrain(
             filteredGraph,
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion
         );
@@ -180,7 +180,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.concurrency(),
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

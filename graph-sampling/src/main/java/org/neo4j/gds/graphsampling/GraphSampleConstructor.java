@@ -30,7 +30,7 @@ import org.neo4j.gds.beta.filter.RelationshipsFilter;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.GraphSampleAlgoConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
@@ -108,7 +108,7 @@ public class GraphSampleConstructor {
             idMap,
             config.concurrency(),
             Map.of(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 

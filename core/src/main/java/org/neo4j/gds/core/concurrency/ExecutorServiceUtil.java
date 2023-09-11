@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.internal.helpers.NamedThreadFactory;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -35,29 +33,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public final class Pools {
+public final class ExecutorServiceUtil {
 
     private static final String THREAD_NAME_PREFIX = "gds";
 
     public static final ThreadFactory DEFAULT_THREAD_FACTORY = NamedThreadFactory.daemon(THREAD_NAME_PREFIX);
-    public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createSingleThreadPool("algo");
 
-    private Pools() {
+    private ExecutorServiceUtil() {
         throw new UnsupportedOperationException();
-    }
-
-    public static ExecutorService createDefaultPool() {
-        var poolSizes = PoolSizesService.poolSizes();
-        return new ThreadPoolExecutor(
-            poolSizes.corePoolSize(),
-            poolSizes.maxPoolSize(),
-            30L,
-            TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
-            DEFAULT_THREAD_FACTORY,
-            new CallerBlocksPolicy()
-        );
     }
 
     public static ExecutorService createSingleThreadPool(String threadPrefix) {
@@ -103,7 +87,7 @@ public final class Pools {
 
     private static final ForkJoinPool.ForkJoinWorkerThreadFactory FJ_WORKER_THREAD_FACTORY = pool -> {
         var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-        worker.setName(Pools.THREAD_NAME_PREFIX + "-forkjoin-" + worker.getPoolIndex());
+        worker.setName(ExecutorServiceUtil.THREAD_NAME_PREFIX + "-forkjoin-" + worker.getPoolIndex());
         return worker;
     };
 }

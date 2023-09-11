@@ -31,7 +31,7 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -194,7 +194,7 @@ public final class GraphLoaderBuilders {
                 .databaseId(DatabaseId.of(databaseService))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
-                .executor(executorService.orElse(Pools.DEFAULT))
+                .executor(executorService.orElse(DefaultPool.INSTANCE))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

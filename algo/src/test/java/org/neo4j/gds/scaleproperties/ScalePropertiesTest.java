@@ -31,7 +31,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -79,7 +79,7 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -98,7 +98,7 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -130,14 +130,14 @@ class ScalePropertiesTest {
             bigGraph,
             config.concurrency(4).build(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         ).compute().scaledProperties();
 
         var expected = new ScaleProperties(
             bigGraph,
             config.concurrency(1).build(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         ).compute().scaledProperties();
 
         IntStream.range(0, nodeCount).forEach(id -> assertEquals(expected.get(id)[0], parallelResult.get(id)[0]));
@@ -150,7 +150,7 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
-        var actual = new ScaleProperties(graph, arrayConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+        var actual = new ScaleProperties(graph, arrayConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
             .compute()
             .scaledProperties();
 
@@ -159,7 +159,7 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
-        var expected = new ScaleProperties(graph, singlePropConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+        var expected = new ScaleProperties(graph, singlePropConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
             .compute()
             .scaledProperties();
 
@@ -175,13 +175,13 @@ class ScalePropertiesTest {
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
         var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
 
-        var expected = new ScaleProperties(graph, bConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+        var expected = new ScaleProperties(graph, bConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
             .compute()
             .scaledProperties();
-        var actualLong = new ScaleProperties(graph, longArrayBConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+        var actualLong = new ScaleProperties(graph, longArrayBConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
             .compute()
             .scaledProperties();
-        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
             .compute()
             .scaledProperties();
 
@@ -197,7 +197,7 @@ class ScalePropertiesTest {
         var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
 
         var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
-        var actual = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+        var actual = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
             .compute()
             .scaledProperties();
 
@@ -211,7 +211,7 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
         assertThat(error.getMessage(), containsString(
@@ -226,7 +226,7 @@ class ScalePropertiesTest {
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE);
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
         assertThat(error.getMessage(), containsString("Node property `IMAGINARY_PROP` not found in graph"));

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -99,7 +99,7 @@ class CELFOnConnectedGraphTest {
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
         IdFunction idFunction = variable -> graph.toMappedNodeId(variable);
 
-        CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE,
+        CELF celf = new CELF(graph, 5, 0.2, 3, DefaultPool.INSTANCE, 2, 0, DEFAULT_BATCH_SIZE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
         var celfResult = celf.compute();
