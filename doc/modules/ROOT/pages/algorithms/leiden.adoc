@@ -148,7 +148,7 @@ YIELD
   modularity: Float,
   modularities: List of Float,
   nodeCount: Integer,
-  didConverge: Integer,
+  didConverge: Boolean,
   nodePropertiesWritten: Integer,
   communityDistribution: Map,
   configuration: Map
@@ -204,7 +204,7 @@ YIELD
   modularity: Float,
   modularities: List of Float,
   nodeCount: Integer,
-  didConverge: Integer,
+  didConverge: Boolean,
   nodePropertiesWritten: Integer,
   communityDistribution: Map,
   configuration: Map
