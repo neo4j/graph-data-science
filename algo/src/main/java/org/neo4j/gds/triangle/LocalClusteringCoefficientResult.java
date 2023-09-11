@@ -19,13 +19,24 @@
  */
 package org.neo4j.gds.triangle;
 
-@SuppressWarnings("unused")
-public class LocalClusteringCoefficientStreamResult {
-    public final long nodeId;
-    public final double localClusteringCoefficient;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
-    public LocalClusteringCoefficientStreamResult(long nodeId, double localClusteringCoefficient) {
-        this.nodeId = nodeId;
-        this.localClusteringCoefficient = localClusteringCoefficient;
+@ValueClass
+public interface LocalClusteringCoefficientResult {
+
+    HugeDoubleArray localClusteringCoefficients();
+
+    double averageClusteringCoefficient();
+
+    static LocalClusteringCoefficientResult of(
+        HugeDoubleArray localClusteringCoefficients,
+        double averageClusteringCoefficient
+    ) {
+        return ImmutableLocalClusteringCoefficientResult
+            .builder()
+            .localClusteringCoefficients(localClusteringCoefficients)
+            .averageClusteringCoefficient(averageClusteringCoefficient)
+            .build();
     }
 }

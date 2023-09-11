@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.localClusteringCoefficient.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<LocalClusteringCoefficient,LocalClusteringCoefficient.Result,LocalClusteringCoefficientStreamConfig,Stream<LocalClusteringCoefficientStreamResult>,LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig>> {
+public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult,LocalClusteringCoefficientStreamConfig,Stream<LocalClusteringCoefficientStreamResult>,LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig>> {
     @Override
     public String name() {
         return "LocalClusteringCoefficientStream";
@@ -50,7 +51,7 @@ public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<Loca
     }
 
     @Override
-    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig, Stream<LocalClusteringCoefficientStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStreamConfig, Stream<LocalClusteringCoefficientStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),

@@ -31,7 +31,7 @@ import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.localClusteringCoefficient.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientStatsConfig>> {
+public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientStatsConfig>> {
 
     @Override
     public String name() {
@@ -49,7 +49,7 @@ public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalC
     }
 
     @Override
-    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var builder = new LocalClusteringCoefficientStatsResult.Builder();
             computationResult.result()

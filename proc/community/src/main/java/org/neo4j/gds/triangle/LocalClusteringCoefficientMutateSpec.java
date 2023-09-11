@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.localClusteringCoefficient.mutate", description = LocalClusteringCoefficientCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig, Stream<LocalClusteringCoefficientMutateResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientMutateConfig>> {
+public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig, Stream<LocalClusteringCoefficientMutateResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientMutateConfig>> {
     @Override
     public String name() {
         return "LocalClusteringCoefficientMutate";
@@ -54,12 +54,12 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
     }
 
     @Override
-    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig, Stream<LocalClusteringCoefficientMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig, Stream<LocalClusteringCoefficientMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(LocalClusteringCoefficient.Result::localClusteringCoefficients)
+                    .map(LocalClusteringCoefficientResult::localClusteringCoefficients)
                     .map(NodePropertyValuesAdapter::adapt)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
@@ -69,7 +69,7 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
 
 
     private AbstractResultBuilder<LocalClusteringCoefficientMutateResult> resultBuilder(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig> computationResult,
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var builder = new LocalClusteringCoefficientMutateResult.Builder();

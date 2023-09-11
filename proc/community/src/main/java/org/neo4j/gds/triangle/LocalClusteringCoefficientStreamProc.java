@@ -22,8 +22,10 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,16 +37,21 @@ import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIP
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientStreamProc extends BaseProc {
+
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.localClusteringCoefficient.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<LocalClusteringCoefficientStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LocalClusteringCoefficientStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().streamLocalClusteringCoefficient(
+            graphName,
+            configuration,
+            executionContext().algorithmMetaDataSetter()
+        );
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stream.estimate", mode = READ)

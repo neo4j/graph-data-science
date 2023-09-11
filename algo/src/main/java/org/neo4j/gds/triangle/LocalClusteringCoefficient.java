@@ -20,7 +20,6 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
@@ -33,13 +32,13 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongToDoubleFunction;
 
-public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient.Result> {
+public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficientResult> {
 
     private final int concurrency;
     private final NodePropertyValues triangleCountProperty;
     private final LocalClusteringCoefficientBaseConfig configuration;
 
-    private Graph graph;
+    private final Graph graph;
 
     // Results
     private HugeDoubleArray localClusteringCoefficients;
@@ -62,7 +61,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     }
 
     @Override
-    public Result compute() {
+    public LocalClusteringCoefficientResult compute() {
         progressTracker.beginSubTask();
 
         if (null == triangleCountProperty) {
@@ -73,7 +72,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         }
 
         progressTracker.endSubTask();
-        return Result.of(
+        return LocalClusteringCoefficientResult.of(
             localClusteringCoefficients,
             averageClusteringCoefficient
         );
@@ -131,22 +130,4 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         return triangles * 2 / (degree * (degree - 1));
     }
 
-    @ValueClass
-    interface Result {
-
-        HugeDoubleArray localClusteringCoefficients();
-
-        double averageClusteringCoefficient();
-
-        static Result of(
-            HugeDoubleArray localClusteringCoefficients,
-            double averageClusteringCoefficient
-        ) {
-            return ImmutableResult
-                .builder()
-                .localClusteringCoefficients(localClusteringCoefficients)
-                .averageClusteringCoefficient(averageClusteringCoefficient)
-                .build();
-        }
-    }
 }
