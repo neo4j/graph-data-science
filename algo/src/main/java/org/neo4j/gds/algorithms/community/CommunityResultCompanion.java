@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
@@ -66,7 +66,7 @@ final class CommunityResultCompanion {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeProperties.nodeCount(),
             nodeProperties::longValue,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             concurrency
         );
         return new CommunitySizeFilter(nodeProperties, communitySizes, size);

@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -53,7 +53,7 @@ class MinMaxTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         assertThat(scaler.min).isEqualTo(min);
@@ -77,7 +77,7 @@ class MinMaxTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
@@ -98,7 +98,7 @@ class MinMaxTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
 
 

@@ -40,7 +40,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.test.TestProc;
@@ -775,7 +775,7 @@ class GraphProjectProcTest extends BaseProcTest {
         // block all available threads
         for (int i = 0; i < ConcurrencyConfig.DEFAULT_CONCURRENCY; i++) {
             futures.add(
-                ExecutorServices.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
+                DefaultPool.INSTANCE.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
             );
         }
 

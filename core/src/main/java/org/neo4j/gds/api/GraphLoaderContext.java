@@ -22,7 +22,7 @@ package org.neo4j.gds.api;
 import org.immutables.value.Value;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -47,7 +47,7 @@ public interface GraphLoaderContext {
 
     @Value.Default
     default ExecutorService executor() {
-        return ExecutorServices.DEFAULT;
+        return DefaultPool.INSTANCE;
     }
 
     @Value.Default

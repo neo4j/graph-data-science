@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -110,7 +110,7 @@ class WccThresholdTest {
 
         DisjointSetStruct dss = new Wcc(
             graph,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             DEFAULT_BATCH_SIZE,
             wccConfig,
             ProgressTracker.NULL_TRACKER

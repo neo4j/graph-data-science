@@ -36,7 +36,7 @@ import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -422,7 +422,7 @@ class HashGNNTest {
             .nodes(firstIdMap)
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(ExecutorServices.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
@@ -446,7 +446,7 @@ class HashGNNTest {
             .nodes(secondIdMap)
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(ExecutorServices.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var random = new SplittableRandom(42);

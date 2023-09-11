@@ -30,7 +30,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
@@ -170,7 +170,7 @@ public abstract class EdgeSplitter {
                 .map(key -> List.of(GraphFactory.PropertyConfig.of(key, Aggregation.SINGLE, DefaultValue.forDouble())))
                 .orElse(List.of()))
             .concurrency(1)
-            .executorService(ExecutorServices.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
     }
 

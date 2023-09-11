@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -125,7 +125,7 @@ class IncrementalWccTest {
     private DisjointSetStruct run(Graph graph, WccBaseConfig config) {
         return new Wcc(
             graph,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             COMMUNITY_SIZE / ConcurrencyConfig.DEFAULT_CONCURRENCY,
             config,
             ProgressTracker.NULL_TRACKER

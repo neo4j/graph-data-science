@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -241,7 +241,7 @@ public abstract class IdMapBuilderTest {
             }
         }, Optional.empty());
 
-        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
 
         var idMap = idMapBuilder.build(LabelInformationBuilders.allNodes(), highestOriginalId, concurrency);
 

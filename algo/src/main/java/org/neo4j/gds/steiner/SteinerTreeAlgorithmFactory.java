@@ -21,7 +21,7 @@ package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -53,7 +53,7 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             configuration.delta(),
             configuration.concurrency(),
             configuration.applyRerouting(),
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }

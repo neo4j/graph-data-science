@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -66,7 +66,7 @@ class LazyIdMapBuilderTest {
 
         }, Optional.empty());
 
-        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
 
         var highLimitIdMap = lazyIdMapBuilder.build().idMap();
 

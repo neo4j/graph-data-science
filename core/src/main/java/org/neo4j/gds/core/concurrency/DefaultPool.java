@@ -27,9 +27,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public final class ExecutorServices {
+public final class DefaultPool {
 
-    public static final ExecutorService DEFAULT = createDefaultPool(PoolSizesService.poolSizes());
+    public static final ExecutorService INSTANCE = createDefaultPool(PoolSizesService.poolSizes());
 
     private static ExecutorService createDefaultPool(PoolSizes poolSizes) {
         return new ThreadPoolExecutor(
@@ -43,5 +43,5 @@ public final class ExecutorServices {
         );
     }
 
-    private ExecutorServices() {}
+    private DefaultPool() {}
 }

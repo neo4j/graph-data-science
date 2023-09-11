@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -85,7 +85,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
                 targetNodeFilter
             ),
             ImmutableKnnContext.of(
-                ExecutorServices.DEFAULT,
+                DefaultPool.INSTANCE,
                 progressTracker
             )
         );

@@ -34,7 +34,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -138,7 +138,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
 
     private GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
-            .executor(ExecutorServices.DEFAULT)
+            .executor(DefaultPool.INSTANCE)
             .log(NullLog.getInstance())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))

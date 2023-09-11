@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
@@ -31,7 +31,7 @@ public interface KnnContext {
 
     @Value.Default
     default ExecutorService executor() {
-        return ExecutorServices.DEFAULT;
+        return DefaultPool.INSTANCE;
     }
 
     @Value.Default

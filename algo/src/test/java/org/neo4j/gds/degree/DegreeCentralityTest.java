@@ -29,7 +29,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -148,7 +148,7 @@ final class DegreeCentralityTest {
 
         var degreeCentrality = new DegreeCentrality(
             graph,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             ProgressTracker.NULL_TRACKER
         );
@@ -200,7 +200,7 @@ final class DegreeCentralityTest {
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             progressTracker
         );
@@ -225,7 +225,7 @@ final class DegreeCentralityTest {
 
         var degreeCentrality = new DegreeCentrality(
             graph,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             ProgressTracker.NULL_TRACKER
         );

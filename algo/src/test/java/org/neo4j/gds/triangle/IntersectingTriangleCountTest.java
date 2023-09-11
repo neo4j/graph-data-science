@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 
 import java.util.stream.Stream;
 
@@ -531,7 +531,7 @@ class IntersectingTriangleCountTest {
     }
 
     private TriangleCountResult compute(Graph graph, TriangleCountBaseConfig config) {
-        return IntersectingTriangleCount.create(graph, config, ExecutorServices.DEFAULT).compute();
+        return IntersectingTriangleCount.create(graph, config, DefaultPool.INSTANCE).compute();
     }
 
     private static Graph fromGdl(String gdl) {

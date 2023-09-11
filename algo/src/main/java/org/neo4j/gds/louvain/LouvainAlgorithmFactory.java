@@ -33,7 +33,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -61,7 +61,7 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
             configuration.tolerance(),
             configuration.concurrency(),
             progressTracker,
-            ExecutorServices.DEFAULT
+            DefaultPool.INSTANCE
         );
     }
 

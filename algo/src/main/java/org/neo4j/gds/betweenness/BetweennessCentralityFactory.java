@@ -26,7 +26,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -66,7 +66,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             graph,
             strategy,
             traverserFactory,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             configuration.concurrency(),
             progressTracker
         );

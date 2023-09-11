@@ -21,7 +21,7 @@ package org.neo4j.gds.steiner;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -75,7 +75,7 @@ class ShortestPathsSteinerAlgorithmTest {
             2.0,
             1,
             false,
-            ExecutorServices.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
