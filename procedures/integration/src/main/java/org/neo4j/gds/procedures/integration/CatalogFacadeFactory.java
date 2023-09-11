@@ -44,6 +44,7 @@ import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodeLabelApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -116,6 +117,7 @@ public class CatalogFacadeFactory {
         var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(
             exporterContext);
         var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
+        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
 
         // GDS applications
         var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
@@ -156,6 +158,7 @@ public class CatalogFacadeFactory {
             relationshipPropertiesExporterBuilder
         );
         var writeNodeLabelApplication = new WriteNodeLabelApplication(log, nodeLabelExporterBuilder);
+        var writeRelationshipsApplication = new WriteRelationshipsApplication(log, relationshipExporterBuilder);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -178,7 +181,8 @@ public class CatalogFacadeFactory {
             streamRelationshipsApplication,
             writeNodePropertiesApplication,
             writeRelationshipPropertiesApplication,
-            writeNodeLabelApplication
+            writeNodeLabelApplication,
+            writeRelationshipsApplication
         );
 
         // wrap in decorator to enable preconditions checks

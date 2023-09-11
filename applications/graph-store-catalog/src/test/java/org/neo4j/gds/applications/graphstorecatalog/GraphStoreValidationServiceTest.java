@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -262,5 +263,116 @@ class GraphStoreValidationServiceTest {
             relationshipTypes
         )).withMessage(
             "Expecting all specified relationship types to be present in graph store, but could not find ['bar', 'baz']");
+    }
+
+    @Test
+    void shouldEnsureRelationshipPropertiesMatchRelationshipType() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.relationshipPropertyKeys(RelationshipType.of("foo"))).thenReturn(Set.of("bar", "baz"));
+        validationService.ensureRelationshipPropertiesMatchRelationshipType(graphStore, "foo", List.of("bar", "baz"));
+
+        // yay, didn't blow up
+    }
+
+    @Test
+    void shouldRejectRelationshipPropertiesNotMatchingRelationshipType() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.relationshipPropertyKeys(RelationshipType.of("foo"))).thenReturn(Set.of("bar", "baz"));
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            validationService.ensureRelationshipPropertiesMatchRelationshipType(
+                graphStore,
+                "foo",
+                List.of("quux", "frazzle")
+            );
+        }).withMessage(
+            "Some properties are missing ['frazzle', 'quux'] for relationship type 'foo'. Available properties: ['bar', 'baz']");
+    }
+
+    @Test
+    void shouldRejectRelationshipPropertyNotMatchingRelationshipType() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.relationshipPropertyKeys(RelationshipType.of("foo"))).thenReturn(Set.of("bar"));
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            validationService.ensureRelationshipPropertiesMatchRelationshipType(
+                graphStore,
+                "foo",
+                List.of("baz")
+            );
+        }).withMessage("Property 'baz' missing for relationship type 'foo'. Available properties: ['bar']");
+    }
+
+    @Test
+    void shouldEnsureRelationshipPropertyMatchesRelationshipType() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.relationshipPropertyKeys(RelationshipType.of("foo"))).thenReturn(Set.of("bar", "baz"));
+        validationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
+            graphStore,
+            "foo",
+            Optional.of("bar")
+        );
+
+        // yay, didn't blow up
+    }
+
+    @Test
+    void shouldEnsureNoRelationshipPropertyMatchesRelationshipType() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.relationshipPropertyKeys(RelationshipType.of("foo"))).thenReturn(Set.of("bar", "baz"));
+        validationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
+            graphStore,
+            "foo",
+            Optional.empty()
+        );
+
+        // yay, didn't blow up
+    }
+
+    @Test
+    void shouldRejectDefiniteRelationshipPropertyNotMatchingRelationshipType() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(true);
+        when(graphStore.relationshipPropertyKeys(RelationshipType.of("foo"))).thenReturn(Set.of("bar", "baz"));
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            validationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
+                graphStore,
+                "foo",
+                Optional.of("quux")
+            );
+        }).withMessage(
+            "Property 'quux' missing for relationship type 'foo'. Available properties: ['bar', 'baz']");
+    }
+
+    @Test
+    void shouldRejectRelationshipRelationshipTypeThatDoesNotExist() {
+        var validationService = new GraphStoreValidationService();
+
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.hasRelationshipType(RelationshipType.of("foo"))).thenReturn(false);
+        when(graphStore.relationshipTypes()).thenReturn(Set.of(RelationshipType.of("bar"), RelationshipType.of("baz")));
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            validationService.ensureRelationshipPropertiesMatchRelationshipType(
+                graphStore,
+                "foo",
+                List.of("quux", "frazzle")
+            );
+        }).withMessage(
+            "Relationship type `foo` not found. Available types: ['bar', 'baz']");
     }
 }

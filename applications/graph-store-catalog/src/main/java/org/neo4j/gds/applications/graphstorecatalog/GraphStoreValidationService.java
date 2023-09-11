@@ -33,6 +33,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -182,18 +183,17 @@ public class GraphStoreValidationService {
         }
     }
 
+    /**
+     * Ensures relationship type exists, and that the relationship properties are available for it.
+     *
+     * @throws java.lang.IllegalArgumentException otherwise
+     */
     void ensureRelationshipPropertiesMatchRelationshipType(
         GraphStore graphStore,
         String relationshipType,
         Collection<String> relationshipProperties
     ) {
-        if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Relationship type `%s` not found. Available types: %s",
-                relationshipType,
-                join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
-            ));
-        }
+        ensureRelationshipTypeExists(graphStore, relationshipType);
 
         var availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipType));
 
@@ -203,12 +203,60 @@ public class GraphStoreValidationService {
             .collect(Collectors.toList());
 
         if (!missingPropertiesList.isEmpty()) {
+            var errorMessage = putTogetherErrorMessage(relationshipType, missingPropertiesList, availableProperties);
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    void ensurePossibleRelationshipPropertyMatchesRelationshipType(
+        GraphStore graphStore,
+        String relationshipTypeAsString,
+        Optional<String> possibleRelationshipProperty
+    ) {
+        ensureRelationshipTypeExists(graphStore, relationshipTypeAsString);
+
+        if (possibleRelationshipProperty.isEmpty()) return;
+        var relationshipProperty = possibleRelationshipProperty.get();
+
+        var availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipTypeAsString));
+        if (availableProperties.contains(relationshipProperty)) return;
+
+        throw new IllegalArgumentException(putTogetherErrorMessage(
+            relationshipTypeAsString,
+            List.of(relationshipProperty),
+            availableProperties
+        ));
+    }
+
+    private static void ensureRelationshipTypeExists(GraphStore graphStore, String relationshipType) {
+        if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Some  properties are missing %s for relationship type '%s'. Available properties: %s",
+                "Relationship type `%s` not found. Available types: %s",
+                relationshipType,
+                join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
+            ));
+        }
+    }
+
+    private static String putTogetherErrorMessage(
+        String relationshipType,
+        List<String> missingPropertiesList,
+        Collection<String> availableProperties
+    ) {
+        if (missingPropertiesList.size() == 1) {
+            return formatWithLocale(
+                "Property '%s' missing for relationship type '%s'. Available properties: %s",
+                missingPropertiesList.get(0),
+                relationshipType,
+                join(availableProperties)
+            );
+        } else {
+            return formatWithLocale(
+                "Some properties are missing %s for relationship type '%s'. Available properties: %s",
                 join(missingPropertiesList),
                 relationshipType,
                 join(availableProperties)
-            ));
+            );
         }
     }
 

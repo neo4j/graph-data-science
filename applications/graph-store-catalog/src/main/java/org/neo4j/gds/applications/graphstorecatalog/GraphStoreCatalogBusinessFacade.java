@@ -222,4 +222,16 @@ public interface GraphStoreCatalogBusinessFacade {
         String nodeLabel,
         Map<String, Object> configuration
     );
+
+    WriteRelationshipResult writeRelationships(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String relationshipType,
+        String relationshipProperty,
+        Map<String, Object> configuration
+    );
 }

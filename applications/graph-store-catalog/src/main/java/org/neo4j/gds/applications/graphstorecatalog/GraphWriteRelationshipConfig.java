@@ -17,21 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringJoining.join;
 
 @ValueClass
 @Configuration
@@ -54,27 +48,5 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
             relationshipProperty,
             config
         );
-    }
-
-    @Configuration.Ignore
-    default void validate(GraphStore graphStore) {
-        if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType()))) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Relationship type `%s` not found. Available types: %s",
-                relationshipType(),
-                join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
-            ));
-        }
-        relationshipProperty().ifPresent(relProperty -> {
-            Set<String> availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipType()));
-            if (!availableProperties.contains(relProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship property `%s` not found for relationship type '%s'. Available properties: %s",
-                    relProperty,
-                    relationshipType(),
-                    StringJoining.join(availableProperties)
-                ));
-            }
-        });
     }
 }

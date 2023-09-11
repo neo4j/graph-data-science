@@ -89,6 +89,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final WriteNodePropertiesApplication writeNodePropertiesApplication;
     private final WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
     private final WriteNodeLabelApplication writeNodeLabelApplication;
+    private final WriteRelationshipsApplication writeRelationshipsApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -110,7 +111,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         StreamRelationshipsApplication streamRelationshipsApplication,
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
-        WriteNodeLabelApplication writeNodeLabelApplication
+        WriteNodeLabelApplication writeNodeLabelApplication,
+        WriteRelationshipsApplication writeRelationshipsApplication
     ) {
         this.log = log;
 
@@ -134,6 +136,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.writeNodePropertiesApplication = writeNodePropertiesApplication;
         this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
         this.writeNodeLabelApplication = writeNodeLabelApplication;
+        this.writeRelationshipsApplication = writeRelationshipsApplication;
     }
 
     @Override
@@ -709,6 +712,44 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             nodeLabel,
             configuration,
             nodeFilter
+        );
+    }
+
+    @Override
+    public WriteRelationshipResult writeRelationships(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String relationshipType,
+        String relationshipProperty,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = configurationService.parseGraphWriteRelationshipConfiguration(
+            relationshipType,
+            relationshipProperty,
+            rawConfiguration
+        );
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        graphStoreValidationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
+            graphStore,
+            configuration.relationshipType(),
+            configuration.relationshipProperty()
+        );
+
+        return writeRelationshipsApplication.compute(
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            graphStore,
+            graphName,
+            configuration
         );
     }
 

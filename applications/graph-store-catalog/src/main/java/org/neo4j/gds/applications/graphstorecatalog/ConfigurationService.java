@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.BaseConfig;
@@ -40,6 +41,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -307,6 +309,24 @@ public class ConfigurationService {
 
         // no extra validation, these are just non-functional flags
         return WriteRelationshipPropertiesConfig.of(cypherConfig);
+    }
+
+    GraphWriteRelationshipConfig parseGraphWriteRelationshipConfiguration(
+        String relationshipType,
+        String relationshipProperty,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = GraphWriteRelationshipConfig.of(
+            relationshipType,
+            Optional.ofNullable(StringUtils.trimToNull(relationshipProperty)),
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
     }
 
     private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {

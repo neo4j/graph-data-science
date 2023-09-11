@@ -35,6 +35,7 @@ import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
 import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesResult;
+import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
@@ -658,6 +659,33 @@ public class CatalogFacade {
             terminationFlag,
             graphName,
             nodeLabel,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<WriteRelationshipResult> writeRelationships(
+        String graphName,
+        String relationshipType,
+        String relationshipProperty,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.writeRelationships(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            graphName,
+            relationshipType,
+            relationshipProperty,
             configuration
         );
 
