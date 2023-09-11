@@ -169,7 +169,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result);
     }
 
-    public StreamComputationResult<KmeansBaseConfig, KmeansResult> kmeans(
+    public StreamComputationResult<KmeansResult> kmeans(
         String graphName,
         KmeansBaseConfig config,
         User user,
@@ -183,7 +183,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
             databaseId
         );
 
-        return createStreamComputationResult(result, config);
+        return createStreamComputationResult(result);
     }
 
     private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result) {

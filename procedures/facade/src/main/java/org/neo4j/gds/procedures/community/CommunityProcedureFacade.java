@@ -343,7 +343,7 @@ public class CommunityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
-            procedureReturnColumns.contains("communityDistribution"),
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
 

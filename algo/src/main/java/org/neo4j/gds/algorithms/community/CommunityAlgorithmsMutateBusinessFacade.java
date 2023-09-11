@@ -343,8 +343,8 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 return new KmeansSpecificFields(
                     communitySummary,
                     arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
-                    0,
-                    0
+                    result.averageDistanceToCentroid(),
+                    result.averageSilhouette()
                 );
             },
             statisticsComputationInstructions,

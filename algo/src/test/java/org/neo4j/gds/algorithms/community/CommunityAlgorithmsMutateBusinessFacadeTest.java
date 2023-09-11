@@ -178,5 +178,5 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
             return true;
         });
     }
-
+    
 }

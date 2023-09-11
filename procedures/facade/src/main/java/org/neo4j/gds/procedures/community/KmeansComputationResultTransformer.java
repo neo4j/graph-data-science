@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
@@ -35,7 +34,7 @@ final class KmeansComputationResultTransformer {
 
     private KmeansComputationResultTransformer() {}
 
-    static Stream<KmeansStreamResult> toStreamResult(StreamComputationResult<KmeansBaseConfig, KmeansResult> computationResult) {
+    static Stream<KmeansStreamResult> toStreamResult(StreamComputationResult<KmeansResult> computationResult) {
         return computationResult.result().map(kmeansResult -> {
             var communities = kmeansResult.communities();
             var distances = kmeansResult.distanceFromCenter();
