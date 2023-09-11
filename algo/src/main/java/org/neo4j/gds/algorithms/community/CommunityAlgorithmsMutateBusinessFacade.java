@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
@@ -40,6 +42,8 @@ import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
+import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -141,7 +145,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
         NodePropertyValuesMapper<LouvainResult, LouvainMutateConfig> mapper = ((result, config) -> {
             return config.includeIntermediateCommunities()
-                ? louvainIntermediateCommunitiesNodePropertyValues(result)
+                ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
                 : CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
                     config.consecutiveIds(),
@@ -166,6 +170,54 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY
+        );
+    }
+
+    public NodePropertyMutateResult<LeidenSpecificFields> leiden(
+        String graphName,
+        LeidenMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        NodePropertyValuesMapper<LeidenResult, LeidenMutateConfig> mapper = ((result, config) -> {
+            return config.includeIntermediateCommunities()
+                ? createIntermediateCommunitiesNodePropertyValues(
+                result::getIntermediateCommunities,
+                result.communities().size()
+            )
+                : CommunityResultCompanion.nodePropertyValues(
+                    config.isIncremental(),
+                    config.consecutiveIds(),
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
+                );
+        });
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            mapper,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return LeidenSpecificFields.from(
+                    result.communities().size(),
+                    result.modularity(),
+                    result.modularities(),
+                    componentCount,
+                    result.ranLevels(),
+                    result.didConverge(),
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LeidenSpecificFields.EMPTY
         );
     }
 
@@ -403,8 +455,10 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         return new AlgorithmResultWithTiming<>(algorithmResult, computeMilliseconds.get());
     }
 
-    private static LongArrayNodePropertyValues louvainIntermediateCommunitiesNodePropertyValues(LouvainResult result) {
-        var size = result.size();
+    private static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
+        LongToObjectFunction<long[]> intermediateCommunitiesProvider,
+        long size
+    ) {
         return new LongArrayNodePropertyValues() {
             @Override
             public long nodeCount() {
@@ -413,7 +467,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
             @Override
             public long[] longArrayValue(long nodeId) {
-                return result.getIntermediateCommunities(nodeId);
+                return intermediateCommunitiesProvider.apply(nodeId);
             }
         };
     }

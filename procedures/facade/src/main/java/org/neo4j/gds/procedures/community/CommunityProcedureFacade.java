@@ -33,6 +33,8 @@ import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
+import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
@@ -41,6 +43,8 @@ import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
@@ -193,6 +197,42 @@ public class CommunityProcedureFacade {
 
         return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
     }
+
+    public Stream<LeidenStreamResult> leidenStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+
+    ) {
+        var streamConfig = createStreamConfig(configuration, LeidenStreamConfig::of, algorithmMetaDataSetter);
+
+        var computationResult = algorithmsStreamBusinessFacade.leiden(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return LeidenComputationResultTransformer.toStreamResult(computationResult, streamConfig);
+    }
+
+    public Stream<LeidenMutateResult> leidenMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createMutateConfig(configuration, LeidenMutateConfig::of);
+
+        var computationResult = algorithmsMutateBusinessFacade.leiden(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LeidenComputationResultTransformer.toMutateResult(computationResult));
+    }
+
 
     public Stream<SccStreamResult> sccStream(
         String graphName,

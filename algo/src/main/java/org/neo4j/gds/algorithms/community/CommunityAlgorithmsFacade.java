@@ -44,6 +44,9 @@ import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
@@ -141,6 +144,22 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new LouvainAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
+    AlgorithmComputationResult<LeidenResult> leiden(
+        String graphName,
+        LeidenBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new LeidenAlgorithmFactory<>(),
             user,
             databaseId
         );
