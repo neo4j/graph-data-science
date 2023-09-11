@@ -31,7 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -149,7 +149,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void stopsParallelExportingWhenTransactionHasBeenTerminated() {
-        transactionTerminationTest(Pools.DEFAULT);
+        transactionTerminationTest(ExecutorServices.DEFAULT);
     }
 
     @ParameterizedTest
@@ -172,7 +172,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withProgressTracker(progressTracker);
         if (parallel) {
-            exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, writeConcurrency);
+            exporterBuilder = exporterBuilder.parallel(ExecutorServices.DEFAULT, writeConcurrency);
         }
         var exporter = exporterBuilder.build();
 

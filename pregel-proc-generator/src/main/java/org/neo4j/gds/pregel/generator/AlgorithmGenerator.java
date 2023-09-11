@@ -29,7 +29,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -90,7 +90,7 @@ public class AlgorithmGenerator {
             .addStatement(
                 "this.pregelJob = $T.create(graph, configuration, computation, $T.DEFAULT, progressTracker)",
                 Pregel.class,
-                Pools.class
+                ExecutorServices.class
             ).build();
     }
 

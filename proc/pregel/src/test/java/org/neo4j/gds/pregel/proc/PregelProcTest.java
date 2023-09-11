@@ -41,7 +41,7 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -464,7 +464,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, Pools.DEFAULT, progressTracker);
+            }, ExecutorServices.DEFAULT, progressTracker);
         }
 
         @Override

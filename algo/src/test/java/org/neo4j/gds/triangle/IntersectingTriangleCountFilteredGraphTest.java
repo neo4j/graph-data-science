@@ -29,7 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collections;
@@ -79,7 +79,7 @@ class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
         );
 
         var config = ImmutableTriangleCountBaseConfig.builder().build();
-        var triangleCount = IntersectingTriangleCount.create(graph, config, Pools.DEFAULT);
+        var triangleCount = IntersectingTriangleCount.create(graph, config, ExecutorServices.DEFAULT);
         var triangleCountResult = triangleCount.compute();
         assertThat(triangleCountResult.globalTriangles()).isEqualTo(1);
         var triangles = triangleCountResult.localTriangles();

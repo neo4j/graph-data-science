@@ -25,7 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -37,7 +37,7 @@ public final class ComputationAlgorithm extends Algorithm<PregelResult> {
                          ProgressTracker progressTracker) {
         super(progressTracker);
         var computation = new Computation();
-        this.pregelJob = Pregel.create(graph, configuration, computation, Pools.DEFAULT, progressTracker);
+        this.pregelJob = Pregel.create(graph, configuration, computation, ExecutorServices.DEFAULT, progressTracker);
     }
 
     @Override

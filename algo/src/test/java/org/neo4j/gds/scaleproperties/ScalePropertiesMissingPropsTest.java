@@ -21,7 +21,7 @@ package org.neo4j.gds.scaleproperties;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -55,7 +55,7 @@ class ScalePropertiesMissingPropsTest {
             .nodeProperties(List.of("arrayOn4", "arrayOn1"))
             .scaler(Max.buildFrom(CypherMapWrapper.empty()))
             .build();
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, ExecutorServices.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -73,7 +73,7 @@ class ScalePropertiesMissingPropsTest {
             .nodeProperties(List.of("a", "b", "c"))
             .scaler(StdScore.buildFrom(CypherMapWrapper.empty()))
             .build();
-        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, ExecutorServices.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();

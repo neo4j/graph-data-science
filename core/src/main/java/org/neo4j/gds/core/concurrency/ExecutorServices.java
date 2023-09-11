@@ -17,29 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kmeans;
-
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.ExecutorServices;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+package org.neo4j.gds.core.concurrency;
 
 import java.util.concurrent.ExecutorService;
 
-@ValueClass
-public interface KmeansContext {
+public final class ExecutorServices {
 
-    @Value.Default
-    default ExecutorService executor() {
-        return ExecutorServices.DEFAULT;
-    }
+    public static final ExecutorService DEFAULT = Pools.createDefaultPool();
 
-    @Value.Default
-    default ProgressTracker progressTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
-    static KmeansContext empty() {
-        return ImmutableKmeansContext.builder().build();
-    }
+    private ExecutorServices() {}
 }

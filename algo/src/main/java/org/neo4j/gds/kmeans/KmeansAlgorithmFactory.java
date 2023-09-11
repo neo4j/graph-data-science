@@ -24,7 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -61,7 +61,7 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
         return Kmeans.createKmeans(graph, configuration, ImmutableKmeansContext
             .builder()
             .progressTracker(progressTracker)
-            .executor(Pools.DEFAULT)
+            .executor(ExecutorServices.DEFAULT)
             .build());
     }
 

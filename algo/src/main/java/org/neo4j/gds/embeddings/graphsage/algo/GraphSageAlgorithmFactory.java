@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.MutateConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -49,7 +49,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
 
     @Override
     public GraphSage build(GraphStore graphStore, CONFIG configuration, ProgressTracker progressTracker) {
-        var executorService = Pools.DEFAULT;
+        var executorService = ExecutorServices.DEFAULT;
         var model = resolveModel(
             modelCatalog,
             configuration.modelUser(),

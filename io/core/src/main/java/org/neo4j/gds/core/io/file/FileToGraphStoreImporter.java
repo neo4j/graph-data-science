@@ -28,8 +28,8 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -175,7 +175,7 @@ public abstract class FileToGraphStoreImporter {
             (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
 
         var nodes = nodesBuilder.build();
 
@@ -206,7 +206,7 @@ public abstract class FileToGraphStoreImporter {
             (index) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
 
         var relationshipImportResult = relationshipImportResult(relationshipBuildersByType);
 
@@ -235,7 +235,7 @@ public abstract class FileToGraphStoreImporter {
                     progressTracker
                 )
             );
-            ParallelUtil.run(tasks, Pools.DEFAULT);
+            ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
             graphStoreGraphPropertyVisitor.close();
 
             graphStoreBuilder.graphProperties(GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(

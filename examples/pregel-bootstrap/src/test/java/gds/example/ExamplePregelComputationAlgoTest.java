@@ -64,7 +64,7 @@ class ExamplePregelComputationAlgoTest {
             graph,
             config,
             new ExamplePregelComputation(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 

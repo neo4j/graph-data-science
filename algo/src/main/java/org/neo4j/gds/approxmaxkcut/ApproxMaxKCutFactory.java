@@ -25,7 +25,7 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -51,7 +51,7 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Gr
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new ApproxMaxKCut(graph, Pools.DEFAULT, configuration, progressTracker);
+        return new ApproxMaxKCut(graph, ExecutorServices.DEFAULT, configuration, progressTracker);
     }
 
     @Override

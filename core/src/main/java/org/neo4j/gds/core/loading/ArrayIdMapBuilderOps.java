@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
@@ -87,7 +87,7 @@ public final class ArrayIdMapBuilderOps {
         ParallelUtil.readParallel(
             concurrency,
             nodeCount,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             (start, end) -> addNodes(graphIds, idMapBuilder, start, end)
         );
         return idMapBuilder.build();

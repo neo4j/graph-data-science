@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -85,7 +85,7 @@ class ConnectedComponentsPregelAlgoTest {
             graph,
             config,
             new ConnectedComponentsPregel(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 

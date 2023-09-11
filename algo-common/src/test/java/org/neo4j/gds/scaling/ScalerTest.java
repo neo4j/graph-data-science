@@ -21,7 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -39,14 +39,14 @@ class ScalerTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
         var meanScaler2 = (Mean) Mean.buildFrom(CypherMapWrapper.empty()).create(
             new DoubleTestPropertyValues(nodeId -> 2 * nodeId),
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         var meanScaler1Stats = meanScaler1.statistics();

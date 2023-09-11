@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.MutateLabelConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -49,7 +49,7 @@ public class NodeLabelMutatorApplication {
                 nodeFilter,
                 configuration.concurrency(),
                 Map.of(),
-                Pools.DEFAULT,
+                ExecutorServices.DEFAULT,
                 ProgressTracker.NULL_TRACKER
             );
 

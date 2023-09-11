@@ -186,11 +186,11 @@ public interface RunWithConcurrency {
      * If {@link #forceUsageOfExecutor()} is {@code true} however, an {@link java.lang.IllegalArgumentException}
      * is thrown when this object is constructed.
      * <p>
-     * The default executor is {@link org.neo4j.gds.core.concurrency.Pools#DEFAULT}.
+     * The default executor is {@link ExecutorServices#DEFAULT}.
      */
     @Value.Default
     default @Nullable ExecutorService executor() {
-        return Pools.DEFAULT;
+        return ExecutorServices.DEFAULT;
     }
 
     /**

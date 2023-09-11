@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,7 +88,7 @@ class WeightedAllShortestPathsTest extends BaseTest {
 
         final ResultConsumer mock = mock(ResultConsumer.class);
 
-        new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4)
+        new WeightedAllShortestPaths(graph, ExecutorServices.DEFAULT, 4)
                 .compute()
                 .forEach(r -> {
                     assertNotEquals(Double.POSITIVE_INFINITY, r.distance);
@@ -115,7 +115,7 @@ class WeightedAllShortestPathsTest extends BaseTest {
             .graph();
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
-            new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4);
+            new WeightedAllShortestPaths(graph, ExecutorServices.DEFAULT, 4);
         });
 
         assertTrue(exception.getMessage().contains("not supported"));

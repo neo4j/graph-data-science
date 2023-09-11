@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.apache.commons.lang3.function.TriFunction;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -58,7 +58,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
         KnnContext knnContext = ImmutableKnnContext
             .builder()
             .progressTracker(progressTracker)
-            .executor(Pools.DEFAULT)
+            .executor(ExecutorServices.DEFAULT)
             .build();
 
         if (configuration.seedTargetNodes()) {

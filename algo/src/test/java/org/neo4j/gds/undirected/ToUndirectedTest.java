@@ -28,7 +28,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -82,7 +82,7 @@ class ToUndirectedTest {
             directedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         ).compute();
 
         directedGraphStore.addRelationshipType(undirectedRelationships);
@@ -129,7 +129,7 @@ class ToUndirectedTest {
             singleDirectedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         ).compute();
 
         singleDirectedGraphStore.addRelationshipType(undirectedRelationships);
@@ -175,7 +175,7 @@ class ToUndirectedTest {
             noPropertyDirectedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         ).compute();
 
         noPropertyDirectedGraphStore.addRelationshipType(undirectedRelationships);
@@ -207,7 +207,7 @@ class ToUndirectedTest {
             inputGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         ).compute();
 
         inputGraphStore.addRelationshipType(undirectedRels);
@@ -240,7 +240,7 @@ class ToUndirectedTest {
             input,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         ).compute();
 
         input.addRelationshipType(aggregatedUndirectedRelationships);
@@ -281,7 +281,7 @@ class ToUndirectedTest {
             input,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         ).compute();
 
         input.addRelationshipType(aggregatedUndirectedRelationships);

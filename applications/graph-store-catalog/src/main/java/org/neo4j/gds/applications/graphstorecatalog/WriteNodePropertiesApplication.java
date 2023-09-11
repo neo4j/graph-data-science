@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -130,7 +130,7 @@ public class WriteNodePropertiesApplication {
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(terminationFlag)
-                    .parallel(Pools.DEFAULT, config.writeConcurrency())
+                    .parallel(ExecutorServices.DEFAULT, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())
                     .build();

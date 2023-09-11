@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -57,7 +57,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         GraphSageTrainConfig configuration,
         ProgressTracker progressTracker
     ) {
-        var executorService = Pools.DEFAULT;
+        var executorService = ExecutorServices.DEFAULT;
         var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
 
         if(configuration.hasRelationshipWeightProperty()) {

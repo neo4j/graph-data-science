@@ -21,8 +21,8 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -50,7 +50,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
         }
         return new Wcc(
             graph,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ParallelUtil.DEFAULT_BATCH_SIZE,
             configuration,
             progressTracker

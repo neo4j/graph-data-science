@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
@@ -44,7 +44,7 @@ class NodeSimilarityTerminationTest extends BaseTest {
                 var nodeSimilarity = NodeSimilarity.create(
                     graph,
                     NodeSimilarityTest.streamConfigBuilder().concurrency(1).build(),
-                    Pools.DEFAULT,
+                    ExecutorServices.DEFAULT,
                     ProgressTracker.NULL_TRACKER
                 );
                 nodeSimilarity.setTerminationFlag(terminationFlag);

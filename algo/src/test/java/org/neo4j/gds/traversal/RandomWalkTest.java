@@ -34,7 +34,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -95,7 +95,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
@@ -136,7 +136,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         return randomWalk.compute().collect(Collectors.toList());
@@ -149,7 +149,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
@@ -190,7 +190,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -250,7 +250,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -299,7 +299,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -336,7 +336,7 @@ class RandomWalkTest {
                 graph,
                 config,
                 ProgressTracker.NULL_TRACKER,
-                Pools.DEFAULT
+                ExecutorServices.DEFAULT
             )
         ).isInstanceOf(RuntimeException.class)
             .hasMessage(
@@ -371,7 +371,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))
@@ -400,7 +400,7 @@ class RandomWalkTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))
@@ -423,7 +423,7 @@ class RandomWalkTest {
                     graph,
                     config,
                     ProgressTracker.NULL_TRACKER,
-                    Pools.DEFAULT
+                    ExecutorServices.DEFAULT
             );
 
             var stream = randomWalk.compute();

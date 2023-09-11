@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -70,7 +71,7 @@ class GraphWithSelfLoopTest {
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
             4,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
 
@@ -164,7 +165,7 @@ class GraphWithSelfLoopTest {
             Direction.UNDIRECTED,
             localCommunities,
             2,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             1,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -180,7 +181,7 @@ class GraphWithSelfLoopTest {
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
             4,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
         

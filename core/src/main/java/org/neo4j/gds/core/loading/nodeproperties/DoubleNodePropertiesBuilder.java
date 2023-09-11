@@ -24,8 +24,8 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -116,7 +116,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
             }
         }).collect(Collectors.toList());
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 

@@ -44,7 +44,7 @@ import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -109,7 +109,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -127,7 +127,7 @@ class PregelTest {
             graph,
             config,
             new TestPregelComputation(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
         pregelJob.setTerminationFlag(terminationFlag);
@@ -163,7 +163,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         ).run();
 
@@ -225,7 +225,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         );
 
@@ -280,7 +280,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -300,7 +300,7 @@ class PregelTest {
             graph,
             config,
             new TestSendTo(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -325,7 +325,7 @@ class PregelTest {
             graph,
             config,
             new CompositeTestComputation(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -363,7 +363,7 @@ class PregelTest {
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -378,7 +378,7 @@ class PregelTest {
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(2),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -515,7 +515,7 @@ class PregelTest {
                     return true;
                 }
             },
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         ).run();
 
@@ -603,7 +603,7 @@ class PregelTest {
             graph,
             config,
             new TestSendTo(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         ));
     }
@@ -626,7 +626,7 @@ class PregelTest {
             graph,
             config,
             new TestEmptyMessageInInitialSuperstep(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -825,7 +825,7 @@ class PregelTest {
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).build(),
             new Bidirectional(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
