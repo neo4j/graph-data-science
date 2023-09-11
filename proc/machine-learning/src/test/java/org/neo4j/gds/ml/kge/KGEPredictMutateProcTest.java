@@ -133,9 +133,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("targetNodeFilter", "N")
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
-            .addParameter("mutateRelationshipProperty", "similarityScore")
             .addParameter("scoringFunction", "TransE")
-            .addParameter("threshold", 0.0)  //TODO check
             .addParameter("topK", 2)
             .yields();
 
@@ -148,7 +146,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
     }
 
     @Test
@@ -166,9 +164,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("targetNodeFilter", idFunction.of("n0"))
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
-            .addParameter("mutateRelationshipProperty", "similarityScore")
             .addParameter("scoringFunction", "TransE")
-            .addParameter("threshold", 0.0)  //TODO check
             .addParameter("topK", 2)
             .yields();
 
@@ -181,7 +177,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
     }
 
     @Test
@@ -201,9 +197,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("targetNodeFilter", "N")
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
-            .addParameter("mutateRelationshipProperty", "similarityScore")
             .addParameter("scoringFunction", "TransE")
-            .addParameter("threshold", 0.0)  //TODO check
             .addParameter("topK", 2)
             .yields();
 
@@ -216,7 +210,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
     }
 
     @Test
@@ -236,9 +230,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("targetNodeFilter", targetNodesIds.stream().map(idFunction::of).collect(Collectors.toList()))
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
-            .addParameter("mutateRelationshipProperty", "similarityScore")
             .addParameter("scoringFunction", "TransE")
-            .addParameter("threshold", 0.0)  //TODO check
             .addParameter("topK", 2)
             .yields();
 
@@ -251,6 +243,6 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
     }
 }
