@@ -24,8 +24,6 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
-import static java.util.Arrays.stream;
-
 public class DistMultLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;

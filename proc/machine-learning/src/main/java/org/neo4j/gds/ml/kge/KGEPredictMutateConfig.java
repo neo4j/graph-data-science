@@ -34,6 +34,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.Collection;
 import java.util.List;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 @Configuration
 public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBaseConfig {
@@ -54,12 +56,7 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
     //TODO use HugeList or double[]
     List<Double> relationshipTypeEmbedding();
 
-    //TODO do we want to record the similarity/distance score?
-    String mutateRelationshipProperty();
-
     String scoringFunction();
-
-    double threshold();
 
     @Configuration.IntegerRange(min = 1)
     int topK();
@@ -88,7 +85,11 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
 
     @Value.Check
     default void validateScoringFunction() {
-
+        if (!scoringFunction().equalsIgnoreCase("transE") && !scoringFunction().equalsIgnoreCase("distMult")) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Invalid scoring function %s, it needs to be either TransE or DistMult.", scoringFunction()
+            ));
+        }
     }
 
 

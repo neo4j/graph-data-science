@@ -19,24 +19,17 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import java.util.Locale;
+import org.junit.jupiter.api.Test;
 
-public class LinkScorerFactory {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private enum ScoreFunction {
-        TRANSE,
-        DISTMULT
-    }
+public class LinkScorerFactoryTest {
 
-
-    public static LinkScorer create(String scoreFunction) {
-        switch (ScoreFunction.valueOf(scoreFunction.toUpperCase(Locale.ROOT))) {
-            case TRANSE:
-                return new EuclideanDistanceLinkScorer();
-            case DISTMULT:
-                return new DistMultLinkScorer();
-            default:
-                throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
-        }
+    @Test
+    void linkScorerFactoryCreateCorrectScorer() {
+        var transe = LinkScorerFactory.create("traNse");
+        assertThat(transe).isInstanceOf(EuclideanDistanceLinkScorer.class);
+        var distmult = LinkScorerFactory.create("distmuLt");
+        assertThat(distmult).isInstanceOf(DistMultLinkScorer.class);
     }
 }
