@@ -31,10 +31,10 @@ import java.util.Map;
 public final class MutateResult extends StandardMutateResult {
 
     public final long relationshipsWritten;
-    public final Map<String, Object> probabilityDistribution;
-    public final Map<String, Object> samplingStats;
+    private final Map<String, Object> probabilityDistribution;
+    private final Map<String, Object> samplingStats;
 
-    public MutateResult(
+    private MutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -85,7 +85,7 @@ public final class MutateResult extends StandardMutateResult {
             return this;
         }
 
-        public void recordHistogramValue(double value) {
+        void recordHistogramValue(double value) {
             if (histogram == null) {
                 return;
             }
@@ -95,7 +95,7 @@ public final class MutateResult extends StandardMutateResult {
             if (value >= 1E-6) histogram.recordValue(value); else histogram.recordValue(1E-6);
         }
 
-        public Builder withSamplingStats(Map<String, Object> samplingStats) {
+        Builder withSamplingStats(Map<String, Object> samplingStats) {
             this.samplingStats = samplingStats;
             return this;
         }

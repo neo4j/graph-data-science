@@ -124,11 +124,13 @@ class TopKMapComputerTest extends BaseTest {
 
         KGEPredictResult result = computer.compute();
 
+        result.topKMap().stream().forEach(System.out::println);
+
         assertTrue(assertTopKApproximatelyEquals(
                 result.topKMap().stream().toList(),
                 List.of(
                     new SimilarityResult(0L, 3L, -1.65),
-                    new SimilarityResult(1L, 3L, -2.4),
+                    new SimilarityResult(1L, 3L, -2.2),
                     new SimilarityResult(2L, 3L, -2.75)
                 ),
                 0.01

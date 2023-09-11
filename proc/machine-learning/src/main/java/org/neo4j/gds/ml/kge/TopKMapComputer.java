@@ -48,7 +48,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private int topK;
     private ScoreFunction scoreFunction;
 
-    // TODO abstract / merge with LinkFilter?
     private LongLongPredicate isCandidateLink;
 
     private boolean higherIsBetter;
@@ -88,7 +87,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
         try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction))) {
-            // TODO exploit symmetry of similarity function if available
+            //TODO maybe exploit symmetry of similarity function if available when there're many source target overlap
             ParallelUtil.parallelStreamConsume(
                 new SetBitsIterable(sourceNodes).stream(),
                 concurrency,

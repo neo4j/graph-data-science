@@ -56,7 +56,7 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
 
     String nodeEmbeddingProperty();
 
-    //TODO use HugeList or double[]
+    //Consider using HugeList or double[] if that saves mem
     List<Double> relationshipTypeEmbedding();
 
     String scoringFunction();

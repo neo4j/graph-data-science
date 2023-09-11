@@ -60,7 +60,7 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
             configuration.nodeEmbeddingProperty(),
             configuration.relationshipTypeEmbedding(),
             configuration.scoringFunction(),
-            (s, t) -> s != t, //TODO s-t should not be an existing edge
+            (s, t) -> s != t,
             configuration.topK(),
             configuration.concurrency(),
             progressTracker
