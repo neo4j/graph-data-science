@@ -22,7 +22,7 @@ package org.neo4j.gds.result;
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.scaling.LogScaler;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -95,7 +95,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
                     return Optional.of(CentralityStatistics.histogram(
                         nodeCount,
                         centralityFunction,
-                        Pools.DEFAULT,
+                        ExecutorServices.DEFAULT,
                         concurrency
                     ));
                 } catch (ArrayIndexOutOfBoundsException e) {

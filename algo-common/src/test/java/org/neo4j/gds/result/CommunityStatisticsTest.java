@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ class CommunityStatisticsTest {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeCount,
             communityFunction,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             concurrency
         );
         expectedCommunitySizes.forEach((communityId, expectedSize) -> {
@@ -72,7 +72,7 @@ class CommunityStatisticsTest {
             CommunityStatistics.communityCount(
                 nodeCount,
                 communityFunction,
-                Pools.DEFAULT,
+                ExecutorServices.DEFAULT,
                 concurrency
             )
         );
@@ -91,7 +91,7 @@ class CommunityStatisticsTest {
         var communityCountAndHistogram = CommunityStatistics.communityCountAndHistogram(
             nodeCount,
             communityFunction,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             concurrency
         );
 

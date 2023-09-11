@@ -21,7 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -62,7 +62,7 @@ class NonStabilizingLabelPropagationTest {
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,
             ImmutableLabelPropagationStreamConfig.builder().build(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
         LabelPropagationResult compute = labelPropagation.compute();

@@ -40,7 +40,7 @@ import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
@@ -295,7 +295,7 @@ public final class GraphFactory {
             .isMultiGraph(isMultiGraph)
             .loadRelationshipProperty(loadRelationshipProperties)
             .direction(Direction.fromOrientation(actualOrientation))
-            .executorService(executorService.orElse(Pools.DEFAULT))
+            .executorService(executorService.orElse(ExecutorServices.DEFAULT))
             .concurrency(finalConcurrency);
 
         if (indexInverse.orElse(false)) {

@@ -22,7 +22,7 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -37,7 +37,7 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
         return ClosenessCentrality.of(
             graph,
             configuration,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         );
     }

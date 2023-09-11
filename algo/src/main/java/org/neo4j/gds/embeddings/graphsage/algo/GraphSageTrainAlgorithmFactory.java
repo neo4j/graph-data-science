@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -58,7 +58,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         GraphSageTrainConfig configuration,
         ProgressTracker progressTracker
     ) {
-        var executorService = Pools.DEFAULT;
+        var executorService = ExecutorServices.DEFAULT;
         if(configuration.hasRelationshipWeightProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }

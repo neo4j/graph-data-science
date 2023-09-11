@@ -21,7 +21,7 @@ package org.neo4j.gds.pregel;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -75,7 +75,7 @@ class SpeakerListenerLPATest {
             graph,
             config,
             new SpeakerListenerLPA(42),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -122,7 +122,7 @@ class SpeakerListenerLPATest {
             graph,
             config,
             new SpeakerListenerLPA(42),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -164,7 +164,7 @@ class SpeakerListenerLPATest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         ).run();
 

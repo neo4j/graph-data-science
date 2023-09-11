@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -73,7 +73,7 @@ class TriangleStreamTest extends BaseTest {
     void testSequential() {
         TripleConsumer mock = mock(TripleConsumer.class);
 
-        TriangleStream.create(graph, Pools.DEFAULT, 1)
+        TriangleStream.create(graph, ExecutorServices.DEFAULT, 1)
                 .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 
@@ -84,7 +84,7 @@ class TriangleStreamTest extends BaseTest {
     void testParallel() {
         TripleConsumer mock = mock(TripleConsumer.class);
 
-        TriangleStream.create(graph, Pools.DEFAULT, 8)
+        TriangleStream.create(graph, ExecutorServices.DEFAULT, 8)
                 .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 

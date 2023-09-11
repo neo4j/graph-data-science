@@ -30,7 +30,7 @@ import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -232,7 +232,7 @@ public class GraphProjectProc extends CatalogProc {
         var graphStore = GraphStoreFilter.filter(
             fromGraphStore,
             config,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         );
 

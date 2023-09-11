@@ -27,8 +27,8 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -121,7 +121,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             configuration,
             computation,
             mode,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         );
     }
@@ -143,7 +143,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
 
         var degreeCentrality = new DegreeCentrality(
             graph,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             config,
             ProgressTracker.NULL_TRACKER
         );

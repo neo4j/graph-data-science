@@ -27,8 +27,8 @@ import net.jqwik.api.Provide;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
@@ -184,7 +184,7 @@ abstract class ShardedLongLongMapTest {
             Optional.of(100)
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, ExecutorServices.DEFAULT);
 
         var map = builder.build();
 

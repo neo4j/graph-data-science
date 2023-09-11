@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -73,7 +73,7 @@ class SimilarityGraphBuilderTest {
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             unlabelledGraph,
             1,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -96,7 +96,7 @@ class SimilarityGraphBuilderTest {
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             graph,
             1,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -131,7 +131,7 @@ class SimilarityGraphBuilderTest {
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             filteredIdMap,
             1,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             TerminationFlag.RUNNING_TRUE
         );
 

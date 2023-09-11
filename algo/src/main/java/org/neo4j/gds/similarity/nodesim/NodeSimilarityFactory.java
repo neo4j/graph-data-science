@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -54,7 +54,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             configuration,
             similarityComputer,
             configuration.concurrency(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         );
     }

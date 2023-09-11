@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -70,7 +70,7 @@ class MaxTest {
             nodeCount,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         assertThat(scaler.maxAbs).isEqualTo(absMax);
@@ -88,7 +88,7 @@ class MaxTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("absMax", List.of(0D)));
@@ -106,7 +106,7 @@ class MaxTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            ExecutorServices.DEFAULT
         );
 
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -58,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
             .topN(1)
             .build();
         
-        var nodeSimilarity = NodeSimilarity.create(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var nodeSimilarity = NodeSimilarity.create(graph, config, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER);
         var result = nodeSimilarity.compute().streamResult().findFirst().get();
 
         //input should be  (0 + 10 + 0)/ (5 + 10 + 8) = 10/23

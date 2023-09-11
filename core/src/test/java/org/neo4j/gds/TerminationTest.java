@@ -22,8 +22,8 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.query.ExecutingQuery;
@@ -103,7 +103,7 @@ class TerminationTest extends BaseProcTest {
         });
 
         // submit
-        ParallelUtil.run(runnables, Pools.DEFAULT);
+        ParallelUtil.run(runnables, ExecutorServices.DEFAULT);
     }
 
     @Test

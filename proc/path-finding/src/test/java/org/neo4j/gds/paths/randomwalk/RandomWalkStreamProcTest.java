@@ -26,7 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.graphdb.Path;
@@ -128,7 +128,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldStopWhenStreamIsNotLongerConsumed() {
-        var pool = (ThreadPoolExecutor) Pools.DEFAULT;
+        var pool = (ThreadPoolExecutor) ExecutorServices.DEFAULT;
         assumeThat(pool.getActiveCount()).as("Test requires that no other threads are currently running").isEqualTo(0);
 
         // re-setup with a larger graph

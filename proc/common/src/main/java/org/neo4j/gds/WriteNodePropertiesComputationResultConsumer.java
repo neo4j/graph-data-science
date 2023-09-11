@@ -23,7 +23,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -111,7 +111,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 .withTerminationFlag(computationResult.algorithm().terminationFlag)
                 .withProgressTracker(progressTracker)
                 .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
-                .parallel(Pools.DEFAULT, config.writeConcurrency())
+                .parallel(ExecutorServices.DEFAULT, config.writeConcurrency())
                 .build();
 
             try {

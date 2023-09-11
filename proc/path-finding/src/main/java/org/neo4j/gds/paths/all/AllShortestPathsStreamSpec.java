@@ -27,7 +27,7 @@ import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
 import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
 import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -64,14 +64,14 @@ public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorit
                 if (configuration.hasRelationshipWeightProperty()) {
                     return new WeightedAllShortestPaths(
                         graph,
-                        Pools.DEFAULT,
+                        ExecutorServices.DEFAULT,
                         configuration.concurrency()
                     );
                 } else {
                     return new MSBFSAllShortestPaths(
                         graph,
                         configuration.concurrency(),
-                        Pools.DEFAULT
+                        ExecutorServices.DEFAULT
                     );
                 }
             }

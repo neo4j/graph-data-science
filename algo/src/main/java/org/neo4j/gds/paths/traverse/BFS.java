@@ -23,8 +23,8 @@ package org.neo4j.gds.paths.traverse;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -199,7 +199,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             if (currentDepth == maximumDepth) {
                 break;
             }
-            ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
+            ParallelUtil.run(bfsTaskList, ExecutorServices.DEFAULT);
 
             if (targetFoundIndex.get() != Long.MAX_VALUE) {
                 break;

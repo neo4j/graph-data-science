@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.config.WriteLabelConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -66,7 +66,7 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
                 nodeFilter,
                 procedureConfig.concurrency(),
                 Map.of(),
-                Pools.DEFAULT,
+                ExecutorServices.DEFAULT,
                 ProgressTracker.NULL_TRACKER
             );
 
@@ -74,7 +74,7 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
                 .withArrowConnectionInfo(procedureConfig.arrowConnectionInfo(), graphStore.databaseId().databaseName())
-                .parallel(Pools.DEFAULT, procedureConfig.concurrency())
+                .parallel(ExecutorServices.DEFAULT, procedureConfig.concurrency())
                 .build();
 
             runWithExceptionLogging(

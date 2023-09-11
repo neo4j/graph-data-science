@@ -36,7 +36,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -142,7 +142,7 @@ final class DeltaSteppingTest {
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER)
+                .of(graph, config, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -172,7 +172,7 @@ final class DeltaSteppingTest {
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER)
+                .of(graph, config, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -191,7 +191,7 @@ final class DeltaSteppingTest {
             var testLog = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-            DeltaStepping.of(graph, config, Pools.DEFAULT, progressTracker)
+            DeltaStepping.of(graph, config, ExecutorServices.DEFAULT, progressTracker)
                 .compute()
                 .pathSet();
 
@@ -279,7 +279,7 @@ final class DeltaSteppingTest {
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER)
+                .of(graph, config, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -335,7 +335,7 @@ final class DeltaSteppingTest {
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER)
+                .of(graph, config, ExecutorServices.DEFAULT, ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -369,7 +369,7 @@ final class DeltaSteppingTest {
         var deltaStepping = DeltaStepping.of(
             newGraph,
             config,
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             ProgressTracker.NULL_TRACKER
         ).compute();
 

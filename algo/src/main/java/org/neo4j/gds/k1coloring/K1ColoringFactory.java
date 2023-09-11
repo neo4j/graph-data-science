@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -54,7 +54,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorith
             configuration.maxIterations(),
             configuration.batchSize(),
             configuration.concurrency(),
-            Pools.DEFAULT,
+            ExecutorServices.DEFAULT,
             progressTracker
         );
     }

@@ -31,7 +31,7 @@ import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -626,7 +626,7 @@ public class FastRPTest {
             .nodes(firstIdMap)
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(Pools.DEFAULT)
+            .executorService(ExecutorServices.DEFAULT)
             .build();
 
         var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
@@ -650,7 +650,7 @@ public class FastRPTest {
             .nodes(secondIdMap)
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(Pools.DEFAULT)
+            .executorService(ExecutorServices.DEFAULT)
             .build();
 
         var random = new SplittableRandom(42);

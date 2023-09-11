@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServices;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -76,7 +76,7 @@ class MSBFSAllShortestPathsTest extends BaseTest {
             .addRelationshipType(RELATIONSHIP)
             .build()
             .graph();
-        testASP(new MSBFSAllShortestPaths(graph, ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT));
+        testASP(new MSBFSAllShortestPaths(graph, ConcurrencyConfig.DEFAULT_CONCURRENCY, ExecutorServices.DEFAULT));
     }
 
     private void testASP(final MSBFSASPAlgorithm hugeMSBFSAllShortestPaths) {
