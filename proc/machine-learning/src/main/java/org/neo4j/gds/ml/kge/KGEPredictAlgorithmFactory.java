@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,12 +39,15 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
 
         Graph graph = graphOrGraphStore.getGraph();
 
-        graph.forEachNode(nodeId -> {
-            if (graph.nodeLabels(nodeId).contains(NodeLabel.of(configuration.sourceNodeLabel()))) {
-                sourceNodes.set(nodeId);
+        var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
+        var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
+
+        graph.forEachNode(node -> {
+            if (sourceNodeFilter.test(node)) {
+                sourceNodes.set(node);
             }
-            if (graph.nodeLabels(nodeId).contains(NodeLabel.of(configuration.targetNodeLabel()))) {
-                targetNodes.set(nodeId);
+            if (targetNodeFilter.test(node)) {
+                targetNodes.set(node);
             }
             return true;
         });

@@ -20,16 +20,15 @@
 package org.neo4j.gds.ml.kge;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,13 +41,17 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
 
 
     @Value.Default
-    default String sourceNodeLabel() {
-        return ElementProjection.PROJECT_ALL;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
+    default NodeFilterSpec sourceNodeFilter() {
+        return NodeFilterSpec.noOp;
     }
 
     @Value.Default
-    default String targetNodeLabel() {
-        return ElementProjection.PROJECT_ALL;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
+    default NodeFilterSpec targetNodeFilter() {
+        return NodeFilterSpec.noOp;
     }
 
     String nodeEmbeddingProperty();
@@ -66,21 +69,21 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
     }
 
     @Configuration.GraphStoreValidationCheck
-    default void validateSourceNodeLabel(
+    default void validateSourceNodeFilter(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementTypeValidator.resolveAndValidate(graphStore, List.of(sourceNodeLabel()), "`sourceNodeLabel`");
+        sourceNodeFilter().validate(graphStore, selectedLabels, "sourceNodeFilter");
     }
 
     @Configuration.GraphStoreValidationCheck
-    default void validateTargetNodeLabel(
+    default void validateTargetNodeFilter(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementTypeValidator.resolveAndValidate(graphStore, List.of(targetNodeLabel()), "`targetNodeLabel`");
+        targetNodeFilter().validate(graphStore, selectedLabels, "targetNodeFilter");
     }
 
     @Value.Check

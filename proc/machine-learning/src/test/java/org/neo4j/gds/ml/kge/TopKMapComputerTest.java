@@ -86,8 +86,11 @@ class TopKMapComputerTest extends BaseTest {
 
         KGEPredictResult result = computer.compute();
 
-        var resultSourceNodes = result.topKMap().stream().map(SimilarityResult::sourceNodeId).collect(Collectors.toList());
-        assertThat(resultSourceNodes).containsExactlyInAnyOrder(0L,1L,2L);
+        var resultSourceNodes = result.topKMap()
+            .stream()
+            .map(SimilarityResult::sourceNodeId)
+            .collect(Collectors.toList());
+        assertThat(resultSourceNodes).containsExactlyInAnyOrder(0L, 1L, 2L);
     }
 
     private BitSet create(long... ids) {

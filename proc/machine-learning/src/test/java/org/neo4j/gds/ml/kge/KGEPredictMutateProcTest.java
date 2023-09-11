@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
@@ -96,8 +97,8 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             .algo("gds.ml.kge.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED_T3")
-            .addParameter("sourceNodeLabel", "M")
-            .addParameter("targetNodeLabel", "N")
+            .addParameter("sourceNodeFilter", "M")
+            .addParameter("targetNodeFilter", "N")
             .addParameter("nodeEmbeddingProperty", "emb")
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
             .addParameter("scoringFunction", "TransE")
@@ -116,4 +117,140 @@ class KGEPredictMutateProcTest extends BaseProcTest {
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
     }
 
+
+    @Test
+    void shouldPredictAndMutateKGEModelsOneSourceId() {
+        var graphStore = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "g")
+            .graphStore();
+
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.ml.kge.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED_T3")
+            .addParameter("sourceNodeFilter", idFunction.of("m0"))
+            .addParameter("targetNodeFilter", "N")
+            .addParameter("nodeEmbeddingProperty", "emb")
+            .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
+            .addParameter("mutateRelationshipProperty", "similarityScore")
+            .addParameter("scoringFunction", "TransE")
+            .addParameter("threshold", 0.0)  //TODO check
+            .addParameter("topK", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "preProcessingMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "postProcessingMillis", 0L,
+            "relationshipsWritten", 2L,
+            "configuration", isA(Map.class)
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+    }
+
+    @Test
+    void shouldPredictAndMutateKGEModelsOneTargetId() {
+        var graphStore = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "g")
+            .graphStore();
+
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.ml.kge.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED_T3")
+            .addParameter("sourceNodeFilter", "N")
+            .addParameter("targetNodeFilter", idFunction.of("n0"))
+            .addParameter("nodeEmbeddingProperty", "emb")
+            .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
+            .addParameter("mutateRelationshipProperty", "similarityScore")
+            .addParameter("scoringFunction", "TransE")
+            .addParameter("threshold", 0.0)  //TODO check
+            .addParameter("topK", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "preProcessingMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "postProcessingMillis", 0L,
+            "relationshipsWritten", 4L,
+            "configuration", isA(Map.class)
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+    }
+
+    @Test
+    void shouldPredictAndMutateKGEModelsSeveralSourceIds() {
+        var graphStore = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "g")
+            .graphStore();
+
+        var sourceNodesIds = List.of("m0", "m1");
+
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.ml.kge.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED_T3")
+            .addParameter("sourceNodeFilter", sourceNodesIds.stream().map(idFunction::of).collect(Collectors.toList()))
+            .addParameter("targetNodeFilter", "N")
+            .addParameter("nodeEmbeddingProperty", "emb")
+            .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
+            .addParameter("mutateRelationshipProperty", "similarityScore")
+            .addParameter("scoringFunction", "TransE")
+            .addParameter("threshold", 0.0)  //TODO check
+            .addParameter("topK", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "preProcessingMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "postProcessingMillis", 0L,
+            "relationshipsWritten", 4L,
+            "configuration", isA(Map.class)
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+    }
+
+    @Test
+    void shouldPredictAndMutateKGEModelsSeveralTargetId() {
+        var targetNodesIds = List.of("n0", "n1");
+
+        var graphStore = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "g")
+            .graphStore();
+
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.ml.kge.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED_T3")
+            .addParameter("sourceNodeFilter", "N")
+            .addParameter("targetNodeFilter", targetNodesIds.stream().map(idFunction::of).collect(Collectors.toList()))
+            .addParameter("nodeEmbeddingProperty", "emb")
+            .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
+            .addParameter("mutateRelationshipProperty", "similarityScore")
+            .addParameter("scoringFunction", "TransE")
+            .addParameter("threshold", 0.0)  //TODO check
+            .addParameter("topK", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "preProcessingMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "postProcessingMillis", 0L,
+            "relationshipsWritten", 8L,
+            "configuration", isA(Map.class)
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "similarityScore"));
+    }
 }
