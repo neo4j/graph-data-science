@@ -38,8 +38,8 @@ public final class DefaultPool {
             30L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
-            Pools.DEFAULT_THREAD_FACTORY,
-            new Pools.CallerBlocksPolicy()
+            ExecutorServiceUtil.DEFAULT_THREAD_FACTORY,
+            new ExecutorServiceUtil.CallerBlocksPolicy()
         );
     }
 

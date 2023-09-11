@@ -33,14 +33,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public final class Pools {
+public final class ExecutorServiceUtil {
 
     private static final String THREAD_NAME_PREFIX = "gds";
 
     public static final ThreadFactory DEFAULT_THREAD_FACTORY = NamedThreadFactory.daemon(THREAD_NAME_PREFIX);
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createSingleThreadPool("algo");
 
-    private Pools() {
+    private ExecutorServiceUtil() {
         throw new UnsupportedOperationException();
     }
 
@@ -87,7 +87,7 @@ public final class Pools {
 
     private static final ForkJoinPool.ForkJoinWorkerThreadFactory FJ_WORKER_THREAD_FACTORY = pool -> {
         var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-        worker.setName(Pools.THREAD_NAME_PREFIX + "-forkjoin-" + worker.getPoolIndex());
+        worker.setName(ExecutorServiceUtil.THREAD_NAME_PREFIX + "-forkjoin-" + worker.getPoolIndex());
         return worker;
     };
 }

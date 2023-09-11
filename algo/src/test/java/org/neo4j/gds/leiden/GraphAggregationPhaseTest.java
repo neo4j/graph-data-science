@@ -22,7 +22,7 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -79,7 +79,7 @@ class GraphAggregationPhaseTest {
             Direction.UNDIRECTED,
             communities,
             1L,
-            Pools.DEFAULT_SINGLE_THREAD_POOL,
+            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
             4,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER

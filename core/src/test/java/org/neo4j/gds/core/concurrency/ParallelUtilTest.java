@@ -358,7 +358,7 @@ final class ParallelUtilTest {
                 AtomicReference<Throwable> thrownException = new AtomicReference<>();
                 AtomicBoolean running = new AtomicBoolean(true);
                 TerminationFlag isRunning = running::get;
-                var thread = Pools.newThread(() -> tasks.run(t ->
+                var thread = ExecutorServiceUtil.newThread(() -> tasks.run(t ->
                     RunWithConcurrency.builder()
                         .concurrency(2)
                         .tasks(t)

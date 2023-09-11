@@ -1,6 +1,6 @@
 org.neo4j.internal.helpers.collection.MapUtil @ Don't do it
-java.lang.Thread.Thread(java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.Pools.newThread to make sure that the new thread is properly named
-java.lang.Thread.Thread(java.lang.ThreadGroup, java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.Pools.newThread to make sure that the new thread is properly named
+java.lang.Thread.Thread(java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.ExecutorServiceUtil.newThread to make sure that the new thread is properly named
+java.lang.Thread.Thread(java.lang.ThreadGroup, java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.ExecutorServiceUtil.newThread to make sure that the new thread is properly named
 org.neo4j.internal.batchimport.staging.ExecutionMonitor.Adapter @ Implement CompatExecutionMonitor and call Neo4jProxy.executionMonitor
 
 org.neo4j.logging.internal.LogService#getUserLogProvider() @ Pass the logService through and use Neo4jProxy at the end.

@@ -22,7 +22,7 @@ package org.neo4j.gds.traversal;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.SourceNodesConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -150,7 +150,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 TOMB,
                 terminationFlag
             ),
-            Pools.DEFAULT_SINGLE_THREAD_POOL
+            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL
         ).whenComplete((__, ___) -> {
             progressTracker.endSubTask("RandomWalk");
         });
