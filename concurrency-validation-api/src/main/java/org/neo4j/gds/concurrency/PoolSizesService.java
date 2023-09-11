@@ -21,7 +21,7 @@ package org.neo4j.gds.concurrency;
 
 public final class PoolSizesService {
 
-    private static PoolSizes instance = new OpenGdsPoolSizes();
+    private static PoolSizes instance = null;
 
     private PoolSizesService() {
     }
