@@ -19,11 +19,29 @@
  */
 package org.neo4j.gds.core.concurrency;
 
+import org.neo4j.gds.concurrency.PoolSizes;
+import org.neo4j.gds.concurrency.PoolSizesService;
+
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public final class ExecutorServices {
 
-    public static final ExecutorService DEFAULT = Pools.createDefaultPool();
+    public static final ExecutorService DEFAULT = createDefaultPool(PoolSizesService.poolSizes());
+
+    private static ExecutorService createDefaultPool(PoolSizes poolSizes) {
+        return new ThreadPoolExecutor(
+            poolSizes.corePoolSize(),
+            poolSizes.maxPoolSize(),
+            30L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
+            Pools.DEFAULT_THREAD_FACTORY,
+            new Pools.CallerBlocksPolicy()
+        );
+    }
 
     private ExecutorServices() {}
 }

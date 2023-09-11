@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.internal.helpers.NamedThreadFactory;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -44,19 +42,6 @@ public final class Pools {
 
     private Pools() {
         throw new UnsupportedOperationException();
-    }
-
-    public static ExecutorService createDefaultPool() {
-        var poolSizes = PoolSizesService.poolSizes();
-        return new ThreadPoolExecutor(
-            poolSizes.corePoolSize(),
-            poolSizes.maxPoolSize(),
-            30L,
-            TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
-            DEFAULT_THREAD_FACTORY,
-            new CallerBlocksPolicy()
-        );
     }
 
     public static ExecutorService createSingleThreadPool(String threadPrefix) {
