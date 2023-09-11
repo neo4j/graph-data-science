@@ -145,7 +145,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.leiden.stream.estimate('leiden', {" +
+        var query = "CALL gds.leiden.stream('leiden', {" +
                     "   includeIntermediateCommunities: true" +
                     "})";
         assertThatNoException().isThrownBy(() -> runQuery(query));

@@ -21,8 +21,10 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -36,16 +38,15 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LeidenMutateProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.leiden.mutate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<LeidenMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LeidenMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().leidenMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.leiden.mutate.estimate", mode = READ)
@@ -65,7 +66,7 @@ public class LeidenMutateProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.leiden.mutate", mode = READ, deprecatedBy = "gds.leiden.mutate")
     @Description(DESCRIPTION)
-    public Stream<MutateResult> mutateBeta(
+    public Stream<LeidenMutateResult> mutateBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

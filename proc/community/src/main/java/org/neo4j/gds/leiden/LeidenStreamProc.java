@@ -21,8 +21,10 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -37,16 +39,16 @@ public class LeidenStreamProc extends BaseProc {
     static final String DESCRIPTION =
         "Leiden is a community detection algorithm, which guarantees that communities are well connected";
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.leiden.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<LeidenStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LeidenStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().leidenStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
 
     @Procedure(value = "gds.leiden.stream.estimate", mode = READ)
@@ -67,7 +69,7 @@ public class LeidenStreamProc extends BaseProc {
     @Internal
     @Procedure(name = "gds.beta.leiden.stream", mode = READ, deprecatedBy = "gds.leiden.stream")
     @Description(DESCRIPTION)
-    public Stream<StreamResult> streamBeta(
+    public Stream<LeidenStreamResult> streamBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
