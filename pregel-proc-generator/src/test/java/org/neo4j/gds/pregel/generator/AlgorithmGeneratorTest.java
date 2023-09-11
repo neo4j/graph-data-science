@@ -61,7 +61,7 @@ class AlgorithmGeneratorTest {
             "    org.neo4j.gds.core.utils.progress.tasks.ProgressTracker progressTracker) {" + NL +
             "  super(progressTracker);" + NL +
             "  var computation = new a.b.C();" + NL +
-            "  this.pregelJob = org.neo4j.gds.beta.pregel.Pregel.create(graph, configuration, computation, org.neo4j.gds.core.concurrency.ExecutorServices.DEFAULT, progressTracker);" + NL +
+            "  this.pregelJob = org.neo4j.gds.beta.pregel.Pregel.create(graph, configuration, computation, org.neo4j.gds.core.concurrency.DefaultPool.INSTANCE, progressTracker);" + NL +
             "}" + NL
         );
     }
