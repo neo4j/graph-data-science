@@ -32,21 +32,20 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TopKMapComputerTest extends BaseTest {
 
 
     private static final String DB_CYPHER =
         "CREATE" +
-            "  (a:N {emb: [0.1, 0.2, 0.3]})" +
-            ", (b:N {emb: [0.1, 0.2, 0.3]})" +
-            ", (c:N {emb: [0.1, 0.2, 0.3]})" +
-            ", (d:M {emb: [0.1, 0.2, 0.3]})" +
-            ", (e:M {emb: [0.1, 0.2, 0.3]})" +
-            ", (f:M {emb: [0.1, 0.2, 0.3]})" +
+            "  (a:N {emb: [-3.0, 3.0]})" +
+            ", (b:N {emb: [-4.0, 4.0]})" +
+            ", (c:N {emb: [-5.0, 5.0]})" +
+            ", (d:M {emb: [0.1, 1.0]})" +
+            ", (e:M {emb: [0.2, 2.0]})" +
+            ", (f:M {emb: [0.3, 3.0]})" +
             ", (a)-[:REL {prop: 1.0}]->(b)" +
             ", (b)-[:REL {prop: 1.0}]->(a)" +
             ", (a)-[:REL {prop: 1.0}]->(c)" +
@@ -60,7 +59,7 @@ class TopKMapComputerTest extends BaseTest {
     }
 
     @Test
-    void shouldComputeTopKMap() {
+    void shouldComputeTopKMapTransE() {
         Graph graph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
             .build()
@@ -76,7 +75,46 @@ class TopKMapComputerTest extends BaseTest {
             sourceNodes,
             targetNodes,
             "emb",
-            List.of(0.1, 0.2, 0.3),
+            List.of(3.0, -0.5),
+            "TransE",
+            (a, b) -> a != b,
+            topK,
+            concurrency,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        KGEPredictResult result = computer.compute();
+        assertTrue(assertTopKApproximatelyEquals(
+                result.topKMap().stream().toList(),
+                List.of(
+                    new SimilarityResult(0L, 4L, 0.538),
+                    new SimilarityResult(1L, 5L, 1.393),
+                    new SimilarityResult(2L, 5L, 2.746)
+                ),
+                0.001
+            )
+        );
+
+    }
+
+    @Test
+    void shouldComputeTopKMapDistMult() {
+        Graph graph = new StoreLoaderBuilder().databaseService(db)
+            .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
+            .build()
+            .graph();
+
+        var sourceNodes = create(0, 1, 2);
+        var targetNodes = create(3, 4, 5);
+        var topK = 1;
+        var concurrency = 1;
+
+        var computer = new TopKMapComputer(
+            graph,
+            sourceNodes,
+            targetNodes,
+            "emb",
+            List.of(0.5, -0.5),
             "DistMult",
             (a, b) -> a != b,
             topK,
@@ -86,11 +124,17 @@ class TopKMapComputerTest extends BaseTest {
 
         KGEPredictResult result = computer.compute();
 
-        var resultSourceNodes = result.topKMap()
-            .stream()
-            .map(SimilarityResult::sourceNodeId)
-            .collect(Collectors.toList());
-        assertThat(resultSourceNodes).containsExactlyInAnyOrder(0L, 1L, 2L);
+        assertTrue(assertTopKApproximatelyEquals(
+                result.topKMap().stream().toList(),
+                List.of(
+                    new SimilarityResult(0L, 3L, -1.65),
+                    new SimilarityResult(1L, 3L, -2.4),
+                    new SimilarityResult(2L, 3L, -2.75)
+                ),
+                0.01
+            )
+        );
+
     }
 
     private BitSet create(long... ids) {
@@ -103,5 +147,25 @@ class TopKMapComputerTest extends BaseTest {
         }
 
         return bitSet;
+    }
+
+    private boolean assertTopKApproximatelyEquals(
+        List<SimilarityResult> actual,
+        List<SimilarityResult> expected,
+        double epsilon
+    ) {
+        if (actual.size() != expected.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < actual.size(); i++) {
+            var actualSimilarity = actual.get(i);
+            var expectedSimilarity = expected.get(i);
+            if (!actualSimilarity.approximatelyEquals(expectedSimilarity, epsilon)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
