@@ -70,7 +70,7 @@ public final class ParallelUtil {
      * The concurrency value is assumed to already be validated towards the edition limitation.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
-        ForkJoinPool pool = Pools.createForkJoinPool(concurrency);
+        ForkJoinPool pool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
         } catch (InterruptedException e) {

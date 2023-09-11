@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -87,7 +87,7 @@ class GraphWithSelfLoopTest {
             Direction.UNDIRECTED,
             communities,
             2L,
-            Pools.DEFAULT_SINGLE_THREAD_POOL,
+            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
             4,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -122,7 +122,7 @@ class GraphWithSelfLoopTest {
             Direction.UNDIRECTED,
             refinedCommunities,
             2,
-            Pools.DEFAULT_SINGLE_THREAD_POOL,
+            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
             1,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
