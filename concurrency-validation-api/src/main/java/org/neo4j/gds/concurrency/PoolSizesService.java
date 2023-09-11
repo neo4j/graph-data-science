@@ -23,7 +23,7 @@ import java.util.Objects;
 
 public final class PoolSizesService {
 
-    private static PoolSizes instance = null;
+    private static PoolSizes instance = new OpenGdsPoolSizes();
 
     private PoolSizesService() {
     }
