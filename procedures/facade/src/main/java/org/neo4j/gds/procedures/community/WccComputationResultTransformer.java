@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
-import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -35,13 +35,19 @@ final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
 
-    static Stream<WccStreamResult> toStreamResult(StreamComputationResult<DisjointSetStruct> computationResult, WccBaseConfig configuration) {
+    static Stream<WccStreamResult> toStreamResult(
+        StreamComputationResult<DisjointSetStruct> computationResult,
+        WccStreamConfig configuration
+    ) {
         return computationResult.result().map(wccResult -> {
             var graph = computationResult.graph();
 
-            var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                configuration,
-                wccResult.asNodeProperties()
+            var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+                false,
+                configuration.consecutiveIds(),
+                wccResult.asNodeProperties(),
+                configuration.minCommunitySize(),
+                configuration.concurrency()
             );
 
             return LongStream

@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
@@ -39,15 +40,20 @@ final class LabelPropagationComputationResultTransformer {
 
     static Stream<LabelPropagationStreamResult> toStreamResult(
         StreamComputationResult<LabelPropagationResult> computationResult,
-        LabelPropagationBaseConfig configuration
+        LabelPropagationStreamConfig configuration
     ) {
         return computationResult.result().map(result -> {
             var graph = computationResult.graph();
 
-            var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                configuration,
-                LongNodePropertyValuesAdapter.create(result.labels())
+
+            var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+                false,
+                configuration.consecutiveIds(),
+                LongNodePropertyValuesAdapter.create(result.labels()),
+                configuration.minCommunitySize(),
+                configuration.concurrency()
             );
+
 
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())

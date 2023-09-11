@@ -29,11 +29,11 @@ import org.neo4j.values.storable.Value;
 
 import java.util.Optional;
 
-final class CommunityResultCompanion {
+public final class CommunityResultCompanion {
 
     private CommunityResultCompanion() {}
 
-    static NodePropertyValues nodePropertyValues(
+    public static NodePropertyValues nodePropertyValues(
         boolean incremental,
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties
@@ -45,7 +45,7 @@ final class CommunityResultCompanion {
         return nodeProperties;
     }
 
-    static NodePropertyValues nodePropertyValues(
+    public static NodePropertyValues nodePropertyValues(
         boolean incremental,
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties,

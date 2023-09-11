@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
@@ -35,13 +35,19 @@ import java.util.stream.Stream;
 final class LeidenComputationResultTransformer {
     private LeidenComputationResultTransformer() {}
 
-    static Stream<LeidenStreamResult> toStreamResult(StreamComputationResult<LeidenResult> computationResult, LeidenBaseConfig configuration) {
+    static Stream<LeidenStreamResult> toStreamResult(
+        StreamComputationResult<LeidenResult> computationResult,
+        LeidenStreamConfig configuration
+    ) {
         return computationResult.result().map(leidenResult -> {
             var graph = computationResult.graph();
 
-            var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                configuration,
-                LongNodePropertyValuesAdapter.create(leidenResult.dendrogramManager().getCurrent())
+            var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+                false,
+                configuration.consecutiveIds(),
+                LongNodePropertyValuesAdapter.create(leidenResult.dendrogramManager().getCurrent()),
+                configuration.minCommunitySize(),
+                configuration.concurrency()
             );
             var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
 
