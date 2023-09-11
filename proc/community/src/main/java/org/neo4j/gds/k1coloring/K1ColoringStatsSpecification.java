@@ -37,7 +37,7 @@ import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING
              aliases = {"gds.beta.k1coloring.stats"},
              description = K1_COLORING_DESCRIPTION,
              executionMode = STATS)
-public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>, K1ColoringFactory<K1ColoringStatsConfig>> {
+public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>, K1ColoringAlgorithmFactory<K1ColoringStatsConfig>> {
 
     @Override
     public String name() {
@@ -45,8 +45,8 @@ public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringStatsConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override

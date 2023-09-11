@@ -35,8 +35,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.ImmutableK1ColoringStreamConfig;
-import org.neo4j.gds.k1coloring.K1ColoringConfig;
-import org.neo4j.gds.k1coloring.K1ColoringFactory;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
@@ -121,7 +121,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             MODULARITY_OPTIMIZATION_TASK_NAME,
             Tasks.task(
                 "initialization",
-                K1ColoringFactory.k1ColoringProgressTask(graph, createModularityConfig())
+                K1ColoringAlgorithmFactory.k1ColoringProgressTask(graph, createModularityConfig())
             ),
             Tasks.iterativeDynamic(
                 "compute modularity",
@@ -131,7 +131,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
         );
     }
 
-    private static K1ColoringConfig createModularityConfig() {
+    private static K1ColoringBaseConfig createModularityConfig() {
         return ImmutableK1ColoringStreamConfig
             .builder()
             .maxIterations(K1COLORING_MAX_ITERATIONS)

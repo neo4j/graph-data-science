@@ -44,7 +44,7 @@ import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING
              aliases = {"gds.beta.k1coloring.write"},
              description = K1_COLORING_DESCRIPTION,
              executionMode = WRITE_NODE_PROPERTY)
-public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>, K1ColoringFactory<K1ColoringWriteConfig>> {
+public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>, K1ColoringAlgorithmFactory<K1ColoringWriteConfig>> {
 
     @Override
     public String name() {
@@ -52,8 +52,8 @@ public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, K
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringWriteConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override

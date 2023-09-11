@@ -32,14 +32,26 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +62,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class K1ColoringStreamProcTest extends BaseProcTest {
 
@@ -163,9 +177,38 @@ class K1ColoringStreamProcTest extends BaseProcTest {
     void shouldRegisterTaskWithCorrectJobId() {
         var taskStore = new InvocationCountingTaskStore();
 
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringStreamProc.class, proc -> {
-            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+
+
+        TestProcedureRunner.applyOnProcedure(db, K1ColoringStreamProc.class, proc -> {
+
+            TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+            proc.taskRegistryFactory = taskRegistryFactory;
+
+            var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
+                new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                    taskRegistryFactory,
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    memoryUsageValidator, logMock
+                ));
+            proc.facade = new GraphDataScience(
+                null,
+                null,
+                new CommunityProcedureFacade(
+                    algorithmsStreamBusinessFacade,
+                    null,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
+            );
             var someJobId = new JobId();
             Map<String, Object> configMap = Map.of("jobId", someJobId);
             proc.stream(K1COLORING_GRAPH, configMap);
@@ -191,7 +234,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             .streamMode()
             .yields();
 
-        var rowCount=runQueryWithRowConsumer(query, resultRow -> {});
+        var rowCount = runQueryWithRowConsumer(query, resultRow -> {});
 
         assertThat(rowCount).isEqualTo(0L);
 

@@ -25,6 +25,8 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
@@ -214,6 +216,23 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         DatabaseId databaseId
     ) {
         var result = this.communityAlgorithmsFacade.localClusteringCoefficient(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<K1ColoringResult> k1coloring(
+        String graphName,
+        K1ColoringStreamConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.k1Coloring(
             graphName,
             config,
             user,

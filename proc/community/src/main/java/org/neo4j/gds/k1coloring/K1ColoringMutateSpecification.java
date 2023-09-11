@@ -43,7 +43,7 @@ import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING
              aliases = { "gds.beta.k1coloring.mutate"},
              description = K1_COLORING_DESCRIPTION,
              executionMode = MUTATE_NODE_PROPERTY)
-public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>, K1ColoringFactory<K1ColoringMutateConfig>> {
+public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>, K1ColoringAlgorithmFactory<K1ColoringMutateConfig>> {
 
     @Override
     public String name() {
@@ -51,8 +51,8 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override

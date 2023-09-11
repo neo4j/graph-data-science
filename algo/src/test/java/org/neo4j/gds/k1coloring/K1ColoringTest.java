@@ -207,7 +207,7 @@ class K1ColoringTest {
             .maxIterations(10)
             .build();
 
-        var progressTask = new K1ColoringFactory<>().progressTask(graph, config);
+        var progressTask = new K1ColoringAlgorithmFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
@@ -240,7 +240,7 @@ class K1ColoringTest {
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         K1ColoringStreamConfig config = ImmutableK1ColoringStreamConfig.builder().build();
-        final MemoryRange actual = new K1ColoringFactory<>()
+        final MemoryRange actual = new K1ColoringAlgorithmFactory<>()
             .memoryEstimation(config)
             .estimate(dimensions, concurrency)
             .memoryUsage();

@@ -34,7 +34,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
-public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorithmFactory<K1Coloring, T> {
+public class K1ColoringAlgorithmFactory<T extends K1ColoringBaseConfig> extends GraphAlgorithmFactory<K1Coloring, T> {
 
     private static final String K1_COLORING_TASK_NAME = "K1Coloring";
 

@@ -29,7 +29,7 @@ final class K1ColoringSpecificationHelper {
 
     private K1ColoringSpecificationHelper() {}
 
-    static <PROC_RESULT, CONFIG extends K1ColoringConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+    static <PROC_RESULT, CONFIG extends K1ColoringBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         K1ColoringResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<K1Coloring, K1ColoringResult, CONFIG> computeResult,
         ProcedureReturnColumns returnColumns

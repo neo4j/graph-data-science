@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -41,7 +42,7 @@ import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING
              aliases = {"gds.beta.k1coloring.stream"},
              description = K1_COLORING_DESCRIPTION,
              executionMode = STREAM)
-public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>, K1ColoringFactory<K1ColoringStreamConfig>> {
+public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>, K1ColoringAlgorithmFactory<K1ColoringStreamConfig>> {
 
     @Override
     public String name() {
@@ -49,8 +50,8 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override

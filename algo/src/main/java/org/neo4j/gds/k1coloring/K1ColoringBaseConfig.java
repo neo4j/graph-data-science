@@ -25,7 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
-public interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
+public interface K1ColoringBaseConfig extends AlgoBaseConfig, IterationsConfig {
 
     @Override
     @Value.Default

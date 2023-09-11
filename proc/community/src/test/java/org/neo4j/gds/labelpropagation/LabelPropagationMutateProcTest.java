@@ -633,6 +633,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         @Test
         void testGraphMutationFiltered() {
+            
             String query = GdsCypher
                 .call(TEST_GRAPH_NAME)
                 .algo("labelPropagation")

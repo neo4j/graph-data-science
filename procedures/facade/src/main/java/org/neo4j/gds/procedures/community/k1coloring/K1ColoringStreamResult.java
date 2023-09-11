@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.k1coloring;
+package org.neo4j.gds.procedures.community.k1coloring;
 
 @SuppressWarnings("unused")
 public class K1ColoringStreamResult {
     public final long nodeId;
     public final long color;
 
-    K1ColoringStreamResult(long nodeId, long color) {
+    public K1ColoringStreamResult(long nodeId, long color) {
         this.nodeId = nodeId;
         this.color = color;
     }

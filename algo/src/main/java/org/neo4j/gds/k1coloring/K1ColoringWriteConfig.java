@@ -28,7 +28,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface K1ColoringWriteConfig extends K1ColoringConfig, WritePropertyConfig, CommunitySizeConfig {
+public interface K1ColoringWriteConfig extends K1ColoringBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
     static K1ColoringWriteConfig of(CypherMapWrapper config) {
         return new K1ColoringWriteConfigImpl(config);

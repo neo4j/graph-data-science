@@ -27,12 +27,12 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -40,7 +40,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1Coloring;
-import org.neo4j.gds.k1coloring.K1ColoringFactory;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 
 import java.util.Collection;
@@ -180,7 +180,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .batchSize((int) minBatchSize)
             .build();
 
-        K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, progressTracker);
+        K1Coloring coloring = new K1ColoringAlgorithmFactory<>().build(graph, k1Config, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
 
         var k1ColoringResult=coloring.compute();
