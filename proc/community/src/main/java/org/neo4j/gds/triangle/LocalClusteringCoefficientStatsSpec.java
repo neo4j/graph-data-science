@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 
 import java.util.stream.Stream;
 
@@ -51,7 +52,7 @@ public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalC
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var builder = new LocalClusteringCoefficientStatsResult.Builder();
+            var builder = LocalClusteringCoefficientStatsResult.statsBuilder();
             computationResult.result()
                 .ifPresent(result ->
                     builder

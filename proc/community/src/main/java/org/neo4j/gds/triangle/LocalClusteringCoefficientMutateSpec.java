@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -72,7 +73,7 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new LocalClusteringCoefficientMutateResult.Builder();
+        var builder = LocalClusteringCoefficientMutateResult.builder();
 
         computationResult.result()
             .ifPresent(result -> builder.withAverageClusteringCoefficient(result.averageClusteringCoefficient()));

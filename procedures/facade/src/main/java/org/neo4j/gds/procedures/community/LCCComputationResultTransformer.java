@@ -19,8 +19,12 @@
  */
 package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
 import java.util.stream.LongStream;
@@ -40,5 +44,20 @@ final class LCCComputationResultTransformer {
                     localClusteringCoefficients.get(i)
                 ));
         }).orElseGet(Stream::empty);
+    }
+
+    static LocalClusteringCoefficientMutateResult toMutateResult(
+        NodePropertyMutateResult<LocalClusteringCoefficientSpecificFields> computationResult,
+        LocalClusteringCoefficientMutateConfig configuration
+    ) {
+        return new LocalClusteringCoefficientMutateResult(
+            computationResult.algorithmSpecificFields().averageClusteringCoefficient(),
+            computationResult.algorithmSpecificFields().nodeCount(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.mutateMillis(),
+            computationResult.nodePropertiesWritten(),
+            configuration.toMap()
+        );
     }
 }

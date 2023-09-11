@@ -23,6 +23,7 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

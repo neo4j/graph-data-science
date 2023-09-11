@@ -24,6 +24,7 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

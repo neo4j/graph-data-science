@@ -50,12 +50,14 @@ import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
@@ -412,6 +414,24 @@ public class CommunityProcedureFacade {
 
         return LCCComputationResultTransformer.toStreamResult(computationResult);
     }
+
+
+    public Stream<LocalClusteringCoefficientMutateResult> mutateLocalClusteringCoefficient(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createMutateConfig(configuration, LocalClusteringCoefficientMutateConfig::of);
+
+        var computationResult = algorithmsMutateBusinessFacade.localClusteringCoefficient(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId
+        );
+
+        return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
+    }
+
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,

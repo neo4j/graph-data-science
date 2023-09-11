@@ -17,56 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.procedures.community.triangle;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class LocalClusteringCoefficientMutateResult extends LocalClusteringCoefficientStatsResult {
+public class LocalClusteringCoefficientStatsResult extends StandardStatsResult {
 
-    public long mutateMillis;
-    public long nodePropertiesWritten;
+    public final double averageClusteringCoefficient;
+    public final long nodeCount;
 
-    LocalClusteringCoefficientMutateResult(
+    LocalClusteringCoefficientStatsResult(
         double averageClusteringCoefficient,
         long nodeCount,
         long preProcessingMillis,
         long computeMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            averageClusteringCoefficient,
-            nodeCount,
-            preProcessingMillis,
-            computeMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+        // post-processing is instant for TC
+        super(preProcessingMillis, computeMillis, 0L, configuration);
+        this.averageClusteringCoefficient = averageClusteringCoefficient;
+        this.nodeCount = nodeCount;
     }
 
-    static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientMutateResult> {
+    public static Builder statsBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientStatsResult> {
 
         double averageClusteringCoefficient = 0;
 
-        Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
+        public Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
             this.averageClusteringCoefficient = averageClusteringCoefficient;
             return this;
         }
 
         @Override
-        public LocalClusteringCoefficientMutateResult build() {
-            return new LocalClusteringCoefficientMutateResult(
+        public LocalClusteringCoefficientStatsResult build() {
+            return new LocalClusteringCoefficientStatsResult(
                 averageClusteringCoefficient,
                 nodeCount,
                 preProcessingMillis,
                 computeMillis,
-                mutateMillis,
-                nodePropertiesWritten,
                 config.toMap()
             );
         }

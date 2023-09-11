@@ -26,6 +26,7 @@ import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
+import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
@@ -49,6 +50,8 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
@@ -405,6 +408,34 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         );
     }
 
+    public NodePropertyMutateResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
+        String graphName,
+        LocalClusteringCoefficientMutateConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        NodePropertyValuesMapper<LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig> mapper = ((result, config) ->
+            NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients()));
+
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            mapper,
+            (result) -> new LocalClusteringCoefficientSpecificFields(
+                result.localClusteringCoefficients().size(),
+                result.averageClusteringCoefficient()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> LocalClusteringCoefficientSpecificFields.EMPTY
+        );
+    }
 
     <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,
@@ -486,7 +517,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         }
         return null;
     }
-
 
     private static final class AlgorithmResultWithTiming<T> {
         final T algorithmResult;
