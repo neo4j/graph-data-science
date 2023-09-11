@@ -22,10 +22,14 @@ package org.neo4j.gds.compat._58;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.procedure.Mode;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -33,6 +37,40 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
     @Override
     public BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return new BoltTransactionRunnerImpl();
+    }
+
+    @Override
+    public ProcedureSignature procedureSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        List<FieldSignature> outputSignature,
+        Mode mode,
+        boolean admin,
+        String deprecated,
+        String description,
+        String warning,
+        boolean eager,
+        boolean caseInsensitive,
+        boolean systemProcedure,
+        boolean internal,
+        boolean allowExpiredCredentials,
+        boolean threadSafe
+    ) {
+        return new ProcedureSignature(
+            name,
+            inputSignature,
+            outputSignature,
+            mode,
+            admin,
+            deprecated,
+            description,
+            warning,
+            eager,
+            caseInsensitive,
+            systemProcedure,
+            internal,
+            allowExpiredCredentials
+        );
     }
 
     @Override

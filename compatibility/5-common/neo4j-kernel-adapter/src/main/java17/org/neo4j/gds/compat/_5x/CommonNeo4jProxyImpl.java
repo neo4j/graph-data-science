@@ -89,7 +89,6 @@ import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
-import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -130,7 +129,6 @@ import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
@@ -585,41 +583,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public Long pageCacheMemoryValue(String value) {
         return SettingValueParsers.BYTES.parse(value);
-    }
-
-    @Override
-    public ProcedureSignature procedureSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        List<FieldSignature> outputSignature,
-        Mode mode,
-        boolean admin,
-        String deprecated,
-        String description,
-        String warning,
-        boolean eager,
-        boolean caseInsensitive,
-        boolean systemProcedure,
-        boolean internal,
-        boolean allowExpiredCredentials,
-        boolean threadSafe
-    ) {
-        return new ProcedureSignature(
-            name,
-            inputSignature,
-            outputSignature,
-            mode,
-            admin,
-            deprecated,
-            description,
-            warning,
-            eager,
-            caseInsensitive,
-            systemProcedure,
-            internal,
-            allowExpiredCredentials,
-            threadSafe
-        );
     }
 
     @Override
