@@ -85,7 +85,8 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
 
     @Value.Check
     default void validateScoringFunction() {
-        if (!scoringFunction().equalsIgnoreCase("transE") && !scoringFunction().equalsIgnoreCase("distMult")) {
+        if (!(scoringFunction().equalsIgnoreCase("transE")
+            || scoringFunction().equalsIgnoreCase("distMult"))) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Invalid scoring function %s, it needs to be either TransE or DistMult.", scoringFunction()
             ));

@@ -19,18 +19,10 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import java.util.Locale;
-
 public class LinkScorerFactory {
 
-    private enum ScoreFunction {
-        TRANSE,
-        DISTMULT
-    }
-
-
-    public static LinkScorer create(String scoreFunction) {
-        switch (ScoreFunction.valueOf(scoreFunction.toUpperCase(Locale.ROOT))) {
+    public static LinkScorer create(ScoreFunction scoreFunction) {
+        switch (scoreFunction) {
             case TRANSE:
                 return new EuclideanDistanceLinkScorer();
             case DISTMULT:

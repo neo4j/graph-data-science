@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
@@ -45,15 +46,24 @@ public class KGEPredictMutateConfigTest {
 
     @Test
     void scoringFunctionMustMatch() {
-        var config = KGEPredictMutateConfigImpl.builder()
+        var wrongConfig = KGEPredictMutateConfigImpl.builder()
             .nodeEmbeddingProperty("embedding")
             .relationshipTypeEmbedding(List.of(0.3, 0.3))
             .scoringFunction("ComplexE")
             .mutateRelationshipType("PREDICTED_REL")
             .topK(3);
 
-        assertThatThrownBy(config::build)
+        assertThatThrownBy(wrongConfig::build)
             .hasMessage("Invalid scoring function ComplexE, it needs to be either TransE or DistMult.");
+
+        var config = KGEPredictMutateConfigImpl.builder()
+            .nodeEmbeddingProperty("embedding")
+            .relationshipTypeEmbedding(List.of(0.3, 0.3))
+            .scoringFunction("traNsE")
+            .mutateRelationshipType("PREDICTED_REL")
+            .topK(3);
+
+        assertThatNoException().isThrownBy(config::build);
     }
 
 

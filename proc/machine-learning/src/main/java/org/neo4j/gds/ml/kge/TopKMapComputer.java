@@ -31,6 +31,7 @@ import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.LongStream;
 
 public class TopKMapComputer extends Algorithm<KGEPredictResult> {
@@ -45,10 +46,12 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private int concurrency;
 
     private int topK;
-    private String scoreFunction;
+    private ScoreFunction scoreFunction;
 
     // TODO abstract / merge with LinkFilter?
     private LongLongPredicate isCandidateLink;
+
+    private boolean higherIsBetter;
 
     public TopKMapComputer(
         Graph graph,
@@ -71,14 +74,19 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.relationshipTypeEmbedding = relationshipTypeEmbedding;
         this.concurrency = concurrency;
         this.topK = topK;
-        this.scoreFunction = scoreFunction;
+        ScoreFunction scoreFunctionEnum = ScoreFunction.valueOf(scoreFunction.toUpperCase(Locale.ROOT));
+        this.scoreFunction = scoreFunctionEnum;
         this.isCandidateLink = isCandidateLink;
+        this.higherIsBetter = switch (scoreFunctionEnum) {
+            case TRANSE -> false;
+            case DISTMULT -> true;
+        };
     }
 
     public KGEPredictResult compute() {
         progressTracker.beginSubTask(estimateWorkload());
 
-        TopKMap topKMap = new TopKMap(sourceNodes.capacity(), sourceNodes, Math.abs(topK), true);
+        TopKMap topKMap = new TopKMap(sourceNodes.capacity(), sourceNodes, Math.abs(topK), higherIsBetter);
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 

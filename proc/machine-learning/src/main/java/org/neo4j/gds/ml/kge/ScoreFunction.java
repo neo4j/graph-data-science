@@ -19,19 +19,7 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
-import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
-
-public class LinkScorerFactoryTest {
-
-    @Test
-    void linkScorerFactoryCreateCorrectScorer() {
-        var transe = LinkScorerFactory.create(TRANSE);
-        assertThat(transe).isInstanceOf(EuclideanDistanceLinkScorer.class);
-        var distmult = LinkScorerFactory.create(DISTMULT);
-        assertThat(distmult).isInstanceOf(DistMultLinkScorer.class);
-    }
+public enum ScoreFunction {
+    TRANSE,
+    DISTMULT
 }
