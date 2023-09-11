@@ -22,9 +22,9 @@ package org.neo4j.gds.k1coloring;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -77,8 +77,6 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
     private HugeLongArray colors;
     private long ranIterations;
     private boolean didConverge;
-
-    private BitSet usedColors;
 
     public K1Coloring(
         Graph graph,

@@ -35,18 +35,15 @@ public interface K1ColoringResult {
         boolean didConverge();
 
         default BitSet usedColors(){
-
                 var colors=colors();
                 var nodeCount=colors.size();
                 var usedColors = new BitSet(nodeCount);
 
                 for (long u=0;u<nodeCount;++u) {
-
                         usedColors.set(colors.get(u));
                 }
 
                 return usedColors;
-
         }
 
         static K1ColoringResult of(
