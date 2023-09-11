@@ -22,13 +22,17 @@ package org.neo4j.gds.core.concurrency;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.concurrency.PoolSizesService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class PoolSizesServiceTest {
 
     @Test
-    void throwOnAccessBeforeProperInitialisation() {
-        assertThatThrownBy(PoolSizesService::poolSizes).isInstanceOf(NullPointerException.class);
+    void openGdsPoolSizesByDefault() {
+        var poolSizes = PoolSizesService.poolSizes();
+
+        assertThat(poolSizes.corePoolSize()).isEqualTo(4);
+        assertThat(poolSizes.maxPoolSize()).isEqualTo(4);
     }
 
 }
