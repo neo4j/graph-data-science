@@ -20,19 +20,15 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.concurrency.PoolSizesService;
 
-import java.util.concurrent.ThreadPoolExecutor;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class PoolsTest {
+class PoolSizesServiceTest {
 
     @Test
-    void shouldGetLimitedPool() {
-        ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
-
-        assertEquals(4, defaultPool.getCorePoolSize());
-        assertEquals(4, defaultPool.getMaximumPoolSize());
+    void throwOnAccessBeforeProperInitialisation() {
+        assertThatThrownBy(PoolSizesService::poolSizes).isInstanceOf(NullPointerException.class);
     }
 
 }
