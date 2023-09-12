@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.kge;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
@@ -32,7 +33,8 @@ public enum ScoreFunction {
 
     private static final List<String> VALUES = Arrays
         .stream(ScoreFunction.values())
-        .map(ScoreFunction::name).toList();
+        .map(ScoreFunction::name)
+        .collect(Collectors.toList());
 
     public static ScoreFunction parse(Object input) {
         if (input instanceof String) {

@@ -32,6 +32,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
@@ -87,7 +88,7 @@ class TopKMapComputerTest extends BaseTest {
 
         KGEPredictResult result = computer.compute();
         assertTrue(assertTopKApproximatelyEquals(
-                result.topKMap().stream().toList(),
+                result.topKMap().stream().collect(Collectors.toList()),
                 List.of(
                     new SimilarityResult(0L, 4L, 0.538),
                     new SimilarityResult(1L, 5L, 1.393),
@@ -129,7 +130,7 @@ class TopKMapComputerTest extends BaseTest {
         result.topKMap().stream().forEach(System.out::println);
 
         assertTrue(assertTopKApproximatelyEquals(
-                result.topKMap().stream().toList(),
+                result.topKMap().stream().collect(Collectors.toList()),
                 List.of(
                     new SimilarityResult(0L, 3L, -1.65),
                     new SimilarityResult(1L, 3L, -2.2),
