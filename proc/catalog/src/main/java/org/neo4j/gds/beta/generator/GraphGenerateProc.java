@@ -48,7 +48,6 @@ import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPE
 import static org.neo4j.procedure.Mode.READ;
 
 public final class GraphGenerateProc extends BaseProc {
-
     private static final String DESCRIPTION = "Computes a random graph, which will be stored in the graph catalog.";
 
     @Internal
@@ -76,7 +75,7 @@ public final class GraphGenerateProc extends BaseProc {
         @Name(value = "averageDegree") long averageDegree,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(username(), graphName);
+        validateGraphNameAndEnsureItDoesNotExist(username(), graphName);
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphMemoryUsageProc extends CatalogProc {
+public class GraphMemoryUsageProc {
     @Context
     public GraphDataScience facade;
 

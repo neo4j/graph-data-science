@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
@@ -41,8 +42,7 @@ import static org.neo4j.gds.catalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
 import static org.neo4j.gds.catalog.SamplerCompanion.RWR_PROVIDER;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphSampleProc extends CatalogProc {
-
+public class GraphSampleProc extends BaseProc {
     private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
     private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
 
@@ -67,7 +67,7 @@ public class GraphSampleProc extends CatalogProc {
     ) {
 
         Preconditions.check();
-        validateGraphName(username(), graphName);
+        validateGraphNameAndEnsureItDoesNotExist(username(), graphName);
         return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,
@@ -87,7 +87,7 @@ public class GraphSampleProc extends CatalogProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         Preconditions.check();
-        validateGraphName(username(), graphName);
+        validateGraphNameAndEnsureItDoesNotExist(username(), graphName);
         return SamplerOperator.performSampling(
             fromGraphName,
             graphName, configuration,

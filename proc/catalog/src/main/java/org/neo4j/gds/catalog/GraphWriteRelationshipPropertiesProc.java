@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.WRITE_RELATIONSHIP_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class GraphWriteRelationshipPropertiesProc extends CatalogProc {
+public class GraphWriteRelationshipPropertiesProc {
     @Context
     public GraphDataScience facade;
 

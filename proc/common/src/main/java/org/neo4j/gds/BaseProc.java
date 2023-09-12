@@ -20,21 +20,17 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
-import org.neo4j.gds.executor.MemoryUsageValidator;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -130,8 +126,8 @@ public abstract class BaseProc {
         cypherConfig.requireOnlyKeysFrom(allowedKeys);
     }
 
-    protected final void validateGraphName(String username, String graphName) {
-        CypherMapAccess.failOnBlank("graphName", graphName);
+    protected final void validateGraphNameAndEnsureItDoesNotExist(String username, String graphName) {
+        validateGraphName(graphName);
         if (GraphStoreCatalog.exists(username, databaseId(), graphName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
@@ -140,20 +136,8 @@ public abstract class BaseProc {
         }
     }
 
-    protected GraphLoaderContext graphLoaderContext() {
-        return ImmutableGraphLoaderContext.builder()
-            .databaseId(databaseId())
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-            .transactionContext(transactionContext())
-            .log(log)
-            .taskRegistryFactory(taskRegistryFactory)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(new TransactionTerminationMonitor(transaction)))
-            .build();
-    }
-
-    public MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(databaseService));
+    protected void validateGraphName(String graphName) {
+        CypherMapAccess.failOnBlank("graphName", graphName);
     }
 
     public ExecutionContext executionContext() {

@@ -22,7 +22,7 @@ package org.neo4j.gds.cypher;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.common.Edition;
 import org.neo4j.dbms.api.DatabaseManagementException;
-import org.neo4j.gds.catalog.CatalogProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.Preconditions;
@@ -38,8 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphCreateEphemeralDatabaseProc extends CatalogProc {
-
+public class GraphCreateEphemeralDatabaseProc extends BaseProc {
     private static final String DESCRIPTION = "Creates an ephemeral database from a GDS graph.";
 
     @Procedure(name = "gds.ephemeral.database.create", mode = READ)
