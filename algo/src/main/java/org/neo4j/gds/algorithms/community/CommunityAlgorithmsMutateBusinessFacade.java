@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
@@ -39,6 +40,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
@@ -315,6 +317,40 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             () -> new TriangleCountSpecificFields(0, 0)
         );
     }
+
+    public NodePropertyMutateResult<K1ColoringSpecificFields> k1coloring(
+        String graphName,
+        K1ColoringMutateConfig config,
+        User user,
+        DatabaseId databaseId,
+        boolean computeUsedColors
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            algorithmResult,
+            config,
+            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.colors()),
+            (result) -> {
+                long usedColors = (computeUsedColors) ? result.usedColors().cardinality() : 0;
+
+                return new K1ColoringSpecificFields(
+                    result.colors().size(),
+                    usedColors,
+                    result.ranIterations(),
+                    result.didConverge()
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> K1ColoringSpecificFields.EMPTY
+        );
+    }
+
 
     /*
         By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields

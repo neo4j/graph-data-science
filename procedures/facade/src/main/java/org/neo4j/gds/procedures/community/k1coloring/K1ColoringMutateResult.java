@@ -17,9 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.k1coloring;
-
-import org.neo4j.gds.api.ProcedureReturnColumns;
+package org.neo4j.gds.procedures.community.k1coloring;
 
 import java.util.Map;
 
@@ -48,7 +46,7 @@ public class K1ColoringMutateResult {
 
     public Map<String, Object> configuration;
 
-    K1ColoringMutateResult(
+    public K1ColoringMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -68,23 +66,4 @@ public class K1ColoringMutateResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends K1ColoringResultBuilder<K1ColoringMutateResult> {
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        @Override
-        protected K1ColoringMutateResult buildResult() {
-            return new K1ColoringMutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                nodeCount,
-                colorCount,
-                ranIterations,
-                didConverge,
-                config.toMap()
-            );
-        }
-    }
 }
