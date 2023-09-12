@@ -108,16 +108,14 @@ class FastRPStreamProcTest extends BaseProcTest {
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
         var weights = List.of(0.0D, 1.0D, 2.0D, 4.0D);
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FAST_RP_GRAPH)
+        var query = GdsCypher.call(FAST_RP_GRAPH)
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("propertyRatio", propertyRatio)
             .addParameter("featureProperties", featureProperties)
-            .addParameter("iterationWeights", weights);
-
-        queryBuilder.addParameter("iterationWeights", weights);
-        String query = queryBuilder.yields();
+            .addParameter("iterationWeights", weights)
+            .yields();
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("embedding"))

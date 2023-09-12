@@ -35,7 +35,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
@@ -438,7 +437,7 @@ class GraphListOperatorTest {
         return ImmutableExecutionContext
             .builder()
             .databaseId(graphStore.databaseId())
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .returnColumns(fieldName -> returnFields.contains(fieldName))
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

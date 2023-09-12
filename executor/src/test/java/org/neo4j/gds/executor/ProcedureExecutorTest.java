@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
@@ -131,7 +130,7 @@ class ProcedureExecutorTest {
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .isGdsAdmin(true)
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .modelCatalog(ModelCatalog.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
