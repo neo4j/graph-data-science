@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.compat._5x;
 
-import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
@@ -38,8 +36,6 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.internal.kernel.api.Cursor;
-import org.neo4j.internal.kernel.api.Scan;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -47,7 +43,7 @@ import java.util.Optional;
 
 public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     @Override
-    public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
+    public GdsGraphDatabaseAPI newDb(org.neo4j.dbms.api.DatabaseManagementService dbms) {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
@@ -167,7 +163,10 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+    public <C extends org.neo4j.internal.kernel.api.Cursor> StoreScan<C> scanToStoreScan(
+        org.neo4j.internal.kernel.api.Scan<C> scan,
+        int batchSize
+    ) {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
@@ -195,7 +194,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         org.neo4j.internal.schema.IndexOrder indexOrder,
         boolean needsValues,
         CompatIndexQuery query
-    ) throws KernelException {
+    ) throws org.neo4j.exceptions.KernelException {
 
     }
 
@@ -501,5 +500,5 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
-    public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
+    public abstract Object cursorContextFactory(Optional<org.neo4j.io.pagecache.tracing.PageCacheTracer> pageCacheTracer);
 }
