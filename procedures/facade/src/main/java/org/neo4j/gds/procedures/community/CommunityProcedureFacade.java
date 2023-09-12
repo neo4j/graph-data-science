@@ -54,6 +54,7 @@ import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResul
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
@@ -69,6 +70,7 @@ import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
@@ -665,6 +667,26 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
+    }
+    public Stream<ModularityOptimizationStreamResult> streamModularityOptimization(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(
+            configuration,
+            ModularityOptimizationStreamConfig::of,
+            algorithmMetaDataSetter
+        );
+
+        var computationResult = algorithmsStreamBusinessFacade.modularityOptimization(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return ModularityOptimisationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
     public Stream<ConductanceStreamResult> conductanceStream(

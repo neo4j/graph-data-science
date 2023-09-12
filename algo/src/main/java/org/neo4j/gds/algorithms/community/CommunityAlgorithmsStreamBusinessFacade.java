@@ -43,6 +43,8 @@ import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -272,6 +274,22 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.approxMaxKCut(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<ModularityOptimizationResult> modularityOptimization(
+        String graphName,
+        ModularityOptimizationStreamConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        var result = this.communityAlgorithmsFacade.modularityOptimization(
             graphName,
             config,
             user,
