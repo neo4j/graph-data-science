@@ -106,7 +106,6 @@ import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
-import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
@@ -133,7 +132,6 @@ import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.StorageEngineFactory;
-import org.neo4j.util.Bits;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.storable.Values;
@@ -142,6 +140,8 @@ import org.neo4j.values.virtual.NodeValue;
 import org.neo4j.values.virtual.VirtualValues;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,7 +153,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
-import static org.neo4j.io.pagecache.context.EmptyVersionContextSupplier.EMPTY;
 
 public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
@@ -494,7 +493,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
             TransactionLogInitializer.getLogFilesInitializer(),
             new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
-            new CursorContextFactory(PageCacheTracer.NULL, EmptyVersionContextSupplier.EMPTY)
+            cursorContextFactory(Optional.empty())
         );
     }
 
@@ -605,8 +604,8 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         if (storeVersion == -1) {
             return "Unknown";
         }
-        Bits bits = Bits.bitsFromLongs(new long[]{storeVersion});
-        int length = bits.getShort(8);
+        var bits = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(storeVersion).rewind();
+        int length = bits.get() & 0xFF;
         if (length == 0 || length > 7) {
             throw new IllegalArgumentException(format(
                 Locale.ENGLISH,
@@ -616,7 +615,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         }
         char[] result = new char[length];
         for (int i = 0; i < length; i++) {
-            result[i] = (char) bits.getShort(8);
+            result[i] = (char) (bits.get() & 0xFF);
         }
         return new String(result);
     }
@@ -704,9 +703,11 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
             fs,
             pageCache,
             logService.getInternalLogProvider(),
-            new CursorContextFactory(pageCacheTracer, EMPTY)
+            cursorContextFactory(Optional.ofNullable(pageCacheTracer))
         );
     }
+
+    public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 
     @Override
     public boolean isNotNumericIndex(IndexCapability indexCapability) {
@@ -890,7 +891,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
     }
 
-    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver.Adapter() {
+    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
         @Override
         public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
             return null;

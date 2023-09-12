@@ -26,10 +26,14 @@ import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.io.pagecache.context.CursorContextFactory;
+import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.procedure.Mode;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -93,5 +97,13 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
                 return globalProcedures.getCurrentView().getAllAggregatingFunctions();
             }
         };
+    }
+
+    @Override
+    public CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
+        return pageCacheTracer.map(cacheTracer -> new CursorContextFactory(
+            cacheTracer,
+            EmptyVersionContextSupplier.EMPTY
+        )).orElse(CursorContextFactory.NULL_CONTEXT_FACTORY);
     }
 }
