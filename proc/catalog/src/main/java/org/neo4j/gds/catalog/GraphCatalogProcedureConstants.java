@@ -37,6 +37,9 @@ final class GraphCatalogProcedureConstants {
     static final String WRITE_NODE_LABEL_DESCRIPTION = "Writes the given node Label to an online Neo4j database.";
     static final String WRITE_RELATIONSHIP_DESCRIPTION = "Writes the given relationship and an optional relationship property to an online Neo4j database.";
     static final String WRITE_RELATIONSHIP_PROPERTIES_DESCRIPTION = "Writes the given relationship and a list of relationship properties to an online Neo4j database.";
+    static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
+    static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
+    static final String ESTIMATE_CNARW_DESCRIPTION = "Estimate memory requirements for sampling graph using CNARW algorithm";
 
     private GraphCatalogProcedureConstants() {}
 }

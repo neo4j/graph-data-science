@@ -32,6 +32,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPrope
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipPropertyResult;
 import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
+import org.neo4j.gds.applications.graphstorecatalog.RandomWalkSamplingResult;
 import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesResult;
@@ -686,6 +687,69 @@ public class CatalogFacade {
             graphName,
             relationshipType,
             relationshipProperty,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestarts(
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.sampleRandomWalkWithRestarts(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<RandomWalkSamplingResult> sampleCommonNeighbourAwareRandomWalk(
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var result = businessFacade.sampleCommonNeighbourAwareRandomWalk(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<MemoryEstimateResult> estimateCommonNeighbourAwareRandomWalk(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var result = businessFacade.estimateCommonNeighbourAwareRandomWalk(
+            user,
+            databaseId,
+            graphName,
             configuration
         );
 

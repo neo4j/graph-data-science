@@ -234,4 +234,31 @@ public interface GraphStoreCatalogBusinessFacade {
         String relationshipProperty,
         Map<String, Object> configuration
     );
+
+    RandomWalkSamplingResult sampleRandomWalkWithRestarts(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    );
+
+    RandomWalkSamplingResult sampleCommonNeighbourAwareRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    );
+
+    MemoryEstimateResult estimateCommonNeighbourAwareRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        Map<String, Object> configuration
+    );
 }

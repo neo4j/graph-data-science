@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
@@ -29,7 +29,6 @@ import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 import java.util.function.Function;
 
 public class SamplerCompanion {
-
     public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> RWR_CONFIG_PROVIDER =
         (cypherMapWrapper) -> RandomWalkWithRestartsConfig.of(cypherMapWrapper);
     public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> CNARW_CONFIG_PROVIDER =
