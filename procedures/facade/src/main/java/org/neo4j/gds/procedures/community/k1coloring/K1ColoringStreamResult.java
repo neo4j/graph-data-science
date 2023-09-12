@@ -17,19 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.k1coloring;
+package org.neo4j.gds.procedures.community.k1coloring;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
+@SuppressWarnings("unused")
+public class K1ColoringStreamResult {
+    public final long nodeId;
+    public final long color;
 
-@Configuration
-@ValueClass
-@SuppressWarnings("immutables:subtype")
-public interface K1ColoringStatsConfig extends K1ColoringBaseConfig {
-
-    static K1ColoringStatsConfig of(CypherMapWrapper config) {
-        return new K1ColoringStatsConfigImpl(config);
+    public K1ColoringStreamResult(long nodeId, long color) {
+        this.nodeId = nodeId;
+        this.color = color;
     }
-
 }

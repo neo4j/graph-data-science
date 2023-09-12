@@ -19,23 +19,25 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 
-public interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
-
-    @Override
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int maxIterations() {
-        return 10;
+class K1ColoringMutateResultBuilder extends K1ColoringResultBuilder<K1ColoringMutateResult> {
+    K1ColoringMutateResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+        super(returnColumns, concurrency);
     }
 
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
+    @Override
+    protected K1ColoringMutateResult buildResult() {
+        return new K1ColoringMutateResult(
+            preProcessingMillis,
+            computeMillis,
+            mutateMillis,
+            nodeCount,
+            colorCount,
+            ranIterations,
+            didConverge,
+            config.toMap()
+        );
     }
 }

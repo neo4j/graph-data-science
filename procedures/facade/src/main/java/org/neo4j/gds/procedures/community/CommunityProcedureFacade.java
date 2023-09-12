@@ -27,6 +27,8 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
@@ -38,6 +40,8 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
@@ -432,6 +436,46 @@ public class CommunityProcedureFacade {
         return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
     }
 
+    public Stream<K1ColoringStreamResult> k1ColoringStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(
+            configuration,
+            K1ColoringStreamConfig::of,
+            algorithmMetaDataSetter
+        );
+
+        var computationResult = algorithmsStreamBusinessFacade.k1coloring(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return K1ColoringComputationResultTransformer.toStreamResult(computationResult, streamConfig);
+    }
+
+    public Stream<K1ColoringMutateResult> k1ColoringMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createMutateConfig(
+            configuration,
+            K1ColoringMutateConfig::of
+        );
+
+        var computationResult = algorithmsMutateBusinessFacade.k1coloring(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("colorCount")
+        );
+
+        return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
+    }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,

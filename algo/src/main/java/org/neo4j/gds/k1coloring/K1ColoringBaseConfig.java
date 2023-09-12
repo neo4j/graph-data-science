@@ -19,13 +19,23 @@
  */
 package org.neo4j.gds.k1coloring;
 
-@SuppressWarnings("unused")
-public class K1ColoringStreamResult {
-    public final long nodeId;
-    public final long color;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.IterationsConfig;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 
-    K1ColoringStreamResult(long nodeId, long color) {
-        this.nodeId = nodeId;
-        this.color = color;
+public interface K1ColoringBaseConfig extends AlgoBaseConfig, IterationsConfig {
+
+    @Override
+    @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int maxIterations() {
+        return 10;
+    }
+
+    @Value.Default
+    default int batchSize() {
+        return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 }

@@ -35,6 +35,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -247,6 +250,23 @@ public class CommunityAlgorithmsFacade {
             databaseId
         );
     }
+
+    AlgorithmComputationResult<K1ColoringResult> k1Coloring(
+        String graphName,
+        K1ColoringBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            Optional.empty(),
+            new K1ColoringAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
 
     private <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
         String graphName,
