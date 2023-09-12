@@ -501,8 +501,5 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
-    @Override
-    public org.neo4j.common.DependencyResolver emptyDependencyResolver() {
-        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
-    }
+    public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 }

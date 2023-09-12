@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._510;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
@@ -96,6 +97,23 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
                 return globalProcedures.getAllAggregatingFunctions();
             }
         };
+    }
+
+    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver.Adapter() {
+        @Override
+        public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+            return null;
+        }
+
+        @Override
+        public boolean containsDependency(Class<?> type) {
+            return false;
+        }
+    };
+
+    @Override
+    public DependencyResolver emptyDependencyResolver() {
+        return EMPTY_DEPENDENCY_RESOLVER;
     }
 
     @Override

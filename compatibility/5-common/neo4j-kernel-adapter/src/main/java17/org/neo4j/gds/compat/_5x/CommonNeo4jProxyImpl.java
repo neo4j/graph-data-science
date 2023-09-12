@@ -707,7 +707,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         );
     }
 
-    public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 
     @Override
     public boolean isNotNumericIndex(IndexCapability indexCapability) {
@@ -891,20 +890,5 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
     }
 
-    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
-        @Override
-        public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-            return null;
-        }
-
-        @Override
-        public boolean containsDependency(Class<?> type) {
-            return false;
-        }
-    };
-
-    @Override
-    public DependencyResolver emptyDependencyResolver() {
-        return EMPTY_DEPENDENCY_RESOLVER;
-    }
+    public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 }
