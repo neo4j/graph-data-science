@@ -38,6 +38,8 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -205,6 +207,22 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result);
     }
 
+    public StreamComputationResult<LocalClusteringCoefficientResult> localClusteringCoefficient(
+        String graphName,
+        LocalClusteringCoefficientStreamConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        var result = this.communityAlgorithmsFacade.localClusteringCoefficient(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result);
+    }
+
     private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result) {
 
         return StreamComputationResult.of(
@@ -214,4 +232,5 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         );
 
     }
+
 }

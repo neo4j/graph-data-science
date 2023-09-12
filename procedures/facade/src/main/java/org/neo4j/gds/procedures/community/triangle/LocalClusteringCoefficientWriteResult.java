@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.procedures.community.triangle;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class LocalClusteringCoefficientWriteResult extends LocalClusteringCoefficientStatsResult {
+public final class LocalClusteringCoefficientWriteResult extends LocalClusteringCoefficientStatsResult {
 
     public long writeMillis;
     public long nodePropertiesWritten;
 
-    public LocalClusteringCoefficientWriteResult(
+    private LocalClusteringCoefficientWriteResult(
         double averageClusteringCoefficient,
         long nodeCount,
         long preProcessingMillis,
@@ -49,11 +49,11 @@ public class LocalClusteringCoefficientWriteResult extends LocalClusteringCoeffi
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientWriteResult> {
+    public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientWriteResult> {
 
         double averageClusteringCoefficient = 0;
 
-        Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
+        public Builder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
             this.averageClusteringCoefficient = averageClusteringCoefficient;
             return this;
         }

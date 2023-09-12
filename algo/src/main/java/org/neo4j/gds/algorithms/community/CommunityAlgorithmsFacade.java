@@ -57,6 +57,9 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
@@ -224,6 +227,22 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new KmeansAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
+    public AlgorithmComputationResult<LocalClusteringCoefficientResult> localClusteringCoefficient(
+        String graphName,
+        LocalClusteringCoefficientBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            Optional.empty(),
+            new LocalClusteringCoefficientFactory<>(),
             user,
             databaseId
         );

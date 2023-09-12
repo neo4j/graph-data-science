@@ -106,19 +106,25 @@ class LocalClusteringCoefficientMutateProcTest extends BaseProcTest {
 
             assertThat(row.getNumber("nodeCount"))
                 .asInstanceOf(LONG)
+                .as("Node count doesn't match")
+                .isEqualTo(5L);
+
+            assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .as("Node properties written count doesn't match")
                 .isEqualTo(5L);
 
             assertThat(row.getNumber("preProcessingMillis"))
                 .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                .isNotNegative();
 
             assertThat(row.getNumber("computeMillis"))
                 .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                .isNotNegative();
 
             assertThat(row.getNumber("postProcessingMillis"))
                 .asInstanceOf(LONG)
-                .isGreaterThan(-1L);
+                .isNotNegative();
 
             assertThat(row.get("configuration"))
                 .isInstanceOf(Map.class);
@@ -170,5 +176,3 @@ class LocalClusteringCoefficientMutateProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(1);
     }
 }
-
-

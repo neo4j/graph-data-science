@@ -36,17 +36,17 @@ final class LocalClusteringCoefficientCompanion {
     private LocalClusteringCoefficientCompanion() {}
 
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodePropertyValues nodeProperties(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, CONFIG> computeResult
     ) {
         return computeResult.result()
-            .map(LocalClusteringCoefficient.Result::localClusteringCoefficients)
+            .map(LocalClusteringCoefficientResult::localClusteringCoefficients)
             .map(NodePropertyValuesAdapter::adapt)
             .orElse(EmptyDoubleNodePropertyValues.INSTANCE);
     }
 
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, CONFIG> computeResult
     ) {
         var result = computeResult.result().orElse(EmptyResult.EMPTY_RESULT);
 
@@ -68,7 +68,7 @@ final class LocalClusteringCoefficientCompanion {
         }
     }
 
-    private static final class EmptyResult implements LocalClusteringCoefficient.Result {
+    private static final class EmptyResult implements LocalClusteringCoefficientResult {
 
         static final EmptyResult EMPTY_RESULT = new EmptyResult();
 
