@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import com.carrotsearch.hppc.DoubleArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.ml.core.tensor.Vector;
-
-import java.util.List;
 
 import static java.util.Arrays.stream;
 
@@ -30,19 +29,22 @@ public class EuclideanDistanceLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;
 
-    List<Double> relationshipTypeEmbedding;
+    Vector relationshipTypeEmbedding;
 
     long currentSourceNode;
 
     Vector currentCandidateTarget;
 
-    @Override
-    public void init(NodePropertyValues embeddings, List<Double> relationshipTypeEmbedding, long sourceNode) {
+    EuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
-        this.relationshipTypeEmbedding = relationshipTypeEmbedding;
+        this.relationshipTypeEmbedding = new Vector(relationshipTypeEmbedding.toArray());
+    }
+
+    @Override
+    public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
         this.currentCandidateTarget = new Vector(embeddings.doubleArrayValue(currentSourceNode))
-            .add(new Vector(relationshipTypeEmbedding.stream().mapToDouble(Double::doubleValue).toArray()));
+            .add(relationshipTypeEmbedding);
     }
 
     @Override

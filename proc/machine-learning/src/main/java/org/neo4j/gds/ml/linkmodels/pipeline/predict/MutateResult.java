@@ -31,8 +31,8 @@ import java.util.Map;
 public final class MutateResult extends StandardMutateResult {
 
     public final long relationshipsWritten;
-    private final Map<String, Object> probabilityDistribution;
-    private final Map<String, Object> samplingStats;
+    public final Map<String, Object> probabilityDistribution;
+    public final Map<String, Object> samplingStats;
 
     private MutateResult(
         long preProcessingMillis,
@@ -56,7 +56,7 @@ public final class MutateResult extends StandardMutateResult {
         this.samplingStats = samplingStats;
     }
 
-    public static class Builder extends AbstractResultBuilder<MutateResult> {
+    static class Builder extends AbstractResultBuilder<MutateResult> {
 
         private Map<String, Object> samplingStats = null;
 
@@ -76,7 +76,7 @@ public final class MutateResult extends StandardMutateResult {
             );
         }
 
-        public Builder withHistogram() {
+        Builder withHistogram() {
             if (histogram != null) {
                 return this;
             }

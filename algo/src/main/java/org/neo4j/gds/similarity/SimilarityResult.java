@@ -68,16 +68,6 @@ public class SimilarityResult implements Comparable<SimilarityResult>, Relations
                Double.compare(that.similarity, similarity) == 0;
     }
 
-    public boolean approximatelyEquals(Object o, double epsilon) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SimilarityResult that = (SimilarityResult) o;
-        return node1 == that.node1 &&
-            node2 == that.node2 &&
-            Math.abs(that.similarity - similarity) <= epsilon;
-    }
-
-
 
     @Override
     public int hashCode() {

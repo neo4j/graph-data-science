@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import com.carrotsearch.hppc.DoubleArrayList;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,8 +38,8 @@ class DistMultLinkScorerTest {
         var hsdaa = propertyBuilder.build();
         DoubleArrayNodePropertyValues ddnpv = new DoubleArrayTestPropertyValues(hsdaa::get);
 
-        LinkScorer linkScorer = new DistMultLinkScorer();
-        linkScorer.init(ddnpv, List.of(0.1, 0.1, 0.1, 0.1), 0);
+        LinkScorer linkScorer = new DistMultLinkScorer(ddnpv, DoubleArrayList.from(0.1, 0.1, 0.1, 0.1));
+        linkScorer.init(0);
 
         assertThat(linkScorer.computeScore(1)).isCloseTo(0.6, Offset.offset(1e-02));
         assertThat(linkScorer.computeScore(2)).isCloseTo(0.9, Offset.offset(1e-02));

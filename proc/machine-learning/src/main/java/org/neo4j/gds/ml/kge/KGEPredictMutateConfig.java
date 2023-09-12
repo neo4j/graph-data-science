@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
@@ -33,9 +32,6 @@ import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 import java.util.Collection;
 import java.util.List;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-@ValueClass
 @Configuration
 public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBaseConfig {
 
@@ -59,7 +55,9 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
     //Consider using HugeList or double[] if that saves mem
     List<Double> relationshipTypeEmbedding();
 
-    String scoringFunction();
+    @Configuration.ConvertWith(method = "org.neo4j.gds.ml.kge.ScoreFunction#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.ml.kge.ScoreFunction#toString")
+    ScoreFunction scoringFunction();
 
     @Configuration.IntegerRange(min = 1)
     int topK();
@@ -86,15 +84,15 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
         targetNodeFilter().validate(graphStore, selectedLabels, "targetNodeFilter");
     }
 
-    @Value.Check
-    default void validateScoringFunction() {
-        if (!(scoringFunction().equalsIgnoreCase("transE")
-            || scoringFunction().equalsIgnoreCase("distMult"))) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Invalid scoring function %s, it needs to be either TransE or DistMult.", scoringFunction()
-            ));
-        }
-    }
+//    @Value.Check
+//    default void validateScoringFunction() {
+//        if (!(scoringFunction().equalsIgnoreCase("transE")
+//            || scoringFunction().equalsIgnoreCase("distMult"))) {
+//            throw new IllegalArgumentException(formatWithLocale(
+//                "Invalid scoring function %s, it needs to be either TransE or DistMult.", scoringFunction()
+//            ));
+//        }
+//    }
 
 
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -31,7 +32,6 @@ import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.LongStream;
 
 public class TopKMapComputer extends Algorithm<KGEPredictResult> {
@@ -42,7 +42,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private BitSet targetNodes;
 
     private String nodeEmbeddingProperty;
-    private List<Double> relationshipTypeEmbedding;
+    private DoubleArrayList relationshipTypeEmbedding;
     private int concurrency;
 
     private int topK;
@@ -58,7 +58,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         BitSet targetNodes,
         String nodeEmbeddingProperty,
         List<Double> relationshipTypeEmbedding,
-        String scoreFunction,
+        ScoreFunction scoreFunction,
         LongLongPredicate isCandidateLink,
         int topK,
         int concurrency,
@@ -70,13 +70,12 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.nodeEmbeddingProperty = nodeEmbeddingProperty;
-        this.relationshipTypeEmbedding = relationshipTypeEmbedding;
+        this.relationshipTypeEmbedding = DoubleArrayList.from(relationshipTypeEmbedding.stream().mapToDouble(Double::doubleValue).toArray());
         this.concurrency = concurrency;
         this.topK = topK;
-        ScoreFunction scoreFunctionEnum = ScoreFunction.valueOf(scoreFunction.toUpperCase(Locale.ROOT));
-        this.scoreFunction = scoreFunctionEnum;
+        this.scoreFunction = scoreFunction;
         this.isCandidateLink = isCandidateLink;
-        this.higherIsBetter = scoreFunctionEnum == ScoreFunction.DISTMULT;
+        this.higherIsBetter = scoreFunction == ScoreFunction.DISTMULT;
     }
 
     public KGEPredictResult compute() {
@@ -86,7 +85,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
-        try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction))) {
+        try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction, embeddings, relationshipTypeEmbedding))) {
             //TODO maybe exploit symmetry of similarity function if available when there're many source target overlap
             ParallelUtil.parallelStreamConsume(
                 new SetBitsIterable(sourceNodes).stream(),
@@ -97,7 +96,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                         terminationFlag.assertRunning();
 
                         LinkScorer linkScorer = threadLocalScorer.get();
-                        linkScorer.init(embeddings, relationshipTypeEmbedding, node1);
+                        linkScorer.init(node1);
 
                         targetNodesStream()
                             .filter(node2 -> isCandidateLink.apply(node1, node2))

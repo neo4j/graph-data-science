@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
@@ -29,9 +31,12 @@ public class LinkScorerFactoryTest {
 
     @Test
     void linkScorerFactoryCreateCorrectScorer() {
-        var transe = LinkScorerFactory.create(TRANSE);
+        var transe = LinkScorerFactory.create(TRANSE, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+            DoubleArrayList.from(0)
+        );
         assertThat(transe).isInstanceOf(EuclideanDistanceLinkScorer.class);
-        var distmult = LinkScorerFactory.create(DISTMULT);
+        var distmult = LinkScorerFactory.create(DISTMULT, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+            DoubleArrayList.from(0));
         assertThat(distmult).isInstanceOf(DistMultLinkScorer.class);
     }
 }

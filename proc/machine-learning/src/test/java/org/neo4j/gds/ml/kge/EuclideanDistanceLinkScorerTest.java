@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import com.carrotsearch.hppc.DoubleArrayList;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,8 +41,8 @@ public class EuclideanDistanceLinkScorerTest {
         var hsdaa = propertyBuilder.build();
         DoubleArrayNodePropertyValues ddnpv = new DoubleArrayTestPropertyValues(hsdaa::get);
 
-        LinkScorer linkScorer = new EuclideanDistanceLinkScorer();
-        linkScorer.init(ddnpv, List.of(-1.0, 0.0, 0.0, 0.0), 0);
+        LinkScorer linkScorer = new EuclideanDistanceLinkScorer(ddnpv, DoubleArrayList.from(-1.0, 0.0, 0.0, 0.0));
+        linkScorer.init(0);
 
         assertThat(linkScorer.computeScore(1)).isCloseTo(2.65, Offset.offset(1e-02));
         assertThat(linkScorer.computeScore(2)).isCloseTo(4.24, Offset.offset(1e-02));

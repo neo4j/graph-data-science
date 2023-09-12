@@ -28,8 +28,10 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
 
 @GdlExtension
 public class KGEPredictMutateConfigTest {
@@ -54,7 +56,7 @@ public class KGEPredictMutateConfigTest {
             .topK(3);
 
         assertThatThrownBy(wrongConfig::build)
-            .hasMessage("Invalid scoring function ComplexE, it needs to be either TransE or DistMult.");
+            .hasMessage("Score function `COMPLEXE` is not supported. Must be one of: [TRANSE, DISTMULT].");
 
         var config = KGEPredictMutateConfigImpl.builder()
             .nodeEmbeddingProperty("embedding")
@@ -64,6 +66,7 @@ public class KGEPredictMutateConfigTest {
             .topK(3);
 
         assertThatNoException().isThrownBy(config::build);
+        assertThat(config.build().scoringFunction()).isEqualTo(TRANSE);
     }
 
 

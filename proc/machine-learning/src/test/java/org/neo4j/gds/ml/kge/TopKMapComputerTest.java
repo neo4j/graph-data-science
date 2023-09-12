@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
+import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
 
 class TopKMapComputerTest extends BaseTest {
 
@@ -76,7 +78,7 @@ class TopKMapComputerTest extends BaseTest {
             targetNodes,
             "emb",
             List.of(3.0, -0.5),
-            "TransE",
+            TRANSE,
             (a, b) -> a != b,
             topK,
             concurrency,
@@ -115,7 +117,7 @@ class TopKMapComputerTest extends BaseTest {
             targetNodes,
             "emb",
             List.of(0.5, -0.5),
-            "DistMult",
+            DISTMULT,
             (a, b) -> a != b,
             topK,
             concurrency,
@@ -163,11 +165,17 @@ class TopKMapComputerTest extends BaseTest {
         for (int i = 0; i < actual.size(); i++) {
             var actualSimilarity = actual.get(i);
             var expectedSimilarity = expected.get(i);
-            if (!actualSimilarity.approximatelyEquals(expectedSimilarity, epsilon)) {
+            if (!approximatelyEquals(actualSimilarity, expectedSimilarity, epsilon)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private boolean approximatelyEquals(SimilarityResult actualSimilarity, SimilarityResult expectedSimilarity, double epsilon) {
+        return actualSimilarity.node1 == expectedSimilarity.node1 &&
+            actualSimilarity.node2 == expectedSimilarity.node2 &&
+            Math.abs(actualSimilarity.similarity - expectedSimilarity.similarity) <= epsilon;
     }
 }

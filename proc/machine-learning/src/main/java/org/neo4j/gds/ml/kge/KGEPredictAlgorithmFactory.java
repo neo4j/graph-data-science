@@ -29,15 +29,15 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
 
     @Override
     public TopKMapComputer build(
-        GraphStore graphOrGraphStore,
+        GraphStore graphStore,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
 
-        BitSet sourceNodes = new BitSet(graphOrGraphStore.nodeCount());
-        BitSet targetNodes = new BitSet(graphOrGraphStore.nodeCount());
+        BitSet sourceNodes = new BitSet(graphStore.nodeCount());
+        BitSet targetNodes = new BitSet(graphStore.nodeCount());
 
-        Graph graph = graphOrGraphStore.getGraph();
+        Graph graph = graphStore.getGraph();
 
         var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
         var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);

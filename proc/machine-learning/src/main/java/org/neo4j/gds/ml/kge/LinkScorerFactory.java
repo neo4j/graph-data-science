@@ -19,14 +19,17 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import com.carrotsearch.hppc.DoubleArrayList;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+
 public class LinkScorerFactory {
 
-    public static LinkScorer create(ScoreFunction scoreFunction) {
+    public static LinkScorer create(ScoreFunction scoreFunction, NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         switch (scoreFunction) {
             case TRANSE:
-                return new EuclideanDistanceLinkScorer();
+                return new EuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);
             case DISTMULT:
-                return new DistMultLinkScorer();
+                return new DistMultLinkScorer(embeddings, relationshipTypeEmbedding);
             default:
                 throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
         }

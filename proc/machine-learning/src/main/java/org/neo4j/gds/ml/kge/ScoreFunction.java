@@ -19,7 +19,45 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
+
 public enum ScoreFunction {
     TRANSE,
-    DISTMULT
+    DISTMULT;
+
+    private static final List<String> VALUES = Arrays
+        .stream(ScoreFunction.values())
+        .map(ScoreFunction::name).toList();
+
+    public static ScoreFunction parse(Object input) {
+        if (input instanceof String) {
+            var inputString = toUpperCaseWithLocale((String) input);
+
+            if (VALUES.contains(inputString)) {
+                return ScoreFunction.valueOf(inputString.toUpperCase(Locale.ENGLISH));
+            }
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Score function `%s` is not supported. Must be one of: %s.",
+                inputString,
+                VALUES
+            ));
+        } else {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Score function `%s` is not supported. Must be one of: %s.",
+                input,
+                VALUES
+            ));
+        }
+    }
+
+    public static String toString(ScoreFunction scoreFunction) {
+        return scoreFunction.toString();
+    }
+
 }
