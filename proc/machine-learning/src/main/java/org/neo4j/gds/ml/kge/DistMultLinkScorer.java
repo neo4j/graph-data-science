@@ -48,8 +48,12 @@ public class DistMultLinkScorer implements LinkScorer {
 
     @Override
     public double computeScore(long targetNode) {
-        return currentCandidateTarget.elementwiseProduct(new Vector(embeddings.doubleArrayValue(targetNode)))
-            .aggregateSum();
+        double res = 0.0;
+        var targetVector = embeddings.doubleArrayValue(targetNode);
+        for (int i = 0; i < currentCandidateTarget.length(); i++) {
+            res += currentCandidateTarget.dataAt(i) * targetVector[i];
+        }
+        return res;
     }
 
     @Override
