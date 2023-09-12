@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,22 +25,21 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.TerminationMonitor;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -48,13 +47,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_CONFIG_PROVIDER;
-import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_PROVIDER;
-import static org.neo4j.gds.catalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
-import static org.neo4j.gds.catalog.SamplerCompanion.RWR_PROVIDER;
 
 @GdlExtension
-class SamplerOperatorTest  {
+class GraphSamplingApplicationTest {
 
     @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =
@@ -112,28 +107,36 @@ class SamplerOperatorTest  {
     @ParameterizedTest
     @MethodSource("samplingParameters")
     void shouldSampleRWR(Map<String, Object> mapConfiguration, long expectedNodeCount) {
+        var graphSamplingApplication = new GraphSamplingApplication(
+            new Neo4jBackedLogForTesting(),
+            new GraphStoreCatalogService()
+        );
 
-        var executionContext = executionContextBuilder()
-            .build();
-
-        var result = SamplerOperator.performSampling("graph", "sample",
+        var user = new User("user", false);
+        var result = graphSamplingApplication.sample(
+            user,
+            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            graphStore,
+            GraphProjectConfig.emptyWithName("user", "graph"),
+            GraphName.parse("graph"),
+            GraphName.parse("sample"),
             mapConfiguration,
-            RWR_CONFIG_PROVIDER,
-            RWR_PROVIDER,
-            executionContext
-        ).findFirst().get();
+            SamplerCompanion.RWR_CONFIG_PROVIDER,
+            SamplerCompanion.RWR_PROVIDER
+        );
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
 
         assertThat(GraphStoreCatalog.exists(
-            executionContext.username(),
-            executionContext.databaseId().databaseName(),
+            user.getUsername(),
+            graphStore.databaseId().databaseName(),
             "sample"
         )).isTrue();
 
         var sampledGraphStore = GraphStoreCatalog.get(
-            executionContext.username(),
-            executionContext.databaseId().databaseName(),
+            user.getUsername(),
+            graphStore.databaseId().databaseName(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
@@ -142,26 +145,35 @@ class SamplerOperatorTest  {
     @ParameterizedTest
     @MethodSource("samplingParameters")
     void shouldSampleCNARW(Map<String, Object> mapConfiguration, long expectedNodeCount) {
-        var executionContext = executionContextBuilder()
-            .build();
+        var graphSamplingApplication = new GraphSamplingApplication(
+            new Neo4jBackedLogForTesting(),
+            new GraphStoreCatalogService()
+        );
 
-        var result = SamplerOperator.performSampling("graph", "sample",
+        var user = new User("user", false);
+        var result = graphSamplingApplication.sample(
+            user,
+            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            graphStore,
+            GraphProjectConfig.emptyWithName("user", "graph"),
+            GraphName.parse("graph"),
+            GraphName.parse("sample"),
             mapConfiguration,
-            CNARW_CONFIG_PROVIDER,
-            CNARW_PROVIDER,
-            executionContext
-        ).findFirst().get();
+            SamplerCompanion.CNARW_CONFIG_PROVIDER,
+            SamplerCompanion.CNARW_PROVIDER
+        );
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
         assertThat(GraphStoreCatalog.exists(
-            executionContext.username(),
-            executionContext.databaseId().databaseName(),
+            user.getUsername(),
+            graphStore.databaseId(),
             "sample"
         )).isTrue();
 
         var sampledGraphStore = GraphStoreCatalog.get(
-            executionContext.username(),
-            executionContext.databaseId().databaseName(),
+            user.getUsername(),
+            graphStore.databaseId(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
@@ -170,28 +182,36 @@ class SamplerOperatorTest  {
     @ParameterizedTest
     @CsvSource(value = {"0.28,1", "0.35,2"})
     void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
+        var graphSamplingApplication = new GraphSamplingApplication(
+            new Neo4jBackedLogForTesting(),
+            new GraphStoreCatalogService()
+        );
+
+        var user = new User("user", false);
         var x = idFunction.of("x");
-
-        var executionContext = executionContextBuilder()
-            .build();
-
-        var result = SamplerOperator.performSampling("graph", "sample",
+        var result = graphSamplingApplication.sample(
+            user,
+            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            graphStore,
+            GraphProjectConfig.emptyWithName("user", "graph"),
+            GraphName.parse("graph"),
+            GraphName.parse("sample"),
             Map.of(
                 "samplingRatio", samplingRatio,
                 "concurrency", 1,
                 "startNodes", List.of(x),
-                "randomSeed", 42l
+                "randomSeed", 42L
             ),
-            RWR_CONFIG_PROVIDER,
-            RWR_PROVIDER,
-            executionContext
-        ).findFirst().get();
+            SamplerCompanion.RWR_CONFIG_PROVIDER,
+            SamplerCompanion.RWR_PROVIDER
+        );
 
         assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
 
         assertThat(GraphStoreCatalog.exists(
-            executionContext.username(),
-            executionContext.databaseId().databaseName(),
+            user.getUsername(),
+            graphStore.databaseId(),
             "sample"
         )).isTrue();
 
@@ -200,49 +220,82 @@ class SamplerOperatorTest  {
     @ParameterizedTest
     @CsvSource(value = {"0.28,1", "0.35,2"})
     void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
+        var graphSamplingApplication = new GraphSamplingApplication(
+            new Neo4jBackedLogForTesting(),
+            new GraphStoreCatalogService()
+        );
+
+        var user = new User("user", false);
         var x = idFunction.of("x");
-
-        var executionContext = executionContextBuilder()
-            .build();
-
-        var result = SamplerOperator.performSampling("graph", "sample",
+        var result = graphSamplingApplication.sample(
+            user,
+            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyUserLogRegistryFactory.INSTANCE,
+            graphStore,
+            GraphProjectConfig.emptyWithName("user", "graph"),
+            GraphName.parse("graph"),
+            GraphName.parse("sample"),
             Map.of(
                 "samplingRatio", samplingRatio,
                 "concurrency", 1,
                 "startNodes", List.of(x),
-                "randomSeed", 42l
+                "randomSeed", 42L
             ),
-            CNARW_CONFIG_PROVIDER,
-            CNARW_PROVIDER,
-            executionContext
-        ).findFirst().get();
+            SamplerCompanion.CNARW_CONFIG_PROVIDER,
+            SamplerCompanion.CNARW_PROVIDER
+        );
 
         assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
 
         assertThat(GraphStoreCatalog.exists(
-            executionContext.username(),
-            executionContext.databaseId().databaseName(),
+            user.getUsername(),
+            graphStore.databaseId(),
             "sample"
         )).isTrue();
 
     }
 
+    /**
+     * @deprecated We need this just long enough that we can drive out usages of Neo4j's log.
+     *     Therefore, I do not want to build general support for this
+     */
+    @Deprecated
+    private static class Neo4jBackedLogForTesting implements Log {
+        private final TestLog neo4jLog = Neo4jProxy.testLog();
 
-    private ImmutableExecutionContext.Builder executionContextBuilder() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseId(graphStore.databaseId())
-            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
-            .returnColumns(ProcedureReturnColumns.EMPTY)
-            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .username("user")
-            .terminationMonitor(TerminationMonitor.EMPTY)
-            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
-            .nodeLookup(NodeLookup.EMPTY)
-            .log(Neo4jProxy.testLog())
-            .isGdsAdmin(false);
+        @Override
+        public void info(String message) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void info(String format, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void warn(String message, Exception e) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void warn(String format, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void debug(String format, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public Object getNeo4jLog() {
+            return neo4jLog;
+        }
     }
-
 }

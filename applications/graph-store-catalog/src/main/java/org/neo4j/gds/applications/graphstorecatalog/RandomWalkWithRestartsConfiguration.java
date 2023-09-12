@@ -17,15 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
 @Configuration
-public interface RandomWalkWithRestartsProcConfig extends GraphSampleProcConfig {
-    static RandomWalkWithRestartsProcConfig of(
+public interface RandomWalkWithRestartsConfiguration extends GraphSampleProcConfig {
+    static RandomWalkWithRestartsConfiguration of(
         String userName,
         String graphName,
         String fromGraphName,
@@ -33,7 +35,8 @@ public interface RandomWalkWithRestartsProcConfig extends GraphSampleProcConfig 
         CypherMapWrapper procedureConfig
     ) {
         var rwrConfig = RandomWalkWithRestartsConfig.of(procedureConfig);
-        return new RandomWalkWithRestartsProcConfigImpl(
+
+        return new RandomWalkWithRestartsConfigurationImpl(
             originalConfig,
             fromGraphName,
             rwrConfig,

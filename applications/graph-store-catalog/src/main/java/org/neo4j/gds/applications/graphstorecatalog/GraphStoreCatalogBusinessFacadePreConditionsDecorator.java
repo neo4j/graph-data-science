@@ -477,6 +477,63 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public RandomWalkSamplingResult sampleRandomWalkWithRestarts(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.sampleRandomWalkWithRestarts(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            configuration
+        ));
+    }
+
+    @Override
+    public RandomWalkSamplingResult sampleCommonNeighbourAwareRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.sampleCommonNeighbourAwareRandomWalk(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            configuration
+        ));
+    }
+
+    @Override
+    public MemoryEstimateResult estimateCommonNeighbourAwareRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.estimateCommonNeighbourAwareRandomWalk(
+            user,
+            databaseId,
+            graphName,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

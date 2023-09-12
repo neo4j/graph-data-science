@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.config.WriteLabelConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -35,6 +36,8 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
+import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -42,8 +45,14 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.CNARW_CONFIG_PROVIDER;
+import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.CNARW_PROVIDER;
+import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
+import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.RWR_PROVIDER;
 
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
@@ -90,6 +99,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
     private final WriteNodeLabelApplication writeNodeLabelApplication;
     private final WriteRelationshipsApplication writeRelationshipsApplication;
+    private final GraphSamplingApplication graphSamplingApplication;
+    private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -112,7 +123,9 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
         WriteNodeLabelApplication writeNodeLabelApplication,
-        WriteRelationshipsApplication writeRelationshipsApplication
+        WriteRelationshipsApplication writeRelationshipsApplication,
+        GraphSamplingApplication graphSamplingApplication,
+        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication
     ) {
         this.log = log;
 
@@ -137,6 +150,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
         this.writeNodeLabelApplication = writeNodeLabelApplication;
         this.writeRelationshipsApplication = writeRelationshipsApplication;
+        this.graphSamplingApplication = graphSamplingApplication;
+        this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
     }
 
     @Override
@@ -750,6 +765,96 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
             graphStore,
             graphName,
             configuration
+        );
+    }
+
+    @Override
+    public RandomWalkSamplingResult sampleRandomWalkWithRestarts(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphName,
+        String originGraphName,
+        Map<String, Object> configuration
+    ) {
+        return sampleRandomWalk(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphName,
+            originGraphName,
+            configuration,
+            RWR_CONFIG_PROVIDER,
+            RWR_PROVIDER
+        );
+    }
+
+    @Override
+    public RandomWalkSamplingResult sampleCommonNeighbourAwareRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String originGraphName,
+        Map<String, Object> configuration
+    ) {
+        return sampleRandomWalk(
+            user,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphNameAsString,
+            originGraphName,
+            configuration,
+            CNARW_CONFIG_PROVIDER,
+            CNARW_PROVIDER
+        );
+    }
+
+    @Override
+    public MemoryEstimateResult estimateCommonNeighbourAwareRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = configurationService.parseCommonNeighbourAwareRandomWalkConfig(rawConfiguration);
+
+        return estimateCommonNeighbourAwareRandomWalkApplication.estimate(user, databaseId, graphName, configuration);
+    }
+
+    private RandomWalkSamplingResult sampleRandomWalk(
+        User user,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        String graphNameAsString,
+        String originGraphNameAsString,
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
+        Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider
+    ) {
+        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+        var originGraphName = GraphName.parse(originGraphNameAsString);
+
+        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), originGraphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        var graphProjectConfig = graphStoreWithConfig.config();
+
+        return graphSamplingApplication.sample(
+            user,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            graphStore,
+            graphProjectConfig,
+            originGraphName,
+            graphName,
+            configuration,
+            samplerConfigProvider,
+            samplerAlgorithmProvider
         );
     }
 

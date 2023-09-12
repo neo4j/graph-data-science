@@ -26,10 +26,12 @@ import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusi
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsApplication;
+import org.neo4j.gds.applications.graphstorecatalog.EstimateCommonNeighbourAwareRandomWalkApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GenericProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
+import org.neo4j.gds.applications.graphstorecatalog.GraphSamplingApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacadePreConditionsDecorator;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreValidationService;
@@ -159,6 +161,8 @@ public class CatalogFacadeFactory {
         );
         var writeNodeLabelApplication = new WriteNodeLabelApplication(log, nodeLabelExporterBuilder);
         var writeRelationshipsApplication = new WriteRelationshipsApplication(log, relationshipExporterBuilder);
+        var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
+        var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -182,7 +186,9 @@ public class CatalogFacadeFactory {
             writeNodePropertiesApplication,
             writeRelationshipPropertiesApplication,
             writeNodeLabelApplication,
-            writeRelationshipsApplication
+            writeRelationshipsApplication,
+            graphSamplingApplication,
+            estimateCommonNeighbourAwareRandomWalkApplication
         );
 
         // wrap in decorator to enable preconditions checks
