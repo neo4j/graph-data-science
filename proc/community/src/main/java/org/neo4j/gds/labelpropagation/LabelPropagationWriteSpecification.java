@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -30,7 +31,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -76,7 +76,7 @@ public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPr
                     computationResult.config().writeProperty(),
                     computationResult.result()
                         .map(LabelPropagationResult::labels)
-                        .map(LongNodePropertyValuesAdapter::create)
+                        .map(NodePropertyValuesAdapter::adapt)
                         .orElse(EmptyLongNodePropertyValues.INSTANCE),
                     () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
                 )

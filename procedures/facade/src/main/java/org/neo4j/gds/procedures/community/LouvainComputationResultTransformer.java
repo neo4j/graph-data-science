@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
-import org.neo4j.gds.nodeproperties.LongNodePropertyValuesAdapter;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -35,14 +35,21 @@ import java.util.stream.Stream;
 final class LouvainComputationResultTransformer {
     private LouvainComputationResultTransformer() {}
 
-    static Stream<LouvainStreamResult> toStreamResult(StreamComputationResult<LouvainResult> computationResult, LouvainBaseConfig configuration) {
+    static Stream<LouvainStreamResult> toStreamResult(
+        StreamComputationResult<LouvainResult> computationResult,
+        LouvainStreamConfig configuration
+    ) {
         return computationResult.result().map(louvainResult -> {
             var graph = computationResult.graph();
 
-            var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                configuration,
-                LongNodePropertyValuesAdapter.create(louvainResult.dendrogramManager().getCurrent())
+            var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+                false,
+                configuration.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(louvainResult.dendrogramManager().getCurrent()),
+                configuration.minCommunitySize(),
+                configuration.concurrency()
             );
+
             var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
 
             return LongStream.range(0, graph.nodeCount())

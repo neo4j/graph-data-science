@@ -29,15 +29,16 @@ import org.neo4j.values.storable.Value;
 
 import java.util.Optional;
 
-final class CommunityResultCompanion {
+public final class CommunityResultCompanion {
 
     private CommunityResultCompanion() {}
 
-    static NodePropertyValues nodePropertyValues(
+    public static NodePropertyValues nodePropertyValues(
         boolean incremental,
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties
     ) {
+
         if (consecutiveIds && !incremental) {
             return new ConsecutiveLongNodePropertyValues(nodeProperties);
         }
@@ -45,7 +46,7 @@ final class CommunityResultCompanion {
         return nodeProperties;
     }
 
-    static NodePropertyValues nodePropertyValues(
+    public static NodePropertyValues nodePropertyValues(
         boolean incremental,
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties,
@@ -55,7 +56,8 @@ final class CommunityResultCompanion {
         var resultAfterMinFilter = minCommunitySize
             .map(size -> applySizeFilter(nodeProperties, size, concurrency))
             .orElse(nodeProperties);
-        return nodePropertyValues(consecutiveIds, incremental, resultAfterMinFilter);
+
+        return nodePropertyValues(incremental, consecutiveIds, resultAfterMinFilter);
     }
 
     private static LongNodePropertyValues applySizeFilter(
