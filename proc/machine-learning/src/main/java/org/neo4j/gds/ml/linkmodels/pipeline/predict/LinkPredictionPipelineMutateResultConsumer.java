@@ -25,8 +25,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.ResultBuilderFunction;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.ComputationResult;
@@ -65,7 +65,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(GraphFactory.PropertyConfig.of(computationResult.config().mutateProperty()))
             .concurrency(concurrency)
-            .executorService(Pools.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;

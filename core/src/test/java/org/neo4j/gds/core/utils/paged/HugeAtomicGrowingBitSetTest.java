@@ -22,8 +22,8 @@ package org.neo4j.gds.core.utils.paged;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.HashSet;
@@ -142,7 +142,7 @@ class HugeAtomicGrowingBitSetTest {
             }
         }, Optional.empty());
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
 
         assertThat(bitSet.cardinality()).isEqualTo(nodeCount);
     }

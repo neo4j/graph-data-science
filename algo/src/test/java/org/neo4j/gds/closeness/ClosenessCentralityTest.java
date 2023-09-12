@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -93,7 +93,7 @@ class ClosenessCentralityTest {
         var algo = ClosenessCentrality.of(
             graph,
             ImmutableClosenessCentralityStreamConfig.builder().build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -116,7 +116,7 @@ class ClosenessCentralityTest {
         var algo = ClosenessCentrality.of(
             graph,
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 

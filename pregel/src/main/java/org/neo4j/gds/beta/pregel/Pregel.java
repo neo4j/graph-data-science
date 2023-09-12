@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -159,7 +159,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .messenger(messenger)
             .voteBits(HugeAtomicBitSet.create(graph.nodeCount()))
             .executorService(config.useForkJoin()
-                ? Pools.createForkJoinPool(config.concurrency())
+                ? ExecutorServiceUtil.createForkJoinPool(config.concurrency())
                 : executor)
             .progressTracker(progressTracker)
             .build();

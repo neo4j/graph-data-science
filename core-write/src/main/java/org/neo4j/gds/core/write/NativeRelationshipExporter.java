@@ -26,7 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -91,7 +91,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         this.propertyTranslator = propertyTranslator;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
-        this.executorService = Pools.DEFAULT_SINGLE_THREAD_POOL;
+        this.executorService = ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL;
     }
 
     @Override

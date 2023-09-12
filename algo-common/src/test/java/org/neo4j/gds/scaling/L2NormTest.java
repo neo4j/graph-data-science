@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -53,7 +53,7 @@ class L2NormTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         assertThat(scaler.euclideanLength).isEqualTo(euclideanLength);
@@ -70,7 +70,7 @@ class L2NormTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         for (int i = 0; i < 10; i++) {
@@ -86,7 +86,7 @@ class L2NormTest {
             10,
             1,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         var euclideanLength = 16.124;

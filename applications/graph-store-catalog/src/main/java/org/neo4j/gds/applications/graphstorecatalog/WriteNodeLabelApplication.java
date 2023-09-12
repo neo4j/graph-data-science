@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.WriteLabelConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -60,7 +60,7 @@ public class WriteNodeLabelApplication {
                 nodeFilter,
                 configuration.concurrency(),
                 Map.of(),
-                Pools.DEFAULT,
+                DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
             );
 
@@ -68,7 +68,7 @@ public class WriteNodeLabelApplication {
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(terminationFlag)
                 .withArrowConnectionInfo(configuration.arrowConnectionInfo(), graphStore.databaseId().databaseName())
-                .parallel(Pools.DEFAULT, configuration.concurrency())
+                .parallel(DefaultPool.INSTANCE, configuration.concurrency())
                 .build();
 
             try {

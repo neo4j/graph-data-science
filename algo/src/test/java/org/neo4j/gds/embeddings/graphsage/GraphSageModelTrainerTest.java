@@ -34,7 +34,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
@@ -120,7 +120,7 @@ class GraphSageModelTrainerTest {
             .modelUser("")
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         int nodeCount = 5_000;
         var bigGraph = RandomGraphGenerator
@@ -160,7 +160,7 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var maybeWeights = useRelationshipWeight ? Optional.of("times") : Optional.<String>empty();
 
@@ -201,7 +201,7 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
@@ -251,7 +251,7 @@ class GraphSageModelTrainerTest {
             .modelUser("")
             .build();
 
-        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var result = trainer.train(arrayGraph, arrayFeatures);
 
@@ -276,7 +276,7 @@ class GraphSageModelTrainerTest {
 
         var trainer = new GraphSageModelTrainer(
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -309,7 +309,7 @@ class GraphSageModelTrainerTest {
 
         var trainer = new GraphSageModelTrainer(
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -329,7 +329,7 @@ class GraphSageModelTrainerTest {
     void testConvergence() {
         var trainer = new GraphSageModelTrainer(
             configBuilder.modelName("convergingModel:)").tolerance(100.0).epochs(10).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -355,13 +355,13 @@ class GraphSageModelTrainerTest {
 
         var trainResultWithoutSampling = new GraphSageModelTrainer(
             configBuilder.maybeBatchSamplingRatio(1.0).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).train(unweightedGraph, features);
 
         var trainResultWithSampling = new GraphSageModelTrainer(
             configBuilder.maybeBatchSamplingRatio(0.01).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).train(unweightedGraph, features);
 
@@ -386,7 +386,7 @@ class GraphSageModelTrainerTest {
 
         var result = new GraphSageModelTrainer(
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).train(unweightedGraph, features);
 
@@ -404,8 +404,8 @@ class GraphSageModelTrainerTest {
             .concurrency(1)
             .build();
 
-        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-        var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var otherTrainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var result = trainer.train(unweightedGraph, features);
         var otherResult = otherTrainer.train(unweightedGraph, features);
@@ -424,8 +424,8 @@ class GraphSageModelTrainerTest {
             .batchSize(5)
             .build();
 
-        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-        var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var trainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var otherTrainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var result = trainer.train(unweightedGraph, features);
         var otherResult = otherTrainer.train(unweightedGraph, features);

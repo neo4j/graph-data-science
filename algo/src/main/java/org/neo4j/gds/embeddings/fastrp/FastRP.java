@@ -23,8 +23,8 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -222,7 +222,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             );
 
             ParallelUtil.parallelPartitionsConsume(
-                RunWithConcurrency.builder().executor(Pools.DEFAULT).concurrency(concurrency),
+                RunWithConcurrency.builder().executor(DefaultPool.INSTANCE).concurrency(concurrency),
                 partitions.stream(),
                 taskSupplier
             );

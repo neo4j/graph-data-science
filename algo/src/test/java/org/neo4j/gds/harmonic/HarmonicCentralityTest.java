@@ -24,7 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -67,7 +67,7 @@ public class HarmonicCentralityTest {
         var harmonicCentrality = new HarmonicCentrality(
             graph,
             1,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -89,7 +89,7 @@ public class HarmonicCentralityTest {
         var algo = new HarmonicCentrality(
             graph,
             1,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 

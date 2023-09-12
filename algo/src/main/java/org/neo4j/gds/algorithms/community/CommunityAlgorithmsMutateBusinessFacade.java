@@ -37,7 +37,7 @@ import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
@@ -350,7 +350,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             var communityStatistics = CommunityStatistics.communityStats(
                 nodePropertyValues.nodeCount(),
                 communityFunctionSupplier.communityFunction(result),
-                Pools.DEFAULT,
+                DefaultPool.INSTANCE,
                 configuration.concurrency(),
                 statisticsComputationInstructions
             );

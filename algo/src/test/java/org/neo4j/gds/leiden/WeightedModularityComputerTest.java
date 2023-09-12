@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -84,7 +84,7 @@ class WeightedModularityComputerTest {
             1.0 / (4.0 * graph.relationshipCount()),
             1.0 / (4.0 * graph.relationshipCount()),
             4,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
         assertThat(modularity).isCloseTo(0.4230, Offset.offset(1e-3));
@@ -103,7 +103,7 @@ class WeightedModularityComputerTest {
             Direction.UNDIRECTED,
             localCommunities,
             1,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             1,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -117,7 +117,7 @@ class WeightedModularityComputerTest {
             1.0 / (4 * graph.relationshipCount()),
             1.0 / (4 * graph.relationshipCount()),
             4,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
         assertThat(modularity).isCloseTo(0.4230, Offset.offset(1e-3));

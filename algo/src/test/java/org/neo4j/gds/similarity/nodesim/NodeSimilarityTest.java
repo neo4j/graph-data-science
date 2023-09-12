@@ -32,7 +32,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -297,7 +297,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -318,7 +318,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -339,7 +339,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().concurrency(concurrency).topN(1).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -360,7 +360,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             writeConfigBuilder().concurrency(concurrency).bottomN(1).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -384,7 +384,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().topK(1).concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -409,7 +409,7 @@ final class NodeSimilarityTest {
                 .topK(10)
                 .bottomK(1)
                 .build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -439,7 +439,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -463,7 +463,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().degreeCutoff(2).concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -485,7 +485,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             undirectedGraph,
             streamConfigBuilder().concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         Set<SimilarityResult> result = nodeSimilarity.compute()
@@ -498,7 +498,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             naturalGraph,
             streamConfigBuilder().concurrency(1).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         var result1 = nodeSimilarity.compute()
@@ -507,7 +507,7 @@ final class NodeSimilarityTest {
         nodeSimilarity = NodeSimilarity.create(
             naturalUnionGraph,
             streamConfigBuilder().concurrency(1).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         var result2 = nodeSimilarity.compute()
@@ -524,7 +524,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             writeConfigBuilder().concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -575,7 +575,7 @@ final class NodeSimilarityTest {
                 .topK(100)
                 .topN(1)
                 .build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -613,7 +613,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().concurrency(concurrency).topN(1).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -641,7 +641,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().concurrency(concurrency).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -859,7 +859,7 @@ final class NodeSimilarityTest {
         NodeSimilarity.create(
             graph,
             config,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
 
@@ -899,7 +899,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
             streamConfigBuilder().concurrency(1).similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -918,7 +918,7 @@ final class NodeSimilarityTest {
                 .concurrency(1)
                 .similarityMetric(MetricSimilarityComputer.parse("ovErLaP"))
                 .build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -961,7 +961,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             naturalGraph,
             streamConfigBuilder().upperDegreeCutoff(upperBound).degreeCutoff(lowBound).build(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

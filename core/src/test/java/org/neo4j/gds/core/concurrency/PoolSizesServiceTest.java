@@ -17,22 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.core.concurrency;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.concurrency.PoolSizesService;
 
-public class TriangleStreamFactory extends GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Override
-    public String taskName() {
-        return "TriangleStream";
+class PoolSizesServiceTest {
+
+    @Test
+    void openGdsPoolSizesByDefault() {
+        var poolSizes = PoolSizesService.poolSizes();
+
+        assertThat(poolSizes.corePoolSize()).isEqualTo(4);
+        assertThat(poolSizes.maxPoolSize()).isEqualTo(4);
     }
 
-    @Override
-    public TriangleStream build(Graph graph, TriangleCountBaseConfig configuration, ProgressTracker progressTracker) {
-        return TriangleStream.create(graph, DefaultPool.INSTANCE, configuration.concurrency());
-    }
 }

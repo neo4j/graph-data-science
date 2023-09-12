@@ -36,7 +36,7 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -155,7 +155,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
 
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -204,7 +204,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
 
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -253,7 +253,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
 
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -304,7 +304,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
 
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -340,7 +340,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -457,7 +457,7 @@ class LouvainTest {
                     config.tolerance(),
                     config.concurrency(),
                     ProgressTracker.NULL_TRACKER,
-                    Pools.DEFAULT
+                    DefaultPool.INSTANCE
 
                 );
                 louvain.setTerminationFlag(terminationFlag);
@@ -494,7 +494,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             progressTracker,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
 
         );
 
@@ -522,7 +522,7 @@ class LouvainTest {
             config.tolerance(),
             config.concurrency(),
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
 
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -554,7 +554,7 @@ class LouvainTest {
             TOLERANCE_DEFAULT,
             4,
             ProgressTracker.NULL_TRACKER,
-            Pools.DEFAULT
+            DefaultPool.INSTANCE
         );
 
         var result = louvain.compute();
