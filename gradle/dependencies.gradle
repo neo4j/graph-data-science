@@ -12,7 +12,6 @@ ext {
         '5.9': properties.getOrDefault('neo4jVersion59', '5.9.0'),
         '5.10': properties.getOrDefault('neo4jVersion510', '5.10.0'),
         '5.11': properties.getOrDefault('neo4jVersion511', '5.11.0'),
-        '5.12': properties.getOrDefault('neo4jVersion511', '5.12.0'),
         '5.12': properties.getOrDefault('neo4jVersion512', '5.12.0'),
     ]
 
