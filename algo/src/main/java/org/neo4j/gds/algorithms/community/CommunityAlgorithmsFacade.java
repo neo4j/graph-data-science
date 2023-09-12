@@ -29,6 +29,9 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.conductance.ConductanceAlgorithmFactory;
+import org.neo4j.gds.conductance.ConductanceBaseConfig;
+import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -267,6 +270,21 @@ public class CommunityAlgorithmsFacade {
         );
     }
 
+    AlgorithmComputationResult<ConductanceResult> conductance(
+        String graphName,
+        ConductanceBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new ConductanceAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
 
     private <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
         String graphName,

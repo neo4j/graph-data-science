@@ -39,7 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ConductanceConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+public interface ConductanceBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Configuration.ConvertWith(method = "validatePropertyName")
     String communityProperty();

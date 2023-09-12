@@ -24,6 +24,8 @@ import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
@@ -233,6 +235,23 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.k1Coloring(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<ConductanceResult> conductance(
+        String graphName,
+        ConductanceStreamConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.communityAlgorithmsFacade.conductance(
             graphName,
             config,
             user,

@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.conductance;
+package org.neo4j.gds.procedures.community.conductance;
 
 @SuppressWarnings("unused")
-public class StreamResult {
+public class ConductanceStreamResult {
 
     public final long community;
     public final double conductance;
 
-    public StreamResult(long community, double conductance) {
+    public ConductanceStreamResult(long community, double conductance) {
         this.community = community;
         this.conductance = conductance;
     }

@@ -26,7 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ConductanceStreamConfig extends ConductanceConfig {
+public interface ConductanceStreamConfig extends ConductanceBaseConfig {
 
     static ConductanceStreamConfig of(CypherMapWrapper config) {
         return new ConductanceStreamConfigImpl(config);

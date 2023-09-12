@@ -25,6 +25,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -40,6 +41,7 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
+import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
@@ -475,6 +477,27 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<ConductanceStreamResult> conductanceStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(
+            configuration,
+            ConductanceStreamConfig::of,
+            algorithmMetaDataSetter
+        );
+
+        var computationResult = algorithmsStreamBusinessFacade.conductance(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return ConductanceComputationResultTransformer.toStreamResult(computationResult);
     }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(

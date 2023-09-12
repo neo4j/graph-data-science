@@ -45,14 +45,14 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
     private Graph graph;
     private final ExecutorService executor;
-    private final ConductanceConfig config;
+    private final ConductanceBaseConfig config;
     private final WeightTransformer weightTransformer;
     private final NodePropertyValues communityProperties;
 
     public Conductance(
         Graph graph,
         ExecutorService executor,
-        ConductanceConfig config,
+        ConductanceBaseConfig config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
