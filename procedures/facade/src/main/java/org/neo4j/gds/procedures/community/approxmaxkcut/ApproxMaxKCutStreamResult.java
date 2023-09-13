@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.approxmaxkcut;
+package org.neo4j.gds.procedures.community.approxmaxkcut;
 
 @SuppressWarnings("unused")
-public class StreamResult {
+public class ApproxMaxKCutStreamResult {
 
     public final long nodeId;
     public final long communityId;
 
-    public StreamResult(long nodeId, long communityId) {
+    public ApproxMaxKCutStreamResult(long nodeId, long communityId) {
         this.nodeId = nodeId;
         this.communityId = communityId;
     }

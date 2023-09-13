@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -149,7 +149,7 @@ final class ApproxMaxKCutTest {
         int vnsMaxNeighborhoodOrder,
         int concurrency
     ) {
-        var configBuilder = ImmutableApproxMaxKCutConfig.builder()
+        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
             .minimize(minimize)
             .concurrency(concurrency)
             .k((byte) 2)
@@ -204,7 +204,7 @@ final class ApproxMaxKCutTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void respectMinCommunitySizes(int concurrency) {
-        var configBuilder = ImmutableApproxMaxKCutConfig.builder()
+        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
             .concurrency(concurrency)
             .minCommunitySizes(LongStream.of(1, 6).boxed().collect(Collectors.toList()));
         if (concurrency > 1) {
@@ -232,13 +232,13 @@ final class ApproxMaxKCutTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 2})
     void progressLogging(int vnsMaxNeighborhoodOrder) {
-        var configBuilder = ImmutableApproxMaxKCutConfig.builder();
+        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder();
         configBuilder.vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder);
 
         var config = configBuilder.build();
 
         var log = Neo4jProxy.testLog();
-        var approxMaxKCut = new ApproxMaxKCutFactory<>().build(
+        var approxMaxKCut = new ApproxMaxKCutAlgorithmFactory<>().build(
             maxGraph,
             config,
             log,
@@ -406,7 +406,7 @@ final class ApproxMaxKCutTest {
     @ParameterizedTest
     @MethodSource("configParamsForMemoryEstimationTest")
     void memoryEstimation(long nodeCount, byte k, boolean weighted, int vnsMaxNeighborhoodOrder, int concurrency) {
-        var configBuilder = ImmutableApproxMaxKCutConfig.builder();
+        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder();
 
         configBuilder.k(k);
         if (weighted) {
@@ -420,7 +420,7 @@ final class ApproxMaxKCutTest {
         var expectedMemory = memUsageHelper(nodeCount, k, vnsMaxNeighborhoodOrder > 0);
 
         assertMemoryEstimation(
-            () -> new ApproxMaxKCutFactory<>().memoryEstimation(config),
+            () -> new ApproxMaxKCutAlgorithmFactory<>().memoryEstimation(config),
             nodeCount,
             concurrency,
             MemoryRange.of(expectedMemory)

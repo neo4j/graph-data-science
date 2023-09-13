@@ -20,7 +20,7 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutBaseConfig;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ final class ApproxMaxKCutConfigTest {
 
     @Test
     void invalidRandomParameters() {
-        var configBuilder = ImmutableApproxMaxKCutConfig.builder()
+        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
             .concurrency(4)
             .randomSeed(1337L);
         assertThrows(IllegalArgumentException.class, configBuilder::build);
@@ -38,12 +38,12 @@ final class ApproxMaxKCutConfigTest {
 
     @Test
     void invalidMinCommunitySizes() {
-        var minConfigBuilder = ImmutableApproxMaxKCutConfig.builder()
+        var minConfigBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
             .minimize(true)
             .minCommunitySizes(List.of(0L, 1L));
         assertThrows(IllegalArgumentException.class, minConfigBuilder::build);
 
-        var maxConfigBuilder = ImmutableApproxMaxKCutConfig.builder()
+        var maxConfigBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
             .minimize(false)
             .minCommunitySizes(List.of(-1L, 1L));
         assertThrows(IllegalArgumentException.class, maxConfigBuilder::build);

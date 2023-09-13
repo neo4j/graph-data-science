@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.community;
 
 import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
@@ -37,6 +38,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -468,6 +470,38 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             () -> LocalClusteringCoefficientSpecificFields.EMPTY
         );
     }
+
+    public NodePropertyMutateResult<ApproxMaxKCutSpecificFields> approxMaxKCut(
+        String graphName,
+        ApproxMaxKCutMutateConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.approxMaxKCut(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+
+        return mutateNodeProperty(
+            algorithmResult,
+            configuration,
+            ((result, configuration1) -> {
+                return CommunityResultCompanion.nodePropertyValues(
+                    false,
+                    false,
+                    NodePropertyValuesAdapter.adapt(result.candidateSolution())
+                );
+            }),
+            (result) -> new ApproxMaxKCutSpecificFields(
+                result.cutCost()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> ApproxMaxKCutSpecificFields.EMPTY
+        );
+    }
+
 
     <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,

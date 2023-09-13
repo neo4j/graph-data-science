@@ -20,10 +20,10 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
-import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.collections.ha.HugeByteArray;
+import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
@@ -35,7 +35,7 @@ class VariableNeighborhoodSearch {
     private final Graph graph;
     private final SplittableRandom random;
     private final ApproxMaxKCut.Comparator comparator;
-    private final ApproxMaxKCutConfig config;
+    private final ApproxMaxKCutBaseConfig config;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
     private final AtomicDouble[] costs;
@@ -47,7 +47,7 @@ class VariableNeighborhoodSearch {
         Graph graph,
         SplittableRandom random,
         ApproxMaxKCut.Comparator comparator,
-        ApproxMaxKCutConfig config,
+        ApproxMaxKCutBaseConfig config,
         LocalSearch localSearch,
         HugeByteArray[] candidateSolutions,
         AtomicDouble[] costs,

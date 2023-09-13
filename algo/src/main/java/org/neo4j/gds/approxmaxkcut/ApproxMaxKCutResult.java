@@ -17,19 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.approxmaxkcut.config;
+package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.CommunitySizeConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 
 @ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutBaseConfig, CommunitySizeConfig {
+public interface ApproxMaxKCutResult {
+    // Value at index `i` is the idx of the community to which node with id `i` belongs.
+    HugeByteArray candidateSolution();
 
-    static ApproxMaxKCutStreamConfig of(CypherMapWrapper config) {
-        return new ApproxMaxKCutStreamConfigImpl(config);
+    double cutCost();
+
+    static ApproxMaxKCutResult of(
+        HugeByteArray candidateSolution,
+        double cutCost
+    ) {
+        return ImmutableApproxMaxKCutResult
+            .builder()
+            .candidateSolution(candidateSolution)
+            .cutCost(cutCost)
+            .build();
     }
 }

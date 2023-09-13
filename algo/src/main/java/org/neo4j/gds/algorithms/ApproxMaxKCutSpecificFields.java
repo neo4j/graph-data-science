@@ -17,26 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.approxmaxkcut;
+package org.neo4j.gds.algorithms;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.ha.HugeByteArray;
+public class ApproxMaxKCutSpecificFields {
+    private final double cutCost;
 
-@ValueClass
-public interface MaxKCutResult {
-    // Value at index `i` is the idx of the community to which node with id `i` belongs.
-    HugeByteArray candidateSolution();
-
-    double cutCost();
-
-    static MaxKCutResult of(
-        HugeByteArray candidateSolution,
+    public final static  ApproxMaxKCutSpecificFields EMPTY = new ApproxMaxKCutSpecificFields(0);
+    public ApproxMaxKCutSpecificFields(
         double cutCost
     ) {
-        return ImmutableMaxKCutResult
-            .builder()
-            .candidateSolution(candidateSolution)
-            .cutCost(cutCost)
-            .build();
+
+        this.cutCost = cutCost;
     }
+
+    public double cutCost() {
+
+        return cutCost;
+    }
+
 }

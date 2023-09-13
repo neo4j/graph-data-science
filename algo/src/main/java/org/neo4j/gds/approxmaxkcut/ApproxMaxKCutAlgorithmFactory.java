@@ -21,7 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -34,9 +34,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends GraphAlgorithmFactory<ApproxMaxKCut, CONFIG> {
+public class ApproxMaxKCutAlgorithmFactory<CONFIG extends ApproxMaxKCutBaseConfig> extends GraphAlgorithmFactory<ApproxMaxKCut, CONFIG> {
 
-    public ApproxMaxKCutFactory() {
+    public ApproxMaxKCutAlgorithmFactory() {
         super();
     }
 
