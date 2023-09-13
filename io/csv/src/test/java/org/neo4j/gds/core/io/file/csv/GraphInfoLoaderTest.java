@@ -69,6 +69,21 @@ class GraphInfoLoaderTest {
         assertThat(graphInfo.inverseIndexedRelationshipTypes()).containsExactly(RelationshipType.of("REL"), RelationshipType.of("REL1"));
     }
 
+    @Test
+    void shouldHandleEmptyRelCountsAndInverseIndexRelTypes(@TempDir Path exportDir) throws IOException {
+        var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts",  "inverseIndexedRelTypes"),
+            String.join(", ",  "my-database", "19", "", "")
+        );
+        FileUtils.writeLines(graphInfoFile, lines);
+
+        var graphInfoLoader = new GraphInfoLoader(exportDir, CSV_MAPPER);
+        var graphInfo = graphInfoLoader.load();
+
+        assertThat(graphInfo.relationshipTypeCounts()).isEmpty();
+    }
+
     /**
      * Test for backwards compatibility by including `databaseId`
      */
