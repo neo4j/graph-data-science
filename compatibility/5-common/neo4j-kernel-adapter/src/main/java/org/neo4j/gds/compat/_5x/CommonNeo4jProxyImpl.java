@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._5x;
 
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
@@ -320,11 +321,13 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public org.neo4j.logging.Log getUserLog(org.neo4j.logging.internal.LogService logService, Class<?> loggingClass) {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public org.neo4j.logging.Log getInternalLog(
         org.neo4j.logging.internal.LogService logService,
         Class<?> loggingClass
@@ -357,6 +360,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public org.neo4j.kernel.impl.store.format.RecordFormats selectRecordFormatForStore(
         org.neo4j.io.layout.DatabaseLayout databaseLayout,
         org.neo4j.io.fs.FileSystemAbstraction fs,
@@ -393,6 +397,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public org.neo4j.io.layout.Neo4jLayout neo4jLayout(org.neo4j.configuration.Config config) {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
@@ -408,6 +413,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public org.neo4j.ssl.config.SslPolicyLoader createSllPolicyLoader(
         org.neo4j.io.fs.FileSystemAbstraction fileSystem,
         org.neo4j.configuration.Config config,
@@ -417,6 +423,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public org.neo4j.kernel.impl.store.format.RecordFormats recordFormatSelector(
         String databaseName,
         org.neo4j.configuration.Config databaseConfig,
@@ -446,11 +453,13 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat API")
     public org.neo4j.kernel.api.procedure.CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat API")
     public org.neo4j.kernel.api.procedure.CallableUserAggregationFunction callableUserAggregationFunction(
         CompatUserAggregationFunction function
     ) {
