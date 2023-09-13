@@ -26,6 +26,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -43,6 +44,7 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
+import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
@@ -532,7 +534,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, ApproxMaxKCutStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.approxMaxKCut(
+        var computationResult = streamBusinessFacade.approxMaxKCut(
             graphName,
             streamConfig,
             user,
@@ -540,6 +542,22 @@ public class CommunityProcedureFacade {
         );
 
         return ApproxMaxKCutComputationResultTransformer.toStreamResult(computationResult, streamConfig);
+    }
+
+    public Stream<ApproxMaxKCutMutateResult> approxMaxKCutMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var streamConfig = createMutateConfig(configuration, ApproxMaxKCutMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.approxMaxKCut(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
     }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
