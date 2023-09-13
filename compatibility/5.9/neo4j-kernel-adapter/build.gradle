@@ -29,6 +29,7 @@ if (ver.'neo4j'.startsWith('5.')) {
         compileOnly group: 'org.neo4j.community', name: 'it-test-support', version: neos.'5.9'
 
         implementation project(':neo4j-kernel-adapter-api')
+        implementation project(':neo4j-kernel-adapter-5-common')
     }
 } else {
     multiRelease {
@@ -61,5 +62,6 @@ if (ver.'neo4j'.startsWith('5.')) {
         java17CompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
         java17Implementation project(':neo4j-kernel-adapter-api')
+        java17Implementation project(':neo4j-kernel-adapter-5-common')
     }
 }
