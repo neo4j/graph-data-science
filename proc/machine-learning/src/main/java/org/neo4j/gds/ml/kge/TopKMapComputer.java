@@ -114,12 +114,13 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                                     if (!Double.isNaN(similarity)) {
                                         topKMap.put(node1, node2, similarity);
                                     }
-                                    progressTracker.logProgress();
+
                                 });
                         });
                     }
                 );
             }
+            progressTracker.logProgress();
         }
 
         progressTracker.endSubTask();
