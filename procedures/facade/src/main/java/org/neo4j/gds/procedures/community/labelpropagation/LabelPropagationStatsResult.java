@@ -31,7 +31,7 @@ public class LabelPropagationStatsResult extends StandardStatsResult {
     public final long communityCount;
     public final Map<String, Object> communityDistribution;
 
-    LabelPropagationStatsResult(
+    public LabelPropagationStatsResult(
         long ranIterations,
         boolean didConverge,
         long communityCount,

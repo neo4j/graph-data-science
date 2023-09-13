@@ -21,14 +21,17 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 
 import java.util.stream.LongStream;
@@ -80,6 +83,22 @@ final class LabelPropagationComputationResultTransformer {
             computationResult.mutateMillis(),
             computationResult.nodePropertiesWritten(),
             mutateConfig.toMap()
+        );
+    }
+
+    static LabelPropagationStatsResult toStatsResult(
+        StatsResult<LabelPropagationSpecificFields> computationResult,
+        LabelPropagationStatsConfig statsConfig
+    ) {
+        return new LabelPropagationStatsResult(
+            computationResult.algorithmSpecificFields().ranIterations(),
+            computationResult.algorithmSpecificFields().didConverge(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            statsConfig.toMap()
         );
     }
 }

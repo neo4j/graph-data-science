@@ -21,12 +21,14 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.wcc.WccStatsConfig;
@@ -68,6 +70,38 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<LabelPropagationSpecificFields> labelPropagation(
+        String graphName,
+        LabelPropagationStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result.labels()::get),
+            (result, componentCount, communitySummary) -> {
+                return LabelPropagationSpecificFields.from(
+                    result.ranIterations(),
+                    result.didConverge(),
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LabelPropagationSpecificFields.EMPTY
+        );
+    }
+
 
     /*
     By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields
