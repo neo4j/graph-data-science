@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kcore;
+package org.neo4j.gds.procedures.community.kcore;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class KCoreDecompositionStatsResult extends StandardStatsResult {
 
     public final long degeneracy;
 
-    public StatsResult(
+    public KCoreDecompositionStatsResult(
         long degeneracy,
         long preProcessingMillis,
         long computeMillis,
@@ -39,17 +39,17 @@ public class StatsResult extends StandardStatsResult {
         this.degeneracy = degeneracy;
     }
 
-    static final class Builder extends AbstractResultBuilder<StatsResult> {
+    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionStatsResult> {
 
         private long degeneracy;
 
-        Builder withDegeneracy(long degeneracy) {
+        public Builder withDegeneracy(long degeneracy) {
             this.degeneracy = degeneracy;
             return this;
         }
 
-        public StatsResult build() {
-            return new StatsResult(
+        public KCoreDecompositionStatsResult build() {
+            return new KCoreDecompositionStatsResult(
                 degeneracy,
                 preProcessingMillis,
                 computeMillis,

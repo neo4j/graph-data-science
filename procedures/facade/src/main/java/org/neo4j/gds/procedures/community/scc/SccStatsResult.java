@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scc;
+package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -25,12 +25,12 @@ import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class SccStatsResult extends StandardStatsResult {
 
     public final long componentCount;
     public final Map<String, Object> componentDistribution;
 
-    public StatsResult(
+    public SccStatsResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -44,15 +44,15 @@ public class StatsResult extends StandardStatsResult {
         this.componentDistribution = componentDistribution;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<StatsResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<SccStatsResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public StatsResult buildResult() {
-            return new StatsResult(
+        public SccStatsResult buildResult() {
+            return new SccStatsResult(
                 maybeCommunityCount.orElse(0L),
                 communityHistogramOrNull(),
                 preProcessingMillis,
@@ -62,12 +62,12 @@ public class StatsResult extends StandardStatsResult {
             );
         }
 
-        public StatsResult.Builder buildHistogram(boolean buildHistogram) {
+        public SccStatsResult.Builder buildHistogram(boolean buildHistogram) {
             this.buildHistogram = buildHistogram;
             return this;
         }
 
-        public StatsResult.Builder buildCommunityCount(boolean buildCommunityCount) {
+        public SccStatsResult.Builder buildCommunityCount(boolean buildCommunityCount) {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }

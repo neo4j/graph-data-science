@@ -34,10 +34,12 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
@@ -50,9 +52,11 @@ import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
@@ -60,6 +64,7 @@ import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
+import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
@@ -68,6 +73,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResul
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -129,7 +135,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createMutateConfig(configuration, WccMutateConfig::of);
+        var config = createConfig(configuration, WccMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.wcc(
             graphName,
@@ -146,7 +152,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = WccStatsConfig.of(CypherMapWrapper.create(configuration));
+        var config = createConfig(configuration, WccStatsConfig::of);
 
         var computationResult = statsBusinessFacade.wcc(
             graphName,
@@ -187,7 +193,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createMutateConfig(configuration, KCoreDecompositionMutateConfig::of);
+        var config = createConfig(configuration, KCoreDecompositionMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.kCore(
             graphName,
@@ -198,6 +204,23 @@ public class CommunityProcedureFacade {
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
     }
+
+    public Stream<KCoreDecompositionStatsResult> kCoreStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, KCoreDecompositionStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.kCore(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
     // K-Core Decomposition end
 
     public Stream<LouvainStreamResult> louvainStream(
@@ -222,7 +245,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createMutateConfig(configuration, LouvainMutateConfig::of);
+        var config = createConfig(configuration, LouvainMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.louvain(
             graphName,
@@ -257,7 +280,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createMutateConfig(configuration, LeidenMutateConfig::of);
+        var config = createConfig(configuration, LeidenMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.leiden(
             graphName,
@@ -293,7 +316,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createMutateConfig(configuration, SccMutateConfig::of);
+        var config = createConfig(configuration, SccMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.scc(
             graphName,
@@ -304,6 +327,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(SccComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<SccStatsResult> sccStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, SccStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.scc(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
+        );
+
+        return Stream.of(SccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<TriangleCountStreamResult> triangleCountStream(
@@ -328,7 +368,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createMutateConfig(configuration, TriangleCountMutateConfig::of);
+        var config = createConfig(configuration, TriangleCountMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.triangleCount(
             graphName,
@@ -361,7 +401,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createMutateConfig(configuration, LabelPropagationMutateConfig::of);
+        var mutateConfig = createConfig(configuration, LabelPropagationMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.labelPropagation(
             graphName,
@@ -372,6 +412,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(LabelPropagationComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
+    }
+
+    public Stream<LabelPropagationStatsResult> labelPropagationStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, LabelPropagationStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.labelPropagation(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LabelPropagationComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<ModularityStreamResult> modularityStream(
@@ -413,7 +470,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createMutateConfig(configuration, KmeansMutateConfig::of);
+        var mutateConfig = createConfig(configuration, KmeansMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.kmeans(
             graphName,
@@ -453,7 +510,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createMutateConfig(configuration, LocalClusteringCoefficientMutateConfig::of);
+        var mutateConfig = createConfig(configuration, LocalClusteringCoefficientMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.localClusteringCoefficient(
             graphName,
@@ -490,7 +547,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createMutateConfig(
+        var mutateConfig = createConfig(
             configuration,
             K1ColoringMutateConfig::of
         );
@@ -548,7 +605,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createMutateConfig(configuration, ApproxMaxKCutMutateConfig::of);
+        var streamConfig = createConfig(configuration, ApproxMaxKCutMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.approxMaxKCut(
             graphName,
@@ -570,7 +627,7 @@ public class CommunityProcedureFacade {
         return config;
     }
 
-    private <C extends AlgoBaseConfig> C createMutateConfig(
+    private <C extends AlgoBaseConfig> C createConfig(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator
     ) {

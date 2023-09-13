@@ -92,7 +92,7 @@ class KCoreDecompositionStatsProcTest extends BaseProcTest {
             assertThat(row.getNumber("postProcessingMillis"))
                 .as("postProcessingMillis")
                 .asInstanceOf(LONG)
-                .isEqualTo(-1L);
+                .isEqualTo(0L);
 
             assertThat(row.getNumber("degeneracy"))
                 .as("degeneracy")

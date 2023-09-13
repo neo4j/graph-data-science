@@ -21,11 +21,14 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
+import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
+import org.neo4j.gds.scc.SccStatsConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -57,6 +60,20 @@ final class SccComputationResultTransformer {
             computationResult.mutateMillis(),
             computationResult.nodePropertiesWritten(),
             computationResult.configuration().toMap()
+        );
+    }
+
+    static SccStatsResult toStatsResult(
+        StatsResult<StandardCommunityStatisticsSpecificFields> computationResult,
+        SccStatsConfig config
+    ) {
+        return new SccStatsResult(
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            config.toMap()
         );
     }
 
