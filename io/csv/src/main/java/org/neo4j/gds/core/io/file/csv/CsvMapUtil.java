@@ -42,6 +42,10 @@ public final class CsvMapUtil {
         Function<String, KEY> keyParser,
         Function<String, VALUE> valueParser
     ) {
+        if (mapString.isEmpty()) {
+            return Map.of();
+        }
+
         var listElements = mapString.split(String.valueOf(LIST_DELIMITER));
         var map = new HashMap<KEY, VALUE>();
         for (int i = 0; i < listElements.length; i+=2) {
