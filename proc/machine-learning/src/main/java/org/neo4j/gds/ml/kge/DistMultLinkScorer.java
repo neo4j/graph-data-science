@@ -19,39 +19,40 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.FloatArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
 public class DistMultLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;
 
-    Vector relationshipTypeEmbedding;
+    float[] relationshipTypeEmbedding;
 
     long currentSourceNode;
 
-    Vector currentCandidateTarget;
+    float[] currentCandidateTarget;
 
 
-    DistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+    DistMultLinkScorer(NodePropertyValues embeddings, FloatArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
-        this.relationshipTypeEmbedding = new Vector(relationshipTypeEmbedding.toArray());
+        this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = new Vector(embeddings.doubleArrayValue(currentSourceNode))
-            .elementwiseProduct(relationshipTypeEmbedding);
+        this.currentCandidateTarget = embeddings.floatArrayValue(currentSourceNode);
+        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
+            this.currentCandidateTarget[i] *= relationshipTypeEmbedding[i];
+        }
     }
 
     @Override
     public double computeScore(long targetNode) {
         double res = 0.0;
-        var targetVector = embeddings.doubleArrayValue(targetNode);
-        for (int i = 0; i < currentCandidateTarget.length(); i++) {
-            res += currentCandidateTarget.dataAt(i) * targetVector[i];
+        var targetVector = embeddings.floatArrayValue(targetNode);
+        for (int i = 0; i < currentCandidateTarget.length; i++) {
+            res += currentCandidateTarget[i] * targetVector[i];
         }
         return res;
     }

@@ -19,45 +19,42 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.FloatArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.ml.core.tensor.Vector;
-
-import static java.util.Arrays.stream;
 
 public class EuclideanDistanceLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;
 
-    Vector relationshipTypeEmbedding;
+    float[] relationshipTypeEmbedding;
 
     long currentSourceNode;
 
-    Vector currentCandidateTarget;
+    float[] currentCandidateTarget;
 
-    EuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+    EuclideanDistanceLinkScorer(NodePropertyValues embeddings, FloatArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
-        this.relationshipTypeEmbedding = new Vector(relationshipTypeEmbedding.toArray());
+        this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = new Vector(embeddings.doubleArrayValue(currentSourceNode))
-            .add(relationshipTypeEmbedding);
+        this.currentCandidateTarget = embeddings.floatArrayValue(currentSourceNode);
+        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
+            this.currentCandidateTarget[i] += relationshipTypeEmbedding[i];
+        }
     }
 
     @Override
     public double computeScore(long targetNode) {
-        Vector translation = currentCandidateTarget.scalarMultiply(-1)
-            .add(new Vector(embeddings.doubleArrayValue(targetNode)));
-
-        return Math.sqrt(
-            stream(translation.data())
-                .map(value -> value * value)
-                .sum()
-        );
-
+        double res = 0.0;
+        var targetVector = embeddings.floatArrayValue(targetNode);
+        for (int i = 0; i < currentCandidateTarget.length; i++) {
+            double elem = currentCandidateTarget[i] - targetVector[i];
+            res += elem * elem;
+        }
+        return Math.sqrt(res);
     }
 
     @Override

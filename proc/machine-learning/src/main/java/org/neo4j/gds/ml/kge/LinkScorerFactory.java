@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.FloatArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 public class LinkScorerFactory {
 
-    public static LinkScorer create(ScoreFunction scoreFunction, NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+    public static LinkScorer create(ScoreFunction scoreFunction, NodePropertyValues embeddings, FloatArrayList relationshipTypeEmbedding) {
         switch (scoreFunction) {
             case TRANSE:
                 return new EuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);

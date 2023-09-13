@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.FloatArrayList;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -43,7 +43,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     private BitSet targetNodes;
 
     private String nodeEmbeddingProperty;
-    private DoubleArrayList relationshipTypeEmbedding;
+    private FloatArrayList relationshipTypeEmbedding;
     private int concurrency;
 
     private int topK;
@@ -68,7 +68,11 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.nodeEmbeddingProperty = nodeEmbeddingProperty;
-        this.relationshipTypeEmbedding = DoubleArrayList.from(relationshipTypeEmbedding.stream().mapToDouble(Double::doubleValue).toArray());
+        var array = new float[relationshipTypeEmbedding.size()];
+        for(int i = 0; i < relationshipTypeEmbedding.size(); i++){
+            array[i] = relationshipTypeEmbedding.get(i).floatValue();
+        }
+        this.relationshipTypeEmbedding = FloatArrayList.from(array);
         this.concurrency = concurrency;
         this.topK = topK;
         this.scoreFunction = scoreFunction;
@@ -82,7 +86,13 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
-        try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction, embeddings, relationshipTypeEmbedding))) {
+        try (
+            var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(
+                scoreFunction,
+                embeddings,
+                relationshipTypeEmbedding
+            ))
+        ) {
             //TODO maybe exploit symmetry of similarity function if available when there're many source target overlap
             try (var concurrentGraph = CloseableThreadLocal.withInitial(graph::concurrentCopy)){
                 ParallelUtil.parallelStreamConsume(
