@@ -39,7 +39,6 @@ public class KCoreDecompositionMutateProc extends BaseProc {
 
     @Context
     public GraphDataScience facade;
-
     @Procedure(value = "gds.kcore.mutate", mode = READ)
     @Description(KCORE_DESCRIPTION)
     public Stream<KCoreDecompositionMutateResult> mutate(

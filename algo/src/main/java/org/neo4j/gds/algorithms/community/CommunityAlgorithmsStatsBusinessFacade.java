@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
@@ -28,6 +29,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -132,6 +134,27 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         );
     }
 
+    public StatsResult<KCoreSpecificFields> kCore(
+        String graphName,
+        KCoreDecompositionStatsConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.kCore(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> new KCoreSpecificFields(result.degeneracy()),
+            intermediateResult.computeMilliseconds,
+            () -> KCoreSpecificFields.EMPTY
+        );
+    }
+
+
 
 
     /*
@@ -172,4 +195,27 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         }).orElseGet(() -> StatsResult.empty(emptyASFSupplier.get()));
 
     }
+
+    <RESULT, CONFIG extends AlgoBaseConfig, ASF> StatsResult<ASF> statsResult(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        SpecificFieldsSupplier<RESULT, ASF> specificFieldsSupplier,
+        long computeMilliseconds,
+        Supplier<ASF> emptyASFSupplier
+    ) {
+
+        return algorithmResult.result().map(result -> {
+
+            var specificFields = specificFieldsSupplier.specificFields(result);
+
+            return StatsResult.<ASF>builder()
+                .computeMillis(computeMilliseconds)
+                .postProcessingMillis(0)
+                .algorithmSpecificFields(specificFields)
+                .build();
+
+        }).orElseGet(() -> StatsResult.empty(emptyASFSupplier.get()));
+
+    }
+
+
 }

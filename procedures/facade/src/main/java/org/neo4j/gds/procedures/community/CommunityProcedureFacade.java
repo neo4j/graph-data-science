@@ -34,6 +34,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
@@ -51,6 +52,7 @@ import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
@@ -202,6 +204,23 @@ public class CommunityProcedureFacade {
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
     }
+
+    public Stream<KCoreDecompositionStatsResult> kCoreStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, KCoreDecompositionStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.kCore(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
     // K-Core Decomposition end
 
     public Stream<LouvainStreamResult> louvainStream(

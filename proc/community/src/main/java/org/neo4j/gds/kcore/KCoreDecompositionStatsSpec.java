@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 
 import java.util.stream.Stream;
 
@@ -31,7 +32,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
 @GdsCallable(name = "gds.kcore.stats", description = KCORE_DESCRIPTION, executionMode = STATS)
-public class KCoreDecompositionStatsSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStatsConfig, Stream<StatsResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionStatsConfig>> {
+public class KCoreDecompositionStatsSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStatsConfig, Stream<KCoreDecompositionStatsResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionStatsConfig>> {
     @Override
     public String name() {
         return "KCoreMutate";
@@ -48,10 +49,10 @@ public class KCoreDecompositionStatsSpec implements AlgorithmSpec<KCoreDecomposi
     }
 
     @Override
-    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStatsConfig, Stream<KCoreDecompositionStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
-            var builder = new StatsResult.Builder();
+            var builder = new KCoreDecompositionStatsResult.Builder();
 
             computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
 
