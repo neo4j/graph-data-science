@@ -24,8 +24,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.ResultBuilderFunction;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.ComputationResult;
@@ -64,7 +64,7 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of(KGE_PREDICT_MUTATE_PROPERTY))
             .concurrency(concurrency)
-            .executorService(Pools.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var similarityResultStream = computationResult.result()

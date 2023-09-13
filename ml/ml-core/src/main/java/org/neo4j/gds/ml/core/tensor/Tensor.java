@@ -109,6 +109,16 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return Dimensions.totalSize(dimensions);
     }
 
+    // TODO: figure out how to replace this one
+    public SELF elementwiseProduct(Tensor<?> other) {
+        var result = createWithSameDimensions();
+        for (int i = 0; i < data.length; i++) {
+            result.data[i] = data[i] * other.data[i];
+        }
+        return result;
+    }
+
+
     public Tensor<SELF> elementwiseProductMutate(Tensor<?> other) {
         for (int i = 0; i < data.length; i++) {
             this.data[i] = data[i] * other.data[i];
