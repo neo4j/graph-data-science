@@ -62,6 +62,7 @@ import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
+import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
@@ -70,6 +71,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResul
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -306,6 +308,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(SccComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<SccStatsResult> sccStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, SccStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.scc(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
+        );
+
+        return Stream.of(SccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<TriangleCountStreamResult> triangleCountStream(

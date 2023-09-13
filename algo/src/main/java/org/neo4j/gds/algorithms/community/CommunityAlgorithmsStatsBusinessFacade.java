@@ -31,6 +31,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.function.Supplier;
@@ -101,6 +102,36 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> LabelPropagationSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<StandardCommunityStatisticsSpecificFields> scc(
+        String graphName,
+        SccStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result::get),
+            (result, componentCount, communitySummary) -> {
+                return new StandardCommunityStatisticsSpecificFields(
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY
+        );
+    }
+
 
 
     /*

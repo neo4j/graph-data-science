@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.scc.stats", description = SCC_DESCRIPTION, executionMode = ExecutionMode.STATS)
-public class SccStatsSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStatsConfig, Stream<StatsResult>, SccAlgorithmFactory<SccStatsConfig>> {
+public class SccStatsSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStatsConfig, Stream<SccStatsResult>, SccAlgorithmFactory<SccStatsConfig>> {
 
     @Override
     public String name() {
@@ -52,16 +53,16 @@ public class SccStatsSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStatsC
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccStatsConfig, Stream<SccStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> Stream.of(resultBuilder(computationResult,executionContext).build());
     }
 
-    private AbstractResultBuilder<StatsResult> resultBuilder(
+    private AbstractResultBuilder<SccStatsResult> resultBuilder(
         ComputationResult<Scc, HugeLongArray, SccStatsConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var config = computationResult.config();
-        var statsBuilder = new StatsResult.Builder(
+        var statsBuilder = new SccStatsResult.Builder(
             executionContext.returnColumns(),
             config.concurrency()
         )
