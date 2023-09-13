@@ -129,7 +129,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             (result, configuration) -> NodePropertyValuesAdapter.adapt(result.coreValues()),
             (result) -> new KCoreSpecificFields(result.degeneracy()),
             intermediateResult.computeMilliseconds,
-            () -> new KCoreSpecificFields(0)
+            () -> KCoreSpecificFields.EMPTY
         );
     }
 
