@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularityoptimization;
+package org.neo4j.gds.procedures.community.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 
@@ -38,7 +38,7 @@ public class ModularityOptimizationMutateResult {
     public final Map<String, Object> communityDistribution;
     public final Map<String, Object> configuration;
 
-    ModularityOptimizationMutateResult(
+    public ModularityOptimizationMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -64,9 +64,9 @@ public class ModularityOptimizationMutateResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationMutateResult> {
+    public static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationMutateResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 

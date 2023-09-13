@@ -21,8 +21,10 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -36,16 +38,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityOptimizationMutateProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.modularityOptimization.mutate", mode = READ)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<ModularityOptimizationMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ModularityOptimizationMutateSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return Stream.of(facade.community().mutateModularityOptimization(graphName, configuration));
     }
 
     @Procedure(value = "gds.modularityOptimization.mutate.estimate", mode = READ)
