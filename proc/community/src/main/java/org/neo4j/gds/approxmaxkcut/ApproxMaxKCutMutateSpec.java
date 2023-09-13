@@ -40,15 +40,15 @@ import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIP
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.maxkcut.mutate", aliases = {"gds.alpha.maxkcut.mutate"}, description = APPROX_MAX_K_CUT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutMutateConfig, Stream<MutateResult>, ApproxMaxKCutFactory<ApproxMaxKCutMutateConfig>> {
+public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, ApproxMaxKCutResult, ApproxMaxKCutMutateConfig, Stream<MutateResult>, ApproxMaxKCutAlgorithmFactory<ApproxMaxKCutMutateConfig>> {
     @Override
     public String name() {
         return "ApproxMaxKCutMutate";
     }
 
     @Override
-    public ApproxMaxKCutFactory<ApproxMaxKCutMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ApproxMaxKCutFactory<>();
+    public ApproxMaxKCutAlgorithmFactory<ApproxMaxKCutMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ApproxMaxKCutAlgorithmFactory<>();
     }
 
     @Override
@@ -57,14 +57,14 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
     }
 
     @Override
-    public ComputationResultConsumer<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ApproxMaxKCut, ApproxMaxKCutResult, ApproxMaxKCutMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 CommunityProcCompanion.considerSizeFilter(
                     computationResult.config(),
                     computationResult.result()
-                        .map(MaxKCutResult::candidateSolution)
+                        .map(ApproxMaxKCutResult::candidateSolution)
                         .map(NodePropertyValuesAdapter::adapt)
                         .orElse(EmptyLongNodePropertyValues.INSTANCE)
                 )
@@ -73,12 +73,12 @@ public class ApproxMaxKCutMutateSpec implements AlgorithmSpec<ApproxMaxKCut, Max
         );
     }
         private AbstractResultBuilder<MutateResult> resultBuilder(
-            ComputationResult<ApproxMaxKCut, MaxKCutResult, ApproxMaxKCutMutateConfig> computationResult,
+            ComputationResult<ApproxMaxKCut, ApproxMaxKCutResult, ApproxMaxKCutMutateConfig> computationResult,
             ExecutionContext executionContext
      ) {
             return new MutateResult.Builder(
                 computationResult.result()
-                    .map(MaxKCutResult::cutCost)
+                    .map(ApproxMaxKCutResult::cutCost)
                     .orElse(-1d)
             );
         }

@@ -19,14 +19,24 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-@SuppressWarnings("unused")
-public class StreamResult {
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 
-    public final long nodeId;
-    public final long communityId;
+@ValueClass
+public interface ApproxMaxKCutResult {
+    // Value at index `i` is the idx of the community to which node with id `i` belongs.
+    HugeByteArray candidateSolution();
 
-    public StreamResult(long nodeId, long communityId) {
-        this.nodeId = nodeId;
-        this.communityId = communityId;
+    double cutCost();
+
+    static ApproxMaxKCutResult of(
+        HugeByteArray candidateSolution,
+        double cutCost
+    ) {
+        return ImmutableApproxMaxKCutResult
+            .builder()
+            .candidateSolution(candidateSolution)
+            .cutCost(cutCost)
+            .build();
     }
 }

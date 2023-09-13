@@ -21,12 +21,12 @@ package org.neo4j.gds.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.ParallelBytePageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -47,7 +47,7 @@ public class LocalSearch {
 
     private final Graph graph;
     private final ApproxMaxKCut.Comparator comparator;
-    private final ApproxMaxKCutConfig config;
+    private final ApproxMaxKCutBaseConfig config;
     private final ExecutorService executor;
     private final WeightTransformer weightTransformer;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
@@ -58,7 +58,7 @@ public class LocalSearch {
     public LocalSearch(
         Graph graph,
         ApproxMaxKCut.Comparator comparator,
-        ApproxMaxKCutConfig config,
+        ApproxMaxKCutBaseConfig config,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {

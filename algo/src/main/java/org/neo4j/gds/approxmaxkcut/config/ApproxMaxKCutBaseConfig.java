@@ -38,7 +38,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, SingleThreadedRandomSeedConfig {
+public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
+    RelationshipWeightConfig,
+    SingleThreadedRandomSeedConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 2, max = Byte.MAX_VALUE)

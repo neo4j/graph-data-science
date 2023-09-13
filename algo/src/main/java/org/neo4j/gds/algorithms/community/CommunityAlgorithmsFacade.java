@@ -28,6 +28,9 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutAlgorithmFactory;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceAlgorithmFactory;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
@@ -285,6 +288,23 @@ public class CommunityAlgorithmsFacade {
             databaseId
         );
     }
+
+    AlgorithmComputationResult<ApproxMaxKCutResult> approxMaxKCut(
+        String graphName,
+        ApproxMaxKCutBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new ApproxMaxKCutAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
 
     private <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
         String graphName,

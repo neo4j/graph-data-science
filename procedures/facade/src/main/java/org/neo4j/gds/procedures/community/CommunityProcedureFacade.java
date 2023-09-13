@@ -26,6 +26,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -42,6 +43,7 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
+import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
@@ -521,6 +523,23 @@ public class CommunityProcedureFacade {
         );
 
         return ConductanceComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(configuration, ApproxMaxKCutStreamConfig::of, algorithmMetaDataSetter);
+
+        var computationResult = algorithmsStreamBusinessFacade.approxMaxKCut(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return ApproxMaxKCutComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
