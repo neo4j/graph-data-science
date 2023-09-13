@@ -68,6 +68,7 @@ public class SimilarityResult implements Comparable<SimilarityResult>, Relations
                Double.compare(that.similarity, similarity) == 0;
     }
 
+
     @Override
     public int hashCode() {
         return Objects.hash(node1, node2, similarity);
