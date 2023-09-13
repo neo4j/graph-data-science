@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
@@ -28,6 +29,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,12 +80,13 @@ public class GraphStoreCatalogService {
         var graphStore = graphStoreWithConfig.graphStore();
         // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
 
-        var relationshipTypes = config.relationshipTypesFilter();
         var nodeLabels = config.nodeLabelsFilter();
 
-        // if the relationship types are empty we are getting a graph without relationships which is not what we actually want...
-        if (relationshipTypes.isEmpty()) {
+        Collection<RelationshipType> relationshipTypes;
+        if (config.projectAllRelationshipTypes()) {
             relationshipTypes = graphStore.relationshipTypes();
+        } else {
+            relationshipTypes = config.relationshipTypesFilter();
         }
 
         //if nodeLabels is empty, we are not getting any node properties

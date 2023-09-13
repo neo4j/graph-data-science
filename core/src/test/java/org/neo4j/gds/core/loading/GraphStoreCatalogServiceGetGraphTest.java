@@ -75,7 +75,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
         var configMock = mock(AlgoBaseConfig.class);
         when(configMock.nodeLabelsFilter()).thenReturn(Collections.emptySet());
-        when(configMock.relationshipTypesFilter()).thenReturn(Collections.emptySet());
+        when(configMock.projectAllRelationshipTypes()).thenReturn(true);
 
         var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
             GraphName.parse("bogus"),
@@ -118,7 +118,7 @@ class GraphStoreCatalogServiceGetGraphTest {
 
         var configMock = mock(AlgoBaseConfig.class);
         when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
-        when(configMock.relationshipTypesFilter()).thenReturn(Collections.emptySet());
+        when(configMock.projectAllRelationshipTypes()).thenReturn(true);
 
         var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
             GraphName.parse("bogus"),
@@ -237,6 +237,48 @@ class GraphStoreCatalogServiceGetGraphTest {
                         .stream()
                         .map(RelationshipType::name))
                     .containsExactly("T");
+            });
+    }
+
+    @Test
+    void shouldReturnGraphWithNoRelationshipsForEmptyRelationshipTypeFilter(SoftAssertions assertions) {
+        var serviceSpy = spy(GraphStoreCatalogService.class);
+        var graphStoreWithConfigMock = mock(GraphStoreWithConfig.class);
+        when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
+        doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
+
+        var configMock = mock(AlgoBaseConfig.class);
+        when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
+        when(configMock.projectAllRelationshipTypes()).thenReturn(false);
+        when(configMock.relationshipTypes()).thenReturn(Collections.emptyList());
+
+        var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
+            GraphName.parse("bogus"),
+            configMock,
+            Optional.empty(),
+            new User("bogusUser", false),
+            DatabaseId.EMPTY
+        );
+
+        assertThat(graphWithGraphStore.getRight()).isSameAs(graphStore);
+        assertThat(graphWithGraphStore.getLeft())
+            .isInstanceOf(Graph.class)
+            .satisfies(graph -> {
+
+                assertions.assertThat(graph.isEmpty()).isFalse();
+                assertions.assertThat(graph.nodeCount())
+                    .as("Unexpected node count")
+                    .isEqualTo(2);
+                assertions.assertThat(graph.relationshipCount())
+                    .as("Unexpected relationship count")
+                    .isZero();
+
+                assertions.assertThat(graph.schema().nodeSchema().availableLabels().stream().map(NodeLabel::name))
+                    .containsExactly("N");
+
+                assertions.assertThat(graph.schema().relationshipSchema().availableTypes())
+                    .as("The relationship schema should not contain any types")
+                    .isEmpty();
             });
     }
 }

@@ -51,6 +51,11 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     }
 
     @Configuration.Ignore
+    default boolean projectAllRelationshipTypes() {
+        return relationshipTypes().size() == 1 && relationshipTypes().contains(ElementProjection.PROJECT_ALL);
+    }
+
+    @Configuration.Ignore
     default Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
         return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes());
     }
