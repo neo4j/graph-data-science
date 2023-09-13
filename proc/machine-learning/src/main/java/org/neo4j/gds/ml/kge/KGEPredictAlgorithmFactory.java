@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Optional;
 
-public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
+public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
 
     @Override
     public TopKMapComputer build(

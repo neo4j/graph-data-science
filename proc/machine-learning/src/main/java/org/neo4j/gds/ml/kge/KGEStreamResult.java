@@ -19,15 +19,16 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+public class KGEStreamResult {
 
-@Configuration
-public interface KGEPredictMutateConfig extends KGEPredictBaseConfig, MutateRelationshipConfig {
+    public final long node1;
+    public final long node2;
+    public final double score;
 
-    static KGEPredictMutateConfig of(CypherMapWrapper userInput) {
-        return new KGEPredictMutateConfigImpl(userInput);
+    public KGEStreamResult(long node1, long node2, double score) {
+        this.node1 = node1;
+        this.node2 = node2;
+        this.score = score;
     }
 
 }
