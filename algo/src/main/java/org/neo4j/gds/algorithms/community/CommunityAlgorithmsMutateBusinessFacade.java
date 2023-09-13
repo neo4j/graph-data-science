@@ -39,7 +39,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
@@ -59,9 +58,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
@@ -85,7 +81,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -120,7 +116,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -143,7 +139,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -186,7 +182,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -234,7 +230,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -265,7 +261,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -303,7 +299,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -327,7 +323,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     ) {
 
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -417,7 +413,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         boolean computeListOfCentroids
         ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -451,7 +447,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         DatabaseId databaseId
     ) {
         // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
+        var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId)
         );
         var algorithmResult = intermediateResult.algorithmResult;
@@ -511,17 +507,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
     }
 
-    private <T> AlgorithmResultWithTiming<T> runWithTiming(Supplier<T> function) {
-
-        var computeMilliseconds = new AtomicLong();
-        T algorithmResult;
-        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-            algorithmResult = function.get();
-        }
-
-        return new AlgorithmResultWithTiming<>(algorithmResult, computeMilliseconds.get());
-    }
-
     private static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
         LongToObjectFunction<long[]> intermediateCommunitiesProvider,
         long size
@@ -539,7 +524,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         };
     }
 
-    List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
+    private List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
         if (shouldCompute) {
             var result = new ArrayList<List<Double>>();
 
@@ -554,34 +539,9 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         return null;
     }
 
-    private static final class AlgorithmResultWithTiming<T> {
-        final T algorithmResult;
-        final long computeMilliseconds;
-
-        private AlgorithmResultWithTiming(
-            T algorithmResult,
-            long computeMilliseconds
-        ) {
-            this.computeMilliseconds = computeMilliseconds;
-            this.algorithmResult = algorithmResult;
-        }
-    }
-
     // Herein lie some private functional interfaces, so we know what we're doing 🤨
     interface NodePropertyValuesMapper<R, C extends MutateNodePropertyConfig> {
         NodePropertyValues map(R result, C configuration);
-    }
-
-    interface CommunityFunctionSupplier<R> {
-        LongUnaryOperator communityFunction(R result);
-    }
-
-    interface SpecificFieldsWithCommunityStatisticsSupplier<R, ASF> {
-        ASF specificFields(R result, long componentCount, Map<String, Object> communitySummary);
-    }
-
-    interface SpecificFieldsSupplier<R, ASF> {
-        ASF specificFields(R result);
     }
 
 }

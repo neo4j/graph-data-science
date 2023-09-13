@@ -21,52 +21,43 @@ package org.neo4j.gds.procedures.community.wcc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public final class WccMutateResult extends WccStatsResult {
+@SuppressWarnings("unused")
+public class WccStatsResult extends StandardStatsResult {
 
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
+    public final long componentCount;
+    public final Map<String, Object> componentDistribution;
 
-    public WccMutateResult(
+    public WccStatsResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            componentCount,
-            componentDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.componentCount = componentCount;
+        this.componentDistribution = componentDistribution;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<WccMutateResult> {
+    static class Builder extends AbstractCommunityResultBuilder<WccStatsResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        protected WccMutateResult buildResult() {
-            return new WccMutateResult(
+        protected WccStatsResult buildResult() {
+            return new WccStatsResult(
                 maybeCommunityCount.orElse(0L),
                 communityHistogramOrNull(),
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
-                mutateMillis,
-                nodePropertiesWritten,
                 config.toMap()
             );
         }

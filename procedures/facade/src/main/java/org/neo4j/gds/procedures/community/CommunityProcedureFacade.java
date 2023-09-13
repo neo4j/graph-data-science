@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
@@ -61,6 +62,7 @@ import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStr
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
+import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
@@ -68,6 +70,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
+import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Map;
@@ -75,22 +78,25 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
-    private final CommunityAlgorithmsStreamBusinessFacade algorithmsStreamBusinessFacade;
-    private final CommunityAlgorithmsMutateBusinessFacade algorithmsMutateBusinessFacade;
+    private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
+    private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
+    private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
 
     private final ProcedureReturnColumns procedureReturnColumns;
     private final DatabaseId databaseId;
     private final User user;
 
     public CommunityProcedureFacade(
-        CommunityAlgorithmsStreamBusinessFacade algorithmsStreamBusinessFacade,
-        CommunityAlgorithmsMutateBusinessFacade algorithmsMutateBusinessFacade,
+        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
+        CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
+        CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns,
         DatabaseId databaseId,
         User user
     ) {
-        this.algorithmsStreamBusinessFacade = algorithmsStreamBusinessFacade;
-        this.algorithmsMutateBusinessFacade = algorithmsMutateBusinessFacade;
+        this.streamBusinessFacade = streamBusinessFacade;
+        this.mutateBusinessFacade = mutateBusinessFacade;
+        this.statsBusinessFacade = statsBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
         this.databaseId = databaseId;
         this.user = user;
@@ -105,7 +111,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, WccStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.wcc(
+        var computationResult = streamBusinessFacade.wcc(
             graphName,
             streamConfig,
             user,
@@ -121,7 +127,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, WccMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.wcc(
+        var computationResult = mutateBusinessFacade.wcc(
             graphName,
             config,
             user,
@@ -130,6 +136,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(WccComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<WccStatsResult> wccStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = WccStatsConfig.of(CypherMapWrapper.create(configuration));
+
+        var computationResult = statsBusinessFacade.wcc(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
+        );
+
+        return Stream.of(WccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
     // WCC end
@@ -146,7 +169,7 @@ public class CommunityProcedureFacade {
             algorithmMetaDataSetter
         );
 
-        var computationResult = algorithmsStreamBusinessFacade.kCore(
+        var computationResult = streamBusinessFacade.kCore(
             graphName,
             streamConfig,
             user,
@@ -162,7 +185,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, KCoreDecompositionMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.kCore(
+        var computationResult = mutateBusinessFacade.kCore(
             graphName,
             config,
             user,
@@ -181,7 +204,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, LouvainStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.louvain(
+        var computationResult = streamBusinessFacade.louvain(
             graphName,
             streamConfig,
             user,
@@ -197,7 +220,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, LouvainMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.louvain(
+        var computationResult = mutateBusinessFacade.louvain(
             graphName,
             config,
             user,
@@ -216,7 +239,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, LeidenStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.leiden(
+        var computationResult = streamBusinessFacade.leiden(
             graphName,
             streamConfig,
             user,
@@ -232,7 +255,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, LeidenMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.leiden(
+        var computationResult = mutateBusinessFacade.leiden(
             graphName,
             config,
             user,
@@ -252,7 +275,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, SccStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.scc(
+        var computationResult = streamBusinessFacade.scc(
             graphName,
             streamConfig,
             user,
@@ -268,7 +291,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, SccMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.scc(
+        var computationResult = mutateBusinessFacade.scc(
             graphName,
             config,
             user,
@@ -287,7 +310,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, TriangleCountStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.triangleCount(
+        var computationResult = streamBusinessFacade.triangleCount(
             graphName,
             streamConfig,
             user,
@@ -303,7 +326,7 @@ public class CommunityProcedureFacade {
     ) {
         var config = createMutateConfig(configuration, TriangleCountMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.triangleCount(
+        var computationResult = mutateBusinessFacade.triangleCount(
             graphName,
             config,
             user,
@@ -320,7 +343,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, LabelPropagationStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.labelPropagation(
+        var computationResult = streamBusinessFacade.labelPropagation(
             graphName,
             streamConfig,
             user,
@@ -336,7 +359,7 @@ public class CommunityProcedureFacade {
     ) {
         var mutateConfig = createMutateConfig(configuration, LabelPropagationMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.labelPropagation(
+        var computationResult = mutateBusinessFacade.labelPropagation(
             graphName,
             mutateConfig,
             user,
@@ -355,7 +378,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, ModularityStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.modularity(
+        var computationResult = streamBusinessFacade.modularity(
             graphName,
             streamConfig,
             user,
@@ -372,7 +395,7 @@ public class CommunityProcedureFacade {
     ) {
         var streamConfig = createStreamConfig(configuration, KmeansStreamConfig::of, algorithmMetaDataSetter);
 
-        var computationResult = algorithmsStreamBusinessFacade.kmeans(
+        var computationResult = streamBusinessFacade.kmeans(
             graphName,
             streamConfig,
             user,
@@ -388,7 +411,7 @@ public class CommunityProcedureFacade {
     ) {
         var mutateConfig = createMutateConfig(configuration, KmeansMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.kmeans(
+        var computationResult = mutateBusinessFacade.kmeans(
             graphName,
             mutateConfig,
             user,
@@ -411,7 +434,7 @@ public class CommunityProcedureFacade {
             algorithmMetaDataSetter
         );
 
-        var computationResult = algorithmsStreamBusinessFacade.localClusteringCoefficient(
+        var computationResult = streamBusinessFacade.localClusteringCoefficient(
             graphName,
             streamConfig,
             user,
@@ -428,7 +451,7 @@ public class CommunityProcedureFacade {
     ) {
         var mutateConfig = createMutateConfig(configuration, LocalClusteringCoefficientMutateConfig::of);
 
-        var computationResult = algorithmsMutateBusinessFacade.localClusteringCoefficient(
+        var computationResult = mutateBusinessFacade.localClusteringCoefficient(
             graphName,
             mutateConfig,
             user,
@@ -449,7 +472,7 @@ public class CommunityProcedureFacade {
             algorithmMetaDataSetter
         );
 
-        var computationResult = algorithmsStreamBusinessFacade.k1coloring(
+        var computationResult = streamBusinessFacade.k1coloring(
             graphName,
             streamConfig,
             user,
@@ -468,7 +491,7 @@ public class CommunityProcedureFacade {
             K1ColoringMutateConfig::of
         );
 
-        var computationResult = algorithmsMutateBusinessFacade.k1coloring(
+        var computationResult = mutateBusinessFacade.k1coloring(
             graphName,
             mutateConfig,
             user,
@@ -490,7 +513,7 @@ public class CommunityProcedureFacade {
             algorithmMetaDataSetter
         );
 
-        var computationResult = algorithmsStreamBusinessFacade.conductance(
+        var computationResult = streamBusinessFacade.conductance(
             graphName,
             streamConfig,
             user,

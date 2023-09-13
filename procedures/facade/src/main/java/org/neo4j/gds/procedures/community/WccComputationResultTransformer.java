@@ -21,11 +21,14 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
+import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
+import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.stream.LongStream;
@@ -71,6 +74,17 @@ final class WccComputationResultTransformer {
             computationResult.mutateMillis(),
             computationResult.nodePropertiesWritten(),
             computationResult.configuration().toMap()
+        );
+    }
+
+    static WccStatsResult toStatsResult(StatsResult<StandardCommunityStatisticsSpecificFields> computationResult, WccStatsConfig configuration) {
+        return new WccStatsResult(
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            configuration.toMap()
         );
     }
 }

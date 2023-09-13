@@ -33,7 +33,7 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.procedures.community.wcc.WccSpecification;
-import org.neo4j.gds.procedures.community.wcc.WccStatsSpecification;
+import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -96,7 +96,7 @@ public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
     }
 
     @SuppressWarnings("unused")
-    public static final class WriteResult extends WccStatsSpecification.StatsResult {
+    public static final class WriteResult extends WccStatsResult {
 
         public final long writeMillis;
         public final long nodePropertiesWritten;
