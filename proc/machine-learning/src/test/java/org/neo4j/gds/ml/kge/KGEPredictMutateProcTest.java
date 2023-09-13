@@ -245,4 +245,38 @@ class KGEPredictMutateProcTest extends BaseProcTest {
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
     }
+
+    @Test
+    void shouldFilterOutNodePairGivenRelTypes() {
+        var targetNodesIds = List.of("n0", "n4");
+
+        var graphStore = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db.databaseName()), "g")
+            .graphStore();
+
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.ml.kge.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED_FILTERED")
+            .addParameter("sourceNodeFilter", "N")
+            .addParameter("targetNodeFilter", targetNodesIds.stream().map(idFunction::of).collect(Collectors.toList()))
+            .addParameter("relationshipTypes", List.of("T1", "T2"))
+            .addParameter("nodeEmbeddingProperty", "emb")
+            .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
+            .addParameter("scoringFunction", "TransE")
+            .addParameter("topK", 10)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "preProcessingMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "postProcessingMillis", 0L,
+            "relationshipsWritten", 6L,  //n0-n4, n1-n0, n1-n4, n2-n0, n3-n0, n4-n0
+            "configuration", isA(Map.class)
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_FILTERED"), "score"));
+    }
 }

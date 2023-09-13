@@ -25,6 +25,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
+
 public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
 
     @Override
@@ -37,7 +39,7 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
         BitSet sourceNodes = new BitSet(graphStore.nodeCount());
         BitSet targetNodes = new BitSet(graphStore.nodeCount());
 
-        Graph graph = graphStore.getGraph();
+        Graph graph = graphStore.getGraph(configuration.relationshipTypesFilter(), Optional.empty());
 
         var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
         var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
@@ -52,7 +54,6 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
             return true;
         });
 
-
         return new TopKMapComputer(
             graph,
             sourceNodes,
@@ -60,7 +61,6 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictMutateConfig> e
             configuration.nodeEmbeddingProperty(),
             configuration.relationshipTypeEmbedding(),
             configuration.scoringFunction(),
-            (s, t) -> s != t,
             configuration.topK(),
             configuration.concurrency(),
             progressTracker

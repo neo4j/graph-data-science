@@ -50,6 +50,12 @@ public interface KGEPredictMutateConfig extends MutateRelationshipConfig, AlgoBa
         return NodeFilterSpec.noOp;
     }
 
+    @Value.Default
+    @Configuration.Key(RELATIONSHIP_TYPES_KEY)
+    default List<String> relationshipTypes() {
+        return List.of();
+    }
+
     String nodeEmbeddingProperty();
 
     //Consider using HugeList or double[] if that saves mem

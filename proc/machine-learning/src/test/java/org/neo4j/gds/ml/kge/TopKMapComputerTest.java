@@ -23,6 +23,8 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -80,7 +82,6 @@ class TopKMapComputerTest extends BaseTest {
             "emb",
             List.of(3.0, -0.5),
             TRANSE,
-            (a, b) -> a != b,
             topK,
             concurrency,
             ProgressTracker.NULL_TRACKER
@@ -119,22 +120,60 @@ class TopKMapComputerTest extends BaseTest {
             "emb",
             List.of(0.5, -0.5),
             DISTMULT,
-            (a, b) -> a != b,
             topK,
             concurrency,
             ProgressTracker.NULL_TRACKER
         );
 
         KGEPredictResult result = computer.compute();
-
-        result.topKMap().stream().forEach(System.out::println);
-
         assertTrue(assertTopKApproximatelyEquals(
                 result.topKMap().stream().collect(Collectors.toList()),
                 List.of(
                     new SimilarityResult(0L, 3L, -1.65),
                     new SimilarityResult(1L, 3L, -2.2),
                     new SimilarityResult(2L, 3L, -2.75)
+                ),
+                0.01
+            )
+        );
+
+    }
+
+    @Test
+    void shouldComputeOverCorrectFiltering() {
+        Graph graph = new StoreLoaderBuilder().databaseService(db)
+            .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
+            .putRelationshipProjectionsWithIdentifier(
+                "REL",
+                RelationshipProjection.of("REL", Orientation.NATURAL)
+            )
+            .build()
+            .graph();
+
+        var sourceNodes = create(0, 1, 2);
+        var targetNodes = create(0, 1, 2, 3);
+        var topK = 10;
+        var concurrency = 1;
+
+        var computer = new TopKMapComputer(
+            graph,
+            sourceNodes,
+            targetNodes,
+            "emb",
+            List.of(0.5, -0.5),
+            TRANSE,
+            topK,
+            concurrency,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        KGEPredictResult result = computer.compute();
+        assertTrue(assertTopKApproximatelyEquals(
+                result.topKMap().stream().collect(Collectors.toList()),
+                List.of(
+                    new SimilarityResult(0L, 3L, 3.00),
+                    new SimilarityResult(1L, 3L, 4.38),
+                    new SimilarityResult(2L, 3L, 5.78)
                 ),
                 0.01
             )

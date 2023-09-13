@@ -59,7 +59,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         String nodeEmbeddingProperty,
         List<Double> relationshipTypeEmbedding,
         ScoreFunction scoreFunction,
-        LongLongPredicate isCandidateLink,
         int topK,
         int concurrency,
         ProgressTracker progressTracker
@@ -74,7 +73,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.concurrency = concurrency;
         this.topK = topK;
         this.scoreFunction = scoreFunction;
-        this.isCandidateLink = isCandidateLink;
+        this.isCandidateLink = (s, t) -> s != t && !graph.exists(s,t);
         this.higherIsBetter = scoreFunction == ScoreFunction.DISTMULT;
     }
 
