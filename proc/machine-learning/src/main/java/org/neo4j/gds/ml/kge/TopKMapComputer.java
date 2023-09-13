@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.List;
 import java.util.stream.LongStream;
@@ -47,8 +48,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
     private int topK;
     private ScoreFunction scoreFunction;
-
-    private LongLongPredicate isCandidateLink;
 
     private boolean higherIsBetter;
 
@@ -73,7 +72,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.concurrency = concurrency;
         this.topK = topK;
         this.scoreFunction = scoreFunction;
-        this.isCandidateLink = (s, t) -> s != t && !graph.exists(s,t);
         this.higherIsBetter = scoreFunction == ScoreFunction.DISTMULT;
     }
 
@@ -86,28 +84,32 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction, embeddings, relationshipTypeEmbedding))) {
             //TODO maybe exploit symmetry of similarity function if available when there're many source target overlap
-            ParallelUtil.parallelStreamConsume(
-                new SetBitsIterable(sourceNodes).stream(),
-                concurrency,
-                terminationFlag,
-                stream -> stream
-                    .forEach(node1 -> {
-                        terminationFlag.assertRunning();
+            try (var concurrentGraph = CloseableThreadLocal.withInitial(graph::concurrentCopy)){
+                ParallelUtil.parallelStreamConsume(
+                    new SetBitsIterable(sourceNodes).stream(),
+                    concurrency,
+                    terminationFlag,
+                    stream -> {
+                        LongLongPredicate isCandidateLinkPredicate = isCandidateLink(concurrentGraph.get());
+                        stream.forEach(node1 -> {
+                            terminationFlag.assertRunning();
 
-                        LinkScorer linkScorer = threadLocalScorer.get();
-                        linkScorer.init(node1);
+                            LinkScorer linkScorer = threadLocalScorer.get();
+                            linkScorer.init(node1);
 
-                        targetNodesStream()
-                            .filter(node2 -> isCandidateLink.apply(node1, node2))
-                            .forEach(node2 -> {
-                                double similarity = linkScorer.computeScore(node2);
-                                if (!Double.isNaN(similarity)) {
-                                    topKMap.put(node1, node2, similarity);
-                                }
-                                progressTracker.logProgress();
-                            });
-                    })
-            );
+                            targetNodesStream()
+                                .filter(node2 -> isCandidateLinkPredicate.apply(node1, node2))
+                                .forEach(node2 -> {
+                                    double similarity = linkScorer.computeScore(node2);
+                                    if (!Double.isNaN(similarity)) {
+                                        topKMap.put(node1, node2, similarity);
+                                    }
+                                    progressTracker.logProgress();
+                                });
+                        });
+                    }
+                );
+            }
         }
 
         progressTracker.endSubTask();
@@ -122,5 +124,9 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
     private long estimateWorkload() {
         return sourceNodes.cardinality() * targetNodes.cardinality();
+    }
+
+    private LongLongPredicate isCandidateLink(Graph graph) {
+        return (s, t) -> s != t && !graph.exists(s,t);
     }
 }
