@@ -181,6 +181,15 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
+    @SuppressWarnings("unused")
+    protected List<StoreScan<org.neo4j.internal.kernel.api.NodeLabelIndexCursor>> partitionedNodeLabelIndexScan(
+        org.neo4j.kernel.api.KernelTransaction ktx,
+        int batchSize,
+        int... labelIds
+    ) {
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
+    }
+
     @Override
     public CompatIndexQuery rangeIndexQuery(
         int propertyKeyId,
