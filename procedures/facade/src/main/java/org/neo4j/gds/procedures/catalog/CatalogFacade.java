@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.catalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
@@ -752,6 +753,20 @@ public class CatalogFacade {
             graphName,
             configuration
         );
+
+        return Stream.of(result);
+    }
+
+    public Stream<GraphGenerationStats> generateGraph(
+        String graphName,
+        long nodeCount,
+        long averageDegree,
+        Map<String, Object> configuration
+    ) {
+        var user = user();
+        var databaseId = databaseId();
+
+        var result = businessFacade.generateGraph(user, databaseId, graphName, nodeCount, averageDegree, configuration);
 
         return Stream.of(result);
     }

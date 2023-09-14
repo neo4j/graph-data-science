@@ -31,6 +31,7 @@ import org.neo4j.gds.config.GraphRemoveGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.WriteRelationshipPropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -334,6 +335,28 @@ public class ConfigurationService {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
 
         return CommonNeighbourAwareRandomWalkConfig.of(cypherConfig);
+    }
+
+    RandomGraphGeneratorConfig parseRandomGraphGeneratorConfig(
+        User user,
+        GraphName graphName,
+        long nodeCount,
+        long averageDegree,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+
+        var configuration = RandomGraphGeneratorConfig.of(
+            user.getUsername(),
+            graphName.getValue(),
+            nodeCount,
+            averageDegree,
+            cypherConfig
+        );
+
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
     }
 
     private void ensureThereAreNoExtraConfigurationKeys(CypherMapAccess cypherConfig, BaseConfig config) {

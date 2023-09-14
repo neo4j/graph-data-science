@@ -534,6 +534,25 @@ public class GraphStoreCatalogBusinessFacadePreConditionsDecorator implements Gr
         ));
     }
 
+    @Override
+    public GraphGenerationStats generateGraph(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        long nodeCount,
+        long averageDegree,
+        Map<String, Object> configuration
+    ) {
+        return runWithPreconditionsChecked(() -> delegate.generateGraph(
+            user,
+            databaseId,
+            graphName,
+            nodeCount,
+            averageDegree,
+            configuration
+        ));
+    }
+
     private <T> T runWithPreconditionsChecked(Supplier<T> businessLogic) {
         preconditionsService.checkPreconditions();
 

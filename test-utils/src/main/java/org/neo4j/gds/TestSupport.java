@@ -69,6 +69,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.Orientation.NATURAL;
@@ -261,11 +262,19 @@ public final class TestSupport {
         });
     }
 
-
     public static void assertGraphEquals(Graph expected, Graph actual) {
         Assertions.assertEquals(expected.nodeCount(), actual.nodeCount(), "Node counts do not match.");
         Assertions.assertEquals(expected.relationshipCount(), actual.relationshipCount(), "Relationship counts do not match.");
         Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(expected), CanonicalAdjacencyMatrix.canonicalize(actual));
+    }
+
+    /**
+     * Same number of nodes and relationships, but differing topology
+     */
+    public static void assertGraphNotEquals(Graph expected, Graph actual) {
+        assertEquals(expected.nodeCount(), actual.nodeCount(), "Node counts do not match.");
+        assertEquals(expected.relationshipCount(), actual.relationshipCount(), "Relationship counts do not match.");
+        assertNotEquals(CanonicalAdjacencyMatrix.canonicalize(expected), CanonicalAdjacencyMatrix.canonicalize(actual));
     }
 
     /**
