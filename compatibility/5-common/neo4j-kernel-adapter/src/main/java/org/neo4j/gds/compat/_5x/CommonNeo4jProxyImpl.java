@@ -75,7 +75,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public long getHighId(org.neo4j.kernel.impl.store.RecordStore<? extends org.neo4j.kernel.impl.store.record.AbstractBaseRecord> recordStore) {
-        return 0;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -115,7 +115,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         PropertyReference reference,
         org.neo4j.internal.kernel.api.PropertyCursor cursor
     ) {
-
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -125,7 +125,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         PropertyReference reference,
         org.neo4j.internal.kernel.api.PropertyCursor cursor
     ) {
-
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -150,7 +150,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public boolean hasNodeLabelIndex(org.neo4j.kernel.api.KernelTransaction kernelTransaction) {
-        return false;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -215,7 +215,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         boolean needsValues,
         CompatIndexQuery query
     ) throws org.neo4j.exceptions.KernelException {
-
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -239,7 +239,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public int writeConcurrency(org.neo4j.internal.batchimport.Configuration batchImportConfiguration) {
-        return 0;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -318,7 +318,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         org.neo4j.internal.kernel.api.Read read,
         org.neo4j.internal.id.IdGeneratorFactory idGeneratorFactory
     ) {
-        return 0;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -326,7 +326,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         org.neo4j.internal.kernel.api.Read read,
         org.neo4j.internal.id.IdGeneratorFactory idGeneratorFactory
     ) {
-        return 0;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -392,12 +392,12 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public boolean isNotNumericIndex(org.neo4j.internal.schema.IndexCapability indexCapability) {
-        return false;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
     public void setAllowUpgrades(org.neo4j.configuration.Config.Builder configBuilder, boolean value) {
-
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -407,7 +407,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public void configureRecordFormat(org.neo4j.configuration.Config.Builder configBuilder, String recordFormat) {
-
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
@@ -496,7 +496,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int size,
         org.neo4j.io.pagecache.context.CursorContext cursorContext
     ) {
-
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
