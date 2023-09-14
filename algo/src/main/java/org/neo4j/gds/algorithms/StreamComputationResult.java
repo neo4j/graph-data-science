@@ -21,7 +21,6 @@ package org.neo4j.gds.algorithms;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 
 import java.util.Optional;
 
@@ -38,13 +37,11 @@ public interface StreamComputationResult<RESULT> {
 
     Graph graph();
 
-    GraphStore graphStore();
 
     static <R> StreamComputationResult<R> of(
         Optional<R> result,
-        Graph graph,
-        GraphStore graphStore
+        Graph graph
     ) {
-        return ImmutableStreamComputationResult.of(result, graph, graphStore);
+        return ImmutableStreamComputationResult.of(result, graph);
     }
 }

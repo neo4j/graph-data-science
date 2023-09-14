@@ -285,8 +285,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
         return StreamComputationResult.of(
             result.result(),
-            result.graph(),
-            result.graphStore()
+            result.graph()
         );
 
     }

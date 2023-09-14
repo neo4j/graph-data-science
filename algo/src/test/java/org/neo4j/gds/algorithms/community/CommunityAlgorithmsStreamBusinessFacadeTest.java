@@ -120,7 +120,6 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                     assertThat(disjointSetStruct.size()).isEqualTo(10);
                 });
             assertThat(wccComputationResult.graph()).isSameAs(graph);
-            assertThat(wccComputationResult.graphStore()).isSameAs(graphStore);
         }
 
         @Test
