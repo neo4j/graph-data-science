@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -67,8 +70,25 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
     public MemoryEstimateResult estimateWcc(Object graphNameOrConfiguration, Map<String, Object> configuration) {
         var config = WccStreamConfig.of(CypherMapWrapper.create(configuration));
 
-        GraphDimensions dimensions = null;
-        Optional<MemoryEstimation> maybeGraphEstimation = Optional.empty();
+        var memoryTreeWithDimensions = estimate(
+            graphNameOrConfiguration,
+            config,
+            config.relationshipWeightProperty(),
+            new WccAlgorithmFactory<>()
+        );
+
+        return new MemoryEstimateResult(memoryTreeWithDimensions);
+    }
+
+
+    private <G, A extends Algorithm<?>, C extends AlgoBaseConfig> MemoryTreeWithDimensions estimate(
+        Object graphNameOrConfiguration,
+        C config,
+        Optional<String> maybeRelationshipProperty,
+        AlgorithmFactory<G, A, C> algorithmFactory
+    ) {
+        GraphDimensions dimensions;
+        Optional<MemoryEstimation> maybeGraphEstimation;
 
         if (graphNameOrConfiguration instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(user.getUsername());
@@ -85,7 +105,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
                 GraphName.parse(
                     (String) graphNameOrConfiguration),
                 config,
-                config.relationshipWeightProperty(),
+                maybeRelationshipProperty,
                 user,
                 databaseId
             ).getRight();
@@ -100,7 +120,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             ));
         }
 
-        var algorithmFactory = new WccAlgorithmFactory<>();
 
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
@@ -111,11 +130,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, dimensions);
-
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
+        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
-
-
 
 }
