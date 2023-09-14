@@ -62,12 +62,11 @@ public class KGEPredictStreamSpec implements AlgorithmSpec<
                     var graphStore = computationResult.graphStore();
                     var graph = graphStore.getGraph();
 
-                    return result.topKMap().stream()
-                        .map(similarityResult -> new KGEStreamResult(
-                            graph.toOriginalNodeId(similarityResult.node1),
-                            graph.toOriginalNodeId(similarityResult.node2),
-                            similarityResult.similarity
-                        ));
+                    return result.topKMap().stream((node1, node2, similarity) -> new KGEStreamResult(
+                        graph.toOriginalNodeId(node1),
+                        graph.toOriginalNodeId(node2),
+                        similarity
+                    ));
                 }).orElseGet(Stream::empty)
         );
     }
