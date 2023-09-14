@@ -22,7 +22,9 @@ package org.neo4j.gds.compat._511;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
@@ -30,7 +32,10 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.impl.store.RecordStore;
+import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.procedure.Mode;
 
 import java.util.List;
@@ -39,6 +44,20 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
+
+    @Override
+    public long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
+        return recordStore.getIdGenerator().getHighId();
+    }
+
+    @Override
+    public <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException {
+        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
+            ctx.dependencyResolver(),
+            GlobalProcedures.class
+        );
+        return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
+    }
 
     @Override
     public BoltTransactionRunner<?, ?> boltTransactionRunner() {

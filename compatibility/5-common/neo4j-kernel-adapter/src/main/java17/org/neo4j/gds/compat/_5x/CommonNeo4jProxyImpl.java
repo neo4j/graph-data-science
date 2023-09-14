@@ -86,7 +86,6 @@ import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
@@ -111,18 +110,14 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
-import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.Log;
@@ -192,11 +187,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
             ClientConnectionInfo.EMBEDDED_CONNECTION,
             databaseName
         );
-    }
-
-    @Override
-    public long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
-        return recordStore.getIdGenerator().getHighId();
     }
 
     @Override
@@ -879,15 +869,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
         var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
         return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService));
-    }
-
-    @Override
-    public <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException {
-        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
-            ctx.dependencyResolver(),
-            GlobalProcedures.class
-        );
-        return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
     }
 
     public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
