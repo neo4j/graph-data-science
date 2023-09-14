@@ -109,6 +109,9 @@ project(':logging').projectDir = file('logging')
 include('proc-machine-learning')
 project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 
+include('memory-estimation')
+project(':memory-estimation').projectDir = file('memory-estimation')
+
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
 

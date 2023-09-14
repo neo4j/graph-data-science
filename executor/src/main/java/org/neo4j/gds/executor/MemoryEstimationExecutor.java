@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;

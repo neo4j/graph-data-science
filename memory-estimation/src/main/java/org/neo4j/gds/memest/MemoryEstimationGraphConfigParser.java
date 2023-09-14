@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.memest;
 
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Map;
 
@@ -30,7 +31,6 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryEstimationGraphConfigParser {
 
@@ -38,10 +38,6 @@ public class MemoryEstimationGraphConfigParser {
 
     public MemoryEstimationGraphConfigParser(String username) {
         this.username = username;
-    }
-
-    public String username() {
-        return username;
     }
 
     public GraphProjectConfig processInput(Object graphNameOrConfig) {
@@ -56,12 +52,12 @@ public class MemoryEstimationGraphConfigParser {
                 "Missing information for implicit graph creation."
             );
             if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
-                return GraphProjectFromStoreConfig.fromProcedureConfig(username(), createConfigMapWrapper);
+                return GraphProjectFromStoreConfig.fromProcedureConfig(username, createConfigMapWrapper);
             } else {
-                return GraphProjectFromCypherConfig.fromProcedureConfig(username(), createConfigMapWrapper);
+                return GraphProjectFromCypherConfig.fromProcedureConfig(username, createConfigMapWrapper);
             }
         }
-        throw new IllegalArgumentException(formatWithLocale(
+        throw new IllegalArgumentException(StringFormatting.formatWithLocale(
             "Could not parse input. Expected a configuration map, but got %s.",
             graphNameOrConfig.getClass().getSimpleName()
         ));
