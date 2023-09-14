@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
@@ -73,6 +74,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResul
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -94,6 +96,8 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
 
+    private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
+
     private final ProcedureReturnColumns procedureReturnColumns;
     private final DatabaseId databaseId;
     private final User user;
@@ -102,13 +106,14 @@ public class CommunityProcedureFacade {
         CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns,
+        CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade, ProcedureReturnColumns procedureReturnColumns,
         DatabaseId databaseId,
         User user
     ) {
         this.streamBusinessFacade = streamBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
+        this.estimateBusinessFacade = estimateBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
         this.databaseId = databaseId;
         this.user = user;
@@ -165,6 +170,10 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(WccComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> wccEstimate(Object graphNameOrConfiguration, Map<String, Object> configuration) {
+        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, configuration));
     }
 
     // WCC end

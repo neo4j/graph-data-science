@@ -20,7 +20,6 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -52,12 +51,8 @@ public class WccStreamProc extends BaseProc {
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new WccStreamSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().wccEstimate(graphNameOrConfiguration, configuration);
     }
 }

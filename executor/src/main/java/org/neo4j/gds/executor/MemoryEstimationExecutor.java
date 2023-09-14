@@ -100,7 +100,7 @@ public class MemoryEstimationExecutor<
                     .transactionContext(transactionContext).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
-            var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
+            var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphProjectConfig)
                 : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);

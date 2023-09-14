@@ -283,6 +283,7 @@ class WccStatsProcTest extends BaseProcTest {
                 null,
                 null,
                 statsBusinessFacade,
+                null,
                 ProcedureReturnColumns.EMPTY,
                 DatabaseId.of(db.databaseName()),
                 new User(getUsername(), false)

@@ -42,7 +42,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class WccStreamProcTest extends BaseProcTest {
 
@@ -204,6 +206,74 @@ class WccStreamProcTest extends BaseProcTest {
         });
 
         assertThat(actualComponents).isEqualTo(expectedCommunities);
+    }
+
+    @Test
+    void memoryEstimationOnProjectedGraph() {
+        runQuery("CALL gds.graph.project('graph', '*', '*')");
+
+        var resultRowCount = runQueryWithRowConsumer(
+            "CALL gds.wcc.stream.estimate('graph', {})",
+            resultRow -> {
+                assertThat(resultRow.getString("requiredMemory")).isNotBlank();
+                assertThat(resultRow.getString("treeView")).isNotBlank();
+                assertThat(resultRow.get("mapView")).asInstanceOf(MAP).isNotEmpty();
+                assertThat(resultRow.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(10L);
+                assertThat(resultRow.getNumber("relationshipCount")).asInstanceOf(LONG).isEqualTo(7L);
+                assertThat(resultRow.getNumber("heapPercentageMin")).asInstanceOf(DOUBLE).isPositive();
+                assertThat(resultRow.getNumber("heapPercentageMax")).asInstanceOf(DOUBLE).isPositive();
+            }
+        );
+
+        assertThat(resultRowCount)
+            .as("Memory estimation should always have a single result row")
+            .isEqualTo(1);
+    }
+
+    @Test
+    void fictitiousMemoryEstimation() {
+        var resultRowCount = runQueryWithRowConsumer(
+            "CALL gds.wcc.stream.estimate({nodeCount: 10, relationshipCount: 7, nodeProjection: '*', relationshipProjection: '*'}, {})",
+            resultRow -> {
+                assertThat(resultRow.getString("requiredMemory")).isNotBlank();
+                assertThat(resultRow.getString("treeView")).isNotBlank();
+                assertThat(resultRow.get("mapView")).asInstanceOf(MAP).isNotEmpty();
+                assertThat(resultRow.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(10L);
+                assertThat(resultRow.getNumber("relationshipCount")).asInstanceOf(LONG).isEqualTo(7L);
+                assertThat(resultRow.getNumber("heapPercentageMin")).asInstanceOf(DOUBLE).isPositive();
+                assertThat(resultRow.getNumber("heapPercentageMax")).asInstanceOf(DOUBLE).isPositive();
+            }
+        );
+
+        assertThat(resultRowCount)
+            .as("Memory estimation should always have a single result row")
+            .isEqualTo(1);
+    }
+
+    @Test
+    void memoryEstimationNativeProjection() {
+        var resultRowCount = runQueryWithRowConsumer(
+            "CALL gds.wcc.stream.estimate({nodeProjection: 'Label', relationshipProjection: 'TYPE'}, {})",
+            resultRow -> {
+                assertThat(resultRow.getString("requiredMemory")).isNotBlank();
+                assertThat(resultRow.getString("treeView")).isNotBlank();
+                assertThat(resultRow.get("mapView")).asInstanceOf(MAP).isNotEmpty();
+                assertThat(resultRow.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(4L);
+                assertThat(resultRow.getNumber("relationshipCount")).asInstanceOf(LONG).isEqualTo(4L);
+                assertThat(resultRow.getNumber("heapPercentageMin")).asInstanceOf(DOUBLE).isPositive();
+                assertThat(resultRow.getNumber("heapPercentageMax")).asInstanceOf(DOUBLE).isPositive();
+            }
+        );
+
+        assertThat(resultRowCount)
+            .as("Memory estimation should always have a single result row")
+            .isEqualTo(1);
     }
 
 }

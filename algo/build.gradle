@@ -36,6 +36,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':licensing')
     implementation project(':logging')
+    implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':ml-algo')

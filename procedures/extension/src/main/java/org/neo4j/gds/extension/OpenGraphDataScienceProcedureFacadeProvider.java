@@ -46,7 +46,7 @@ public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunc
     }
 
     @Override
-    public GraphDataScience apply(Context context) {
+    public GraphDataScience apply(Context context) throws ProcedureException {
         var catalogFacade = catalogFacadeFactory.createCatalogFacade(context);
         var communityProcedureFacade = communityProcedureFactory.createCommunityProcedureFacade(context);
 

@@ -21,18 +21,30 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.NodePropertyService;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.memest.FictitiousGraphStoreService;
+import org.neo4j.gds.memest.GraphStoreFromDatabaseService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class CommunityProcedureFactory {
@@ -62,7 +74,7 @@ public class CommunityProcedureFactory {
         this.userLogServices = userLogServices;
     }
 
-    public CommunityProcedureFacade createCommunityProcedureFacade(Context context) {
+    public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(
             log,
             useMaxMemoryEstimation
@@ -97,6 +109,16 @@ public class CommunityProcedureFactory {
         );
 
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
+        var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
+            graphStoreCatalogService,
+            new FictitiousGraphStoreService(),
+            new GraphStoreFromDatabaseService(
+                user,
+                buildGraphLoaderContext(context, databaseId, taskRegistryFactory, userLogRegistryFactory)
+            ),
+            databaseId,
+            user
+        );
 
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
@@ -105,9 +127,31 @@ public class CommunityProcedureFactory {
             streamBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
+            estimateBusinessFacade,
             returnColumns,
             databaseId,
             user
         );
+    }
+
+    private GraphLoaderContext buildGraphLoaderContext(
+        Context context,
+        DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory
+    ) throws ProcedureException {
+        return ImmutableGraphLoaderContext
+            .builder()
+            .databaseId(databaseId)
+            .dependencyResolver(context.dependencyResolver())
+            .log((org.neo4j.logging.Log) log.getNeo4jLog())
+            .taskRegistryFactory(taskRegistryFactory)
+            .userLogRegistryFactory(userLogRegistryFactory)
+            .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
+            .transactionContext(DatabaseTransactionContext.of(
+                context.graphDatabaseAPI(),
+                context.internalTransaction()
+            ))
+            .build();
     }
 }

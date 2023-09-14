@@ -205,6 +205,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     algorithmsStreamBusinessFacade,
                     null,
                     null,
+                    null,
                     ProcedureReturnColumns.EMPTY,
                     DatabaseId.of(db.databaseName()),
                     new User(getUsername(), false)

@@ -40,7 +40,7 @@ public class MemoryEstimationGraphConfigParser {
         this.username = username;
     }
 
-    public GraphProjectConfig processInput(Object graphNameOrConfig) {
+    public GraphProjectConfig parse(Object graphNameOrConfig) {
         if (graphNameOrConfig instanceof Map) {
             var createConfigMap = (Map<String, Object>) graphNameOrConfig;
             var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
