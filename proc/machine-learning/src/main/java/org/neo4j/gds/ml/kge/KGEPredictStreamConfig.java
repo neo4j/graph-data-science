@@ -20,14 +20,13 @@
 package org.neo4j.gds.ml.kge;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface KGEPredictMutateConfig extends KGEPredictBaseConfig, MutateRelationshipConfig {
+public interface KGEPredictStreamConfig extends KGEPredictBaseConfig {
 
-    static KGEPredictMutateConfig of(CypherMapWrapper userInput) {
-        return new KGEPredictMutateConfigImpl(userInput);
+    static KGEPredictStreamConfig of(CypherMapWrapper userInput) {
+        return new KGEPredictStreamConfigImpl(userInput);
     }
 
 }
