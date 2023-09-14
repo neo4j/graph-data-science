@@ -33,7 +33,7 @@ import java.util.Set;
 import static java.util.function.Predicate.isEqual;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
-public class FictitiousGraphStoreService {
+public class FictitiousGraphStoreEstimationService {
     public GraphMemoryEstimation estimate(GraphProjectConfig graphProjectConfig) {
         var dimensions = graphDimensions(graphProjectConfig);
         var estimateMemoryUsageAfterLoading = estimateMemoryUsageAfterLoading(graphProjectConfig, dimensions);

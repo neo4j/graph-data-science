@@ -28,12 +28,10 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.memest.FictitiousGraphStoreService;
-import org.neo4j.gds.memest.GraphStoreFromDatabaseService;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
@@ -48,21 +46,21 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
 
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    private final FictitiousGraphStoreService fictitiousGraphStoreLoaderService;
-    private final GraphStoreFromDatabaseService graphStoreFromDatabaseService;
+    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService;
+    private final DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService;
     private final DatabaseId databaseId;
     private final User user;
 
     public CommunityAlgorithmsEstimateBusinessFacade(
         GraphStoreCatalogService graphStoreCatalogService,
-        FictitiousGraphStoreService fictitiousGraphStoreLoaderService,
-        GraphStoreFromDatabaseService graphStoreFromDatabaseService,
+        FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService,
+        DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
         DatabaseId databaseId,
         User user
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.fictitiousGraphStoreLoaderService = fictitiousGraphStoreLoaderService;
-        this.graphStoreFromDatabaseService = graphStoreFromDatabaseService;
+        this.fictitiousGraphStoreEstimationService = fictitiousGraphStoreEstimationService;
+        this.databaseGraphStoreEstimationService = databaseGraphStoreEstimationService;
         this.databaseId = databaseId;
         this.user = user;
     }
@@ -88,18 +86,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         AlgorithmFactory<G, A, C> algorithmFactory
     ) {
         GraphDimensions dimensions;
-        Optional<MemoryEstimation> maybeGraphEstimation;
 
+        var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
         if (graphNameOrConfiguration instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(user.getUsername());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
 
             var graphMemoryEstimation = graphProjectConfig.isFictitiousLoading()
-                ? fictitiousGraphStoreLoaderService.estimate(graphProjectConfig)
-                : graphStoreFromDatabaseService.estimate(graphProjectConfig);
+                ? fictitiousGraphStoreEstimationService.estimate(graphProjectConfig)
+                : databaseGraphStoreEstimationService.estimate(graphProjectConfig);
 
             dimensions = graphMemoryEstimation.dimensions();
-            maybeGraphEstimation = Optional.of(graphMemoryEstimation.estimateMemoryUsageAfterLoading());
+            estimationBuilder.add("graph", graphMemoryEstimation.estimateMemoryUsageAfterLoading());
         } else if (graphNameOrConfiguration instanceof String) {
             var graphStore = graphStoreCatalogService.getGraphWithGraphStore(
                 GraphName.parse(
@@ -110,9 +108,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
                 databaseId
             ).getRight();
             dimensions = GraphDimensionsComputer.of(graphStore, config);
-            // This here is empty because the graph is already in the catalog,
-            // and we don't have to account for the memory it would occupy.
-            maybeGraphEstimation = Optional.empty();
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Expected `graphNameOrConfiguration` to be of type String or Map, but got `%s`",
@@ -120,15 +115,10 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             ));
         }
 
-
-        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-
-        GraphDimensions extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(dimensions, config);
-
-        maybeGraphEstimation.ifPresent(graphMemoryEstimation -> estimationBuilder.add("graph", graphMemoryEstimation));
-        estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
-
-        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
+        var memoryTree = estimationBuilder
+            .add("algorithm", algorithmFactory.memoryEstimation(config))
+            .build()
+            .estimate(dimensions, config.concurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }

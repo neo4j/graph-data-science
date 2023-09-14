@@ -36,8 +36,8 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.memest.FictitiousGraphStoreService;
-import org.neo4j.gds.memest.GraphStoreFromDatabaseService;
+import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
@@ -111,8 +111,8 @@ public class CommunityProcedureFactory {
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
         var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
             graphStoreCatalogService,
-            new FictitiousGraphStoreService(),
-            new GraphStoreFromDatabaseService(
+            new FictitiousGraphStoreEstimationService(),
+            new DatabaseGraphStoreEstimationService(
                 user,
                 buildGraphLoaderContext(context, databaseId, taskRegistryFactory, userLogRegistryFactory)
             ),

@@ -24,12 +24,12 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 
-public class GraphStoreFromDatabaseService {
+public class DatabaseGraphStoreEstimationService {
 
     private final User user;
     private final GraphLoaderContext graphLoaderContext;
 
-    public GraphStoreFromDatabaseService(User user, GraphLoaderContext graphLoaderContext) {
+    public DatabaseGraphStoreEstimationService(User user, GraphLoaderContext graphLoaderContext) {
         this.user = user;
         this.graphLoaderContext = graphLoaderContext;
     }
