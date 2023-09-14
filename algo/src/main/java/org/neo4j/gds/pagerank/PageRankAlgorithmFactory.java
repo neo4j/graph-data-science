@@ -44,9 +44,6 @@ import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
 
 public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends GraphAlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
-    static <CONFIG extends PageRankConfig> Task pagerankProgressTask(Graph graph, CONFIG config) {
-        return Pregel.progressTask(graph, config, "PageRank");
-    }
 
     private static double averageDegree(Graph graph, int concurrency) {
         var degreeSum = new LongAdder();
@@ -60,9 +57,19 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
     }
 
     public enum Mode {
-        PAGE_RANK,
-        ARTICLE_RANK,
-        EIGENVECTOR,
+        PAGE_RANK("PageRank"),
+        ARTICLE_RANK("ArticleRank"),
+        EIGENVECTOR("EigenVector");
+
+        private final String taskName;
+
+        Mode(String taskName) {
+            this.taskName = taskName;
+        }
+
+        String taskName() {
+            return taskName;
+        }
     }
 
     private final Mode mode;
@@ -77,7 +84,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
 
     @Override
     public String taskName() {
-        return mode.name();
+        return mode.taskName();
     }
 
     @Override
@@ -128,7 +135,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return pagerankProgressTask(graph, config);
+        return Pregel.progressTask(graph, config, taskName());
     }
 
     @NotNull
