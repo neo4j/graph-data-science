@@ -44,9 +44,9 @@ public class WccStatsResult extends StandardStatsResult {
         this.componentDistribution = componentDistribution;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<WccStatsResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<WccStatsResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 

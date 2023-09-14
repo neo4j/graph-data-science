@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community;
+package org.neo4j.gds.procedures.community.wcc;
 
 public class WccStreamResult {
     public final long nodeId;
     public final long componentId;
 
-    WccStreamResult(long nodeId, long componentId) {
+    public WccStreamResult(long nodeId, long componentId) {
         this.nodeId = nodeId;
         this.componentId = componentId;
     }

@@ -23,7 +23,6 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
-import org.neo4j.gds.procedures.community.wcc.WccStatsSpecification;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -33,7 +32,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.community.wcc.WccSpecification.WCC_DESCRIPTION;
+import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class WccStatsProc extends BaseProc {

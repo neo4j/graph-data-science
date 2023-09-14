@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.wcc;
+package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -27,11 +27,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.wcc.Wcc;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
-import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.stream.Stream;
 

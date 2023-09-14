@@ -28,6 +28,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
+import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 

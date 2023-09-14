@@ -72,6 +72,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResul
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
+import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
