@@ -19,17 +19,34 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import com.carrotsearch.hppc.FloatArrayList;
+import com.carrotsearch.hppc.DoubleArrayList;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 public class LinkScorerFactory {
 
-    public static LinkScorer create(ScoreFunction scoreFunction, NodePropertyValues embeddings, FloatArrayList relationshipTypeEmbedding) {
+    public static LinkScorer create(
+        ScoreFunction scoreFunction,
+        NodePropertyValues embeddings,
+        DoubleArrayList relationshipTypeEmbedding
+    ) {
         switch (scoreFunction) {
             case TRANSE:
-                return new EuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);
+                if (embeddings.valueType() == ValueType.FLOAT_ARRAY) {
+                    return new FloatEuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);
+                } else if (embeddings.valueType() == ValueType.DOUBLE_ARRAY) {
+                    return new DoubleEuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);
+                } else {
+                    throw new IllegalArgumentException("Unsupported embeddings value type:" + embeddings.valueType());
+                }
             case DISTMULT:
-                return new DistMultLinkScorer(embeddings, relationshipTypeEmbedding);
+                if (embeddings.valueType() == ValueType.FLOAT_ARRAY) {
+                    return new FloatDistMultLinkScorer(embeddings, relationshipTypeEmbedding);
+                } else if (embeddings.valueType() == ValueType.DOUBLE_ARRAY) {
+                    return new DoubleDistMultLinkScorer(embeddings, relationshipTypeEmbedding);
+                } else {
+                    throw new IllegalArgumentException("Unsupported embeddings value type:" + embeddings.valueType());
+                }
             default:
                 throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
         }

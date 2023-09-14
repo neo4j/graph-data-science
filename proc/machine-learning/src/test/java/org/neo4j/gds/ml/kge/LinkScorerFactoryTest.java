@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import com.carrotsearch.hppc.FloatArrayList;
+import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,11 +33,23 @@ public class LinkScorerFactoryTest {
     @Test
     void linkScorerFactoryCreateCorrectScorer() {
         var transe = LinkScorerFactory.create(TRANSE, new FloatArrayTestPropertyValues(l -> new float[]{0}),
-            FloatArrayList.from(0)
+            DoubleArrayList.from(0)
         );
-        assertThat(transe).isInstanceOf(EuclideanDistanceLinkScorer.class);
+        assertThat(transe).isInstanceOf(FloatEuclideanDistanceLinkScorer.class);
+
         var distmult = LinkScorerFactory.create(DISTMULT, new FloatArrayTestPropertyValues(l -> new float[]{0}),
-            FloatArrayList.from(0));
-        assertThat(distmult).isInstanceOf(DistMultLinkScorer.class);
+            DoubleArrayList.from(0)
+        );
+        assertThat(distmult).isInstanceOf(FloatDistMultLinkScorer.class);
+
+        var transeDouble = LinkScorerFactory.create(TRANSE, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+            DoubleArrayList.from(0)
+        );
+        assertThat(transeDouble).isInstanceOf(DoubleEuclideanDistanceLinkScorer.class);
+
+        var distmultDouble = LinkScorerFactory.create(DISTMULT, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+            DoubleArrayList.from(0)
+        );
+        assertThat(distmultDouble).isInstanceOf(DoubleDistMultLinkScorer.class);
     }
 }
