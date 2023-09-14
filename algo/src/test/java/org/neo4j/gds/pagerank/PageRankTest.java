@@ -165,15 +165,19 @@ class PageRankTest {
             }
         }
 
-        @Test
-        void shouldLogProgress() {
+        @ParameterizedTest
+        @EnumSource(Mode.class)
+        void shouldLogProgress(Mode mode) {
             var maxIterations = 10;
             var config = ImmutablePageRankConfig.builder()
                 .maxIterations(maxIterations)
                 .build();
 
-            var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph, config);
+            var factory = new PageRankAlgorithmFactory<>(mode);
+
+            var progressTask = factory.progressTask(graph, config);
             var log = Neo4jProxy.testLog();
+
             var progressTracker = new TestProgressTracker(
                 progressTask,
                 log,
@@ -181,7 +185,12 @@ class PageRankTest {
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
+            factory.build(
+                    graph,
+                    config,
+                    progressTracker
+                )
+                .compute();
 
             var progresses = progressTracker.getProgresses().stream()
                 .filter(it -> it.get() > 0)
@@ -203,22 +212,26 @@ class PageRankTest {
                     .extracting(removingThreadId())
                     .contains(
                         formatWithLocale(
-                            "PageRank :: Compute iteration %d of %d :: Start",
+                            "%s :: Compute iteration %d of %d :: Start",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Compute iteration %d of %d :: Finished",
+                            "%s :: Compute iteration %d of %d :: Finished",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Master compute iteration %d of %d :: Start",
+                            "%s :: Master compute iteration %d of %d :: Start",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Master compute iteration %d of %d :: Finished",
+                            "%s :: Master compute iteration %d of %d :: Finished",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         )
@@ -227,8 +240,8 @@ class PageRankTest {
             assertThat(messages)
                 .extracting(removingThreadId())
                 .contains(
-                    "PageRank :: Start",
-                    "PageRank :: Finished"
+                    formatWithLocale("%s :: Start", mode.taskName()),
+                    formatWithLocale("%s :: Finished", mode.taskName())
                 );
         }
 
@@ -663,16 +676,13 @@ class PageRankTest {
     }
 
     PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode) {
-        return runOnPregel(graph, config, mode, ProgressTracker.NULL_TRACKER);
-    }
-
-    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode, ProgressTracker progressTracker) {
         return new PageRankAlgorithmFactory<>(mode)
             .build(
                 graph,
                 config,
-                progressTracker
+                ProgressTracker.NULL_TRACKER
             )
             .compute();
     }
+    
 }
