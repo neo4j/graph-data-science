@@ -46,6 +46,7 @@ import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
@@ -65,6 +66,7 @@ import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
@@ -470,6 +472,22 @@ public class CommunityProcedureFacade {
         );
 
         return ModularityComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<ModularityStatsResult> modularityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, ModularityStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.modularity(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<KmeansStreamResult> kmeansStream(

@@ -17,37 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.algorithms;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+public final class ModularitySpecificFields {
 
-@ValueClass
-public interface ModularityResult {
-    long nodeCount();
 
-    long relationshipCount();
-    double totalModularity();
-    long communityCount();
-    HugeObjectArray<CommunityModularity> modularityScores();
+    public static final ModularitySpecificFields EMPTY =
+        new ModularitySpecificFields(0,  0L, 0L, 0.0d);
 
-    static ModularityResult of(
+    private final long nodeCount;
+    private final long relationshipCount;
+    private final long communityCount;
+    private final double modularity;
+
+    public ModularitySpecificFields(
         long nodeCount,
         long relationshipCount,
-        double totalModularity,
         long communityCount,
-        HugeObjectArray<CommunityModularity> modularityScores
+        double modularity
     ) {
-        return ImmutableModularityResult.of(
-            nodeCount,
-            relationshipCount,
-            totalModularity,
-            communityCount,
-            modularityScores
-        );
+        this.communityCount = communityCount;
+        this.nodeCount = nodeCount;
+        this.relationshipCount=relationshipCount;
+        this.modularity=modularity;
     }
 
-    static ModularityResult empty() {
-        return of(0, 0, 0d, 0L, HugeObjectArray.of());
+    public long communityCount() {
+        return communityCount;
     }
+
+    public long nodeCount() {
+        return nodeCount;
+    }
+
+    public long  relationshipCount() {
+        return relationshipCount;
+    }
+
+    public double modularity(){ return  modularity;}
 }

@@ -21,8 +21,10 @@ package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -36,16 +38,15 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityStatsProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.modularity.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<ModularityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ModularityStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().modularityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularity.stats.estimate", mode = READ)
@@ -65,7 +66,7 @@ public class ModularityStatsProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.alpha.modularity.stats", mode = READ, deprecatedBy = "gds.modularity.stats")
     @Description(DESCRIPTION)
-    public Stream<StatsResult> statsAlpha(
+    public Stream<ModularityStatsResult> statsAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

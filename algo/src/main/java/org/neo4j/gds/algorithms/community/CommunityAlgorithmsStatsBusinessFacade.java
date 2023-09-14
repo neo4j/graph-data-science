@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
@@ -34,6 +35,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -212,6 +214,33 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> TriangleCountSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<ModularitySpecificFields> modularity(
+        String graphName,
+        ModularityStatsConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.modularity(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> new ModularitySpecificFields(
+                result.nodeCount(),
+                result.relationshipCount(),
+                result.communityCount(),
+                result.totalModularity()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> ModularitySpecificFields.EMPTY
+        );
+    }
+
 
     /*
     By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields
