@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -55,6 +57,9 @@ public class KGEPredictStreamProcTest extends BaseProcTest {
             ", (m2)-[:T4]->(m4)" +
             ", (m2)-[:T4]->(p)";
 
+    @Inject
+    IdFunction idFunction;
+
 
     @BeforeEach
     void setup() throws Exception {
@@ -79,6 +84,14 @@ public class KGEPredictStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldPredictAndStreamKGEResults() {
+        var n0 = idFunction.of("n0");
+        var n4 = idFunction.of("n4");
+        var m0 = idFunction.of("m0");
+        var m1 = idFunction.of("m1");
+        var m2 = idFunction.of("m2");
+        var m3 = idFunction.of("m3");
+        var m4 = idFunction.of("m4");
+
         assertCypherResult(
             "CALL gds.ml.kge.predict.stream('g', {" +
                 " sourceNodeFilter: 'M'," +
@@ -92,16 +105,16 @@ public class KGEPredictStreamProcTest extends BaseProcTest {
                 " RETURN node1, node2, score" +
                 " ORDER BY node1",
             List.of(
-                Map.of("node1", 47L, "node2", 46L, "score", 9.77358173854396),
-                Map.of("node1", 47L, "node2", 42L, "score", 10.33058081619809),
-                Map.of("node1", 48L, "node2", 46L, "score", 9.09521302664209),
-                Map.of("node1", 48L, "node2", 42L, "score", 9.649917098089496),
-                Map.of("node1", 49L, "node2", 46L, "score", 8.480736996275736),
-                Map.of("node1", 49L, "node2", 42L, "score", 9.028892512373819),
-                Map.of("node1", 50L, "node2", 46L, "score", 7.944992133413349),
-                Map.of("node1", 50L, "node2", 42L, "score", 8.480619081175618),
-                Map.of("node1", 51L, "node2", 46L, "score", 7.50485842637954),
-                Map.of("node1", 51L, "node2", 42L, "score", 8.020031172009245)
+                Map.of("node1", m0, "node2", n4, "score", 9.77358173854396),
+                Map.of("node1", m0, "node2", n0, "score", 10.33058081619809),
+                Map.of("node1", m1, "node2", n4, "score", 9.09521302664209),
+                Map.of("node1", m1, "node2", n0, "score", 9.649917098089496),
+                Map.of("node1", m2, "node2", n4, "score", 8.480736996275736),
+                Map.of("node1", m2, "node2", n0, "score", 9.028892512373819),
+                Map.of("node1", m3, "node2", n4, "score", 7.944992133413349),
+                Map.of("node1", m3, "node2", n0, "score", 8.480619081175618),
+                Map.of("node1", m4, "node2", n4, "score", 7.50485842637954),
+                Map.of("node1", m4, "node2", n0, "score", 8.020031172009245)
                 )
         );
 
