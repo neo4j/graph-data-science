@@ -53,6 +53,7 @@ import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;

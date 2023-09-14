@@ -28,6 +28,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
