@@ -101,6 +101,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final WriteRelationshipsApplication writeRelationshipsApplication;
     private final GraphSamplingApplication graphSamplingApplication;
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
+    private final GenerateGraphApplication generateGraphApplication;
 
     public DefaultGraphStoreCatalogBusinessFacade(
         Log log,
@@ -125,7 +126,8 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         WriteNodeLabelApplication writeNodeLabelApplication,
         WriteRelationshipsApplication writeRelationshipsApplication,
         GraphSamplingApplication graphSamplingApplication,
-        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication
+        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication,
+        GenerateGraphApplication generateGraphApplication
     ) {
         this.log = log;
 
@@ -152,6 +154,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         this.writeRelationshipsApplication = writeRelationshipsApplication;
         this.graphSamplingApplication = graphSamplingApplication;
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
+        this.generateGraphApplication = generateGraphApplication;
     }
 
     @Override
@@ -824,6 +827,28 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
         var configuration = configurationService.parseCommonNeighbourAwareRandomWalkConfig(rawConfiguration);
 
         return estimateCommonNeighbourAwareRandomWalkApplication.estimate(user, databaseId, graphName, configuration);
+    }
+
+    @Override
+    public GraphGenerationStats generateGraph(
+        User user,
+        DatabaseId databaseId,
+        String graphNameAsString,
+        long nodeCount,
+        long averageDegree,
+        Map<String, Object> rawConfiguration
+    ) {
+        var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
+
+        var configuration = configurationService.parseRandomGraphGeneratorConfig(
+            user,
+            graphName,
+            nodeCount,
+            averageDegree,
+            rawConfiguration
+        );
+
+        return generateGraphApplication.compute(databaseId, averageDegree, configuration);
     }
 
     private RandomWalkSamplingResult sampleRandomWalk(

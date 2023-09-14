@@ -261,4 +261,13 @@ public interface GraphStoreCatalogBusinessFacade {
         String graphName,
         Map<String, Object> configuration
     );
+
+    GraphGenerationStats generateGraph(
+        User user,
+        DatabaseId databaseId,
+        String graphName,
+        long nodeCount,
+        long averageDegree,
+        Map<String, Object> configuration
+    );
 }

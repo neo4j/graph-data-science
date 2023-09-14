@@ -35,6 +35,7 @@ dependencies {
     implementation project(':executor')
     implementation project(':graph-projection-api')
     implementation project(':graph-sampling')
+    implementation project(':graph-schema-api')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':native-projection')

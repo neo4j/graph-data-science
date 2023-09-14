@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.graphstorecatalog.DropGraphApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.EstimateCommonNeighbourAwareRandomWalkApplication;
+import org.neo4j.gds.applications.graphstorecatalog.GenerateGraphApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GenericProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
@@ -163,6 +164,7 @@ public class CatalogFacadeFactory {
         var writeRelationshipsApplication = new WriteRelationshipsApplication(log, relationshipExporterBuilder);
         var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
         var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
+        var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
 
         // GDS business facade
         GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
@@ -188,7 +190,8 @@ public class CatalogFacadeFactory {
             writeNodeLabelApplication,
             writeRelationshipsApplication,
             graphSamplingApplication,
-            estimateCommonNeighbourAwareRandomWalkApplication
+            estimateCommonNeighbourAwareRandomWalkApplication,
+            generateGraphApplication
         );
 
         // wrap in decorator to enable preconditions checks
