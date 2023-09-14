@@ -37,6 +37,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
@@ -55,6 +56,7 @@ import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
@@ -484,6 +486,24 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KmeansComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<KmeansStatsResult> kmeansStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, KmeansStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.kmeans(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
+            procedureReturnColumns.contains("centroids")
+        );
+
+        return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
     public Stream<LocalClusteringCoefficientStreamResult> streamLocalClusteringCoefficient(

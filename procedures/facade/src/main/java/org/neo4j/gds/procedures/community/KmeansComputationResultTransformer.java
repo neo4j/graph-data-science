@@ -21,10 +21,13 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 
 import java.util.stream.LongStream;
@@ -64,6 +67,22 @@ final class KmeansComputationResultTransformer {
             computationResult.algorithmSpecificFields().averageDistanceToCentroid(),
             computationResult.algorithmSpecificFields().averageSilhouette(),
             computationResult.configuration().toMap()
+        );
+    }
+
+    static KmeansStatsResult toStatsResult(
+        StatsResult<KmeansSpecificFields> computationResult,
+        KmeansStatsConfig config
+    ) {
+        return new KmeansStatsResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.algorithmSpecificFields().centroids(),
+            computationResult.algorithmSpecificFields().averageDistanceToCentroid(),
+            computationResult.algorithmSpecificFields().averageSilhouette(),
+            config.toMap()
         );
     }
 

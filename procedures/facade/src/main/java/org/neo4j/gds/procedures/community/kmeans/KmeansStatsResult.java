@@ -27,13 +27,14 @@ import org.neo4j.gds.results.StandardStatsResult;
 import java.util.List;
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class KmeansStatsResult extends StandardStatsResult {
 
     public final Map<String, Object> communityDistribution;
     public final List<List<Double>> centroids;
     public final double averageDistanceToCentroid;
     public final double averageSilhouette;
-    public StatsResult(
+
+    public KmeansStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -50,7 +51,7 @@ public class StatsResult extends StandardStatsResult {
         this.averageSilhouette = averageSilhouette;
     }
 
-    public static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
+    public static final class Builder extends AbstractCommunityResultBuilder<KmeansStatsResult> {
         public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
@@ -59,8 +60,8 @@ public class StatsResult extends StandardStatsResult {
         private double averageDistanceToCentroid;
         private double averageSilhouette;
         @Override
-        public StatsResult buildResult() {
-            return new StatsResult(
+        public KmeansStatsResult buildResult() {
+            return new KmeansStatsResult(
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,

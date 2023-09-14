@@ -21,13 +21,13 @@ package org.neo4j.gds.kmeans;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.community.kmeans.StatsResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-public class WriteResult extends StatsResult {
+public class WriteResult extends KmeansStatsResult {
 
     public final long writeMillis;
     public final long nodePropertiesWritten;
