@@ -23,6 +23,7 @@ public class TriangleCountSpecificFields {
     private final long globalTriangleCount;
     private final long nodeCount;
 
+    public static TriangleCountSpecificFields EMPTY = new TriangleCountSpecificFields(0, 0);
     public TriangleCountSpecificFields(
         long globalTriangleCount,
         long nodeCount

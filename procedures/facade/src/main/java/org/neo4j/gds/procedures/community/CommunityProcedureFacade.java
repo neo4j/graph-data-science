@@ -72,6 +72,7 @@ import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
@@ -82,6 +83,7 @@ import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
@@ -383,6 +385,23 @@ public class CommunityProcedureFacade {
 
         return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
     }
+
+    public Stream<TriangleCountStatsResult> triangleCountStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, TriangleCountStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.triangleCount(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
 
     public Stream<LabelPropagationStreamResult> labelPropagationStream(
         String graphName,

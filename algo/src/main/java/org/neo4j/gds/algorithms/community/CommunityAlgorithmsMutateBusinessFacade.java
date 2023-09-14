@@ -312,7 +312,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             (result, configuration) -> NodePropertyValuesAdapter.adapt(result.localTriangles()),
             (result) -> new TriangleCountSpecificFields(result.globalTriangles(), algorithmResult.graph().nodeCount()),
             intermediateResult.computeMilliseconds,
-            () -> new TriangleCountSpecificFields(0, 0)
+            () -> TriangleCountSpecificFields.EMPTY
         );
     }
 
