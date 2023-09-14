@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.ml.kge.scorers;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
+public class FloatDistMultLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;
 
@@ -30,9 +30,10 @@ public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
 
     long currentSourceNode;
 
-    double[] currentCandidateTarget;
+    float[] currentCandidateTarget;
 
-    DoubleEuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+
+    FloatDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
     }
@@ -40,24 +41,23 @@ public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = embeddings.doubleArrayValue(currentSourceNode);
+        this.currentCandidateTarget = embeddings.floatArrayValue(currentSourceNode);
         for(int i = 0; i < relationshipTypeEmbedding.length; i++){
-            this.currentCandidateTarget[i] += relationshipTypeEmbedding[i];
+            this.currentCandidateTarget[i] *= relationshipTypeEmbedding[i];
         }
     }
 
     @Override
     public double computeScore(long targetNode) {
         double res = 0.0;
-        var targetVector = embeddings.doubleArrayValue(targetNode);
+        var targetVector = embeddings.floatArrayValue(targetNode);
         for (int i = 0; i < currentCandidateTarget.length; i++) {
-            double elem = currentCandidateTarget[i] - targetVector[i];
-            res += elem * elem;
+            res += currentCandidateTarget[i] * targetVector[i];
         }
-        return Math.sqrt(res);
+        return res;
     }
 
     @Override
-    public void close() throws Exception { }
+    public void close() throws Exception {}
 
 }

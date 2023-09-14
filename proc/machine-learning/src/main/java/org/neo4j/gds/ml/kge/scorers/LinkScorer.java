@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.ml.kge.scorers;
 
 
-interface LinkScorer extends AutoCloseable {
+public interface LinkScorer extends AutoCloseable {
 
     void init(long sourceNode);
 
