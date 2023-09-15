@@ -25,17 +25,16 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
-import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -65,21 +64,17 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         this.user = user;
     }
 
-    public MemoryEstimateResult estimateWcc(Object graphNameOrConfiguration, Map<String, Object> configuration) {
-        var config = WccStreamConfig.of(CypherMapWrapper.create(configuration));
-
-        var memoryTreeWithDimensions = estimate(
+    public <C extends WccBaseConfig> MemoryEstimateResult estimateWcc(Object graphNameOrConfiguration, C configuration) {
+        return estimate(
             graphNameOrConfiguration,
-            config,
-            config.relationshipWeightProperty(),
+            configuration,
+            configuration.relationshipWeightProperty(),
             new WccAlgorithmFactory<>()
         );
-
-        return new MemoryEstimateResult(memoryTreeWithDimensions);
     }
 
 
-    private <G, A extends Algorithm<?>, C extends AlgoBaseConfig> MemoryTreeWithDimensions estimate(
+    private <G, A extends Algorithm<?>, C extends AlgoBaseConfig> MemoryEstimateResult estimate(
         Object graphNameOrConfiguration,
         C config,
         Optional<String> maybeRelationshipProperty,
@@ -120,7 +115,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             .build()
             .estimate(dimensions, config.concurrency());
 
-        return new MemoryTreeWithDimensions(memoryTree, dimensions);
+        return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions));
     }
 
 }

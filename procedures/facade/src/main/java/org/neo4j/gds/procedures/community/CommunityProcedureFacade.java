@@ -172,8 +172,28 @@ public class CommunityProcedureFacade {
         return Stream.of(WccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<MemoryEstimateResult> wccEstimate(Object graphNameOrConfiguration, Map<String, Object> configuration) {
-        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, configuration));
+    public Stream<MemoryEstimateResult> estimateWccMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, WccMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateWccStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, WccStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateWccStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, WccStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
     }
 
     // WCC end
@@ -644,5 +664,4 @@ public class CommunityProcedureFacade {
     ) {
         return configCreator.apply(CypherMapWrapper.create(configuration));
     }
-
 }

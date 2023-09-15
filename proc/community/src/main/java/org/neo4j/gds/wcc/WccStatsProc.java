@@ -54,6 +54,6 @@ public class WccStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().wccEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateWccStats(graphNameOrConfiguration, algoConfiguration);
     }
 }

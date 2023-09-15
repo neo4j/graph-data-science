@@ -53,6 +53,6 @@ public class WccMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().wccEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateWccMutate(graphNameOrConfiguration, algoConfiguration);
     }
 }
