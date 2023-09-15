@@ -24,16 +24,30 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 @ValueClass
 public interface ModularityResult {
+    long nodeCount();
 
+    long relationshipCount();
     double totalModularity();
     long communityCount();
     HugeObjectArray<CommunityModularity> modularityScores();
 
-    static ModularityResult of(double totalModularity, long communityCount, HugeObjectArray<CommunityModularity> modularityScores) {
-        return ImmutableModularityResult.of(totalModularity, communityCount, modularityScores);
+    static ModularityResult of(
+        long nodeCount,
+        long relationshipCount,
+        double totalModularity,
+        long communityCount,
+        HugeObjectArray<CommunityModularity> modularityScores
+    ) {
+        return ImmutableModularityResult.of(
+            nodeCount,
+            relationshipCount,
+            totalModularity,
+            communityCount,
+            modularityScores
+        );
     }
 
     static ModularityResult empty() {
-        return of(0d, 0L, HugeObjectArray.of());
+        return of(0, 0, 0d, 0L, HugeObjectArray.of());
     }
 }

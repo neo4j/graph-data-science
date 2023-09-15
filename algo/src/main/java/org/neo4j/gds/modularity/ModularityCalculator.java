@@ -23,10 +23,10 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -113,7 +113,13 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
             communityModularities.set(resultIndex++, CommunityModularity.of(communityId, modularity));
         }
 
-        return ModularityResult.of(totalModularity.doubleValue(), communityCount, communityModularities);
+        return ModularityResult.of(
+            graph.nodeCount(),
+            graph.relationshipCount(),
+            totalModularity.doubleValue(),
+            communityCount,
+            communityModularities
+        );
     }
 
     static HugeLongLongMap createMapping(long nodeCount, LongUnaryOperator seedCommunityId) {

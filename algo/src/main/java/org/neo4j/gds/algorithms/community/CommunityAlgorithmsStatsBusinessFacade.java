@@ -22,20 +22,28 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
+import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
+import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class CommunityAlgorithmsStatsBusinessFacade {
@@ -154,7 +162,84 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         );
     }
 
+    public StatsResult<KmeansSpecificFields> kmeans(
+        String graphName,
+        KmeansStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions,
+        boolean computeListOfCentroids
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
 
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return new KmeansSpecificFields(
+                    communitySummary,
+                    arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
+                    result.averageDistanceToCentroid(),
+                    result.averageSilhouette()
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> KmeansSpecificFields.EMPTY
+        );
+    }
+
+    public StatsResult<TriangleCountSpecificFields> triangleCount(
+        String graphName,
+        TriangleCountStatsConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> new TriangleCountSpecificFields(result.globalTriangles(), algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> TriangleCountSpecificFields.EMPTY
+        );
+    }
+
+    public StatsResult<ModularitySpecificFields> modularity(
+        String graphName,
+        ModularityStatsConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.modularity(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> new ModularitySpecificFields(
+                result.nodeCount(),
+                result.relationshipCount(),
+                result.communityCount(),
+                result.totalModularity()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> ModularitySpecificFields.EMPTY
+        );
+    }
 
 
     /*
@@ -215,6 +300,21 @@ public class CommunityAlgorithmsStatsBusinessFacade {
 
         }).orElseGet(() -> StatsResult.empty(emptyASFSupplier.get()));
 
+    }
+
+    private List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
+        if (shouldCompute) {
+            var result = new ArrayList<List<Double>>();
+
+            for (double[] row : matrix) {
+                List<Double> rowList = new ArrayList<>();
+                result.add(rowList);
+                for (double column : row)
+                    rowList.add(column);
+            }
+            return result;
+        }
+        return null;
     }
 
 

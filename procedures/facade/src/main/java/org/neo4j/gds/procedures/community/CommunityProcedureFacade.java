@@ -38,6 +38,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
@@ -46,6 +47,7 @@ import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
@@ -56,6 +58,7 @@ import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
@@ -64,6 +67,7 @@ import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
@@ -71,6 +75,7 @@ import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
@@ -82,6 +87,7 @@ import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
@@ -411,6 +417,23 @@ public class CommunityProcedureFacade {
         return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<TriangleCountStatsResult> triangleCountStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, TriangleCountStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.triangleCount(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+
     public Stream<LabelPropagationStreamResult> labelPropagationStream(
         String graphName,
         Map<String, Object> configuration,
@@ -480,6 +503,22 @@ public class CommunityProcedureFacade {
         return ModularityComputationResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<ModularityStatsResult> modularityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, ModularityStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.modularity(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
     public Stream<KmeansStreamResult> kmeansStream(
         String graphName,
         Map<String, Object> configuration,
@@ -513,6 +552,24 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KmeansComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<KmeansStatsResult> kmeansStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, KmeansStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.kmeans(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
+            procedureReturnColumns.contains("centroids")
+        );
+
+        return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
     public Stream<LocalClusteringCoefficientStreamResult> streamLocalClusteringCoefficient(

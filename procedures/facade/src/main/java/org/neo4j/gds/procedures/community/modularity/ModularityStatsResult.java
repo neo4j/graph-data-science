@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.procedures.community.modularity;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -25,13 +25,13 @@ import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class ModularityStatsResult extends StandardStatsResult {
     public final long nodeCount;
     public final long relationshipCount;
     public final long communityCount;
     public final double modularity;
 
-    StatsResult(
+    public ModularityStatsResult(
         long nodeCount,
         long relationshipCount,
         long communityCount,
@@ -48,34 +48,34 @@ public class StatsResult extends StandardStatsResult {
         this.modularity = modularity;
     }
 
-    static class StatsBuilder extends AbstractCommunityResultBuilder<StatsResult> {
+    public static class StatsBuilder extends AbstractCommunityResultBuilder<ModularityStatsResult> {
 
         double modularity;
         private long relationshipCount;
         private long communityCount;
 
-        StatsBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public StatsBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
-        StatsBuilder withModularity(double modularity) {
+        public StatsBuilder withModularity(double modularity) {
             this.modularity = modularity;
             return this;
         }
 
-        StatsBuilder withRelationshipCount(long relationshipCount) {
+        public StatsBuilder withRelationshipCount(long relationshipCount) {
             this.relationshipCount = relationshipCount;
             return this;
         }
 
-        StatsBuilder withCommunityCount(long communityCount) {
+        public StatsBuilder withCommunityCount(long communityCount) {
             this.communityCount = communityCount;
             return this;
         }
 
         @Override
-        protected StatsResult buildResult() {
-            return new StatsResult(
+        protected ModularityStatsResult buildResult() {
+            return new ModularityStatsResult(
                 nodeCount,
                 relationshipCount,
                 communityCount,

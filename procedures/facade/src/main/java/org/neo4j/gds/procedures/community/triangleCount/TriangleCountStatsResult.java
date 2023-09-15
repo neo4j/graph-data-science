@@ -30,7 +30,7 @@ public class TriangleCountStatsResult extends StandardStatsResult {
     public final long globalTriangleCount;
     public final long nodeCount;
 
-    protected TriangleCountStatsResult(
+    public TriangleCountStatsResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,

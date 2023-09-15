@@ -19,25 +19,40 @@
  */
 package org.neo4j.gds.algorithms;
 
-public class TriangleCountSpecificFields {
-    private final long globalTriangleCount;
-    private final long nodeCount;
+public final class ModularitySpecificFields {
 
-    public static TriangleCountSpecificFields EMPTY = new TriangleCountSpecificFields(0, 0);
-    public TriangleCountSpecificFields(
-        long globalTriangleCount,
-        long nodeCount
+
+    public static final ModularitySpecificFields EMPTY =
+        new ModularitySpecificFields(0,  0L, 0L, 0.0d);
+
+    private final long nodeCount;
+    private final long relationshipCount;
+    private final long communityCount;
+    private final double modularity;
+
+    public ModularitySpecificFields(
+        long nodeCount,
+        long relationshipCount,
+        long communityCount,
+        double modularity
     ) {
-        this.globalTriangleCount = globalTriangleCount;
-        this.nodeCount=nodeCount;
+        this.communityCount = communityCount;
+        this.nodeCount = nodeCount;
+        this.relationshipCount=relationshipCount;
+        this.modularity=modularity;
     }
 
-    public long  nodeCount() {
+    public long communityCount() {
+        return communityCount;
+    }
+
+    public long nodeCount() {
         return nodeCount;
     }
 
-    public long  globalTriangleCount() {
-        return globalTriangleCount;
+    public long  relationshipCount() {
+        return relationshipCount;
     }
 
+    public double modularity(){ return  modularity;}
 }

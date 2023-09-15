@@ -26,7 +26,7 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import java.util.List;
 import java.util.Map;
 
-public class KmeansMutateResult extends StatsResult {
+public class KmeansMutateResult extends KmeansStatsResult {
 
     public final long mutateMillis;
     public final long nodePropertiesWritten;
