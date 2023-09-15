@@ -163,6 +163,9 @@ project(':neo4j-kernel-adapter-5.10').projectDir = file('compatibility/5.10/neo4
 include('neo4j-kernel-adapter-5.11')
 project(':neo4j-kernel-adapter-5.11').projectDir = file('compatibility/5.11/neo4j-kernel-adapter')
 
+include('neo4j-kernel-adapter-5.12')
+project(':neo4j-kernel-adapter-5.12').projectDir = file('compatibility/5.12/neo4j-kernel-adapter')
+
 include('neo4j-kernel-adapter-api')
 project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
 
@@ -273,6 +276,9 @@ project(':storage-engine-adapter-5.10').projectDir = file('compatibility/5.10/st
 
 include('storage-engine-adapter-5.11')
 project(':storage-engine-adapter-5.11').projectDir = file('compatibility/5.11/storage-engine-adapter')
+
+include('storage-engine-adapter-5.12')
+project(':storage-engine-adapter-5.12').projectDir = file('compatibility/5.12/storage-engine-adapter')
 
 include('storage-engine-adapter-api')
 project(':storage-engine-adapter-api').projectDir = file('compatibility/api/storage-engine-adapter')
