@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.ml.kge.scorers;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
+import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
@@ -31,12 +32,24 @@ public class LinkScorerFactoryTest {
 
     @Test
     void linkScorerFactoryCreateCorrectScorer() {
-        var transe = LinkScorerFactory.create(TRANSE, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+        var transe = LinkScorerFactory.create(TRANSE, new FloatArrayTestPropertyValues(l -> new float[]{0}),
             DoubleArrayList.from(0)
         );
-        assertThat(transe).isInstanceOf(EuclideanDistanceLinkScorer.class);
-        var distmult = LinkScorerFactory.create(DISTMULT, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
-            DoubleArrayList.from(0));
-        assertThat(distmult).isInstanceOf(DistMultLinkScorer.class);
+        assertThat(transe).isInstanceOf(FloatEuclideanDistanceLinkScorer.class);
+
+        var distmult = LinkScorerFactory.create(DISTMULT, new FloatArrayTestPropertyValues(l -> new float[]{0}),
+            DoubleArrayList.from(0)
+        );
+        assertThat(distmult).isInstanceOf(FloatDistMultLinkScorer.class);
+
+        var transeDouble = LinkScorerFactory.create(TRANSE, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+            DoubleArrayList.from(0)
+        );
+        assertThat(transeDouble).isInstanceOf(DoubleEuclideanDistanceLinkScorer.class);
+
+        var distmultDouble = LinkScorerFactory.create(DISTMULT, new DoubleArrayTestPropertyValues(l -> new double[]{0}),
+            DoubleArrayList.from(0)
+        );
+        assertThat(distmultDouble).isInstanceOf(DoubleDistMultLinkScorer.class);
     }
 }

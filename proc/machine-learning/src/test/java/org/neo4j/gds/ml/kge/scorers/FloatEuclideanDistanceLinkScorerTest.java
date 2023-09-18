@@ -17,31 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.ml.kge.scorers;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.collections.hsa.HugeSparseDoubleArrayArray;
-import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
+import org.neo4j.gds.collections.hsa.HugeSparseFloatArrayArray;
+import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class EuclideanDistanceLinkScorerTest {
+class FloatEuclideanDistanceLinkScorerTest {
 
 
     @Test
     void shouldComputeEuclideanDistanceScore() {
-        var propertyBuilder = HugeSparseDoubleArrayArray.builder(new double[]{0.0, 0.0, 0.0, 0.0});
-        propertyBuilder.set(0, new double[]{1.0, 1.0, 1.0, 1.0});
-        propertyBuilder.set(1, new double[]{2.0, 2.0, 2.0, 0.0});
-        propertyBuilder.set(2, new double[]{3.0, 3.0, 3.0, 0.0});
+        var propertyBuilder = HugeSparseFloatArrayArray.builder(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
+        propertyBuilder.set(0, new float[]{1.0f, 1.0f, 1.0f, 1.0f});
+        propertyBuilder.set(1, new float[]{2.0f, 2.0f, 2.0f, 0.0f});
+        propertyBuilder.set(2, new float[]{3.0f, 3.0f, 3.0f, 0.0f});
         var hsdaa = propertyBuilder.build();
-        DoubleArrayNodePropertyValues ddnpv = new DoubleArrayTestPropertyValues(hsdaa::get);
+        var ddnpv = new FloatArrayTestPropertyValues(hsdaa::get);
 
-        LinkScorer linkScorer = new EuclideanDistanceLinkScorer(ddnpv, DoubleArrayList.from(-1.0, 0.0, 0.0, 0.0));
+        LinkScorer linkScorer = new FloatEuclideanDistanceLinkScorer(ddnpv, DoubleArrayList.from(-1.0, 0.0, 0.0, 0.0));
         linkScorer.init(0);
 
         assertThat(linkScorer.computeScore(1)).isCloseTo(2.65, Offset.offset(1e-02));

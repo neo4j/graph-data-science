@@ -17,42 +17,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.ml.kge.scorers;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
-public class DistMultLinkScorer implements LinkScorer {
+public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
 
     NodePropertyValues embeddings;
 
-    Vector relationshipTypeEmbedding;
+    double[] relationshipTypeEmbedding;
 
     long currentSourceNode;
 
-    Vector currentCandidateTarget;
+    double[] currentCandidateTarget;
 
-
-    DistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+    DoubleEuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
-        this.relationshipTypeEmbedding = new Vector(relationshipTypeEmbedding.toArray());
+        this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = new Vector(embeddings.doubleArrayValue(currentSourceNode))
-            .elementwiseProduct(relationshipTypeEmbedding);
+        this.currentCandidateTarget = embeddings.doubleArrayValue(currentSourceNode);
+        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
+            this.currentCandidateTarget[i] += relationshipTypeEmbedding[i];
+        }
     }
 
     @Override
     public double computeScore(long targetNode) {
-        return currentCandidateTarget.elementwiseProduct(new Vector(embeddings.doubleArrayValue(targetNode)))
-            .aggregateSum();
+        double res = 0.0;
+        var targetVector = embeddings.doubleArrayValue(targetNode);
+        for (int i = 0; i < currentCandidateTarget.length; i++) {
+            double elem = currentCandidateTarget[i] - targetVector[i];
+            res += elem * elem;
+        }
+        return Math.sqrt(res);
     }
 
     @Override
-    public void close() throws Exception {}
+    public void close() throws Exception { }
 
 }

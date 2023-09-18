@@ -28,6 +28,8 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.kge.scorers.LinkScorer;
+import org.neo4j.gds.ml.kge.scorers.LinkScorerFactory;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -68,7 +70,9 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.nodeEmbeddingProperty = nodeEmbeddingProperty;
-        this.relationshipTypeEmbedding = DoubleArrayList.from(relationshipTypeEmbedding.stream().mapToDouble(Double::doubleValue).toArray());
+        this.relationshipTypeEmbedding = DoubleArrayList.from(relationshipTypeEmbedding.stream()
+            .mapToDouble(Double::doubleValue)
+            .toArray());
         this.concurrency = concurrency;
         this.topK = topK;
         this.scoreFunction = scoreFunction;
@@ -82,9 +86,15 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
         NodePropertyValues embeddings = graph.nodeProperties(nodeEmbeddingProperty);
 
-        try (var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(scoreFunction, embeddings, relationshipTypeEmbedding))) {
+        try (
+            var threadLocalScorer = AutoCloseableThreadLocal.withInitial(() -> LinkScorerFactory.create(
+                scoreFunction,
+                embeddings,
+                relationshipTypeEmbedding
+            ))
+        ) {
             //TODO maybe exploit symmetry of similarity function if available when there're many source target overlap
-            try (var concurrentGraph = CloseableThreadLocal.withInitial(graph::concurrentCopy)){
+            try (var concurrentGraph = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelStreamConsume(
                     new SetBitsIterable(sourceNodes).stream(),
                     concurrency,
@@ -104,12 +114,13 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                                     if (!Double.isNaN(similarity)) {
                                         topKMap.put(node1, node2, similarity);
                                     }
-                                    progressTracker.logProgress();
+
                                 });
                         });
                     }
                 );
             }
+            progressTracker.logProgress();
         }
 
         progressTracker.endSubTask();
@@ -127,6 +138,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     }
 
     private LongLongPredicate isCandidateLink(Graph graph) {
-        return (s, t) -> s != t && !graph.exists(s,t);
+        return (s, t) -> s != t && !graph.exists(s, t);
     }
 }
