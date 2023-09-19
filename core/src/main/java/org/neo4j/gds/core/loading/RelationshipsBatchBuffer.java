@@ -98,7 +98,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
             add(source, target, record.relationshipId(), record.propertiesReference());
         }
-        return true;
+        return !this.isFull();
     }
 
     public void add(long sourceId, long targetId) {

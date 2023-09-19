@@ -116,7 +116,7 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
                 add(record.nodeId(), propertiesReference, labels);
             }
         }
-        return true;
+        return !this.isFull();
     }
 
     public void add(long nodeId, PropertyReference propertyReference, long[] labels) {
