@@ -11,53 +11,57 @@ NOTE: This feature requires Neo4j Enterprise Edition.
 
 Using an xref:management-ops/graph-reads/create-cypher-db.adoc#_syntax[ephemeral database], you can use Cypher to update your graph as well as xref:management-ops/graph-reads/create-cypher-db.adoc#_read_query[reading from it].
 
-[[create-ephemeral-db-example]]
-== Example
+This feature is under development.
 
-This example shows the creation of an ephemeral database from a simple social network graph and its usage with Cypher queries.
+// TODO: Uncomment all the following when the SET clause bug is resolved
 
-=== Setup
+// [[create-ephemeral-db-example]]
+// == Example
 
-include::partial$/management-ops/ephemeral-db/create-example.adoc[]
+// This example shows the creation of an ephemeral database from a simple social network graph and its usage with Cypher queries.
 
-=== Update query
+// === Setup
 
-As an example of updating the graph, we add a `level` node property only to some nodes that match a given condition:
+// include::partial$/management-ops/ephemeral-db/create-example.adoc[]
 
-[source, cypher, role=noplay]
-----
-MATCH (n:Person)
-WHERE n.age > 40
-SET n.level = 3
-RETURN n.age, n.level
-----
+// === Update query
 
-.Results
-[opts="header"]
-|===
-| n.age | n.level
-| 42    | 3
-|===
+// As an example of updating the graph, we add a `level` node property only to some nodes that match a given condition:
 
-Then, we run a Cypher query to check that the new property has actually been added:
+// [source, cypher, role=noplay]
+// ----
+// MATCH (n:Person)
+// WHERE n.age > 40
+// SET n.level = 3
+// RETURN n.age, n.level
+// ----
 
-[source, cypher, role=noplay]
-----
-MATCH (n:Person)
-WHERE n.level = 3
-RETURN n.age, n.level
-----
+// .Results
+// [opts="header"]
+// |===
+// | n.age | n.level
+// | 42    | 3
+// |===
 
-.Results
-[opts="header"]
-|===
-| n.age | n.level
-| 42    | 3
-|===
+// Then, we run a Cypher query to check that the new property has actually been added:
 
-[[drop-ephemeral-db]]
-=== Cleanup
+// [source, cypher, role=noplay]
+// ----
+// MATCH (n:Person)
+// WHERE n.level = 3
+// RETURN n.age, n.level
+// ----
 
-include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
+// .Results
+// [opts="header"]
+// |===
+// | n.age | n.level
+// | 42    | 3
+// |===
 
-include::partial$/management-ops/ephemeral-db/limitations.adoc[]
+// [[drop-ephemeral-db]]
+// === Cleanup
+
+// include::partial$/management-ops/ephemeral-db/drop-example.adoc[]
+
+// include::partial$/management-ops/ephemeral-db/limitations.adoc[]
