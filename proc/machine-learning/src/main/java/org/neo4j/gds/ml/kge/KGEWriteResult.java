@@ -25,24 +25,18 @@ import java.util.Map;
 
 public final class KGEWriteResult {
 
-    public final long nodeCount;
-    public final long nodePropertiesWritten;
     public final long preProcessingMillis;
     public final long computeMillis;
     public final long writeMillis;
     public final long relationshipsWritten;
     public final Map<String, Object> configuration;
     private KGEWriteResult(
-        long nodeCount,
-        long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        this.nodeCount = nodeCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
         this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
         this.writeMillis = writeMillis;
@@ -56,8 +50,6 @@ public final class KGEWriteResult {
         @Override
         public KGEWriteResult build() {
             return new KGEWriteResult(
-                nodeCount,
-                nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,

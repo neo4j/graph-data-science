@@ -28,7 +28,7 @@ public class TopKGraph extends GraphAdapter {
 
     private final TopKMap topKMap;
 
-    TopKGraph(Graph graph, TopKMap topKMap) {
+    public TopKGraph(Graph graph, TopKMap topKMap) {
         super(graph);
         this.topKMap = topKMap;
     }
