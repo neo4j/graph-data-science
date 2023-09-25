@@ -8,10 +8,8 @@
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 
-// tag::introduction[]
 Harmonic centrality (also known as valued centrality) is a variant of closeness centrality, that was invented to solve the problem the original formula had when dealing with unconnected graphs.
 As with many of the centrality algorithms, it originates from the field of social network analysis.
-// end::introduction[]
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -19,15 +17,12 @@ include::partial$/operations-reference/alpha-note.adoc[]
 [[algorithms-harmonic-centrality-context]]
 == History and explanation
 
-// tag::explanation[]
 Harmonic centrality was proposed by Marchiori and Latora in https://arxiv.org/pdf/cond-mat/0008357.pdf[Harmony in the Small World^] while trying to come up with a sensible notion of "average shortest path".
 
 They suggested a different way of calculating the average distance to that used in the Closeness Centrality algorithm.
 Rather than summing the distances of a node to all other nodes, the harmonic centrality algorithm sums the inverse of those distances.
 This enables it deal with infinite values.
-// end::explanation[]
 
-// tag::formula[]
 The *raw harmonic centrality* for a node is calculated using the following formula:
 
 `raw harmonic centrality(node) = sum(1 / distance from node to every other node excluding itself)`
@@ -37,22 +32,16 @@ As with closeness centrality, we can also calculate a *normalized harmonic centr
 `normalized harmonic centrality(node) = sum(1 / distance from node to every other node excluding itself) / (number of nodes - 1)`
 
 In this formula, ∞ values are handled cleanly.
-// end::formula[]
 
 
 [[algorithms-harmonic-centrality-usecase]]
 == Use-cases - when to use the Harmonic Centrality algorithm
 
-// tag::use-case[]
 Harmonic centrality was proposed as an alternative to closeness centrality, and therefore has similar use cases.
 
 For example, we might use it if we're trying to identify where in the city to place a new public service so that it's easily accessible for residents.
 If we're trying to spread a message on social media we could use the algorithm to find the key influencers that can help us achieve our goal.
-// end::use-case[]
 
-// tag::constraint[]
-// == Constraints - when not to use the Harmonic Centrality algorithm
-// end::constraint[]
 
 [[algorithms-harmonic-centrality-syntax]]
 == Syntax
@@ -206,62 +195,67 @@ YIELD nodeId, centrality
 
 
 [[algorithms-harmonic-centrality-sample]]
-== Harmonic Centrality algorithm sample
+== Harmonic Centrality algorithm example
 
 .The following will create a sample graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay setup-query]
 ----
-CREATE (a:Node{id:"A"}),
-       (b:Node{id:"B"}),
-       (c:Node{id:"C"}),
-       (d:Node{id:"D"}),
-       (e:Node{id:"E"}),
+CREATE (a:User {name: "Alice"}),
+       (b:User {name: "Bob"}),
+       (c:User {name: "Charles"}),
+       (d:User {name: "Doug"}),
+       (e:User {name: "Ethan"}),
        (a)-[:LINK]->(b),
        (b)-[:LINK]->(c),
        (d)-[:LINK]->(e)
 ----
 
 .The following will project and store a named graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'graph',
-  'Node',
-  'LINK'
+  'User',
+  { LINK: {orientation: 'UNDIRECTED'} }
 )
 ----
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.harmonic.stream('graph', {})
-YIELD nodeId, centrality
-RETURN gds.util.asNode(nodeId).name AS user, centrality
-ORDER BY centrality DESC
+CALL gds.closeness.harmonic.stream('graph', {})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS user, score
+ORDER BY score DESC
 ----
 
-// tag::stream-sample-graph-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name | Centrality weight
-| B    | 0.5
-| A    | 0.375
-| c    | 0.375
-| D    | 0.25
-| E    | 0.25
+| user      | score
+| "Bob"     | 0.5
+| "Alice"   | 0.375
+| "Charles" | 0.375
+| "Doug"    | 0.25
+| "Ethan"   | 0.25
 |===
+--
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.harmonic.write('graph', {})
-YIELD nodes, writeProperty
+CALL gds.closeness.harmonic.write('graph', {writeProperty: 'score'})
+YIELD nodePropertiesWritten
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| nodes | writeProperty
-| 5     | "centrality"
+| nodePropertiesWritten
+| 5
 |===
+--

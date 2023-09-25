@@ -73,7 +73,7 @@ class TopKMapComputerTest extends BaseTest {
         var sourceNodes = create(0, 1, 2);
         var targetNodes = create(3, 4, 5);
         var topK = 1;
-        var concurrency = 1;
+        var concurrency = 4;
 
         var computer = new TopKMapComputer(
             graph,
@@ -111,7 +111,7 @@ class TopKMapComputerTest extends BaseTest {
         var sourceNodes = create(0, 1, 2);
         var targetNodes = create(3, 4, 5);
         var topK = 1;
-        var concurrency = 1;
+        var concurrency = 4;
 
         var computer = new TopKMapComputer(
             graph,
@@ -153,7 +153,7 @@ class TopKMapComputerTest extends BaseTest {
         var sourceNodes = create(0, 1, 2);
         var targetNodes = create(0, 1, 2, 3);
         var topK = 10;
-        var concurrency = 1;
+        var concurrency = 4;
 
         var computer = new TopKMapComputer(
             graph,

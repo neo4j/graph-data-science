@@ -20,10 +20,7 @@ For more information on configuring Neo4j logs, please refer to the https://neo4
 
 
 [[logging-progress-logging]]
-[.beta]
 == Progress-logging procedure
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 Progress is also tracked by the GDS library itself.
 This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
@@ -115,10 +112,7 @@ YIELD
 
 
 [[logging-user-warnings]]
-[.alpha]
-== User Log
-
-include::partial$/operations-reference/alpha-note.adoc[]
+== User log
 
 Hints and warnings can also be tracked through the GDS library and be accessed via Cypher queries.
 The GDS library keeps track for each user their 100 most recent tasks that have generated hints or warnings and stores them in memory.

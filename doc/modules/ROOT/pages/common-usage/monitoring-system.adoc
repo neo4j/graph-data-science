@@ -10,10 +10,7 @@ To know whether it is a reasonable time for a user to run a GDS procedure it is 
 Graphs and models are not shared between non-admin users by default, however GDS users on the same system will share its capacity.
 
 
-[.alpha]
 == System monitor procedure
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 To be able to get an overview of the system's current capacity and its analytics workload one can use the procedure `gds.systemMonitor`.
 It will give you information on the capacity of the DBMS's JVM instance in terms of memory and CPU cores, and an overview of the resources consumed by the GDS procedures currently being run on the system.

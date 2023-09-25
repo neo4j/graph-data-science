@@ -1,13 +1,10 @@
 :page-aliases: algorithms/alpha/kmeans.adoc
 [[algorithms-k-means]]
-[.beta]
 = K-Means Clustering
 :description: This section describes the K-Means algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: cluster
 :algorithm: K-Means
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 

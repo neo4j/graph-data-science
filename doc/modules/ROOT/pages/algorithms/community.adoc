@@ -7,24 +7,22 @@ Community detection algorithms are used to evaluate how groups of nodes are clus
 The Neo4j GDS library includes the following community detection algorithms, grouped by quality tier:
 
 * Production-quality
-** xref:algorithms/louvain.adoc[Louvain]
-** xref:algorithms/label-propagation.adoc[Label Propagation]
-** xref:algorithms/wcc.adoc[Weakly Connected Components]
-** xref:algorithms/triangle-count.adoc[Triangle Count]
-** xref:algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient]
-** xref:algorithms/k1coloring.adoc[K-1 Coloring]
-** xref:algorithms/k-core.adoc[K-Core Decomposition]
-** xref:algorithms/approx-max-k-cut.adoc[Approximate Maximum k-cut]
 ** xref:algorithms/conductance.adoc[Conductance metric]
+** xref:algorithms/k-core.adoc[K-Core Decomposition]
+** xref:algorithms/k1coloring.adoc[K-1 Coloring]
+** xref:algorithms/kmeans.adoc[K-Means Clustering]
+** xref:algorithms/label-propagation.adoc[Label Propagation]
+** xref:algorithms/leiden.adoc[Leiden]
+** xref:algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient]
+** xref:algorithms/louvain.adoc[Louvain]
 ** xref:algorithms/modularity.adoc[Modularity metric]
 ** xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
-** xref:algorithms/leiden.adoc[Leiden]
 ** xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
+** xref:algorithms/triangle-count.adoc[Triangle Count]
+** xref:algorithms/wcc.adoc[Weakly Connected Components]
 
-* Beta
-
-** xref:algorithms/kmeans.adoc[K-Means Clustering]
 
 * Alpha
+** xref:algorithms/approx-max-k-cut.adoc[Approximate Maximum k-cut]
 ** xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
 
