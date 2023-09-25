@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KGEPredictWriteProcTest extends BaseProcTest {
     @Neo4jGraph
@@ -82,14 +83,6 @@ class KGEPredictWriteProcTest extends BaseProcTest {
 
     @Test
     void shouldWriteUniqueRelationships() {
-        var n0 = idFunction.of("n0");
-        var n4 = idFunction.of("n4");
-        var m0 = idFunction.of("m0");
-        var m1 = idFunction.of("m1");
-        var m2 = idFunction.of("m2");
-        var m3 = idFunction.of("m3");
-        var m4 = idFunction.of("m4");
-
         String query = "CALL gds.ml.kge.predict.write('g', {" +
             " sourceNodeFilter: 'M'," +
             " targetNodeFilter: 'N'," +
@@ -97,7 +90,7 @@ class KGEPredictWriteProcTest extends BaseProcTest {
             " relationshipTypeEmbedding: [10.5, 12.43, 3.1, 10.0]," +
             " scoringFunction: 'TransE'," +
             " writeProperty: 'score'," +
-            " writeRelationshipType: 'newRelType'," +
+            " writeRelationshipType: 'NEWRELTYPE'," +
             " topK: 2" +
             "})" +
             "YIELD *";
@@ -111,6 +104,13 @@ class KGEPredictWriteProcTest extends BaseProcTest {
                 assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(10L);
             }
         );
+
+        final long relCount = runQuery(
+            "MATCH (a)-[:NEWRELTYPE]->(b) RETURN id(a) AS a, id(b) AS b",
+            result -> result.stream().count()
+        );
+
+        assertEquals(relCount, 10);
 
     }
 }
