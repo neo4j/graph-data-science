@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -40,6 +41,7 @@ public class KGEPredictWriteProc extends BaseProc {
 
     @Procedure(name = "gds.ml.kge.predict.write", mode = WRITE)
     @Description("Predicts new relationships using an existing KGE model.")
+    @Internal
     public Stream<KGEWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
