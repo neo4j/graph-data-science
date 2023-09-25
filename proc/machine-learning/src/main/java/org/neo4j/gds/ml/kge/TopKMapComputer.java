@@ -100,9 +100,9 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
                     concurrency,
                     terminationFlag,
                     stream -> {
-                        LongLongPredicate isCandidateLinkPredicate = isCandidateLink(concurrentGraph.get());
                         stream.forEach(node1 -> {
                             terminationFlag.assertRunning();
+                            LongLongPredicate isCandidateLinkPredicate = isCandidateLink(concurrentGraph.get());
 
                             LinkScorer linkScorer = threadLocalScorer.get();
                             linkScorer.init(node1);
@@ -138,6 +138,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
     }
 
     private LongLongPredicate isCandidateLink(Graph graph) {
+        //exists O(n)
         return (s, t) -> s != t && !graph.exists(s, t);
     }
 }
