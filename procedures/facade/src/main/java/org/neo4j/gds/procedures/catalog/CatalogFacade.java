@@ -24,7 +24,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyOrPropertiesResultProducer;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
@@ -106,7 +106,7 @@ public class CatalogFacade {
     private final UserServices userServices;
 
     // business facade
-    private final GraphStoreCatalogBusinessFacade businessFacade;
+    private final CatalogBusinessFacade businessFacade;
 
     public CatalogFacade(
         DatabaseIdService databaseIdService,
@@ -120,7 +120,7 @@ public class CatalogFacade {
         TransactionContextService transactionContextService,
         UserLogServices userLogServices,
         UserServices userServices,
-        GraphStoreCatalogBusinessFacade businessFacade
+        CatalogBusinessFacade businessFacade
     ) {
         this.databaseIdService = databaseIdService;
         this.graphDatabaseService = graphDatabaseService;

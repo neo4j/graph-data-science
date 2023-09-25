@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface GraphStoreCatalogBusinessFacade {
+public interface CatalogBusinessFacade {
     boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString);
 
     List<GraphStoreWithConfig> dropGraph(

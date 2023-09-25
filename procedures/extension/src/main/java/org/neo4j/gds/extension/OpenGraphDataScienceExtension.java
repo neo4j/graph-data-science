@@ -49,6 +49,8 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
+import java.util.Optional;
+
 /**
  * The OpenGDS extension for Neo4j.
  * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScience},
@@ -102,7 +104,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             __ -> new NativeExportBuildersProvider(), // we always just offer native writes in OpenGDS
             taskRegistryFactoryService,
             userLogServices,
-            userServices
+            userServices,
+            Optional.empty() // we have no extra checks to do in OpenGDS
         );
         var communityProcedureFactory = new CommunityProcedureFactory(
             log,

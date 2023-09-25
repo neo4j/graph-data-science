@@ -33,11 +33,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class DefaultGraphStoreCatalogBusinessFacadeTest {
+class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphExists() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
             new GraphNameValidationService(),
@@ -77,7 +77,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphDoesNotExist() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
             mock(GraphNameValidationService.class),
@@ -121,7 +121,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldValidateInputGraphName() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
             new GraphNameValidationService(),
@@ -156,7 +156,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldUseStrictValidationWhenProjecting() {
         var validationService = mock(GraphNameValidationService.class);
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
             validationService,
@@ -222,7 +222,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInNativeProjectParameters() {
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             new ConfigurationService(),
             new GraphNameValidationService(),
@@ -309,7 +309,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInCypherProjectParameters() {
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             new ConfigurationService(),
             new GraphNameValidationService(),
@@ -394,7 +394,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldDoExistenceCheckWhenProjecting() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
             new GraphNameValidationService(),
@@ -471,7 +471,7 @@ class DefaultGraphStoreCatalogBusinessFacadeTest {
     @Test
     void shouldDoPositiveExistenceCheckWhenProjectingSubGraph() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphStoreCatalogBusinessFacade(
+        var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
             new GraphNameValidationService(),

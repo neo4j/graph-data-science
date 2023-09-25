@@ -20,9 +20,10 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.ConfigurationService;
 import org.neo4j.gds.applications.graphstorecatalog.CypherProjectApplication;
-import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsApplication;
@@ -33,13 +34,10 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphSamplingApplication;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacadePreConditionsDecorator;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.ListGraphApplication;
 import org.neo4j.gds.applications.graphstorecatalog.NativeProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorApplication;
-import org.neo4j.gds.applications.graphstorecatalog.PreconditionsService;
 import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
@@ -52,7 +50,6 @@ import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
-import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.KernelTransactionService;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
@@ -66,6 +63,9 @@ import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserServices;
 import org.neo4j.kernel.api.procedure.Context;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 /**
  * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.CatalogFacade}
  * from a {@link org.neo4j.kernel.api.procedure.Context} at request time
@@ -78,6 +78,7 @@ public class CatalogFacadeFactory {
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
     private final UserServices userServices;
+    private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
 
     public CatalogFacadeFactory(
         Log log,
@@ -86,7 +87,8 @@ public class CatalogFacadeFactory {
         ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
-        UserServices userServices
+        UserServices userServices,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -95,6 +97,7 @@ public class CatalogFacadeFactory {
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
         this.userServices = userServices;
+        this.businessFacadeDecorator = businessFacadeDecorator;
     }
 
     public CatalogFacade createCatalogFacade(Context context) {
@@ -167,7 +170,7 @@ public class CatalogFacadeFactory {
         var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
 
         // GDS business facade
-        GraphStoreCatalogBusinessFacade businessFacade = new DefaultGraphStoreCatalogBusinessFacade(
+        CatalogBusinessFacade businessFacade = new DefaultCatalogBusinessFacade(
             log,
             configurationService,
             graphNameValidationService,
@@ -194,12 +197,10 @@ public class CatalogFacadeFactory {
             generateGraphApplication
         );
 
-        // wrap in decorator to enable preconditions checks
-        var preconditionsService = createPreconditionsService();
-        businessFacade = new GraphStoreCatalogBusinessFacadePreConditionsDecorator(
-            businessFacade,
-            preconditionsService
-        );
+        // wrap in decorator to inject conditional behaviour
+        if (businessFacadeDecorator.isPresent()) {
+            businessFacade = businessFacadeDecorator.get().apply(businessFacade);
+        }
 
         return new CatalogFacade(
             databaseIdService,
@@ -215,13 +216,5 @@ public class CatalogFacadeFactory {
             userServices,
             businessFacade
         );
-    }
-
-    /**
-     * @deprecated Inject this behaviour instead of relying on static state
-     */
-    @Deprecated
-    private static PreconditionsService createPreconditionsService() {
-        return Preconditions::check;
     }
 }

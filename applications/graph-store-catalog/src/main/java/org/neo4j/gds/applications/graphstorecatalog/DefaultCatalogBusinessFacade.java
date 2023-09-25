@@ -61,7 +61,7 @@ import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.RWR_
  * Here we have just business logic: no Neo4j bits or other integration bits, just Java POJO things.
  * <p>
  * By nature business logic is going to be bespoke, so one method per logical thing.
- * Take {@link DefaultGraphStoreCatalogBusinessFacade#graphExists(User, DatabaseId, String)} for example:
+ * Take {@link DefaultCatalogBusinessFacade#graphExists(User, DatabaseId, String)} for example:
  * pure expressed business logic that layers above will use in multiple places, but!
  * Any marshalling happens in those layers, not here.
  * <p>
@@ -73,7 +73,7 @@ import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.RWR_
  * Ideally though this is a facade over many individual pieces of business logic in separate classes,
  * or behind other facades (oh gosh turtles, turtles everywhere :scream:).
  */
-public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalogBusinessFacade {
+public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     private final Log log;
 
     // services
@@ -103,7 +103,7 @@ public class DefaultGraphStoreCatalogBusinessFacade implements GraphStoreCatalog
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private final GenerateGraphApplication generateGraphApplication;
 
-    public DefaultGraphStoreCatalogBusinessFacade(
+    public DefaultCatalogBusinessFacade(
         Log log,
         ConfigurationService configurationService,
         GraphNameValidationService graphNameValidationService,

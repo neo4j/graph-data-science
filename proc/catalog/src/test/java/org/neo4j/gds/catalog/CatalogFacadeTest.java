@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStoreCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
@@ -47,7 +47,7 @@ class CatalogFacadeTest {
         var graphDatabaseService = mock(GraphDatabaseService.class);
         var securityContext = mock(SecurityContext.class);
         var usernameService = mock(UserServices.class);
-        var businessFacade = mock(GraphStoreCatalogBusinessFacade.class);
+        var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
             databaseIdService,
             graphDatabaseService,
@@ -89,7 +89,7 @@ class CatalogFacadeTest {
         var graphDatabaseService = mock(GraphDatabaseService.class);
         var userLogServices = mock(UserLogServices.class);
         var usernameService = mock(UserServices.class);
-        var businessFacade = mock(GraphStoreCatalogBusinessFacade.class);
+        var businessFacade = mock(CatalogBusinessFacade.class);
         var securityContext = mock(SecurityContext.class);
         var catalogFacade = new CatalogFacade(
             databaseIdService,
