@@ -196,7 +196,7 @@ Then further down the page you might want to illustrate streaming results:
 .The following will run the Conductance algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+CALL gds.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
 YIELD community, conductance
 ----
 
