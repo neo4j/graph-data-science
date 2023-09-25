@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -27,6 +28,9 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,7 +93,7 @@ class KGEPredictWriteProcTest extends BaseProcTest {
             " nodeEmbeddingProperty: 'emb'," +
             " relationshipTypeEmbedding: [10.5, 12.43, 3.1, 10.0]," +
             " scoringFunction: 'TransE'," +
-            " writeProperty: 'score'," +
+            " writeProperty: 'scoreWeird'," +
             " writeRelationshipType: 'NEWRELTYPE'," +
             " topK: 2" +
             "})" +
@@ -112,5 +116,22 @@ class KGEPredictWriteProcTest extends BaseProcTest {
 
         assertEquals(relCount, 10);
 
+        final List<Double> listOfProperties = runQuery(
+            "MATCH (a)-[r:NEWRELTYPE]->(b) RETURN r.scoreWeird",
+            result -> result.stream().map(hashMap -> (Double) hashMap.get("r.scoreWeird")).collect(Collectors.toList())
+        );
+
+        assertThat(listOfProperties.toArray()).satisfiesExactlyInAnyOrder(
+            value -> assertThat((Double) value).isCloseTo(9.77, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(10.33, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(9.09, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(9.64, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(8.48, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(9.02, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(7.94, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(8.48, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(7.50, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(8.02, Offset.offset(0.01))
+        );
     }
 }
