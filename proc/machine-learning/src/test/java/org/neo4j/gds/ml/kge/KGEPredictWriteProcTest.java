@@ -122,8 +122,8 @@ class KGEPredictWriteProcTest extends BaseProcTest {
         );
 
         assertThat(listOfProperties.toArray()).satisfiesExactlyInAnyOrder(
-            value -> assertThat((Double) value).isCloseTo(9.77, Offset.offset(0.01)),
             value -> assertThat((Double) value).isCloseTo(10.33, Offset.offset(0.01)),
+            value -> assertThat((Double) value).isCloseTo(9.77, Offset.offset(0.01)),
             value -> assertThat((Double) value).isCloseTo(9.09, Offset.offset(0.01)),
             value -> assertThat((Double) value).isCloseTo(9.64, Offset.offset(0.01)),
             value -> assertThat((Double) value).isCloseTo(8.48, Offset.offset(0.01)),

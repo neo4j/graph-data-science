@@ -71,14 +71,14 @@ public class KGEPredictWriteSpec implements AlgorithmSpec<
             Graph graph = computationResult.graph();
 
             var topKMap = computationResult.result().get().topKMap();
-            var newRelGraph = new TopKGraph(graph, topKMap);
+            var topKGraph = new TopKGraph(graph, topKMap);
             var config = computationResult.config();
 
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
                 executionContext.relationshipExporterBuilder()
-                    .withGraph(newRelGraph)
-                    .withIdMappingOperator(newRelGraph::toOriginalNodeId)
+                    .withGraph(topKGraph)
+                    .withIdMappingOperator(topKGraph::toOriginalNodeId)
                     .withTerminationFlag(computationResult.algorithm().getTerminationFlag())
                     .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
                         name(),
@@ -95,7 +95,7 @@ public class KGEPredictWriteSpec implements AlgorithmSpec<
             }
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withRelationshipsWritten(newRelGraph.relationshipCount());
+            builder.withRelationshipsWritten(topKGraph.relationshipCount());
             builder.withConfig(config);
             return Stream.of(builder.build());
         };
