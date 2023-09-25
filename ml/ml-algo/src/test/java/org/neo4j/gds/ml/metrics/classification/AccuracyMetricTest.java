@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

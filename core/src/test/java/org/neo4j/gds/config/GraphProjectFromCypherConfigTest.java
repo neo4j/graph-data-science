@@ -71,9 +71,9 @@ class GraphProjectFromCypherConfigTest {
 
     static Stream<Arguments> invalidKeys() {
         return Stream.of(
-            Arguments.of(GraphProjectFromStoreConfig.NODE_PROJECTION_KEY, ImmutableNodeProjections.of()),
-            Arguments.of(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, ImmutableRelationshipProjections.of()),
-            Arguments.of(GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY, ImmutableNodeProjections.of())
+            Arguments.of("nodeProjection", ImmutableNodeProjections.of()),
+            Arguments.of("relationshipProjection", ImmutableRelationshipProjections.of()),
+            Arguments.of("nodeProperties", ImmutableNodeProjections.of())
         );
     }
 

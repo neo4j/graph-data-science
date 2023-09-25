@@ -79,8 +79,8 @@ Such steps producing node properties can be chained one after another and create
 Moreover, the node property steps that are added to the training pipeline will be executed both when xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training] a model and when the regression pipeline is xref:machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[applied for regression].
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
-The ending `.mutate` may be omitted and one may also use shorthand forms such as `beta.node2vec` instead of `gds.beta.node2vec.mutate`.
-But please note that tier qualification (in this case `beta`) must still be given as part of the name.
+The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.node2vec.mutate`.
+But please note that a tier qualification must still be given as part of the name.
 
 For example, xref:machine-learning/pre-processing/index.adoc[pre-processing algorithms] can be used as node property steps.
 
@@ -279,7 +279,7 @@ For detailed information about the available training methods in GDS, see xref:m
 
 In xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
-The parameter space of a pipeline can be inspected using `gds.beta.model.list` and yielding `parameterSpace`.
+The parameter space of a pipeline can be inspected using `gds.model.list` and yielding `parameterSpace`.
 
 [NOTE]
 ====

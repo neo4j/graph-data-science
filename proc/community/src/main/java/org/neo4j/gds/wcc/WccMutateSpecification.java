@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.MutateNodePropertyListFunction;
-import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -30,17 +29,17 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.mutate", description = WCC_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateSpecification.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
+public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
 
     public WccMutateSpecification() {}
 
@@ -60,7 +59,7 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
     }
 
     @Override
-    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateResult>> computationResultConsumer() {
         MutateNodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult) -> List.of(
             ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -73,12 +72,12 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
         return new MutatePropertyComputationResultConsumer<>(mutateConfigNodePropertyListFunction, this::resultBuilder);
     }
 
-    private AbstractCommunityResultBuilder<MutateResult> resultBuilder(
+    private AbstractCommunityResultBuilder<WccMutateResult> resultBuilder(
         ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         return WccSpecification.resultBuilder(
-            new MutateResult.Builder(
+            new WccMutateResult.Builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             ),
@@ -86,53 +85,4 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
         );
     }
 
-    @SuppressWarnings("unused")
-    public static final class MutateResult extends WccStatsSpecification.StatsResult {
-
-        public final long mutateMillis;
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            long componentCount,
-            Map<String, Object> componentDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                componentCount,
-                componentDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.mutateMillis = mutateMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected MutateResult buildResult() {
-                return new MutateResult(
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

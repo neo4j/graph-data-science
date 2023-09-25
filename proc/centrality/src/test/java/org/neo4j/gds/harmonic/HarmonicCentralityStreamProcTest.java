@@ -57,17 +57,15 @@ class HarmonicCentralityStreamProcTest  extends BaseProcTest {
     @Test
     void shouldStream() {
         var query = GdsCypher.call("graph")
-            .algo("gds.alpha.closeness.harmonic")
+            .algo("gds.closeness.harmonic")
             .streamMode()
-            .yields("nodeId", "centrality");
+            .yields("nodeId", "score");
 
         var resultMap = new HashMap<Long, Double>();
-        var rowCount=runQueryWithRowConsumer(query, row -> {
-            resultMap.put(
-                row.getNumber("nodeId").longValue(),
-                row.getNumber("centrality").doubleValue()
-            );
-        });
+        var rowCount= runQueryWithRowConsumer(query, row -> resultMap.put(
+            row.getNumber("nodeId").longValue(),
+            row.getNumber("score").doubleValue()
+        ));
 
         assertThat(rowCount).isEqualTo(5);
 

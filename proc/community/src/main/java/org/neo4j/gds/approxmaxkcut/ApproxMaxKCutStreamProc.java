@@ -21,9 +21,12 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,19 +38,22 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ApproxMaxKCutStreamProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.maxkcut.stream", mode = READ)
+    @Context
+    public GraphDataScience facade;
+    @Procedure(value = "gds.maxkcut.stream", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<ApproxMaxKCutStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ApproxMaxKCutStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().approxMaxKCutStream(
+            graphName,
+            configuration,
+            executionContext().algorithmMetaDataSetter()
+        );
     }
 
-    @Procedure(value = "gds.alpha.maxkcut.stream.estimate", mode = READ)
+    @Procedure(value = "gds.maxkcut.stream.estimate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -58,6 +64,35 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Deprecated
+    @Internal
+    @Procedure(value = "gds.alpha.maxkcut.stream", mode = READ, deprecatedBy = "gds.maxcut.stream")
+    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    public Stream<ApproxMaxKCutStreamResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.maxkcut.stream` has been deprecated, please use `gds.maxkcut.stream`.");
+
+        return stream(graphName, configuration);
+    }
+
+    @Deprecated
+    @Internal
+    @Procedure(value = "gds.alpha.maxkcut.stream.estimate", mode = READ, deprecatedBy = "gds.maxcut.stream.estimate")
+    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateAlpha(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.maxkcut.stream.estimate` has been deprecated, please use `gds.maxkcut.stream.estimate`.");
+        return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

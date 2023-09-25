@@ -21,82 +21,41 @@ package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class PerDatabaseUserLogStore implements UserLogStore {
-    public static final int MOST_RECENT = 100;
+    private final ConcurrentHashMap<String, LogStore> logStores = new ConcurrentHashMap<>();
 
-    private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
+    @Override
+    public void addUserLogMessage(String username, Task task, String message) {
+        var logStore = getUserLogStore(username);
 
-    public PerDatabaseUserLogStore() {
-        this.registeredMessages = new ConcurrentHashMap<>();
+        logStore.addLogMessage(task, message);
     }
 
+    @Override
     public Stream<UserLogEntry> query(String username) {
-        if (registeredMessages.containsKey(username)) {
-            return registeredMessages.get(username)
-                .entrySet()
-                .stream()
-                .flatMap(PerDatabaseUserLogStore::fromEntryToUserLog);
-        }
-        return Stream.empty();
+        var logStore = getUserLogStore(username);
+
+        return logStore.stream().flatMap(PerDatabaseUserLogStore::taskWithMessagesToUserLogEntryStream);
     }
 
-    private static Stream<UserLogEntry> fromEntryToUserLog(Map.Entry<Task, List<String>> entry) {
-        return entry.getValue().stream().map(message -> new UserLogEntry(entry.getKey(), message));
+    private LogStore getUserLogStore(String username) {
+        return logStores.computeIfAbsent(username, __ -> new LogStore());
     }
 
-    private synchronized void pollLeastRecentElement(String username) {
-        var usernameMap = this.registeredMessages.get(username);
-
-        //because this is synchronized, this will keep the usernameMap with exactly MOST_RECENT elements
-        if (usernameMap.size() > MOST_RECENT) {
-            usernameMap.pollFirstEntry();
-        }
-    }
-
-    private ConcurrentSkipListMap<Task, List<String>> getUserStore(String username) {
-        return registeredMessages.computeIfAbsent(
-            username,
-            __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
+    /**
+     * One task with messages turns into several user log entries
+     */
+    private static Stream<UserLogEntry> taskWithMessagesToUserLogEntryStream(Map.Entry<Task, Queue<String>> taskWithMessages) {
+        return taskWithMessages.getValue().stream().map(message ->
+            new UserLogEntry(
+                taskWithMessages.getKey(),
+                message
+            )
         );
-    }
-
-
-    private boolean shouldConsiderTask(SortedMap<Task, List<String>> usernameMap, Task taskId) {
-        if (usernameMap.size() < MOST_RECENT) {
-            return true;
-        } else {
-            var leastRecentCachedTask = usernameMap.firstKey();
-            return leastRecentCachedTask.startTime() <= taskId.startTime();
-        }
-    }
-
-    public void addUserLogMessage(String username, Task taskId, String message) {
-        var usernameMap = getUserStore(username);
-
-        if (shouldConsiderTask(usernameMap, taskId)) {
-            AtomicBoolean addedInStore = new AtomicBoolean();
-            usernameMap
-                .computeIfAbsent(taskId, __ -> {
-                    addedInStore.set(true);
-                    return Collections.synchronizedList(new ArrayList<>());
-                })
-                .add(message);
-
-            //check if something needs to potentially  be removed
-            if (addedInStore.get() && usernameMap.size() > MOST_RECENT) {
-                pollLeastRecentElement(username);
-            }
-        }
     }
 }

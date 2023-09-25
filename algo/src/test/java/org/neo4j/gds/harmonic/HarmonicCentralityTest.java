@@ -24,7 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -67,17 +67,17 @@ public class HarmonicCentralityTest {
         var harmonicCentrality = new HarmonicCentrality(
             graph,
             1,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
         var result = harmonicCentrality.compute();
 
-        assertThat(result.getCentralityScore(mappedId.of("a"))).isEqualTo(0.375, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("b"))).isEqualTo(0.5, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("c"))).isEqualTo(0.375, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
-        assertThat(result.getCentralityScore(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("a"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("b"))).isEqualTo(0.5, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("c"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.centralities().get(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class HarmonicCentralityTest {
         var algo = new HarmonicCentrality(
             graph,
             1,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 

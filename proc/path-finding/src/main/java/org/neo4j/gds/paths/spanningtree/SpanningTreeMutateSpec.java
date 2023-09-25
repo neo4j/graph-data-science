@@ -40,7 +40,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.beta.spanningTree.mutate", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(
+    name = "gds.spanningTree.mutate",
+    aliases = {"gds.beta.spanningTree.mutate"},
+    description = SpanningTreeWriteProc.DESCRIPTION,
+    executionMode = MUTATE_RELATIONSHIP
+)
 public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<MutateResult>, SpanningTreeAlgorithmFactory<SpanningTreeMutateConfig>> {
 
     @Override

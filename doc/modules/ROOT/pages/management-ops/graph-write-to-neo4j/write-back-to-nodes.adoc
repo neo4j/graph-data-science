@@ -61,7 +61,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.write(
+CALL gds.graph.nodeLabel.write(
     graphName: String,
     nodeLabel: String,
     configuration: Map
@@ -88,7 +88,7 @@ YIELD
 [opts="header",cols="1,1,1,7"]
 |===
 | Name                   | Type                  | Default           | Description
-| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-project-subgraph.adoc[Projecting a subgraph].
+| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-filter.adoc[Projecting a subgraph].
 | concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure.
 |===
 
@@ -108,6 +108,8 @@ YIELD
 
 
 == Examples
+
+include::partial$/common-usage/examples-empty-db-note.adoc[]
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
@@ -234,7 +236,7 @@ To write a new node label to the database for nodes with score higher than `0`, 
 .Write the `Reader` node label back to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+CALL gds.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
 YIELD graphName, nodeCount, nodeLabel, nodeLabelsWritten
 ----
 

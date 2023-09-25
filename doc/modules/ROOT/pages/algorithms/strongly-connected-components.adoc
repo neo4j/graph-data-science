@@ -2,8 +2,8 @@
 [.alpha]
 = Strongly Connected Components
 :description: This section describes the Strongly Connected Components algorithm in the Neo4j Graph Data Science library.
-
-
+:result: component
+:entity: node
 The Strongly Connected Components (SCC) algorithm finds maximal sets of connected nodes in a directed graph.
 A set is considered a strongly connected component if there is a directed path between each pair of nodes within the set.
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
@@ -44,64 +44,25 @@ Decomposing a directed graph into its strongly connected components is a classic
 
 [[algorithms-strongly-connected-components-syntax]]
 == Syntax
-
-.The following will run the algorithm and write back results:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.scc.write(
-  graphName: string,
-  configuration: map
-)
-YIELD preProcessingMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| writeProperty    | String  | 'componentId'          | yes      | The property name written back to.
-| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                 | Type    | Description
-| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
-| computeMillis        | Integer | Milliseconds for running the algorithm.
-| writeMillis          | Integer | Milliseconds for writing result data back.
-| postProcessingMillis | Integer | Milliseconds for computing percentiles and community count.
-| nodes                | Integer | The number of nodes considered.
-| communityCount       | Integer | The number of communities found.
-| p1                   | Float   | The 1 percentile of community size.
-| p5                   | Float   | The 5 percentile of community size.
-| p10                  | Float   | The 10 percentile of community size.
-| p25                  | Float   | The 25 percentile of community size.
-| p50                  | Float   | The 50 percentile of community size.
-| p75                  | Float   | The 75 percentile of community size.
-| p90                  | Float   | The 90 percentile of community size.
-| p95                  | Float   | The 95 percentile of community size.
-| p99                  | Float   | The 99 percentile of community size.
-| p100                 | Float   | The 100 percentile of community size.
-| writeProperty        | String  | The property name written back to.
-
-|===
-
+Decomposition syntax per mode
+[.tabbed-example, caption = ]
+====
+[.include-with-stream]
+======
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
-YIELD nodeId, componentId
+CALL gds.scc.stream(graphName: String, configuration: Map)
+YIELD  nodeId,
+       componentId
 ----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
 |===
-| Name             | Type    | Default                | Optional | Description
-| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 |===
 
 .Results
@@ -111,7 +72,136 @@ YIELD nodeId, componentId
 | nodeId      | Integer | Node ID.
 | componentId | Integer | Component ID.
 |===
+======
+[.include-with-stats]
+======
+.The following will run the algorithm in stats mode
+[source, cypher, role=noplay]
+----
+CALL gds.scc.stats(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  componentCount: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  componentDistribution: Map,
+  configuration: Map
+----
 
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| componentCount        | Integer | The number of computed strongly connected components.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+======
+[.include-with-mutate]
+======
+.The following will run the algorithm and mutate the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.scc.mutate(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  componentCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  componentDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| componentCount                | Integer | The number of computed strongly connected components.
+| nodePropertiesWritten         | Integer | The number of node properties written.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| mutateMillis                   | Integer | Milliseconds for mutating the in-memory graph.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
+
+|===
+======
+[.include-with-write]
+======
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.scc.write(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  componentCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  componentDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| componentCount                | Integer | The number of computed strongly connected components.
+| nodePropertiesWritten         | Integer | The number of node properties written.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| writeMillis                   | Integer | Milliseconds for writing result back to Neo4j.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
+
+|===
+======
+
+====
 
 [[algorithms-strongly-connected-components-example]]
 == Strongly Connected Components algorithm examples
@@ -147,14 +237,17 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
+[[algorithms-scc-stream-example]]
 === Stream
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
 
 [role=query-example]
 --
 .The following will run the algorithm and stream back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.stream('graph', {})
+CALL gds.scc.stream('graph', {})
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
 ORDER BY Component DESC
@@ -178,23 +271,71 @@ We have 3 strongly connected components in our sample graph.
 The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
 Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
 
+[[algorithms-scc-stats-example]]
+=== Stats
+:stats-syntax: algorithms-strongly-connected-components-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source,cypher,role=noplay]
+----
+CALL gds.scc.stats('graph')
+YIELD componentCount
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| componentCount
+| 3
+|===
+--
+
+[[algorithms-scc-mutate-example]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and store the results in `graph`:
+[source,cypher,role=noplay]
+----
+CALL gds.scc.mutate('graph', { mutateProperty: 'componentId'})
+YIELD componentCount
+----
+
+.Results
+[opts="header"]
+|===
+| componentCount
+| 3
+|===
+--
+
+[[algorithms-scc-write-example]]
 === Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example, group=writeAndMax]
 --
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.write('graph', {
+CALL gds.scc.write('graph', {
   writeProperty: 'componentId'
 })
-YIELD setCount, maxSetSize, minSetSize;
+YIELD componentCount, componentDistribution
+RETURN componentCount,componentDistribution.max as maxSetSize, componentDistribution.min as minSetSize
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m"]
 |===
-| setCount | maxSetSize | minSetSize
+| componentCount | maxSetSize | minSetSize
 | 3        | 3          | 1
 |===
 --

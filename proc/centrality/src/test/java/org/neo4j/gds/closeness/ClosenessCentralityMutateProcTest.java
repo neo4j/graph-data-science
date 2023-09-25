@@ -124,7 +124,7 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
     @Test
     void shouldMutate() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
+            .algo("closeness")
             .mutateMode()
             .addParameter("mutateProperty", MUTATE_PROPERTY)
             .yields();
@@ -163,4 +163,43 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
             expectedCentralityResult
         );
     }
+
+    @Test
+    void betaShouldMutate() {
+
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.closeness")
+            .mutateMode()
+            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("mutateMillis")).isNotEqualTo(-1L);
+            assertThat(row.getNumber("preProcessingMillis")).isNotEqualTo(-1L);
+            assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
+
+            assertThat(row.get("configuration")).isNotNull();
+
+            assertThat(row.get("centralityDistribution"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
+            assertThat(row.get("mutateProperty")).isEqualTo(MUTATE_PROPERTY);
+        });
+
+        assertCypherResult(
+            formatWithLocale("MATCH (n) WHERE n.%s IS NOT NULL RETURN count(n) AS count", MUTATE_PROPERTY),
+            List.of(Map.of("count", 0L))
+        );
+
+        assertCypherResult(
+            formatWithLocale(
+                "CALL gds.graph.nodeProperties.stream('graph',['%1$s']) YIELD nodeId, propertyValue AS %1$s",
+                MUTATE_PROPERTY
+            ),
+            expectedCentralityResult
+        );
+    }
+
 }

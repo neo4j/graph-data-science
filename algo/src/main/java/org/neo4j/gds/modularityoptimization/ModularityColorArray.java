@@ -22,7 +22,7 @@ package org.neo4j.gds.modularityoptimization;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.LongLongMap;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 final class ModularityColorArray {
 

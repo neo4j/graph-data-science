@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -48,7 +48,7 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
         return IntersectingTriangleCount.create(
             graph,
             configuration,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }

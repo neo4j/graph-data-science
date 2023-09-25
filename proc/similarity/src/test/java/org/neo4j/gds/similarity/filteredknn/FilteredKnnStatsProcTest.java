@@ -21,10 +21,10 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -72,11 +72,12 @@ public final class FilteredKnnStatsProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testStatsYields() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.alpha.knn.filtered", "gds.knn.filtered"})
+    void testStatsYields(String tieredProceure) {
         String query = GdsCypher
             .call("filteredKnnGraph")
-            .algo("gds.alpha.knn.filtered")
+            .algo(tieredProceure)
             .statsMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -125,7 +126,7 @@ public final class FilteredKnnStatsProcTest extends BaseProcTest {
 
         String algoQuery = GdsCypher
             .call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .statsMode()
             .addParameter("nodeProperties", List.of("weight"))
             .addParameter("concurrency", 1)

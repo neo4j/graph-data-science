@@ -42,6 +42,12 @@ public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseCo
 
     String exportName();
 
+    @Value.Default
+    default boolean useLabelMapping() {
+        // the reason for default false (unlike BackupConfig) is to prevent a breaking change in CSV export
+        return false;
+    }
+
     static GraphStoreToFileExporterConfig of(String username, CypherMapWrapper config) {
         return new GraphStoreToFileExporterConfigImpl(username, config);
     }

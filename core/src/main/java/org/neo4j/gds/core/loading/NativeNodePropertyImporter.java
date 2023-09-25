@@ -68,7 +68,7 @@ public final class NativeNodePropertyImporter {
         // TODO: create a union of all property keys for all labels and use that one to filter the property cursor on 4.4-dev
     }
 
-    int importProperties(
+    public int importProperties(
         long neoNodeId,
         long[] labelIds,
         PropertyReference propertiesReference,

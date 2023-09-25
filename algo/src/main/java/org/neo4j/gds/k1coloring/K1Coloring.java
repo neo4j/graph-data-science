@@ -22,9 +22,9 @@ package org.neo4j.gds.k1coloring;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -60,7 +60,7 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
  * and contain more colors as needed.
  * </p>
  */
-public class K1Coloring extends Algorithm<HugeLongArray> {
+public class K1Coloring extends Algorithm<K1ColoringResult> {
     private static final long FINISHED = -1;
     private final Graph graph;
     private final long nodeCount;
@@ -77,8 +77,6 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
     private HugeLongArray colors;
     private long ranIterations;
     private boolean didConverge;
-
-    private BitSet usedColors;
 
     public K1Coloring(
         Graph graph,
@@ -113,33 +111,9 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         return nodesToColor[(bitSetId + 1) % 2];
     }
 
-    public long ranIterations() {
-        return ranIterations;
-    }
-
-    public boolean didConverge() {
-        return didConverge;
-    }
-
-    public BitSet usedColors() {
-        if (usedColors == null) {
-            this.usedColors = new BitSet(nodeCount);
-            graph.forEachNode((nodeId) -> {
-                    usedColors.set(colors.get(nodeId));
-                    return true;
-                }
-            );
-        }
-        return usedColors;
-    }
-
-    public HugeLongArray colors() {
-        return colors;
-    }
-
 
     @Override
-    public HugeLongArray compute() {
+    public K1ColoringResult compute() {
         progressTracker.beginSubTask();
 
         colors = HugeLongArray.newArray(nodeCount);
@@ -159,7 +133,8 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         this.didConverge = ranIterations < maxIterations;
 
         progressTracker.endSubTask();
-        return colors();
+
+        return K1ColoringResult.of(colors,ranIterations, didConverge);
     }
 
     private long updateVolume() {
@@ -242,6 +217,7 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
             .tasks(steps)
             .executor(executor)
             .run();
+
         progressTracker.endSubTask();
     }
 }

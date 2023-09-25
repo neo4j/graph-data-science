@@ -20,8 +20,11 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -31,7 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FilteredKnnMutateProc extends BaseProc {
-    @Procedure(name = "gds.alpha.knn.filtered.mutate", mode = READ)
+    @Procedure(name = "gds.knn.filtered.mutate", mode = READ)
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
     public Stream<FilteredKnnMutateProcResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -41,5 +44,33 @@ public class FilteredKnnMutateProc extends BaseProc {
             new FilteredKnnMutateSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.knn.filtered.mutate.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return new MemoryEstimationExecutor<>(
+            new FilteredKnnMutateSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Procedure(name = "gds.alpha.knn.filtered.mutate", mode = READ, deprecatedBy = "gds.knn.filtered.mutate")
+    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<FilteredKnnMutateProcResult> alphaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.knn.filtered.mutate` has been deprecated, please use `gds.knn.filtered.mutate`.");
+        return mutate(graphName, configuration);
     }
 }

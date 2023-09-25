@@ -123,6 +123,8 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 In this section we will demonstrate the usage of the RWR sampling algorithm on a small toy graph.
 
 
@@ -160,8 +162,6 @@ Between those clusters there is one single relationship.
 
 We can now project the graph and store it in the graph catalog.
 
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
-
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
@@ -181,7 +181,7 @@ Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as
 [source, cypher, role=noplay]
 ----
 MATCH (start:User {name: 'Alice'})
-CALL gds.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
+CALL gds.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [start] })
 YIELD nodeCount, relationshipCount
 RETURN nodeCount, relationshipCount
 ----

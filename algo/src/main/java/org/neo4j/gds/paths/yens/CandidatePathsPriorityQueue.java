@@ -31,8 +31,8 @@ import java.util.concurrent.locks.ReentrantLock;
     private final PriorityQueue<MutablePathResult> candidates;
 
     CandidatePathsPriorityQueue(){
-        this.candidateLock=new ReentrantLock();
-        this.candidates=initCandidatesQueue();
+        this.candidateLock = new ReentrantLock();
+        this.candidates = initCandidatesQueue();
      }
 
     void addPath(MutablePathResult rootPath){

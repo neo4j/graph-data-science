@@ -19,24 +19,26 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.kmeans.write", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.kmeans.write", aliases = {"gds.beta.kmeans.write"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>, KmeansAlgorithmFactory<KmeansWriteConfig>> {
 
     @Override
@@ -54,83 +56,51 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
         return (__, config) -> KmeansWriteConfig.of(config);
     }
 
-    @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            var returnColumns = executionContext.returnColumns();
-            var builder = new WriteResult.Builder(
-                returnColumns,
-                computationResult.config().concurrency()
+        @Override
+        public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+            return new WriteNodePropertiesComputationResultConsumer<>(
+                this::resultBuilder,
+                computationResult -> {
+                    var nodePropertyValues  = computationResult.result()
+                        .map(KmeansResult::communities)
+                        .map(NodePropertyValuesAdapter::adapt)
+                        .orElse(EmptyLongNodePropertyValues.INSTANCE);
+
+                    return List.of(ImmutableNodeProperty.of(
+                    computationResult.config().writeProperty(),
+                        nodePropertyValues));
+                },
+                name()
             );
+        }
 
-            computationResult.result().ifPresent(result -> {
-                if (returnColumns.contains("centroids")) {
-                    builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
-                }
-                if (returnColumns.contains("averageDistanceToCentroid")) {
-                    builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
-                }
-
-                if (returnColumns.contains("averageSilhouette")) {
-                    builder.withAverageSilhouette(result.averageSilhouette());
-                }
-                builder.withCommunityFunction(result.communities()::get);
-
-            });
-
-            builder
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(graph.nodeCount())
-                .withConfig(computationResult.config());
-
-
-            try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-                var writeConcurrency = computationResult.config().writeConcurrency();
-                var algorithm = computationResult.algorithm();
-                var config = computationResult.config();
-
-                NodePropertyExporter exporter =  executionContext.nodePropertyExporterBuilder()
-                    .withIdMap(graph)
-                    .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                        name(),
-                        graph.nodeCount(),
-                        writeConcurrency,
-                        executionContext
-                    ))
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
-                    .parallel(Pools.DEFAULT, writeConcurrency)
-                    .build();
-
-                LongNodePropertyValues properties;
-                if (computationResult.result().isPresent()) {
-                    var communities = computationResult.result().get().communities();
-                    properties = new LongNodePropertyValues() {
-                        @Override
-                        public long nodeCount() {
-                            return graph.nodeCount();
-                        }
-
-                        @Override
-                        public long longValue(long nodeId) {
-                            return communities.get(nodeId);
-                        }
-                    };
-                } else {
-                    properties = EmptyLongNodePropertyValues.INSTANCE;
-                }
-
-                exporter.write(
-                    config.writeProperty(),
-                    properties
-                );
-                builder.withNodePropertiesWritten(exporter.propertiesWritten());
+    @NotNull
+    private AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<Kmeans, KmeansResult, KmeansWriteConfig> computationResult,
+        ExecutionContext executionContext
+    ) {
+        var builder = new WriteResult.Builder(
+            executionContext.returnColumns(),
+            computationResult.config().concurrency()
+        );
+        var returnColumns = executionContext.returnColumns();
+        computationResult.result().ifPresent(result -> {
+            if (returnColumns.contains("centroids")) {
+                builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
+            }
+            if (returnColumns.contains("averageDistanceToCentroid")) {
+                builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
             }
 
-            return Stream.of(builder.build());
-        };
+            if (returnColumns.contains("averageSilhouette")) {
+                builder.withAverageSilhouette(result.averageSilhouette());
+            }
+            builder.withCommunityFunction(result.communities()::get);
+
+        });
+
+        return builder
+            .withConfig(computationResult.config());
     }
 
 }

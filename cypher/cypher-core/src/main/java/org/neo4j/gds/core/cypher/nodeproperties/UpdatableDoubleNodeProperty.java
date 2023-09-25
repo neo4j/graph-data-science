@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.cypher.nodeproperties;
 
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.collections.HugeSparseDoubleList;
+import org.neo4j.gds.collections.hsl.HugeSparseDoubleList;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;

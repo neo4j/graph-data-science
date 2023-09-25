@@ -98,6 +98,8 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 [[graph-project-examples]]
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS Graph Project capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 
@@ -490,7 +492,7 @@ ORDER BY person ASC, numberOfPages DESC
 --
 
 If we compare the results to the ones from xref:management-ops/graph-creation/graph-project-cypher-legacy.adoc#cypher-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
-This functionality is only expressible with xref:management-ops/graph-creation/graph-project.adoc[native projections] by projecting a xref:management-ops/graph-creation/graph-project-subgraph.adoc[subgraph].
+This functionality is only expressible with xref:management-ops/graph-creation/graph-project.adoc[native projections] by projecting a xref:management-ops/graph-creation/graph-filter.adoc[subgraph].
 
 [[cypher-projection-parameters]]
 === Using query parameters

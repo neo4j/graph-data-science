@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
@@ -39,6 +40,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.catalog.GraphListProc;
+import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.RandomGraphTestCase;
@@ -46,6 +48,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -86,8 +89,7 @@ class CypherAggregationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        var procedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
-        procedures.register(Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()), true);
+        registerUserAggregationFunction(db, CypherAggregation.newInstance());
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 
@@ -893,9 +895,39 @@ class CypherAggregationTest extends BaseProcTest {
             (Result result) -> result.next().get("config")
         );
 
-        var config = GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
+        var config = GraphProjectFromCypherAggregationConfig.of("", "g", "", configMap);
 
         assertThat(config.readConcurrency()).isEqualTo(2);
+    }
+
+    @Test
+    void testReturnExecutingQuery() {
+        var query = "MATCH (s)-->(t) RETURN gds.graph.project('g', s, t, {}).query as query";
+        var resultQuery = runQuery(query, result -> result.<String>columnAs("query").next());
+
+        assertThat(resultQuery).isEqualTo(query);
+
+        var listQuery = runQuery(
+            "CALL gds.graph.list('g') YIELD configuration RETURN configuration.query as query",
+            result -> result.<String>columnAs("query").next()
+        );
+
+        assertThat(listQuery).isEqualTo(query);
+    }
+
+    @Test
+    void testReturnExecutingQueryWithParams() {
+        var query = "MATCH (s)-->(t) RETURN gds.graph.project($graphName, s, t, {}).query as query";
+        var resultQuery = runQuery(query, Map.of("graphName", "g"), result -> result.<String>columnAs("query").next());
+
+        assertThat(resultQuery).isEqualTo(query);
+
+        var listQuery = runQuery(
+            "CALL gds.graph.list('g') YIELD configuration RETURN configuration.query as query",
+            result -> result.<String>columnAs("query").next()
+        );
+
+        assertThat(listQuery).isEqualTo(query);
     }
 
     @Test
@@ -1054,5 +1086,17 @@ class CypherAggregationTest extends BaseProcTest {
         );
         assertThatCode(() -> runQuery(query))
             .doesNotThrowAnyException();
+    }
+
+    private static void registerUserAggregationFunction(GraphDatabaseService db, CompatUserAggregationFunction function) throws
+        KernelException {
+        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
+        var alreadyExists = Neo4jProxy.globalProcedureRegistry(globalProcedures).getAllAggregatingFunctions()
+            .collect(Collectors.toSet())
+            .contains(function.signature());
+
+        if (!alreadyExists) {
+            GraphDatabaseApiProxy.register(globalProcedures, Neo4jProxy.callableUserAggregationFunction(function));
+        }
     }
 }

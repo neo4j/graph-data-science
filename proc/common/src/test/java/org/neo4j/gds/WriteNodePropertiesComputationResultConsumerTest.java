@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
@@ -83,8 +82,8 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
 
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
-        .databaseId(DatabaseId.from(""))
-        .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+        .databaseId(DatabaseId.of(""))
+        .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
         .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

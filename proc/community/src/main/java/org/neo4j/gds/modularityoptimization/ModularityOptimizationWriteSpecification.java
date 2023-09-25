@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.modularityOptimization.write", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.modularityOptimization.write", aliases = {"gds.beta.modularityOptimization.write"}, description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ModularityOptimizationWriteSpecification implements AlgorithmSpec<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig, Stream<ModularityOptimizationWriteResult>, ModularityOptimizationFactory<ModularityOptimizationWriteConfig>> {
 
     @Override

@@ -20,7 +20,8 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -36,8 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-
+@GdsCallable(name = "gds.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
 
     @Override
@@ -62,8 +62,8 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
                 computationResult.config().writeProperty(),
                 computationResult.result()
                     .map(ClosenessCentralityResult::centralities)
-                    .orElseGet(() -> HugeDoubleArray.newArray(0))
-                    .asNodeProperties()
+                    .map(NodePropertyValuesAdapter::adapt)
+                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             name());
     }

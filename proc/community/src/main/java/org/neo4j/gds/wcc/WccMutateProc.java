@@ -20,9 +20,10 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,18 +35,16 @@ import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class WccMutateProc extends BaseProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<WccMutateSpecification.MutateResult> mutate(
+    public Stream<WccMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
-        return new ProcedureExecutor<>(
-            new WccMutateSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().wccMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
@@ -54,11 +53,6 @@ public class WccMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-
-        return new MemoryEstimationExecutor<>(
-            new WccMutateSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateWccMutate(graphNameOrConfiguration, algoConfiguration);
     }
 }

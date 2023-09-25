@@ -114,7 +114,7 @@ class ClosenessCentralityStreamProcTest extends BaseProcTest {
     @Test
     void shouldStream() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
+            .algo("closeness")
             .streamMode()
             .yields("nodeId", "score");
 

@@ -27,15 +27,15 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
@@ -53,7 +53,7 @@ public final class GraphLoaderBuilders {
 
     /**
      * Factory method that defines the generation of a {@link GraphLoader}
-     * using a {@link org.neo4j.gds.config.GraphProjectFromStoreConfig}. Use {@link StoreLoaderBuilder}
+     * using a {@link org.neo4j.gds.projection.GraphProjectFromStoreConfig}. Use {@link StoreLoaderBuilder}
      * to create the input for that method in a convenient way.
      */
     @Builder.Factory
@@ -83,7 +83,7 @@ public final class GraphLoaderBuilders {
         Optional<Boolean> validateRelationships
     ) {
 
-        GraphProjectFromStoreConfig graphProjectConfig = GraphProjectConfigBuilders.storeConfig(
+        var graphProjectConfig = GraphProjectConfigBuilders.storeConfig(
             userName.or(() -> transactionContext.map(TransactionContext::username)),
             graphName,
             nodeLabels,
@@ -191,10 +191,10 @@ public final class GraphLoaderBuilders {
     ) {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(databaseService))
+                .databaseId(DatabaseId.of(databaseService.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
-                .executor(executorService.orElse(Pools.DEFAULT))
+                .executor(executorService.orElse(DefaultPool.INSTANCE))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

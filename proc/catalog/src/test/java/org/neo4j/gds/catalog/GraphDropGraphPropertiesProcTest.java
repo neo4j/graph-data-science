@@ -51,7 +51,7 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 
-        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), DEFAULT_GRAPH_NAME).graphStore();
+        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), DEFAULT_GRAPH_NAME).graphStore();
     }
 
     @AfterEach
@@ -76,7 +76,7 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
         graphStore.addGraphProperty("prop", values);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.alpha.graph.graphProperty.drop('%s', 'prop')",
+            "CALL gds.graph.graphProperty.drop('%s', 'prop')",
             DEFAULT_GRAPH_NAME
         );
 
@@ -84,43 +84,13 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
             graphWriteQuery,
             List.of(
                 Map.of(
-                  "graphName", DEFAULT_GRAPH_NAME,
-                  "graphProperty", "prop",
-                  "propertiesRemoved", 10L
+                    "graphName", DEFAULT_GRAPH_NAME,
+                    "graphProperty", "prop",
+                    "propertiesRemoved", 10L
                 )
             )
         );
 
         assertThat(graphStore.hasGraphProperty("prop")).isFalse();
-    }
-
-    @Test
-    void shouldFailOnNonExistingNodeProperty() {
-        assertError(
-            "CALL gds.alpha.graph.graphProperty.drop($graph, 'UNKNOWN')",
-            Map.of("graph", DEFAULT_GRAPH_NAME),
-            "The specified graph property 'UNKNOWN' does not exist. The following properties exist in the graph []."
-        );
-    }
-
-    @Test
-    void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
-        LongGraphPropertyValues values = new LongGraphPropertyValues() {
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, 10);
-            }
-
-            @Override
-            public long valueCount() {
-                return 10;
-            }
-        };
-        graphStore.addGraphProperty("prop", values);
-        assertError(
-            "CALL gds.alpha.graph.graphProperty.drop($graph, 'porp')",
-            Map.of("graph", DEFAULT_GRAPH_NAME),
-            "The specified graph property 'porp' does not exist. Did you mean: ['prop']."
-        );
     }
 }

@@ -20,7 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -58,10 +60,15 @@ public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult ->
-                List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                    computationResult.result().get().scores().asNodeProperties()
-            )),name());
+                List.of(NodeProperty.of(
+                    computationResult.config().writeProperty(),
+                    computationResult.result()
+                        .map(PageRankResult::scores)
+                        .map(NodePropertyValuesAdapter::adapt)
+                        .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
+                )),
+            name()
+        );
     }
 
     private AbstractResultBuilder<WriteResult> resultBuilder(

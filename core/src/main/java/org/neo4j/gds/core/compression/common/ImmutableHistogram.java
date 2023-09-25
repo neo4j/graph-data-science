@@ -36,6 +36,8 @@ public interface ImmutableHistogram {
 
     long valueAtPercentile(double percentile);
 
+    ImmutableHistogram merge(ImmutableHistogram other);
+
     default Map<String, Object> toMap() {
         return Map.of(
             "min", minValue(),
@@ -51,7 +53,13 @@ public interface ImmutableHistogram {
     }
 
     static ImmutableHistogram of(AbstractHistogram abstractHistogram) {
-        return new ImmutableHistogram() {
+        class ImmutableAbstractHistogram implements ImmutableHistogram {
+            private final AbstractHistogram abstractHistogram;
+
+            ImmutableAbstractHistogram(AbstractHistogram abstractHistogram) {
+                this.abstractHistogram = abstractHistogram;
+            }
+
             @Override
             public long minValue() {
                 return abstractHistogram.getMinValue();
@@ -71,7 +79,19 @@ public interface ImmutableHistogram {
             public long valueAtPercentile(double percentile) {
                 return abstractHistogram.getValueAtPercentile(percentile);
             }
-        };
+
+            @Override
+            public ImmutableHistogram merge(ImmutableHistogram other) {
+                if (other instanceof Empty) {
+                    return this;
+                }
+                var merged = abstractHistogram.copy();
+                merged.add(((ImmutableAbstractHistogram) other).abstractHistogram);
+                return new ImmutableAbstractHistogram(merged);
+            }
+        }
+
+        return new ImmutableAbstractHistogram(abstractHistogram);
     }
 
     static ImmutableHistogram of(BoundedHistogram boundedHistogram) {
@@ -94,6 +114,11 @@ public interface ImmutableHistogram {
             @Override
             public long valueAtPercentile(double percentile) {
                 return boundedHistogram.percentile((float) percentile);
+            }
+
+            @Override
+            public ImmutableHistogram merge(ImmutableHistogram other) {
+                throw new IllegalStateException("todo!()");
             }
         };
     }
@@ -118,6 +143,11 @@ public interface ImmutableHistogram {
         @Override
         public long valueAtPercentile(double percentile) {
             return 0;
+        }
+
+        @Override
+        public ImmutableHistogram merge(ImmutableHistogram other) {
+            return other;
         }
     }
 }

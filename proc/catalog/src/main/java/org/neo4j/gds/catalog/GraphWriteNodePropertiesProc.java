@@ -19,47 +19,41 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
 import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.WRITE_NODE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class GraphWriteNodePropertiesProc extends CatalogProc {
-
+public class GraphWriteNodePropertiesProc {
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.write", mode = WRITE)
-    @Description("Writes the given node properties to an online Neo4j database.")
+    @Description(WRITE_NODE_PROPERTIES_DESCRIPTION)
     public Stream<NodePropertiesWriteResult> writeNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        Preconditions.check();
-
-        return NodePropertiesWriter.write(
-            graphName,
-            nodeProperties,
-            nodeLabels,
-            configuration,
-            executionContext(),
-            Optional.empty()
-        );
+        return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 
     @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
-    @Description("Writes the given node properties to an online Neo4j database.")
+    @Description(WRITE_NODE_PROPERTIES_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<NodePropertiesWriteResult> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") Object nodeProperties,
@@ -68,19 +62,8 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     ) {
         Preconditions.check();
 
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.write`";
-        return NodePropertiesWriter.write(
-            graphName,
-            nodeProperties,
-            nodeLabels,
-            configuration,
-            executionContext(),
-            Optional.of(deprecationWarning)
-        );
-    }
+        facade.log().warn("Procedure `gds.graph.writeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.write`.");
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
+        return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 }

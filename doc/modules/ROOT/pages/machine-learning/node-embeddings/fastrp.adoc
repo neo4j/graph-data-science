@@ -364,6 +364,8 @@ include::partial$/machine-learning/node-embeddings/fastrp/specific-configuration
 [[algorithms-embeddings-fastrp-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: FastRP node embedding
 :graph-description: social network
 :image-file: fastrp.svg
@@ -401,8 +403,6 @@ For the relationships we will use the `UNDIRECTED` orientation.
 This is because the FastRP algorithm has been measured to compute more predictive node embeddings in undirected graphs.
 We will also add the `weight` relationship property which we will make use of when running the weighted version of FastRP.
 
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
-
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]
 ----
@@ -439,7 +439,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header", cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 18                | 11320    | 11320    | "11320 Bytes"
+| 7         | 18                | 11392    | 11392    | "11392 Bytes"
 |===
 --
 

@@ -135,8 +135,8 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     }
 
     @Override
-    public final MemoryEstimation estimateMemoryUsageDuringLoading() {
-        return NativeFactory.getMemoryEstimation(
+    public MemoryEstimation estimateMemoryUsageDuringLoading() {
+        return CSRGraphStoreFactory.getMemoryEstimation(
             buildEstimateNodeProjections(),
             buildEstimateRelationshipProjections(),
             true
@@ -145,7 +145,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
 
     @Override
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
-        return NativeFactory.getMemoryEstimation(
+        return CSRGraphStoreFactory.getMemoryEstimation(
             buildEstimateNodeProjections(),
             buildEstimateRelationshipProjections(),
             false

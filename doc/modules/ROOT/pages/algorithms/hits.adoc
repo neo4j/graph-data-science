@@ -40,7 +40,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run HITS in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hits.stream(
+CALL gds.hits.stream(
   graphName: String,
   configuration: Map
 )
@@ -75,7 +75,7 @@ include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
 .Run HITS in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hits.stats(
+CALL gds.hits.stats(
   graphName: String,
   configuration: Map
 )
@@ -116,7 +116,7 @@ include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
 .Run HITS in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hits.mutate(
+CALL gds.hits.mutate(
   graphName: String,
   configuration: Map
 )
@@ -161,7 +161,7 @@ include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
 .Run HITS in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hits.write(
+CALL gds.hits.write(
   graphName: String,
   configuration: Map
 )
@@ -205,6 +205,8 @@ include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
 
 [[algorithms-hits-examples]]
 == Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: social network
@@ -273,7 +275,7 @@ For more details on the `stream` mode in general, see xref:common-usage/running-
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hits.stream('myGraph', {hitsIterations: 20})
+CALL gds.hits.stream('myGraph', {hitsIterations: 20})
 YIELD nodeId, values
 RETURN gds.util.asNode(nodeId).name AS Name, values.auth AS auth, values.hub as hub
 ORDER BY Name ASC

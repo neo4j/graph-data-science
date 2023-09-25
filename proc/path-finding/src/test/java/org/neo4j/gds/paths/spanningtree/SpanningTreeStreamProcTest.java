@@ -20,7 +20,8 @@
 package org.neo4j.gds.paths.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -78,10 +79,11 @@ class SpanningTreeStreamProcTest extends BaseProcTest {
         return idFunction.of("a");
     }
 
-    @Test
-    void testYields() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.spanningTree", "gds.beta.spanningTree"})
+    void testYields(String tieredProcedure) {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.spanningTree")
+            .algo(tieredProcedure)
             .streamMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")

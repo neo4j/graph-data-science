@@ -44,10 +44,10 @@ import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -109,7 +109,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -127,7 +127,7 @@ class PregelTest {
             graph,
             config,
             new TestPregelComputation(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         pregelJob.setTerminationFlag(terminationFlag);
@@ -163,7 +163,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         ).run();
 
@@ -225,7 +225,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 
@@ -280,7 +280,7 @@ class PregelTest {
             graph,
             config,
             computation,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -300,7 +300,7 @@ class PregelTest {
             graph,
             config,
             new TestSendTo(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -325,7 +325,7 @@ class PregelTest {
             graph,
             config,
             new CompositeTestComputation(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -363,7 +363,7 @@ class PregelTest {
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -378,7 +378,7 @@ class PregelTest {
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(2),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -393,8 +393,8 @@ class PregelTest {
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based sync
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441704L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442208L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441752L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442256L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -403,7 +403,7 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9441776L
+                9441824L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -413,12 +413,12 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9442280L
+                9442328L
             ),
 
             // queue based async
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841664L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842168L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841688L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842192L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -427,7 +427,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5841736L
+                5841760L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -437,7 +437,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5842240L
+                5842264L
             ),
 
             // array based
@@ -515,7 +515,7 @@ class PregelTest {
                     return true;
                 }
             },
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).run();
 
@@ -603,7 +603,7 @@ class PregelTest {
             graph,
             config,
             new TestSendTo(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ));
     }
@@ -626,7 +626,7 @@ class PregelTest {
             graph,
             config,
             new TestEmptyMessageInInitialSuperstep(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -825,7 +825,7 @@ class PregelTest {
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).build(),
             new Bidirectional(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

@@ -23,9 +23,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.utils.GdsSystemProperties;
+import org.neo4j.gds.core.compression.MemoryInfo;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.lang.ref.Cleaner;
 
@@ -54,8 +55,42 @@ public class PackedAdjacencyList implements AdjacencyList {
         AdjacencyCursor newRawCursor(long[] pages);
     }
 
+    /**
+     * Block-aligned-tail cursor methods.
+     */
+
+    private static AdjacencyCursor newCursorWithBlockAlignedTail(long offset, int degree, long[] pages) {
+        var cursor = new BlockAlignedTailCursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    private static AdjacencyCursor newReuseCursorWithBlockAlignedTail(
+        @Nullable AdjacencyCursor reuse,
+        long offset,
+        int degree,
+        long[] pages
+    ) {
+        if (reuse instanceof BlockAlignedTailCursor) {
+            reuse.init(offset, degree);
+            return reuse;
+        } else {
+            var cursor = new BlockAlignedTailCursor(pages);
+            cursor.init(offset, degree);
+            return cursor;
+        }
+    }
+
+    private static AdjacencyCursor newRawCursorWithBlockAlignedTail(long[] pages) {
+        return new BlockAlignedTailCursor(pages);
+    }
+
+    /**
+     * Packed-tail cursor methods.
+     */
+
     private static AdjacencyCursor newCursorWithPackedTail(long offset, int degree, long[] pages) {
-        var cursor = new DecompressingCursorWithPackedTail(pages);
+        var cursor = new PackedTailCursor(pages);
         cursor.init(offset, degree);
         return cursor;
     }
@@ -66,45 +101,80 @@ public class PackedAdjacencyList implements AdjacencyList {
         int degree,
         long[] pages
     ) {
-        if (reuse instanceof DecompressingCursorWithPackedTail) {
+        if (reuse instanceof PackedTailCursor) {
             reuse.init(offset, degree);
             return reuse;
         } else {
-            var cursor = new DecompressingCursorWithPackedTail(pages);
+            var cursor = new PackedTailCursor(pages);
             cursor.init(offset, degree);
             return cursor;
         }
     }
 
     private static AdjacencyCursor newRawCursorWithPackedTail(long[] pages) {
-        return new DecompressingCursorWithPackedTail(pages);
+        return new PackedTailCursor(pages);
     }
 
+    /**
+     * Var-long-tail cursor methods.
+     */
+
     private static AdjacencyCursor newCursorWithVarLongTail(long offset, int degree, long[] pages) {
-        var cursor = new DecompressingCursorWithVarLongTail(pages);
+        var cursor = new VarLongTailCursor(pages);
         cursor.init(offset, degree);
         return cursor;
     }
 
-    private static AdjacencyCursor newReuseCursorWithVarLongTail(
+    private static AdjacencyCursor newReuseCursorWithVarLengthTail(
         @Nullable AdjacencyCursor reuse,
         long offset,
         int degree,
         long[] pages
     ) {
-        if (reuse instanceof DecompressingCursorWithVarLongTail) {
+        if (reuse instanceof VarLongTailCursor) {
             reuse.init(offset, degree);
             return reuse;
         } else {
-            var cursor = new DecompressingCursorWithVarLongTail(pages);
+            var cursor = new VarLongTailCursor(pages);
             cursor.init(offset, degree);
             return cursor;
         }
     }
 
     private static AdjacencyCursor newRawCursorWithVarLongTail(long[] pages) {
-        return new DecompressingCursorWithVarLongTail(pages);
+        return new VarLongTailCursor(pages);
     }
+
+    /**
+     * Inlined-head-Packed-tail cursor methods.
+     */
+
+    private static AdjacencyCursor newCursorWithInlinedHeadPackedTail(long offset, int degree, long[] pages) {
+        var cursor = new InlinedHeadPackedTailCursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    private static AdjacencyCursor newReuseCursorWithInlinedHeadPackedTail(
+        @Nullable AdjacencyCursor reuse,
+        long offset,
+        int degree,
+        long[] pages
+    ) {
+        if (reuse instanceof InlinedHeadPackedTailCursor) {
+            reuse.init(offset, degree);
+            return reuse;
+        } else {
+            var cursor = new InlinedHeadPackedTailCursor(pages);
+            cursor.init(offset, degree);
+            return cursor;
+        }
+    }
+
+    private static AdjacencyCursor newRawCursorWithInlinedHeadPackedTail(long[] pages) {
+        return new InlinedHeadPackedTailCursor(pages);
+    }
+
 
     private final NewCursor newCursor;
     private final NewReuseCursor newReuseCursor;
@@ -123,19 +193,31 @@ public class PackedAdjacencyList implements AdjacencyList {
         this.memoryInfo = memoryInfo;
         this.cleanable = CLEANER.register(this, new AdjacencyListCleaner(pages, allocationSizes));
 
-        switch (GdsSystemProperties.PACKED_TAIL_COMPRESSION) {
-            case VarLong:
+        var adjacencyPackingStrategy = GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get();
+
+        switch (adjacencyPackingStrategy) {
+            case VAR_LONG_TAIL:
                 this.newCursor = PackedAdjacencyList::newCursorWithVarLongTail;
-                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLongTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLengthTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithVarLongTail;
                 break;
-            case Packed:
+            case PACKED_TAIL:
                 this.newCursor = PackedAdjacencyList::newCursorWithPackedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithPackedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithPackedTail;
                 break;
+            case BLOCK_ALIGNED_TAIL:
+                this.newCursor = PackedAdjacencyList::newCursorWithBlockAlignedTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithBlockAlignedTail;
+                this.newRawCursor = PackedAdjacencyList::newRawCursorWithBlockAlignedTail;
+                break;
+            case INLINED_HEAD_PACKED_TAIL:
+                this.newCursor = PackedAdjacencyList::newCursorWithInlinedHeadPackedTail;
+                this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithInlinedHeadPackedTail;
+                this.newRawCursor = PackedAdjacencyList::newRawCursorWithInlinedHeadPackedTail;
+                break;
             default:
-                throw new IllegalArgumentException("Unknown compression type");
+                throw new IllegalArgumentException("Unsupported packing strategy: " + adjacencyPackingStrategy);
         }
     }
 

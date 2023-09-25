@@ -109,6 +109,9 @@ project(':logging').projectDir = file('logging')
 include('proc-machine-learning')
 project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 
+include('memory-estimation')
+project(':memory-estimation').projectDir = file('memory-estimation')
+
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
 
@@ -127,29 +130,20 @@ project(':ml-api').projectDir = file('ml/ml-api')
 include('model-catalog-api')
 project(':model-catalog-api').projectDir = file('model-catalog-api')
 
+include('native-projection')
+project(':native-projection').projectDir = file('native-projection')
+
 include('neo4j-adapter')
 project(':neo4j-adapter').projectDir = file('neo4j-adapter')
 
 include('neo4j-kernel-adapter')
 project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-kernel-adapter')
 
+include('neo4j-kernel-adapter-5-common')
+project(':neo4j-kernel-adapter-5-common').projectDir = file('compatibility/5-common/neo4j-kernel-adapter')
+
 include('neo4j-kernel-adapter-4.4')
 project(':neo4j-kernel-adapter-4.4').projectDir = file('compatibility/4.4/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.1')
-project(':neo4j-kernel-adapter-5.1').projectDir = file('compatibility/5.1/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.2')
-project(':neo4j-kernel-adapter-5.2').projectDir = file('compatibility/5.2/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.3')
-project(':neo4j-kernel-adapter-5.3').projectDir = file('compatibility/5.3/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.4')
-project(':neo4j-kernel-adapter-5.4').projectDir = file('compatibility/5.4/neo4j-kernel-adapter')
-
-include('neo4j-kernel-adapter-5.5')
-project(':neo4j-kernel-adapter-5.5').projectDir = file('compatibility/5.5/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-5.6')
 project(':neo4j-kernel-adapter-5.6').projectDir = file('compatibility/5.6/neo4j-kernel-adapter')
@@ -162,6 +156,15 @@ project(':neo4j-kernel-adapter-5.8').projectDir = file('compatibility/5.8/neo4j-
 
 include('neo4j-kernel-adapter-5.9')
 project(':neo4j-kernel-adapter-5.9').projectDir = file('compatibility/5.9/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-5.10')
+project(':neo4j-kernel-adapter-5.10').projectDir = file('compatibility/5.10/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-5.11')
+project(':neo4j-kernel-adapter-5.11').projectDir = file('compatibility/5.11/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-5.12')
+project(':neo4j-kernel-adapter-5.12').projectDir = file('compatibility/5.12/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-api')
 project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
@@ -229,8 +232,14 @@ project(':proc-test').projectDir = file('proc/test')
 include('proc-pipeline-catalog')
 project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 
-include('procedure-facade')
-project(':procedure-facade').projectDir = file('procedure-facade')
+include('opengds-extension')
+project(':opengds-extension').projectDir = file('procedures/extension')
+
+include('procedure-integration')
+project(':procedure-integration').projectDir = file('procedures/integration')
+
+include('opengds-procedure-facade')
+project(':opengds-procedure-facade').projectDir = file('procedures/facade')
 
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
@@ -240,21 +249,6 @@ project(':storage-engine-adapter').projectDir = file('compatibility/common/stora
 
 include('storage-engine-adapter-4.4')
 project(':storage-engine-adapter-4.4').projectDir = file('compatibility/4.4/storage-engine-adapter')
-
-include('storage-engine-adapter-5.1')
-project(':storage-engine-adapter-5.1').projectDir = file('compatibility/5.1/storage-engine-adapter')
-
-include('storage-engine-adapter-5.2')
-project(':storage-engine-adapter-5.2').projectDir = file('compatibility/5.2/storage-engine-adapter')
-
-include('storage-engine-adapter-5.3')
-project(':storage-engine-adapter-5.3').projectDir = file('compatibility/5.3/storage-engine-adapter')
-
-include('storage-engine-adapter-5.4')
-project(':storage-engine-adapter-5.4').projectDir = file('compatibility/5.4/storage-engine-adapter')
-
-include('storage-engine-adapter-5.5')
-project(':storage-engine-adapter-5.5').projectDir = file('compatibility/5.5/storage-engine-adapter')
 
 include('storage-engine-adapter-5.6')
 project(':storage-engine-adapter-5.6').projectDir = file('compatibility/5.6/storage-engine-adapter')
@@ -267,6 +261,15 @@ project(':storage-engine-adapter-5.8').projectDir = file('compatibility/5.8/stor
 
 include('storage-engine-adapter-5.9')
 project(':storage-engine-adapter-5.9').projectDir = file('compatibility/5.9/storage-engine-adapter')
+
+include('storage-engine-adapter-5.10')
+project(':storage-engine-adapter-5.10').projectDir = file('compatibility/5.10/storage-engine-adapter')
+
+include('storage-engine-adapter-5.11')
+project(':storage-engine-adapter-5.11').projectDir = file('compatibility/5.11/storage-engine-adapter')
+
+include('storage-engine-adapter-5.12')
+project(':storage-engine-adapter-5.12').projectDir = file('compatibility/5.12/storage-engine-adapter')
 
 include('storage-engine-adapter-api')
 project(':storage-engine-adapter-api').projectDir = file('compatibility/api/storage-engine-adapter')

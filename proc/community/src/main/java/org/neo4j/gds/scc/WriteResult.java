@@ -20,72 +20,32 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.results.StandardWriteResult;
 
-public class WriteResult {
+import java.util.Map;
 
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final long writeMillis;
-    public final long postProcessingMillis;
-    public final long nodes;
-    public final long communityCount;
-    public final long setCount;
-    public final long minSetSize;
-    public final long maxSetSize;
-    public final long p1;
-    public final long p5;
-    public final long p10;
-    public final long p25;
-    public final long p50;
-    public final long p75;
-    public final long p90;
-    public final long p95;
-    public final long p99;
-    public final long p100;
-    public final String writeProperty;
+public class WriteResult extends StandardWriteResult {
+
+    public final long componentCount;
+    public final Map<String, Object> componentDistribution;
+    public final long nodePropertiesWritten;
 
     public WriteResult(
+        long componentCount,
+        Map<String, Object> componentDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
-        long nodes,
-        long communityCount,
-        long p100,
-        long p99,
-        long p95,
-        long p90,
-        long p75,
-        long p50,
-        long p25,
-        long p10,
-        long p5,
-        long p1,
-        long minSetSize,
-        long maxSetSize,
-        String writeProperty
+        long nodePropertiesWritten,
+        Map<String, Object> configuration
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.writeMillis = writeMillis;
-        this.nodes = nodes;
-        this.setCount = this.communityCount = communityCount;
-        this.p100 = p100;
-        this.p99 = p99;
-        this.p95 = p95;
-        this.p90 = p90;
-        this.p75 = p75;
-        this.p50 = p50;
-        this.p25 = p25;
-        this.p10 = p10;
-        this.p5 = p5;
-        this.p1 = p1;
-        this.minSetSize = minSetSize;
-        this.maxSetSize = maxSetSize;
-        this.writeProperty = writeProperty;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
+
+        this.nodePropertiesWritten = nodePropertiesWritten;
+        this.componentCount = componentCount;
+        this.componentDistribution = componentDistribution;
     }
 
     static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
@@ -97,28 +57,16 @@ public class WriteResult {
         @Override
         public WriteResult buildResult() {
             return new WriteResult(
+                maybeCommunityCount.orElse(0L),
+                communityHistogramOrNull(),
                 preProcessingMillis,
                 computeMillis,
-                writeMillis,
                 postProcessingDuration,
-                nodeCount,
-                maybeCommunityCount.orElse(0),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(100)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(99)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(95)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(90)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(75)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(50)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(25)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getMinNonZeroValue()).orElse(0L),
-                maybeCommunityHistogram.map(h -> h.getMaxValue()).orElse(0L),
-                config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
+                writeMillis,
+                nodePropertiesWritten,
+                config.toMap()
             );
         }
-
         public Builder buildHistogram(boolean buildHistogram) {
             this.buildHistogram = buildHistogram;
             return this;
@@ -128,6 +76,7 @@ public class WriteResult {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }
+
     }
 }
 

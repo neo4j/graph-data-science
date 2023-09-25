@@ -63,14 +63,14 @@ class ListProgressProcTest extends BaseProgressTest {
 
     @Test
     void shouldNotFailWhenTheTaskStoreIsEmpty() {
-        assertDoesNotThrow(() -> runQuery("CALL gds.beta.listProgress()"));
+        assertDoesNotThrow(() -> runQuery("CALL gds.listProgress()"));
     }
 
     @Test
     void canListProgressEvent() {
         runQuery("CALL gds.test.pl('foo')");
         assertCypherResult(
-            "CALL gds.beta.listProgress() " +
+            "CALL gds.listProgress() " +
             "YIELD username, taskName, progress, progressBar, status, timeStarted, elapsedTime " +
             "RETURN username, taskName, progress, progressBar, status, timeStarted, elapsedTime ",
             List.of(
@@ -91,7 +91,7 @@ class ListProgressProcTest extends BaseProgressTest {
     void shouldReturnValidJobId() {
         runQuery("CALL gds.test.pl('foo')");
         runQueryWithRowConsumer(
-            "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
+            "CALL gds.listProgress() YIELD jobId RETURN jobId",
             row -> assertDoesNotThrow(() -> new JobId(row.getString("jobId")))
         );
     }
@@ -101,7 +101,7 @@ class ListProgressProcTest extends BaseProgressTest {
         runQuery("CALL gds.test.pl('foo')");
         runQuery("CALL gds.test.pl('bar')");
         assertCypherResult(
-            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName ORDER BY taskName",
+            "CALL gds.listProgress() YIELD taskName RETURN taskName ORDER BY taskName",
             List.of(
                 Map.of("taskName", "bar"),
                 Map.of("taskName","foo")
@@ -116,14 +116,14 @@ class ListProgressProcTest extends BaseProgressTest {
 
         var aliceResult = runQuery(
             "Alice",
-            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
+            "CALL gds.listProgress() YIELD taskName RETURN taskName",
             r -> r.stream().collect(Collectors.toList())
         );
         assertThat(aliceResult).containsExactlyInAnyOrder(Map.of("taskName", "foo"));
 
         var bobResult = runQuery(
             "Bob",
-            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
+            "CALL gds.listProgress() YIELD taskName RETURN taskName",
             r -> r.stream().collect(Collectors.toList())
         );
         assertThat(bobResult).containsExactlyInAnyOrder(Map.of("taskName", "bar"));
@@ -132,11 +132,11 @@ class ListProgressProcTest extends BaseProgressTest {
     @Test
     void progressLoggerShouldEmitProgressEventsOnActualAlgoButClearProgressEventsOnLogFinish() {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
-            runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
+            runQuery("CALL gds.graph.generate('foo', 100, 5)");
             runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
 
             assertCypherResult(
-                "CALL gds.beta.listProgress() YIELD taskName, progress RETURN taskName, progress",
+                "CALL gds.listProgress() YIELD taskName, progress RETURN taskName, progress",
                 List.of(
                     Map.of("taskName", "FastRP", "progress", "100%")
                 )

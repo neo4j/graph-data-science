@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
 
     private static final List<String> EMPTY_LABELS = Collections.emptyList();
-    private static final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
+    protected static final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
 
-    private final NodeSchema nodeSchema;
+    protected final NodeSchema nodeSchema;
     private long currentId;
-    private List<String> currentLabels;
+    protected List<String> currentLabels;
     private String labelIdentifier;
 
     protected NodeVisitor(NodeSchema nodeSchema) {

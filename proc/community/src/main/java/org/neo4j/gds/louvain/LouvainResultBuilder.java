@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -36,11 +37,11 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
     }
 
     @NotNull
-    static LouvainResultBuilder<MutateResult> createForMutate(
+    static LouvainResultBuilder<LouvainMutateResult> createForMutate(
         ComputationResult<Louvain, LouvainResult, LouvainMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        LouvainResultBuilder<MutateResult> procResultBuilder = new LouvainMutateResultBuilder(
+        LouvainResultBuilder<LouvainMutateResult> procResultBuilder = new LouvainMutateResultBuilder(
             executionContext.returnColumns(),
             computeResult.config().concurrency()
         );

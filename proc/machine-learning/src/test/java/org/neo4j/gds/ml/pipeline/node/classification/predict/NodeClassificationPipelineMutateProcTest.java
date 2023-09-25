@@ -103,7 +103,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db.databaseName()), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class"));
         assertThat(mutatedGraph.nodeProperties("class").nodeCount()).isEqualTo(5);
     }
@@ -130,7 +130,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db.databaseName()), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class", "probabilities"));
         assertThat(mutatedGraph.nodeProperties("class").nodeCount()).isEqualTo(5);
         assertThat(mutatedGraph.nodeProperties("probabilities").nodeCount()).isEqualTo(5);

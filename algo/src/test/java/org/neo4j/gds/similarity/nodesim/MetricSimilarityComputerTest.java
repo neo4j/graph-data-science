@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MetricSimilarityComputerTest {
@@ -30,5 +31,12 @@ class MetricSimilarityComputerTest {
         assertThatThrownBy(() -> MetricSimilarityComputer.parse("ovErLaPPPPP"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("ovErLaPPPPP is not a valid metric");
+    }
+
+    @Test
+    void shouldParseCosineSimilarityComputer() {
+        var cosineComputer = MetricSimilarityComputer.parse("CosiNe").build(0);
+        assertThat(cosineComputer)
+            .isExactlyInstanceOf(CosineSimilarityComputer.class);
     }
 }

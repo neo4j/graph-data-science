@@ -60,7 +60,7 @@ For more information on this algorithm, see:
 * https://dl.acm.org/doi/abs/10.1145/1963405.1963487[Efficient k-nearest neighbor graph construction for generic similarity measures]
 * https://en.wikipedia.org/wiki/Nearest_neighbor_graph[Nearest neighbor graph (Wikipedia)]
 
-It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/alpha/filtered-knn.adoc[filtered K-Nearest Neighbors] algorithm for this purpose.
+It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/filtered-knn.adoc[filtered K-Nearest Neighbors] algorithm for this purpose.
 
 [NOTE]
 ====
@@ -433,6 +433,8 @@ To get a deterministic result when running the algorithm:
 [[algorithms-knn-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 In this section we will show examples of running the KNN algorithm on a concrete graph.
 With the _Uniform sampler_, KNN samples initial neighbors uniformly at random, and doesn't take into account graph topology.
 This means KNN can run on a graph of only nodes, without any relationships.
@@ -451,8 +453,6 @@ CREATE (eve:Person {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embedding: [1.
 ----
 
 In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
@@ -493,7 +493,7 @@ YIELD nodeCount, bytesMin, bytesMax, requiredMemory
 [opts="header", cols="1,1,1,1"]
 |===
 | nodeCount | bytesMin | bytesMax | requiredMemory
-| 5         | 2096     | 3152     | "[2096 Bytes \... 3152 Bytes]"
+| 5         | 2200     | 3256     | "[2200 Bytes \... 3256 Bytes]"
 |===
 --
 

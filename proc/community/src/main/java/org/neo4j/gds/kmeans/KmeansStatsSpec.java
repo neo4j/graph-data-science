@@ -25,14 +25,15 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.kmeans.stats", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STATS)
-public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStatsConfig, Stream<StatsResult>, KmeansAlgorithmFactory<KmeansStatsConfig>> {
+@GdsCallable(name = "gds.kmeans.stats", aliases = {"gds.beta.kmeans.stats"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STATS)
+public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStatsConfig, Stream<KmeansStatsResult>, KmeansAlgorithmFactory<KmeansStatsConfig>> {
 
     @Override
     public String name() {
@@ -51,13 +52,13 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
 
 
     @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStatsConfig, Stream<KmeansStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Stats call failed",
             executionContext.log(),
             () -> {
                 var returnColumns = executionContext.returnColumns();
-                var builder = new StatsResult.Builder(
+                var builder = new KmeansStatsResult.Builder(
                     returnColumns,
                     computationResult.config().concurrency()
                 );

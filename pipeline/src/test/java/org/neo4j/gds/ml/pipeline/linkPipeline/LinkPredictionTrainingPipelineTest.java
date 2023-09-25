@@ -27,11 +27,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
@@ -181,8 +181,8 @@ class LinkPredictionTrainingPipelineTest {
     @Test
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
-            .databaseId(DatabaseId.from(""))
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .databaseId(DatabaseId.of(""))
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
@@ -225,8 +225,8 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
-            .databaseId(DatabaseId.from(""))
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .databaseId(DatabaseId.of(""))
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)
@@ -269,8 +269,8 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
-            .databaseId(DatabaseId.from(""))
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .databaseId(DatabaseId.of(""))
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)

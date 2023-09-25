@@ -35,21 +35,30 @@ import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -65,6 +74,8 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
 import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
@@ -73,7 +84,8 @@ class WccStatsProcTest extends BaseProcTest {
     private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
 
     @Neo4jGraph
-    static final @Language("Cypher") String DB_CYPHER =
+    @Language("Cypher")
+    static final String DB_CYPHER =
         "CREATE" +
         " (nA:Label {nodeId: 0, seedId: 42})" +
         ",(nB:Label {nodeId: 1, seedId: 42})" +
@@ -214,6 +226,7 @@ class WccStatsProcTest extends BaseProcTest {
     @Test
     void testRunOnEmptyGraph() {
         applyOnProcedure((proc) -> {
+            proc.facade = createFacade();
             var methods = ProcedureMethodHelper.statsMethods(proc).collect(Collectors.toList());
 
             if (!methods.isEmpty()) {
@@ -245,6 +258,39 @@ class WccStatsProcTest extends BaseProcTest {
         });
     }
 
+
+    private GraphDataScience createFacade() {
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+
+        var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, logMock)
+        );
+
+        return new GraphDataScience(
+            null,
+            null,
+            new CommunityProcedureFacade(
+                null,
+                null,
+                statsBusinessFacade,
+                null,
+                ProcedureReturnColumns.EMPTY,
+                DatabaseId.of(db.databaseName()),
+                new User(getUsername(), false)
+            )
+        );
+    }
+
     private void applyOnProcedure(Consumer<WccStatsProc> func) {
         TestProcedureRunner.applyOnProcedure(
             db,
@@ -258,7 +304,7 @@ class WccStatsProcTest extends BaseProcTest {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

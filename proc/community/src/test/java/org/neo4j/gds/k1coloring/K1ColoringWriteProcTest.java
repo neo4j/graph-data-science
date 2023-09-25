@@ -19,57 +19,33 @@
  */
 package org.neo4j.gds.k1coloring;
 
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutablePropertyMappings;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphLoader;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class K1ColoringWriteProcTest extends BaseProcTest {
 
@@ -108,24 +84,28 @@ class K1ColoringWriteProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testWriting() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testWriting(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .writeMode()
             .addParameter("writeProperty", "color")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("preProcessingMillis").longValue());
-            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
-            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-            assertEquals(4, row.getNumber("nodeCount").longValue());
-            assertEquals(2, row.getNumber("colorCount").longValue());
-            assertUserInput(row, "writeProperty", "color");
-            assertTrue(row.getBoolean("didConverge"));
-            assertTrue(row.getNumber("ranIterations").longValue() < 3);
-        });
+       var rowCount= runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0);
+            assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(4);
+            assertThat(row.getNumber("colorCount").longValue()).isEqualTo(2);
+            assertThat(row.getNumber("ranIterations").longValue()).isLessThan(3);
+            assertThat(row.getBoolean("didConverge")).isTrue();
+           assertUserInput(row, "writeProperty", "color");
+
+       });
+
+       assertThat(rowCount).isEqualTo(1);
 
         Map<String, Long> coloringResult = new HashMap<>(4);
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
@@ -133,15 +113,16 @@ class K1ColoringWriteProcTest extends BaseProcTest {
             long color = row.getNumber("color").longValue();
             coloringResult.put(idToVariable.of(nodeId), color);
         });
+        assertThat(coloringResult.get("a")).isNotEqualTo(coloringResult.get("b"));
+        assertThat(coloringResult.get("a")).isNotEqualTo(coloringResult.get("c"));
 
-        assertNotEquals(coloringResult.get("a"), coloringResult.get("b"));
-        assertNotEquals(coloringResult.get("a"), coloringResult.get("c"));
     }
 
-    @Test
-    void testWritingEstimate() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
+    void testWritingEstimate(String tieredProcedure) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .estimationMode(GdsCypher.ExecutionModes.WRITE)
             .addParameter("writeProperty", "color")
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
@@ -176,7 +157,7 @@ class K1ColoringWriteProcTest extends BaseProcTest {
     @MethodSource("communitySizeInputs")
     void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         @Language("Cypher")
-        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
                 .writeMode()
                 .addParameter("writeProperty", "color")
                 .addAllParameters(parameter)
@@ -195,66 +176,33 @@ class K1ColoringWriteProcTest extends BaseProcTest {
 
     @Test
     void testRunOnEmptyGraph() {
-        applyOnProcedure((proc) -> {
-            var methods = ProcedureMethodHelper.writeMethods(proc).collect(Collectors.toList());
+        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
 
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
+        runQuery("CALL db.createLabel('X')");
+        runQuery("MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
 
-                var graphName = "graph";
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    Username.EMPTY_USERNAME.username(),
-                    graphName,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
-                var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
-                methods.forEach(method -> {
-                    Map<String, Object> configMap = Map.of("writeProperty", "color");
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, configMap);
-                        assertEquals(1, result.count());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
+        String  projectQuery = GdsCypher.call("foo")
+            .graphProject().withNodeLabel("X").yields();
+        runQuery(projectQuery);
+
+        String query = GdsCypher.call("foo")
+            .algo("gds", "k1coloring")
+            .writeMode()
+            .addParameter("writeProperty","foo2")
+            .yields();
+
+
+        var rowCount=runQueryWithRowConsumer(query, row -> {
+            AssertionsForClassTypes.assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
+            assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(0);
+            assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
+            assertThat(row.getNumber("colorCount").longValue()).isEqualTo(0);
+            assertThat(row.getNumber("ranIterations").longValue()).isEqualTo(0);
+            assertThat(row.getBoolean("didConverge")).isFalse();
         });
+
+        assertThat(rowCount).isEqualTo(1L);
     }
 
-    private void applyOnProcedure(Consumer<K1ColoringWriteProc> func) {
-        TestProcedureRunner.applyOnProcedure(
-            db,
-            K1ColoringWriteProc.class,
-            proc -> {
-                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                    DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
-                );
-                func.accept(proc);
-            }
-        );
-    }
-
-    @NotNull
-    private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
-                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-                .transactionContext(TestSupport.fullAccessTransaction(db))
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
-                .build())
-            .username("")
-            .projectConfig(graphProjectConfig)
-            .build();
-    }
 }

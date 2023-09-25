@@ -22,7 +22,8 @@ package org.neo4j.gds.ml.pipeline.node.regression.predict;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -79,7 +80,7 @@ public class NodeRegressionPipelineStreamSpec
                 () -> computationResult.result()
                     .map(result -> {
                         Graph graph = computationResult.graph();
-                        NodePropertyValues nodePropertyValues = result.asNodeProperties();
+                        NodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
                         return LongStream
                             .range(IdMap.START_NODE_ID, graph.nodeCount())
                             .filter(nodePropertyValues::hasValue)

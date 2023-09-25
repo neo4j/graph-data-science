@@ -51,14 +51,14 @@ class ModelListProcTest extends ModelProcBaseTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
+    @ValueSource(strings = {"gds.model.list()", "gds.model.list(null)"})
     void listsModel(String query) {
         var model1 = Model.of(
             "testAlgo1",
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
-            new TestCustomInfo()
+            new TestCustomInfo(Map.of("foo", "bar"))
         );
         var model2 = Model.of(
             "testAlgo2",
@@ -82,25 +82,57 @@ class ModelListProcTest extends ModelProcBaseTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, shared " +
-                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, shared " +
-                "ORDER BY modelInfo.modelName",
+                "CALL %s YIELD modelName, modelType, modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, published " +
+                "RETURN * " +
+                "ORDER BY modelName",
                 query
             ),
             List.of(
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1"),
+                    "modelName", "testModel1",
+                    "modelType", "testAlgo1",
+                    "modelInfo", Map.of("foo", "bar"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
-                    "shared", false
+                    "published", false
                 ),
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "modelName", "testModel2",
+                    "modelType", "testAlgo2",
+                    "modelInfo", Map.of(),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
+                    "loaded", true,
+                    "stored", false,
+                    "creationTime", isA(ZonedDateTime.class),
+                    "published", false
+                )
+            )
+        );
+    }
+
+    @Test
+    void betaProcWithOldColumns() {
+        var model = Model.of(
+            "testAlgo1",
+            GRAPH_SCHEMA,
+            "testData",
+            TestTrainConfig.of(getUsername(), "testModel1"),
+            new TestCustomInfo(Map.of("foo", "bar"))
+        );
+
+        modelCatalog.set(model);
+
+        assertCypherResult(
+            "CALL gds.beta.model.list()",
+            List.of(
+                Map.of(
+                    "modelInfo", Map.of("modelName", "testModel1", "modelType", "testAlgo1", "foo", "bar"),
+                    "graphSchema", EXPECTED_SCHEMA,
+                    "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
@@ -112,8 +144,8 @@ class ModelListProcTest extends ModelProcBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "CALL gds.beta.model.list()",
-        "CALL gds.beta.model.list('someModel')"
+        "CALL gds.model.list()",
+        "CALL gds.model.list('someModel')"
     })
     void emptyResultOnListQueries(String query) {
         assertCypherResult(
@@ -137,22 +169,24 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(getUsername(), "testModel2"),
-            new TestCustomInfo()
+            new TestCustomInfo(Map.of("num", 42L))
         );
         modelCatalog.set(model1);
         modelCatalog.set(model2);
 
         assertCypherResult(
-            "CALL gds.beta.model.list('testModel2')",
+            "CALL gds.model.list('testModel2')",
             singletonList(
                 Map.of(
-                    "modelInfo", Map.of("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "modelName", "testModel2",
+                    "modelType", "testAlgo2",
+                    "modelInfo", Map.of("num", 42L),
                     "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "graphSchema", EXPECTED_SCHEMA,
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
-                    "shared", false
+                    "published", false
                 )
             )
         );
@@ -162,7 +196,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     @MethodSource("invalidModelNames")
     void failOnEmptyModelName(String modelName) {
         assertError(
-            "CALL gds.beta.model.list($modelName)",
+            "CALL gds.model.list($modelName)",
             Map.of("modelName", modelName),
             "can not be null or blank"
         );

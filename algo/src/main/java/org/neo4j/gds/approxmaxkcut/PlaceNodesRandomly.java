@@ -20,10 +20,10 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.collections.ha.HugeByteArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,7 +41,7 @@ import java.util.stream.IntStream;
 
 class PlaceNodesRandomly {
 
-    private final ApproxMaxKCutConfig config;
+    private final ApproxMaxKCutBaseConfig config;
     private final SplittableRandom random;
     private final Graph graph;
     private final List<Long> rangePartitionActualBatchSizes;
@@ -49,7 +49,7 @@ class PlaceNodesRandomly {
     private final ProgressTracker progressTracker;
 
     PlaceNodesRandomly(
-        ApproxMaxKCutConfig config,
+        ApproxMaxKCutBaseConfig config,
         SplittableRandom random,
         Graph graph,
         ExecutorService executor,

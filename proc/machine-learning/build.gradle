@@ -43,7 +43,6 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':transaction')
 
-
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
 
     testAnnotationProcessor project(':annotations')
@@ -60,4 +59,6 @@ dependencies {
     testImplementation project(':proc-community')
     testImplementation project(':proc-centrality')
     testImplementation project(':proc-embeddings')
+
+    testImplementation project(':opengds-extension')
 }

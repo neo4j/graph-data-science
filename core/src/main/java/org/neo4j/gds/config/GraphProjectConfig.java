@@ -24,17 +24,11 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
-
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
 
@@ -43,6 +37,16 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     String RELATIONSHIP_COUNT_KEY = "relationshipCount";
     String READ_CONCURRENCY_KEY = "readConcurrency";
     String VALIDATE_RELATIONSHIPS_KEY = "validateRelationships";
+
+    static GraphProjectConfig emptyWithName(String userName, String graphName) {
+        return ImmutableGraphCatalogConfig.builder()
+            .username(userName)
+            .graphName(graphName)
+            .graphStoreFactory(loaderContext -> {
+                throw new UnsupportedOperationException("GraphStoreFactory not set");
+            })
+            .build();
+    }
 
     @Configuration.Parameter
     @Value.Default
@@ -104,6 +108,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
+    @Value.Auxiliary
     @Configuration.Ignore
     <R> R accept(Cases<R> visitor);
 
@@ -111,23 +116,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
     }
 
-    static GraphProjectConfig createImplicit(String username, CypherMapWrapper config) {
-        CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
-            NODE_PROJECTION_KEY,
-            RELATIONSHIP_PROJECTION_KEY,
-            NODE_QUERY_KEY,
-            RELATIONSHIP_QUERY_KEY,
-            "Missing information for implicit graph creation."
-        );
-        if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
-            return GraphProjectFromStoreConfig.fromProcedureConfig(username, config);
-        } else {
-            return GraphProjectFromCypherConfig.fromProcedureConfig(username, config);
-        }
-    }
-
     interface Cases<R> {
-        R store(GraphProjectFromStoreConfig storeConfig);
 
         R cypher(GraphProjectFromCypherConfig cypherConfig);
 
@@ -136,15 +125,11 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         R random(RandomGraphGeneratorConfig randomGraphConfig);
 
         R sample(GraphSampleProcConfig graphSampleProcConfig);
+
+        R catalog(GraphCatalogConfig graphCatalogConfig);
     }
 
     interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void store(GraphProjectFromStoreConfig storeConfig) {
-            visit(storeConfig);
-            return null;
-        }
 
         @Override
         default Void cypher(GraphProjectFromCypherConfig cypherConfig) {
@@ -170,7 +155,11 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             return null;
         }
 
-        default void visit(GraphProjectFromStoreConfig storeConfig) {}
+        @Override
+        default Void catalog(GraphCatalogConfig graphCatalogConfig) {
+            visit(graphCatalogConfig);
+            return null;
+        }
 
         default void visit(GraphProjectFromCypherConfig cypherConfig) {}
 
@@ -179,5 +168,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
 
         default void visit(GraphSampleProcConfig sampleProcConfig) {}
+
+        default void visit(GraphCatalogConfig graphCatalogConfig) {}
     }
 }

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutateNodePropertyConfig {
+public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutBaseConfig, MutateNodePropertyConfig {
 
     static ApproxMaxKCutMutateConfig of(CypherMapWrapper config) {
         return new ApproxMaxKCutMutateConfigImpl(config);

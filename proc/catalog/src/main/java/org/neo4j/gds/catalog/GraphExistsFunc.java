@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,12 +32,12 @@ import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.EXISTS_DESCRI
 public class GraphExistsFunc {
     @SuppressWarnings("WeakerAccess")
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScience facade;
 
     @SuppressWarnings("unused")
     @UserFunction("gds.graph.exists")
     @Description(EXISTS_DESCRIPTION)
     public boolean existsFunctionButBetter(@Name(value = "graphName") String graphName) {
-        return facade.graphExists(graphName, Function.identity());
+        return facade.catalog().graphExists(graphName, Function.identity());
     }
 }

@@ -32,8 +32,6 @@ import static java.util.Collections.singletonList;
 
 class PipelineExistsProcTest extends BaseProcTest {
 
-    private static final String EXISTS_QUERY = "CALL gds.beta.pipeline.exists($pipelineName)";
-
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(PipelineExistsProc.class);
@@ -56,7 +54,7 @@ class PipelineExistsProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            EXISTS_QUERY,
+            "CALL gds.pipeline.exists($pipelineName)",
             Map.of(
                 "pipelineName", pipeName
             ),
@@ -75,7 +73,7 @@ class PipelineExistsProcTest extends BaseProcTest {
         String bogusPipe = "bogusPipe";
 
         assertCypherResult(
-            EXISTS_QUERY,
+            "CALL gds.pipeline.exists($pipelineName)",
             Map.of(
                 "pipelineName", bogusPipe),
             singletonList(

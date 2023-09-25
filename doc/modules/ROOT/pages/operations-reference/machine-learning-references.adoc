@@ -1,8 +1,6 @@
 [[appendix-a-machine-learning]]
 = Machine Learning
 
-Please see xref:algorithms/index.adoc[Graph algorithms] for an introduction to the maturity tiers: production-quality, beta and alpha.
-
 include::partial$/operations-reference/pipeline-operation-references.adoc[]
 
 include::partial$/operations-reference/model-operation-references.adoc[]
@@ -58,14 +56,12 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.3+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.2+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.alpha.pipeline.linkPrediction.addMLP` label:procedure[Procedure]
 | `gds.alpha.pipeline.linkPrediction.configureAutoTuning` label:procedure[Procedure]
-| `gds.alpha.pipeline.linkPrediction.addRandomForest` label:procedure[Procedure] label:deprecated[Deprecated]
-.3+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+.2+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.alpha.pipeline.nodeClassification.addMLP` label:procedure[Procedure]
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning` label:procedure[Procedure]
-| `gds.alpha.pipeline.nodeClassification.addRandomForest` label:procedure[Procedure] label:deprecated[Deprecated]
 .10+<.^| xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
 | `gds.alpha.pipeline.nodeRegression.create` label:procedure[Procedure]
 | `gds.alpha.pipeline.nodeRegression.addNodeProperty` label:procedure[Procedure]
@@ -126,10 +122,10 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.beta.hashgnn.stream` label:procedure[Procedure]
 | `gds.beta.hashgnn.stream.estimate` label:procedure[Procedure]
 .6+<.^|xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
-| `gds.beta.node2vec.mutate` label:procedure[Procedure]
-| `gds.beta.node2vec.mutate.estimate` label:procedure[Procedure]
-| `gds.beta.node2vec.stream` label:procedure[Procedure]
-| `gds.beta.node2vec.stream.estimate` label:procedure[Procedure]
-| `gds.beta.node2vec.write` label:procedure[Procedure]
-| `gds.beta.node2vec.write.estimate` label:procedure[Procedure]
+| `gds.node2vec.mutate` label:procedure[Procedure]
+| `gds.node2vec.mutate.estimate` label:procedure[Procedure]
+| `gds.node2vec.stream` label:procedure[Procedure]
+| `gds.node2vec.stream.estimate` label:procedure[Procedure]
+| `gds.node2vec.write` label:procedure[Procedure]
+| `gds.node2vec.write.estimate` label:procedure[Procedure]
 |===

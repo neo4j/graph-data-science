@@ -13,10 +13,10 @@ The different kinds of pipelines supported by GDS are described elsewhere in xre
 This section explains the available pipeline catalog operations:
 
 [[pipeline-catalog-procs]]
-[opts=header,cols="1m,1"]
+[opts=header,cols="1m,3"]
 |===
-| Name                                                        | Description
-| xref:pipeline-catalog/list.adoc[gds.beta.pipeline.list]     | Prints information about pipelines that are currently available in the catalog.
-| xref:pipeline-catalog/exists.adoc[gds.beta.pipeline.exists] | Checks if a named pipeline is available in the catalog.
-| xref:pipeline-catalog/drop.adoc[gds.beta.pipeline.drop]     | Drops a named pipeline from the catalog.
+| Name                                                   | Description
+| xref:pipeline-catalog/list.adoc[gds.pipeline.list]     | Prints information about pipelines that are currently available in the catalog.
+| xref:pipeline-catalog/exists.adoc[gds.pipeline.exists] | Checks if a named pipeline is available in the catalog.
+| xref:pipeline-catalog/drop.adoc[gds.pipeline.drop]     | Drops a named pipeline from the catalog.
 |===

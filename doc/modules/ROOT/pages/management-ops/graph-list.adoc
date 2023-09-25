@@ -82,6 +82,8 @@ The `density` is the result of `relationshipCount` divided by the maximal number
 
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS Graph List capabilities we are going to create a small social network graph in Neo4j.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -161,15 +163,24 @@ ORDER BY graphName ASC
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
-YIELD graphName, schemaWithOrientation
-RETURN graphName, schemaWithOrientation
+YIELD graphName, configuration, schemaWithOrientation
+RETURN graphName, configuration.query AS query, schemaWithOrientation
 ----
 
 .Results
 [opts="header"]
 |===
-| graphName | schemaWithOrientation
+| graphName | query | schemaWithOrientation
 | "personsCypher"
+| "MATCH (n:Person)
+OPTIONAL MATCH (n)-[r:KNOWS]\->(m:Person)
+RETURN gds.graph.project('personsCypher', n, m,
+  {
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    relationshipType: type(r)
+  }
+)"
 | {graphProperties={}, nodes={Person={}}, relationships={KNOWS={properties={}, direction=DIRECTED}}}
 |===
 --
@@ -194,8 +205,7 @@ RETURN graphName, schemaWithOrientation, configuration.nodeProjection AS nodePro
 |===
 --
 
-The above examples demonstrate that `nodeProjection` only has a value when the graph is projected using native projection.
-This is also true for `relationshipProjection`.
+The above examples demonstrate that `nodeProjection` and `relationshipProjection` only have a value when the graph is projected using native projection while `query` is present when we have a Cypher projected graph.
 
 Despite different result columns being present for the different projections that we can use, other data such as the Graph Schema is the same, as we can see in the examples above.
 

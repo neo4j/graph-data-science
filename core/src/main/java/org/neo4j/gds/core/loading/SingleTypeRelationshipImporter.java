@@ -109,7 +109,7 @@ public final class SingleTypeRelationshipImporter {
             .build();
     }
 
-    ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
+    public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
         PartialIdMap idMap,
         int bulkSize,
         KernelTransaction kernelTransaction,
@@ -141,7 +141,7 @@ public final class SingleTypeRelationshipImporter {
     }
 
     public AdjacencyListsWithProperties build() {
-        return adjacencyCompressorFactory.build();
+        return adjacencyCompressorFactory.build(true);
     }
 
     @ValueClass

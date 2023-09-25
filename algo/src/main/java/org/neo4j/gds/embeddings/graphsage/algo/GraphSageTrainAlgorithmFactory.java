@@ -21,12 +21,12 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -57,7 +57,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         GraphSageTrainConfig configuration,
         ProgressTracker progressTracker
     ) {
-        var executorService = Pools.DEFAULT;
+        var executorService = DefaultPool.INSTANCE;
         var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
 
         if(configuration.hasRelationshipWeightProperty()) {
@@ -116,12 +116,6 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
         var isMultiLabel = config.isMultiLabel();
 
-        var perNodeFeaturesMemory = MemoryRange.of(
-            sizeOfDoubleArray(isMultiLabel ? 1 : config.estimationFeatureDimension()),
-            sizeOfDoubleArray(config.estimationFeatureDimension())
-        );
-        var initialFeaturesMemory = HugeObjectArray.memoryEstimation(MemoryEstimations.of("", perNodeFeaturesMemory));
-
         var estimationsBuilder = layerBuilder
             .endField()
             .endField()
@@ -140,7 +134,10 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         }
 
         return estimationsBuilder
-            .add("initialFeatures", initialFeaturesMemory)
+            .rangePerNode("initialFeatures", nc -> MemoryRange.of(
+                HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(isMultiLabel ? 1 : config.estimationFeatureDimension())),
+                HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.estimationFeatureDimension()))
+            ))
             .startField("trainOnEpoch")
             .fixed("initialAdamOptimizer", initialAdamOptimizer)
             .perThread("concurrentBatches", MemoryEstimations

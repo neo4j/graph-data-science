@@ -1,0 +1,2 @@
+WARNING: The {algorithm} algorithm requires the graph to use the `UNDIRECTED` orientation for relationships.
+You can either xref:management-ops/graph-creation/graph-project.adoc#_relationship_orientation[create] the graph with undirected relationships or xref:management-ops/graph-update/to-undirected.adoc[update] it by converting the directed relationships into new undirected ones.

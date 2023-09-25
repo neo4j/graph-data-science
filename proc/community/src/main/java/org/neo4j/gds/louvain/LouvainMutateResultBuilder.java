@@ -20,18 +20,19 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-class LouvainMutateResultBuilder extends LouvainResultBuilder<MutateResult> {
+class LouvainMutateResultBuilder extends LouvainResultBuilder<LouvainMutateResult> {
     LouvainMutateResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
         super(returnColumns, concurrency);
     }
 
     @Override
-    protected MutateResult buildResult() {
-        return new MutateResult(
+    protected LouvainMutateResult buildResult() {
+        return new LouvainMutateResult(
             modularity,
             Arrays.stream(modularities).boxed().collect(Collectors.toList()),
             levels,

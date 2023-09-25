@@ -28,10 +28,15 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':annotations')
+    implementation project(':collections-memory-estimation')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':core-utils')
     implementation project(':graph-schema-api')
+    implementation project(':licensing')
+    implementation project(':logging')
+    implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':ml-algo')
@@ -54,4 +59,6 @@ dependencies {
     testImplementation project(':ml-algo')
     testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
     testImplementation group: 'com.github.s1ck', name: 'gdl', version: ver.'gdl'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+
 }

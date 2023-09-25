@@ -29,22 +29,21 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipsProc.TopologyResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GraphStreamRelationshipsProcTest extends BaseProcTest {
-
-    @Neo4jGraph(offsetIds = true)
+    @SuppressWarnings("unused")
+    @Neo4jGraph
     static String DB_CYPHER = "CREATE" +
                               "  (a:N), (b:N), (c:N)" +
                               ", (a)-[:REL1]->(b)" +
@@ -52,6 +51,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
                               ", (c)-[:REL2]->(b)" +
                               ", (b)-[:REL2]->(a)";
 
+    @SuppressWarnings("WeakerAccess")
     @Inject
     IdFunction idFunction;
 
@@ -72,7 +72,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
     void shouldStreamAllRelationships() {
         var actualRelationships = new ArrayList<TopologyResult>();
 
-        runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('graph')", row -> actualRelationships.add(
+        runQueryWithRowConsumer("CALL gds.graph.relationships.stream('graph')", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
                 row.getNumber("targetNodeId").longValue(),
@@ -111,7 +111,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
     ) {
         var actualRelationships = new ArrayList<TopologyResult>();
         runQueryWithRowConsumer(
-            "CALL gds.beta.graph.relationships.stream('graph', ['" + relType + "'])",
+            "CALL gds.graph.relationships.stream('graph', ['" + relType + "'])",
             row -> actualRelationships.add(
                 resultContainerFunction.apply(
                     row.getNumber("sourceNodeId").longValue(),
@@ -130,10 +130,10 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
     @Test
     void shouldStreamInParallel() {
-        runQuery("CALL gds.beta.graph.generate('generatedGraph', 10000, 5)");
+        runQuery("CALL gds.graph.generate('generatedGraph', 10000, 5)");
 
         var actualRelationships = new ArrayList<TopologyResult>();
-        runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
+        runQueryWithRowConsumer("CALL gds.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
                 row.getNumber("targetNodeId").longValue(),
@@ -142,7 +142,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         ));
 
         var expectedRelationships = new ArrayList<TopologyResult>();
-        var generatedGraph = GraphStoreCatalog.get("", DatabaseId.of(db), "generatedGraph").graphStore().getUnion();
+        var generatedGraph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "generatedGraph").graphStore().getUnion();
         generatedGraph.forEachNode(nodeId -> {
             generatedGraph.forEachRelationship(nodeId, (source, target) -> expectedRelationships.add(
                 relationship(source, target, "REL")
@@ -151,14 +151,6 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         });
 
         assertThat(actualRelationships).containsExactlyInAnyOrderElementsOf(expectedRelationships);
-    }
-
-    @Test
-    void shouldFailOnNonExistentRelationshipType() {
-        assertThatThrownBy(() -> runQuery("CALL gds.beta.graph.relationships.stream('graph', ['NON_EXISTENT'])"))
-            .hasRootCauseInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("could not find")
-            .hasMessageContaining("'NON_EXISTENT'");
     }
 
     private static TopologyResult relationship(long sourceId, long targetId, String relationshipType) {

@@ -40,6 +40,8 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     private final Map<String, LongFunction<Object>> neoNodeProperties;
 
+    private final Optional<NodeLabelMapping> nodeLabelMapping;
+
     public enum IdMappingType implements IdMapFunction {
         MAPPED {
             @Override
@@ -84,13 +86,15 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
     protected GraphStoreExporter(
         GraphStore graphStore,
         CONFIG config,
-        Optional<NeoNodeProperties> neoNodeProperties
+        Optional<NeoNodeProperties> neoNodeProperties,
+        Optional<NodeLabelMapping> nodeLabelMapping
     ) {
         this.graphStore = graphStore;
         this.config = config;
         this.neoNodeProperties = neoNodeProperties
             .map(NeoNodeProperties::neoNodeProperties)
             .orElse(Map.of());
+        this.nodeLabelMapping = nodeLabelMapping;
     }
 
     protected abstract void export(GraphStoreInput graphStoreInput);
@@ -99,7 +103,11 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     public ExportedProperties run() {
         var metaDataStore = MetaDataStore.of(graphStore);
-        var nodeStore = NodeStore.of(graphStore, neoNodeProperties);
+        var nodeStore = NodeStore.of(
+            graphStore,
+            neoNodeProperties,
+            nodeLabelMapping
+        );
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphProperties = graphStore
             .graphPropertyKeys()

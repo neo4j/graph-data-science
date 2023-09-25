@@ -96,7 +96,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
     @Test
     void testStreaming() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .streamMode()
             .yields("nodeId", "communityId");
 
@@ -112,7 +112,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
     @Test
     void testStreamingWeighted() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "communityId");
@@ -129,7 +129,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
     @Test
     void testStreamingSeeded() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .streamMode()
             .addParameter("seedProperty", "seed1")
             .yields("nodeId", "communityId");
@@ -147,7 +147,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
     @Test
     void testStreamingEstimate() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .estimationMode(STREAM)
             .yields();
 
@@ -174,7 +174,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
     @MethodSource("communitySizeInputs")
     void testWriteMinCommunitySize(Map<String, Object> parameters, Iterable<Long> expectedCommunityIds) {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .streamMode()
             .addAllParameters(parameters)
             .yields("nodeId", "communityId");

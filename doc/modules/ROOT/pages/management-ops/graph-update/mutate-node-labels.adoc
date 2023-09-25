@@ -10,7 +10,7 @@ As with existing labels, they allow filtering the graph on following operations.
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.mutate(
+CALL gds.graph.nodeLabel.mutate(
     graphName: String,
     nodeLabel: String,
     configuration: Map
@@ -37,7 +37,7 @@ YIELD
 [opts="header",cols="1,1,1,7"]
 |===
 | Name                   | Type                  | Default           | Description
-| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-project-subgraph.adoc[Projecting a subgraph].
+| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/graph-creation/graph-filter.adoc[Projecting a subgraph].
 | concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
 | writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
 |===
@@ -57,6 +57,8 @@ YIELD
 
 [[catalog-graph-mutate-node-label-example]]
 == Example
+
+include::partial$/common-usage/examples-empty-db-note.adoc[]
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
@@ -100,7 +102,7 @@ To mutate the in-memory graph by adding a new node label for nodes with score hi
 .Add the `Reader` node label to the in-memory graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.graph.nodeLabel.mutate('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+CALL gds.graph.nodeLabel.mutate('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
 YIELD graphName, nodeLabel, nodeLabelsWritten, nodeCount
 ----
 

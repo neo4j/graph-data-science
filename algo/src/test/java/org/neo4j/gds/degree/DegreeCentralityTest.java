@@ -26,11 +26,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -148,7 +148,7 @@ final class DegreeCentralityTest {
 
         var degreeCentrality = new DegreeCentrality(
             graph,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             ProgressTracker.NULL_TRACKER
         );
@@ -200,7 +200,7 @@ final class DegreeCentralityTest {
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             progressTracker
         );
@@ -225,7 +225,7 @@ final class DegreeCentralityTest {
 
         var degreeCentrality = new DegreeCentrality(
             graph,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             ProgressTracker.NULL_TRACKER
         );

@@ -28,8 +28,8 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -150,6 +150,14 @@ public abstract class FileToGraphStoreImporter {
         progressTracker.beginSubTask();
         MutableNodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
+        nodeSchema.entries().stream().forEach(entry -> log.info("Imported node label schema: %s", entry.identifier()));
+        var labelMapping = fileInput.labelMapping();
+        if (labelMapping.isPresent()) {
+            labelMapping.get().entrySet().forEach(entry -> log.info("Label mapping: %s -> %s", entry.getKey(), entry.getValue()));
+        }
+        else {
+            log.info("Label mapping file was not found, continuing import without label mapping");
+        }
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(fileInput.graphInfo().maxOriginalId())
@@ -167,7 +175,7 @@ public abstract class FileToGraphStoreImporter {
             (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
 
         var nodes = nodesBuilder.build();
 
@@ -198,7 +206,7 @@ public abstract class FileToGraphStoreImporter {
             (index) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
 
         var relationshipImportResult = relationshipImportResult(relationshipBuildersByType);
 
@@ -227,7 +235,7 @@ public abstract class FileToGraphStoreImporter {
                     progressTracker
                 )
             );
-            ParallelUtil.run(tasks, Pools.DEFAULT);
+            ParallelUtil.run(tasks, DefaultPool.INSTANCE);
             graphStoreGraphPropertyVisitor.close();
 
             graphStoreBuilder.graphProperties(GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(

@@ -27,9 +27,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.TentativeDistances;
@@ -102,6 +106,30 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         this.metTerminals = new LongAdder();
         this.numOfTerminals = isTerminal.cardinality();
         this.binSizeThreshold = binSizeThreshold;
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        //the estimation  copies  the original delta stepping class(see DeltaStepping.java for details)
+        var builder = MemoryEstimations.builder(SteinerBasedDeltaStepping.class)
+            .rangePerGraphDimension("shared bin", (dimensions, concurrency) -> {
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount());
+                var upperBound = HugeLongArray.memoryEstimation(dimensions.relCountUpperBound());
+
+                return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+            })
+            .rangePerGraphDimension("local bins", (dimensions, concurrency) -> {
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
+                var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
+
+                return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+            });
+        //tentative distances info
+        builder.perNode("distance array", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("predecessor array", HugeAtomicLongArray::memoryEstimation);
+
+        builder.perNode("merged with source", MemoryUsage::sizeOfBitset);
+
+        return builder.build();
     }
 
     private void mergeNodesOnPathToSource(long nodeId, AtomicLong frontierIndex) {

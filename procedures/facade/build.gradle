@@ -1,0 +1,45 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: OpenGDS Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation 'org.jetbrains:annotations:24.0.0'
+
+    // the necessary Neo4j things
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+
+        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
+    }
+
+    // the necessary GDS things
+    implementation project(':algo')
+    implementation project(':algo-common')
+    implementation project(':annotations')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':core-write')
+    implementation project(':cypher-aggregation')
+    implementation project(':executor')
+    implementation project(':graph-schema-api')
+    implementation project(':graph-store-catalog-applications')
+    implementation project(':logging')
+    implementation project(':memory-usage')
+    implementation project(':native-projection')
+    implementation project(':neo4j-api')
+    implementation project(':proc-common')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+    implementation project(':transaction')
+
+    // test infrastructure
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: ver.'junit5bom'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+}

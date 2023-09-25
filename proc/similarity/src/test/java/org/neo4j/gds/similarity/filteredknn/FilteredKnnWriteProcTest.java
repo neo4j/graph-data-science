@@ -22,6 +22,8 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -76,10 +78,11 @@ class FilteredKnnWriteProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void shouldWriteResults() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.alpha.knn.filtered", "gds.knn.filtered"})
+    void shouldWriteResults(String tieredProcedure) {
         String query = GdsCypher.call("filteredKnnGraph")
-            .algo("gds.alpha.knn.filtered")
+            .algo(tieredProcedure)
             .writeMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -130,7 +133,7 @@ class FilteredKnnWriteProcTest extends BaseProcTest {
         assertGraphEquals(
             fromGdl(
                 "(a {id: 1})-[:SIMILAR {w: 0.5}]->(b {id: 2}), (b)-[:SIMILAR {w: 0.5}]->(a), (c {id: 3})-[:SIMILAR {w: 0.25}]->(b)"),
-            GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), resultGraphName).graphStore().getUnion()
+            GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), resultGraphName).graphStore().getUnion()
         );
     }
 
@@ -148,7 +151,7 @@ class FilteredKnnWriteProcTest extends BaseProcTest {
         runQuery(graphCreateQuery);
 
         var query = GdsCypher.call(graphName)
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .writeMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -187,7 +190,7 @@ class FilteredKnnWriteProcTest extends BaseProcTest {
         String relationshipProperty = "score";
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.knn.filtered")
+            .algo("gds.knn.filtered")
             .writeMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))

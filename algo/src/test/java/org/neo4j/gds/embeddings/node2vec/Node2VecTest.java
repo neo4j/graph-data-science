@@ -40,18 +40,18 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.HugeSparseLongArray;
+import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
@@ -280,7 +280,7 @@ class Node2VecTest extends BaseTest {
             .nodes(firstIdMap)
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(Pools.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
@@ -302,7 +302,7 @@ class Node2VecTest extends BaseTest {
             .nodes(secondIdMap)
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(Pools.DEFAULT)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var random = new SplittableRandom(42);

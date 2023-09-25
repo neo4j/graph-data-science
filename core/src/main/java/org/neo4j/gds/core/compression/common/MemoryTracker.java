@@ -23,87 +23,125 @@ import org.HdrHistogram.ConcurrentHistogram;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
-public abstract class MemoryTracker {
+public interface MemoryTracker {
 
-    private final ConcurrentHistogram heapAllocations;
-    private final ConcurrentHistogram nativeAllocations;
-    private final ConcurrentHistogram pageSizes;
-    private final ConcurrentHistogram headerBits;
-    private final ConcurrentHistogram headerAllocations;
+    MemoryTracker EMPTY = new MemoryTracker.Empty();
 
-    private final AutoCloseableThreadLocal<BlockStatistics> blockStatistics;
-
-    public static MemoryTracker of() {
-        return GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled() ? new NonEmpty() : EMPTY;
+    static MemoryTracker create() {
+        return GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled()
+            ? new NonEmpty()
+            : empty();
     }
 
-    public static MemoryTracker empty() {
+    static MemoryTracker empty() {
         return EMPTY;
     }
 
-    MemoryTracker() {
-        this.heapAllocations = new ConcurrentHistogram(0);
-        this.nativeAllocations = new ConcurrentHistogram(0);
-        this.pageSizes = new ConcurrentHistogram(0);
-        this.headerBits = new ConcurrentHistogram(0);
-        this.headerAllocations = new ConcurrentHistogram(0);
-        this.blockStatistics = AutoCloseableThreadLocal.withInitial(BlockStatistics::new);
+    void recordHeapAllocation(long size);
+
+    void recordNativeAllocation(long size);
+
+    void recordPageSize(int size);
+
+    void recordHeaderBits(int bits);
+
+    void recordHeaderAllocation(long size);
+
+    void recordBlockStatistics(long[] values, int start, int length);
+
+    ImmutableHistogram heapAllocations();
+
+    ImmutableHistogram nativeAllocations();
+
+    ImmutableHistogram pageSizes();
+
+    ImmutableHistogram headerBits();
+
+    ImmutableHistogram headerAllocations();
+
+    BlockStatistics blockStatistics();
+
+    class NonEmpty implements MemoryTracker {
+        private final ConcurrentHistogram heapAllocations;
+        private final ConcurrentHistogram nativeAllocations;
+        private final ConcurrentHistogram pageSizes;
+        private final ConcurrentHistogram headerBits;
+        private final ConcurrentHistogram headerAllocations;
+        private final AutoCloseableThreadLocal<BlockStatistics> blockStatistics;
+
+        NonEmpty() {
+            this.heapAllocations = new ConcurrentHistogram(0);
+            this.nativeAllocations = new ConcurrentHistogram(0);
+            this.pageSizes = new ConcurrentHistogram(0);
+            this.headerBits = new ConcurrentHistogram(0);
+            this.headerAllocations = new ConcurrentHistogram(0);
+            this.blockStatistics = AutoCloseableThreadLocal.withInitial(BlockStatistics::new);
+        }
+
+        @Override
+        public void recordHeapAllocation(long size) {
+            this.heapAllocations.recordValue(size);
+        }
+
+        @Override
+        public void recordNativeAllocation(long size) {
+            this.nativeAllocations.recordValue(size);
+        }
+
+        @Override
+        public void recordPageSize(int size) {
+            this.pageSizes.recordValue(size);
+        }
+
+        @Override
+        public void recordHeaderBits(int bits) {
+            this.headerBits.recordValue(bits);
+        }
+
+        @Override
+        public void recordHeaderAllocation(long size) {
+            this.headerAllocations.recordValue(size);
+        }
+
+        @Override
+        public void recordBlockStatistics(long[] values, int start, int length) {
+            blockStatistics.get().record(values, start, length);
+        }
+
+        @Override
+        public ImmutableHistogram heapAllocations() {
+            return ImmutableHistogram.of(heapAllocations);
+        }
+
+        @Override
+        public ImmutableHistogram nativeAllocations() {
+            return ImmutableHistogram.of(nativeAllocations);
+        }
+
+        @Override
+        public ImmutableHistogram pageSizes() {
+            return ImmutableHistogram.of(pageSizes);
+        }
+
+        @Override
+        public ImmutableHistogram headerBits() {
+            return ImmutableHistogram.of(headerBits);
+        }
+
+        @Override
+        public ImmutableHistogram headerAllocations() {
+            return ImmutableHistogram.of(headerAllocations);
+        }
+
+        @Override
+        public BlockStatistics blockStatistics() {
+            var union = new BlockStatistics();
+            blockStatistics.forEach(localStats -> localStats.mergeInto(union));
+            return union;
+        }
     }
 
-    public void recordHeapAllocation(long size) {
-        this.heapAllocations.recordValue(size);
-    }
-
-    public void recordNativeAllocation(long size) {
-        this.nativeAllocations.recordValue(size);
-    }
-
-    public void recordPageSize(int size) {
-        this.pageSizes.recordValue(size);
-    }
-
-    public void recordHeaderBits(int bits) {
-        this.headerBits.recordValue(bits);
-    }
-
-    public void recordHeaderAllocation(long size) {
-        this.headerAllocations.recordValue(size);
-    }
-
-    public void recordBlockStatistics(long[] values, int start, int length) {
-        blockStatistics.get().record(values, start, length);
-    }
-
-    public ImmutableHistogram heapAllocations() {
-        return ImmutableHistogram.of(heapAllocations);
-    }
-
-    public ImmutableHistogram nativeAllocations() {
-        return ImmutableHistogram.of(nativeAllocations);
-    }
-
-    public ImmutableHistogram pageSizes() {
-        return ImmutableHistogram.of(pageSizes);
-    }
-
-    public ImmutableHistogram headerBits() {
-        return ImmutableHistogram.of(headerBits);
-    }
-
-    public ImmutableHistogram headerAllocations() {
-        return ImmutableHistogram.of(headerAllocations);
-    }
-
-    public BlockStatistics blockStatistics() {
-        var union = new BlockStatistics();
-        blockStatistics.forEach(localStats -> localStats.mergeInto(union));
-        return union;
-    }
-
-    private static final class NonEmpty extends MemoryTracker {
-    }
-
-    private static final MemoryTracker EMPTY = new MemoryTracker() {
+    final class Empty implements MemoryTracker {
 
         @Override
         public void recordHeapAllocation(long size) {}
@@ -122,5 +160,35 @@ public abstract class MemoryTracker {
 
         @Override
         public void recordBlockStatistics(long[] values, int start, int length) {}
-    };
+
+        @Override
+        public ImmutableHistogram heapAllocations() {
+            return ImmutableHistogram.EMPTY;
+        }
+
+        @Override
+        public ImmutableHistogram nativeAllocations() {
+            return ImmutableHistogram.EMPTY;
+        }
+
+        @Override
+        public ImmutableHistogram pageSizes() {
+            return ImmutableHistogram.EMPTY;
+        }
+
+        @Override
+        public ImmutableHistogram headerBits() {
+            return ImmutableHistogram.EMPTY;
+        }
+
+        @Override
+        public ImmutableHistogram headerAllocations() {
+            return ImmutableHistogram.EMPTY;
+        }
+
+        @Override
+        public BlockStatistics blockStatistics() {
+            return BlockStatistics.EMPTY;
+        }
+    }
 }

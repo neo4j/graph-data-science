@@ -23,12 +23,13 @@ import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -37,8 +38,11 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.k1coloring.stream", description = K1_COLORING_DESCRIPTION, executionMode = STREAM)
-public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>, K1ColoringFactory<K1ColoringStreamConfig>> {
+@GdsCallable(name = "gds.k1coloring.stream",
+             aliases = {"gds.beta.k1coloring.stream"},
+             description = K1_COLORING_DESCRIPTION,
+             executionMode = STREAM)
+public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>, K1ColoringAlgorithmFactory<K1ColoringStreamConfig>> {
 
     @Override
     public String name() {
@@ -46,8 +50,8 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override
@@ -56,7 +60,7 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<K1Coloring, K1ColoringResult, K1ColoringStreamConfig, Stream<K1ColoringStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -67,7 +71,7 @@ public class K1ColoringStreamSpecification implements AlgorithmSpec<K1Coloring, 
                     var nodePropertyValues = (NodePropertyValues) CommunityProcCompanion.considerSizeFilter(
                         config,
                         computationResult.result()
-                            .map(HugeLongArray::asNodeProperties)
+                            .map(k1ColoringResult -> NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()))
                             .orElse(EmptyLongNodePropertyValues.INSTANCE)
                     );
                     return LongStream

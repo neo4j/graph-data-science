@@ -34,14 +34,20 @@ import org.neo4j.gds.results.StandardMutateResult;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@GdsCallable(name = "gds.beta.graph.relationships.toUndirected", executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = ToUndirectedSpec.DESCRIPTION)
+@GdsCallable(
+    name = ToUndirectedSpec.CALLABLE_NAME,
+    executionMode = ExecutionMode.MUTATE_RELATIONSHIP,
+    description = ToUndirectedSpec.DESCRIPTION,
+    aliases = {"gds.beta.graph.relationships.toUndirected"}
+)
 public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedAlgorithmFactory> {
 
-    public static final String DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
+    static final String DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
+    static final String CALLABLE_NAME = "gds.graph.relationships.toUndirected";
 
     @Override
     public String name() {
-        return "gds.beta.graph.relationships.toUndirected";
+        return CALLABLE_NAME;
     }
 
     @Override

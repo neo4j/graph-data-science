@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -65,6 +66,8 @@ public class ScalePropertiesStreamProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
+    @Internal
+    @Deprecated(forRemoval = true)
     @Procedure(value = "gds.alpha.scaleProperties.stream", deprecatedBy = "gds.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<Result> alphaStream(

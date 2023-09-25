@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -80,21 +81,17 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.addRandomForest", mode = READ, deprecatedBy = "gds.beta.pipeline.nodeClassification.addRandomForest")
     @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<NodePipelineInfoResult> addRandomForestAlpha(
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
-
-        var allowedKeys = RandomForestClassifierTrainerConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestClassifierConfig.keySet());
-
-        var tunableTrainerConfig = TunableTrainerConfig.of(randomForestClassifierConfig, TrainingMethod.RandomForestClassification);
-        pipeline.addTrainerConfig(
-            tunableTrainerConfig
-        );
-
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.pipeline.nodeClassification.addRandomForest` has been deprecated, please use `gds.beta.pipeline.nodeClassification.addRandomForest`.");
+        return addRandomForest(pipelineName, randomForestClassifierConfig);
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.addMLP", mode = READ)

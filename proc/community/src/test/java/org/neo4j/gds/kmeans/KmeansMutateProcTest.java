@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.assertj.core.data.Offset;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +71,7 @@ class KmeansMutateProcTest extends BaseProcTest {
             .algo("gds.beta.kmeans")
             .mutateMode()
             .addParameter("k", 3)
+            .addParameter("randomSeed", 1337L)
             .addParameter("nodeProperty", "weights")
             .addParameter("mutateProperty", "communityId")
             .addParameter("computeSilhouette", true)
@@ -131,13 +133,15 @@ class KmeansMutateProcTest extends BaseProcTest {
 
                 assertThat(resultRow.get("averageDistanceToCentroid"))
                     .isNotNull()
-                    .asInstanceOf(DOUBLE);
+                    .asInstanceOf(DOUBLE)
+                    .isCloseTo(0.04, Offset.offset(1e-5));
 
                 var centroids = resultRow.get("centroids");
                 assertThat(centroids)
                     .isNotNull()
                     .asInstanceOf(LIST)
                     .isNotEmpty();
+                
                 List<Object> listCentroids = (List<Object>) centroids;
                 for (Object centroid : listCentroids) {
                     assertThat(centroid)
@@ -145,9 +149,11 @@ class KmeansMutateProcTest extends BaseProcTest {
                         .asInstanceOf(LIST)
                         .isNotEmpty();
                 }
+
                 assertThat(resultRow.get("averageSilhouette"))
                     .isNotNull()
-                    .asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(-1d).isLessThanOrEqualTo(1d);
+                    .asInstanceOf(DOUBLE)
+                    .isCloseTo(0.13333, Offset.offset(1e-4));
             }
 
             return true;

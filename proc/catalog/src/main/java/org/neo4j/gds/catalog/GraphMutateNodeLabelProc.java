@@ -19,29 +19,46 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.applications.graphstorecatalog.MutateLabelResult;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphMutateNodeLabelProc extends CatalogProc {
+public class GraphMutateNodeLabelProc {
+    @Context
+    public GraphDataScience facade;
 
-    @Procedure(name = "gds.alpha.graph.nodeLabel.mutate", mode = READ)
+    @Procedure(name = "gds.graph.nodeLabel.mutate", mode = READ)
     @Description("Mutates the in-memory graph with the given node Label.")
     public Stream<MutateLabelResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
-    ) throws ParseException {
+    ) {
 
-        Preconditions.check();
-        return NodeLabelMutator.mutateNodeLabel(graphName, nodeLabel, configuration, executionContext());
+        return facade.catalog().mutateNodeLabel(graphName, nodeLabel, configuration);
+    }
 
+    @Procedure(name = "gds.alpha.graph.nodeLabel.mutate", mode = READ, deprecatedBy = "gds.graph.nodeLabel.mutate")
+    @Description("Mutates the in-memory graph with the given node Label.")
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<MutateLabelResult> alphaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeLabel") String nodeLabel,
+        @Name(value = "configuration") Map<String, Object> configuration
+    ) {
+        facade.log().warn(
+            "Procedure `gds.alpha.graph.nodeLabel.mutate` has been deprecated, please use `gds.graph.nodeLabel.mutate`.");
+
+        return mutate(graphName, nodeLabel, configuration);
     }
 }

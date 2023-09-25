@@ -19,104 +19,46 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_RELATIONSHIPS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphStreamRelationshipsProc extends CatalogProc {
+public class GraphStreamRelationshipsProc {
+    @Context
+    public GraphDataScience facade;
 
-    @Procedure(name = "gds.beta.graph.relationships.stream", mode = READ)
-    @Description("Streams the given relationship source/target pairs")
+    @Procedure(name = "gds.graph.relationships.stream", mode = READ)
+    @Description(STREAM_RELATIONSHIPS_DESCRIPTION)
     public Stream<TopologyResult> streamRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        Preconditions.check();
-        validateGraphName(graphName);
-
-        var cypherMapWrapper = CypherMapWrapper.create(configuration);
-        var config = GraphStreamRelationshipsConfig.of(
-            graphName,
-            relationshipTypes,
-            cypherMapWrapper
-        );
-
-        validateConfig(cypherMapWrapper, config);
-        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
-        config.validate(graphStore);
-
-        return streamRelationshipTopology(graphStore, config);
+        return facade.catalog().streamRelationships(graphName, relationshipTypes, configuration);
     }
 
-    private static Stream<TopologyResult> streamRelationshipTopology(GraphStore graphStore, GraphStreamRelationshipsConfig config) {
-        var relationshipTypesAndGraphs = config.relationshipTypeIdentifiers(graphStore).stream()
-            .map(relationshipType -> Tuples.pair(relationshipType.name(), graphStore.getGraph(relationshipType)))
-            .collect(Collectors.toList());
+    @Procedure(name = "gds.beta.graph.relationships.stream", mode = READ, deprecatedBy = "gds.graph.relationships.stream")
+    @Description(STREAM_RELATIONSHIPS_DESCRIPTION)
+    @Deprecated(forRemoval = true)
+    @Internal
+    public Stream<TopologyResult> betaStreamRelationships(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        facade.log().warn("Procedure `gds.beta.graph.relationships.stream` has been deprecated, please use `gds.graph.relationships.stream`.");
 
-        return ParallelUtil.parallelStream(
-            LongStream.range(0, graphStore.nodeCount()),
-            config.concurrency(),
-            nodeStream -> nodeStream
-                .boxed()
-                .flatMap(nodeId -> relationshipTypesAndGraphs.stream().flatMap(graphAndRelationshipType -> {
-                    var relationshipType = graphAndRelationshipType.getOne();
-                    Graph graph = graphAndRelationshipType.getTwo();
-
-                    var originalSourceId = graph.toOriginalNodeId(nodeId);
-
-                    return graph
-                        .streamRelationships(nodeId, Double.NaN)
-                        .map(relationshipCursor -> new TopologyResult(originalSourceId, graph.toOriginalNodeId(relationshipCursor.targetId()), relationshipType));
-                }))
-        );
-    }
-
-    public static class TopologyResult {
-        public final long sourceNodeId;
-        public final long targetNodeId;
-        public final String relationshipType;
-
-        public TopologyResult(long sourceNodeId, long targetNodeId, String relationshipType) {
-            this.sourceNodeId = sourceNodeId;
-            this.targetNodeId = targetNodeId;
-            this.relationshipType = relationshipType;
-        }
-
-        @Override
-        public String toString() {
-            return formatWithLocale("TopologyResult(%d, %d, type: %s)", sourceNodeId, targetNodeId, relationshipType);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            TopologyResult that = (TopologyResult) o;
-            return sourceNodeId == that.sourceNodeId && targetNodeId == that.targetNodeId && relationshipType.equals(
-                that.relationshipType);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourceNodeId, targetNodeId, relationshipType);
-        }
+        return facade.catalog().streamRelationships(graphName, relationshipTypes, configuration);
     }
 }

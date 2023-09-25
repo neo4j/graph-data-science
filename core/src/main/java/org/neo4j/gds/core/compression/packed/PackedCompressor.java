@@ -33,9 +33,9 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AbstractAdjacencyCompressorFactory;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.utils.GdsSystemProperties;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;
 import java.util.function.LongSupplier;
@@ -141,7 +141,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final ModifiableSlice<long[]> propertySlice;
     private final MutableInt degree;
 
-    private final boolean packed;
+    private final GdsFeatureToggles.AdjacencyPackingStrategy packingStrategy;
 
     private PackedCompressor(
         AdjacencyListBuilder.Allocator<Address> adjacencyAllocator,
@@ -168,7 +168,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.propertySlice = ModifiableSlice.create();
         this.degree = new MutableInt(0);
 
-        this.packed = GdsSystemProperties.PACKED_TAIL_COMPRESSION == GdsSystemProperties.PackedTailCompression.Packed;
+        this.packingStrategy = GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get();
     }
 
     @Override
@@ -211,22 +211,40 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.degree.setValue(degree);
 
         long offset;
-        if (this.packed) {
-            offset = AdjacencyPacker.compressWithPropertiesWithPackedTail(
-                this.adjacencyAllocator,
-                this.adjacencySlice,
-                targets,
-                degree,
-                this.memoryTracker
-            );
-        } else {
-            offset = AdjacencyPacker.compressWithPropertiesWithVarLongTail(
-                this.adjacencyAllocator,
-                this.adjacencySlice,
-                targets,
-                degree,
-                this.memoryTracker
-            );
+
+        switch (this.packingStrategy) {
+            case PACKED_TAIL:
+                offset = PackedTailPacker.compressWithProperties(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.memoryTracker
+                );
+                break;
+            case VAR_LONG_TAIL:
+                offset = VarLongTailPacker.compressWithProperties(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.memoryTracker
+                );
+                break;
+            case INLINED_HEAD_PACKED_TAIL:
+                offset = InlinedHeadPackedTailPacker.compressWithProperties(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.memoryTracker
+                );
+                break;
+            case BLOCK_ALIGNED_TAIL:
+                throw new IllegalArgumentException(
+                    "Block aligned tail is not supported for adjacency lists with properties");
+            default:
+                throw new IllegalArgumentException("Unknown packing strategy: " + this.packingStrategy);
         }
 
         degree = this.degree.intValue();
@@ -242,26 +260,52 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private int packWithoutProperties(long nodeId, long[] targets, int degree) {
         long offset;
 
-        if (this.packed) {
-            offset = AdjacencyPacker.compressWithPackedTail(
-                this.adjacencyAllocator,
-                this.adjacencySlice,
-                targets,
-                degree,
-                this.aggregations[0],
-                this.degree,
-                this.memoryTracker
-            );
-        } else {
-            offset = AdjacencyPacker.compressWithVarLongTail(
-                this.adjacencyAllocator,
-                this.adjacencySlice,
-                targets,
-                degree,
-                this.aggregations[0],
-                this.degree,
-                this.memoryTracker
-            );
+        switch (this.packingStrategy) {
+            case BLOCK_ALIGNED_TAIL:
+                offset = BlockAlignedTailPacker.compress(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.aggregations[0],
+                    this.degree
+                );
+                break;
+            case VAR_LONG_TAIL:
+                offset = VarLongTailPacker.compress(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.aggregations[0],
+                    this.degree,
+                    this.memoryTracker
+                );
+                break;
+            case PACKED_TAIL:
+                offset = PackedTailPacker.compress(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.aggregations[0],
+                    this.degree,
+                    this.memoryTracker
+                );
+                break;
+            case INLINED_HEAD_PACKED_TAIL:
+                offset = InlinedHeadPackedTailPacker.compress(
+                    this.adjacencyAllocator,
+                    this.adjacencySlice,
+                    targets,
+                    degree,
+                    this.aggregations[0],
+                    this.degree,
+                    this.memoryTracker
+                );
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown packing strategy: " + this.packingStrategy);
         }
 
         degree = this.degree.intValue();

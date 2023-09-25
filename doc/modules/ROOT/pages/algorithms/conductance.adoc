@@ -1,0 +1,202 @@
+:page-aliases: algorithms/alpha/conductance.adoc
+[[algorithms-conductance]]
+= Conductance metric
+:description: This section describes the Conductance algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: conductance
+:algorithm: Conductance
+
+:directed:
+:undirected:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+== Introduction
+
+https://en.wikipedia.org/wiki/Conductance_(graph)[Conductance] is a metric that allows you to evaluate the quality of a community detection.
+Relationships of nodes in a community `C` connect to nodes either within `C` or outside `C`.
+The conductance is the ratio between relationships that point outside `C` and the total number of relationships of `C`.
+The lower the conductance, the more "well-knit" a community is.
+
+It was shown by Yang and Leskovec in the paper _"Defining and Evaluating Network Communities based on Ground-truth"_ that conductance is a very good metric for evaluating actual communities of real world graphs.
+
+The algorithm runs in time linear to the number of relationships in the graph.
+
+
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Conductance syntax per mode
+[.tabbed-example]
+====
+
+
+[.include-with-stream]
+======
+.Run Conductance in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.conductance.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  community: Integer,
+  conductance: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/conductance/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| community   | Integer | Community ID.
+| conductance | Float   | Conductance of the community.
+|===
+======
+
+====
+
+[NOTE]
+====
+Only non-negative community IDs are valid for identifying communities.
+Nodes with a negative community ID will only take part in the computation to the extent that they are connected to nodes in valid communities, and thus contribute to those valid communities' outward relationship counts.
+====
+
+
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: Conductance
+:graph-description: social network
+:image-file: two-user-communities.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (nAlice:User {name: 'Alice', seed: 42}),
+  (nBridget:User {name: 'Bridget', seed: 42}),
+  (nCharles:User {name: 'Charles', seed: 42}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
+
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
+
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
+----
+
+This graph has two clusters of _Users_, that are closely connected.
+Between those clusters there is one single edge.
+The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
+
+We can now project the graph and store it in the graph catalog.
+We load the `LINK` relationships with orientation set to `UNDIRECTED` as this works best with the Louvain algorithm which we will use to create the communities that we evaluate using Conductance.
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            orientation: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'seed',
+        relationshipProperties: 'weight'
+    }
+)
+----
+
+We now run the xref:algorithms/louvain.adoc[Louvain algorithm] to create a division of the nodes into communities that we can then evalutate.
+
+[role=query-example, group=louvain-conductance]
+--
+.The following will run the Louvain algorithm and store the results in `myGraph`:
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.mutate('myGraph', { mutateProperty: 'community', relationshipWeightProperty: 'weight' })
+YIELD communityCount
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount
+| 3
+|===
+--
+
+Now our in-memory graph `myGraph` is populated with node properties under the key `community` that we can set as input for our evaluation using Conductance.
+The nodes are now assigned to communities in the following way:
+
+.Community assignments
+[opts="header"]
+|===
+| name      | community
+| "Alice"   | 3
+| "Bridget" | 2
+| "Charles" | 2
+| "Doug"    | 3
+| "Mark"    | 5
+| "Michael" | 5
+|===
+
+Please see the xref:management-ops/graph-reads/graph-stream-nodes.adoc#catalog-graph-stream-single-node-property-example[stream node properties] procedure for how to obtain such an assignment table.
+
+For more information about Louvain, see its xref:algorithms/louvain.adoc[algorithm page].
+
+
+=== Stream
+
+Since we now have a community detection, we can evaluate how good it is under the conductance metric.
+Note that we in this case we use the feature of relationships being weighted by a relationship property.
+
+The Conductance stream procedure returns the conductance for each community.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example, group=louvain-conductance]
+--
+.The following will run the Conductance algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+YIELD community, conductance
+----
+
+.Results
+[opts="header"]
+|===
+| community | conductance
+| 2         | 0.5
+| 3         | 0.23076923076923078
+| 5         | 0.2
+|===
+--
+
+We can see that the community of the weighted graph with the lowest conductance is community 5.
+This means that 5 is the community that is most "well-knit" in the sense that most of its relationship weights are internal to the community.

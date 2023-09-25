@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.beta.closeness.stats", description = CLOSENESS_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.closeness.stats", aliases = {"gds.beta.closeness.stats"}, description = CLOSENESS_DESCRIPTION, executionMode = STATS)
 public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<StatsResult>, ClosenessCentralityFactory<ClosenessCentralityStatsConfig>> {
 
     @Override

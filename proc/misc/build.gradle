@@ -16,7 +16,6 @@ dependencies {
     implementation project(':csv')
     implementation project(':executor')
     implementation project(':memory-usage')
-    implementation project(':proc-catalog')
     implementation project(':proc-common')
     implementation project(':proc-embeddings')
     implementation project(':progress-tracking')
@@ -41,4 +40,6 @@ dependencies {
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')
     testImplementation project(':proc-test')
+
+    testImplementation project(':opengds-extension')
 }

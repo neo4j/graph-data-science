@@ -37,7 +37,8 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(
-    name = "gds.SteinerTree.stream", aliases = {"gds.beta.SteinerTree.stream"},
+    name = "gds.steinerTree.stream",
+    aliases = {"gds.beta.steinerTree.stream"},
     description = Constants.DESCRIPTION,
     executionMode = STREAM
 )

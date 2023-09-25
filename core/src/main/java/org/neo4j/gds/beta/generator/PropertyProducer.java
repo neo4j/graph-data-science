@@ -38,8 +38,16 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         return new RandomEmbeddingProducer(propertyName, embeddingSize, min, max);
     }
 
+    static PropertyProducer<double[][]> randomEmbeddingDouble(String propertyName, int embeddingSize, double min, double max) {
+        return new RandomDoubleEmbeddingProducer(propertyName, embeddingSize, min, max);
+    }
+
     static PropertyProducer<long[]> nodeIdAsLong(String propertyName) {
         return new NodeIdProducer(propertyName);
+    }
+
+    static PropertyProducer<long[]> fixedLong(String propertyName, long value) {
+        return new FixedLongProducer(propertyName, value);
     }
 
     static PropertyProducer<long[]> randomLong(String propertyName, long min, long max) {
@@ -104,6 +112,53 @@ public interface PropertyProducer<PROPERTY_SLICE> {
                    "propertyName='" + propertyName + '\'' +
                    ", value=" + value +
                    '}';
+        }
+    }
+
+    class FixedLongProducer implements PropertyProducer<long[]> {
+        private final String propertyName;
+        private final long value;
+
+        public FixedLongProducer(String propertyName, long value) {
+            this.propertyName = propertyName;
+            this.value = value;
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+            return ValueType.LONG;
+        }
+
+        @Override
+        public void setProperty(long nodeId, long[] longs, int index, Random random) {
+            longs[index] = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FixedLongProducer fixedLongProducer = (FixedLongProducer) o;
+            return fixedLongProducer.value == value &&
+                Objects.equals(propertyName, fixedLongProducer.propertyName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(propertyName, value);
+        }
+
+        @Override
+        public String toString() {
+            return "FixedLongProducer{" +
+                "propertyName='" + propertyName + '\'' +
+                ", value=" + value +
+                '}';
         }
     }
 
@@ -222,6 +277,69 @@ public interface PropertyProducer<PROPERTY_SLICE> {
                    ", min=" + min +
                    ", max=" + max +
                    '}';
+        }
+    }
+
+    class RandomDoubleEmbeddingProducer implements PropertyProducer<double[][]> {
+        private final String propertyName;
+        private final int embeddingSize;
+        private final double min;
+        private final double max;
+
+        public RandomDoubleEmbeddingProducer(String propertyName, int embeddingSize, double min, double max) {
+            this.propertyName = propertyName;
+            this.embeddingSize = embeddingSize;
+            this.min = min;
+            this.max = max;
+
+            if (max <= min) {
+                throw new IllegalArgumentException("Max value must be greater than min value");
+            }
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+            return ValueType.DOUBLE_ARRAY;
+        }
+
+        @Override
+        public void setProperty(long nodeId, double[][] embeddings, int index, Random random) {
+            var nodeEmbeddings = new double[embeddingSize];
+            for (int i = 0; i < embeddingSize; i++) {
+                nodeEmbeddings[i] = min + (random.nextDouble() * (max - min));
+            }
+            embeddings[index] = nodeEmbeddings;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RandomEmbeddingProducer random = (RandomEmbeddingProducer) o;
+            return random.embeddingSize == embeddingSize &&
+                Double.compare(random.min, min) == 0 &&
+                Double.compare(random.max, max) == 0 &&
+                Objects.equals(propertyName, random.propertyName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(propertyName, embeddingSize, min, max);
+        }
+
+        @Override
+        public String toString() {
+            return "RandomDoubleProducer{" +
+                "propertyName='" + propertyName + '\'' +
+                ", embeddingSize=" + embeddingSize +
+                ", min=" + min +
+                ", max=" + max +
+                '}';
         }
     }
 

@@ -45,7 +45,7 @@ public class GraphProjectResult {
     }
 
     // protected fields because this guy is all about reuse via inheritance :grimace:
-    public abstract static class Builder {
+    public abstract static class Builder<T extends GraphProjectResult> {
         protected final String graphName;
         protected long nodeCount;
         protected long relationshipCount;
@@ -55,12 +55,12 @@ public class GraphProjectResult {
             this.graphName = config.graphName();
         }
 
-        public Builder withNodeCount(long nodeCount) {
+        public Builder<T> withNodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
             return this;
         }
 
-        public Builder withRelationshipCount(long relationshipCount) {
+        public Builder<T> withRelationshipCount(long relationshipCount) {
             this.relationshipCount = relationshipCount;
             return this;
         }
@@ -69,6 +69,6 @@ public class GraphProjectResult {
             this.projectMillis = projectMillis;
         }
 
-        public abstract GraphProjectResult build();
+        public abstract T build();
     }
 }

@@ -134,13 +134,13 @@ class SpecificationGeneratorTest {
     @Test
     void shouldGenerateInverseIndexValidationOverride() {
         var typeNames = new TypeNames("gds.test", "Bar", TypeName.get(PregelProcedureConfig.class));
-        var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty());
+        var procedureGenerator = new ProcedureGenerator(typeNames, "gds.bar", Optional.empty(), Optional.empty());
         var methodSpec = procedureGenerator.inverseIndexValidationOverride();
         assertThat(methodSpec.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.executor.validation.ValidationConfiguration<org.neo4j.gds.beta.pregel.PregelProcedureConfig> validationConfig(" + NL +
             "    org.neo4j.gds.executor.ExecutionContext executionContext) {" + NL +
-            "  return org.neo4j.gds.pregel.proc.PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());" + NL +
+            "  return org.neo4j.gds.pregel.proc.PregelCompanion.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());" + NL +
             "}" + NL
         );
     }

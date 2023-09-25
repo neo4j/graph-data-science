@@ -180,6 +180,8 @@ include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
 [[nodeclassification-pipelines-examples-train]]
 == Example
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 In this section we will show examples of running a Node Classification training pipeline on a concrete graph.
 The intention is to illustrate what the results look like and to provide a guide in how to make use of the model in a real setting.
 We will do this on a small graph of a handful of nodes representing houses.
@@ -231,8 +233,6 @@ CREATE
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for the pipeline execution.
 We do this using a native projection targeting the `House` and `UnknownHouse` labels.
 We will also project the `sizeOfStory` property to use as a model feature, and the `class` property to use as a target feature.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=nc]

@@ -21,16 +21,25 @@ package org.neo4j.gds.catalog;
 
 final class GraphCatalogProcedureConstants {
     static final String DROP_DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
+    static final String DROP_GRAPH_PROPERTY_DESCRIPTION = "Removes a graph property from a projected graph.";
+    static final String DROP_NODE_PROPERTIES_DESCRIPTION = "Removes node properties from a projected graph.";
+    static final String DROP_RELATIONSHIPS_DESCRIPTION = "Delete the relationship type for a given graph stored in the graph-catalog.";
     static final String EXISTS_DESCRIPTION = "Checks if a graph exists in the catalog.";
     static final String LIST_DESCRIPTION = "Lists information about named graphs stored in the catalog.";
     static final String PROJECT_DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
-
-    /**
-     * This exists because procedures need default values sometimes.
-     * For example, CALL gds.graph.list() would fail otherwise,
-     * the user would have to do something silly like CALL gds.graph.list("")
-     */
-    static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
+    static final String STREAM_GRAPH_PROPERTY_DESCRIPTION = "Streams the given graph property.";
+    static final String STREAM_NODE_PROPERTIES_DESCRIPTION = "Streams the given node properties.";
+    static final String STREAM_NODE_PROPERTY_DESCRIPTION = "Streams the given node property.";
+    static final String STREAM_RELATIONSHIP_PROPERTIES_DESCRIPTION = "Streams the given relationship properties.";
+    static final String STREAM_RELATIONSHIP_PROPERTY_DESCRIPTION = "Streams the given relationship property.";
+    static final String STREAM_RELATIONSHIPS_DESCRIPTION = "Streams the given relationship source/target pairs";
+    static final String WRITE_NODE_PROPERTIES_DESCRIPTION = "Writes the given node properties to an online Neo4j database.";
+    static final String WRITE_NODE_LABEL_DESCRIPTION = "Writes the given node Label to an online Neo4j database.";
+    static final String WRITE_RELATIONSHIP_DESCRIPTION = "Writes the given relationship and an optional relationship property to an online Neo4j database.";
+    static final String WRITE_RELATIONSHIP_PROPERTIES_DESCRIPTION = "Writes the given relationship and a list of relationship properties to an online Neo4j database.";
+    static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
+    static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
+    static final String ESTIMATE_CNARW_DESCRIPTION = "Estimate memory requirements for sampling graph using CNARW algorithm";
 
     private GraphCatalogProcedureConstants() {}
 }

@@ -21,9 +21,12 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,31 +38,56 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansStatsProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.kmeans.stats", mode = READ)
+    @Context
+    public GraphDataScience facade;
+
+    @Procedure(value = "gds.kmeans.stats", mode = READ)
     @Description(KMEANS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<KmeansStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var statsSpec = new KmeansStatsSpec();
-        return new ProcedureExecutor<>(
-            statsSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().kmeansStats(graphName, configuration);
+
     }
 
-    @Procedure(value = "gds.beta.kmeans.stats.estimate", mode = READ)
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.kmeans.stats", mode = READ, deprecatedBy = "gds.kmeans.stats")
+    @Description(KMEANS_DESCRIPTION)
+    public Stream<KmeansStatsResult> betaStats(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.kmeans.stats` has been deprecated, please use `gds.kmeans.stats`.");
+        return stats(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.kmeans.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var writeSpec = new KmeansStatsSpec();
-
+        var spec = new KmeansStatsSpec();
         return new MemoryEstimationExecutor<>(
-            writeSpec,
+            spec,
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.kmeans.stats.estimate", mode = READ, deprecatedBy = "gds.kmeans.stats.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.kmeans.stats.estimate` has been deprecated, please use `gds.kmeans.stats.estimate`.");
+        return estimate(graphName, configuration);
     }
 }

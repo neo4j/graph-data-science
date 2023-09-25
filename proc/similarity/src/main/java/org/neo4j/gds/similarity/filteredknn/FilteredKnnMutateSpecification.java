@@ -41,7 +41,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.alpha.knn.filtered.mutate", executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(
+    name = "gds.alpha.knn.filtered.mutate",
+    aliases = {"gds.knn.filtered.mutate"},
+    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
+    executionMode = MUTATE_RELATIONSHIP
+)
 public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<FilteredKnnMutateProcResult>, FilteredKnnFactory<FilteredKnnMutateConfig>> {
     @Override
     public String name() {
@@ -83,7 +88,7 @@ public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn
                         try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
                             similarityGraphResult = FilteredKnnHelpers.computeToGraph(
                                 computationResult.graph(),
-                                filteredKnn.nodeCount(),
+                                computationResult.graph().nodeCount(),
                                 config.concurrency(),
                                 result,
                                 filteredKnn.executorService()

@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -41,7 +42,7 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         "The algorithm computes pair-wise similarities based on Jaccard or Overlap metrics. " +
         "The filtered variant supports limiting which nodes to compare via source and target node filters.";
 
-    @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stream", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.filtered.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> stream(
         @Name(value = "graphName") String graphName,
@@ -53,7 +54,7 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stream.estimate", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.filtered.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -64,5 +65,35 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stream", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.stream")
+    @Description(DESCRIPTION)
+    public Stream<SimilarityResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ){
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stream` has been deprecated, please use `gds.nodeSimilarity.filtered.stream`.");
+
+        return stream(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stream.estimate", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.stream.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateAlpha(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stream.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.stream.estimate`.");
+
+        return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

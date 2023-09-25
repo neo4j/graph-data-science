@@ -40,9 +40,12 @@ dependencies {
 
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
+    testImplementation project(':native-projection')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
     testImplementation project(':licensing')
     testImplementation project(':open-licensing')
     testImplementation project(':test-utils')
+
+    testImplementation project(':opengds-extension')
 }

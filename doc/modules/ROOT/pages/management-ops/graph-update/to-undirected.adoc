@@ -15,7 +15,7 @@ This can be useful to convert relationships produced by algorithms such as path 
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.relationships.toUndirected(
+CALL gds.graph.relationships.toUndirected(
     graphName: String,
     configuration: Map
 )
@@ -63,6 +63,8 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 
 [[catalog-graph-relationship-to-undirected-example]]
 == Example
+
+include::partial$/common-usage/examples-empty-db-note.adoc[]
 
 In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
@@ -116,7 +118,7 @@ The following shows how to convert the relationships of type `LIKES` in the grap
 .Convert relationships from directed to undirected:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.relationships.toUndirected(
+CALL gds.graph.relationships.toUndirected(
   'personsAndInstruments',                                          // <1>
   {relationshipType: 'LIKES', mutateRelationshipType: 'INTERACTS'}  // <2>
 )

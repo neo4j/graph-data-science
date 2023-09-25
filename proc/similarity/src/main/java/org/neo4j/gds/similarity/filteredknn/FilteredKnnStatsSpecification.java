@@ -37,7 +37,12 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 
-@GdsCallable(name = "gds.alpha.knn.filtered.stats", executionMode = STATS)
+@GdsCallable(
+    name = "gds.alpha.knn.filtered.stats",
+    aliases = {"gds.knn.filtered.stats"},
+    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
+    executionMode = STATS
+)
 public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<FilteredKnnStatsResult>, FilteredKnnFactory<FilteredKnnStatsConfig>> {
     @Override
     public String name() {
@@ -77,7 +82,7 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
                             try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                                 SimilarityGraphResult similarityGraphResult = FilteredKnnHelpers.computeToGraph(
                                     computationResult.graph(),
-                                    filteredKnn.nodeCount(),
+                                    computationResult.graph().nodeCount(),
                                     config.concurrency(),
                                     result,
                                     filteredKnn.executorService()
@@ -92,7 +97,7 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
                             }
                         } else {
                             resultBuilder
-                                .withNodesCompared(filteredKnn.nodeCount())
+                                .withNodesCompared(computationResult.graph().nodeCount())
                                 .withRelationshipsWritten(result.numberOfSimilarityPairs());
                         }
                     });

@@ -38,35 +38,39 @@ class Neo4jVersionTest {
         "4.4.0-drop04, V_4_4",
         "4.4.0, V_4_4",
         "4.4.14, V_4_4",
-        "5.1.0, V_5_1",
-        "5.2.0, V_5_2",
-        "5.1.0-dev, V_5_1",
-        "5.2.0-dev, V_5_2",
-        "5.2.0, V_5_2",
-        "5.3.0, V_5_3",
-        "5.4.0, V_5_4",
-        "5.5.0, V_5_5",
+        "5.8.0-dev, V_5_8",
+        "5.9.0-dev, V_5_9",
         "5.6.0, V_5_6",
         "5.7.0, V_5_7",
         "5.8.0, V_5_8",
         "5.9.0, V_5_9",
-        "5.10.0, V_Dev",
+        "5.10.0, V_5_10",
+        "5.11.0, V_5_11",
+        "5.12.0, V_5_12",
+        "5.13.0, V_Dev",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "dev",
-        "4.3", // EOL
-        "5.dev",
-        "dev.5",
-        "5.0", // 5.0 was never released to the public
-        "dev.5.dev.1",
-        "5",
-        "6.0.0",
-    })
+    @CsvSource(
+        {
+            "dev",
+            "4.3", // EOL
+            "5.dev",
+            "dev.5",
+            "5.0", // 5.0 was never released to the public
+            "5.1.0",
+            "5.2.0",
+            "5.2.0",
+            "5.3.0",
+            "5.4.0",
+            "5.5.0", // 5.x versions no longer supported
+            "dev.5.dev.1",
+            "5",
+            "6.0.0",
+        })
     void testParseInvalid(String input) {
         assertThatThrownBy(() -> Neo4jVersion.parse(input))
             .isInstanceOf(UnsupportedOperationException.class)
@@ -80,18 +84,17 @@ class Neo4jVersionTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "4.4.0-drop04, 4, 4",
-        "4.4.14, 4, 4",
-        "5.1.0, 5, 1",
-        "5.2.0, 5, 2",
-        "5.3.0, 5, 3",
-        "5.4.0, 5, 4",
-        "5.5.0, 5, 5",
-        "5.6.0, 5, 6",
-        "5.7.0, 5, 7",
-        "5.8.0, 5, 8",
-    })
+    @CsvSource(
+        {
+            "4.4.0-drop04, 4, 4",
+            "4.4.14, 4, 4",
+            "5.6.0, 5, 6",
+            "5.7.0, 5, 7",
+            "5.8.0, 5, 8",
+            "5.9.0, 5, 9",
+            "5.10.0, 5, 10",
+        }
+    )
     void semanticVersion(String input, int expectedMajor, int expectedMinor) {
         Neo4jVersion version = Neo4jVersion.parse(input);
 

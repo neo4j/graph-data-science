@@ -22,8 +22,8 @@ package org.neo4j.gds.k1coloring;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -39,8 +40,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.k1coloring.mutate", description = K1_COLORING_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>, K1ColoringFactory<K1ColoringMutateConfig>> {
+@GdsCallable(name = "gds.k1coloring.mutate",
+             aliases = { "gds.beta.k1coloring.mutate"},
+             description = K1_COLORING_DESCRIPTION,
+             executionMode = MUTATE_NODE_PROPERTY)
+public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>, K1ColoringAlgorithmFactory<K1ColoringMutateConfig>> {
 
     @Override
     public String name() {
@@ -48,8 +52,8 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override
@@ -58,32 +62,34 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
     }
 
     @Override
-    public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<K1Coloring, K1ColoringResult, K1ColoringMutateConfig, Stream<K1ColoringMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             K1ColoringMutateSpecification::nodePropertyList,
             K1ColoringMutateSpecification::resultBuilder
         );
     }
 
-    private static List<NodeProperty> nodePropertyList(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult) {
+    private static List<NodeProperty> nodePropertyList(ComputationResult<K1Coloring, K1ColoringResult, K1ColoringMutateConfig> computationResult) {
+        LongNodePropertyValues longNodePropertyValues = computationResult.result()
+            .map(k1ColoringResult -> NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()))
+            .orElse(EmptyLongNodePropertyValues.INSTANCE);
         return List.of(
-            ImmutableNodeProperty.of(
+            NodeProperty.of(
                 computationResult.config().mutateProperty(),
                 CommunityProcCompanion.considerSizeFilter(
                     computationResult.config(),
-                    computationResult.result().map(HugeLongArray::asNodeProperties)
-                        .orElse(EmptyLongNodePropertyValues.INSTANCE)
+                    longNodePropertyValues
                 )
             )
         );
     }
 
     private static AbstractResultBuilder<K1ColoringMutateResult> resultBuilder(
-       ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult,
+       ComputationResult<K1Coloring, K1ColoringResult, K1ColoringMutateConfig> computationResult,
        ExecutionContext executionContext
     ) {
         return K1ColoringSpecificationHelper.resultBuilder(
-            new K1ColoringMutateResult.Builder(
+            new K1ColoringMutateResultBuilder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             ), computationResult,

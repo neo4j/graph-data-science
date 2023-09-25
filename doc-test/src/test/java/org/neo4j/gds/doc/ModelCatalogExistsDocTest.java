@@ -23,7 +23,7 @@ import org.neo4j.gds.model.catalog.ModelExistsProc;
 
 import java.util.List;
 
-class ModelCatalogExistsDocTest extends ModelCatalogDocTest {
+class ModelCatalogExistsDocTest extends ModelCatalogDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

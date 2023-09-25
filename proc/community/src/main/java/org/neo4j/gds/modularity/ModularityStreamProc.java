@@ -20,8 +20,13 @@
 package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,16 +39,48 @@ public class ModularityStreamProc extends BaseProc {
 
     static final String DESCRIPTION = "TODO: Add modularity description";
 
-    @Procedure(value = "gds.alpha.modularity.stream", mode = READ)
+    @Context
+    public GraphDataScience facade;
+    @Procedure(value = "gds.modularity.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<ModularityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
+        return facade.community().modularityStream(
+            graphName,
+            configuration,
+            executionContext().algorithmMetaDataSetter()
+        );
+
+    }
+
+    @Procedure(value = "gds.modularity.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return new MemoryEstimationExecutor<>(
             new ModularityStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+    
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.modularity.stream", mode = READ, deprecatedBy = "gds.modularity.stream")
+    @Description(DESCRIPTION)
+    public Stream<ModularityStreamResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.modularity.stream` has been deprecated, please use `gds.modularity.stream`.");
+
+        return stream(graphName, configuration);
 
     }
 

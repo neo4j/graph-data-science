@@ -92,7 +92,7 @@ final class NodeRegressionPipelineMutateProcTest extends BaseProcTest {
 
     @Test
     void mutate() {
-        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
+        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), GRAPH_NAME).graphStore();
         assertThat(graphStore.nodePropertyKeys()).doesNotContain("p");
 
         assertCypherResult(

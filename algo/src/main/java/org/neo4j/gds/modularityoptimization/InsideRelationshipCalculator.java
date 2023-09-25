@@ -21,7 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 
 class InsideRelationshipCalculator implements Runnable {

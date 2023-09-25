@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -38,7 +39,7 @@ public class ClosenessCentralityWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.beta.closeness.write", mode = WRITE)
+    @Procedure(value = "gds.closeness.write", mode = WRITE)
     @Description(CLOSENESS_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -48,6 +49,25 @@ public class ClosenessCentralityWriteProc extends BaseProc {
             new ClosenessCentralityWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.closeness.write", mode = WRITE, deprecatedBy = "gds.closeness.write")
+    @Description(CLOSENESS_DESCRIPTION)
+    public Stream<BetaWriteResult> writeBeta(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.closeness.write` has been deprecated, please use `gds.closeness.write`.");
+
+        return new ProcedureExecutor<>(
+            new BetaClosenessCentralityWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+
     }
 
     @Override

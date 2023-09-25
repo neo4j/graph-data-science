@@ -39,7 +39,7 @@ import org.neo4j.gds.core.StringIdentifierValidations;
 import java.util.concurrent.atomic.DoubleAdder;
 
 @PregelProcedure(
-    name = "gds.alpha.hits",
+    name = "gds.hits",
     description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes"
 )
 public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
@@ -143,7 +143,10 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
     @SuppressWarnings("immutables:subtype")
     public interface HitsConfig extends PregelProcedureConfig {
 
-        int hitsIterations();
+        @Value.Default
+        default int hitsIterations() {
+            return 20;
+        }
 
         @Override
         @Value.Derived
@@ -172,6 +175,8 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
         }
 
         @Override
+        @Configuration.ConvertWith(method = "org.neo4j.gds.beta.pregel.Partitioning#parse")
+        @Configuration.ToMapValue("org.neo4j.gds.beta.pregel.Partitioning#toString")
         default Partitioning partitioning() {
             return Partitioning.AUTO;
         }

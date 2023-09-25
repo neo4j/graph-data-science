@@ -30,7 +30,6 @@ import java.util.Map;
 public final class MutateResult extends StandardMutateResult {
 
     public final long nodePropertiesWritten;
-    public final String mutateProperty;
     public final Map<String, Object> centralityDistribution;
 
     MutateResult(
@@ -39,26 +38,18 @@ public final class MutateResult extends StandardMutateResult {
         long computeMillis,
         long postProcessingMillis,
         long mutateMillis,
-        String mutateProperty,
         @Nullable Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
-        this.mutateProperty = mutateProperty;
         this.centralityDistribution = centralityDistribution;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
     static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
-        public String mutateProperty;
 
          Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
-        }
-
-        public Builder withMutateProperty(String mutateProperty) {
-            this.mutateProperty = mutateProperty;
-            return this;
         }
 
         @Override
@@ -69,7 +60,6 @@ public final class MutateResult extends StandardMutateResult {
                 computeMillis,
                 postProcessingMillis,
                 mutateMillis,
-                mutateProperty,
                 centralityHistogram,
                 config.toMap()
             );

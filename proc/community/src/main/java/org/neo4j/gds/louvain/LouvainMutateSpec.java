@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 import static org.neo4j.gds.louvain.LouvainNodePropertyValuesDelegate.extractNodeProperties;
 
 @GdsCallable(name = "gds.louvain.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
-public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainMutateConfig, Stream<MutateResult>, LouvainAlgorithmFactory<LouvainMutateConfig>> {
+public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainMutateConfig, Stream<LouvainMutateResult>, LouvainAlgorithmFactory<LouvainMutateConfig>> {
     @Override
     public String name() {
         return "LouvainMutate";
@@ -53,7 +54,7 @@ public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, 
     }
 
     @Override
-    public ComputationResultConsumer<Louvain, LouvainResult, LouvainMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Louvain, LouvainResult, LouvainMutateConfig, Stream<LouvainMutateResult>> computationResultConsumer() {
         MutateNodePropertyListFunction<Louvain, LouvainResult, LouvainMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),

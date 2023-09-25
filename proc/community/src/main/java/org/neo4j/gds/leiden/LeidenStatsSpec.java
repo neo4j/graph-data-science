@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.leiden.StatsResult;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.leiden.stats", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.leiden.stats", aliases = {"gds.beta.leiden.stats"}, description = DESCRIPTION, executionMode = STREAM)
 public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>, LeidenAlgorithmFactory<LeidenStatsConfig>> {
     @Override
     public String name() {

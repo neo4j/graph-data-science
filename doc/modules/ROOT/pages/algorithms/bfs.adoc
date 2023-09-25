@@ -52,7 +52,7 @@ include::partial$/algorithms/bfs/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type            | Description
-| sourceNode    | Integer         | The node id of the node where to start the traversal.
+| sourceNode    | Integer or Node        | The node id of the node where to start the traversal.
 | nodeIds       | List of Integer | The ids of all nodes that were visited during the traversal.
 | path          | Path            | A path containing all the nodes that were visited during the traversal.
 |===
@@ -148,6 +148,8 @@ include::partial$/algorithms/bfs/specific-configuration.adoc[]
 [[algorithms-bfs-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description:
 :image-file: traverse-graph.svg
@@ -236,8 +238,8 @@ image::bfs-full-stream-path.svg[Visualization of Breadth First Search stream wit
 .Running the Breadth First Search algorithm with target nodes:
 [source, cypher, role=noplay]
 ----
-MATCH (a:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
-WITH id(a) AS source, [id(d), id(e)] AS targetNodes
+MATCH (source:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
+WITH source, [d, e] AS targetNodes
 CALL gds.bfs.stream('myGraph', {
   sourceNode: source,
   targetNodes: targetNodes

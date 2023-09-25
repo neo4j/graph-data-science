@@ -95,11 +95,11 @@ class ProcedureNameExtractorTest {
                 "gds.beta.graphSage.train"
             ),
             Arguments.of(
-                "CALL gds.alpha.scc.write(\n" +
-                "  graphName: String,\n" +
-                "  configuration: Map\n" +
-                ")",
-                "gds.alpha.scc.write"
+                "CALL gds.scc.write(\n" +
+                    "  graphName: String,\n" +
+                    "  configuration: Map\n" +
+                    ")",
+                "gds.scc.write"
             ),
             Arguments.of(
                 "CALL gds.alpha.ml.nodeClassification.train(\n" +

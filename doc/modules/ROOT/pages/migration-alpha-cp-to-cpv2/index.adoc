@@ -1,0 +1,185 @@
+[appendix]
+[[appendix-d]]
+= Migration from Alpha Cypher Aggregation to new Cypher projection
+:description: If you have been using `gds.alpha.graph.project` Cypher aggregation, you can find the info you will need to migrate to using the new Cypher projection.
+
+
+== Who should read this guide
+
+This guide is intended for users who have been using the Alpha Cypher Aggregation https://neo4j.com/docs/graph-data-science/2.3/management-ops/projections/graph-project-cypher-aggregation/[`gds.alpha.graph.project`].
+Cypher projections are now done using the `gds.graph.project` aggregation function.
+We assume that most of the mentioned operations and concepts can be understood with little explanation.
+Thus we are intentionally brief in the examples and comparisons.
+Please see xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[the documentation for the Cypher projection] for more details.
+
+== API Changes
+
+The new Cypher projection is a replacement for the Alpha Cypher Aggregation.
+Like the Alpha Cypher Aggregation, the new Cypher projection is an aggregation function that is called as part of a Cypher query.
+
+The following changes have been made to the API:
+
+* The new Cypher projection is called using `gds.graph.project` instead of `gds.alpha.graph.project`.
+* The new Cypher projection defines a single map parameter for defining projection related information such as labels or properties.
+** There is still a separate map parameter for defining the graph configuration.
+* The `properties` key of the relationship configuration map has been renamed to `relationshipProperties`.
+* Additional validation to reduce mis-use of the API:
+** Validate that each `sourceNode*` entry has a corresponding `targetNode*` entry and vice-versa.
+** Identify end help with migration to this new API if any of the points above have not been followed.
+
+
+.Structural changes between the Alpha aggregation/new projections:
+[opts=header,cols="1a,1a"]
+|===
+| Legacy | New
+|
+[source, cypher, role=noplay]
+----
+$query
+RETURN gds.alpha.graph.project(
+  $graphName,
+  sourceNode,
+  targetNode,
+  $nodeConfig,
+  $relationshipConfig,
+  $configuration
+)
+----
+|
+[source, cypher, role=noplay]
+----
+$relationshipQuery
+RETURN gds.graph.project(
+  $graphName,
+  sourceNode,
+  targetNode,
+  $dataConfig,
+  $configuration
+)
+----
+|===
+
+== Examples
+
+The following examples not include the full Cypher queries before the aggreation function is called, nor do they include and YIELD of return fields.
+There are no changes related to those two aspects.
+
+.Side-by-side comparison
+[opts=header,cols="1a,1a"]
+|===
+| Alpha | New
+2+| : Projection without any configuration
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.alpha.graph.project('g', source, target)
+----
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.graph.project('g', source, target)
+----
+2+| : Multi-graph projection
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.alpha.graph.project(
+  'g',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
+  }, {
+    relationshipType: type(r)
+  }
+)
+----
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.graph.project(
+  'g',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
+    relationshipType: type(rel)
+  }
+)
+----
+2+| : Graph projection with properties
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.alpha.graph.project(
+  'g',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: target { .age },
+  }, {
+    relationshipType: type(rel),
+    properties: rel { .numberOfPages }
+  }
+)
+----
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.graph.project(
+  'g',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: target { .age },
+    relationshipType: type(rel),
+    relationshipProperties: rel { .numberOfPages }
+  }
+)
+----
+2+| : Graph projection with one-sided properties
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.alpha.graph.project(
+  'g',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    sourceNodeProperties: source { .age },
+  }
+)
+----
+|
+[source, cypher, role=noplay]
+----
+...
+RETURN gds.graph.project(
+  'g',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: NULL,
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: NULL,
+  }
+)
+----
+|===

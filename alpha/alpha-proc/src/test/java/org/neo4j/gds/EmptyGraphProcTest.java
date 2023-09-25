@@ -52,7 +52,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSccStream() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.scc")
+            .algo("gds.scc")
             .streamMode()
             .yields();
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
@@ -61,10 +61,11 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSccWrite() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.scc")
+            .algo("gds.scc")
             .writeMode()
+            .addParameter("writeProperty", "foo")
             .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodePropertiesWritten")));
     }
 
     @Test
@@ -75,7 +76,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
-        String query = "CALL gds.alpha.triangles('undirectedGraph', {})";
+        String query = "CALL gds.triangles('undirectedGraph', {})";
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 

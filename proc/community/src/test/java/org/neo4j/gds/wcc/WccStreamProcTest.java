@@ -20,7 +20,6 @@
 package org.neo4j.gds.wcc;
 
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,60 +29,28 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutablePropertyMapping;
-import org.neo4j.gds.ImmutablePropertyMappings;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphLoader;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class WccStreamProcTest extends BaseProcTest {
 
-    private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     @Neo4jGraph
-    static final @Language("Cypher") String DB_CYPHER = "CREATE" +
+    @Language("Cypher")
+    static final String DB_CYPHER = "CREATE" +
         " (nA:Label {nodeId: 0, seedId: 42})" +
         ",(nB:Label {nodeId: 1, seedId: 42})" +
         ",(nC:Label {nodeId: 2, seedId: 42})" +
@@ -242,112 +209,71 @@ class WccStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void testRunOnEmptyGraph() {
-        applyOnProcedure((proc) -> {
-            var methods = Stream.concat(
-                ProcedureMethodHelper.writeMethods(proc),
-                ProcedureMethodHelper.streamMethods(proc)
-            ).collect(Collectors.toList());
+    void memoryEstimationOnProjectedGraph() {
+        runQuery("CALL gds.graph.project('graph', '*', '*')");
 
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
-
-                var graphName = "graph";
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    TEST_USERNAME,
-                    graphName,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
-                var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
-                methods.forEach(method -> {
-                    Map<String, Object> configMap = CypherMapWrapper.empty().toMap();
-
-                    configMap.remove(NODE_PROPERTIES_KEY);
-                    configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
-                    configMap.remove("relationshipWeightProperty");
-
-                    if (configMap.containsKey("nodeWeightProperty")) {
-                        var nodeProperty = String.valueOf(configMap.get("nodeWeightProperty"));
-                        runQuery(
-                            "CALL db.createProperty($prop)",
-                            Map.of("prop", nodeProperty)
-                        );
-                        configMap.put(
-                            NODE_PROPERTIES_KEY,
-                            Map.ofEntries(
-                                ImmutablePropertyMapping
-                                    .builder()
-                                    .propertyKey(nodeProperty)
-                                    .defaultValue(DefaultValue.forDouble())
-                                    .build()
-                                    .toObject(false)
-                            )
-                        );
-                    }
-
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, configMap);
-                        if (ProcedureMethodHelper.methodName(method).endsWith("stream")) {
-                            assertEquals(0, result.count(), "Stream result should be empty.");
-                        } else {
-                            assertEquals(1, result.count());
-                        }
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
+        var resultRowCount = runQueryWithRowConsumer(
+            "CALL gds.wcc.stream.estimate('graph', {})",
+            resultRow -> {
+                assertThat(resultRow.getString("requiredMemory")).isNotBlank();
+                assertThat(resultRow.getString("treeView")).isNotBlank();
+                assertThat(resultRow.get("mapView")).asInstanceOf(MAP).isNotEmpty();
+                assertThat(resultRow.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(10L);
+                assertThat(resultRow.getNumber("relationshipCount")).asInstanceOf(LONG).isEqualTo(7L);
+                assertThat(resultRow.getNumber("heapPercentageMin")).asInstanceOf(DOUBLE).isPositive();
+                assertThat(resultRow.getNumber("heapPercentageMax")).asInstanceOf(DOUBLE).isPositive();
             }
-        });
-    }
-
-    private void applyOnProcedure(Consumer<WccStreamProc> func) {
-        TestProcedureRunner.applyOnProcedure(
-            db,
-            WccStreamProc.class,
-            func
         );
+
+        assertThat(resultRowCount)
+            .as("Memory estimation should always have a single result row")
+            .isEqualTo(1);
     }
 
-    @NotNull
-    private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(
-                ImmutableGraphLoaderContext.builder()
-                    .databaseId(DatabaseId.of(db))
-                    .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-                    .transactionContext(TestSupport.fullAccessTransaction(db))
-                    .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                    .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                    .log(Neo4jProxy.testLog())
-                    .build()
-            )
-            .username("")
-            .projectConfig(graphProjectConfig)
-            .build();
-    }
-
-    private GraphProjectFromStoreConfig withNameAndRelationshipProjections(
-        String graphName,
-        RelationshipProjections rels
-    ) {
-        return ImmutableGraphProjectFromStoreConfig.of(
-            TEST_USERNAME,
-            graphName,
-            NodeProjections.create(
-                singletonMap(
-                    ALL_NODES,
-                    ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-                )
-            ),
-            rels
+    @Test
+    void fictitiousMemoryEstimation() {
+        var resultRowCount = runQueryWithRowConsumer(
+            "CALL gds.wcc.stream.estimate({nodeCount: 10, relationshipCount: 7, nodeProjection: '*', relationshipProjection: '*'}, {})",
+            resultRow -> {
+                assertThat(resultRow.getString("requiredMemory")).isNotBlank();
+                assertThat(resultRow.getString("treeView")).isNotBlank();
+                assertThat(resultRow.get("mapView")).asInstanceOf(MAP).isNotEmpty();
+                assertThat(resultRow.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(10L);
+                assertThat(resultRow.getNumber("relationshipCount")).asInstanceOf(LONG).isEqualTo(7L);
+                assertThat(resultRow.getNumber("heapPercentageMin")).asInstanceOf(DOUBLE).isPositive();
+                assertThat(resultRow.getNumber("heapPercentageMax")).asInstanceOf(DOUBLE).isPositive();
+            }
         );
+
+        assertThat(resultRowCount)
+            .as("Memory estimation should always have a single result row")
+            .isEqualTo(1);
     }
+
+    @Test
+    void memoryEstimationNativeProjection() {
+        var resultRowCount = runQueryWithRowConsumer(
+            "CALL gds.wcc.stream.estimate({nodeProjection: 'Label', relationshipProjection: 'TYPE'}, {})",
+            resultRow -> {
+                assertThat(resultRow.getString("requiredMemory")).isNotBlank();
+                assertThat(resultRow.getString("treeView")).isNotBlank();
+                assertThat(resultRow.get("mapView")).asInstanceOf(MAP).isNotEmpty();
+                assertThat(resultRow.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+                assertThat(resultRow.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(4L);
+                assertThat(resultRow.getNumber("relationshipCount")).asInstanceOf(LONG).isEqualTo(4L);
+                assertThat(resultRow.getNumber("heapPercentageMin")).asInstanceOf(DOUBLE).isPositive();
+                assertThat(resultRow.getNumber("heapPercentageMax")).asInstanceOf(DOUBLE).isPositive();
+            }
+        );
+
+        assertThat(resultRowCount)
+            .as("Memory estimation should always have a single result row")
+            .isEqualTo(1);
+    }
+
 }

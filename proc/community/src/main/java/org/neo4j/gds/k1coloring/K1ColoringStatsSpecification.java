@@ -20,7 +20,6 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.StatsComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -34,8 +33,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.k1coloring.stats", description = K1_COLORING_DESCRIPTION, executionMode = STATS)
-public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>, K1ColoringFactory<K1ColoringStatsConfig>> {
+@GdsCallable(name = "gds.k1coloring.stats",
+             aliases = {"gds.beta.k1coloring.stats"},
+             description = K1_COLORING_DESCRIPTION,
+             executionMode = STATS)
+public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K1ColoringResult, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>, K1ColoringAlgorithmFactory<K1ColoringStatsConfig>> {
 
     @Override
     public String name() {
@@ -43,8 +45,8 @@ public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, H
     }
 
     @Override
-    public K1ColoringFactory<K1ColoringStatsConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new K1ColoringFactory<>();
+    public K1ColoringAlgorithmFactory<K1ColoringStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new K1ColoringAlgorithmFactory<>();
     }
 
     @Override
@@ -53,12 +55,12 @@ public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, H
     }
 
     @Override
-    public ComputationResultConsumer<K1Coloring, HugeLongArray, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<K1Coloring, K1ColoringResult, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>> computationResultConsumer() {
         return new StatsComputationResultConsumer<>(K1ColoringStatsSpecification::resultBuilder);
     }
 
     private static AbstractResultBuilder<K1ColoringStatsResult> resultBuilder(
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computeResult,
+        ComputationResult<K1Coloring, K1ColoringResult, K1ColoringStatsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         K1ColoringStatsResult.Builder builder = new K1ColoringStatsResult.Builder(

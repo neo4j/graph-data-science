@@ -24,14 +24,15 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.modularity.stats", description = DESCRIPTION, executionMode = STATS)
-public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStatsConfig, Stream<StatsResult>, ModularityCalculatorFactory<ModularityStatsConfig>> {
+@GdsCallable(name = "gds.modularity.stats", aliases = {"gds.alpha.modularity.stats"}, description = DESCRIPTION, executionMode = STATS)
+public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStatsConfig, Stream<ModularityStatsResult>, ModularityCalculatorFactory<ModularityStatsConfig>> {
     @Override
     public String name() {
         return "ModularityStats";
@@ -48,12 +49,15 @@ public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, 
     }
 
     @Override
-    public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStatsConfig, Stream<ModularityStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
 
             var config = computationResult.config();
-            var statsBuilder = new StatsResult.StatsBuilder(executionContext.returnColumns(), config.concurrency());
+            var statsBuilder = new ModularityStatsResult.StatsBuilder(
+                executionContext.returnColumns(),
+                config.concurrency()
+            );
             var result = computationResult.result()
                 .orElseGet(ModularityResult::empty);
 

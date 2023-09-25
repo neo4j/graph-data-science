@@ -89,7 +89,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
         String query = GdsCypher.call("naturalGraph")
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .writeMode()
             .addParameter("writeProperty", COMMUNITY)
             .yields();
@@ -113,7 +113,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     @Test
     void testWritingUndirected() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .writeMode()
             .addParameter("writeProperty", COMMUNITY)
             .yields();
@@ -137,7 +137,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     @Test
     void testWritingWeighted() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .writeMode()
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("writeProperty", COMMUNITY)
@@ -162,7 +162,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     @Test
     void testWritingSeeded() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .writeMode()
             .addParameter("seedProperty", "seed1")
             .addParameter("writeProperty", COMMUNITY)
@@ -181,7 +181,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     @Test
     void testWritingTolerance() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .writeMode()
             .addParameter("tolerance", 1)
             .addParameter("writeProperty", COMMUNITY)
@@ -201,7 +201,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     @Test
     void testWritingIterations() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization")
+            .algo("modularityOptimization")
             .writeMode()
             .addParameter("maxIterations", 1)
             .addParameter("writeProperty", COMMUNITY)
@@ -217,7 +217,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
 
     @Test
     void testWritingEstimate() {
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME).algo("gds", "beta", "modularityOptimization")
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME).algo("modularityOptimization")
             .estimationMode(WRITE)
             .addParameter("writeProperty", COMMUNITY)
             .yields();
@@ -246,7 +246,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
     void testWriteMinCommunitySize(Map<String, Object> parameters, List<Long> expectedCommunityIds) {
         var query = GdsCypher
                 .call(DEFAULT_GRAPH_NAME)
-                .algo("gds", "beta", "modularityOptimization")
+                .algo("modularityOptimization")
                 .writeMode()
                 .addParameter("writeProperty", COMMUNITY)
                 .addAllParameters(parameters)

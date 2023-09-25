@@ -21,13 +21,15 @@ package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> extends GraphAlgorithmFactory<ShortestPathsSteinerAlgorithm, CONFIG> {
@@ -51,7 +53,7 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             configuration.delta(),
             configuration.concurrency(),
             configuration.applyRerouting(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }
@@ -71,5 +73,10 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             subtasks.add(Tasks.leaf("Reroute", nodeCount));
         }
         return Tasks.task(taskName(), subtasks);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        return ShortestPathsSteinerAlgorithm.memoryEstimation(config.applyRerouting(), Optional.of(false));
     }
 }

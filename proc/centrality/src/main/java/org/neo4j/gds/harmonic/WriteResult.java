@@ -22,63 +22,48 @@ package org.neo4j.gds.harmonic;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class WriteResult  {
+public final class WriteResult extends StandardStatsResult {
 
-    public final long nodes;
-    public final String writeProperty;
+    public final long nodePropertiesWritten;
     public final long writeMillis;
-    public final long computeMillis;
-    public final long preProcessingMillis;
     public final Map<String, Object> centralityDistribution;
 
-    WriteResult(
-        long nodes,
+    private WriteResult(
+        long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
+        long postProcessingMillis,
         long writeMillis,
-        String writeProperty,
-        @Nullable Map<String, Object> centralityDistribution
+        @Nullable Map<String, Object> centralityDistribution,
+        Map<String, Object> config
     ) {
-        this.preProcessingMillis=preProcessingMillis;
-        this.computeMillis=computeMillis;
-        this.writeMillis=writeMillis;
-
-        this.writeProperty = writeProperty;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, config);
         this.centralityDistribution = centralityDistribution;
-        this.nodes = nodes;
+        this.nodePropertiesWritten = nodePropertiesWritten;
+        this.writeMillis = writeMillis;
     }
 
     static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
-        public String writeProperty;
 
-         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
-
-        public Builder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
-        }
-
-        @Override
-        public Builder withNodePropertiesWritten(long nodePropertiesWritten){
-            return this;
-        }
-
 
         @Override
         public WriteResult buildResult() {
             return new WriteResult(
-                nodeCount,
+                nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
+                postProcessingMillis,
                 writeMillis,
-                writeProperty,
-                centralityHistogram
+                centralityHistogram,
+                config.toMap()
             );
         }
     }

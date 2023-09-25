@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -39,8 +40,7 @@ public class HarmonicCentralityWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-
-    @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE)
+    @Procedure(value = "gds.closeness.harmonic.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -48,6 +48,23 @@ public class HarmonicCentralityWriteProc extends BaseProc {
     ) {
         return new ProcedureExecutor<>(
             new HarmonicCentralityWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE, deprecatedBy = "gds.closeness.harmonic.write")
+    @Description(DESCRIPTION)
+    public Stream<DeprecatedTieredWriteResult> alphaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.closeness.harmonic.write` has been deprecated, please use `gds.closeness.harmonic.write`.");
+        return new ProcedureExecutor<>(
+            new DeprecatedTieredHarmonicCentralityWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
     }

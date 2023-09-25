@@ -52,7 +52,7 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(KSpanningWriteTreeProc.class, GraphProjectProc.class);
+        registerProcedures(KSpanningTreeWriteProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
             .withRelationshipProperty("w")
@@ -64,7 +64,7 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
     @Test
     void testMax() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.kSpanningTree")
+            .algo("gds.kSpanningTree")
             .writeMode()
             .addParameter("sourceNode", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
@@ -99,7 +99,7 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
     @Test
     void testMin() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.kSpanningTree")
+            .algo("gds.kSpanningTree")
             .writeMode()
             .addParameter("sourceNode", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")

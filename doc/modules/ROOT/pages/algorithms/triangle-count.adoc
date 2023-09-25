@@ -33,8 +33,6 @@ This is described in http://chato.cl/papers/becchetti_2007_approximate_count_tri
 
 include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 
-WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Triangle Count algorithm.
-
 
 .Triangle Count syntax per mode
 [.tabbed-example, caption = ]
@@ -209,14 +207,14 @@ include::partial$/algorithms/triangle-count/specific-configuration.adoc[]
 [[algorithms-triangle-count-syntax-triangles-listing]]
 === Triangles listing
 
-In addition to the standard execution modes there is an `alpha` procedure `gds.alpha.triangles` that can be used to list all triangles in the graph.
+In addition to the standard execution modes there is additionally the procedure `gds.triangles` that can be used to list all triangles in the graph.
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
 .The following will return a stream of node IDs for each triangle:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.triangles(
+CALL gds.triangles(
   graphName: String,
   configuration: Map
 )
@@ -244,6 +242,8 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 
 [[algorithms-triangle-count-examples]]
 == Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: social network
@@ -276,8 +276,6 @@ We do this using a native projection targeting the `Person` nodes and the `KNOWS
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Triangle Count algorithm is defined only for undirected graphs.
 
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
-
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
@@ -292,7 +290,7 @@ CALL gds.graph.project(
 )
 ----
 
-WARNING: The Triangle Count algorithm requires the graph to be projected using the `UNDIRECTED` orientation for relationships.
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
 
 In the following examples we will demonstrate using the Triangle Count algorithm on this graph.
 
@@ -491,7 +489,7 @@ As this node is part of all the triangles in the example graph excluding it resu
 == Triangles listing
 
 It is also possible to list all the triangles in the graph.
-To do this we make use of the `alpha` procedure `gds.alpha.triangles`.
+To do this we make use of the  procedure `gds.triangles`.
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -500,7 +498,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 .The following will compute a stream of node IDs for each triangle and return the name property of the nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.triangles('myGraph')
+CALL gds.triangles('myGraph')
 YIELD nodeA, nodeB, nodeC
 RETURN
   gds.util.asNode(nodeA).name AS nodeA,

@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -36,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.localClusteringCoefficient.write", description = LocalClusteringCoefficientCompanion.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientWriteConfig>> {
+public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientWriteConfig>> {
     @Override
     public String name() {
         return "LocalClusteringCoefficientWrite";
@@ -53,13 +55,14 @@ public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalC
     }
 
     @Override
-    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 computationResult.result()
-                    .map(LocalClusteringCoefficient.Result::asNodeProperties)
+                    .map(LocalClusteringCoefficientResult::localClusteringCoefficients)
+                    .map(NodePropertyValuesAdapter::adapt)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             name()
@@ -68,7 +71,7 @@ public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalC
 
 
     private AbstractResultBuilder<LocalClusteringCoefficientWriteResult> resultBuilder(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computationResult,
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var builder = new LocalClusteringCoefficientWriteResult.Builder();

@@ -95,17 +95,17 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
     @Test
     void shouldBeAbleToMutateAndDelete() {
-        Graph graphBefore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH2).graphStore().getUnion();
+        Graph graphBefore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH2).graphStore().getUnion();
 
         runQuery("CALL gds.nodeSimilarity.mutate('testGraph2', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
-        Graph graphAfterMutate = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH2).graphStore().getUnion();
+        Graph graphAfterMutate = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH2).graphStore().getUnion();
         assertNotEquals(graphBefore.relationshipCount(), graphAfterMutate.relationshipCount());
 
         assertCypherResult(
             "CALL gds.graph.relationships.drop('testGraph2', 'SIM') YIELD deletedProperties",
             singletonList(Map.of("deletedProperties", Map.of("foo", 2L)))
         );
-        Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH2).graphStore().getUnion();
+        Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH2).graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
     }
 

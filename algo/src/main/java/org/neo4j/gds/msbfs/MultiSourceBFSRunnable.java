@@ -21,7 +21,7 @@ package org.neo4j.gds.msbfs;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 /**
@@ -76,7 +76,8 @@ public final class MultiSourceBFSRunnable implements Runnable {
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean allowStartNodeTraversal,
-        long[] sourceNodes
+        int sourceNodeCount,
+        long nodeOffset
     ) {
         var visits = new LocalHugeLongArray(nodeCount);
         var visitsNext = new LocalHugeLongArray(nodeCount);
@@ -91,9 +92,9 @@ public final class MultiSourceBFSRunnable implements Runnable {
             relationships,
             strategy,
             allowStartNodeTraversal,
-            sourceNodes,
-            0,
-            0
+            null,
+            sourceNodeCount,
+            nodeOffset
         );
     }
 
@@ -137,19 +138,28 @@ public final class MultiSourceBFSRunnable implements Runnable {
         var seenNextSet = seensNext != null ? seensNext.get() : null;
 
         SourceNodes sourceNodes = this.sourceNodes == null
-            ? prepareOffsetSources(visitSet, seenSet)
+            ? prepareOffsetSources(visitSet, seenSet, allowStartNodeTraversal)
             : prepareSpecifiedSources(visitSet, seenSet, this.sourceNodes, allowStartNodeTraversal);
 
         strategy.run(relationships, nodeCount, sourceNodes, visitSet, visitNextSet, seenSet, seenNextSet);
     }
 
-    private SourceNodes prepareOffsetSources(HugeLongArray visitSet, HugeLongArray seenSet) {
+    private SourceNodes prepareOffsetSources(
+        HugeLongArray visitSet,
+        HugeLongArray seenSet,
+        boolean allowStartNodeTraversal
+    ) {
         var localNodeCount = this.sourceNodeCount;
         var nodeOffset = this.nodeOffset;
 
         for (int i = 0; i < localNodeCount; ++i) {
-            seenSet.set(nodeOffset + i, 1L << i);
-            visitSet.or(nodeOffset + i, 1L << i);
+            long currentNode = nodeOffset + i;
+
+            if (!allowStartNodeTraversal) {
+                seenSet.set(currentNode, 1L << i);
+            }
+            
+            visitSet.or(currentNode, 1L << i);
         }
 
         return new SourceNodes(nodeOffset, localNodeCount);

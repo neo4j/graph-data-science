@@ -31,7 +31,12 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.triangle.TriangleProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.triangles", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.triangles",
+    aliases = "gds.alpha.triangles",
+    description = DESCRIPTION,
+    executionMode = STREAM
+)
 public class TriangleStreamSpecification implements AlgorithmSpec<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, Stream<TriangleStream.Result>, TriangleStreamFactory> {
 
     @Override

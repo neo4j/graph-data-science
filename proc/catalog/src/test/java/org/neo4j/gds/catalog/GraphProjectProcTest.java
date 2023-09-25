@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,28 +30,19 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -68,7 +57,6 @@ import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,14 +80,12 @@ import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.getCypherAggregation;
-import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.gds.core.utils.progress.TaskStore.UserTask;
+import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphProjectProcTest extends BaseProcTest {
@@ -116,15 +102,6 @@ class GraphProjectProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-    }
-
-    @Test
-    void failWhenNotFindingGraph() {
-        String query1 = "CALL gds.testProc.write('nope', {writeProperty: 'p'})";
-        String query2 = "CALL gds.testProc.write.estimate('nope', {writeProperty: 'p'})";
-
-        assertError(query1, "Graph with name `nope` does not exist on database `neo4j`.");
-        assertError(query2, "Graph with name `nope` does not exist on database `neo4j`.");
     }
 
     @Test
@@ -147,7 +124,7 @@ class GraphProjectProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.graph.project($name, 'A', 'REL')",
             Map.of("name", graphName),
-            singletonList(Map.of(
+            List.of(Map.of(
                 "graphName", graphName,
                 NODE_PROJECTION_KEY, Map.of(
                     "A", Map.of(
@@ -191,31 +168,6 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(graphName);
-    }
-
-    @Disabled("The trouble of injecting procedure facade as things stand currently is not worth the value od this test")
-    @Test
-    void testNativeProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
-            var taskStore = new PerDatabaseTaskStore();
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-
-            proc.project("myGraph", "*", "*", Map.of());
-
-            Assertions.assertThat(taskStore.query().map(UserTask::task).map(Task::description)).contains("Loading");
-        });
-    }
-
-    @Test
-    void testCypherProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
-            var taskStore = new PerDatabaseTaskStore();
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-
-            proc.projectCypher("myGraph", ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY, Map.of());
-
-            Assertions.assertThat(taskStore.query().map(UserTask::task).map(Task::description)).contains("Loading");
-        });
     }
 
     @Test
@@ -505,7 +457,7 @@ class GraphProjectProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[:B {w:55}]->()"), graph);
     }
 
@@ -529,7 +481,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -638,7 +590,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), name).graphStore().getUnion();
         assertGraphEquals(fromGdl(formatWithLocale("()-[:B {w: %d}]->()", expectedValue)), graph);
     }
 
@@ -788,7 +740,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        var graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
+        var graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("({ratings: [1.0, 2.0]}), ({ratings: [5.0]})"), graph);
     }
 
@@ -813,76 +765,6 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldFailOnTooBigGraphNative() {
-        assertThatThrownBy(() -> {
-            applyOnProcedure(proc -> {
-                GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
-                    "",
-                    CypherMapWrapper.create(Map.of(
-                        NODE_PROJECTION_KEY, "*",
-                        RELATIONSHIP_PROJECTION_KEY, "*"))
-                );
-                proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-            });
-        }).isInstanceOf(IllegalStateException.class)
-            .hasMessageMatching(
-                "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
-    }
-
-    @Test
-    void shouldNotFailOnTooBigGraphIfInSudoModeNative() {
-        applyOnProcedure(proc -> {
-            GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
-                "",
-                CypherMapWrapper.create(Map.of(
-                    NODE_PROJECTION_KEY, "*",
-                    RELATIONSHIP_PROJECTION_KEY, "*",
-                    SUDO_KEY, true
-                ))
-            );
-            proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-        });
-    }
-
-    @Test
-    void shouldNotFailOnTooBigGraphIfInSudoModeCypher() {
-        applyOnProcedure(proc -> {
-            GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
-                "",
-                CypherMapWrapper.create(Map.of(
-                    NODE_QUERY_KEY, "MATCH (n) RETURN n",
-                    RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
-                    SUDO_KEY, true
-                ))
-            );
-            proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-        });
-    }
-
-    @Test
-    void shouldFailOnTooBigGraphCypher() {
-        assertThatThrownBy(() -> {
-            applyOnProcedure(proc -> {
-                GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
-                    "",
-                    CypherMapWrapper.create(Map.of(
-                        NODE_QUERY_KEY, "MATCH (n) RETURN n",
-                        RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
-                        "sudo", false
-                    ))
-                );
-                proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
-            });
-        }).isInstanceOf(IllegalStateException.class)
-            .hasMessageMatching(
-                "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
-    }
-
-    void applyOnProcedure(Consumer<GraphProjectProc> func) {
-        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, func);
-    }
-
-    @Test
     void loadGraphWithSaturatedThreadPool() {
         // ensure that we don't drop task that can't be scheduled while importing a graph.
 
@@ -893,7 +775,7 @@ class GraphProjectProcTest extends BaseProcTest {
         // block all available threads
         for (int i = 0; i < ConcurrencyConfig.DEFAULT_CONCURRENCY; i++) {
             futures.add(
-                Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
+                DefaultPool.INSTANCE.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
             );
         }
 
@@ -931,7 +813,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         runQuery(query, Map.of());
 
-        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "g").graphStore().getUnion();
         Graph expected = fromGdl("(:Node { fooProp: 42, barProp: 13.37D })" +
                                  "(:Node { fooProp: 43, barProp: 13.38D })" +
                                  "(:Node { fooProp: 44, barProp: 13.39D })" +
@@ -983,7 +865,7 @@ class GraphProjectProcTest extends BaseProcTest {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph actual = GraphStoreCatalog.get("", DatabaseId.of(db), "aggGraph").graphStore().getUnion();
+        Graph actual = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "aggGraph").graphStore().getUnion();
         Graph expected = fromGdl("(a:Node)-[:TYPE_1 {w:85.3D}]->(b:Node),(a)-[:TYPE_1 {w:42.1D}]->(b),(a)-[:TYPE_1 {w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1256,34 +1138,6 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
-    void failsOnNulls() {
-        assertError(
-            "CALL gds.graph.project(null, null, null)",
-            "`graphName` can not be null or blank, but it was `null`"
-        );
-        assertError(
-            "CALL gds.graph.project('name', null, null)",
-            "No value specified for the mandatory configuration parameter `nodeProjection`"
-        );
-        assertError(
-            "CALL gds.graph.project('name', 'A', null)",
-            "No value specified for the mandatory configuration parameter `relationshipProjection`"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher(null, null, null)",
-            "`graphName` can not be null or blank, but it was `null`"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher('name', null, null)",
-            "No value specified for the mandatory configuration parameter `nodeQuery`"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
-            "No value specified for the mandatory configuration parameter `relationshipQuery`"
-        );
-    }
-
-    @Test
     void failsOnInvalidAggregationCombinations() {
         String query =
             "CALL gds.graph.project('g', '*', " +
@@ -1354,30 +1208,6 @@ class GraphProjectProcTest extends BaseProcTest {
         assertGraphDoesNotExist("g");
     }
 
-    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
-    void failsOnInvalidGraphName(String invalidName) {
-        assertError(
-            "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relationshipQuery)",
-            mapWithNulls("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
-            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
-        );
-
-        assertGraphDoesNotExist(invalidName);
-    }
-
-    @Test
-    void failsOnMissingMandatory() {
-        assertError(
-            "CALL gds.graph.project()",
-            "Procedure call does not provide the required number of arguments"
-        );
-        assertError(
-            "CALL gds.graph.project.cypher()",
-            "Procedure call does not provide the required number of arguments"
-        );
-    }
-
     @Test
     void failsOnInvalidNeoLabel() {
         String name = "g";
@@ -1436,35 +1266,6 @@ class GraphProjectProcTest extends BaseProcTest {
             "Orientation `INVALID` is not supported."
         );
     }
-
-    @Test
-    void failsOnExistingGraphName() {
-        String name = "g";
-        runQuery("CALL gds.graph.project($name, '*', '*')", Map.of("name", name));
-        assertError(
-            "CALL gds.graph.project($name, '*', '*')",
-            Map.of("name", name),
-            formatWithLocale("A graph with name '%s' already exists.", name)
-        );
-
-        assertError(
-            "CALL gds.graph.project.cypher($name, '*', '*')",
-            Map.of("name", name),
-            formatWithLocale("A graph with name '%s' already exists.", name)
-        );
-    }
-
-    @Test
-    void failOnInvalidGraphName() {
-        String invalidName = " na me ";
-        String expectedMessage = formatWithLocale(
-            "`graphName` must not end or begin with whitespace characters, but got `%s`.",
-            invalidName
-        );
-
-        assertError("CALL gds.graph.project.cypher($name, '*', '*')", Map.of("name", invalidName), expectedMessage);
-    }
-
 
     @Test
     void failsOnWriteQuery() {
@@ -1578,31 +1379,9 @@ class GraphProjectProcTest extends BaseProcTest {
         });
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_QUERY_KEY, RELATIONSHIP_QUERY_KEY})
-    void failOnUsingGraphProjectionConfigurationParamsNative(String configKey) {
-        assertError(
-            formatWithLocale("CALL gds.graph.project('g', '*', '*', {%s: 'does not matter'})", configKey),
-            formatWithLocale("Unexpected configuration key: %s", configKey)
-        );
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {NODE_QUERY_KEY, RELATIONSHIP_QUERY_KEY})
-    void failOnUsingGraphProjectionConfigurationParamsCypher(String configKey) {
-        assertError(
-            formatWithLocale(
-                "CALL gds.graph.project.cypher('g', 'MATCH ...', 'MATCH ...', {%s: 'does not matter'})",
-                configKey
-            ),
-            formatWithLocale("Unexpected configuration key: %s", configKey)
-        );
-    }
-
-
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {
         return GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), graphName)
+            .get(getUsername(), DatabaseId.of(db.databaseName()), graphName)
             .graphStore()
             .getGraph(relationshipType, Optional.of(property));
     }

@@ -36,7 +36,7 @@ public interface AdjacencyCompressor extends AutoCloseable {
      *
      * Implementors will need to write the resulting target list somewhere. Where exactly is up to the implementation.
      * The results should end up in the data that is returned by the
-     * {@link AdjacencyCompressorFactory#build()} method.
+     * {@link AdjacencyCompressorFactory#build(boolean)} method.
      * The method only needs to return the degree of the compressed adjacency list. This value can be different from
      * {@code degree} due to possible deduplication, though it should never be larger.
      * The return value is only used for tracking progress and reporting, it is not stored in

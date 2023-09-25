@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 
 import java.util.Arrays;
 
@@ -59,7 +59,7 @@ final class LoadingTest extends BaseTest {
     void testBasicLoading() {
         Graph graph = new StoreLoaderBuilder()
                 .databaseService(db)
-                .executorService(Pools.DEFAULT)
+                .executorService(DefaultPool.INSTANCE)
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")
                 .build()

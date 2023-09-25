@@ -25,10 +25,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -77,7 +77,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.theta = theta;
         this.randomSeed = randomSeed;
         // TODO: Pass these two as parameters
-        this.executorService = Pools.DEFAULT;
+        this.executorService = DefaultPool.INSTANCE;
         this.concurrency = concurrency;
         this.dendrogramManager = new LeidenDendrogramManager(
             rootGraph,

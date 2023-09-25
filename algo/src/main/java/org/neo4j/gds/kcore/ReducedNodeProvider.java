@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 class ReducedNodeProvider implements NodeProvider {
     private final long size;

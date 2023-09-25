@@ -19,19 +19,33 @@
  */
 package org.neo4j.gds.steiner;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryUsage;
 
 class LinkCutTree {
-//Look here: https://dl.acm.org/doi/pdf/10.1145/3828.3835
+    //Look here: https://dl.acm.org/doi/pdf/10.1145/3828.3835
     private final HugeObjectArray<LinkCutNode> nodes;
     private final HugeObjectArray<LinkCutNode> edgeInTree;
 
+    static MemoryEstimation estimation() {
+
+        var linkCutNodeMemoryEstimation = MemoryUsage.sizeOfObject(LinkCutNode.createSingle(0)).getAsLong();
+
+        var memoryEstimationBuilder = MemoryEstimations.builder(LinkCutTree.class)
+            .perNode("nodes", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, linkCutNodeMemoryEstimation))
+            .perNode("edge", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, linkCutNodeMemoryEstimation));
+
+        return memoryEstimationBuilder.build();
+    }
+
     public LinkCutTree(long nodeCount) {
-        nodes = HugeObjectArray.newArray(LinkCutNode.class,nodeCount);
+        nodes = HugeObjectArray.newArray(LinkCutNode.class, nodeCount);
         for (long i = 0; i < nodeCount; i++) {
             nodes.set(i, LinkCutNode.createSingle(i));
         }
-        edgeInTree = HugeObjectArray.newArray(LinkCutNode.class,nodeCount);
+        edgeInTree = HugeObjectArray.newArray(LinkCutNode.class, nodeCount);
     }
 
     private void fixSituation(LinkCutNode u) {

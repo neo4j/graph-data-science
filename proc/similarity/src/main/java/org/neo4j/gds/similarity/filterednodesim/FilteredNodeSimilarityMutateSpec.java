@@ -27,7 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -56,7 +56,7 @@ import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.mutate", aliases = {"gds.alpha.nodeSimilarity.filtered.mutate"}, description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
 public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
@@ -145,7 +145,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
                 .concurrency(1)
-                .executorService(Pools.DEFAULT)
+                .executorService(DefaultPool.INSTANCE)
                 .build();
 
             IdMap idMap = computationResult.graph();

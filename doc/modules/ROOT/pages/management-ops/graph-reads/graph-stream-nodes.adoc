@@ -111,6 +111,8 @@ YIELD
 [[streaming-nodes-examples]]
 == Examples
 
+include::partial$/common-usage/examples-empty-db-note.adoc[]
+
 In order to demonstrate the GDS capabilities of streaming node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -290,7 +292,7 @@ GDS offers a function to access the property value of a specific node from an in
 ----
 gds.util.nodeProperty(
   graphName: String,
-  nodeId: Integer,
+  nodeId: Node or Integer,
   propertyKey: String,
   nodeLabel: String
 )
@@ -322,7 +324,7 @@ We use the `socialGraph` with the property `score` introduced xref:management-op
 MATCH (florentin:Person {name: 'Florentin'})
 RETURN
   florentin.name AS name,
-  gds.util.nodeProperty('socialGraph', id(florentin), 'score') AS score
+  gds.util.nodeProperty('socialGraph', florentin, 'score') AS score
 ----
 
 .Results

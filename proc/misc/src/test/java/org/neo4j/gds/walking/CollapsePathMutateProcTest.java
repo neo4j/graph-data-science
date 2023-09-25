@@ -20,7 +20,8 @@
 package org.neo4j.gds.walking;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
@@ -75,20 +76,21 @@ class CollapsePathMutateProcTest extends BaseProcTest {
         runQuery("CALL gds.graph.project('cp', '*', ['BURGUNDY', 'GREEN', 'PINK', 'YELLOW'])");
     }
 
-    @Test
-    void shouldMutateGraphWithCollapsedPaths() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.collapsePath", "gds.collapsePath"})
+    void shouldMutateGraphWithCollapsedPaths(String tieredProcedure) {
         // turn London Underground map into a more high level thing
-        String query = "" +
-                       "CALL gds.beta.collapsePath.mutate('cp', { " +
-                       "  pathTemplates:" +
-                       "    [" +
-                       "      ['BURGUNDY', 'BURGUNDY', 'BURGUNDY']," +
-                       "      ['GREEN', 'GREEN']," +
-                       "      ['PINK', 'PINK']," +
-                       "      ['YELLOW']" +
-                       "    ], " +
-                       "  mutateRelationshipType: 'ROUTE'" +
-                       " })";
+        String query = String.format(
+            "CALL %s.mutate('cp', { " +
+                "  pathTemplates:" +
+                "    [" +
+                "      ['BURGUNDY', 'BURGUNDY', 'BURGUNDY']," +
+                "      ['GREEN', 'GREEN']," +
+                "      ['PINK', 'PINK']," +
+                "      ['YELLOW']" +
+                "    ], " +
+                "  mutateRelationshipType: 'ROUTE'" +
+                " })", tieredProcedure);
         Map<String, Object> parameters = Map.of();
         runQueryWithResultConsumer(query, parameters, result -> {
             // establish the shape of output; didn't want to put in it's own test case

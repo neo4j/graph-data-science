@@ -74,7 +74,7 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            "CALL gds.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
                 assertions.assertThat(result.hasNext()).isTrue();
 
@@ -123,7 +123,7 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty <= 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            "CALL gds.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty <= 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
                 assertions.assertThat(result.hasNext()).isTrue();
 
@@ -173,7 +173,7 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.floatProperty <= 22.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            "CALL gds.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.floatProperty <= 22.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
                 assertions.assertThat(result.hasNext()).isTrue();
 
@@ -224,7 +224,7 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.floatProperty > 19.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            "CALL gds.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.floatProperty > 19.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
                 assertions.assertThat(result.hasNext()).isTrue();
 
@@ -273,7 +273,8 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
     )
     void shouldFailOnIncompatiblePropertyAndValue(String nodeFilter) {
         assertThatExceptionOfType(QueryExecutionException.class)
-            .isThrownBy(() -> runQuery("CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: $nodeFilter })",
+            .isThrownBy(() -> runQuery(
+                "CALL gds.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: $nodeFilter })",
                 Map.of("nodeFilter", nodeFilter)))
             .withMessageContaining("Semantic errors while parsing expression")
             .withMessageContaining("Incompatible types");

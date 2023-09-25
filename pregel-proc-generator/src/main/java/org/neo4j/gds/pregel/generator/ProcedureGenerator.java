@@ -33,10 +33,11 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.pregel.proc.PregelBaseProc;
+import org.neo4j.gds.pregel.proc.PregelCompanion;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -53,15 +54,18 @@ public class ProcedureGenerator {
     private final TypeNames typeNames;
     private final String procedureBaseName;
     private final Optional<String> description;
+    private final Optional<String> deprecatedBy;
 
     public ProcedureGenerator(
         TypeNames typeNames,
         String procedureBaseName,
-        Optional<String> description
+        Optional<String> description,
+        Optional<String> deprecatedBy
     ) {
         this.typeNames = typeNames;
         this.procedureBaseName = procedureBaseName;
         this.description = description;
+        this.deprecatedBy = deprecatedBy;
     }
 
     public TypeSpec generate(GDSMode gdsMode, Optional<AnnotationSpec> generatedAnnotationSpec) {
@@ -106,12 +110,22 @@ public class ProcedureGenerator {
 
     MethodSpec procMethod(GDSMode gdsMode) {
         var fullProcedureName = formatWithLocale("%s.%s", procedureBaseName, gdsMode.lowerCase());
-        var methodBuilder = MethodSpec.methodBuilder(gdsMode.lowerCase())
-            .addAnnotation(AnnotationSpec.builder(Procedure.class)
-                .addMember("name", "$S", fullProcedureName)
-                .addMember("mode", "$T.$L", Mode.class, neo4jProcedureMode(gdsMode))
-                .build()
+        var methodBuilder = MethodSpec.methodBuilder(gdsMode.lowerCase());
+
+        var procedureAnnotationSpecBuilder = AnnotationSpec.builder(Procedure.class)
+            .addMember("name", "$S", fullProcedureName)
+            .addMember("mode", "$T.$L", Mode.class, neo4jProcedureMode(gdsMode));
+        deprecatedBy.ifPresent(replacement -> {
+            var replacementWithMode = formatWithLocale("%s.%s", replacement, gdsMode.lowerCase());
+            procedureAnnotationSpecBuilder.addMember("deprecatedBy", "$S", replacementWithMode);
+            methodBuilder.addAnnotation(Internal.class);
+            methodBuilder.addAnnotation(
+                AnnotationSpec.builder(Deprecated.class)
+                    .addMember("forRemoval", "$L", true)
+                    .build()
             );
+        });
+        methodBuilder.addAnnotation(procedureAnnotationSpecBuilder.build());
         description.ifPresent(description -> methodBuilder.addAnnotation(
             AnnotationSpec.builder(Description.class)
                 .addMember("value", "$S", description)
@@ -142,12 +156,22 @@ public class ProcedureGenerator {
 
     MethodSpec procEstimateMethod(GDSMode gdsMode) {
         var fullProcedureName = formatWithLocale("%s.%s.estimate", procedureBaseName, gdsMode.lowerCase());
-        return MethodSpec.methodBuilder("estimate")
-            .addAnnotation(AnnotationSpec.builder(Procedure.class)
-                .addMember("name", "$S", fullProcedureName)
-                .addMember("mode", "$T.$L", Mode.class, Mode.READ)
-                .build()
-            )
+        var methodBuilder = MethodSpec.methodBuilder("estimate");
+
+        var procedureAnnotationSpecBuilder = AnnotationSpec.builder(Procedure.class)
+            .addMember("name", "$S", fullProcedureName)
+            .addMember("mode", "$T.$L", Mode.class, Mode.READ);
+        deprecatedBy.ifPresent(replacement -> {
+            var replacementWithMode = formatWithLocale("%s.%s.estimate", replacement, gdsMode.lowerCase());
+            procedureAnnotationSpecBuilder.addMember("deprecatedBy", "$S", replacementWithMode);
+            methodBuilder.addAnnotation(Internal.class);
+            methodBuilder.addAnnotation(
+                AnnotationSpec.builder(Deprecated.class)
+                    .addMember("forRemoval", "$L", true)
+                    .build()
+            );
+        });
+        methodBuilder.addAnnotation(procedureAnnotationSpecBuilder.build())
             .addModifiers(Modifier.PUBLIC)
             .returns(ParameterizedTypeName.get(Stream.class, MemoryEstimateResult.class))
             .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfiguration")
@@ -165,8 +189,8 @@ public class ProcedureGenerator {
             )
             .addStatement("var specification = new $T()", typeNames.specification(gdsMode))
             .addStatement("var executor = new $T<>(specification, executionContext(), transactionContext())", MemoryEstimationExecutor.class)
-            .addStatement("return executor.computeEstimate(graphNameOrConfiguration, algoConfiguration)")
-            .build();
+            .addStatement("return executor.computeEstimate(graphNameOrConfiguration, algoConfiguration)");
+        return methodBuilder.build();
     }
 
     MethodSpec inverseIndexValidationOverride() {
@@ -178,7 +202,10 @@ public class ProcedureGenerator {
                 typeNames.config()
             ))
             .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
-            .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
+            .addStatement(
+                "return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())",
+                PregelCompanion.class
+            )
             .build();
     }
 

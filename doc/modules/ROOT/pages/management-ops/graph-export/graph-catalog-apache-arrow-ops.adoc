@@ -219,7 +219,7 @@ To stream the topology of one or more relationship types, the client needs to en
 {
     graph_name: "my_graph",
     database_name: "database_name",
-    procedure_name: "gds.beta.graph.relationships.stream",
+    procedure_name: "gds.graph.relationships.stream",
     configuration: {
         relationship_types: "REL"
     }
@@ -264,7 +264,7 @@ For example, to stream the topology of one or more relationship types, the clien
 {
     graph_name: "my_graph",
     database_name: "database_name",
-    procedure_name: "gds.beta.graph.relationships.stream",
+    procedure_name: "gds.graph.relationships.stream",
     concurrency: 2,
     configuration: {
         relationship_types: "REL"
@@ -280,7 +280,7 @@ The server will answer with 2 tickets:
     {
         graph_name: "my_graph",
         database_name: "database_name",
-        procedure_name: "gds.beta.graph.relationships.stream",
+        procedure_name: "gds.graph.relationships.stream",
         concurrency: 4,
         partition_offset: 0,
         partition_size: 100,
@@ -291,7 +291,7 @@ The server will answer with 2 tickets:
     {
         graph_name: "my_graph",
         database_name: "database_name",
-        procedure_name: "gds.beta.graph.relationships.stream",
+        procedure_name: "gds.graph.relationships.stream",
         partition_offset: 100,
         partition_size: 100,
         concurrency: 4,

@@ -22,7 +22,7 @@ package org.neo4j.gds.louvain;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.function.LongUnaryOperator;
 
@@ -63,6 +63,11 @@ public interface LouvainResult {
     @Value.Derived
     default LongUnaryOperator communitiesFunction() {
         return communities()::get;
+    }
+
+    @Value.Derived
+    default long size() {
+        return communities().size();
     }
 
     static LouvainResult of(

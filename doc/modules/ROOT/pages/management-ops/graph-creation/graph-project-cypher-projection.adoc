@@ -60,6 +60,7 @@ RETURN gds.graph.project(
     nodeCount: Integer,
     relationshipCount: Integer,
     projectMillis: Integer,
+    query: String,
     configuration: Map
 ----
 
@@ -106,6 +107,7 @@ RETURN gds.graph.project(
 | nodeCount              | Integer  | The number of nodes stored in the projected graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | projectMillis          | Integer  | Milliseconds for projecting the graph.
+| query                  | String   | The query used for this projection.
 | configuration          | Integer  | The configuration used for this projection.
 |===
 --
@@ -115,6 +117,8 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 
 [[graph-project-cypher-projection-examples]]
 == Examples
+
+include::partial$/common-usage/examples-empty-db-note.adoc[]
 
 In order to demonstrate the GDS Cypher Aggregation we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
@@ -397,7 +401,7 @@ In the following we check if the price was correctly projected:
 [source, cypher, role=noplay]
 ----
 MATCH (n:Book)
-RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') AS price
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', n, 'price') AS price
 ORDER BY price
 ----
 
@@ -637,4 +641,4 @@ ORDER BY person ASC, numberOfPages DESC
 --
 
 If we compare the results to the ones from xref:management-ops/graph-creation/graph-project-cypher-projection.adoc#cypher-aggregation-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
-This functionality is only expressible with xref:management-ops/graph-creation/graph-project.adoc[native projections] by projecting a xref:management-ops/graph-creation/graph-project-subgraph.adoc[subgraph].
+This functionality is only expressible with xref:management-ops/graph-creation/graph-project.adoc[native projections] by projecting a xref:management-ops/graph-creation/graph-filter.adoc[subgraph].

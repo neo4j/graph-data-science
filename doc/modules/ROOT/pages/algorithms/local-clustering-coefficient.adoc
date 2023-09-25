@@ -209,6 +209,8 @@ include::partial$/algorithms/local-clustering-coefficient/specific-configuration
 [[algorithms-local-clustering-coefficient-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: triangle_count.png
@@ -240,8 +242,6 @@ We do this using a native projection targeting the `Person` nodes and the `KNOWS
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Local Clustering Coefficient algorithm is defined only for undirected graphs.
 
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
-
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
@@ -256,7 +256,7 @@ CALL gds.graph.project(
 )
 ----
 
-WARNING: The Local Clustering Coefficient algorithm requires the graph to be created using the `UNDIRECTED` orientation for relationships.
+include::partial$/algorithms/shared/undirected-req-note.adoc[]
 
 In the following examples we will demonstrate using the Local Clustering Coefficient algorithm on 'myGraph'.
 

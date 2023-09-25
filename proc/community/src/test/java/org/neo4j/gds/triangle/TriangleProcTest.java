@@ -63,7 +63,7 @@ class TriangleProcTest extends BaseProcTest {
     @Test
     void testStreaming() {
         assertCypherResult(
-            "CALL gds.alpha.triangles('graph', {}) " +
+            "CALL gds.triangles('graph', {}) " +
             "YIELD nodeA, nodeB, nodeC " +
             "RETURN nodeA + nodeB + nodeC AS triangleSum ORDER BY triangleSum", List.of(
                 Map.of("triangleSum", Stream.of("a", "b", "c").mapToLong(idFunction::of).sum()),

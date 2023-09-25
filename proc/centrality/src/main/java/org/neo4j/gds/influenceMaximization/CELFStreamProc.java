@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -36,7 +37,7 @@ public class CELFStreamProc extends BaseProc {
 
     public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
-    @Procedure(name = "gds.beta.influenceMaximization.celf.stream", mode = READ)
+    @Procedure(name = "gds.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -48,7 +49,7 @@ public class CELFStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(name = "gds.beta.influenceMaximization.celf.stream.estimate", mode = READ)
+    @Procedure(name = "gds.influenceMaximization.celf.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphName,
@@ -62,4 +63,43 @@ public class CELFStreamProc extends BaseProc {
             transactionContext()
         ).computeEstimate(graphName, configuration);
     }
+
+    @Procedure(
+        name = "gds.beta.influenceMaximization.celf.stream",
+        mode = READ,
+        deprecatedBy = "gds.influenceMaximization.celf.stream"
+    )
+    @Internal
+    @Description(DESCRIPTION)
+    @Deprecated
+    public Stream<StreamResult> betaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.influenceMaximization.celf.stream has been deprecated, please use `gds.influenceMaximization.celf.stream`.");
+        return stream(graphName, configuration);
+    }
+
+    @Procedure(
+        name = "gds.beta.influenceMaximization.celf.stream.estimate",
+        mode = READ,
+        deprecatedBy = "gds.influenceMaximization.celf.stream.estimate"
+    )
+    @Internal
+    @Description(DESCRIPTION)
+    @Deprecated
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphName") Object graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.influenceMaximization.celf.stream.estimate has been deprecated, please use `gds.influenceMaximization.celf.stream.estimate`.");
+        return estimate(graphName, configuration);
+    }
+
 }

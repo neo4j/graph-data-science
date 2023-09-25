@@ -27,16 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TensorTest {
 
     @Test
-    void elementWiseProduct() {
-        var dimensions = Dimensions.matrix(2, 2);
-        var a = TensorFactory.constant(2, dimensions);
-
-        assertThat(a.elementwiseProduct(a))
-            .isNotSameAs(a)
-            .isEqualTo(TensorFactory.constant(4, dimensions));
-    }
-
-    @Test
     void elementWiseProductMutate() {
         var dimensions = Dimensions.matrix(2, 2);
         var a = TensorFactory.constant(2, dimensions);

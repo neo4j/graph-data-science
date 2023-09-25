@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.pregel.cc;
 
-import javax.annotation.processing.Generated;
-
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -30,10 +28,11 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.pregel.proc.PregelBaseProc;
+import org.neo4j.gds.pregel.proc.PregelCompanion;
 import org.neo4j.gds.pregel.proc.PregelStreamComputationResultConsumer;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
+import javax.annotation.processing.Generated;
 import java.util.stream.Stream;
 
 @GdsCallable(
@@ -67,6 +66,6 @@ public final class BidirectionalComputationStreamSpecification implements Algori
     @Override
     public ValidationConfiguration<PregelProcedureConfig> validationConfig(
         ExecutionContext executionContext) {
-        return PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());
+        return PregelCompanion.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());
     }
 }

@@ -120,7 +120,7 @@ class ClosenessCentralityWriteProcTest extends BaseProcTest {
     @Test
     void shouldWrite() {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
+            .algo("closeness")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields();
@@ -135,7 +135,7 @@ class ClosenessCentralityWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("preProcessingMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
-            
+
             assertThat(row.get("configuration")).isNotNull();
 
             assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
@@ -155,6 +155,43 @@ class ClosenessCentralityWriteProcTest extends BaseProcTest {
             formatWithLocale("MATCH (n) WHERE n.%1$s IS NOT NULL RETURN id(n) AS nodeId, n.%1$s AS %1$s", WRITE_PROPERTY),
             expectedCentralityResult
         );
+    }
+
+    @Test
+    void betaShouldWrite() {
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.closeness")
+            .writeMode()
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+
+            assertThat(row.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
+            assertThat(row.getNumber("writeMillis")).isNotEqualTo(-1L);
+            assertThat(row.getNumber("preProcessingMillis")).isNotEqualTo(-1L);
+            assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
+
+            assertThat(row.get("configuration")).isNotNull();
+
+            assertThat(row.get("centralityDistribution"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
+            assertThat(row.get("writeProperty")).isEqualTo(WRITE_PROPERTY);
+
+            assertCypherResult(
+                formatWithLocale(
+                    "MATCH (n) WHERE n.%1$s IS NOT NULL RETURN id(n) AS nodeId, n.%1$s AS %1$s",
+                    WRITE_PROPERTY
+                ),
+                expectedCentralityResult
+            );
+        });
     }
 
 }

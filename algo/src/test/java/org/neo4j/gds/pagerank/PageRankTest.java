@@ -114,14 +114,12 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var actual = runOnPregel(graph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -158,26 +156,28 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var actual = runOnPregel(graph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
-        @Test
-        void shouldLogProgress() {
+        @ParameterizedTest
+        @EnumSource(Mode.class)
+        void shouldLogProgress(Mode mode) {
             var maxIterations = 10;
             var config = ImmutablePageRankConfig.builder()
                 .maxIterations(maxIterations)
                 .build();
 
-            var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph, config);
+            var factory = new PageRankAlgorithmFactory<>(mode);
+
+            var progressTask = factory.progressTask(graph, config);
             var log = Neo4jProxy.testLog();
+
             var progressTracker = new TestProgressTracker(
                 progressTask,
                 log,
@@ -185,7 +185,12 @@ class PageRankTest {
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
+            factory.build(
+                    graph,
+                    config,
+                    progressTracker
+                )
+                .compute();
 
             var progresses = progressTracker.getProgresses().stream()
                 .filter(it -> it.get() > 0)
@@ -207,22 +212,26 @@ class PageRankTest {
                     .extracting(removingThreadId())
                     .contains(
                         formatWithLocale(
-                            "PageRank :: Compute iteration %d of %d :: Start",
+                            "%s :: Compute iteration %d of %d :: Start",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Compute iteration %d of %d :: Finished",
+                            "%s :: Compute iteration %d of %d :: Finished",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Master compute iteration %d of %d :: Start",
+                            "%s :: Master compute iteration %d of %d :: Start",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Master compute iteration %d of %d :: Finished",
+                            "%s :: Master compute iteration %d of %d :: Finished",
+                            mode.taskName(),
                             iteration,
                             config.maxIterations()
                         )
@@ -231,8 +240,8 @@ class PageRankTest {
             assertThat(messages)
                 .extracting(removingThreadId())
                 .contains(
-                    "PageRank :: Start",
-                    "PageRank :: Finished"
+                    formatWithLocale("%s :: Start", mode.taskName()),
+                    formatWithLocale("%s :: Finished", mode.taskName())
                 );
         }
 
@@ -331,14 +340,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -351,14 +358,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(zeroWeightsGraph, config)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(zeroWeightsGraph, config).scores();
 
             var expected = zeroWeightsGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < zeroWeightsGraph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
@@ -430,20 +435,18 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.ARTICLE_RANK)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.ARTICLE_RANK).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                softly.assertThat(actual.doubleValue(nodeId))
+                softly.assertThat(actual.get(nodeId))
                     .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
         @Test
-        void articleRankOnPaperGraph(SoftAssertions softly) {
+        void articleRankOnPaperGraphTest(SoftAssertions softly) {
             var config = ImmutablePageRankStreamConfig
                 .builder()
                 .maxIterations(20)
@@ -452,14 +455,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK).scores();
 
             var expected = paperGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < paperGraph.nodeCount(); nodeId++) {
-                softly.assertThat(actual.doubleValue(nodeId))
+                softly.assertThat(actual.get(nodeId))
                     .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
@@ -507,14 +508,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -528,14 +527,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
 
             var expected = graph.nodeProperties("expectedWeightedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -549,14 +546,12 @@ class PageRankTest {
                 .addSourceNode(idFunction.of("d"))
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
-                .scores()
-                .asNodeProperties();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
 
             var expected = graph.nodeProperties("expectedPersonalizedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
@@ -681,16 +676,13 @@ class PageRankTest {
     }
 
     PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode) {
-        return runOnPregel(graph, config, mode, ProgressTracker.NULL_TRACKER);
-    }
-
-    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode, ProgressTracker progressTracker) {
         return new PageRankAlgorithmFactory<>(mode)
             .build(
                 graph,
                 config,
-                progressTracker
+                ProgressTracker.NULL_TRACKER
             )
             .compute();
     }
+    
 }

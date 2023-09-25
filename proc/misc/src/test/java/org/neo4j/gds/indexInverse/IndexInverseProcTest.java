@@ -63,7 +63,7 @@ class IndexInverseProcTest extends BaseProcTest {
 
     @Test
     void indexInverse() {
-        String query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipTypes: ['REL', 'REL2']})";
+        String query = "CALL gds.graph.relationships.indexInverse('graph', {relationshipTypes: ['REL', 'REL2']})";
 
         assertCypherResult(query, List.of(Map.of(
             "inputRelationships", 4L,
@@ -80,7 +80,7 @@ class IndexInverseProcTest extends BaseProcTest {
 
     @Test
     void shouldFailIfRelationshipTypeIsAlreadyIndexed() {
-        var query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipTypes: 'INDEXED_REL'})";
+        var query = "CALL gds.graph.relationships.indexInverse('graph', {relationshipTypes: 'INDEXED_REL'})";
 
         assertThatThrownBy(() -> runQuery(query))
             .hasRootCauseInstanceOf(UnsupportedOperationException.class)
@@ -99,7 +99,7 @@ class IndexInverseProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL gds.beta.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'}) YIELD inputRelationships",
+            "CALL gds.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'}) YIELD inputRelationships",
             List.of(Map.of("inputRelationships", 4L))
         );
 
@@ -117,7 +117,7 @@ class IndexInverseProcTest extends BaseProcTest {
             .yields()
         );
         assertCypherResult(
-            "CALL gds.beta.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'}) YIELD inputRelationships",
+            "CALL gds.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'}) YIELD inputRelationships",
             List.of(Map.of("inputRelationships", 4L))
         );
         var gs = GraphStoreCatalog.get(getUsername(), db.databaseName(), "other_graph");
@@ -135,13 +135,13 @@ class IndexInverseProcTest extends BaseProcTest {
             .yields()
         );
 
-        assertThatThrownBy(() -> runQuery("CALL gds.beta.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'})"))
+        assertThatThrownBy(() -> runQuery("CALL gds.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'})"))
             .hasMessageContaining("The 'relationshipTypes' parameter is ambiguous");
     }
 
     @Test
     void memoryEstimation() {
-        String query = "CALL gds.beta.graph.relationships.indexInverse.estimate('graph', {relationshipTypes: 'REL'})";
+        String query = "CALL gds.graph.relationships.indexInverse.estimate('graph', {relationshipTypes: 'REL'})";
 
         assertCypherResult(query, List.of(Map.of(
             "mapView", instanceOf(Map.class),

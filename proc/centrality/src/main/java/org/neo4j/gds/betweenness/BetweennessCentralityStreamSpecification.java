@@ -20,9 +20,9 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.core.utils.paged.HugeArrayToNodeProperties;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -62,7 +62,7 @@ public class BetweennessCentralityStreamSpecification implements AlgorithmSpec<B
             executionContext.log(),
             ()  -> computationResult.result()
                 .map(result -> {
-                    var nodePropertyValues = HugeArrayToNodeProperties.convert(result);
+                    var nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())

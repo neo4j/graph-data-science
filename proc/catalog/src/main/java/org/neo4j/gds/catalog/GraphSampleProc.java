@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
-import org.neo4j.gds.executor.Preconditions;
-import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
-import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
+import org.neo4j.gds.applications.graphstorecatalog.RandomWalkSamplingResult;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,18 +31,28 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_CONFIG_PROVIDER;
-import static org.neo4j.gds.catalog.SamplerCompanion.CNARW_PROVIDER;
-import static org.neo4j.gds.catalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
-import static org.neo4j.gds.catalog.SamplerCompanion.RWR_PROVIDER;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.CNARW_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.ESTIMATE_CNARW_DESCRIPTION;
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.RWR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphSampleProc extends CatalogProc {
+public class GraphSampleProc {
+    @Context
+    public GraphDataScience facade;
 
-    private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
-    private static final String CNARW_DESCRIPTION = "Constructs a random subgraph based on common neighbour aware random walks";
+    @SuppressWarnings("WeakerAccess")
+    @Procedure(name = "gds.graph.sample.rwr", mode = READ)
+    @Description(RWR_DESCRIPTION)
+    public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestarts(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.catalog().sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);
+    }
 
     @Internal
+    @Deprecated(forRemoval = true)
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ, deprecatedBy = "gds.graph.sample.rwr")
     @Description(RWR_DESCRIPTION)
     public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestartsAlpha(
@@ -57,27 +63,8 @@ public class GraphSampleProc extends CatalogProc {
         return sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);
     }
 
-    @Procedure(name = "gds.graph.sample.rwr", mode = READ)
-    @Description(RWR_DESCRIPTION)
-    public Stream<RandomWalkSamplingResult> sampleRandomWalkWithRestarts(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "fromGraphName") String fromGraphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
 
-        Preconditions.check();
-        validateGraphName(username(), graphName);
-        return SamplerOperator.performSampling(
-            fromGraphName,
-            graphName, configuration,
-            RWR_CONFIG_PROVIDER,
-            RWR_PROVIDER,
-            executionContext()
-        );
-
-    }
-
-
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.sample.cnarw", mode = READ)
     @Description(CNARW_DESCRIPTION)
     public Stream<RandomWalkSamplingResult> sampleCNARW(
@@ -85,41 +72,16 @@ public class GraphSampleProc extends CatalogProc {
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        Preconditions.check();
-        validateGraphName(username(), graphName);
-        return SamplerOperator.performSampling(
-            fromGraphName,
-            graphName, configuration,
-            CNARW_CONFIG_PROVIDER,
-            CNARW_PROVIDER,
-            executionContext()
-        );
-
+        return facade.catalog().sampleCommonNeighbourAwareRandomWalk(graphName, fromGraphName, configuration);
     }
 
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.sample.cnarw.estimate", mode = READ)
-    @Description("Estimate memory requirements for sampling graph using CNARW algorithm")
+    @Description(ESTIMATE_CNARW_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateCNARW(
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var cypherMap = CypherMapWrapper.create(configuration);
-        var cnarwConfig = CommonNeighbourAwareRandomWalkConfig.of(cypherMap);
-
-        var loader = new GraphStoreFromCatalogLoader(
-            fromGraphName,
-            cnarwConfig,
-            executionContext().username(),
-            executionContext().databaseId(),
-            executionContext().isGdsAdmin()
-        );
-
-        MemoryTree memoryTree = CommonNeighbourAwareRandomWalk.memoryEstimation(cnarwConfig)
-            .estimate(loader.graphDimensions(), cnarwConfig.concurrency());
-
-        return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(
-            memoryTree,
-            loader.graphDimensions()
-        )));
+        return facade.catalog().estimateCommonNeighbourAwareRandomWalk(fromGraphName, configuration);
     }
 }

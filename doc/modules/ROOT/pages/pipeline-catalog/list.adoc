@@ -1,10 +1,7 @@
-[.beta]
 [[pipeline-catalog-list]]
 = Listing pipelines
 
-include::partial$/operations-reference/beta-note.adoc[]
-
-Information about pipelines in the catalog can be retrieved using the `gds.beta.pipeline.list()` procedure.
+Information about pipelines in the catalog can be retrieved using the `gds.pipeline.list()` procedure.
 
 
 == Syntax
@@ -14,7 +11,7 @@ Information about pipelines in the catalog can be retrieved using the `gds.beta.
 .List pipelines from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.list(pipelineName: String)
+CALL gds.pipeline.list(pipelineName: String)
 YIELD
     pipelineName: String,
     pipelineType: String,
@@ -58,7 +55,7 @@ CALL gds.beta.pipeline.nodeClassification.create('ncPipe')
 .Listing detailed information about all pipelines:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.list()
+CALL gds.pipeline.list()
 YIELD pipelineName, pipelineType
 ----
 
@@ -79,7 +76,7 @@ YIELD pipelineName, pipelineType
 .Listing detailed information about specific pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.list('lpPipe')
+CALL gds.pipeline.list('lpPipe')
 YIELD pipelineName, pipelineType
 ----
 

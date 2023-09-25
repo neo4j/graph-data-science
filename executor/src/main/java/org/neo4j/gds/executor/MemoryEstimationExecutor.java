@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -99,7 +100,7 @@ public class MemoryEstimationExecutor<
                     .transactionContext(transactionContext).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
-            var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
+            var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphProjectConfig)
                 : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);

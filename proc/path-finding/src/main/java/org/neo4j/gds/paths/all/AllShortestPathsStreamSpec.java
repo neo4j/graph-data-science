@@ -27,7 +27,7 @@ import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
 import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
 import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -40,7 +40,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.all.AllShortestPathsConstants.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.allShortestPaths.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(
+    name = "gds.allShortestPaths.stream",
+    aliases = "gds.alpha.allShortestPaths.stream",
+    description = DESCRIPTION,
+    executionMode = STREAM
+)
 public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorithm, Stream<AllShortestPathsStreamResult>, AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, AlgorithmFactory<Graph, MSBFSASPAlgorithm, AllShortestPathsConfig>> {
     @Override
     public String name() {
@@ -64,14 +69,14 @@ public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorit
                 if (configuration.hasRelationshipWeightProperty()) {
                     return new WeightedAllShortestPaths(
                         graph,
-                        Pools.DEFAULT,
+                        DefaultPool.INSTANCE,
                         configuration.concurrency()
                     );
                 } else {
                     return new MSBFSAllShortestPaths(
                         graph,
                         configuration.concurrency(),
-                        Pools.DEFAULT
+                        DefaultPool.INSTANCE
                     );
                 }
             }

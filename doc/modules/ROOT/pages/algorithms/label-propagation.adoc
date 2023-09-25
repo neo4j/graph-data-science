@@ -255,6 +255,8 @@ include::partial$/algorithms/label-propagation/specific-configuration-write.adoc
 [[algorithms-label-propagation-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: label-propagation-graph.svg
@@ -288,8 +290,6 @@ Besides a `name` property, each user also has a `seed_label` property.
 The `seed_label` property represents a value in the graph used to seed the node with a label.
 For example, this can be a result from a previous run of the Label Propagation algorithm.
 In addition, each relationship has a weight property.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

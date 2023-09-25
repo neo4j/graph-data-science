@@ -21,11 +21,13 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -35,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.labelPropagation.stream", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = STREAM)
-public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig, Stream<StreamResult>, LabelPropagationFactory<LabelPropagationStreamConfig>> {
+public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig, Stream<LabelPropagationStreamResult>, LabelPropagationFactory<LabelPropagationStreamConfig>> {
     @Override
     public String name() {
         return "LabelPropagationStream";
@@ -52,7 +54,7 @@ public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelP
     }
 
     @Override
-    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig, Stream<LabelPropagationStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -61,12 +63,12 @@ public class LabelPropagationStreamSpecification implements AlgorithmSpec<LabelP
                     var graph = computationResult.graph();
                     var nodePropertyValues = CommunityProcCompanion.nodeProperties(
                         computationResult.config(),
-                        result.labels().asNodeProperties()
+                        NodePropertyValuesAdapter.adapt(result.labels())
                     );
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(nodePropertyValues::hasValue)
-                        .mapToObj(nodeId -> new StreamResult(
+                        .mapToObj(nodeId -> new LabelPropagationStreamResult(
                             graph.toOriginalNodeId(nodeId),
                             nodePropertyValues.longValue(nodeId)
                         ));

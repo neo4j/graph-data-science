@@ -181,7 +181,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsv() {
         projectGraph();
 
-        var exportQuery = "CALL gds.beta.graph.export.csv('test-graph', {exportName: 'export'})";
+        var exportQuery = "CALL gds.graph.export.csv('test-graph', {exportName: 'export'})";
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("export", row.getString("exportName"));
@@ -198,7 +198,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsvWithAdditionalNodeProperties() {
         projectGraph();
 
-        var exportQuery = "CALL gds.beta.graph.export.csv(" +
+        var exportQuery = "CALL gds.graph.export.csv(" +
                           "  'test-graph', {" +
                           "    exportName: 'export'," +
                           "    additionalNodeProperties: [" +
@@ -227,7 +227,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         projectGraph();
 
         var exportQuery = formatWithLocale(
-            "CALL gds.beta.graph.export.csv('test-graph', {" +
+            "CALL gds.graph.export.csv('test-graph', {" +
             "  exportName: '%s'" +
             "})",
             exportName
@@ -248,7 +248,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         projectGraph();
 
         var exportQuery = formatWithLocale(
-            "CALL gds.beta.graph.export.csv('test-graph', {" +
+            "CALL gds.graph.export.csv('test-graph', {" +
             "  exportName: '%s'" +
             "})",
             exportName
@@ -273,7 +273,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .set(GraphStoreExportSettings.export_location_setting, null);
 
         var exportQuery =
-            "CALL gds.beta.graph.export.csv('test-graph', {" +
+            "CALL gds.graph.export.csv('test-graph', {" +
             "  exportName: 'export'" +
             "})";
 
@@ -292,7 +292,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsvWithAdditionalNodePropertiesDuplicateProperties() {
         projectGraph();
 
-        var exportQuery = "CALL gds.beta.graph.export.csv(" +
+        var exportQuery = "CALL gds.graph.export.csv(" +
                           "  'test-graph', {" +
                           "    exportName: 'export'," +
                           "    additionalNodeProperties: [" +
@@ -317,7 +317,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         projectGraph();
 
         assertThatNoException().isThrownBy(() -> runQuery(
-            "CALL gds.beta.graph.export.csv('test-graph', { exportName: 'export' })"
+            "CALL gds.graph.export.csv('test-graph', { exportName: 'export' })"
         ));
     }
 
@@ -354,7 +354,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         projectGraph();
 
         var exportQuery =
-            "CALL gds.beta.graph.export.csv.estimate('test-graph', {" +
+            "CALL gds.graph.export.csv.estimate('test-graph', {" +
             "  exportName: 'export'" +
             "})";
 
@@ -372,7 +372,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         projectGraph();
 
         assertThatNoException().isThrownBy(() -> runQuery(
-            "CALL gds.beta.graph.export.csv.estimate('test-graph', { exportName: 'export' })"
+            "CALL gds.graph.export.csv.estimate('test-graph', { exportName: 'export' })"
         ));
     }
 

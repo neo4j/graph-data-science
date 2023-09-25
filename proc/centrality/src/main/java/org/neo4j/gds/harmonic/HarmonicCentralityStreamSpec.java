@@ -20,6 +20,7 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -34,7 +35,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
-public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<StreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
+public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<CentralityStreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
 
     @Override
     public String name() {
@@ -52,19 +53,20 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
+                    var centralities = result.centralities();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
-                            new StreamResult(
+                            new CentralityStreamResult(
                                 graph.toOriginalNodeId(nodeId),
-                                result.getCentralityScore(nodeId)
+                                centralities.get(nodeId)
                             ));
                 }).orElseGet(Stream::empty));
     }

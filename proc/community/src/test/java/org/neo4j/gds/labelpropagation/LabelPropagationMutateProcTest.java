@@ -42,11 +42,17 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.community.NodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -54,17 +60,21 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -87,6 +97,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -294,8 +305,37 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure ->
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
+            procedure.facade = new GraphDataScience(
+                null,
+                null,
+                new CommunityProcedureFacade(
+                    null,
+                    algorithmsMutateBusinessFacade,
+                    null,
+                    null,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
+            );
+
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = Map.of(
@@ -307,7 +347,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
-                }));
+                });
+        });
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
@@ -369,7 +410,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
         runMutation(TEST_GRAPH_NAME, config);
 
-        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), TEST_GRAPH_NAME).graphStore();
+        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
 
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
@@ -379,7 +420,37 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     @Test
     void testMutateFailsOnExistingToken() {
         String graphName = ensureGraphExists();
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure ->
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
+            procedure.facade = new GraphDataScience(
+                null,
+                null,
+                new CommunityProcedureFacade(
+                    null,
+                    algorithmsMutateBusinessFacade,
+                    null,
+                    null,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
+            );
+
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
@@ -396,8 +467,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
-                }));
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore().getUnion();
+                });
+        });
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -418,8 +490,38 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
     @Test
     void testRunOnEmptyGraph() {
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, (proc) -> {
-            var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, (procedure) -> {
+            procedure.facade = new GraphDataScience(
+                null,
+                null,
+                new CommunityProcedureFacade(
+                    null,
+                    algorithmsMutateBusinessFacade,
+                    null,
+                    null,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
+            );
+
+            var methods = ProcedureMethodHelper.mutateMethods(procedure).collect(Collectors.toList());
 
             if (!methods.isEmpty()) {
                 // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
@@ -441,7 +543,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 methods.forEach(method -> {
                     Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
                     try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, config);
+                        Stream<?> result = (Stream<?>) method.invoke(procedure, graphName, config);
                         assertEquals(1, result.count());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
@@ -461,7 +563,36 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
     @NotNull
     private GraphStore runMutation(String graphName, Map<String, Object> config) {
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure ->
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
+            procedure.facade = new GraphDataScience(
+                null,
+                null,
+                new CommunityProcedureFacade(
+                    null,
+                    algorithmsMutateBusinessFacade,
+                    null,
+                    null,
+                    ProcedureReturnColumns.EMPTY,
+                    DatabaseId.of(db.databaseName()),
+                    new User(getUsername(), false)
+                )
+            );
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     try {
@@ -469,9 +600,10 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
-                }));
+                });
+        });
 
-        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), graphName).graphStore();
+        return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
     }
 
     @NotNull
@@ -479,7 +611,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db))
+                .databaseId(DatabaseId.of(db.databaseName()))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
@@ -509,6 +641,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         @Test
         void testGraphMutationFiltered() {
+            
             String query = GdsCypher
                 .call(TEST_GRAPH_NAME)
                 .algo("labelPropagation")
@@ -524,7 +657,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
             var mutatedGraph = GraphStoreCatalog.get(
                 TEST_USERNAME,
-                DatabaseId.of(LabelPropagationMutateProcTest.this.db),
+                DatabaseId.of(LabelPropagationMutateProcTest.this.db.databaseName()),
                 TEST_GRAPH_NAME
             ).graphStore().getUnion();
             mutatedGraph.forEachNode(nodeId -> {

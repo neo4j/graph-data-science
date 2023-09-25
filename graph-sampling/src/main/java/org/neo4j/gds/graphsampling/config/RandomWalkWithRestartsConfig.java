@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphsampling.config;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.GraphSampleAlgoConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
@@ -30,6 +31,8 @@ import java.util.List;
 @SuppressWarnings("immutables:subtype")
 public interface RandomWalkWithRestartsConfig extends GraphSampleAlgoConfig, SingleThreadedRandomSeedConfig {
 
+    @Value.Default
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
     default List<Long> startNodes() {
         return List.of();
     }

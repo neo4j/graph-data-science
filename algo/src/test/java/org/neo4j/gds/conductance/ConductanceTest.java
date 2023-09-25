@@ -28,7 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -118,7 +118,7 @@ final class ConductanceTest {
         Map<Long, Double> expectedConductances,
         int concurrency
     ) {
-        var configBuilder = ImmutableConductanceConfig.builder()
+        var configBuilder = ImmutableConductanceBaseConfig.builder()
             .concurrency(concurrency)
             .communityProperty("community");
 
@@ -134,7 +134,7 @@ final class ConductanceTest {
 
         var conductance = new Conductance(
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             config,
             ProgressTracker.NULL_TRACKER
         );
@@ -153,12 +153,12 @@ final class ConductanceTest {
 
     @Test
     void logProgress() {
-        var config = ImmutableConductanceConfig.builder()
+        var config = ImmutableConductanceBaseConfig.builder()
             .communityProperty("community")
             .concurrency(1)
             .build();
 
-        var factory = new ConductanceFactory<>();
+        var factory = new ConductanceAlgorithmFactory<>();
 
         var progressTask = factory.progressTask(naturalGraph, config);
         var log = Neo4jProxy.testLog();

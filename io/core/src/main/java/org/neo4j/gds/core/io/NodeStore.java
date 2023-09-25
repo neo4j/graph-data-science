@@ -23,12 +23,15 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.stream.Collectors;
 
 public class NodeStore {
 
@@ -40,12 +43,16 @@ public class NodeStore {
 
     final IdMap idMap;
 
-    final Map<String, Map<String, NodePropertyValues>> nodeProperties;
+    private final Map<String, Map<String, NodePropertyValues>> nodeProperties;
+
     final Map<String, LongFunction<Object>> additionalProperties;
 
     private final Set<NodeLabel> availableNodeLabels;
 
     private final boolean hasLabels;
+
+    private final Optional<NodeLabelMapping> nodeLabelMapping;
+    private final Function<NodeLabel, String> labelNameFunction;
 
     private NodeStore(
         long nodeCount,
@@ -53,7 +60,8 @@ public class NodeStore {
         IdMap idMap,
         boolean hasLabels,
         Map<String, Map<String, NodePropertyValues>> nodeProperties,
-        Map<String, LongFunction<Object>> additionalProperties
+        Map<String, LongFunction<Object>> additionalProperties,
+        Optional<NodeLabelMapping> nodeLabelMapping
     ) {
         this.nodeCount = nodeCount;
         this.labelCounts = labelCounts;
@@ -62,6 +70,10 @@ public class NodeStore {
         this.hasLabels = hasLabels;
         this.availableNodeLabels = idMap.availableNodeLabels();
         this.additionalProperties = additionalProperties;
+        this.nodeLabelMapping = nodeLabelMapping;
+        this.labelNameFunction = nodeLabelMapping.isPresent()
+            ? nodeLabelMapping.get()::get
+            : (NodeLabel nodeLabel) -> nodeLabel.name();
     }
 
     boolean hasLabels() {
@@ -72,8 +84,23 @@ public class NodeStore {
         return nodeProperties != null;
     }
 
+    Map<String, Map<String, NodePropertyValues>> labelToNodeProperties() {
+        return nodeLabelMapping.isPresent()
+            ? nodeProperties.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                entry -> nodeLabelMapping.get().get(NodeLabel.of(entry.getKey())),
+                entry -> entry.getValue()
+            ))
+            : nodeProperties;
+    }
+
     int labelCount() {
         return !hasLabels() ? 0 : idMap.availableNodeLabels().size();
+    }
+
+    Optional<NodeLabelMapping> labelMapping() {
+        return nodeLabelMapping;
     }
 
     int propertyCount() {
@@ -94,7 +121,7 @@ public class NodeStore {
         int i = 0;
         for (var nodeLabel : availableNodeLabels) {
             if (idMap.hasLabel(nodeId, nodeLabel)) {
-                labels[i++] = nodeLabel.name;
+                labels[i++] = labelNameFunction.apply(nodeLabel);
             }
         }
 
@@ -103,7 +130,8 @@ public class NodeStore {
 
     static NodeStore of(
         GraphStore graphStore,
-        Map<String, LongFunction<Object>> additionalProperties
+        Map<String, LongFunction<Object>> additionalProperties,
+        Optional<NodeLabelMapping> nodeLabelMapping
     ) {
         HugeIntArray labelCounts = null;
 
@@ -137,7 +165,8 @@ public class NodeStore {
             nodeLabels,
             hasNodeLabels,
             nodeProperties.isEmpty() ? null : nodeProperties,
-            additionalProperties
+            additionalProperties,
+            nodeLabelMapping
         );
     }
 }

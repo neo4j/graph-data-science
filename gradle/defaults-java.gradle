@@ -88,6 +88,8 @@ allprojects {
                 includeEngines 'jqwik'
             }
 
+            reports.junitXml.required = !project.hasProperty('disableTestXMLReports')
+
             // enable verbose test logging
             testLogging {
                 // set options for log level LIFECYCLE (the default)

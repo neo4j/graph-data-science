@@ -22,7 +22,6 @@ package org.neo4j.gds.executor;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
 import java.util.Map;
@@ -56,11 +55,6 @@ public interface AlgorithmSpec<
 
     default ValidationConfiguration<CONFIG> validationConfig(ExecutionContext executionContext) {
         return ValidationConfiguration.empty();
-    }
-
-    // TODO: Remove this and use the ModelCatalog from the ExecutionContext
-    default AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ALGO_FACTORY> withModelCatalog(ModelCatalog modelCatalog) {
-        return this;
     }
 
     default ProcedureExecutorSpec<ALGO, ALGO_RESULT, CONFIG> createDefaultExecutorSpec() {

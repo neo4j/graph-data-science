@@ -20,8 +20,11 @@
 package org.neo4j.gds.conductance;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,17 +35,33 @@ import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ConductanceStreamProc extends BaseProc {
-
-    @Procedure(value = "gds.alpha.conductance.stream", mode = READ)
+    @Context
+    public GraphDataScience facade;
+    @Procedure(value = "gds.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<ConductanceStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ConductanceStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().conductanceStream(
+            graphName,
+            configuration,
+            executionContext().algorithmMetaDataSetter()
+        );
+    }
 
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.conductance.stream", mode = READ, deprecatedBy = "gds.conductance.stream")
+    @Description(CONDUCTANCE_DESCRIPTION)
+    public Stream<ConductanceStreamResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.conductance.stream` has been deprecated, please use `gds.conductance.stream`.");
+
+        return stream(graphName, configuration);
     }
 }

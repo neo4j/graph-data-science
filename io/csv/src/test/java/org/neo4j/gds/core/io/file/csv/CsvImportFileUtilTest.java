@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.collections.impl.block.factory.Functions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -164,7 +165,7 @@ class CsvImportFileUtilTest {
         var headerPath = tempDir.resolve("nodes_Person_King_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of(":ID,foo:long,bar:double"));
 
-        var parsedHeader = CsvImportFileUtil.parseNodeHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseNodeHeader(headerPath, Functions.identity());
 
         assertThat(parsedHeader.nodeLabels()).containsExactlyInAnyOrder("Person", "King");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(

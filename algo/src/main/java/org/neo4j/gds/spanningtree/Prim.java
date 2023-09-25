@@ -22,7 +22,7 @@ package org.neo4j.gds.spanningtree;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
@@ -40,11 +40,10 @@ import java.util.function.DoubleUnaryOperator;
  * weights in the MST.
  */
 public class Prim extends Algorithm<SpanningTree> {
-
+    private  final int EMPTY=-1;
     public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
     public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
     private final Graph graph;
-    private final long nodeCount;
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;
 
@@ -58,7 +57,6 @@ public class Prim extends Algorithm<SpanningTree> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = graph.nodeCount();
         this.minMax = minMax;
         this.startNodeId = startNodeId;
     }
@@ -67,9 +65,9 @@ public class Prim extends Algorithm<SpanningTree> {
     public SpanningTree compute() {
         progressTracker.beginSubTask("SpanningTree");
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
-        HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
-        BitSet visited = new BitSet(nodeCount);
-        parent.fill(-1);
+        HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(graph.nodeCount());
+        BitSet visited = new BitSet(graph.nodeCount());
+        parent.fill(EMPTY);
         double totalWeight = 0;
         queue.add(startNodeId, 0.0);
         long effectiveNodeCount = 0;
@@ -105,7 +103,7 @@ public class Prim extends Algorithm<SpanningTree> {
         }
         this.spanningTree = new SpanningTree(
             startNodeId,
-            nodeCount,
+            graph.nodeCount(),
             effectiveNodeCount,
             parent,
             nodeId -> minMax.applyAsDouble(queue.cost(nodeId)),

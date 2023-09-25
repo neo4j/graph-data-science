@@ -41,7 +41,7 @@ public interface ExporterContext {
     final class ProcedureContextWrapper implements ExporterContext {
         private final Context procedureContext;
 
-        ProcedureContextWrapper(Context procedureContext) { this.procedureContext = procedureContext; }
+        public ProcedureContextWrapper(Context procedureContext) { this.procedureContext = procedureContext; }
 
         @Override
         public GraphDatabaseAPI graphDatabaseAPI() {

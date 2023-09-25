@@ -36,6 +36,6 @@ class ModularitySyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/modularity.adoc";
+        return "pages/algorithms/modularity.adoc";
     }
 }

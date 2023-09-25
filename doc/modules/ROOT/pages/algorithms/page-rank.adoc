@@ -250,6 +250,8 @@ include::partial$/algorithms/page-rank/specific-configuration.adoc[]
 [[algorithms-page-rank-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: web network
 :image-file: page-rank-graph.svg
@@ -286,8 +288,6 @@ CREATE
 
 This graph represents eight pages, linking to one another.
 Each relationship has a property called `weight`, which describes the importance of the relationship.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

@@ -48,6 +48,7 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Spliterator;
@@ -217,6 +218,10 @@ public final class GraphStoreInput implements CompatInput {
 
     public InputIterable graphProperties() {
         return () -> new GraphPropertyIterator(graphProperties.iterator(), concurrency);
+    }
+
+    public Optional<NodeLabelMapping> labelMapping() {
+        return nodeStore.labelMapping();
     }
 
     static class GraphPropertyIterator implements InputIterator {
@@ -468,7 +473,7 @@ public final class GraphStoreInput implements CompatInput {
 
                     if (hasProperties) {
                         for (var label : labels) {
-                            nodeStore.nodeProperties
+                            nodeStore.labelToNodeProperties()
                                 .getOrDefault(label, Map.of())
                                 .forEach((propertyKey, properties) -> exportProperty(
                                     visitor,
@@ -478,7 +483,7 @@ public final class GraphStoreInput implements CompatInput {
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
-                    nodeStore.nodeProperties.forEach((label, nodeProperties) -> nodeProperties.forEach((propertyKey, properties) -> exportProperty(
+                    nodeStore.labelToNodeProperties().forEach((label, nodeProperties) -> nodeProperties.forEach((propertyKey, properties) -> exportProperty(
                         visitor,
                         propertyKey,
                         properties::getObject

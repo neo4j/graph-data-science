@@ -21,9 +21,12 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -36,31 +39,60 @@ public class LeidenStreamProc extends BaseProc {
     static final String DESCRIPTION =
         "Leiden is a community detection algorithm, which guarantees that communities are well connected";
 
-    @Procedure(name = "gds.beta.leiden.stream", mode = READ)
+    @Context
+    public GraphDataScience facade;
+
+    @Procedure(name = "gds.leiden.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<LeidenStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LeidenStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().leidenStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
 
-    @Procedure(value = "gds.beta.leiden.stream.estimate", mode = READ)
+    @Procedure(value = "gds.leiden.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new LeidenStreamSpec();
 
         return new MemoryEstimationExecutor<>(
-            spec,
+            new LeidenStreamSpec(),
             executionContext(),
             transactionContext()
         ).computeEstimate(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(name = "gds.beta.leiden.stream", mode = READ, deprecatedBy = "gds.leiden.stream")
+    @Description(DESCRIPTION)
+    public Stream<LeidenStreamResult> streamBeta(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.leiden.stream` has been deprecated, please use `gds.leiden.stream`.");
+
+        return stream(graphName, configuration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.beta.leiden.stream.estimate", mode = READ, deprecatedBy = "gds.leiden.stream.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateBeta(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.leiden.stream.estimate` has been deprecated, please use `gds.leiden.stream.estimate`.");
+
+        return estimate(graphName, configuration);
     }
 
 }

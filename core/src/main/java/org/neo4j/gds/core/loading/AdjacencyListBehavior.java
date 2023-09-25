@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
+import org.neo4j.gds.core.compression.mixed.MixedCompressor;
 import org.neo4j.gds.core.compression.packed.PackedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.uncompressed.RawCompressor;
@@ -58,9 +59,11 @@ public interface AdjacencyListBehavior {
 
         return GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()
             ? packed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
-            : GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-                ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
-                : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
+            : GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.isEnabled()
+                ? mixed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+                : GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+                    ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+                    : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
     }
 
     static AdjacencyCompressorFactory compressed(
@@ -75,7 +78,7 @@ public interface AdjacencyListBehavior {
             propertyMappings,
             aggregations,
             noAggregation,
-            MemoryTracker.of()
+            MemoryTracker.create()
         );
     }
 
@@ -91,7 +94,7 @@ public interface AdjacencyListBehavior {
             propertyMappings,
             aggregations,
             noAggregation,
-            MemoryTracker.of()
+            MemoryTracker.create()
         );
     }
 
@@ -107,7 +110,24 @@ public interface AdjacencyListBehavior {
             propertyMappings,
             aggregations,
             noAggregation,
-            MemoryTracker.of()
+            MemoryTracker.create()
+        );
+    }
+
+    static AdjacencyCompressorFactory mixed(
+        LongSupplier nodeCountSupplier,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation
+    ) {
+        return MixedCompressor.factory(
+            nodeCountSupplier,
+            PackedAdjacencyListBuilderFactory.of(),
+            CompressedAdjacencyListBuilderFactory.of(),
+            propertyMappings,
+            aggregations,
+            noAggregation,
+            MemoryTracker.create()
         );
     }
 

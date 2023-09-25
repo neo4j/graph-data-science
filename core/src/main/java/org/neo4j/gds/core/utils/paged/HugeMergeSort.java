@@ -20,7 +20,8 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 
 import java.util.concurrent.CountedCompleter;
 
@@ -30,7 +31,7 @@ public final class HugeMergeSort {
 
     public static void sort(HugeLongArray array, int concurrency) {
         var temp = HugeLongArray.newArray(array.size());
-        var forkJoinPool = Pools.createForkJoinPool(concurrency);
+        var forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         try {
             forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
         } finally {

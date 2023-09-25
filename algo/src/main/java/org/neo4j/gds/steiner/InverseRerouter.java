@@ -22,8 +22,10 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -57,6 +59,21 @@ public class InverseRerouter extends ReroutingAlgorithm {
         this.progressTracker = progressTracker;
     }
 
+    static MemoryEstimation estimation() {
+
+        var memoryEstimationBuilder = MemoryEstimations.builder(SimpleRerouter.class)
+            .add(LinkCutTree.estimation())
+            .add(ReroutingChildrenManager.estimation())
+            .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
+            .perNode("current segment", HugeLongArray::memoryEstimation)
+            .perNode("queue", HugeLongArrayQueue::memoryEstimation)
+            .perNode("pruning array", HugeLongArray::memoryEstimation)
+            .perNode("best alternative", HugeLongArray::memoryEstimation)
+            .perNode("best alternative parent cost ", HugeDoubleArray::memoryEstimation);
+
+        return memoryEstimationBuilder.build();
+    }
+
     @Override
     public void reroute(
         HugeLongArray parent,
@@ -76,7 +93,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
         initializeChildrenManager(childrenManager, parent);
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.max(graph.nodeCount());
         HugeLongArray currentSegmentArray = HugeLongArray.newArray(graph.nodeCount());
-        HugeLongArrayQueue examinationQueue = HugeLongArrayQueue.newQueue(graph.nodeCount());
+        HugeLongArrayQueue actualExaminationQueue = HugeLongArrayQueue.newQueue(graph.nodeCount());
         HugeLongArray pruningArray = HugeLongArray.newArray(graph.nodeCount());
         HugeLongArray bestAlternative = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray bestAlternativeParentCost = HugeDoubleArray.newArray(graph.nodeCount());
@@ -94,7 +111,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
 
             while (currentSegmentIndex > 0) {
                 long node = currentSegmentArray.get(--currentSegmentIndex);
-                examinationQueue.add(node); //transfer path to the examination queue (FIFO)
+                actualExaminationQueue.add(node); //transfer path to the examination queue (FIFO)
                 //if the node in the path cannot be pruned (because it's part of other paths), we prune what we can so far
                 //at the end prune
                 boolean shouldOptimizeSegment = currentSegmentIndex == 0 || !childrenManager.prunable(node);
@@ -102,7 +119,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
                 if (shouldOptimizeSegment) {
                     optimizeSegment(
                         childrenManager,
-                        examinationQueue,
+                        actualExaminationQueue,
                         priorityQueue,
                         pruningArray,
                         bestAlternative,

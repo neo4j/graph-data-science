@@ -35,7 +35,7 @@ class TaskStoreServiceTest {
     void shouldRespectToggle() {
         var taskStoreService = new TaskStoreService(false);
 
-        var taskStore = taskStoreService.getTaskStore(DatabaseId.from("a database"));
+        var taskStore = taskStoreService.getTaskStore(DatabaseId.of("a database"));
 
         assertEquals(EmptyTaskStore.INSTANCE, taskStore);
     }
@@ -44,9 +44,9 @@ class TaskStoreServiceTest {
     void shouldGetOrCreatePerDatabase() {
         var taskStoreService = new TaskStoreService(true);
 
-        var taskStore1 = taskStoreService.getTaskStore(DatabaseId.from("some database"));
-        var taskStore2 = taskStoreService.getTaskStore(DatabaseId.from("some database"));
-        var taskStore3 = taskStoreService.getTaskStore(DatabaseId.from("some other database"));
+        var taskStore1 = taskStoreService.getTaskStore(DatabaseId.of("some database"));
+        var taskStore2 = taskStoreService.getTaskStore(DatabaseId.of("some database"));
+        var taskStore3 = taskStoreService.getTaskStore(DatabaseId.of("some other database"));
 
         assertSame(taskStore1, taskStore2);
         assertNotSame(taskStore1, taskStore3);

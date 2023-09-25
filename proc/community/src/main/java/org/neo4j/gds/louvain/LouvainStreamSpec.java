@@ -20,11 +20,13 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -34,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 
 @GdsCallable(name = "gds.louvain.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStreamConfig, Stream<StreamResult>, LouvainAlgorithmFactory<LouvainStreamConfig>> {
+public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStreamConfig, Stream<LouvainStreamResult>, LouvainAlgorithmFactory<LouvainStreamConfig>> {
     @Override
     public String name() {
         return "LouvainStream";
@@ -51,7 +53,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
     }
 
     @Override
-    public ComputationResultConsumer<Louvain, LouvainResult, LouvainStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Louvain, LouvainResult, LouvainStreamConfig, Stream<LouvainStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -61,7 +63,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
                     var config = computationResult.config();
                     var nodePropertyValues = CommunityProcCompanion.nodeProperties(
                         config,
-                        result.dendrogramManager().getCurrent().asNodeProperties()
+                        NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
                     );
                     var includeIntermediateCommunities = config.includeIntermediateCommunities();
 
@@ -73,7 +75,7 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
                                 ? result.getIntermediateCommunities(nodeId)
                                 : null;
                             var communityId = nodePropertyValues.longValue(nodeId);
-                            return new StreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
+                            return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
                         });
                 }).orElseGet(Stream::empty)
         );

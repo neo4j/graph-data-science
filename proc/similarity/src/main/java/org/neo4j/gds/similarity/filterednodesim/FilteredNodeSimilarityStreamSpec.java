@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.stream", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.stream", aliases = {"gds.alpha.nodeSimilarity.filtered.stream"}, description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,

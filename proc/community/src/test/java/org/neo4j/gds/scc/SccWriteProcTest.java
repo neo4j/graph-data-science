@@ -29,7 +29,10 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class SccWriteProcTest extends BaseProcTest {
 
@@ -71,13 +74,68 @@ class SccWriteProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldWrite() {
+    void shouldWriteCorrectly() {
+
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("gds.scc")
+            .writeMode()
+            .addParameter("writeProperty", "scc")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            long preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
+
+            assertThat(row.get("configuration")).isInstanceOf(Map.class)
+                .asInstanceOf(MAP).containsAllEntriesOf(Map.of("writeProperty", "scc"));
+
+            assertThat(row.get("componentDistribution"))
+                .isInstanceOf(Map.class)
+                .asInstanceOf(MAP)
+                .containsExactlyInAnyOrderEntriesOf(
+                    Map.of(
+                        "p99", 3L,
+                        "min", 3L,
+                        "max", 3L,
+                        "mean", 3.0,
+                        "p999", 3L,
+                        "p95", 3L,
+                        "p90", 3L,
+                        "p75", 3L,
+                        "p50", 3L
+                    )
+                );
+
+            assertThat(row.getNumber("componentCount").longValue()).isEqualTo(3L);
+
+            assertThat(preProcessingMillis).isNotEqualTo(-1L);
+            assertThat(computeMillis).isNotEqualTo(-1L);
+            assertThat(writeMillis).isNotEqualTo(-1L);
+
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(9L);
+
+        });
+
+        String validationQuery = "MATCH (n) RETURN n.scc as c";
+        final IntIntScatterMap testMap = new IntIntScatterMap();
+        runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
+
+        // 3 sets with 3 elements each
+        assertThat(testMap).hasSize(3);
+        for (IntIntCursor cursor : testMap) {
+            assertThat(cursor.value).isEqualTo(3);
+        }
+    }
+
+    @Test
+    void alphaShouldReturnCorrectly() {
 
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
-            .addParameter("writeProperty","scc")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -94,14 +152,14 @@ class SccWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("minSetSize").longValue()).isEqualTo(3L);
             assertThat(row.getNumber("maxSetSize").longValue()).isEqualTo(3L);
 
-            assertThat(row.getString("writeProperty")).isEqualTo("scc");
+            assertThat(row.getString("writeProperty")).isEqualTo("componentId");
             assertThat(preProcessingMillis).isNotEqualTo(-1L);
             assertThat(computeMillis).isNotEqualTo(-1L);
             assertThat(writeMillis).isNotEqualTo(-1L);
 
         });
 
-        String validationQuery = "MATCH (n) RETURN n.scc as c";
+        String validationQuery = "MATCH (n) RETURN n.componentId as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
         runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 

@@ -20,6 +20,9 @@
 package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.catalog.GraphInfoWithHistogram;
 
 import java.util.stream.Stream;
 
@@ -30,11 +33,13 @@ import static org.mockito.Mockito.when;
 class GraphListProcTest {
     @Test
     void shouldDelegateToFacade() {
-        var facade = mock(GraphStoreCatalogProcedureFacade.class);
+        var facade = mock(GraphDataScience.class);
         var procedure = new GraphListProc(facade);
 
         var expectedResultStream = Stream.of(mock(GraphInfoWithHistogram.class));
-        when(facade.listGraphs("some graph")).thenReturn(expectedResultStream);
+        var catalogFacade = mock(CatalogFacade.class);
+        when(facade.catalog()).thenReturn(catalogFacade);
+        when(catalogFacade.listGraphs("some graph")).thenReturn(expectedResultStream);
         var actualResultStream = procedure.listGraphs("some graph");
 
         assertSame(expectedResultStream, actualResultStream);

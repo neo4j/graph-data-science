@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.concurrency;
 
+import java.util.Objects;
+
 public final class PoolSizesService {
 
     private static PoolSizes instance = new OpenGdsPoolSizes();
@@ -31,6 +33,6 @@ public final class PoolSizesService {
     }
 
     public static PoolSizes poolSizes() {
-        return instance;
+        return Objects.requireNonNull(instance);
     }
 }

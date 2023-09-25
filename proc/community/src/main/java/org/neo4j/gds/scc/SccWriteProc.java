@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -40,7 +41,7 @@ public class SccWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.alpha.scc.write", mode = WRITE)
+    @Procedure(value = "gds.scc.write", mode = WRITE)
     @Description(SCC_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -51,6 +52,25 @@ public class SccWriteProc extends BaseProc {
             executionContext()
         ).compute(graphName, configuration);
     }
+
+    @Procedure(value = "gds.alpha.scc.write", mode = WRITE, deprecatedBy = "gds.scc.write")
+    @Description(SCC_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<AlphaWriteResult> alphaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");
+        return new ProcedureExecutor<>(
+            new AlphaSccWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+    }
+
 
     @Override
     public ExecutionContext executionContext() {

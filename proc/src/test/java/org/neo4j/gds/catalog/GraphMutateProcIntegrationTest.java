@@ -183,7 +183,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(louvainQuery);
         runQuery(nodeSimilarityQuery);
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH).graphStore().getUnion());
 
         int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
@@ -253,6 +253,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .yields()
         );
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH).graphStore().getUnion());
     }
 }

@@ -59,7 +59,7 @@ class LocalClusteringCoefficientTest {
     @MethodSource("noTriangleQueries")
     @ParameterizedTest(name = "{1}")
     void noTriangles(Graph graph, String ignoredName) {
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(0, result.averageClusteringCoefficient());
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -76,7 +76,7 @@ class LocalClusteringCoefficientTest {
             gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
 
-        LocalClusteringCoefficient.Result result = compute(fromGdl(gdl.toString(), UNDIRECTED));
+        LocalClusteringCoefficientResult result = compute(fromGdl(gdl.toString(), UNDIRECTED));
 
         assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(3 * nbrOfTriangles, result.localClusteringCoefficients().size());
@@ -102,7 +102,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(5, result.localClusteringCoefficients().size());
@@ -120,7 +120,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(13.0 / 15.0, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(5, result.localClusteringCoefficients().size());
@@ -148,7 +148,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(7.0 / 9.0, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(6, result.localClusteringCoefficients().size());
@@ -169,7 +169,7 @@ class LocalClusteringCoefficientTest {
     void selfLoop() {
         var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(0, result.averageClusteringCoefficient());
         assertEquals(1, result.localClusteringCoefficients().size());
@@ -181,7 +181,7 @@ class LocalClusteringCoefficientTest {
         // a self loop adds one to the degree
         var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(7.0 / 9, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -199,7 +199,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1.0, result.averageClusteringCoefficient());
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -217,7 +217,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1.0, result.averageClusteringCoefficient());
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -235,7 +235,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1.0, result.averageClusteringCoefficient());
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -254,7 +254,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1.0, result.averageClusteringCoefficient());
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -273,7 +273,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(4, result.localClusteringCoefficients().size());
         assertEquals(7.0 / 12, result.averageClusteringCoefficient(), 1e-10);
@@ -343,7 +343,7 @@ class LocalClusteringCoefficientTest {
             UNDIRECTED
         );
 
-        LocalClusteringCoefficient.Result result = compute(graph);
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(4.0 / 15, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(15, result.localClusteringCoefficients().size());
@@ -364,7 +364,7 @@ class LocalClusteringCoefficientTest {
         assertEquals(0, result.localClusteringCoefficients().get(14)); // o
     }
 
-    private LocalClusteringCoefficient.Result compute(Graph graph) {
+    private LocalClusteringCoefficientResult compute(Graph graph) {
         var localClusteringCoefficient = new LocalClusteringCoefficient(
             graph,
             createConfig().build(),

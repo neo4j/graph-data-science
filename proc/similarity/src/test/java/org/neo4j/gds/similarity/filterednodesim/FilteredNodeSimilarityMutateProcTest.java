@@ -69,7 +69,7 @@ class FilteredNodeSimilarityMutateProcTest extends BaseTest {
     @Test
     void shouldWorkWithoutFiltering() {
         var query = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .mutateMode()
             .addParameter("mutateProperty", "score")
             .addParameter("mutateRelationshipType", "SIMILAR_TO")
@@ -131,7 +131,7 @@ class FilteredNodeSimilarityMutateProcTest extends BaseTest {
         var filter = List.of(0, 3);
 
         var sourceFilteredQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .mutateMode()
             .addParameter("mutateProperty", "score")
             .addParameter("mutateRelationshipType", "SIMILAR_TO")
@@ -165,7 +165,7 @@ class FilteredNodeSimilarityMutateProcTest extends BaseTest {
         var filter = List.of(0, 3);
 
         var targetFilteredQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
+            .algo("gds.nodeSimilarity.filtered")
             .mutateMode()
             .addParameter("mutateProperty", "score")
             .addParameter("mutateRelationshipType", "SIMILAR_TO")

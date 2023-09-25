@@ -33,10 +33,8 @@ public class AdamOptimizer implements Updater {
 
     private static final double CLIP_MAX = 5.0;
     private static final double CLIP_MIN = -5.0;
-    private static final double DEFAULT_ALPHA = 0.001;
 
-    // TODO: Pass these via config???
-    private final double alpha;
+    private final double learningRate;
     private final double beta_1 = 0.9;
     private final double beta_2 = 0.999;
     private final double epsilon = 1e-8;
@@ -55,15 +53,11 @@ public class AdamOptimizer implements Updater {
                 2 * termSize; // working memory: mCap, vCap
     }
 
-    public AdamOptimizer(List<Weights<? extends Tensor<?>>> weights) {
-        this(weights, DEFAULT_ALPHA);
-    }
-
     public AdamOptimizer(
         List<Weights<? extends Tensor<?>>> weights,
         double learningRate
     ) {
-        this.alpha = learningRate;
+        this.learningRate = learningRate;
         this.weights = weights;
         this.momentumTerms = weights.stream().map(v -> v.data().createWithSameDimensions()).collect(Collectors.toList());
         this.velocityTerms = weights.stream().map(v -> v.data().createWithSameDimensions()).collect(Collectors.toList());
@@ -99,7 +93,7 @@ public class AdamOptimizer implements Updater {
 
             // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
             weight.addInPlace(mCap
-                .scalarMultiplyMutate(-alpha)
+                .scalarMultiplyMutate(-learningRate)
                 .elementwiseProductMutate(vCap.mapInPlace(v -> 1 / (Math.sqrt(v) + epsilon)))
             );
         }
@@ -109,9 +103,6 @@ public class AdamOptimizer implements Updater {
         if (value > CLIP_MAX) {
             return CLIP_MAX;
         }
-        if (value < CLIP_MIN) {
-            return CLIP_MIN;
-        }
-        return value;
+        return Math.max(value, CLIP_MIN);
     }
 }

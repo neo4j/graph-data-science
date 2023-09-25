@@ -53,7 +53,7 @@ class PipelineListProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"gds.beta.pipeline.list()", "gds.beta.pipeline.list(null)"})
+    @ValueSource(strings = {"gds.pipeline.list()", "gds.pipeline.list(null)"})
     void listsPipelines(String query) {
         var ncPipe1 = new NodeClassificationTrainingPipeline();
         ncPipe1.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
@@ -113,8 +113,8 @@ class PipelineListProcTest extends BaseProcTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "CALL gds.beta.pipeline.list()",
-        "CALL gds.beta.pipeline.list('somePipe')"
+        "CALL gds.pipeline.list()",
+        "CALL gds.pipeline.list('somePipe')"
     })
     void emptyResultOnListQueries(String query) {
         assertCypherResult(
@@ -136,7 +136,7 @@ class PipelineListProcTest extends BaseProcTest {
         PipelineCatalog.set(getUsername(), "ncPipe2", ncPipe2);
 
         assertCypherResult(
-            "CALL gds.beta.pipeline.list('ncPipe1') YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
+            "CALL gds.pipeline.list('ncPipe1') YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
             "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType, creationTime " +
             "ORDER BY pipelineName",
             List.of(
@@ -161,7 +161,7 @@ class PipelineListProcTest extends BaseProcTest {
     @MethodSource("invalidPipeNames")
     void failOnEmptyPipeName(String pipeName) {
         assertError(
-            "CALL gds.beta.pipeline.list($pipeName)",
+            "CALL gds.pipeline.list($pipeName)",
             Map.of("pipeName", pipeName),
             "can not be null or blank"
         );

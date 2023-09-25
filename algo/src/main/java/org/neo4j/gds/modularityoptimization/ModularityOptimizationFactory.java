@@ -22,21 +22,21 @@ package org.neo4j.gds.modularityoptimization;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.ImmutableK1ColoringStreamConfig;
-import org.neo4j.gds.k1coloring.K1ColoringConfig;
-import org.neo4j.gds.k1coloring.K1ColoringFactory;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
@@ -106,7 +106,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             seedProperty,
             configuration.concurrency(),
             configuration.batchSize(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             progressTracker
         );
     }
@@ -121,7 +121,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             MODULARITY_OPTIMIZATION_TASK_NAME,
             Tasks.task(
                 "initialization",
-                K1ColoringFactory.k1ColoringProgressTask(graph, createModularityConfig())
+                K1ColoringAlgorithmFactory.k1ColoringProgressTask(graph, createModularityConfig())
             ),
             Tasks.iterativeDynamic(
                 "compute modularity",
@@ -131,7 +131,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
         );
     }
 
-    private static K1ColoringConfig createModularityConfig() {
+    private static K1ColoringBaseConfig createModularityConfig() {
         return ImmutableK1ColoringStreamConfig
             .builder()
             .maxIterations(K1COLORING_MAX_ITERATIONS)

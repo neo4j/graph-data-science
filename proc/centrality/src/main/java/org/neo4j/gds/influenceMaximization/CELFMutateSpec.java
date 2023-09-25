@@ -39,11 +39,16 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.influenceMaximization.celf.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(
+    name = "gds.influenceMaximization.celf.mutate",
+    aliases = {"gds.beta.influenceMaximization.celf.mutate"},
+    description = DESCRIPTION,
+    executionMode = MUTATE_NODE_PROPERTY
+)
 public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig, Stream<MutateResult>, CELFAlgorithmFactory<InfluenceMaximizationMutateConfig>> {
     @Override
     public String name() {
-        return "CELFStream";
+        return "CELFMutate";
     }
 
     @Override
@@ -66,7 +71,7 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
                 var nodeCount = computationResult.graph().nodeCount();
                 var celfSeedSetNodeProperty = ImmutableNodeProperty.of(
                     computationResult.config().mutateProperty(),
-                    new CelfNodeProperties(celfSeedSet, nodeCount)
+                    new CELFNodeProperties(celfSeedSet, nodeCount)
                 );
                 return List.of(celfSeedSetNodeProperty);
             };

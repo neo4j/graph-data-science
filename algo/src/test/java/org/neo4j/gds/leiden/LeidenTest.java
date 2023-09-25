@@ -30,10 +30,10 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -219,7 +219,7 @@ class LeidenTest {
             Direction.UNDIRECTED,
             refinedCommunities,
             4,
-            Pools.DEFAULT_SINGLE_THREAD_POOL,
+            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
             1,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER

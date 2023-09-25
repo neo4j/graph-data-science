@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
 
-@GdsCallable(name = "gds.beta.leiden.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.leiden.write", aliases = {"gds.beta.leiden.write"}, description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenWriteConfig, Stream<WriteResult>, LeidenAlgorithmFactory<LeidenWriteConfig>> {
     @Override
     public String name() {

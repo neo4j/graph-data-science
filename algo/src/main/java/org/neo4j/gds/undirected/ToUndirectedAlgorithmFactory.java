@@ -22,7 +22,7 @@ package org.neo4j.gds.undirected;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -39,7 +39,7 @@ public class ToUndirectedAlgorithmFactory extends GraphStoreAlgorithmFactory<ToU
         ToUndirectedConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return new ToUndirected(graphStore, configuration, progressTracker, Pools.DEFAULT);
+        return new ToUndirected(graphStore, configuration, progressTracker, DefaultPool.INSTANCE);
     }
 
     @Override

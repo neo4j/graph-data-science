@@ -24,7 +24,7 @@ The `gds.export.location` parameter must be configured for this feature.
 .Export a named graph to a set of CSV files:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.export.csv(graphName: String, configuration: Map)
+CALL gds.graph.export.csv(graphName: String, configuration: Map)
 YIELD
     graphName: String,
     exportName: String,
@@ -49,9 +49,10 @@ YIELD
 |===
 | Name                     | Type                | Default   | Optional | Description
 | exportName               | String              | none      | No       | The name of the directory where the graph is exported to. The absolute path of the exported CSV files depends on the configuration parameter `gds.export.location` in the `neo4j.conf`.
-| writeConcurrency         | Boolean             | 4         | yes      | The number of concurrent threads used for writing the database.
+| writeConcurrency         | Integer             | 4         | yes      | The number of concurrent threads used for writing the database.
 | defaultRelationshipType  | String              | +__ALL__+ | yes      | Relationship type used for `*` relationship projections.
 | additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the projected graph.
+| useLabelMapping          | Boolean             | false     | yes      | Flag to decide whether to use node label mapping when exporting the graph
 |===
 
 
@@ -73,7 +74,7 @@ YIELD
 == Estimation
 
 As many other procedures in GDS, export to csv has an estimation mode. For more details see xref:common-usage/memory-estimation.adoc[Memory Estimation].
-Using the `gds.beta.graph.export.csv.estimate` procedure, it is possible to estimate the required disk space of the exported CSV files.
+Using the `gds.graph.export.csv.estimate` procedure, it is possible to estimate the required disk space of the exported CSV files.
 The estimation uses sampling to generate a more accurate estimate.
 
 [.estimate-syntax]
@@ -81,7 +82,7 @@ The estimation uses sampling to generate a more accurate estimate.
 .Estimate the required disk space for exporting a named graph to CSV files.:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.export.csv.estimate(graphName:String, configuration: Map)
+CALL gds.graph.export.csv.estimate(graphName:String, configuration: Map)
 YIELD
   nodeCount: Integer,
   relationshipCount: Integer,
@@ -108,7 +109,7 @@ YIELD
 | Name                    | Type    | Default    | Optional  | Description
 | exportName              | String  | none       | no        | Name of the folder the exported CSV files are saved at.
 | samplingFactor          | Double  | 0.001      | yes       | The fraction of nodes and relationships to sample for the estimation.
-| writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
+| writeConcurrency        | Integer | 4          | yes       | The number of concurrent threads used for writing the database.
 | defaultRelationshipType | String  | +__ALL__+  | yes       | Relationship type used for `*` relationship projections.
 |===
 
@@ -133,6 +134,11 @@ YIELD
 
 The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/[import] command.
 
+GDS does not add a column for node labels and relationship types in the data.
+In order to import them using Neo4j Admin, the labels and types should be set using the `--nodes` and `--relationship` parameters.
+
+More details here: using the same https://neo4j.com/docs/operations-manual/current/tutorial/neo4j-admin-import/#_using_the_same_label_for_every_node[label for every node],
+https://neo4j.com/docs/operations-manual/current/tutorial/neo4j-admin-import/#_using_the_same_relationship_type_for_every_relationship[type for every relationship]
 
 === Nodes
 
@@ -161,6 +167,33 @@ nodes_A_B_1.csv
 nodes_A_B_2.csv
 ----
 
+[[node_label_mapping]]
+==== Nodes label mapping
+
+When the configuration parameter `useLabelMapping` is set to true, the names of the labels will be mapped to integers during the export.
+This mapping will be written to a new file named `label-mappings.csv`.
+This parameter is required when label names contain underscores or special characters that are forbidden in file names by the OS.
+
+Using the example above, if label mapping is enabled, the content of `label-mappings.csv` may be:
+----
+index,label
+0,A
+1,B
+----
+
+In this case, these files will be created for the nodes:
+
+----
+nodes_0_header.csv
+nodes_0_0.csv
+nodes_1_header.csv
+nodes_1_0.csv
+nodes_1_2.csv
+nodes_0_1_header.csv
+nodes_0_1_0.csv
+nodes_0_1_1.csv
+nodes_0_1_2.csv
+----
 
 === Relationships
 
@@ -190,7 +223,7 @@ relationships_LIVES_IN_2.csv
 .Export the `my-graph` from GDS into a directory `my-export`:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export' })
+CALL gds.graph.export.csv('my-graph', { exportName: 'my-export' })
 ----
 
 
@@ -202,7 +235,7 @@ If we want to export `my-in-memory-graph` but additionally add the `myproperty` 
 .Export the `my-in-memory-graph` from GDS with the `myproperty` from `my-db-graph` into a directory `my-export`:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: ['myproperty']})
+CALL gds.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: ['myproperty']})
 ----
 
 [NOTE]
@@ -216,5 +249,5 @@ So we could for instance define a default value for our `myproperty`.
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` with default value into a directory called `my-export`:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
+CALL gds.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
 ----

@@ -20,6 +20,9 @@
 package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.catalog.GraphInfo;
 
 import java.util.stream.Stream;
 
@@ -30,11 +33,13 @@ import static org.mockito.Mockito.when;
 class GraphDropProcTest {
     @Test
     void shouldDelegateToFacade() {
-        var facade = mock(GraphStoreCatalogProcedureFacade.class);
+        var facade = mock(GraphDataScience.class);
         var procedure = new GraphDropProc(facade);
 
         var expectedResult = Stream.<GraphInfo>of();
-        when(facade.dropGraph("my graph", true, "some database", "some user")).thenReturn(expectedResult);
+        var catalogFacade = mock(CatalogFacade.class);
+        when(facade.catalog()).thenReturn(catalogFacade);
+        when(catalogFacade.dropGraph("my graph", true, "some database", "some user")).thenReturn(expectedResult);
         var actualResult = procedure.dropGraph("my graph", true, "some database", "some user");
 
         assertSame(expectedResult, actualResult);

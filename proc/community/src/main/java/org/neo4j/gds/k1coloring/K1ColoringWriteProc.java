@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -42,7 +43,7 @@ public class K1ColoringWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
+    @Procedure(name = "gds.k1coloring.write", mode = WRITE)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringWriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -54,7 +55,7 @@ public class K1ColoringWriteProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ)
+    @Procedure(value = "gds.k1coloring.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -65,6 +66,36 @@ public class K1ColoringWriteProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE, deprecatedBy ="gds.k1coloring.write" )
+    @Description(K1_COLORING_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<K1ColoringWriteResult> betaWrite(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.write` has been deprecated, please use `gds.k1coloring.write`.");
+        return  write(graphName,configuration);
+    }
+
+    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ, deprecatedBy = "gds.k1coloring.write.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.write.estimate` has been deprecated, please use `gds.k1coloring.write.estimate`.");
+        return estimate(graphNameOrConfiguration,algoConfiguration);
     }
 
     @Override

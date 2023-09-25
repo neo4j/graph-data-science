@@ -19,12 +19,17 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,6 +68,39 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 
+    public Pair<Graph, GraphStore> getGraphWithGraphStore(
+        GraphName graphName,
+        AlgoBaseConfig config,
+        Optional<String> relationshipProperty,
+        User user,
+        DatabaseId databaseId
+    ) {
+        CatalogRequest catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
+        var graphStoreWithConfig = get(catalogRequest, graphName);
+        var graphStore = graphStoreWithConfig.graphStore();
+        // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
+
+        var nodeLabels = config.nodeLabelsFilter();
+
+        Collection<RelationshipType> relationshipTypes;
+        if (config.projectAllRelationshipTypes()) {
+            relationshipTypes = graphStore.relationshipTypes();
+        } else {
+            relationshipTypes = config.relationshipTypesFilter();
+        }
+
+        //if nodeLabels is empty, we are not getting any node properties
+        if (nodeLabels.isEmpty()) {
+            nodeLabels = graphStore.nodeLabels();
+        }
+
+        // Validate the graph store before going any further
+        config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+        return Pair.of(graph, graphStore);
+    }
+
     /**
      * Predicate around @graphExists
      *
@@ -72,6 +110,21 @@ public class GraphStoreCatalogService {
         if (graphExists(user, databaseId, graphName)) {
             String message = formatWithLocale(
                 "A graph with name '%s' already exists.",
+                graphName
+            );
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Predicate around @graphExists
+     *
+     * @throws java.lang.IllegalArgumentException if graph does not exist in graph catalog
+     */
+    public void ensureGraphExists(User user, DatabaseId databaseId, GraphName graphName) {
+        if (! graphExists(user, databaseId, graphName)) {
+            String message = formatWithLocale(
+                "The graph '%s' does not exist.",
                 graphName
             );
             throw new IllegalArgumentException(message);
@@ -104,7 +157,15 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.getAllGraphStores();
     }
 
+    public long graphStoreCount() {
+        return GraphStoreCatalog.graphStoreCount();
+    }
+
     public Map<GraphProjectConfig, GraphStore> getGraphStores(User user) {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
+    }
+
+    public void set(GraphProjectConfig configuration, GraphStore graphStore) {
+        GraphStoreCatalog.set(configuration, graphStore);
     }
 }

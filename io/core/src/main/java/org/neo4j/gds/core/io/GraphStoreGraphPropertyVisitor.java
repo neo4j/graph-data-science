@@ -21,12 +21,12 @@ package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.collections.HugeSparseDoubleArrayList;
-import org.neo4j.gds.collections.HugeSparseDoubleList;
-import org.neo4j.gds.collections.HugeSparseFloatArrayList;
-import org.neo4j.gds.collections.HugeSparseLongArrayList;
-import org.neo4j.gds.collections.HugeSparseLongList;
-import org.neo4j.gds.collections.HugeSparseObjectArrayList;
+import org.neo4j.gds.collections.hsl.HugeSparseDoubleArrayList;
+import org.neo4j.gds.collections.hsl.HugeSparseDoubleList;
+import org.neo4j.gds.collections.hsl.HugeSparseFloatArrayList;
+import org.neo4j.gds.collections.hsl.HugeSparseLongArrayList;
+import org.neo4j.gds.collections.hsl.HugeSparseLongList;
+import org.neo4j.gds.collections.hsl.HugeSparseObjectArrayList;
 import org.neo4j.gds.core.io.file.GraphPropertyVisitor;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 

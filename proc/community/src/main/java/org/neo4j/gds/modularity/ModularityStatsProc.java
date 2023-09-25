@@ -20,8 +20,13 @@
 package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,16 +38,43 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityStatsProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.modularity.stats", mode = READ)
+    @Context
+    public GraphDataScience facade;
+    @Procedure(value = "gds.modularity.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StatsResult> stream(
+    public Stream<ModularityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
+        return facade.community().modularityStats(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.modularity.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return new MemoryEstimationExecutor<>(
             new ModularityStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(value = "gds.alpha.modularity.stats", mode = READ, deprecatedBy = "gds.modularity.stats")
+    @Description(DESCRIPTION)
+    public Stream<ModularityStatsResult> statsAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.modularity.stats` has been deprecated, please use `gds.modularity.stats`.");
+
+        return stats(graphName, configuration);
     }
 
 }

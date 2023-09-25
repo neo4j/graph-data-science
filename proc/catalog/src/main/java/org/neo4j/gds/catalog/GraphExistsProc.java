@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,7 +33,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphExistsProc {
     @SuppressWarnings("WeakerAccess")
     @Context
-    public GraphStoreCatalogProcedureFacade facade;
+    public GraphDataScience facade;
 
     /**
      * This would be dumber (=better) if the bespoke conversion didn't live here. Think it over.
@@ -41,6 +42,6 @@ public class GraphExistsProc {
     @Procedure(name = "gds.graph.exists", mode = READ)
     @Description(EXISTS_DESCRIPTION)
     public Stream<GraphExistsResult> existsBetter(@Name(value = "graphName") String graphName) {
-        return facade.graphExists(graphName, b -> Stream.of(new GraphExistsResult(graphName, b)));
+        return facade.catalog().graphExists(graphName, b -> Stream.of(new GraphExistsResult(graphName, b)));
     }
 }

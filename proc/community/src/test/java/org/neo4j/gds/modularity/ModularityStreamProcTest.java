@@ -78,7 +78,7 @@ class ModularityStreamProcTest extends BaseProcTest {
     @Test
     void stream() {
         String streamQuery = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.modularity")
+            .algo("modularity")
             .streamMode()
             .addParameter("communityProperty", "communityId")
             .yields();
@@ -90,8 +90,8 @@ class ModularityStreamProcTest extends BaseProcTest {
 
         var rowCount = runQueryWithRowConsumer(streamQuery, row -> {
             long community = row.getNumber("communityId").longValue();
-            double conductance = row.getNumber("modularity").doubleValue();
-            assertThat(conductance).isCloseTo(expected.get(community), Offset.offset(0.0001));
+            double modularity = row.getNumber("modularity").doubleValue();
+            assertThat(modularity).isCloseTo(expected.get(community), Offset.offset(0.0001));
         });
 
         assertThat(rowCount)

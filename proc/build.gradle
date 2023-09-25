@@ -38,11 +38,6 @@ dependencies {
     api project(':proc-pipeline-catalog')
     api project(':proc-misc')
 
-    // I am uncertain where things should go.
-    // I think we should do some conceptual modeling of our modules.
-    // Because I am not the only one with this problem now, nor in future
-    implementation project(':procedure-facade')
-
     // TEST DEPENDENCIES
 
     testCompileOnly project(':annotations')
@@ -55,4 +50,6 @@ dependencies {
     testImplementation project(':executor')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
+
+    testImplementation project(':opengds-extension')
 }

@@ -259,7 +259,7 @@ public abstract class AdjacencyListBuilderBaseTest {
             .adjacencyListBuilderTasks(mapper, Optional.empty())
             .forEach(Runnable::run);
 
-        AdjacencyListsWithProperties adjacencyListsWithProperties = adjacencyCompressorFactory.build();
+        AdjacencyListsWithProperties adjacencyListsWithProperties = adjacencyCompressorFactory.build(true);
         AdjacencyList adjacencyList = adjacencyListsWithProperties.adjacency();
         List<AdjacencyProperties> propertyLists = adjacencyListsWithProperties.properties();
         assertThat(propertyLists).hasSize(propertyAggregations.length);

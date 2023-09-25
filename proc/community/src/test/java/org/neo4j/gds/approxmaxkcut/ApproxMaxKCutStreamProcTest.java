@@ -98,7 +98,7 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
     @Test
     void testStream() {
         String streamQuery = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.maxkcut")
+            .algo("maxkcut")
             .streamMode()
             // Make sure we get a deterministic result.
             .addParameter("randomSeed", 1337L)
@@ -149,7 +149,7 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
     @MethodSource("communitySizeInputs")
     void testStreamWithMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
         String streamQuery = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.maxkcut")
+            .algo("maxkcut")
             .streamMode()
             // Make sure we get a deterministic result.
             .addParameter("randomSeed", 1337L)

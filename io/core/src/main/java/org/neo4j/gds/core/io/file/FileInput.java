@@ -26,13 +26,16 @@ import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.internal.batchimport.InputIterable;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public interface FileInput extends CompatInput {
     InputIterable graphProperties();
     String userName();
     GraphInfo graphInfo();
     MutableNodeSchema nodeSchema();
+    Optional<HashMap<String, String>> labelMapping();
     MutableRelationshipSchema relationshipSchema();
     Map<String, PropertySchema> graphPropertySchema();
     Capabilities capabilities();

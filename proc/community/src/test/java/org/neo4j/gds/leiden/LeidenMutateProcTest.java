@@ -81,9 +81,9 @@ class LeidenMutateProcTest  extends BaseProcTest {
 
     @Test
     void mutate() {
-        var query = "CALL gds.beta.leiden.mutate('leiden', {mutateProperty: 'communityId', concurrency: 1})";
+        var query = "CALL gds.leiden.mutate('leiden', {mutateProperty: 'communityId', concurrency: 1})";
         assertLeidenMutateQuery(query);
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "leiden").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "leiden").graphStore().getUnion();
         var communities = mutatedGraph.nodeProperties("communityId");
         var communitySet = new HashSet<Long>();
         mutatedGraph.forEachNode(nodeId -> {
@@ -96,10 +96,10 @@ class LeidenMutateProcTest  extends BaseProcTest {
 
     @Test
     void shoudMutateCorrectlyConsecutiveIds() {
-        var query = "CALL gds.beta.leiden.mutate('leiden', {mutateProperty: 'communityId',  consecutiveIds: true})";
+        var query = "CALL gds.leiden.mutate('leiden', {mutateProperty: 'communityId',  consecutiveIds: true})";
 
         assertLeidenMutateQuery(query);
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "leiden").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "leiden").graphStore().getUnion();
         var communities = mutatedGraph.nodeProperties("communityId");
         var communitySet = new HashSet<Long>();
         mutatedGraph.forEachNode(nodeId -> {
@@ -185,7 +185,7 @@ class LeidenMutateProcTest  extends BaseProcTest {
 
     @Test
     void mutateWithIntermediateCommunities() {
-        var query = "CALL gds.beta.leiden.mutate('leiden', {" +
+        var query = "CALL gds.leiden.mutate('leiden', {" +
                     "   mutateProperty: 'intermediateCommunities'," +
                     "   includeIntermediateCommunities: true" +
                     "})";
@@ -199,7 +199,7 @@ class LeidenMutateProcTest  extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.beta.leiden.mutate.estimate('leiden', {" +
+        var query = "CALL gds.leiden.mutate.estimate('leiden', {" +
                     "   mutateProperty: 'intermediateCommunities'," +
                     "   includeIntermediateCommunities: true" +
                     "})";

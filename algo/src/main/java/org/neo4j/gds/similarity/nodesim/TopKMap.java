@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.core.utils.queue.BoundedLongPriorityQueue;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -58,13 +58,22 @@ public class TopKMap {
         int topK,
         Comparator<SimilarityResult> comparator
     ) {
+        this(items, sourceNodes, topK, comparator.equals(SimilarityResult.DESCENDING));
+    }
+
+    public TopKMap(
+        long items,
+        BitSet sourceNodes,
+        int topK,
+        boolean higherIsBetter
+    ) {
         this.sourceNodes = sourceNodes;
         int boundedTopK = (int) Math.min(topK, items);
         topKLists = HugeObjectArray.newArray(TopKList.class, items);
         topKLists.setAll(node1 -> sourceNodes.get(node1)
-            ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
-                ? BoundedLongPriorityQueue.min(boundedTopK)
-                : BoundedLongPriorityQueue.max(boundedTopK)
+                ? new TopKList(higherIsBetter
+                ? BoundedLongPriorityQueue.max(boundedTopK)
+                : BoundedLongPriorityQueue.min(boundedTopK)
             ) : null
         );
     }
@@ -102,9 +111,18 @@ public class TopKMap {
     }
 
     public Stream<SimilarityResult> stream() {
+        return stream(SimilarityResult::new);
+    }
+
+    public <R> Stream<R> stream(ResultEntryCreator<R> entryCreator) {
         return new SetBitsIterable(sourceNodes).stream()
             .boxed()
-            .flatMap(node1 -> topKLists.get(node1).stream(node1));
+            .flatMap(node1 -> topKLists.get(node1).stream(node1, entryCreator));
+    }
+
+    public interface ResultEntryCreator<R> {
+
+        R create(long node1, long node2, double similarity);
     }
 
     public static final class TopKList {
@@ -126,20 +144,19 @@ public class TopKMap {
         void forEach(BoundedLongPriorityQueue.Consumer consumer) {
             queue.forEach(consumer);
         }
+        <R> Stream<R> stream(long node1, ResultEntryCreator<R> resultCreator) {
 
-        Stream<SimilarityResult> stream(long node1) {
-
-            Iterable<SimilarityResult> iterable = () -> new AbstractIterator<>() {
+            Iterable<R> iterable = () -> new AbstractIterator<>() {
 
                 final PrimitiveIterator.OfLong elementsIter = queue.elements().iterator();
                 final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
 
                 @Override
-                protected SimilarityResult fetch() {
+                protected R fetch() {
                     if (!elementsIter.hasNext() || !prioritiesIter.hasNext()) {
                         return done();
                     }
-                    return new SimilarityResult(node1, elementsIter.nextLong(), prioritiesIter.nextDouble());
+                    return resultCreator.create(node1, elementsIter.nextLong(), prioritiesIter.nextDouble());
                 }
             };
 

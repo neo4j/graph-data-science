@@ -20,12 +20,13 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -35,8 +36,13 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scc.Scc.NOT_VALID;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scc.stream", description = SCC_DESCRIPTION, executionMode = STREAM)
-public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
+@GdsCallable(
+    name = "gds.scc.stream",
+    aliases = {"gds.alpha.scc.stream"},
+    description = SCC_DESCRIPTION,
+    executionMode = STREAM
+)
+public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStreamConfig, Stream<SccStreamResult>, SccAlgorithmFactory<SccStreamConfig>> {
     @Override
     public String name() {
         return "SccStream";
@@ -53,7 +59,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccStreamConfig, Stream<SccStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -63,7 +69,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
                     var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(i -> components.get(i) != NOT_VALID)
-                        .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
+                        .mapToObj(i -> new SccStreamResult(graph.toOriginalNodeId(i), components.get(i)));
                 }).orElseGet(Stream::empty)
         );
     }

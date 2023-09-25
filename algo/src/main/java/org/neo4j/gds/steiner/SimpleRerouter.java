@@ -24,10 +24,13 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -41,16 +44,26 @@ public class SimpleRerouter extends ReroutingAlgorithm {
     private final List<Long> terminals;
     private final TerminationFlag terminationFlag;
 
+    static MemoryEstimation estimation() {
+
+        var memoryEstimationBuilder = MemoryEstimations.builder(SimpleRerouter.class)
+            .add("link cut tree", LinkCutTree.estimation())
+            .perNode("queue", HugeLongArrayQueue::memoryEstimation)
+            .perThread("bitset", MemoryUsage::sizeOfBitset);
+
+        return memoryEstimationBuilder.build();
+    }
+
     SimpleRerouter(
-         Graph graph,
-         long sourceId,
-         List<Long> terminals,
-         int concurrency,
-         ProgressTracker progressTracker,
-         TerminationFlag terminationFlag
-     ) {
-         super(graph, sourceId, concurrency, progressTracker);
-         this.terminals = terminals;
+        Graph graph,
+        long sourceId,
+        List<Long> terminals,
+        int concurrency,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        super(graph, sourceId, concurrency, progressTracker);
+        this.terminals = terminals;
         this.terminationFlag = terminationFlag;
     }
 
@@ -104,12 +117,14 @@ public class SimpleRerouter extends ReroutingAlgorithm {
     ) {
         BitSet endsAtTerminal = new BitSet(graph.nodeCount());
         HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
+
         for (var terminal : terminals) {
             if (parent.get(terminal) != PRUNED) {
                 queue.add(terminal);
                 endsAtTerminal.set(terminal);
             }
         }
+
         while (!queue.isEmpty()) {
             long nodeId = queue.remove();
             long parentId = parent.get(nodeId);

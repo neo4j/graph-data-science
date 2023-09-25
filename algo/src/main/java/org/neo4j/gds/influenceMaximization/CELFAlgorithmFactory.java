@@ -21,11 +21,11 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -53,7 +53,7 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
             configuration.seedSetSize(),
             configuration.propagationProbability(),
             configuration.monteCarloSimulations(),
-            Pools.DEFAULT,
+            DefaultPool.INSTANCE,
             configuration.concurrency(),
             configuration.randomSeed().orElse(0L),
             DEFAULT_BATCH_SIZE,

@@ -19,19 +19,11 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 @ValueClass
 public interface HarmonicResult {
 
-    HugeAtomicDoubleArray inverseFarness();
-
-    long nodeCount();
-
-    @Value.Derived
-    default double getCentralityScore(long nodeId) {
-        return inverseFarness().get(nodeId) / (double) (nodeCount() - 1);
-    }
+    HugeAtomicDoubleArray centralities();
 }

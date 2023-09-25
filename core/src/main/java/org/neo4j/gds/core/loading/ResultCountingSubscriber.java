@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.core.utils.ErrorCachingQuerySubscriber;
 import org.neo4j.graphdb.QueryStatistics;
-import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
-import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.values.AnyValue;
 
-import java.util.Optional;
-
-class ResultCountingSubscriber implements QuerySubscriber {
+class ResultCountingSubscriber extends ErrorCachingQuerySubscriber {
     private long rows = 0;
-    private Optional<Exception> error = Optional.empty();
-
-    Optional<Exception> error() {
-        return error;
-    }
 
     public long rows() {
         return rows;
@@ -57,17 +49,6 @@ class ResultCountingSubscriber implements QuerySubscriber {
     @Override
     public void onRecordCompleted() {
 
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-        if (throwable instanceof RuntimeException) {
-            this.error = Optional.of((RuntimeException) throwable);
-        } else if (throwable instanceof QueryExecutionKernelException) {
-            this.error = Optional.of(((QueryExecutionKernelException) throwable).asUserException());
-        } else {
-            this.error = Optional.of(new RuntimeException(throwable));
-        }
     }
 
     @Override

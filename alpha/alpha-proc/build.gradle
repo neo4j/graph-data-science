@@ -35,6 +35,7 @@ dependencies {
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
+    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
@@ -52,4 +53,6 @@ dependencies {
     testImplementation project(':proc-community')
 
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+
+    testImplementation project(':opengds-extension')
 }

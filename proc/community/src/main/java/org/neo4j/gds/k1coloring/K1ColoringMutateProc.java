@@ -21,9 +21,12 @@ package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,19 +38,19 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringMutateProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ)
+    @Context
+    public GraphDataScience facade;
+
+    @Procedure(value = "gds.k1coloring.mutate", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new K1ColoringMutateSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().k1ColoringMutate(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.k1coloring.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.k1coloring.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -58,5 +61,35 @@ public class K1ColoringMutateProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ, deprecatedBy = "gds.beta.k1coloring.mutate")
+    @Description(K1_COLORING_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<K1ColoringMutateResult> betaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.mutate` has been deprecated, please use `gds.k1coloring.mutate`.");
+        return mutate(graphName,configuration);
+    }
+
+    @Procedure(value = "gds.beta.k1coloring.mutate.estimate", mode = READ, deprecatedBy = "gds.k1coloring.mutate.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.beta.k1coloring.mutate.estimate` has been deprecated, please use `gds.k1coloring.mutate.estimate`.");
+        return estimate(graphNameOrConfiguration,algoConfiguration);
     }
 }

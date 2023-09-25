@@ -124,7 +124,7 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 
 [.include-with-mutate]
 ======
-.Run the Spanning Tree algorithm in write mode on a named graph.
+.Run the Spanning Tree algorithm in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.steinerTree.mutate(
@@ -218,6 +218,8 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 [[algorithms-directed-steiner-tree-sample]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: road network
 :image-file: steiner-graph.svg
@@ -256,6 +258,34 @@ CALL gds.graph.project(
 )
 ----
 
+[[algorithm-steiner-tree-mem-est]]
+=== Memory Estimation
+
+:mode: stats
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stats mode:
+[source, cypher, role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.steinerTree.stats.estimate('graph', {
+  sourceNode: a,
+  targetNodes: [d, e, f],
+  relationshipWeightProperty: 'cost'
+})
+YIELD nodeCount, relationshipCount, requiredMemory
+RETURN nodeCount, relationshipCount, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | requiredMemory
+| 6         | 7              | "[672 Bytes \... 864 Bytes]"
+|===
+--
 
 [[algorithms-steiner-tree-examples-sream]]
 === Stream
@@ -270,8 +300,8 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stream('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost'
 })
 YIELD nodeId,parentId, weight
@@ -310,8 +340,8 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stats('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost'
 })
 YIELD effectiveNodeCount, totalWeight
@@ -339,8 +369,8 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.write('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   writeProperty: 'steinerWeight',
   writeRelationshipType: 'STEINER'
@@ -392,8 +422,8 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.mutate('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   mutateProperty: 'steinerWeight',
   mutateRelationshipType: 'STEINER'
@@ -440,8 +470,8 @@ Note that there is no guarantee that enabling rerouting will always lead to an i
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stream('graph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   applyRerouting: true
 })
@@ -492,8 +522,8 @@ We know repeat the algorithm; this time with the extended rerouting heuristic.
 ----
 MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
 CALL gds.steinerTree.stream('inverseGraph', {
-  sourceNode: id(a),
-  targetNodes: [id(d), id(e), id(f)],
+  sourceNode: a,
+  targetNodes: [d, e, f],
   relationshipWeightProperty: 'cost',
   applyRerouting: true
 })

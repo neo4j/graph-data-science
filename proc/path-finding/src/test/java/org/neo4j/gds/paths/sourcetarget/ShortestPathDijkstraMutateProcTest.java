@@ -95,7 +95,7 @@ class ShortestPathDijkstraMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph")
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
             .getUnion();
         var expectedGraph = TestSupport.fromGdl(expectedMutatedGraph());
@@ -124,7 +124,7 @@ class ShortestPathDijkstraMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph")
+        var actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
             .graphStore()
             .getUnion();
         var expected = TestSupport.fromGdl(DB_CYPHER + ", (a)-[:PATH {w: 20.0D}]->(f)");

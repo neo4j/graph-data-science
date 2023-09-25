@@ -20,8 +20,10 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -33,9 +35,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class HarmonicCentralityStreamProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ)
+    @Procedure(name = "gds.closeness.harmonic.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<CentralityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -45,4 +47,20 @@ public class HarmonicCentralityStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
+    @Deprecated(forRemoval = true)
+    @Internal
+    @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ, deprecatedBy = "gds.closeness.harmonic.stream")
+    @Description(DESCRIPTION)
+    public Stream<DeprecatedTieredStreamResult> streamAlpha(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn("Procedure `gds.alpha.closeness.harmonic.stream` has been deprecated, please use `gds.closeness.harmonic.stream`.");
+        return new ProcedureExecutor<>(
+            new DeprecatedTieredHarmonicCentralityStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+    }
 }

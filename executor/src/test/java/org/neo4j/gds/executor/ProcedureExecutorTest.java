@@ -25,16 +25,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -67,7 +66,7 @@ class ProcedureExecutorTest {
 
     @BeforeEach
     void setUp() {
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", "graph"), graphStore);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("", "graph"), graphStore);
     }
 
     @AfterEach
@@ -131,7 +130,7 @@ class ProcedureExecutorTest {
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .isGdsAdmin(true)
-            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
+            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .modelCatalog(ModelCatalog.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)

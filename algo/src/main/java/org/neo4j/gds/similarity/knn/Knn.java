@@ -29,7 +29,7 @@ import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -135,10 +135,6 @@ public class Knn extends Algorithm<Knn.Result> {
         this.executorService = executorService;
         this.splittableRandom = splittableRandom;
         this.neighborConsumers = neighborConsumers;
-    }
-
-    public long nodeCount() {
-        return graph.nodeCount();
     }
 
     public ExecutorService executorService() {

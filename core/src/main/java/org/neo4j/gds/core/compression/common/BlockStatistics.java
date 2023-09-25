@@ -41,8 +41,10 @@ public final class BlockStatistics implements AutoCloseable {
     private final BoundedHistogram indexOfMaxValue;
     private final BoundedHistogram indexOfMinValue;
     private final BoundedHistogram headTailDiffBits;
+    private final BoundedHistogram bestMaxDiffBits;
+    private final BoundedHistogram exceptions;
 
-    BlockStatistics() {
+    public BlockStatistics() {
         this.blockCount = 0;
         this.bitsPerValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
         this.stdDevBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
@@ -54,6 +56,8 @@ public final class BlockStatistics implements AutoCloseable {
         this.indexOfMinValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
         this.indexOfMaxValue = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
         this.headTailDiffBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.bestMaxDiffBits = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
+        this.exceptions = new BoundedHistogram(AdjacencyPacking.BLOCK_SIZE);
     }
 
     public long blockCount() {
@@ -94,6 +98,14 @@ public final class BlockStatistics implements AutoCloseable {
 
     public ImmutableHistogram headTailDiffBits() {
         return ImmutableHistogram.of(headTailDiffBits);
+    }
+
+    public ImmutableHistogram bestMaxDiffBits() {
+        return ImmutableHistogram.of(bestMaxDiffBits);
+    }
+
+    public ImmutableHistogram exceptions() {
+        return ImmutableHistogram.of(exceptions);
     }
 
     public void record(long[] values, int start, int length) {
@@ -140,9 +152,42 @@ public final class BlockStatistics implements AutoCloseable {
         this.minBits.record(minValue);
         this.indexOfMaxValue.record(indexOfMaxValue - start);
         this.indexOfMinValue.record(indexOfMinValue - start);
+
+        recordFastPFORHeuristic(length);
     }
 
-    void mergeInto(BlockStatistics other) {
+    void recordFastPFORHeuristic(int length) {
+        int maxBits = this.bitsPerValue.max();
+        int bestBits = maxBits;
+        int bestCost = bestBits * length;
+        int exceptions = 0;
+        int bestExceptions = exceptions;
+
+        for (int bits = bestBits - 1; bits >= 0; bits--) {
+            exceptions += this.bitsPerValue.frequency(bits + 1);
+            if (exceptions == length) {
+                break;
+            }
+            int currentCost = exceptions * 8 // FastPFOR uses 1 byte for storing a single exception index
+                + exceptions * (maxBits - bits) // FastPFOR needs (maxBits - bits) bits for storing the exception value
+                + bits * length // packing for all values
+                + 8; // FastPFOR uses 1 byte for storing maxBits
+
+            if (maxBits - bits == 1) {
+                currentCost -= exceptions;
+            }
+
+            if (currentCost < bestCost) {
+                bestCost = currentCost;
+                bestBits = bits;
+                bestExceptions = exceptions;
+            }
+        }
+        this.bestMaxDiffBits.record(maxBits - bestBits);
+        this.exceptions.record(bestExceptions);
+    }
+
+    public void mergeInto(BlockStatistics other) {
         other.blockCount += this.blockCount;
         other.minBits.add(this.minBits);
         other.maxBits.add(this.maxBits);
@@ -153,6 +198,8 @@ public final class BlockStatistics implements AutoCloseable {
         other.indexOfMaxValue.add(this.indexOfMaxValue);
         other.indexOfMinValue.add(this.indexOfMinValue);
         other.headTailDiffBits.add(this.headTailDiffBits);
+        other.bestMaxDiffBits.add(this.bestMaxDiffBits);
+        other.exceptions.add(this.exceptions);
     }
 
     @Override

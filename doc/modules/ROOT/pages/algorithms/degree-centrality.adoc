@@ -216,6 +216,8 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 [[algorithms-degree-centrality-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: degree-centrality-graph.svg
@@ -244,8 +246,6 @@ CREATE
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a native projection targeting the `User` nodes and the `FOLLOWS` relationships.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a reverse projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]

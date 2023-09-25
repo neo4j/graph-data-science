@@ -60,7 +60,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
         runQuery("CALL gds.test.track");
         AtomicReference<JobId> jobIdRef = new AtomicReference<>();
         runQueryWithRowConsumer(
-            "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
+            "CALL gds.listProgress() YIELD jobId RETURN jobId",
             row -> jobIdRef.set(new JobId(row.getString("jobId")))
         );
         this.jobId = jobIdRef.get().asString();
@@ -70,7 +70,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
     void shouldReturnProgressDetail() {
         var expectedLocalTime = LocalTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         assertCypherResult(
-            "CALL gds.beta.listProgress('" + jobId + "')" +
+            "CALL gds.listProgress('" + jobId + "')" +
             "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
             "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId ",
             List.of(
@@ -125,7 +125,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
 
     @Test
     void shouldReturnZeroTimesWhenTaskHasNotStarted() {
-        var query = "CALL gds.beta.listProgress('" + jobId + "') " +
+        var query = "CALL gds.listProgress('" + jobId + "') " +
                     "YIELD status, timeStarted, elapsedTime " +
                     "WHERE status = 'PENDING' " +
                     "RETURN timeStarted, elapsedTime";

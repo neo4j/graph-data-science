@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+
 public class HugeDoubleTriangularMatrix {
 
     private final HugeDoubleArray array;

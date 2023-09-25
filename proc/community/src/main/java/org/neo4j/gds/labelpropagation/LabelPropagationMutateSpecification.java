@@ -22,7 +22,8 @@ package org.neo4j.gds.labelpropagation;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -30,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -39,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.labelPropagation.mutate", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<MutateResult>, LabelPropagationFactory<LabelPropagationMutateConfig>> {
+public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<LabelPropagationMutateResult>, LabelPropagationFactory<LabelPropagationMutateConfig>> {
     @Override
     public String name() {
         return "LabelPropagationMutate";
@@ -56,7 +58,7 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
     }
 
     @Override
-    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, Stream<LabelPropagationMutateResult>> computationResultConsumer() {
 
         return new MutatePropertyComputationResultConsumer<>(
             this::nodeProperties,
@@ -74,19 +76,19 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
                     computationResult.config().mutateProperty(),
                     computationResult.result()
                         .map(LabelPropagationResult::labels)
-                        .orElseGet(() -> HugeLongArray.newArray(0))
-                        .asNodeProperties(),
+                        .map(NodePropertyValuesAdapter::adapt)
+                        .orElse(EmptyLongNodePropertyValues.INSTANCE),
                     () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
                 )
             ));
     }
 
     @NotNull
-    AbstractResultBuilder<MutateResult> resultBuilder(
+    AbstractResultBuilder<LabelPropagationMutateResult> resultBuilder(
         ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = LabelPropagationMutateResult.builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

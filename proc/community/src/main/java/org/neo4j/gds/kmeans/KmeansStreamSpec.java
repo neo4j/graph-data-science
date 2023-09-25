@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -33,8 +34,8 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.kmeans.stream", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>, KmeansAlgorithmFactory<KmeansStreamConfig>> {
+@GdsCallable(name = "gds.kmeans.stream", aliases = {"gds.beta.kmeans.stream"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
+public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamResult>, KmeansAlgorithmFactory<KmeansStreamConfig>> {
     @Override
     public String name() {
         return "KmeansStream";
@@ -51,7 +52,7 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     }
 
     @Override
-    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -63,7 +64,7 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(nodeId -> new StreamResult(
+                        .mapToObj(nodeId -> new KmeansStreamResult(
                             graph.toOriginalNodeId(nodeId),
                             communities.get(nodeId),
                             distances.get(nodeId),

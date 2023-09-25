@@ -101,22 +101,18 @@ public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
                 RelationshipIterator[] localPathTemplate = getPathTemplate(pathTemplateIndex);
 
                 var offset = -1L;
-                var startNodes = new long[MSBFSConstants.OMEGA];
+
                 AtomicLong offsetHolder = globalSharedBatchOffsets.get(pathTemplateIndex);
 
                 // remember that this loop happens on many thread concurrently, hence the shared offset counter
                 while ((offset = offsetHolder.getAndAdd(MSBFSConstants.OMEGA)) < nodeCount) {
                     // at the end of the array we might not have a whole omega-sized chunk left, so we resize
+                    int offsetLength = MSBFSConstants.OMEGA;
                     if (offset + MSBFSConstants.OMEGA >= nodeCount) {
-                        var numberOfNodesRemaining = (int) (nodeCount - offset);
-                        startNodes = new long[numberOfNodesRemaining];
+                        offsetLength = (int) (nodeCount - offset);
                     }
 
-                    for (int i = 0; i < startNodes.length; i++) {
-                        startNodes[i] = offset + i;
-                    }
-
-                    var msbfsTask = createMSBFSTask(localPathTemplate, startNodes, pathTemplateIndex);
+                    var msbfsTask = createMSBFSTask(localPathTemplate, offset, offsetLength, pathTemplateIndex);
 
                     msbfsTask.run();
                 }
@@ -145,7 +141,8 @@ public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
 
     private MultiSourceBFSRunnable createMSBFSTask(
         RelationshipIterator[] localPathTemplate,
-        long[] startNodes,
+        long nodeOffset,
+        int sourceNodeCount,
         int pathTemplateIndex
     ) {
         var executionStrategy = new TraversalToEdgeMSBFSStrategy(
@@ -158,7 +155,8 @@ public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
             null,
             executionStrategy,
             allowSelfLoops,
-            startNodes
+            sourceNodeCount,
+            nodeOffset
         );
     }
 }

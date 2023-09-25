@@ -21,7 +21,6 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,12 +45,11 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
-
+    @SuppressWarnings("unused")
     @Neo4jGraph
     private static final String GRAPH = "CREATE (a)";
 
     private GraphStore graphStore;
-
 
     @BeforeEach
     void setup() throws Exception {
@@ -59,7 +57,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 
-        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), DEFAULT_GRAPH_NAME).graphStore();
+        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), DEFAULT_GRAPH_NAME).graphStore();
     }
 
     @AfterEach
@@ -73,7 +71,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
         graphStore.addGraphProperty("prop", values);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.alpha.graph.graphProperty.stream('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
+            "CALL gds.graph.graphProperty.stream('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
             DEFAULT_GRAPH_NAME
         );
 
@@ -114,35 +112,5 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
                 return 2;
             }
         }));
-    }
-
-    @Test
-    void shouldFailOnNonExistingNodeProperty() {
-        assertError(
-            "CALL gds.alpha.graph.graphProperty.stream($graph, 'UNKNOWN')",
-            Map.of("graph", DEFAULT_GRAPH_NAME),
-            "The specified graph property 'UNKNOWN' does not exist. The following properties exist in the graph []."
-        );
-    }
-
-    @Test
-    void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
-        LongGraphPropertyValues values = new LongGraphPropertyValues() {
-            @Override
-            public LongStream longValues() {
-                return LongStream.range(0, valueCount());
-            }
-
-            @Override
-            public long valueCount() {
-                return 10;
-            }
-        };
-        graphStore.addGraphProperty("prop", values);
-        assertError(
-            "CALL gds.alpha.graph.graphProperty.stream($graph, 'porp')",
-            Map.of("graph", DEFAULT_GRAPH_NAME),
-            "The specified graph property 'porp' does not exist. Did you mean: ['prop']."
-        );
     }
 }

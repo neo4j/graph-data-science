@@ -3,33 +3,30 @@
 :description: This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
 
 
-
 Machine learning algorithms which support the `train` mode produce trained models which are stored in the Model Catalog.
 Similarly, `predict` procedures can use such trained models to produce predictions.
 A model is generally a mathematical formula representing real-world or fictitious entities.
 Each algorithm requiring a trained model provides the formulation and means to compute this model.
 
 The model catalog is a concept within the GDS library that allows storing and managing multiple trained models by name.
-
-
 This chapter explains the available model catalog operations.
 
 [[model-catalog-procs]]
-[opts=header,cols="1m,1"]
+[opts=header,cols="1m,3"]
 |===
-| Name                                                | Description
-| xref:model-catalog/list.adoc[gds.beta.model.list]         | Prints information about models that are currently available in the catalog.
-| xref:model-catalog/exists.adoc[gds.beta.model.exists]     | Checks if a named model is available in the catalog.
-| xref:model-catalog/drop.adoc[gds.beta.model.drop]         | Drops a named model from the catalog.
-| xref:model-catalog/store.adoc[gds.alpha.model.store]      | Stores a names model from the catalog on disk.
-| xref:model-catalog/store.adoc#catalog-model-load[gds.alpha.model.load]        | Loads a named and stored model from disk.
-| xref:model-catalog/store.adoc#catalog-model-delete[gds.alpha.model.delete]    | Removes a named and stored model from disk.
-| xref:model-catalog/publish.adoc[gds.alpha.model.publish]  | Makes a model accessible to all users.
+| Name                                                                 | Description
+| xref:model-catalog/list.adoc[gds.model.list]                         | Prints information about models that are currently available in the catalog.
+| xref:model-catalog/exists.adoc[gds.model.exists]                     | Checks if a named model is available in the catalog.
+| xref:model-catalog/drop.adoc[gds.model.drop]                         | Drops a named model from the catalog.
+| xref:model-catalog/store.adoc[gds.model.store]                       | Stores a names model from the catalog on disk.
+| xref:model-catalog/store.adoc#catalog-model-load[gds.model.load]     | Loads a named and stored model from disk.
+| xref:model-catalog/store.adoc#catalog-model-delete[gds.model.delete] | Removes a named and stored model from disk.
+| xref:model-catalog/publish.adoc[gds.model.publish]                   | Makes a model accessible to all users.
 |===
 
 [NOTE]
 ====
 Training models is a responsibility of the corresponding algorithm and is provided by a procedure mode - `train`.
 Training, using, listing, and dropping named models are management operations bound to a Neo4j user.
-Models trained by a different Neo4j user are not accessible at any time.
+Models trained by a different Neo4j user are not accessible unless explicitly published.
 ====

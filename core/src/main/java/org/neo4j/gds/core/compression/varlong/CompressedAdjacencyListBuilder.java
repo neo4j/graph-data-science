@@ -20,14 +20,17 @@
 package org.neo4j.gds.core.compression.varlong;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.AdjacencyList.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.compression.MemoryInfo;
+import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
+
+import java.util.Optional;
 
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
@@ -50,9 +53,11 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     }
 
     @Override
-    public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
         byte[][] intoPages = builder.intoPages();
-        reorder(intoPages, offsets, degrees);
+        if (allowReordering) {
+            reorder(intoPages, offsets, degrees);
+        }
         var memoryInfo = memoryInfo(intoPages, degrees, offsets);
 
         return new CompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
@@ -63,8 +68,8 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
             this.memoryTracker.recordPageSize(page.length * Byte.BYTES);
         }
 
-        var memoryInfoBuilder = MemoryInfo
-            .builder(memoryTracker)
+        var memoryInfoBuilder = MemoryInfoUtil
+            .builder(memoryTracker, Optional.empty())
             .pages(pages.length)
             .bytesOffHeap(0);
 
@@ -77,7 +82,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         return memoryInfoBuilder.build();
     }
 
-    private enum Factory implements BumpAllocator.Factory<byte[]> {
+    enum Factory implements BumpAllocator.Factory<byte[]> {
         INSTANCE;
 
         @Override
@@ -102,9 +107,9 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         }
 
         @Override
-        public long allocate(int length, Slice<byte[]> into) {
-            this.memoryTracker.recordHeapAllocation(length);
-            return allocator.insertInto(length, (ModifiableSlice<byte[]>) into);
+        public long allocate(int allocationSize, Slice<byte[]> into) {
+            this.memoryTracker.recordHeapAllocation(allocationSize);
+            return allocator.insertInto(allocationSize, (ModifiableSlice<byte[]>) into);
         }
 
         @Override

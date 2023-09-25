@@ -25,10 +25,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.TerminationMonitor;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -120,7 +120,7 @@ public interface ExecutionContext {
 
         @Override
         public DependencyResolver dependencyResolver() {
-            return EmptyDependencyResolver.INSTANCE;
+            return Neo4jProxy.emptyDependencyResolver();
         }
 
         @Override

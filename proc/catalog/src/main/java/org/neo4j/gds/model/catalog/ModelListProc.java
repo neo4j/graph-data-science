@@ -21,6 +21,7 @@ package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +33,7 @@ public class ModelListProc extends ModelCatalogProc {
 
     private static final String DESCRIPTION = "Lists all models contained in the model catalog.";
 
-    @Procedure(name = "gds.beta.model.list", mode = READ)
+    @Procedure(name = "gds.model.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelCatalogResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
         ModelCatalog modelCatalog = executionContext().modelCatalog();
@@ -46,5 +47,18 @@ public class ModelListProc extends ModelCatalogProc {
                 ? Stream.empty()
                 : Stream.of(new ModelCatalogResult(model));
         }
+    }
+
+    @Procedure(name = "gds.beta.model.list", mode = READ, deprecatedBy = "gds.model.list")
+    @Description(DESCRIPTION)
+    @Deprecated
+    @Internal
+    public Stream<BetaModelCatalogResult> betaList(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
+
+        executionContext()
+            .log()
+            .warn("Procedure `gds.beta.model.list` has been deprecated, please use `gds.model.list`.");
+
+        return list(modelName).map(BetaModelCatalogResult::new);
     }
 }

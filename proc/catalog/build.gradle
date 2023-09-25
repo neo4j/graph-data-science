@@ -25,12 +25,13 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
-    implementation project(':graph-store-catalog-applications') // duh
     implementation project(':io-core')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
+    implementation project(':native-projection')
     implementation project(':neo4j-api')
+    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
@@ -61,4 +62,5 @@ dependencies {
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     testImplementation group: 'org.mockito', name:'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
 
+    testImplementation project(':opengds-extension')
 }

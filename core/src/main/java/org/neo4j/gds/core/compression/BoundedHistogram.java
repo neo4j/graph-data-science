@@ -48,6 +48,13 @@ public final class BoundedHistogram {
     }
 
     /**
+     * Returns the number of recordings for the given value.
+     */
+    public long frequency(int value) {
+        return this.histogram[value];
+    }
+
+    /**
      * Returns the total number of recorded values.
      */
     public long total() {

@@ -1,0 +1,211 @@
+:page-aliases: alpha-algorithms/all-pairs-shortest-path.adoc
+
+[[algorithm-all-pairs-shortest-path]]
+[.alpha]
+= All Pairs Shortest Path
+:description: This section describes the All Pairs Shortest Path algorithm in the Neo4j Graph Data Science library.
+
+
+The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.
+This algorithm has optimizations that make it quicker than calling the Single Source Shortest Path algorithm for every pair of nodes in the graph.
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+
+:directed:
+:undirected:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithm-all-pairs-shortest-path-context]]
+== History and explanation
+
+// tag::explanation[]
+Some pairs of nodes might not be reachable between each other, so no shortest path exists between these pairs.
+In this scenario, the algorithm will return `Infinity` value as a result between these pairs of nodes.
+// end::explanation[]
+
+GDS includes xref:management-ops/utility-functions.adoc[functions] such as  `gds.util.isFinite` to help filter infinity values from results.
+Starting with Neo4j 5, the `Infinity` literal is now included in Cypher too.
+
+
+[[algorithm-all-pairs-shortest-path-usecase]]
+== Use-cases - when to use the All Pairs Shortest Path algorithm
+
+// tag::use-case[]
+
+* The All Pairs Shortest Path algorithm is used in urban service system problems, such as the location of urban facilities or the distribution or delivery of goods.
+  One example of this is determining the traffic load expected on different segments of a transportation grid.
+  For more information, see http://web.mit.edu/urban_or_book/www/book/[Urban Operations Research^].
+* All pairs shortest path is used as part of the REWIRE data center design algorithm that finds a network with maximum bandwidth and minimal latency.
+  There are more details about this approach in https://cs.uwaterloo.ca/research/tr/2011/CS-2011-21.pdf["REWIRE: An Optimization-based Framework for Data Center Network Design"^]
+
+// end::use-case[]
+
+
+[[algorithm-all-pairs-shortest-path-syntax]]
+== Syntax
+[.include-with-stream]
+======
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.allShortestPaths.stream(
+  graphName: string,
+  configuration: map
+)
+YIELD sourceNodeId, targetNodeId, distance
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type      | Description
+| sourceNodeId               | Integer   | The source node.
+| targetNodeId               | Integer   | The target node.
+| distance  | Float |  The distance of the shortest path from source to target.
+|===
+
+======
+
+[[algorithm-all-pairs-shortest-path-sample]]
+== All Pairs Shortest Path algorithm sample
+
+image::example-graphs/shortest-path_graph.png[]
+
+.The following will create a sample graph:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Loc {name: 'A'}),
+       (b:Loc {name: 'B'}),
+       (c:Loc {name: 'C'}),
+       (d:Loc {name: 'D'}),
+       (e:Loc {name: 'E'}),
+       (f:Loc {name: 'F'}),
+       (a)-[:ROAD {cost: 50}]->(b),
+       (a)-[:ROAD {cost: 50}]->(c),
+       (a)-[:ROAD {cost: 100}]->(d),
+       (b)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 80}]->(e),
+       (d)-[:ROAD {cost: 30}]->(e),
+       (d)-[:ROAD {cost: 80}]->(f),
+       (e)-[:ROAD {cost: 40}]->(f);
+
+----
+
+=== Using native projection
+
+.The following will project and store a graph using native projection:
+[source, cypher, role=noplay graph-project-query, group=native]
+----
+CALL gds.graph.project(
+  'nativeGraph',
+  'Loc',
+  {
+    ROAD: {
+      properties: 'cost'
+    }
+  }
+)
+YIELD graphName
+----
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay, group=native]
+----
+CALL gds.allShortestPaths.stream('nativeGraph', {
+  relationshipWeightProperty: 'cost'
+})
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE gds.util.isFinite(distance) = true
+WITH gds.util.asNode(sourceNodeId) AS source, gds.util.asNode(targetNodeId) AS target, distance WHERE source <> target
+RETURN source.name AS source, target.name AS target, distance
+ORDER BY distance DESC, source ASC, target ASC
+LIMIT 10
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| source | target | distance
+| "A"    | "F"    | 160
+| "A"    | "E"    | 120
+| "B"    | "F"    | 110
+| "C"    | "F"    | 110
+| "A"    | "D"    | 90
+| "B"    | "E"    | 70
+| "C"    | "E"    | 70
+| "D"    | "F"    | 70
+| "A"    | "B"    | 50
+| "A"    | "C"    | 50
+|===
+--
+
+This query returned the top 10 pairs of nodes that are the furthest away from each other.
+F and E appear to be quite distant from the others.
+
+=== Using Cypher projection
+
+.The following will project and store an undirected graph using cypher projection:
+[source, cypher, role=noplay graph-project-query, group=cypher]
+----
+MATCH (src:Loc)-[r:ROAD]->(trg:Loc)
+RETURN gds.graph.project(
+  'cypherGraph',
+  src,
+  trg,
+  {relationshipType: type(r), relationshipProperties: {cost: r.cost}},
+  {undirectedRelationshipTypes: ['ROAD']
+})
+----
+
+[role=query-example]
+--
+.The following will run the algorithm, treating the graph as undirected:
+[source, cypher, role=noplay, group=cypher]
+----
+CALL gds.allShortestPaths.stream('cypherGraph', {
+  relationshipWeightProperty: 'cost'
+})
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE gds.util.isFinite(distance) = true
+WITH gds.util.asNode(sourceNodeId) AS source, gds.util.asNode(targetNodeId) AS target, distance WHERE source <> target
+
+RETURN source.name AS source, target.name AS target, distance
+ORDER BY distance DESC, source ASC, target ASC
+LIMIT 10
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| source | target | distance
+| "A"    | "F"    | 160
+| "F"    | "A"    | 160
+| "A"    | "E"    | 120
+| "E"    | "A"    | 120
+| "B"    | "F"    | 110
+| "C"    | "F"    | 110
+| "F"    | "B"    | 110
+| "F"    | "C"    | 110
+| "A"    | "D"    | 90
+| "D"    | "A"    | 90
+|===
+--

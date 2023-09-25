@@ -1,0 +1,17 @@
+[[algorithms-dag]]
+= DAG algorithms
+:description: This chapter provides a description of the available DAG algorithms in the Neo4j Graph Data Science library.
+
+
+Directed Acyclic Graphs (DAGs) are directed graphs that do not contain cycles.
+These kind of graphs are commonly used to model dependencies between entities.
+
+The canonical algorithm that goes hand in hand with DAGs is topological sort, for which GDS provides an efficient parallel implementation. Running topological sort is the best way to make sure the graph is a DAG.
+
+Some of the problems that are computationally hard to solve in the general case can be solved efficiently when the scope is limited to DAGs. One of these is the longest path problem, for which GDS provides an efficient algorithm.
+
+The Neo4j GDS library includes the following DAG algorithms:
+
+* Alpha
+** xref:algorithms/dag/topological-sort.adoc[Topological Sort]
+** xref:algorithms/dag/longest-path.adoc[Longest Path]

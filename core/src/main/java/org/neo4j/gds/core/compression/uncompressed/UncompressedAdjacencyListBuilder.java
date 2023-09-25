@@ -20,16 +20,18 @@
 package org.neo4j.gds.core.compression.uncompressed;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.AdjacencyList.MemoryInfo;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
+import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuilder<long[], UncompressedAdjacencyList> {
 
@@ -52,9 +54,11 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
     }
 
     @Override
-    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets, boolean allowReordering) {
         long[][] intoPages = builder.intoPages();
-        reorder(intoPages, offsets, degrees);
+        if (allowReordering) {
+            reorder(intoPages, offsets, degrees);
+        }
         var memoryInfo = memoryInfo(intoPages, degrees, offsets);
 
         return new UncompressedAdjacencyList(intoPages, degrees, offsets, memoryInfo);
@@ -65,8 +69,8 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
             this.memoryTracker.recordPageSize(page.length * Long.BYTES);
         }
 
-        var memoryInfoBuilder = MemoryInfo
-            .builder(memoryTracker)
+        var memoryInfoBuilder = MemoryInfoUtil
+            .builder(memoryTracker, Optional.empty())
             .pages(pages.length)
             .bytesOffHeap(0);
 
@@ -118,9 +122,9 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public long allocate(int length, Slice<long[]> into) {
-            this.memoryTracker.recordHeapAllocation(length);
-            return allocator.insertInto(length, (ModifiableSlice<long[]>) into);
+        public long allocate(int allocationSize, Slice<long[]> into) {
+            this.memoryTracker.recordHeapAllocation(allocationSize);
+            return allocator.insertInto(allocationSize, (ModifiableSlice<long[]>) into);
         }
 
         @Override

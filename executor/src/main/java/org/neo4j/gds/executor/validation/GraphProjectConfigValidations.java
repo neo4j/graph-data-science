@@ -23,7 +23,7 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -37,7 +37,7 @@ public final class GraphProjectConfigValidations {
     public static class UndirectedGraphValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
         @Override
         public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config) {
-            graphProjectConfig.accept(new GraphProjectConfig.Visitor() {
+            graphProjectConfig.accept(new GraphProjectFromStoreConfig.Visitor() {
                 @Override
                 public void visit(GraphProjectFromStoreConfig storeConfig) {
                     storeConfig.relationshipProjections().projections().entrySet().stream()
@@ -66,7 +66,7 @@ public final class GraphProjectConfigValidations {
     public static class OrientationValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
         @Override
         public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG algorithmConfig) {
-            graphProjectConfig.accept(new GraphProjectConfig.Visitor() {
+            graphProjectConfig.accept(new GraphProjectFromStoreConfig.Visitor() {
                 @Override
                 public void visit(GraphProjectFromStoreConfig storeConfig) {
                     var filteredProjections = storeConfig

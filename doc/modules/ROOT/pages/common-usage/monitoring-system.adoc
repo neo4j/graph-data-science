@@ -15,7 +15,7 @@ Graphs and models are not shared between non-admin users by default, however GDS
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
-To be able to get an overview of the system's current capacity and its analytics workload one can use the procedure `gds.alpha.systemMonitor`.
+To be able to get an overview of the system's current capacity and its analytics workload one can use the procedure `gds.systemMonitor`.
 It will give you information on the capacity of the DBMS's JVM instance in terms of memory and CPU cores, and an overview of the resources consumed by the GDS procedures currently being run on the system.
 
 
@@ -26,7 +26,7 @@ It will give you information on the capacity of the DBMS's JVM instance in terms
 .Monitor the system capacity and analytics workload:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.systemMonitor()
+CALL gds.systemMonitor()
 YIELD
   freeHeap,
   totalHeap,
@@ -61,14 +61,14 @@ To inspect the graphs in the graph catalog you can use the xref:management-ops/g
 
 === Example
 
-First let us assume that we just started `gds.beta.node2vec.stream` procedure with some arbitrary parameters.
+First let us assume that we just started `gds.node2vec.stream` procedure with some arbitrary parameters.
 
 We can have a look at the status of the JVM heap.
 
 .Monitor JVM heap status:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.systemMonitor()
+CALL gds.systemMonitor()
 YIELD
   freeHeap,
   totalHeap,
@@ -89,7 +89,7 @@ We can also inspect CPU core usage as well as the status of currently running GD
 .Monitor CPU core usage and ongoing GDS procedures:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.systemMonitor()
+CALL gds.systemMonitor()
 YIELD
   availableCpuCoresNotRequested,
   jvmAvailableCpuCores,

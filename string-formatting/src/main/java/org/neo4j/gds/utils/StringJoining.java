@@ -21,6 +21,7 @@ package org.neo4j.gds.utils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,5 +83,9 @@ public final class StringJoining {
             join(alternatives.stream().limit(alternatives.size() - 1), ", "),
             alternatives.stream().skip(alternatives.size() - 1).findFirst().orElseThrow(() -> new IllegalStateException("No alternatives found."))
         ));
+    }
+
+    public static <T> String join(Collection<T> elements, Function<T, String> elementToStringifier) {
+        return join(elements.stream().map(elementToStringifier));
     }
 }

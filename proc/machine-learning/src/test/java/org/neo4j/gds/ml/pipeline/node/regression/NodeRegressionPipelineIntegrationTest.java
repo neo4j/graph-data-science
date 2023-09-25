@@ -162,7 +162,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
                  "})");
 
         assertCypherResult(
-            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
+            "CALL gds.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
             List.of(Map.of("modelCount", 1L))
         );
 
@@ -217,7 +217,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
                  "})");
 
         assertCypherResult(
-            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
+            "CALL gds.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
             List.of(Map.of("modelCount", 1L))
         );
 

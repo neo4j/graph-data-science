@@ -24,15 +24,19 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.HdrHistogram.Histogram;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.HugeSparseLongArray;
+import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
 
 public final class CommunityStatistics {
@@ -133,6 +137,56 @@ public final class CommunityStatistics {
             concurrency
         );
         return communityCountAndHistogram(communitySizes, executorService, concurrency);
+    }
+
+    public static CommunityStats communityStats(
+        long nodeCount,
+        LongUnaryOperator communityFunction,
+        ExecutorService executorService,
+        int concurrency,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        long componentCount = 0;
+        Optional<Histogram> maybeHistogram = Optional.empty();
+        var computeMilliseconds = new AtomicLong(0);
+        try(var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+            if (statisticsComputationInstructions.computeCountAndDistribution()) {
+                var communityStatistics = CommunityStatistics.communityCountAndHistogram(
+                    nodeCount,
+                    communityFunction,
+                    executorService,
+                    concurrency
+                );
+
+                componentCount = communityStatistics.componentCount();
+                maybeHistogram = Optional.of(communityStatistics.histogram());
+            } else if (statisticsComputationInstructions.computeCountOnly()) {
+                componentCount = CommunityStatistics.communityCount(
+                    nodeCount,
+                    communityFunction,
+                    executorService,
+                    concurrency
+                );
+            }
+        }
+
+        return ImmutableCommunityStats.of(componentCount, maybeHistogram, computeMilliseconds.get());
+    }
+
+    public static Map<String, Object> communitySummary(Optional<Histogram> histogram) {
+        return histogram
+            .map(HistogramUtils::communitySummary)
+            .orElseGet(Collections::emptyMap);
+    }
+
+    @ValueClass
+    @SuppressWarnings("immutables:incompat")
+    public interface CommunityStats {
+        long componentCount();
+
+        Optional<Histogram> histogram();
+
+        long computeMilliseconds();
     }
 
     public static CommunityCountAndHistogram communityCountAndHistogram(

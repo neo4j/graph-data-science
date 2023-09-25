@@ -22,7 +22,8 @@ package org.neo4j.gds.labelpropagation;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -30,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -39,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
 
 @GdsCallable(name = "gds.labelPropagation.write", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, Stream<WriteResult>, LabelPropagationFactory<LabelPropagationWriteConfig>> {
+public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, Stream<LabelPropagationWriteResult>, LabelPropagationFactory<LabelPropagationWriteConfig>> {
     @Override
     public String name() {
         return "LabelPropagationWrite";
@@ -56,7 +58,7 @@ public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPr
     }
 
     @Override
-    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, Stream<LabelPropagationWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             this::nodeProperties,
@@ -74,19 +76,19 @@ public class LabelPropagationWriteSpecification implements AlgorithmSpec<LabelPr
                     computationResult.config().writeProperty(),
                     computationResult.result()
                         .map(LabelPropagationResult::labels)
-                        .orElseGet(() -> HugeLongArray.newArray(0))
-                        .asNodeProperties(),
+                        .map(NodePropertyValuesAdapter::adapt)
+                        .orElse(EmptyLongNodePropertyValues.INSTANCE),
                     () -> computationResult.graphStore().nodeProperty(computationResult.config().seedProperty())
                 )
             ));
     }
 
     @NotNull
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<LabelPropagationWriteResult> resultBuilder(
         ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = LabelPropagationWriteResult.builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

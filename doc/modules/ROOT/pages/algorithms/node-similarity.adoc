@@ -58,7 +58,7 @@ For more information on this algorithm, see:
 * https://en.wikipedia.org/wiki/Overlap_coefficient[The Overlap Coefficient (Wikipedia)].
 * https://en.wikipedia.org/wiki/Bipartite_graph[Bipartite graphs (Wikipedia)]
 
-It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/alpha/filtered-node-similarity.adoc[filtered Node Similarity] algorithm for this purpose.
+It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/filtered-node-similarity.adoc[filtered Node Similarity] algorithm for this purpose.
 
 [NOTE]
 ====
@@ -248,6 +248,8 @@ include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 [[algorithms-node-similarity-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: knowledge
 :image-file: node-similarity.png
@@ -286,8 +288,6 @@ In the example, we want to use the Node Similarity algorithm to compare people b
 
 The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]

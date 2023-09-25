@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.api.compress;
 
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+
 import java.util.concurrent.atomic.LongAdder;
 
 public interface AdjacencyCompressorFactory {
@@ -27,6 +30,8 @@ public interface AdjacencyCompressorFactory {
      * Prepares the compressor for flushing, for example by initializing data structures as they are needed.
      */
     void init();
+
+    void init(HugeIntArray degrees, HugeLongArray adjacencyOffsets, HugeLongArray propertyOffsets);
 
     /**
      * @return a copy of this blueprint that can be used concurrently with other copies to compress data.
@@ -38,5 +43,5 @@ public interface AdjacencyCompressorFactory {
     /**
      * @return the final adjacency list, together with any number of properties, if any.
      */
-    AdjacencyListsWithProperties build();
+    AdjacencyListsWithProperties build(boolean allowReordering);
 }

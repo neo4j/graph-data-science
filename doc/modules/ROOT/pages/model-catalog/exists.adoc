@@ -1,8 +1,5 @@
-[.beta]
 [[catalog-model-exists]]
 = Checking if a model exists
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 We can check if a model is available in the catalog by looking up its name.
 
@@ -14,7 +11,7 @@ We can check if a model is available in the catalog by looking up its name.
 .Check if a model exists in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.exists(modelName: String)
+CALL gds.model.exists(modelName: String)
 YIELD
     modelName: String,
     modelType: String,
@@ -39,23 +36,54 @@ YIELD
 --
 
 
-== Example
+== Examples
 
-In this section we are going to demonstrate the usage of `gds.beta.model.exists`.
-Assume we trained a model by running `train` on one of our xref:machine-learning/machine-learning.adoc[Machine learning algorithms].
+In this section we are going to demonstrate the usage of `gds.model.exists`.
+For simplicity, we will assume that an example model named `my-model1` has already been trained and exists in the model catalog.
+
+
+=== Check an existing model
+
+We can check if a model exists in the catalog by specifying its name.
 
 [role=query-example]
 --
 .Check if a model exists in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.exists('my-model');
+CALL gds.model.exists('my-model1');
 ----
 
 .Results
 [opts="header"]
 |===
-| modelName    | modelType   | exists
-| "my-model"   | "graphSage" | true
+| modelName   | modelType            | exists
+| "my-model1" | "example-model-type" | true
 |===
 --
+
+As we can see, the model does exist in the model catalog.
+
+
+=== Check a non-existing model
+
+If we instead use a non-existing model name, we will get a `false` value for the `exists` field.
+
+[role=query-example]
+--
+.Check if a model exists in the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.model.exists('does-not-exist');
+----
+
+.Results
+[opts="header"]
+|===
+| modelName        | modelType | exists
+| "does-not-exist" | "n/a"     | false
+|===
+--
+
+As we can see, this model does not exist in the model catalog.
+Since this model does not exist, its type is `n/a`.

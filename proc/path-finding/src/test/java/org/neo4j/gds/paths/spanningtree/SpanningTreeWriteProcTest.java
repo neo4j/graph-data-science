@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
@@ -79,7 +80,7 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
     @ValueSource(strings = {"minimum", "maximum"})
     void testYields(String objective) {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.spanningTree")
+            .algo("gds.spanningTree")
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
@@ -114,4 +115,33 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
         assertEquals(relCount, 4);
     }
 
+    @Test
+    void testYieldsWithBeta() {
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.spanningTree")
+            .writeMode()
+            .addParameter("sourceNode", getSourceNode())
+            .addParameter("relationshipWeightProperty", "cost")
+            .addParameter("writeProperty", "cost")
+            .addParameter("writeRelationshipType", "MST")
+            .yields(
+                "preProcessingMillis",
+                "computeMillis",
+                "writeMillis",
+                "effectiveNodeCount",
+                "relationshipsWritten"
+            );
+
+        runQueryWithRowConsumer(
+            query,
+            res -> {
+                assertThat(res.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
+                assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(4L);
+
+            }
+        );
+    }
 }

@@ -116,7 +116,7 @@ public final class TestGeneratorUtils {
         } else if (valueType == TypeName.FLOAT) {
             return "random.nextFloat()";
         } else if (valueType == TypeName.DOUBLE) {
-            return "random.nextFloat()";
+            return "random.nextDouble()";
         } else if (valueType.equals(ArrayTypeName.of(TypeName.BYTE))) {
             return "new byte[] { " + randomValue(TypeName.BYTE) + " }";
         } else if (valueType.equals(ArrayTypeName.of(TypeName.SHORT))) {

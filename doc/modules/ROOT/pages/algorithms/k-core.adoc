@@ -5,6 +5,7 @@
 :result: core value
 :algorithm: K-Core Decomposition
 
+:no-directed:
 :undirected:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
@@ -201,6 +202,8 @@ include::partial$/algorithms/common-configuration/common-write-configuration-ent
 [[algorithms-k-core-examples]]
 == Examples
 
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
 :algorithm-name: {algorithm}
 :graph-description: social network
 :image-file: k-core-graph.svg
@@ -238,8 +241,6 @@ CREATE
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a native projection targeting the `User` nodes and the `FRIEND` relationships.
-
-include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using athe undirected projection and store it in the graph catalog under the name 'graph'.
 [source, cypher, role=noplay graph-project-query]

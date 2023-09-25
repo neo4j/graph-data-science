@@ -19,96 +19,47 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.DeleteRelationshipsConfig;
-import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.DROP_RELATIONSHIPS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphDropRelationshipProc extends CatalogProc {
+public class GraphDropRelationshipProc {
+    @Context
+    public GraphDataScience facade;
 
-    private static final String DESCRIPTION = "Delete the relationship type for a given graph stored in the graph-catalog.";
-
+    @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.relationships.drop", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<Result> dropRelationships(
+    @Description(DROP_RELATIONSHIPS_DESCRIPTION)
+    public Stream<GraphDropRelationshipResult> dropRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        return dropRelationships(graphName, relationshipType, Optional.empty());
-    }
-
-    @Procedure(name = "gds.graph.deleteRelationships", mode = READ, deprecatedBy = "gds.graph.relationships.drop")
-    @Description(DESCRIPTION)
-    public Stream<Result> delete(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "relationshipType") String relationshipType
-    ) {
-        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationships.drop`";
-        return dropRelationships(graphName, relationshipType, Optional.of(deprecationWarning));
-    }
-
-    private Stream<Result> dropRelationships(
-        String graphName,
-        String relationshipType,
-        Optional<String> deprecationWarning
-    ) {
-        Preconditions.check();
-
-        GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
-
-        DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());
-
-        var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
-        var progressTracker = new TaskProgressTracker(
-            task,
-            executionContext().log(),
-            1,
-            new JobId(),
-            executionContext().taskRegistryFactory(),
-            executionContext().userLogRegistryFactory()
-        );
-
-        deprecationWarning.ifPresent(progressTracker::logWarning);
-
-        progressTracker.beginSubTask();
-        DeletionResult deletionResult = graphStoreWithConfig
-            .graphStore()
-            .deleteRelationships(RelationshipType.of(relationshipType));
-        progressTracker.endSubTask();
-
-        return Stream.of(new Result(
-            graphName,
-            relationshipType,
-            deletionResult
-        ));
+        return facade.catalog().dropRelationships(graphName, relationshipType);
     }
 
     @SuppressWarnings("unused")
-    public static class Result {
-        public final String graphName;
-        public final String relationshipType;
-
-        public final long deletedRelationships;
-        public final Map<String, Long> deletedProperties;
-
-        Result(String graphName, String relationshipType, DeletionResult deletionResult) {
-            this.graphName = graphName;
-            this.relationshipType = relationshipType;
-            this.deletedRelationships = deletionResult.deletedRelationships();
-            this.deletedProperties = deletionResult.deletedProperties();
-        }
+    @Procedure(name = "gds.graph.deleteRelationships", mode = READ, deprecatedBy = "gds.graph.relationships.drop")
+    @Description(DROP_RELATIONSHIPS_DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
+    public Stream<GraphDropRelationshipResult> deleteRelationships(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipType") String relationshipType
+    ) {
+        facade
+            .log()
+            .warn(
+                "Procedure `gds.graph.deleteRelationships` has been deprecated, please use `gds.graph.relationships.drop`.");
+        
+        return facade.catalog().dropRelationships(graphName, relationshipType);
     }
 }

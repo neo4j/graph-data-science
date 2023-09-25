@@ -19,40 +19,21 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.warnings.PerDatabaseUserLogStore;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 class GraphDropRelationshipProcTest extends BaseProcTest {
-
     private final String DB_CYPHER =
-        "CREATE (:A)-[:T1]->(:A), " +
-        "       (:A)-[:T2 {p: 1}]->(:A) ";
+        "CREATE (:A)-[:T1]->(:A), (:A)-[:T2 {p: 1}]->(:A) ";
 
     private final String graphName = "g";
     private final Map<String, Object> params = Map.of("graphName", this.graphName);
-
-    PerDatabaseUserLogStore userLogStore;
-
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        this.userLogStore = new PerDatabaseUserLogStore();
-        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
-        builder.addExtension(new UserLogRegistryExtension(__ -> userLogStore));
-    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -67,40 +48,14 @@ class GraphDropRelationshipProcTest extends BaseProcTest {
     }
 
     @Test
-    void failWhenNoSuchGraph() {
-        assertError(
-            "CALL gds.graph.relationships.drop('foo', 'bar')",
-            "Graph with name `foo` does not exist on database `neo4j`."
-        );
-    }
-
-    @Test
-    void failWhenNoSuchRelType() {
-        assertError("CALL gds.graph.relationships.drop('g', 'bar')", "No relationship type 'bar' found in graph 'g'.");
-    }
-
-    @Test
-    void failWhenDeletingLastRelType() {
-        // deleting one is fine
-        runQuery("CALL gds.graph.relationships.drop('g', 'T1')");
-
-        String query2 = "CALL gds.graph.relationships.drop('g', 'T2')";
-
-        assertError(
-            query2,
-            "Deleting the last relationship type ('T2') from a graph ('g') is not supported. " +
-            "Use `gds.graph.drop()` to drop the entire graph instead."
-        );
-    }
-
-    @Test
     void shouldDeleteRelationshipType() {
         String query = "CALL gds.graph.relationships.drop('g', 'T1')";
         assertCypherResult(query, Collections.singletonList(Map.of(
-            "graphName", "g",
-            "relationshipType", "T1",
-            "deletedRelationships", 1L,
-            "deletedProperties", Map.of())
+                "graphName", "g",
+                "relationshipType", "T1",
+                "deletedRelationships", 1L,
+                "deletedProperties", Map.of()
+            )
         ));
     }
 
@@ -108,21 +63,11 @@ class GraphDropRelationshipProcTest extends BaseProcTest {
     void shouldDeleteRelationshipTypeWithProperties() {
         String query = "CALL gds.graph.relationships.drop('g', 'T2')";
         assertCypherResult(query, Collections.singletonList(Map.of(
-            "graphName", "g",
-            "relationshipType", "T2",
-            "deletedRelationships", 1L,
-            "deletedProperties", Map.of("p", 1L))
+                "graphName", "g",
+                "relationshipType", "T2",
+                "deletedRelationships", 1L,
+                "deletedProperties", Map.of("p", 1L)
+            )
         ));
     }
-
-    @Test
-    void shouldLogDeprecationWarning() {
-        runQuery("CALL gds.graph.deleteRelationships($graph, 'T1')", Map.of("graph", graphName));
-        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
-        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
-        Assertions.assertThat(userLogEntries.get(0).getMessage())
-            .contains("deprecated")
-            .contains("gds.graph.relationships.drop");
-    }
-
 }

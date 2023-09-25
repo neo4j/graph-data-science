@@ -19,22 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.logging.Log;
-
-import java.util.Collections;
-
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 final class LocalClusteringCoefficientCompanion {
 
@@ -44,16 +36,17 @@ final class LocalClusteringCoefficientCompanion {
     private LocalClusteringCoefficientCompanion() {}
 
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodePropertyValues nodeProperties(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, CONFIG> computeResult
     ) {
         return computeResult.result()
-            .map(LocalClusteringCoefficient.Result::asNodeProperties)
+            .map(LocalClusteringCoefficientResult::localClusteringCoefficients)
+            .map(NodePropertyValuesAdapter::adapt)
             .orElse(EmptyDoubleNodePropertyValues.INSTANCE);
     }
 
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, CONFIG> computeResult
     ) {
         var result = computeResult.result().orElse(EmptyResult.EMPTY_RESULT);
 
@@ -75,7 +68,7 @@ final class LocalClusteringCoefficientCompanion {
         }
     }
 
-    private static final class EmptyResult implements LocalClusteringCoefficient.Result {
+    private static final class EmptyResult implements LocalClusteringCoefficientResult {
 
         static final EmptyResult EMPTY_RESULT = new EmptyResult();
 
@@ -92,28 +85,4 @@ final class LocalClusteringCoefficientCompanion {
         }
     }
 
-    private static final class WarnOnGraphsWithParallelRelationships<CONFIG extends LocalClusteringCoefficientBaseConfig> implements BeforeLoadValidation<CONFIG> {
-        private final Log log;
-
-        private WarnOnGraphsWithParallelRelationships(Log log) {
-            this.log = log;
-        }
-
-        @Override
-        public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config) {
-            if (graphProjectConfig instanceof GraphProjectFromStoreConfig) {
-                GraphProjectFromStoreConfig storeConfig = (GraphProjectFromStoreConfig) graphProjectConfig;
-                storeConfig.relationshipProjections().projections().entrySet().stream()
-                    .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                     config.relationshipTypes().contains(entry.getKey().name()))
-                    .filter(entry -> entry.getValue().isMultiGraph())
-                    .forEach(entry -> log.warn(
-                        "Procedure runs optimal with relationship aggregation." +
-                        " Projection for `%s` does not aggregate relationships." +
-                        " You might experience a slowdown in the procedure execution.",
-                        entry.getKey().equals(RelationshipType.ALL_RELATIONSHIPS) ? "*" : entry.getKey().name
-                    ));
-            }
-        }
-    }
 }

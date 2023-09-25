@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.metrics.regression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 import java.util.List;
 

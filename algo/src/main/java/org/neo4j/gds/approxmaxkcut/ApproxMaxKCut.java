@@ -21,10 +21,10 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
+import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * [1]: Festa et al. Randomized Heuristics for the Max-Cut Problem, 2002.
  * [2]: Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.
  */
-public class ApproxMaxKCut extends Algorithm<MaxKCutResult> {
+public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
     public static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the sum of weights of relationships between these communities.";
 
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
@@ -51,7 +51,7 @@ public class ApproxMaxKCut extends Algorithm<MaxKCutResult> {
 
     private Graph graph;
     private final SplittableRandom random;
-    private final ApproxMaxKCutConfig config;
+    private final ApproxMaxKCutBaseConfig config;
     private final Comparator comparator;
     private final PlaceNodesRandomly placeNodesRandomly;
     private final LocalSearch localSearch;
@@ -63,7 +63,7 @@ public class ApproxMaxKCut extends Algorithm<MaxKCutResult> {
     public ApproxMaxKCut(
         Graph graph,
         ExecutorService executor,
-        ApproxMaxKCutConfig config,
+        ApproxMaxKCutBaseConfig config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -109,7 +109,7 @@ public class ApproxMaxKCut extends Algorithm<MaxKCutResult> {
     }
 
     @Override
-    public MaxKCutResult compute() {
+    public ApproxMaxKCutResult compute() {
         // Keep track of which candidate solution is currently being used and which is best.
         byte currIdx = 0, bestIdx = 1;
 
@@ -162,7 +162,7 @@ public class ApproxMaxKCut extends Algorithm<MaxKCutResult> {
 
         progressTracker.endSubTask();
 
-        return MaxKCutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
+        return ApproxMaxKCutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
     }
 
 }

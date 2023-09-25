@@ -20,8 +20,8 @@
 package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
@@ -31,7 +31,6 @@ public interface SteinerTreeResult {
 
     HugeDoubleArray relationshipToParentCost();
 
-    
     double totalCost();
 
     long effectiveNodeCount();

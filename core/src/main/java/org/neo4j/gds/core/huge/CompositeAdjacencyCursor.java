@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class CompositeAdjacencyCursor implements AdjacencyCursor {
-
     private final PriorityQueue<AdjacencyCursor> cursorQueue;
     private final List<AdjacencyCursor> cursors;
 
@@ -52,6 +51,10 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursors;
     }
 
+    void updateCursorsQueue() {
+        cursorQueue.clear();
+        cursorQueue.addAll(cursors);
+    }
     @Override
     public int size() {
         int sum = 0;

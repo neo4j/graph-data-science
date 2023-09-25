@@ -156,7 +156,7 @@ class GraphSageIntegrationTest extends BaseProcTest {
 
     private void checkModelExistence(String modelType, boolean exists) {
         assertCypherResult(
-            "CALL gds.beta.model.exists($modelName)",
+            "CALL gds.model.exists($modelName)",
             Map.of("modelName", modelName),
             List.of(
                 Map.of(
@@ -189,13 +189,13 @@ class GraphSageIntegrationTest extends BaseProcTest {
 
     private void dropModel() {
         assertCypherResult(
-            "CALL gds.beta.model.drop($modelName)",
+            "CALL gds.model.drop($modelName)",
             Map.of("modelName", modelName),
             singletonList(
                 Map.of(
+                    "modelName", modelName,
+                    "modelType", GraphSage.MODEL_TYPE,
                     "modelInfo", allOf(
-                        hasEntry("modelName", modelName),
-                        hasEntry("modelType", GraphSage.MODEL_TYPE),
                         hasEntry(equalTo("metrics"), isA(Map.class))
                     ),
                     "creationTime", isA(ZonedDateTime.class),
@@ -205,10 +205,10 @@ class GraphSageIntegrationTest extends BaseProcTest {
                         hasEntry("aggregator", "MEAN"),
                         hasEntry("activationFunction", "SIGMOID")
                     ),
+                    "graphSchema", isA(Map.class),
                     "loaded", true,
                     "stored", false,
-                    "graphSchema", isA(Map.class),
-                    "shared", false
+                    "published", false
                 )
             )
         );

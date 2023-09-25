@@ -20,7 +20,9 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -36,7 +38,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scc.write", description = SCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(
+    name = "gds.scc.write",
+    description = SCC_DESCRIPTION,
+    executionMode = ExecutionMode.WRITE_NODE_PROPERTY
+)
 public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
 
     @Override
@@ -60,7 +66,9 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
-                computationResult.result().get().asNodeProperties()
+                computationResult.result()
+                    .map(NodePropertyValuesAdapter::adapt)
+                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
             )),
             name()
         );

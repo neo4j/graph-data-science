@@ -21,7 +21,13 @@ package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> extends GraphAlgorithmFactory<ModularityCalculator, CONFIG> {
     @Override
@@ -35,6 +41,26 @@ public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> ex
             graph.nodeProperties(configuration.communityProperty())::longValue,
             configuration.concurrency()
         );
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        //only methods inside, but want the class overhead
+        var perTask = MemoryEstimations.builder(RelationshipCountCollector.class).build();
+
+        return MemoryEstimations.builder(ModularityCalculator.class)
+            .add("Community Mapper", HugeLongLongMap.memoryEstimation())
+            .perNode("Inside Relationships", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("Total Community Relationships", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode(
+                "Community Modularity",
+                nodeCount -> HugeObjectArray.memoryEstimation(
+                    nodeCount,
+                    MemoryUsage.sizeOfInstance(CommunityModularity.class)
+                )
+            )
+            .perThread("RelationshipCountCollector", perTask)
+            .build();
     }
 
     @Override

@@ -22,13 +22,14 @@ package org.neo4j.gds.cypher;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.common.Edition;
 import org.neo4j.dbms.api.DatabaseManagementException;
-import org.neo4j.gds.catalog.CatalogProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreator;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -37,8 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphCreateEphemeralDatabaseProc extends CatalogProc {
-
+public class GraphCreateEphemeralDatabaseProc extends BaseProc {
     private static final String DESCRIPTION = "Creates an ephemeral database from a GDS graph.";
 
     @Procedure(name = "gds.ephemeral.database.create", mode = READ)
@@ -68,10 +68,17 @@ public class GraphCreateEphemeralDatabaseProc extends CatalogProc {
 
     @Procedure(name = "gds.alpha.create.cypherdb", mode = READ, deprecatedBy = "gds.ephemeral.database.create")
     @Description(DESCRIPTION)
+    @Internal
+    @Deprecated(forRemoval = true)
     public Stream<CreateEphemeralDbResult> createDb(
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName
     ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.create.cypherdb` has been deprecated, please use `gds.ephemeral.database.create`.");
+        
         return createInMemoryDatabase(dbName, graphName);
     }
 

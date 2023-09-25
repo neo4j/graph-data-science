@@ -20,8 +20,11 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -32,7 +35,7 @@ import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDUR
 import static org.neo4j.procedure.Mode.READ;
 
 public final class FilteredKnnStatsProc extends BaseProc {
-    @Procedure(name = "gds.alpha.knn.filtered.stats", mode = READ)
+    @Procedure(name = "gds.knn.filtered.stats", mode = READ)
     @Description(PROCEDURE_DESCRIPTION)
     public Stream<FilteredKnnStatsResult> stats(
         @Name(value = "graphName") String graphName,
@@ -42,5 +45,33 @@ public final class FilteredKnnStatsProc extends BaseProc {
             new FilteredKnnStatsSpecification(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.knn.filtered.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return new MemoryEstimationExecutor<>(
+            new FilteredKnnStatsSpecification(),
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Procedure(name = "gds.alpha.knn.filtered.stats", mode = READ, deprecatedBy = "gds.knn.filtered.stats")
+    @Description(PROCEDURE_DESCRIPTION)
+    @Internal
+    @Deprecated
+    public Stream<FilteredKnnStatsResult> alphaStats(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.knn.filtered.stats` has been deprecated, please use `gds.knn.filtered.stats`.");
+        return stats(graphName, configuration);
     }
 }

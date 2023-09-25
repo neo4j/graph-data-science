@@ -62,13 +62,13 @@ class MultiGraphProjectTest extends BaseProcTest {
         runQuery(create2);
 
         Graph graph1 = GraphStoreCatalog
-            .get("", DatabaseId.of(db), "graph1")
+            .get("", DatabaseId.of(db.databaseName()), "graph1")
             .graphStore()
             .getGraph(RelationshipType.of("TYPE1"), Optional.empty());
         assertGraph(graph1);
 
         Graph graph2 = GraphStoreCatalog
-            .get("", DatabaseId.of(db), "graph2")
+            .get("", DatabaseId.of(db.databaseName()), "graph2")
             .graphStore()
             .getGraph(RelationshipType.of("TYPE2"), Optional.empty());
         assertGraph(graph2);

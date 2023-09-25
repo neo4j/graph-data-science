@@ -19,64 +19,51 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphAccessGraphPropertiesConfig;
-import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.Preconditions;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.catalog.StreamGraphPropertyResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.STREAM_GRAPH_PROPERTY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphStreamGraphPropertiesProc extends CatalogProc {
+public class GraphStreamGraphPropertiesProc {
+    @Context
+    public GraphDataScience facade;
 
-    @Procedure(name = "gds.alpha.graph.graphProperty.stream", mode = READ)
-    @Description("Streams the given graph property.")
-    public Stream<PropertyResult> streamProperty(
+    @SuppressWarnings("unused")
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(
+        name = "gds.alpha.graph.graphProperty.stream", mode = READ, deprecatedBy = "gds.graph.graphProperty.stream"
+    )
+    @Description(STREAM_GRAPH_PROPERTY_DESCRIPTION)
+    public Stream<StreamGraphPropertyResult> alphaStreamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        Preconditions.check();
-        validateGraphName(graphName);
+        facade.log()
+            .warn(
+                "Procedure `gds.alpha.graph.graphProperty.stream` has been deprecated, please use `gds.graph.graphProperty.stream`.");
 
-        // input
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var config = GraphStreamGraphPropertiesConfig.of(
-            graphName,
-            graphProperty,
-            cypherConfig
-        );
-
-        // validation
-        validateConfig(cypherConfig, config);
-        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
-        config.validate(graphStore);
-
-        return streamGraphProperties(graphStore, config);
-    }
-
-    private Stream<PropertyResult> streamGraphProperties(
-        GraphStore graphStore,
-        GraphAccessGraphPropertiesConfig config
-    ) {
-        return graphStore
-            .graphPropertyValues(config.graphProperty())
-            .objects()
-            .map(PropertyResult::new);
+        return streamProperty(graphName, graphProperty, configuration);
     }
 
     @SuppressWarnings("unused")
-    public static class PropertyResult {
-        public final Object propertyValue;
-
-        PropertyResult(Object propertyValue) {
-            this.propertyValue = propertyValue;
-        }
+    @Procedure(name = "gds.graph.graphProperty.stream", mode = READ)
+    @Description(STREAM_GRAPH_PROPERTY_DESCRIPTION)
+    public Stream<StreamGraphPropertyResult> streamProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "graphProperty") String graphProperty,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return facade.catalog().streamGraphProperty(graphName, graphProperty, configuration);
     }
 }
