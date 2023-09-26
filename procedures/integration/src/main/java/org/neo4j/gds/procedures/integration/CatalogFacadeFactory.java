@@ -68,18 +68,31 @@ import java.util.function.Function;
 
 /**
  * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.CatalogFacade}
- * from a {@link org.neo4j.kernel.api.procedure.Context} at request time
+ * from a {@link org.neo4j.kernel.api.procedure.Context}, at request time.
+ * <p>
+ * We can resolve things like user and database id here, construct termination flags, and such.
  */
 public class CatalogFacadeFactory {
+    // Global scoped/ global state things
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
+
+    // Request scoped things
     private final DatabaseIdService databaseIdService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
     private final UserServices userServices;
+
+    // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
 
+    /**
+     * We inject services here so that we may control and isolate access to dependencies.
+     * Take {@link org.neo4j.gds.services.UserServices} for example.
+     * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
+     * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
+     */
     public CatalogFacadeFactory(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -100,6 +113,10 @@ public class CatalogFacadeFactory {
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
 
+    /**
+     * We construct the catalog facade at request time. At this point things like user and database id are set in stone.
+     * And we can readily construct things like termination flags.
+     */
     public CatalogFacade createCatalogFacade(Context context) {
         // Neo4j's services, all encapsulated so that they can be resolved late
         var graphDatabaseService = context.graphDatabaseAPI();
@@ -108,6 +125,7 @@ public class CatalogFacadeFactory {
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var terminationFlagService = new TerminationFlagService();
         var transactionContextService = new TransactionContextService();
+        var user = userServices.getUser(context.securityContext());
 
         // GDS services
         var configurationService = new ConfigurationService();
@@ -116,7 +134,7 @@ public class CatalogFacadeFactory {
         var graphStoreFilterService = new GraphStoreFilterService();
         var graphStoreValidationService = new GraphStoreValidationService();
 
-        // Exporter builders. These are request scoped, interestingly enough
+        // Exporter builders
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
@@ -208,12 +226,11 @@ public class CatalogFacadeFactory {
             kernelTransactionService,
             procedureReturnColumns,
             procedureTransactionService,
-            context.securityContext(),
             taskRegistryFactoryService,
             terminationFlagService,
             transactionContextService,
             userLogServices,
-            userServices,
+            user,
             businessFacade
         );
     }

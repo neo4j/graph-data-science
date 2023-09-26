@@ -29,9 +29,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.gds.services.UserServices;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.stream.Stream;
 
@@ -45,8 +43,6 @@ class CatalogFacadeTest {
     void shouldStackOffNeo4jThings() {
         var databaseIdService = mock(DatabaseIdService.class);
         var graphDatabaseService = mock(GraphDatabaseService.class);
-        var securityContext = mock(SecurityContext.class);
-        var usernameService = mock(UserServices.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
             databaseIdService,
@@ -54,16 +50,14 @@ class CatalogFacadeTest {
             null,
             null,
             null,
-            securityContext,
             null,
             null,
             null,
             null,
-            usernameService,
+            new User("current user", false),
             businessFacade
         );
 
-        when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.of("current database"));
         catalogFacade.graphExists("some graph");
 
@@ -88,21 +82,18 @@ class CatalogFacadeTest {
         var databaseIdService = mock(DatabaseIdService.class);
         var graphDatabaseService = mock(GraphDatabaseService.class);
         var userLogServices = mock(UserLogServices.class);
-        var usernameService = mock(UserServices.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var securityContext = mock(SecurityContext.class);
         var catalogFacade = new CatalogFacade(
             databaseIdService,
             graphDatabaseService,
             null,
             null,
             null,
-            securityContext,
             null,
             null,
             null,
             userLogServices,
-            usernameService,
+            new User("current user", false),
             businessFacade
         );
 
@@ -110,7 +101,6 @@ class CatalogFacadeTest {
         when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
         var userLogStore = mock(UserLogStore.class);
         when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);
-        when(usernameService.getUser(securityContext)).thenReturn(new User("current user", false));
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),

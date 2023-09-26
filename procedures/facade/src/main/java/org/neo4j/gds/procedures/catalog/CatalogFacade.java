@@ -22,9 +22,9 @@ package org.neo4j.gds.procedures.catalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyOrPropertiesResultProducer;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
@@ -52,9 +52,7 @@ import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.gds.services.UserServices;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.List;
 import java.util.Map;
@@ -62,27 +60,10 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * The top layer for the Neo4j integration side:
- * thin, dumb procedure stubs can have this context-injected and call exactly one method,
- * passing user input and an appropriate output marshaller.
+ * Catalog facade groups all catalog procedures in one class, for ease of dependency injection and management.
+ * Having this allows us to keep the procedure stub classes dumb and thin.
  * <p>
- * The output marshaller determines how easy or not it will be to generate stubs, but let's take that another day.
- * <p>
- * Take the graph exists _function_: logically it is a quad of {"gds.graph.exists", READ, input string, output boolean},
- * everything else is details. Contrast with the graph-exists _procedure_, same as the function,
- * but output gets marshalled in a bespoke fashion.
- * <p>
- * Baby steps: we start here, extracting business logic, structuring marshalling,
- * getting a handle on parameters vs dependencies.
- * <p>
- * Note that we take in _only_ parameters. That's because everything else is a dependency (maybe not the best name),
- * but certainly something that is not necessary for the stubs to consider;
- * this facade will be an extension and can grab/ initialise/ resolve anything except the things the user passes in.
- * Username for example, turns out we resolve that, so no need to consider it a parameter.
- * Nice lovely decoupling innit when we can just focus on business logic.
- * <p>
- * Note (to self especially because I keep getting confused) that this is _request scoped_,
- * i.e. it gets newed up with a fresh @{@link org.neo4j.procedure.Context} all the time.
+ * This class gets constructed per request, and as such has fields for request scoped things like user and database id.
  */
 public class CatalogFacade {
     /**
@@ -98,12 +79,11 @@ public class CatalogFacade {
     private final KernelTransactionService kernelTransactionService;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final ProcedureTransactionService procedureTransactionService;
-    private final SecurityContext securityContext;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TerminationFlagService terminationFlagService;
     private final TransactionContextService transactionContextService;
+    private final User user;
     private final UserLogServices userLogServices;
-    private final UserServices userServices;
 
     // business facade
     private final CatalogBusinessFacade businessFacade;
@@ -114,12 +94,11 @@ public class CatalogFacade {
         KernelTransactionService kernelTransactionService,
         ProcedureReturnColumns procedureReturnColumns,
         ProcedureTransactionService procedureTransactionService,
-        SecurityContext securityContext,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         TransactionContextService transactionContextService,
         UserLogServices userLogServices,
-        UserServices userServices,
+        User user,
         CatalogBusinessFacade businessFacade
     ) {
         this.databaseIdService = databaseIdService;
@@ -127,12 +106,11 @@ public class CatalogFacade {
         this.kernelTransactionService = kernelTransactionService;
         this.procedureReturnColumns = procedureReturnColumns;
         this.procedureTransactionService = procedureTransactionService;
-        this.securityContext = securityContext;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.terminationFlagService = terminationFlagService;
         this.transactionContextService = transactionContextService;
         this.userLogServices = userLogServices;
-        this.userServices = userServices;
+        this.user = user;
 
         this.businessFacade = businessFacade;
     }
@@ -157,7 +135,6 @@ public class CatalogFacade {
 
     public boolean graphExists(String graphName) {
         // stripping off Neo4j bits
-        var user = user();
         var databaseId = databaseId();
 
         // no static access! we want to be able to test this stuff
@@ -170,7 +147,7 @@ public class CatalogFacade {
     public Stream<UserLogEntry> queryUserLog(String jobId) {
         var userLogStore = userLogServices.getUserLogStore(databaseId());
 
-        return userLogStore.query(user().getUsername());
+        return userLogStore.query(user.getUsername());
     }
 
     /**
@@ -186,7 +163,6 @@ public class CatalogFacade {
         String username
     ) throws IllegalArgumentException {
         var databaseId = databaseId();
-        var user = user();
 
         var results = businessFacade.dropGraph(
             graphNameOrListOfGraphNames,
@@ -207,7 +183,6 @@ public class CatalogFacade {
     public Stream<GraphInfoWithHistogram> listGraphs(String graphName) {
         graphName = validateValue(graphName);
 
-        var user = user();
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
@@ -230,7 +205,6 @@ public class CatalogFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
@@ -263,7 +237,6 @@ public class CatalogFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
@@ -294,7 +267,6 @@ public class CatalogFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
@@ -326,7 +298,6 @@ public class CatalogFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
@@ -358,7 +329,6 @@ public class CatalogFacade {
         String relationshipFilter,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -379,7 +349,6 @@ public class CatalogFacade {
     }
 
     public Stream<GraphMemoryUsage> sizeOf(String graphName) {
-        var user = user();
         var databaseId = databaseId();
 
         var result = businessFacade.sizeOf(user, databaseId, graphName);
@@ -392,7 +361,6 @@ public class CatalogFacade {
         Object nodeProperties,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -414,7 +382,6 @@ public class CatalogFacade {
         String graphName,
         String relationshipType
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -436,7 +403,6 @@ public class CatalogFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var numberOfPropertiesRemoved = businessFacade.dropGraphProperty(
@@ -455,7 +421,6 @@ public class CatalogFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var result = businessFacade.mutateNodeLabel(user, databaseId, graphName, nodeLabel, configuration);
@@ -468,7 +433,6 @@ public class CatalogFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         Stream<?> result = businessFacade.streamGraphProperty(
@@ -524,7 +488,6 @@ public class CatalogFacade {
         Map<String, Object> configuration,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -590,7 +553,6 @@ public class CatalogFacade {
         List<String> relationshipTypes,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         return businessFacade.streamRelationships(user, databaseId, graphName, relationshipTypes, configuration);
@@ -602,7 +564,6 @@ public class CatalogFacade {
         Object nodeLabels,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
@@ -629,7 +590,6 @@ public class CatalogFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
@@ -651,7 +611,6 @@ public class CatalogFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
@@ -673,7 +632,6 @@ public class CatalogFacade {
         String relationshipProperty,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
@@ -699,7 +657,6 @@ public class CatalogFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -722,7 +679,6 @@ public class CatalogFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -744,7 +700,6 @@ public class CatalogFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var result = businessFacade.estimateCommonNeighbourAwareRandomWalk(
@@ -763,7 +718,6 @@ public class CatalogFacade {
         long averageDegree,
         Map<String, Object> configuration
     ) {
-        var user = user();
         var databaseId = databaseId();
 
         var result = businessFacade.generateGraph(user, databaseId, graphName, nodeCount, averageDegree, configuration);
@@ -778,7 +732,6 @@ public class CatalogFacade {
         Map<String, Object> configuration,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var user = user();
         var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -819,14 +772,5 @@ public class CatalogFacade {
      */
     private DatabaseId databaseId() {
         return databaseIdService.getDatabaseId(graphDatabaseService);
-    }
-
-    /**
-     * The user here is request scoped, so we resolve it now and pass it down stream
-     *
-     * @return
-     */
-    private User user() {
-        return userServices.getUser(securityContext);
     }
 }
