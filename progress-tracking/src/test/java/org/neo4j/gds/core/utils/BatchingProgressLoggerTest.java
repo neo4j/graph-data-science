@@ -183,6 +183,18 @@ class BatchingProgressLoggerTest {
     }
 
     @Test
+    void shouldNotExceed100Percent() {
+        TestLog log = Neo4jProxy.testLog();
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
+        testProgressLogger.reset(1);
+        testProgressLogger.logProgress(1); // reaches 100 %
+        testProgressLogger.logProgress(1); // exceeds 100 %
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(Extractors.removingThreadId())
+            .containsExactly("Test 100%");
+    }
+
+    @Test
     void closesThreadLocal() {
         var logger = new BatchingProgressLogger(
             Neo4jProxy.testLog(),
