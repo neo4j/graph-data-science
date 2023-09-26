@@ -24,7 +24,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
+import org.neo4j.gds.core.utils.paged.PagedLongStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -60,6 +62,16 @@ public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgo
             .perNode("visited", MemoryUsage::sizeOfBitset)
             .add("boundaries", HugeLongArrayStack.memoryEstimation())
             .add("stack", HugeLongArrayStack.memoryEstimation());
+
+        builder.rangePerGraphDimension("todo", ((graphDimensions, concurrency) -> {
+            long nodeCount = graphDimensions.nodeCount();
+            long relationshipCount = graphDimensions.relCountUpperBound();
+            return MemoryRange.of(
+                PagedLongStack.memoryEstimation(nodeCount),
+                PagedLongStack.memoryEstimation(2 * Math.max(nodeCount, relationshipCount))
+                //this bound is very-very-very loose
+            );
+        }));
 
         return builder.build();
     }

@@ -237,6 +237,8 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
+[[algorithms-scc-mem-example]]
+
 === Memory Estimation
 
 :mode: write
@@ -255,7 +257,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6        | 10                | 512       | 512       | "512 Bytes"
+| 6        | 10                | 33332       | 33332       | "32 KiB"
 |===
 --
 

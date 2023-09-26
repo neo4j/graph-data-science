@@ -59,7 +59,7 @@ public class Scc extends Algorithm<HugeLongArray> {
         this.connectedComponents = HugeLongArray.newArray(nodeCount);
         this.boundaries = HugeLongArrayStack.newStack(nodeCount);
 
-        this.todo = new PagedLongStack(nodeCount);
+        this.todo = new PagedLongStack(nodeCount); //can be as high as `2 * graph.relationshipsCount()` if we are unlucky...
     }
 
     /**

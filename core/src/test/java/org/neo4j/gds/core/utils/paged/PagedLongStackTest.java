@@ -19,8 +19,12 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 final class PagedLongStackTest {
 
@@ -160,4 +165,20 @@ final class PagedLongStackTest {
         assertions.add(() -> assertThrows(ArrayIndexOutOfBoundsException.class, stack::peek, "peek on empty stack shouldn't succeed"));
         assertAll(assertions);
     }
+
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+            arguments(1, 32820L),
+            arguments(5000, 65604L), //+32784
+            arguments(10000, 98388L)// + 32784
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("memoryEstimationTuples")
+    void shouldEstimateMemoryCorrectly(long size, long expectedResult) {
+        Assertions.assertThat(PagedLongStack.memoryEstimation(size)).isEqualTo(expectedResult);
+    }
+
+
 }
