@@ -1,0 +1,31 @@
+[.create-cypher-db-syntax]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.ephemeral.database.create(
+    dbName: String
+    graphName: String
+)
+YIELD
+    dbName: String,
+    graphName: String,
+    createMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                  | Type                | Optional | Description
+| dbName                | String              | no       | The name under which the new database is stored.
+| graphName             | String              | no       | The name under which the graph is stored in the catalog.
+|===
+
+.Results
+[opts="header",cols="2,1,4"]
+|===
+| Name                   | Type     | Description
+| dbName                 | String   | The name under which the new database is stored.
+| graphName              | String   | The name under which the graph is stored in the catalog.
+| createMillis           | Integer  | The elapsed time to create the database in milliseconds.
+|===
+--

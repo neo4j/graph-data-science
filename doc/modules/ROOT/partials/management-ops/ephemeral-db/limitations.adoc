@@ -1,0 +1,10 @@
+[[ephemeral-db-limitations]]
+== Limitations
+
+Although it is possible to execute arbitrary Cypher queries on the ephemeral database, the database itself is _not_ a plain Neo4j database.
+As such, not every aspect of Cypher is implemented.
+
+The following operations are not supported:
+
+* Creating new nodes and adding node labels
+* Creating and updating relationships
