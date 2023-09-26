@@ -44,7 +44,6 @@ For complex use cases where an expressive query language is needed, you can run 
 In-memory graphs are usually updated by algorithms running in `mutate` mode, which add new properties to nodes or relationships.
 
 Besides, you can xref:management-ops/graph-update/mutate-node-labels.adoc[update node labels], xref:management-ops/graph-update/to-undirected.adoc[convert relationships] from directed to undirected, and xref:management-ops/graph-update/collapse-path.adoc[collapse path].
-It is also supported to update parts of the graph through xref:management-ops/graph-reads/create-cypher-db.adoc[cypher queries].
 You can also drop xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-remove-node-properties-example[node properties] and xref:management-ops/graph-update/dropping-parts.adoc#catalog-graph-delete-rel-type[relationships of a given type].
 
 
