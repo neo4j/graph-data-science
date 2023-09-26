@@ -124,7 +124,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         String message = msgFactory != NO_MESSAGE ? msgFactory.get() : null;
         progressCounter.add(progress);
         int nextPercentage = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
-        if (globalPercentage < nextPercentage) {
+        if (globalPercentage < nextPercentage && globalPercentage < 100) {
             globalPercentage = nextPercentage;
             if (message == null || message.isEmpty()) {
                 logProgress(nextPercentage);
