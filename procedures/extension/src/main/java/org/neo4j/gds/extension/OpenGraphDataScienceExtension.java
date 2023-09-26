@@ -33,6 +33,7 @@ import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
+import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.integration.AlgorithmMetaDataSetterService;
 import org.neo4j.gds.procedures.integration.CatalogFacadeFactory;
 import org.neo4j.gds.procedures.integration.CommunityProcedureFactory;
@@ -90,6 +91,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));
         var taskStoreService = new TaskStoreService(progressTrackingEnabled);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
+        var terminationFlagService = new TerminationFlagService();
         var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
         var userLogServices = new UserLogServices();
@@ -105,6 +107,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             databaseIdService,
             __ -> new NativeExportBuildersProvider(), // we always just offer native writes in OpenGDS
             taskRegistryFactoryService,
+            terminationFlagService,
             userLogServices,
             userServices,
             Optional.empty() // we have no extra checks to do in OpenGDS

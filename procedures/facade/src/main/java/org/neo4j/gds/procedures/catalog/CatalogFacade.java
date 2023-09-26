@@ -42,11 +42,11 @@ import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.procedures.KernelTransactionService;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.TransactionContextService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -78,7 +78,7 @@ public class CatalogFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final ProcedureTransactionService procedureTransactionService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final TerminationFlagService terminationFlagService;
+    private final TerminationFlag terminationFlag;
     private final TransactionContextService transactionContextService;
     private final User user;
     private final UserLogServices userLogServices;
@@ -93,7 +93,7 @@ public class CatalogFacade {
         ProcedureReturnColumns procedureReturnColumns,
         ProcedureTransactionService procedureTransactionService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        TerminationFlagService terminationFlagService,
+        TerminationFlag terminationFlag,
         TransactionContextService transactionContextService,
         User user,
         UserLogServices userLogServices,
@@ -105,12 +105,12 @@ public class CatalogFacade {
         this.procedureReturnColumns = procedureReturnColumns;
         this.procedureTransactionService = procedureTransactionService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.terminationFlagService = terminationFlagService;
         this.transactionContextService = transactionContextService;
         this.userLogServices = userLogServices;
         this.user = user;
 
         this.businessFacade = businessFacade;
+        this.terminationFlag = terminationFlag;
     }
 
     /**
@@ -176,7 +176,6 @@ public class CatalogFacade {
         graphName = validateValue(graphName);
 
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
         var results = businessFacade.listGraphs(user, graphName, displayDegreeDistribution, terminationFlag);
 
@@ -198,7 +197,6 @@ public class CatalogFacade {
         Map<String, Object> configuration
     ) {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
             graphDatabaseService,
             procedureTransactionService
@@ -228,7 +226,6 @@ public class CatalogFacade {
         Map<String, Object> configuration
     ) {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
             graphDatabaseService,
             procedureTransactionService
@@ -256,7 +253,6 @@ public class CatalogFacade {
         Map<String, Object> configuration
     ) {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
             graphDatabaseService,
             procedureTransactionService
@@ -285,7 +281,6 @@ public class CatalogFacade {
         Map<String, Object> configuration
     ) {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
             graphDatabaseService,
             procedureTransactionService
@@ -537,7 +532,6 @@ public class CatalogFacade {
         Map<String, Object> configuration
     ) {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
         var result = businessFacade.writeNodeProperties(
@@ -561,8 +555,6 @@ public class CatalogFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     ) {
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
-
         var result = businessFacade.writeRelationshipProperties(
             user,
             databaseId,
@@ -581,8 +573,6 @@ public class CatalogFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
-
         var result = businessFacade.writeNodeLabel(
             user,
             databaseId,
@@ -602,7 +592,6 @@ public class CatalogFacade {
         Map<String, Object> configuration
     ) {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
         var result = businessFacade.writeRelationships(

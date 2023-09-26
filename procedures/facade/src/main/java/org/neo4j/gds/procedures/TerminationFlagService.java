@@ -23,6 +23,10 @@ import org.neo4j.gds.TransactionTerminationMonitor;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
 public class TerminationFlagService {
+    /**
+     * Improve this: strip off the ktx service, can happen later
+     */
+    @Deprecated
     public TerminationFlag terminationFlag(KernelTransactionService kernelTransactionService) {
         var kernelTransaction = kernelTransactionService.getKernelTransaction();
         var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);

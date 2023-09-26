@@ -81,6 +81,7 @@ public class CatalogFacadeFactory {
     private final DatabaseIdService databaseIdService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final TerminationFlagService terminationFlagService;
     private final UserLogServices userLogServices;
     private final UserServices userServices;
 
@@ -99,6 +100,7 @@ public class CatalogFacadeFactory {
         DatabaseIdService databaseIdService,
         ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
         UserServices userServices,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
@@ -109,6 +111,7 @@ public class CatalogFacadeFactory {
         this.databaseIdService = databaseIdService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userServices = userServices;
 
@@ -128,7 +131,7 @@ public class CatalogFacadeFactory {
         var kernelTransactionService = new KernelTransactionService(context);
         var procedureTransactionService = new ProcedureTransactionService(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var terminationFlagService = new TerminationFlagService();
+        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContextService = new TransactionContextService();
         var user = userServices.getUser(context.securityContext());
 
@@ -232,7 +235,7 @@ public class CatalogFacadeFactory {
             procedureReturnColumns,
             procedureTransactionService,
             taskRegistryFactoryService,
-            terminationFlagService,
+            terminationFlag,
             transactionContextService,
             user,
             userLogServices,
