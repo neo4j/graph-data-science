@@ -27,9 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
-import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
@@ -40,13 +38,10 @@ import static org.mockito.Mockito.when;
 
 class CatalogFacadeTest {
     @Test
-    void shouldStackOffNeo4jThings() {
-        var databaseIdService = mock(DatabaseIdService.class);
-        var graphDatabaseService = mock(GraphDatabaseService.class);
+    void shouldDetermineIfGraphExists() {
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
-            databaseIdService,
-            graphDatabaseService,
+            DatabaseId.of("current database"),
             null,
             null,
             null,
@@ -55,10 +50,10 @@ class CatalogFacadeTest {
             null,
             null,
             new User("current user", false),
+            null,
             businessFacade
         );
 
-        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(DatabaseId.of("current database"));
         catalogFacade.graphExists("some graph");
 
         verify(businessFacade).graphExists(
@@ -79,28 +74,24 @@ class CatalogFacadeTest {
      */
     @Test
     void shouldQueryUserLog() {
-        var databaseIdService = mock(DatabaseIdService.class);
-        var graphDatabaseService = mock(GraphDatabaseService.class);
         var userLogServices = mock(UserLogServices.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
-            databaseIdService,
-            graphDatabaseService,
+            DatabaseId.of("current database"),
             null,
             null,
             null,
             null,
             null,
             null,
-            userLogServices,
+            null,
             new User("current user", false),
+            userLogServices,
             businessFacade
         );
 
-        var databaseId = DatabaseId.of("current database");
-        when(databaseIdService.getDatabaseId(graphDatabaseService)).thenReturn(databaseId);
         var userLogStore = mock(UserLogStore.class);
-        when(userLogServices.getUserLogStore(databaseId)).thenReturn(userLogStore);
+        when(userLogServices.getUserLogStore(DatabaseId.of("current database"))).thenReturn(userLogStore);
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),

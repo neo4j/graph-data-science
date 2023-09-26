@@ -105,11 +105,13 @@ public class CatalogFacadeFactory {
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
+
         this.databaseIdService = databaseIdService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
         this.userServices = userServices;
+
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
 
@@ -118,8 +120,11 @@ public class CatalogFacadeFactory {
      * And we can readily construct things like termination flags.
      */
     public CatalogFacade createCatalogFacade(Context context) {
-        // Neo4j's services, all encapsulated so that they can be resolved late
+        // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
+
+        // Derived data and services
+        var databaseId = databaseIdService.getDatabaseId(graphDatabaseService);
         var kernelTransactionService = new KernelTransactionService(context);
         var procedureTransactionService = new ProcedureTransactionService(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
@@ -221,7 +226,7 @@ public class CatalogFacadeFactory {
         }
 
         return new CatalogFacade(
-            databaseIdService,
+            databaseId,
             graphDatabaseService,
             kernelTransactionService,
             procedureReturnColumns,
@@ -229,8 +234,8 @@ public class CatalogFacadeFactory {
             taskRegistryFactoryService,
             terminationFlagService,
             transactionContextService,
-            userLogServices,
             user,
+            userLogServices,
             businessFacade
         );
     }

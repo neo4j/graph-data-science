@@ -50,7 +50,6 @@ import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.TransactionContextService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -73,8 +72,7 @@ public class CatalogFacade {
      */
     public static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
 
-    // services
-    private final DatabaseIdService databaseIdService;
+    private final DatabaseId databaseId;
     private final GraphDatabaseService graphDatabaseService;
     private final KernelTransactionService kernelTransactionService;
     private final ProcedureReturnColumns procedureReturnColumns;
@@ -89,7 +87,7 @@ public class CatalogFacade {
     private final CatalogBusinessFacade businessFacade;
 
     public CatalogFacade(
-        DatabaseIdService databaseIdService,
+        DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
         KernelTransactionService kernelTransactionService,
         ProcedureReturnColumns procedureReturnColumns,
@@ -97,11 +95,11 @@ public class CatalogFacade {
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         TransactionContextService transactionContextService,
-        UserLogServices userLogServices,
         User user,
+        UserLogServices userLogServices,
         CatalogBusinessFacade businessFacade
     ) {
-        this.databaseIdService = databaseIdService;
+        this.databaseId = databaseId;
         this.graphDatabaseService = graphDatabaseService;
         this.kernelTransactionService = kernelTransactionService;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -134,10 +132,6 @@ public class CatalogFacade {
     }
 
     public boolean graphExists(String graphName) {
-        // stripping off Neo4j bits
-        var databaseId = databaseId();
-
-        // no static access! we want to be able to test this stuff
         return businessFacade.graphExists(user, databaseId, graphName);
     }
 
@@ -145,7 +139,7 @@ public class CatalogFacade {
      * Huh, we never did jobId filtering...
      */
     public Stream<UserLogEntry> queryUserLog(String jobId) {
-        var userLogStore = userLogServices.getUserLogStore(databaseId());
+        var userLogStore = userLogServices.getUserLogStore(databaseId);
 
         return userLogStore.query(user.getUsername());
     }
@@ -162,8 +156,6 @@ public class CatalogFacade {
         String databaseName,
         String username
     ) throws IllegalArgumentException {
-        var databaseId = databaseId();
-
         var results = businessFacade.dropGraph(
             graphNameOrListOfGraphNames,
             failIfMissing,
@@ -205,8 +197,6 @@ public class CatalogFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
@@ -237,8 +227,6 @@ public class CatalogFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
@@ -267,8 +255,6 @@ public class CatalogFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
@@ -298,8 +284,6 @@ public class CatalogFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var transactionContext = transactionContextService.transactionContext(
@@ -329,7 +313,6 @@ public class CatalogFacade {
         String relationshipFilter,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -349,8 +332,6 @@ public class CatalogFacade {
     }
 
     public Stream<GraphMemoryUsage> sizeOf(String graphName) {
-        var databaseId = databaseId();
-
         var result = businessFacade.sizeOf(user, databaseId, graphName);
 
         return Stream.of(result);
@@ -361,7 +342,6 @@ public class CatalogFacade {
         Object nodeProperties,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -382,7 +362,6 @@ public class CatalogFacade {
         String graphName,
         String relationshipType
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -403,8 +382,6 @@ public class CatalogFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var numberOfPropertiesRemoved = businessFacade.dropGraphProperty(
             user,
             databaseId,
@@ -421,8 +398,6 @@ public class CatalogFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var result = businessFacade.mutateNodeLabel(user, databaseId, graphName, nodeLabel, configuration);
 
         return Stream.of(result);
@@ -433,9 +408,7 @@ public class CatalogFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
-        Stream<?> result = businessFacade.streamGraphProperty(
+        var result = businessFacade.streamGraphProperty(
             user,
             databaseId,
             graphName,
@@ -488,12 +461,11 @@ public class CatalogFacade {
         Map<String, Object> configuration,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
         // odd behaviour selection, how can we do better?
-        boolean usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
+        var usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
 
         var resultStream = businessFacade.streamNodeProperties(
             user,
@@ -523,7 +495,9 @@ public class CatalogFacade {
     ) {
         return streamRelationshipPropertyOrProperties(
             graphName,
-            relationshipProperties, relationshipTypes, configuration,
+            relationshipProperties,
+            relationshipTypes,
+            configuration,
             GraphStreamRelationshipPropertiesResult::new
         );
     }
@@ -553,8 +527,6 @@ public class CatalogFacade {
         List<String> relationshipTypes,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         return businessFacade.streamRelationships(user, databaseId, graphName, relationshipTypes, configuration);
     }
 
@@ -564,7 +536,6 @@ public class CatalogFacade {
         Object nodeLabels,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -590,7 +561,6 @@ public class CatalogFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
         var result = businessFacade.writeRelationshipProperties(
@@ -611,7 +581,6 @@ public class CatalogFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
 
         var result = businessFacade.writeNodeLabel(
@@ -632,7 +601,6 @@ public class CatalogFacade {
         String relationshipProperty,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -657,7 +625,6 @@ public class CatalogFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -679,7 +646,6 @@ public class CatalogFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -700,8 +666,6 @@ public class CatalogFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var result = businessFacade.estimateCommonNeighbourAwareRandomWalk(
             user,
             databaseId,
@@ -718,8 +682,6 @@ public class CatalogFacade {
         long averageDegree,
         Map<String, Object> configuration
     ) {
-        var databaseId = databaseId();
-
         var result = businessFacade.generateGraph(user, databaseId, graphName, nodeCount, averageDegree, configuration);
 
         return Stream.of(result);
@@ -732,7 +694,6 @@ public class CatalogFacade {
         Map<String, Object> configuration,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var databaseId = databaseId();
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -764,13 +725,5 @@ public class CatalogFacade {
         if (NO_VALUE_PLACEHOLDER.equals(graphName)) return null;
 
         return graphName;
-    }
-
-    /**
-     * We need to obtain the database id at this point in time so that we can send it down stream to business logic.
-     * The database id is specific to the procedure call and/ or timing (note to self, figure out which it is).
-     */
-    private DatabaseId databaseId() {
-        return databaseIdService.getDatabaseId(graphDatabaseService);
     }
 }
