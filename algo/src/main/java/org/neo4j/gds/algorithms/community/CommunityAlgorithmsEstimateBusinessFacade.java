@@ -33,6 +33,8 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.scc.SccAlgorithmFactory;
+import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -70,6 +72,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new WccAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends SccBaseConfig> MemoryEstimateResult estimateScc(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new SccAlgorithmFactory<>()
         );
     }
 

@@ -21,9 +21,14 @@ package org.neo4j.gds.scc;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
 
@@ -43,5 +48,19 @@ public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgo
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.leaf(taskName(), graph.nodeCount());
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+
+        var builder = MemoryEstimations.builder(Scc.class);
+        builder
+            .perNode("index", HugeLongArray::memoryEstimation)
+            .perNode("connectedComponents", HugeLongArray::memoryEstimation)
+            .perNode("visited", MemoryUsage::sizeOfBitset)
+            .add("boundaries", HugeLongArrayStack.memoryEstimation())
+            .add("stack", HugeLongArrayStack.memoryEstimation());
+
+        return builder.build();
     }
 }

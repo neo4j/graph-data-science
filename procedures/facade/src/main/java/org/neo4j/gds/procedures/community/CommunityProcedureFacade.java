@@ -79,8 +79,8 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
@@ -382,6 +382,31 @@ public class CommunityProcedureFacade {
 
         return Stream.of(SccComputationResultTransformer.toStatsResult(computationResult, config));
     }
+
+    public Stream<MemoryEstimateResult> estimateSccMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, SccMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateSccStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, SccStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateSccStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, SccStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
+    }
+
 
     public Stream<TriangleCountStreamResult> triangleCountStream(
         String graphName,

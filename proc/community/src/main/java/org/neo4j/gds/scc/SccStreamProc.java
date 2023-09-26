@@ -22,6 +22,7 @@ package org.neo4j.gds.scc;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -47,6 +48,16 @@ public class SccStreamProc extends BaseProc {
     ) {
         return facade.community().sccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
     }
+
+    @Procedure(value = "gds.scc.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.community().estimateSccStream(graphNameOrConfiguration, algoConfiguration);
+    }
+
     @Procedure(value = "gds.alpha.scc.stream", mode = READ, deprecatedBy = "gds.scc.stream")
     @Description(SCC_DESCRIPTION)
     @Internal
