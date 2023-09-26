@@ -30,7 +30,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.ml.kge.predict.stream", description = "Predicts new relationships using an existing KGE model", executionMode = STREAM)
+@GdsCallable(
+    name = "gds.ml.kge.predict.stream",
+    description = "Predicts new relationships using an existing KGE model",
+    executionMode = STREAM
+)
 public class KGEPredictStreamSpec implements AlgorithmSpec<
     TopKMapComputer,
     KGEPredictResult,
