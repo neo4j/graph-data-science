@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -31,10 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.algorithms.AlgorithmProcedureConstants.ESTIMATION_DESCRIPTION;
 import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccStreamProc extends BaseProc {
+public class WccStreamProc {
     @Context
     public GraphDataScience facade;
 
@@ -44,11 +44,11 @@ public class WccStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().wccStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().wccStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> configuration

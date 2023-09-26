@@ -48,7 +48,7 @@ public class LeidenStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().leidenStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().leidenStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.leiden.stream.estimate", mode = READ)

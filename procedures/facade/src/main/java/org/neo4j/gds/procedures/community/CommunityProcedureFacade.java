@@ -98,41 +98,45 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
-    private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
-    private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
-    private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
-
-    private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-
-    private final ProcedureReturnColumns procedureReturnColumns;
+    // services
+    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
     private final DatabaseId databaseId;
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final User user;
 
+    // business logic
+    private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
+    private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
+    private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
+    private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
+
     public CommunityProcedureFacade(
-        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter,
+        DatabaseId databaseId,
+        ProcedureReturnColumns procedureReturnColumns,
+        User user,
+        CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
-        CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade, ProcedureReturnColumns procedureReturnColumns,
-        DatabaseId databaseId,
-        User user
+        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade
     ) {
-        this.streamBusinessFacade = streamBusinessFacade;
+        this.algorithmMetaDataSetter = algorithmMetaDataSetter;
+        this.databaseId = databaseId;
+        this.procedureReturnColumns = procedureReturnColumns;
+        this.user = user;
+        this.estimateBusinessFacade = estimateBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
-        this.estimateBusinessFacade = estimateBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-        this.databaseId = databaseId;
-        this.user = user;
+        this.streamBusinessFacade = streamBusinessFacade;
     }
 
     // WCC
 
     public Stream<WccStreamResult> wccStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, WccStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, WccStreamConfig::of);
 
         var computationResult = streamBusinessFacade.wcc(
             graphName,
@@ -207,13 +211,11 @@ public class CommunityProcedureFacade {
     // K-Core Decomposition
     public Stream<KCoreStreamResult> kCoreStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
         var streamConfig = createStreamConfig(
             configuration,
-            KCoreDecompositionStreamConfig::of,
-            algorithmMetaDataSetter
+            KCoreDecompositionStreamConfig::of
         );
 
         var computationResult = streamBusinessFacade.kCore(
@@ -262,11 +264,10 @@ public class CommunityProcedureFacade {
 
     public Stream<LouvainStreamResult> louvainStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, LouvainStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, LouvainStreamConfig::of);
 
         var computationResult = streamBusinessFacade.louvain(
             graphName,
@@ -297,11 +298,10 @@ public class CommunityProcedureFacade {
 
     public Stream<LeidenStreamResult> leidenStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, LeidenStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, LeidenStreamConfig::of);
 
         var computationResult = streamBusinessFacade.leiden(
             graphName,
@@ -333,11 +333,10 @@ public class CommunityProcedureFacade {
 
     public Stream<SccStreamResult> sccStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, SccStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, SccStreamConfig::of);
 
         var computationResult = streamBusinessFacade.scc(
             graphName,
@@ -385,11 +384,10 @@ public class CommunityProcedureFacade {
 
     public Stream<TriangleCountStreamResult> triangleCountStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, TriangleCountStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, TriangleCountStreamConfig::of);
 
         var computationResult = streamBusinessFacade.triangleCount(
             graphName,
@@ -436,10 +434,9 @@ public class CommunityProcedureFacade {
 
     public Stream<LabelPropagationStreamResult> labelPropagationStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, LabelPropagationStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, LabelPropagationStreamConfig::of);
 
         var computationResult = streamBusinessFacade.labelPropagation(
             graphName,
@@ -487,11 +484,10 @@ public class CommunityProcedureFacade {
 
     public Stream<ModularityStreamResult> modularityStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, ModularityStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, ModularityStreamConfig::of);
 
         var computationResult = streamBusinessFacade.modularity(
             graphName,
@@ -521,10 +517,9 @@ public class CommunityProcedureFacade {
 
     public Stream<KmeansStreamResult> kmeansStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, KmeansStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, KmeansStreamConfig::of);
 
         var computationResult = streamBusinessFacade.kmeans(
             graphName,
@@ -574,13 +569,11 @@ public class CommunityProcedureFacade {
 
     public Stream<LocalClusteringCoefficientStreamResult> streamLocalClusteringCoefficient(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
         var streamConfig = createStreamConfig(
             configuration,
-            LocalClusteringCoefficientStreamConfig::of,
-            algorithmMetaDataSetter
+            LocalClusteringCoefficientStreamConfig::of
         );
 
         var computationResult = streamBusinessFacade.localClusteringCoefficient(
@@ -612,13 +605,11 @@ public class CommunityProcedureFacade {
 
     public Stream<K1ColoringStreamResult> k1ColoringStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
         var streamConfig = createStreamConfig(
             configuration,
-            K1ColoringStreamConfig::of,
-            algorithmMetaDataSetter
+            K1ColoringStreamConfig::of
         );
 
         var computationResult = streamBusinessFacade.k1coloring(
@@ -653,13 +644,11 @@ public class CommunityProcedureFacade {
 
     public Stream<ConductanceStreamResult> conductanceStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
         var streamConfig = createStreamConfig(
             configuration,
-            ConductanceStreamConfig::of,
-            algorithmMetaDataSetter
+            ConductanceStreamConfig::of
         );
 
         var computationResult = streamBusinessFacade.conductance(
@@ -674,10 +663,9 @@ public class CommunityProcedureFacade {
 
     public Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, ApproxMaxKCutStreamConfig::of, algorithmMetaDataSetter);
+        var streamConfig = createStreamConfig(configuration, ApproxMaxKCutStreamConfig::of);
 
         var computationResult = streamBusinessFacade.approxMaxKCut(
             graphName,
@@ -707,8 +695,7 @@ public class CommunityProcedureFacade {
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configCreator,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Function<CypherMapWrapper, C> configCreator
     ) {
         var config = configCreator.apply(CypherMapWrapper.create(configuration));
         algorithmMetaDataSetter.set(config);

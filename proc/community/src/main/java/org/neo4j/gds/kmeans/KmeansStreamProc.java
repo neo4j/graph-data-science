@@ -36,16 +36,16 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansStreamProc extends BaseProc {
-
     @Context
     public GraphDataScience facade;
+
     @Procedure(value = "gds.kmeans.stream", mode = READ)
     @Description(Kmeans.KMEANS_DESCRIPTION)
     public Stream<KmeansStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().kmeansStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -56,7 +56,7 @@ public class KmeansStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext().log()
+        facade.log()
             .warn("Procedure `gds.beta.kmeans.stream` has been deprecated, please use `gds.kmeans.stream`.");
         return stream(graphName, configuration);
     }
@@ -84,7 +84,7 @@ public class KmeansStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        executionContext().log()
+        facade.log()
             .warn("Procedure `gds.beta.kmeans.stream.estimate` has been deprecated, please use `gds.kmeans.stream.estimate`.");
         return estimate(graphName, configuration);
     }

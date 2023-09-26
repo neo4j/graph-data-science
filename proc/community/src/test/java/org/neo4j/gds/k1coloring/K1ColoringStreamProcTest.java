@@ -35,6 +35,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
@@ -202,13 +203,14 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                 null,
                 null,
                 new CommunityProcedureFacade(
-                    algorithmsStreamBusinessFacade,
-                    null,
-                    null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
+                    mock(AlgorithmMetaDataSetter.class),
                     DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
+                    null,
+                    null,
+                    algorithmsStreamBusinessFacade
                 )
             );
             var someJobId = new JobId();

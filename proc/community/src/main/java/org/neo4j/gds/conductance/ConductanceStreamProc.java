@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.procedure.Context;
@@ -34,20 +33,17 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ConductanceStreamProc extends BaseProc {
+public class ConductanceStreamProc {
     @Context
     public GraphDataScience facade;
+
     @Procedure(value = "gds.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
     public Stream<ConductanceStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().conductanceStream(
-            graphName,
-            configuration,
-            executionContext().algorithmMetaDataSetter()
-        );
+        return facade.community().conductanceStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -58,7 +54,7 @@ public class ConductanceStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.alpha.conductance.stream` has been deprecated, please use `gds.conductance.stream`.");
 

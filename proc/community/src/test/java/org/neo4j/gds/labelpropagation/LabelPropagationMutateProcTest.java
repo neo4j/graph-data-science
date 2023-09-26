@@ -327,12 +327,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 null,
                 new CommunityProcedureFacade(
                     null,
+                    DatabaseId.of(db.databaseName()),
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
                     algorithmsMutateBusinessFacade,
                     null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
-                    DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    null
                 )
             );
 
@@ -442,12 +443,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 null,
                 new CommunityProcedureFacade(
                     null,
+                    DatabaseId.of(db.databaseName()),
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
                     algorithmsMutateBusinessFacade,
                     null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
-                    DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    null
                 )
             );
 
@@ -512,12 +514,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 null,
                 new CommunityProcedureFacade(
                     null,
+                    DatabaseId.of(db.databaseName()),
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
                     algorithmsMutateBusinessFacade,
                     null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
-                    DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    null
                 )
             );
 
@@ -585,12 +588,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 null,
                 new CommunityProcedureFacade(
                     null,
+                    DatabaseId.of(db.databaseName()),
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
                     algorithmsMutateBusinessFacade,
                     null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
-                    DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    null
                 )
             );
             ProcedureMethodHelper.mutateMethods(procedure)

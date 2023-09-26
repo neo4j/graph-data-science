@@ -46,11 +46,7 @@ public class LabelPropagationStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().labelPropagationStream(
-            graphName,
-            configuration,
-            executionContext().algorithmMetaDataSetter()
-        );
+        return facade.community().labelPropagationStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.stream.estimate", mode = READ)

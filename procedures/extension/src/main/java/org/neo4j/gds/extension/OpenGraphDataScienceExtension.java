@@ -33,6 +33,7 @@ import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
+import org.neo4j.gds.procedures.integration.AlgorithmMetaDataSetterService;
 import org.neo4j.gds.procedures.integration.CatalogFacadeFactory;
 import org.neo4j.gds.procedures.integration.CommunityProcedureFactory;
 import org.neo4j.gds.procedures.integration.LogAdapter;
@@ -82,6 +83,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
          * Some things are needed both for the procedure facade, but also for legacy stuff, temporarily.
          * They are initialised here.
          */
+        var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
         var databaseIdService = new DatabaseIdService();
         var neo4jConfig = dependencies.config();
         var progressTrackingEnabled = neo4jConfig.get(ProgressFeatureSettings.progress_tracking_enabled);
@@ -109,12 +111,13 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         );
         var communityProcedureFactory = new CommunityProcedureFactory(
             log,
-            useMaxMemoryEstimation,
             graphStoreCatalogService,
-            userServices,
+            algorithmMetaDataSetterService,
             databaseIdService,
             taskRegistryFactoryService,
-            userLogServices
+            userLogServices,
+            userServices,
+            useMaxMemoryEstimation
         );
 
         // We need a provider to slot into the Neo4j Procedure Framework mechanism

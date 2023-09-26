@@ -46,11 +46,7 @@ public class TriangleCountStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().triangleCountStream(
-            graphName,
-            configuration,
-            executionContext().algorithmMetaDataSetter()
-        );
+        return facade.community().triangleCountStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.triangleCount.stream.estimate", mode = READ)

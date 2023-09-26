@@ -46,11 +46,7 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().approxMaxKCutStream(
-            graphName,
-            configuration,
-            executionContext().algorithmMetaDataSetter()
-        );
+        return facade.community().approxMaxKCutStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.maxkcut.stream.estimate", mode = READ)
@@ -74,7 +70,7 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.stream` has been deprecated, please use `gds.maxkcut.stream`.");
 
@@ -89,7 +85,7 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.stream.estimate` has been deprecated, please use `gds.maxkcut.stream.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);

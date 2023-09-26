@@ -45,7 +45,7 @@ public class KCoreDecompositionStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kCoreStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().kCoreStream(graphName, configuration);
     }
     @Procedure(value = "gds.kcore.stream.estimate", mode = READ)
     @Description(KCORE_DESCRIPTION)

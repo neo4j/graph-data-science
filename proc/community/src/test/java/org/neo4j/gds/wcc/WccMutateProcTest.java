@@ -355,14 +355,15 @@ class WccMutateProcTest extends BaseProcTest {
                 null,
                 null,
                 new CommunityProcedureFacade(
-                null,
-                algorithmsMutateBusinessFacade,
-                null,
                     null,
+                    DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                DatabaseId.of(db.databaseName()),
-                new User(getUsername(), false)
-            )
+                    new User(getUsername(), false),
+                    null,
+                    algorithmsMutateBusinessFacade,
+                    null,
+                    null
+                )
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -475,12 +476,13 @@ class WccMutateProcTest extends BaseProcTest {
                 null,
                 new CommunityProcedureFacade(
                     null,
+                    DatabaseId.of(db.databaseName()),
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
                     algorithmsBusinessFacade,
                     null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
-                    DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    null
                 )
             );
                 ProcedureMethodHelper.mutateMethods(procedure)
@@ -543,12 +545,13 @@ class WccMutateProcTest extends BaseProcTest {
                 null,
                 new CommunityProcedureFacade(
                     null,
+                    DatabaseId.of(db.databaseName()),
+                    ProcedureReturnColumns.EMPTY,
+                    new User(getUsername(), false),
+                    null,
                     algorithmsBusinessFacade,
                     null,
-                    null,
-                    ProcedureReturnColumns.EMPTY,
-                    DatabaseId.of(db.databaseName()),
-                    new User(getUsername(), false)
+                    null
                 )
             );
 
@@ -617,12 +620,13 @@ class WccMutateProcTest extends BaseProcTest {
                         null,
                         new CommunityProcedureFacade(
                             null,
+                            DatabaseId.of(db.databaseName()),
+                            ProcedureReturnColumns.EMPTY,
+                            new User(getUsername(), false),
+                            null,
                             algorithmsBusinessFacade,
                             null,
-                            null,
-                            ProcedureReturnColumns.EMPTY,
-                            DatabaseId.of(db.databaseName()),
-                            new User(getUsername(), false)
+                            null
                         )
                     );
                     Map<String, Object> config = new HashMap<>(additionalConfig);

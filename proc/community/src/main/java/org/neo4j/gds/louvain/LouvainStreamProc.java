@@ -45,7 +45,7 @@ public class LouvainStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().louvainStream(graphName, configuration, executionContext().algorithmMetaDataSetter());
+        return facade.community().louvainStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.stream.estimate", mode = READ)

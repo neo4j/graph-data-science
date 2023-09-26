@@ -281,12 +281,13 @@ class WccStatsProcTest extends BaseProcTest {
             null,
             new CommunityProcedureFacade(
                 null,
+                DatabaseId.of(db.databaseName()),
+                ProcedureReturnColumns.EMPTY,
+                new User(getUsername(), false),
+                null,
                 null,
                 statsBusinessFacade,
-                null,
-                ProcedureReturnColumns.EMPTY,
-                DatabaseId.of(db.databaseName()),
-                new User(getUsername(), false)
+                null
             )
         );
     }

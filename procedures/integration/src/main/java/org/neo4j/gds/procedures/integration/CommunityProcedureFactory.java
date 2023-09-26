@@ -38,6 +38,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.procedures.KernelTransactionService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
@@ -49,45 +50,47 @@ import org.neo4j.kernel.api.procedure.Context;
 
 public class CommunityProcedureFactory {
     private final Log log;
-    private final boolean useMaxMemoryEstimation;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final UserServices userServices;
+    private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
     private final DatabaseIdService databaseIdService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
+    private final UserServices userServices;
+    private final boolean useMaxMemoryEstimation;
 
     public CommunityProcedureFactory(
         Log log,
-        boolean useMaxMemoryEstimation,
         GraphStoreCatalogService graphStoreCatalogService,
-        UserServices userServices,
+        AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
         DatabaseIdService databaseIdService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices
+        UserLogServices userLogServices,
+        UserServices userServices,
+        boolean useMaxMemoryEstimation
     ) {
         this.log = log;
-        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.userServices = userServices;
+        this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
         this.databaseIdService = databaseIdService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
+        this.userServices = userServices;
+        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
     }
 
     public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
-        var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(
-            log,
-            useMaxMemoryEstimation
-        );
-
+        var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+        var kernelTransactionService = new KernelTransactionService(context);
+        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+        var kernelTransaction = kernelTransactionService.getKernelTransaction();
         var user = userServices.getUser(context.securityContext());
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
             databaseId,
             user
         );
-
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
 
         // algorithm facade
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
@@ -98,39 +101,42 @@ public class CommunityProcedureFactory {
             log
         );
 
-        // business facade
-        var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
-            communityAlgorithmsFacade
+        // moar services
+        var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
+        var graphLoaderContext = buildGraphLoaderContext(
+            context,
+            databaseId,
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            user,
+            graphLoaderContext
         );
 
-        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            communityAlgorithmsFacade,
-            new NodePropertyService(log)
-        );
-
-        var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
+        // business facades
         var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
             graphStoreCatalogService,
-            new FictitiousGraphStoreEstimationService(),
-            new DatabaseGraphStoreEstimationService(
-                user,
-                buildGraphLoaderContext(context, databaseId, taskRegistryFactory, userLogRegistryFactory)
-            ),
+            fictitiousGraphStoreEstimationService,
+            databaseGraphStoreEstimationService,
             databaseId,
             user
         );
+        var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
+        var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);
+        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(communityAlgorithmsFacade, new NodePropertyService(log));
 
-        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
         // procedure facade
         return new CommunityProcedureFacade(
-            streamBusinessFacade,
+            algorithmMetaDataSetter,
+            databaseId,
+            returnColumns,
+            user,
+            estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
-            estimateBusinessFacade,
-            returnColumns,
-            databaseId,
-            user
+            streamBusinessFacade
         );
     }
 

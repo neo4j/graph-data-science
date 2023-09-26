@@ -47,12 +47,7 @@ public class ModularityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().modularityStream(
-            graphName,
-            configuration,
-            executionContext().algorithmMetaDataSetter()
-        );
-
+        return facade.community().modularityStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularity.stream.estimate", mode = READ)
@@ -76,7 +71,7 @@ public class ModularityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.alpha.modularity.stream` has been deprecated, please use `gds.modularity.stream`.");
 
