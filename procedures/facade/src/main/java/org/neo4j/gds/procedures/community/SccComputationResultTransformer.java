@@ -33,7 +33,7 @@ import org.neo4j.gds.scc.SccStatsConfig;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.scc.Scc.NOT_VALID;
+import static org.neo4j.gds.scc.Scc.UNORDERED;
 
 final class SccComputationResultTransformer {
 
@@ -44,7 +44,7 @@ final class SccComputationResultTransformer {
             var graph = computationResult.graph();
             var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
             return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(i -> components.get(i) != NOT_VALID)
+                .filter(i -> components.get(i) != UNORDERED)
                 .mapToObj(i -> new SccStreamResult(graph.toOriginalNodeId(i), components.get(i)));
 
         }).orElseGet(Stream::empty);

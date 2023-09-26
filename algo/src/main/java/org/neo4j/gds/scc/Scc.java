@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -32,16 +33,15 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
 public class Scc extends Algorithm<HugeLongArray> {
-    public static final int NOT_VALID = -1;
+    public static final int UNORDERED = -1;
     public static final String SCC_DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
                                                  "where all nodes in the same set form a connected component.";
     private Graph graph;
-    private final long nodeCount;
     private HugeLongArray index;
     private BitSet visited;
     private HugeLongArray connectedComponents;
-    private PagedLongStack stack;
-    private PagedLongStack boundaries;
+    private HugeLongArrayStack stack;
+    private HugeLongArrayStack boundaries;
     private PagedLongStack todo; // stores pairs of (node-Id, TODO-Id)
 
     public Scc(
@@ -49,13 +49,16 @@ public class Scc extends Algorithm<HugeLongArray> {
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
+
+        var nodeCount = graph.nodeCount();
+
         this.graph = graph;
-        this.nodeCount = graph.nodeCount();
         this.index = HugeLongArray.newArray(nodeCount);
-        this.stack = new PagedLongStack(nodeCount);
-        this.boundaries = new PagedLongStack(nodeCount);
-        this.connectedComponents = HugeLongArray.newArray(nodeCount);
+        this.stack = HugeLongArrayStack.newStack(nodeCount);
         this.visited = new BitSet(nodeCount);
+        this.connectedComponents = HugeLongArray.newArray(nodeCount);
+        this.boundaries = HugeLongArrayStack.newStack(nodeCount);
+
         this.todo = new PagedLongStack(nodeCount);
     }
 
@@ -64,30 +67,32 @@ public class Scc extends Algorithm<HugeLongArray> {
      */
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
-        index.fill(NOT_VALID);
-        connectedComponents.fill(NOT_VALID);
+        index.fill(UNORDERED);
+        connectedComponents.fill(UNORDERED);
         todo.clear();
         boundaries.clear();
         stack.clear();
-        graph.forEachNode(this::compute);
+        graph.forEachNode(this::computePerNode);
         progressTracker.endSubTask();
         return connectedComponents;
     }
 
-    private boolean compute(long nodeId) {
+    private boolean computePerNode(long nodeId) {
         if (!terminationFlag.running()) {
             return false;
         }
-        if (index.get(nodeId) != NOT_VALID) {
+
+        if (index.get(nodeId) != UNORDERED) {
             return true;
         }
+
         push(Action.VISIT, nodeId);
         while (!todo.isEmpty()) {
             var action = todo.pop();
             var node = todo.pop();
             
             if (action == Action.VISIT.code) {
-                visit(node);
+                firstVisitToNode(node);
             } else if (action == Action.VISITEDGE.code) {
                 visitEdge(node);
             } else {
@@ -99,7 +104,7 @@ public class Scc extends Algorithm<HugeLongArray> {
     }
 
     private void visitEdge(long nodeId) {
-        if (index.get(nodeId) == NOT_VALID) {
+        if (index.get(nodeId) == UNORDERED) {
             push(Action.VISIT, nodeId);
         } else if (!visited.get(nodeId)) {
             while (index.get(nodeId) < boundaries.peek()) {
@@ -113,7 +118,7 @@ public class Scc extends Algorithm<HugeLongArray> {
             boundaries.pop();
             long element;
             do {
-                element = stack.pop();
+                element = stack.pop(); //pop to stack
                 connectedComponents.set(element, nodeId);
                 visited.set(element);
             } while (element != nodeId);
@@ -121,11 +126,11 @@ public class Scc extends Algorithm<HugeLongArray> {
 
     }
 
-    private void visit(long nodeId) {
+    private void firstVisitToNode(long nodeId) {
         final long stackSize = stack.size();
         index.set(nodeId, stackSize);
-        stack.push(nodeId);
-        boundaries.push(stackSize);
+        stack.push(nodeId); // push to stack (at most one entry per vertex)
+        boundaries.push(stackSize); // push to stack (at most one entry per vertex)
         push(Action.POSTVISIT, nodeId);
         graph.forEachRelationship(nodeId, (s, t) -> {
             push(Action.VISITEDGE, t);

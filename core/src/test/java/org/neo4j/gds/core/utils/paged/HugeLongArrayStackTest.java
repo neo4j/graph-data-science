@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -95,5 +97,28 @@ class HugeLongArrayStackTest {
         var q = HugeLongArrayStack.newStack(0);
         var ex = assertThrows(IndexOutOfBoundsException.class, () -> q.push(42));
         assertEquals("Stack is full.", rootCause(ex).getMessage());
+    }
+
+    @Test
+    void shouldClearCorrectly() {
+        var q = HugeLongArrayStack.newStack(2);
+
+        q.push(10);
+        q.push(3);
+
+        q.clear();
+
+        assertThat(q.isEmpty()).isTrue();
+
+        assertDoesNotThrow(() -> q.push(11));
+        assertDoesNotThrow(() -> q.push(4));
+
+        assertThat(q.size()).isEqualTo(2);
+        assertThat(q.pop()).isEqualTo(4);
+        assertThat(q.pop()).isEqualTo(11);
+
+        assertThat(q.isEmpty()).isTrue();
+
+
     }
 }
