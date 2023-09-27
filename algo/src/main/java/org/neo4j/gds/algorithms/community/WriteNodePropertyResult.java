@@ -26,10 +26,10 @@ public final class WriteNodePropertyResult {
 
     WriteNodePropertyResult(
         long nodePropertiesWritten,
-        long mutateMilliseconds
+        long writeMilliseconds
     ) {
         this.nodePropertiesWritten = nodePropertiesWritten;
-        this.writeMilliseconds = mutateMilliseconds;
+        this.writeMilliseconds = writeMilliseconds;
     }
 
     long nodePropertiesWritten() {
