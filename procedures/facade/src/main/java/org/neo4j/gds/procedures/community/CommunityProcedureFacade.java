@@ -92,6 +92,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResul
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
+import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -105,6 +106,7 @@ import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -197,6 +199,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(WccComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<WccWriteResult> wccWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, WccWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.wcc(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
+        );
+
+        return Stream.of(WccComputationResultTransformer.toWriteResult(computationResult));
     }
 
     public Stream<MemoryEstimateResult> wccEstimateMutate(

@@ -37,7 +37,6 @@ import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -615,11 +614,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             return result;
         }
         return null;
-    }
-
-    // Herein lie some private functional interfaces, so we know what we're doing 🤨
-    interface NodePropertyValuesMapper<R, C extends MutateNodePropertyConfig> {
-        NodePropertyValues map(R result, C configuration);
     }
 
 }

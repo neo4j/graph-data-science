@@ -52,6 +52,11 @@ public interface AlgorithmComputationResult<RESULT> {
     }
 
     static <R> AlgorithmComputationResult<R> withoutAlgorithmResult(Graph graph, GraphStore graphStore) {
-        return ImmutableAlgorithmComputationResult.of(Optional.empty(), graph, graphStore, null);
+        return ImmutableAlgorithmComputationResult.of(
+            Optional.empty(),
+            graph,
+            graphStore,
+            TerminationFlag.RUNNING_TRUE
+        );
     }
 }

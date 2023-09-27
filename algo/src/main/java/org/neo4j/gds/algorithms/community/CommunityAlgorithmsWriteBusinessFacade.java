@@ -19,6 +19,22 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
+import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.result.CommunityStatistics;
+import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.wcc.WccWriteConfig;
+
+import java.util.Optional;
+import java.util.function.Supplier;
+
 public class CommunityAlgorithmsWriteBusinessFacade {
 
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
@@ -32,6 +48,108 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
+    public NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> wcc(
+        String graphName,
+        WccWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+                config.isIncremental(),
+                config.consecutiveIds(),
+                result.asNodeProperties(),
+                config.minCommunitySize(),
+                config.concurrency()
+            ),
+            (result -> result::setIdOf),
+            (result, componentCount, communitySummary) -> {
+                return new StandardCommunityStatisticsSpecificFields(
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY,
+            "WccWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+
+    }
+
+    <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CommunityStatisticsSpecificFields> NodePropertyWriteResult<ASF> writeToDatabase(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        NodePropertyValuesMapper<RESULT, CONFIG> nodePropertyValuesMapper,
+        CommunityFunctionSupplier<RESULT> communityFunctionSupplier,
+        SpecificFieldsWithCommunityStatisticsSupplier<RESULT, ASF> specificFieldsSupplier,
+        StatisticsComputationInstructions statisticsComputationInstructions,
+        long computeMilliseconds,
+        Supplier<ASF> emptyASFSupplier,
+        String procedureName,
+        int writeConcurrency,
+        String writeProperty,
+        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo
+    ) {
+
+        return algorithmResult.result().map(result -> {
+            // 2. Construct NodePropertyValues from the algorithm result
+            // 2.1 Should we measure some post-processing here?
+            var nodePropertyValues = nodePropertyValuesMapper.map(
+                result,
+                configuration
+            );
+
+            // 3. Go and mutate the graph store
+            var writeNodePropertyResult = writeNodePropertyService.write(
+                algorithmResult.graph(),
+                algorithmResult.graphStore(),
+                nodePropertyValues,
+                writeConcurrency,
+                writeProperty,
+                procedureName,
+                arrowConnectionInfo,
+                algorithmResult.terminationFlag()
+            );
+
+            // 4. Compute result statistics
+            var communityStatistics = CommunityStatistics.communityStats(
+                nodePropertyValues.nodeCount(),
+                communityFunctionSupplier.communityFunction(result),
+                DefaultPool.INSTANCE,
+                configuration.concurrency(),
+                statisticsComputationInstructions
+            );
+
+            var componentCount = communityStatistics.componentCount();
+            var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+
+            var specificFields = specificFieldsSupplier.specificFields(result, componentCount, communitySummary);
+
+            return NodePropertyWriteResult.<ASF>builder()
+                .computeMillis(computeMilliseconds)
+                .postProcessingMillis(communityStatistics.computeMilliseconds())
+                .nodePropertiesWritten(writeNodePropertyResult.nodePropertiesWritten())
+                .writeMillis(writeNodePropertyResult.writeMilliseconds())
+                .configuration(configuration)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> NodePropertyWriteResult.empty(emptyASFSupplier.get(), configuration));
+
+    }
 
 
 }
