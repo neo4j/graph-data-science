@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
 
-public class ProcedureTransactionService {
-    private final Context context;
-
-    public ProcedureTransactionService(Context context) {
-        this.context = context;
-    }
-
-    public Transaction getProcedureTransaction() {
-        try {
-            return context.internalTransaction();
-        } catch (ProcedureException e) {
-            throw new IllegalStateException("This is not possible, we always have a transaction", e);
-        }
+/**
+ * This exists as a way of easy dependency injection. It is not rocket science :)
+ */
+public class TransactionContextAccessor {
+    public TransactionContext transactionContext(
+        GraphDatabaseService graphDatabaseService,
+        Transaction procedureTransaction
+    ) {
+        return DatabaseTransactionContext.of(
+            graphDatabaseService,
+            procedureTransaction
+        );
     }
 }

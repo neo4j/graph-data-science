@@ -47,11 +47,9 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
-import org.neo4j.gds.procedures.ProcedureTransactionService;
-import org.neo4j.gds.procedures.TransactionContextService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -79,12 +77,10 @@ public class CatalogFacade {
     // services
     private final Consumer<AutoCloseable> streamCloser;
     private final DatabaseId databaseId;
-    private final GraphDatabaseService graphDatabaseService;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final ProcedureTransactionService procedureTransactionService;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
-    private final TransactionContextService transactionContextService;
+    private final TransactionContext transactionContext;
     private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
     private final UserLogStore userLogStore;
@@ -98,12 +94,10 @@ public class CatalogFacade {
     public CatalogFacade(
         Consumer<AutoCloseable> streamCloser,
         DatabaseId databaseId,
-        GraphDatabaseService graphDatabaseService,
         ProcedureReturnColumns procedureReturnColumns,
-        ProcedureTransactionService procedureTransactionService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TransactionContextService transactionContextService,
+        TransactionContext transactionContext,
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
         UserLogStore userLogStore,
@@ -111,12 +105,10 @@ public class CatalogFacade {
     ) {
         this.streamCloser = streamCloser;
         this.databaseId = databaseId;
-        this.graphDatabaseService = graphDatabaseService;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.procedureTransactionService = procedureTransactionService;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
-        this.transactionContextService = transactionContextService;
+        this.transactionContext = transactionContext;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.userLogStore = userLogStore;
@@ -205,11 +197,6 @@ public class CatalogFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var transactionContext = transactionContextService.transactionContext(
-            graphDatabaseService,
-            procedureTransactionService
-        );
-
         var result = businessFacade.nativeProject(
             user,
             databaseId,
@@ -232,11 +219,6 @@ public class CatalogFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var transactionContext = transactionContextService.transactionContext(
-            graphDatabaseService,
-            procedureTransactionService
-        );
-
         var result = businessFacade.estimateNativeProject(
             databaseId,
             taskRegistryFactory,
@@ -257,11 +239,6 @@ public class CatalogFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var transactionContext = transactionContextService.transactionContext(
-            graphDatabaseService,
-            procedureTransactionService
-        );
-
         var result = businessFacade.cypherProject(
             user,
             databaseId,
@@ -283,11 +260,6 @@ public class CatalogFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var transactionContext = transactionContextService.transactionContext(
-            graphDatabaseService,
-            procedureTransactionService
-        );
-
         var result = businessFacade.estimateCypherProject(
             databaseId,
             taskRegistryFactory,

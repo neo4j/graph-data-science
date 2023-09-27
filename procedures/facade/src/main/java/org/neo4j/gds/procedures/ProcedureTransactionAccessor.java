@@ -17,16 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.services;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.kernel.api.procedure.Context;
 
-/**
- * Database id is request scoped
- */
-public class DatabaseIdService {
-    public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
-        return DatabaseId.of(databaseService.databaseName());
+public class ProcedureTransactionAccessor {
+    public Transaction getProcedureTransaction(Context context) {
+        try {
+            return context.internalTransaction();
+        } catch (ProcedureException e) {
+            throw new IllegalStateException("This is not possible, we always have a transaction", e);
+        }
     }
 }

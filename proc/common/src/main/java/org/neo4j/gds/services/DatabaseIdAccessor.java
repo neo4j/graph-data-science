@@ -19,21 +19,14 @@
  */
 package org.neo4j.gds.services;
 
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 /**
- * An abstraction that allows us to stack off Neo4j concerns cleanly.
- * <p>
- * As long as username service is used for procedure facade _and_ legacy services,
- * we have to keep having security context as a parameter.
- * Once we only use it in procedure facade we can switch to using constructor injection and hide security context.
+ * Database id is request scoped
  */
-public class UserServices {
-    public User getUser(SecurityContext securityContext) {
-        String username = Neo4jProxy.username(securityContext.subject());
-        boolean isAdmin = securityContext.roles().contains("admin");
-        return new User(username, isAdmin);
+public class DatabaseIdAccessor {
+    public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
+        return DatabaseId.of(databaseService.databaseName());
     }
 }

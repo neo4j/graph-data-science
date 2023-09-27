@@ -224,7 +224,7 @@ class DefaultCatalogBusinessFacadeTest {
     void shouldHandleNullsInNativeProjectParameters() {
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            new ConfigurationService(),
+            new CatalogConfigurationService(),
             new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
             null,
@@ -311,7 +311,7 @@ class DefaultCatalogBusinessFacadeTest {
     void shouldHandleNullsInCypherProjectParameters() {
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            new ConfigurationService(),
+            new CatalogConfigurationService(),
             new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
             null,

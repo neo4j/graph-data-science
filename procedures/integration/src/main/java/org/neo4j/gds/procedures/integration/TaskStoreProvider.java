@@ -23,7 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
-import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -35,17 +35,17 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 @Deprecated
 public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-    private final DatabaseIdService databaseIdService;
+    private final DatabaseIdAccessor databaseIdAccessor;
     private final TaskStoreService taskStoreService;
 
-    public TaskStoreProvider(DatabaseIdService databaseIdService, TaskStoreService taskStoreService) {
-        this.databaseIdService = databaseIdService;
+    public TaskStoreProvider(DatabaseIdAccessor databaseIdAccessor, TaskStoreService taskStoreService) {
+        this.databaseIdAccessor = databaseIdAccessor;
         this.taskStoreService = taskStoreService;
     }
 
     @Override
     public TaskStore apply(Context context) {
-        DatabaseId databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
+        DatabaseId databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
 
         return taskStoreService.getTaskStore(databaseId);
     }

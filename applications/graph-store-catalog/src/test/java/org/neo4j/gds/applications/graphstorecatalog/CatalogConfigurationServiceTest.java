@@ -44,14 +44,14 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class ConfigurationServiceTest {
+class CatalogConfigurationServiceTest {
     /*
      * This does not capture every element and variation;
      * it is here as a placeholder for when you have tricky stuff and want to iterate locally
      */
     @Test
     void shouldParseNativeProjectConfiguration() {
-        var service = new ConfigurationService();
+        var service = new CatalogConfigurationService();
 
         var configuration = service.parseNativeProjectConfiguration(
             new User("some user", false),
@@ -82,7 +82,7 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"nodeProjection", "relationshipProjection", "nodeQuery", "relationshipQuery"})
     void shouldDisallowNativeProjectConfigurationWithConfigurationCertainKeywordsInIt(String key) {
-        var service = new ConfigurationService();
+        var service = new CatalogConfigurationService();
 
         try {
             service.parseNativeProjectConfiguration(
@@ -100,7 +100,7 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldParseCypherProjectConfiguration() {
-        var service = new ConfigurationService();
+        var service = new CatalogConfigurationService();
 
         var configuration = service.parseCypherProjectConfiguration(
             new User("some user", false),
@@ -125,7 +125,7 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"nodeQuery", "relationshipQuery"})
     void shouldDisallowCypherProjectConfigurationWithConfigurationCertainKeywordsInIt(String key) {
-        var service = new ConfigurationService();
+        var service = new CatalogConfigurationService();
 
         try {
             service.parseCypherProjectConfiguration(
@@ -145,7 +145,7 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"nodeProjection", "relationshipProjection"})
     void shouldDisallowCypherProjectConfigurationWithConfigurationCertainKeywordsInItButDifferent(String key) {
-        var service = new ConfigurationService();
+        var service = new CatalogConfigurationService();
 
         try {
             service.parseCypherProjectConfiguration(
@@ -164,7 +164,7 @@ class ConfigurationServiceTest {
     @ParameterizedTest
     @MethodSource("stuffThatIsNotStringOrListOfString")
     void shouldRejectNodeLabelsThatAreNotStringOrListOfString(Object notStringOrListOfString) {
-        var service = new ConfigurationService();
+        var service = new CatalogConfigurationService();
 
         assertThatIllegalArgumentException().isThrownBy(() -> {
             service.parseGraphStreamNodePropertiesConfiguration(

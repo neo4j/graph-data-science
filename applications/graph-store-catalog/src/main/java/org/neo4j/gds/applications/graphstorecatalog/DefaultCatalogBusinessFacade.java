@@ -77,7 +77,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     private final Log log;
 
     // services
-    private final ConfigurationService configurationService;
+    private final CatalogConfigurationService catalogConfigurationService;
     private final GraphNameValidationService graphNameValidationService;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphStoreValidationService graphStoreValidationService;
@@ -105,7 +105,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
     public DefaultCatalogBusinessFacade(
         Log log,
-        ConfigurationService configurationService,
+        CatalogConfigurationService catalogConfigurationService,
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreValidationService graphStoreValidationService,
@@ -131,7 +131,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         this.log = log;
 
-        this.configurationService = configurationService;
+        this.catalogConfigurationService = catalogConfigurationService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphStoreValidationService = graphStoreValidationService;
@@ -215,7 +215,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
-        var configuration = configurationService.parseNativeProjectConfiguration(
+        var configuration = catalogConfigurationService.parseNativeProjectConfiguration(
             user,
             graphName,
             nodeProjection,
@@ -244,7 +244,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         Object relationshipProjection,
         Map<String, Object> rawConfiguration
     ) {
-        var configuration = configurationService.parseEstimateNativeProjectConfiguration(
+        var configuration = catalogConfigurationService.parseEstimateNativeProjectConfiguration(
             nodeProjection,
             relationshipProjection,
             rawConfiguration
@@ -275,7 +275,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
-        var configuration = configurationService.parseCypherProjectConfiguration(
+        var configuration = catalogConfigurationService.parseCypherProjectConfiguration(
             user,
             graphName,
             nodeQuery,
@@ -304,7 +304,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         String relationshipQuery,
         Map<String, Object> rawConfiguration
     ) {
-        var configuration = configurationService.parseEstimateCypherProjectConfiguration(
+        var configuration = catalogConfigurationService.parseEstimateCypherProjectConfiguration(
             nodeQuery,
             relationshipQuery,
             rawConfiguration
@@ -342,7 +342,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             originGraphName
         );
 
-        var configuration = configurationService.parseSubGraphProjectConfiguration(
+        var configuration = catalogConfigurationService.parseSubGraphProjectConfiguration(
             user,
             graphName,
             originGraphName,
@@ -387,7 +387,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphDropNodePropertiesConfiguration(
+        var configuration = catalogConfigurationService.parseGraphDropNodePropertiesConfiguration(
             graphName,
             nodeProperties,
             rawConfiguration
@@ -448,7 +448,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         // we do this for the side effect of checking for unknown configuration keys, it is a bit naff
-        configurationService.validateDropGraphPropertiesConfiguration(
+        catalogConfigurationService.validateDropGraphPropertiesConfiguration(
             graphName,
             graphProperty,
             rawConfiguration
@@ -506,7 +506,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        configurationService.validateGraphStreamGraphPropertiesConfig(
+        catalogConfigurationService.validateGraphStreamGraphPropertiesConfig(
             graphName,
             graphProperty,
             rawConfiguration
@@ -534,7 +534,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphStreamNodePropertiesConfiguration(
+        var configuration = catalogConfigurationService.parseGraphStreamNodePropertiesConfiguration(
             graphName,
             nodePropertiesAsObject,
             nodeLabelsAsObject,
@@ -579,7 +579,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphStreamRelationshipPropertiesConfiguration(
+        var configuration = catalogConfigurationService.parseGraphStreamRelationshipPropertiesConfiguration(
             graphName,
             relationshipProperties,
             relationshipTypes,
@@ -610,7 +610,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphStreamRelationshipsConfiguration(
+        var configuration = catalogConfigurationService.parseGraphStreamRelationshipsConfiguration(
             graphName,
             relationshipTypes,
             rawConfiguration
@@ -640,7 +640,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphWriteNodePropertiesConfiguration(
+        var configuration = catalogConfigurationService.parseGraphWriteNodePropertiesConfiguration(
             graphName,
             nodePropertiesAsObject,
             nodeLabelsAsObject,
@@ -693,7 +693,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         );
 
         // maybe because this configuration is non-functionals only?
-        var configuration = configurationService.parseWriteRelationshipPropertiesConfiguration(rawConfiguration);
+        var configuration = catalogConfigurationService.parseWriteRelationshipPropertiesConfiguration(rawConfiguration);
 
         return writeRelationshipPropertiesApplication.compute(
             terminationFlag,
@@ -747,7 +747,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
-        var configuration = configurationService.parseGraphWriteRelationshipConfiguration(
+        var configuration = catalogConfigurationService.parseGraphWriteRelationshipConfiguration(
             relationshipType,
             relationshipProperty,
             rawConfiguration
@@ -824,7 +824,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         String graphName,
         Map<String, Object> rawConfiguration
     ) {
-        var configuration = configurationService.parseCommonNeighbourAwareRandomWalkConfig(rawConfiguration);
+        var configuration = catalogConfigurationService.parseCommonNeighbourAwareRandomWalkConfig(rawConfiguration);
 
         return estimateCommonNeighbourAwareRandomWalkApplication.estimate(user, databaseId, graphName, configuration);
     }
@@ -840,7 +840,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     ) {
         var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
 
-        var configuration = configurationService.parseRandomGraphGeneratorConfig(
+        var configuration = catalogConfigurationService.parseRandomGraphGeneratorConfig(
             user,
             graphName,
             nodeCount,

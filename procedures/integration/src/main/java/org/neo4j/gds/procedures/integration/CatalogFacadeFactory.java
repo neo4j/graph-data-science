@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
-import org.neo4j.gds.applications.graphstorecatalog.ConfigurationService;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogConfigurationService;
 import org.neo4j.gds.applications.graphstorecatalog.CypherProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DropGraphApplication;
@@ -52,15 +52,15 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
-import org.neo4j.gds.procedures.ProcedureTransactionService;
+import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
-import org.neo4j.gds.procedures.TransactionContextService;
+import org.neo4j.gds.procedures.TransactionContextAccessor;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.services.DatabaseIdService;
+import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.gds.services.UserServices;
+import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.Optional;
@@ -74,50 +74,68 @@ import java.util.function.Function;
  * We can resolve things like user and database id here, construct termination flags, and such.
  */
 public class CatalogFacadeFactory {
-    // Global scoped/ global state things
+    // Global scoped/ global state/ stateless things
+    private final CatalogConfigurationService catalogConfigurationService;
     private final Log log;
+    private final GraphNameValidationService graphNameValidationService;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final GraphStoreFilterService graphStoreFilterService;
+    private final GraphStoreValidationService graphStoreValidationService;
+    private final ProcedureTransactionAccessor procedureTransactionAccessor;
 
     // Request scoped things
-    private final DatabaseIdService databaseIdService;
+    private final DatabaseIdAccessor databaseIdAccessor;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TerminationFlagService terminationFlagService;
+    private final TransactionContextAccessor transactionContextAccessor;
     private final UserLogServices userLogServices;
-    private final UserServices userServices;
+    private final UserAccessor userAccessor;
 
     // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
 
     /**
      * We inject services here so that we may control and isolate access to dependencies.
-     * Take {@link org.neo4j.gds.services.UserServices} for example.
+     * Take {@link org.neo4j.gds.services.UserAccessor} for example.
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
     public CatalogFacadeFactory(
+        CatalogConfigurationService catalogConfigurationService,
         Log log,
+        GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
-        DatabaseIdService databaseIdService,
+        GraphStoreFilterService graphStoreFilterService,
+        GraphStoreValidationService graphStoreValidationService,
+        ProcedureTransactionAccessor procedureTransactionAccessor,
+        DatabaseIdAccessor databaseIdAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
         KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
+        TransactionContextAccessor transactionContextAccessor,
         UserLogServices userLogServices,
-        UserServices userServices,
+        UserAccessor userAccessor,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
-        this.log = log;
+        this.catalogConfigurationService = catalogConfigurationService;
+        this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.graphStoreFilterService = graphStoreFilterService;
+        this.graphStoreValidationService = graphStoreValidationService;
+        this.log = log;
+        this.procedureTransactionAccessor = procedureTransactionAccessor;
 
-        this.databaseIdService = databaseIdService;
+        this.databaseIdAccessor = databaseIdAccessor;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.terminationFlagService = terminationFlagService;
+        this.transactionContextAccessor = transactionContextAccessor;
         this.userLogServices = userLogServices;
-        this.userServices = userServices;
+        this.userAccessor = userAccessor;
 
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
@@ -127,13 +145,14 @@ public class CatalogFacadeFactory {
      * And we can readily construct things like termination flags.
      */
     public CatalogFacade createCatalogFacade(Context context) {
-        // Neo4j's services
+        // Neo4j's basic request scoped services
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
+        var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
         // Derived data and services
-        var databaseId = databaseIdService.getDatabaseId(graphDatabaseService);
-        var procedureTransactionService = new ProcedureTransactionService(context);
+        var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
+        var graphProjectMemoryUsage = new GraphProjectMemoryUsageService(log, graphDatabaseService);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
@@ -144,19 +163,15 @@ public class CatalogFacadeFactory {
             }
         };
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
-        var transactionContextService = new TransactionContextService();
-        var user = userServices.getUser(context.securityContext());
+        var transactionContext = transactionContextAccessor.transactionContext(
+            graphDatabaseService,
+            procedureTransaction
+        );
+        var user = userAccessor.getUser(context.securityContext());
+        var userLogStore = userLogServices.getUserLogStore(databaseId);
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-        var userLogStore = userLogServices.getUserLogStore(databaseId);
-
-        // GDS services
-        var configurationService = new ConfigurationService();
-        var graphNameValidationService = new GraphNameValidationService();
-        var graphProjectMemoryUsage = new GraphProjectMemoryUsageService(log, graphDatabaseService);
-        var graphStoreFilterService = new GraphStoreFilterService();
-        var graphStoreValidationService = new GraphStoreValidationService();
 
         // Exporter builders
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
@@ -214,7 +229,7 @@ public class CatalogFacadeFactory {
         // GDS business facade
         CatalogBusinessFacade businessFacade = new DefaultCatalogBusinessFacade(
             log,
-            configurationService,
+            catalogConfigurationService,
             graphNameValidationService,
             graphStoreCatalogService,
             graphStoreValidationService,
@@ -247,12 +262,10 @@ public class CatalogFacadeFactory {
         return new CatalogFacade(
             streamCloser,
             databaseId,
-            graphDatabaseService,
             procedureReturnColumns,
-            procedureTransactionService,
             taskRegistryFactory,
             terminationFlag,
-            transactionContextService,
+            transactionContext,
             user,
             userLogRegistryFactory,
             userLogStore,

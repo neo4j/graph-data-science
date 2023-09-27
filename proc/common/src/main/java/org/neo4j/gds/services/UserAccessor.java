@@ -17,23 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures;
+package org.neo4j.gds.services;
 
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 /**
- * This exists as a way of easy dependency injection.
+ * An abstraction that allows us to stack off Neo4j concerns cleanly.
  */
-public class TransactionContextService {
-    public TransactionContext transactionContext(
-        GraphDatabaseService graphDatabaseService,
-        ProcedureTransactionService procedureTransactionService
-    ) {
-        return DatabaseTransactionContext.of(
-            graphDatabaseService,
-            procedureTransactionService.getProcedureTransaction()
-        );
+public class UserAccessor {
+    public User getUser(SecurityContext securityContext) {
+        String username = Neo4jProxy.username(securityContext.subject());
+        boolean isAdmin = securityContext.roles().contains("admin");
+        return new User(username, isAdmin);
     }
 }

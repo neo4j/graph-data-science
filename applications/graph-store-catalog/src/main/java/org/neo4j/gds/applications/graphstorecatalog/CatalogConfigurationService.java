@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  * This is all about syntax checking/ dull boring parsing of disparate data into a nested data structure.
  * The behaviour selection in @GraphProjectFromStoreConfig#graphStoreFactory sticks out as belonging somewhere else.
  */
-public class ConfigurationService {
+public class CatalogConfigurationService {
     private static final Set<String> DISALLOWED_NATIVE_PROJECT_CONFIG_KEYS = Set.of(
         GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
         GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY

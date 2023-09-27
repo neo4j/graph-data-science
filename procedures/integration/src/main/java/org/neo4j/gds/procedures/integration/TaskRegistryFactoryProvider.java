@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.integration;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.services.DatabaseIdService;
-import org.neo4j.gds.services.UserServices;
+import org.neo4j.gds.services.DatabaseIdAccessor;
+import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -32,24 +32,24 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 @Deprecated
 public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
-    private final DatabaseIdService databaseIdService;
-    private final UserServices userServices;
+    private final DatabaseIdAccessor databaseIdAccessor;
+    private final UserAccessor userAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
 
     public TaskRegistryFactoryProvider(
-        DatabaseIdService databaseIdService,
-        UserServices userServices,
+        DatabaseIdAccessor databaseIdAccessor,
+        UserAccessor userAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService
     ) {
-        this.databaseIdService = databaseIdService;
-        this.userServices = userServices;
+        this.databaseIdAccessor = databaseIdAccessor;
+        this.userAccessor = userAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
     }
 
     @Override
     public TaskRegistryFactory apply(Context context) {
-        var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
-        var user = userServices.getUser(context.securityContext());
+        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var user = userAccessor.getUser(context.securityContext());
 
         return taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
     }
