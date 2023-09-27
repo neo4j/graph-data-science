@@ -462,7 +462,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .aggregator(Aggregator.AggregatorType.POOL)
             .tolerance(1e-10)
             .sampleSizes(List.of(5, 3))
-            .batchSize(5)
+            .batchSize(4)
             .randomSeed(42L)
             .modelName("model")
             .relationshipWeightProperty("times")
@@ -493,9 +493,10 @@ class GraphSageTrainAlgorithmFactoryTest {
             .containsExactly(
                 "GraphSageTrain :: Start",
                 "GraphSageTrain :: Prepare batches :: Start",
-                "GraphSageTrain :: Prepare batches 25%",
-                "GraphSageTrain :: Prepare batches 50%",
-                "GraphSageTrain :: Prepare batches 75%",
+                "GraphSageTrain :: Prepare batches 20%",
+                "GraphSageTrain :: Prepare batches 40%",
+                "GraphSageTrain :: Prepare batches 60%",
+                "GraphSageTrain :: Prepare batches 80%",
                 "GraphSageTrain :: Prepare batches 100%",
                 "GraphSageTrain :: Prepare batches :: Finished",
                 "GraphSageTrain :: Train model :: Start",
@@ -505,14 +506,14 @@ class GraphSageTrainAlgorithmFactoryTest {
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 50%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Average loss per node: 26.84",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Average loss per node: 26.52",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 25%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 50%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Average loss per node: 22.50",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Average loss per node: 22.35",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Start",
@@ -521,14 +522,14 @@ class GraphSageTrainAlgorithmFactoryTest {
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 50%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Average loss per node: 23.13",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Average loss per node: 22.43",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 25%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 50%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 100%",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Average loss per node: 22.84",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Average loss per node: 25.86",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Finished",
